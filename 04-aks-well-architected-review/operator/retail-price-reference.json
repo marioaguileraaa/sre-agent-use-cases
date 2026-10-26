@@ -1,0 +1,38 @@
+{
+  "state": "REFERENCE_ONLY_NOT_AN_INVOICE_OR_SPEND_APPROVAL",
+  "observed_date_utc": "2026-10-13",
+  "source": "https://prices.azure.com/api/retail/prices",
+  "currency": "EUR",
+  "region": "swedencentral",
+  "rates": {
+    "vm_v6": {"sku": "Standard_D4pls_v6", "meter_id": "2bf003a1-75c7-531c-8628-7b5468a12ad5", "unit": "1 Hour", "rate": 0.1162},
+    "vm_v5": {"sku": "Standard_D4pls_v5", "meter_id": "8c4cfc3f-5e61-5e44-9f2c-500b9d298a59", "unit": "1 Hour", "rate": 0.1285},
+    "os_disk": {"sku": "P4 LRS", "meter_id": "739a9a9c-bcb1-54fe-b44f-e8773d6f1e41", "unit": "1/Month", "rate": 5.1102},
+    "load_balancer": {"sku": "Standard", "meter_id": "27827eb0-7f60-4928-940b-f5fe15e7a4cb", "unit": "1 Hour", "rate": 0.022},
+    "public_ip": {"sku": "Standard", "meter_id": "9c150bf9-2bad-430e-a53c-c213804f49ef", "unit": "1 Hour", "rate": 0.0044},
+    "automation": {"sku": "Basic Runtime", "meter_id": "95eca2c1-9519-4c55-baa1-9a0e0b201e25", "unit": "1 Minute", "rate": 0.0018},
+    "lb_data": {"sku": "Standard", "meter_id": "dfc7cc11-fbe2-41c8-b6fa-24a574223938", "unit": "1 GB", "rate": 0.0044}
+  },
+  "assumptions": {
+    "days": 30,
+    "system_nodes": 2,
+    "hours_per_day": 8,
+    "stop_overrun_allowance_hours_per_day": 1,
+    "os_disk_gib_each": 32,
+    "load_balancers": 1,
+    "public_ips": 1,
+    "scheduled_jobs_per_day": 2,
+    "max_job_minutes": 61,
+    "free_automation_minutes_assumed": 0,
+    "disk_month_price_is_conservative_full_month": true,
+    "demo_service_type": "ClusterIP",
+    "paid_monitoring_or_defender_added": false
+  },
+  "not_included": [
+    "Tax and customer-specific contract/discounts",
+    "Initial deployment/validation runtime and temporary upgrade surge nodes",
+    "Variable outbound bandwidth and processed LB data",
+    "Compute after a failed/missed stop beyond the stated one-hour/day allowance",
+    "A hard spending limit or a guarantee that resource capacity is available at restart"
+  ]
+}

@@ -1,0 +1,4 @@
+__pycache__/
+operations-digest-reports/
+.pytest_cache/
+*.private.*

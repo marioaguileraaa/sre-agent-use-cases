@@ -1,0 +1,37 @@
+{
+  "provenance": "LIVE LAB SUPPLEMENTARY HOST CHECK",
+  "reference_utc": "2026-10-09T12:00:14Z",
+  "scope": "Exactly two lab Ubuntu hosts, checked separately by an authorized operator.",
+  "fleet_wide_verification": false,
+  "included_in_live_tool_sensor_health": false,
+  "source": "Retained parent-run host diagnostics and separate persistent service-enablement verification.",
+  "servers": [
+    {
+      "server_name": "Arcbox-Ubuntu-01",
+      "host_check_utc": "2026-10-09T11:58:32Z",
+      "extension_state": "Succeeded",
+      "mdatp_version": "101.26081.0010",
+      "service_active": true,
+      "persistent_enablement_separately_verified": true,
+      "healthy": true,
+      "licensed": true,
+      "health_issues": [],
+      "definitions_status": "up_to_date",
+      "connectivity_checks_all_ok": true
+    },
+    {
+      "server_name": "Arcbox-Ubuntu-02",
+      "host_check_utc": "2026-10-09T11:58:47Z",
+      "extension_state": "Succeeded",
+      "mdatp_version": "101.26081.0010",
+      "service_active": true,
+      "persistent_enablement_separately_verified": true,
+      "healthy": true,
+      "licensed": true,
+      "health_issues": [],
+      "definitions_status": "up_to_date",
+      "connectivity_checks_all_ok": true
+    }
+  ],
+  "qualification": "Observations at the stated UTC times only, not fleet-wide or ongoing health assurance. No raw diagnostics, credentials, tokens or protected settings are included."
+}

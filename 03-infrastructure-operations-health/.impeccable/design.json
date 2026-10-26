@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T19:23:53.526Z",
+  "title": "Design System: Infrastructure operations",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Cool technical paper",
+        "tonalRamp": ["oklch(15% 0.0045 179.7)", "oklch(26% 0.0045 179.7)", "oklch(38% 0.0045 179.7)", "oklch(49% 0.0045 179.7)", "oklch(61% 0.0045 179.7)", "oklch(72% 0.0045 179.7)", "oklch(84% 0.0045 179.7)", "oklch(95% 0.0045 179.7)"]
+      },
+      "sheet": {
+        "role": "neutral",
+        "displayName": "White sheet",
+        "tonalRamp": ["oklch(15% 0.0000 0.0)", "oklch(26% 0.0000 0.0)", "oklch(38% 0.0000 0.0)", "oklch(49% 0.0000 0.0)", "oklch(61% 0.0000 0.0)", "oklch(72% 0.0000 0.0)", "oklch(84% 0.0000 0.0)", "oklch(95% 0.0000 0.0)"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Deep green-black ink",
+        "tonalRamp": ["oklch(15% 0.0317 185.7)", "oklch(26% 0.0317 185.7)", "oklch(38% 0.0317 185.7)", "oklch(49% 0.0317 185.7)", "oklch(61% 0.0317 185.7)", "oklch(72% 0.0317 185.7)", "oklch(84% 0.0317 185.7)", "oklch(95% 0.0317 185.7)"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted annotation ink",
+        "tonalRamp": ["oklch(15% 0.0259 175.0)", "oklch(26% 0.0259 175.0)", "oklch(38% 0.0259 175.0)", "oklch(49% 0.0259 175.0)", "oklch(61% 0.0259 175.0)", "oklch(72% 0.0259 175.0)", "oklch(84% 0.0259 175.0)", "oklch(95% 0.0259 175.0)"]
+      },
+      "petrol": {
+        "role": "primary",
+        "displayName": "Petrol ink",
+        "tonalRamp": ["oklch(15% 0.0442 188.4)", "oklch(26% 0.0442 188.4)", "oklch(38% 0.0442 188.4)", "oklch(49% 0.0442 188.4)", "oklch(61% 0.0442 188.4)", "oklch(72% 0.0442 188.4)", "oklch(84% 0.0442 188.4)", "oklch(95% 0.0442 188.4)"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Register rule",
+        "tonalRamp": ["oklch(15% 0.0128 164.7)", "oklch(26% 0.0128 164.7)", "oklch(38% 0.0128 164.7)", "oklch(49% 0.0128 164.7)", "oklch(61% 0.0128 164.7)", "oklch(72% 0.0128 164.7)", "oklch(84% 0.0128 164.7)", "oklch(95% 0.0128 164.7)"]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Pale petrol wash",
+        "tonalRamp": ["oklch(15% 0.0100 164.9)", "oklch(26% 0.0100 164.9)", "oklch(38% 0.0100 164.9)", "oklch(49% 0.0100 164.9)", "oklch(61% 0.0100 164.9)", "oklch(72% 0.0100 164.9)", "oklch(84% 0.0100 164.9)", "oklch(95% 0.0100 164.9)"]
+      },
+      "critical": {
+        "role": "tertiary",
+        "displayName": "Critical red",
+        "tonalRamp": ["oklch(15% 0.1460 25.5)", "oklch(26% 0.1460 25.5)", "oklch(38% 0.1460 25.5)", "oklch(49% 0.1460 25.5)", "oklch(61% 0.1460 25.5)", "oklch(72% 0.1460 25.5)", "oklch(84% 0.1460 25.5)", "oklch(95% 0.1460 25.5)"]
+      },
+      "critical-wash": {
+        "role": "neutral",
+        "displayName": "Pale critical wash",
+        "tonalRamp": ["oklch(15% 0.0185 17.5)", "oklch(26% 0.0185 17.5)", "oklch(38% 0.0185 17.5)", "oklch(49% 0.0185 17.5)", "oklch(61% 0.0185 17.5)", "oklch(72% 0.0185 17.5)", "oklch(84% 0.0185 17.5)", "oklch(95% 0.0185 17.5)"]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Review amber",
+        "tonalRamp": ["oklch(15% 0.0951 57.5)", "oklch(26% 0.0951 57.5)", "oklch(38% 0.0951 57.5)", "oklch(49% 0.0951 57.5)", "oklch(61% 0.0951 57.5)", "oklch(72% 0.0951 57.5)", "oklch(84% 0.0951 57.5)", "oklch(95% 0.0951 57.5)"]
+      },
+      "warning-wash": {
+        "role": "neutral",
+        "displayName": "Pale review wash",
+        "tonalRamp": ["oklch(15% 0.0238 73.6)", "oklch(26% 0.0238 73.6)", "oklch(38% 0.0238 73.6)", "oklch(49% 0.0238 73.6)", "oklch(61% 0.0238 73.6)", "oklch(72% 0.0238 73.6)", "oklch(84% 0.0238 73.6)", "oklch(95% 0.0238 73.6)"]
+      },
+      "unknown": {
+        "role": "neutral",
+        "displayName": "Unknown slate",
+        "tonalRamp": ["oklch(15% 0.0218 250.8)", "oklch(26% 0.0218 250.8)", "oklch(38% 0.0218 250.8)", "oklch(49% 0.0218 250.8)", "oklch(61% 0.0218 250.8)", "oklch(72% 0.0218 250.8)", "oklch(84% 0.0218 250.8)", "oklch(95% 0.0218 250.8)"]
+      },
+      "unknown-wash": {
+        "role": "neutral",
+        "displayName": "Pale slate wash",
+        "tonalRamp": ["oklch(15% 0.0059 239.8)", "oklch(26% 0.0059 239.8)", "oklch(38% 0.0059 239.8)", "oklch(49% 0.0059 239.8)", "oklch(61% 0.0059 239.8)", "oklch(72% 0.0059 239.8)", "oklch(84% 0.0059 239.8)", "oklch(95% 0.0059 239.8)"]
+      },
+      "blue": {
+        "role": "secondary",
+        "displayName": "Recorder blue",
+        "tonalRamp": ["oklch(15% 0.1093 257.8)", "oklch(26% 0.1093 257.8)", "oklch(38% 0.1093 257.8)", "oklch(49% 0.1093 257.8)", "oklch(61% 0.1093 257.8)", "oklch(72% 0.1093 257.8)", "oklch(84% 0.1093 257.8)", "oklch(95% 0.1093 257.8)"]
+      },
+      "purple": {
+        "role": "secondary",
+        "displayName": "Recorder plum",
+        "tonalRamp": ["oklch(15% 0.0838 314.9)", "oklch(26% 0.0838 314.9)", "oklch(38% 0.0838 314.9)", "oklch(49% 0.0838 314.9)", "oklch(61% 0.0838 314.9)", "oklch(72% 0.0838 314.9)", "oklch(84% 0.0838 314.9)", "oklch(95% 0.0838 314.9)"]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus blue",
+        "tonalRamp": ["oklch(15% 0.1511 252.5)", "oklch(26% 0.1511 252.5)", "oklch(38% 0.1511 252.5)", "oklch(49% 0.1511 252.5)", "oklch(61% 0.1511 252.5)", "oklch(72% 0.1511 252.5)", "oklch(84% 0.1511 252.5)", "oklch(95% 0.1511 252.5)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Page heading", "purpose": "Report title; responsive sizes are documented in Layout." },
+      "headline": { "displayName": "Section heading", "purpose": "Ruled register and work-section headings." },
+      "title": { "displayName": "Subordinate heading", "purpose": "Supporting headings with the built semantic heading weight." },
+      "body": { "displayName": "Working copy", "purpose": "Explanations and normal native controls." },
+      "label": { "displayName": "Field label", "purpose": "Persistent search, filter and recorder field labels." },
+      "stamp": { "displayName": "Status stamp", "purpose": "Named evidence states, never a decorative health score." },
+      "identifier": { "displayName": "Resource identifier", "purpose": "Wrapping machine identities; timestamps use a related monospace size." }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      { "name": "wide-min", "value": "1600px" },
+      { "name": "laptop-max", "value": "1190px" },
+      { "name": "compact-max", "value": "780px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary export button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The complete snapshot export, without implying a live collection.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\">Complete JSON</button>",
+      "css": ".ds-button-primary{font:600 15px/1.5 \"Segoe UI\",system-ui,sans-serif;cursor:pointer;touch-action:manipulation;min-height:40px;padding:7px 11px;border:1px solid var(--petrol,#163d3a);border-radius:var(--radius,3px);background:var(--petrol,#163d3a);color:var(--sheet,#ffffff)}.ds-button-primary:active:not(:disabled){background:#d8e5de}.ds-button-primary:hover:not(:disabled){background:#27524d}.ds-button-primary:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}.ds-button-primary:disabled{cursor:not-allowed;opacity:.58}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet native actions beside the evidence.",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">Reset filters</button>",
+      "css": ".ds-button-secondary{font:15px/1.5 \"Segoe UI\",system-ui,sans-serif;cursor:pointer;touch-action:manipulation;min-height:40px;padding:7px 11px;border:1px solid #95aaa1;border-radius:var(--radius,3px);background:var(--sheet,#ffffff);color:var(--ink,#18312e)}.ds-button-secondary:hover:not(:disabled){background:var(--wash,#e7efeb)}.ds-button-secondary:active:not(:disabled){background:#d8e5de}.ds-button-secondary:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}.ds-button-secondary:disabled{cursor:not-allowed;opacity:.58}"
+    },
+    {
+      "name": "Compact contextual button",
+      "kind": "button",
+      "refersTo": "button-compact",
+      "description": "Local exports and show-more actions inside ruled section headers.",
+      "html": "<button type=\"button\" class=\"ds-button-compact\">Export matches</button>",
+      "css": ".ds-button-compact{font:13px/1.5 \"Segoe UI\",system-ui,sans-serif;cursor:pointer;touch-action:manipulation;min-height:35px;padding:6px 9px;white-space:nowrap;border:1px solid #95aaa1;border-radius:var(--radius,3px);background:var(--sheet,#ffffff);color:var(--ink,#18312e)}.ds-button-compact:hover:not(:disabled){background:var(--wash,#e7efeb)}.ds-button-compact:active:not(:disabled){background:#d8e5de}.ds-button-compact:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}.ds-button-compact:disabled{cursor:not-allowed;opacity:.58}"
+    },
+    {
+      "name": "Resource search field",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "A labelled native search field, with no invented resource names.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-resource-search\">Find a resource</label><input class=\"ds-search-input\" id=\"ds-resource-search\" type=\"search\" placeholder=\"Name, resource group or owner\" autocomplete=\"off\"></div>",
+      "css": ".ds-field{display:grid;gap:5px;min-width:0;font:15px/1.5 \"Segoe UI\",system-ui,sans-serif;color:var(--ink,#18312e)}.ds-field label{font-size:13px;font-weight:600}.ds-search-input{font:inherit;touch-action:manipulation;width:100%;min-width:0;min-height:40px;padding:7px 11px;border:1px solid #95aaa1;border-radius:var(--radius,3px);background:var(--sheet,#ffffff);color:var(--ink,#18312e)}.ds-search-input::placeholder{color:var(--muted,#526660);opacity:1}.ds-search-input:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}"
+    },
+    {
+      "name": "Report file index",
+      "kind": "nav",
+      "description": "Petrol filing navigation, pale selection and explicit section names.",
+      "html": "<aside class=\"ds-report-index\" aria-label=\"Report index\"><nav class=\"ds-index-nav\"><a class=\"ds-index-link ds-index-active\" href=\"#fleet\">Fleet register</a><a class=\"ds-index-link\" href=\"#recorder\">Time recorder</a><a class=\"ds-index-link\" href=\"#reviews\">Owner review</a><a class=\"ds-index-link\" href=\"#timeline\">Event log</a><a class=\"ds-index-link\" href=\"#sources\">Sources</a></nav></aside>",
+      "css": ".ds-report-index{font:15px/1.5 \"Segoe UI\",system-ui,sans-serif;background:var(--petrol,#163d3a);color:#f4f8f6;padding:28px 19px}.ds-index-nav{display:grid;gap:5px}.ds-index-link{color:#e0ede6;text-decoration:none;display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:10px 9px;border:1px solid transparent;font-size:14px;touch-action:manipulation}.ds-index-link:hover,.ds-index-link:focus-visible{background:#2a504a;border-color:#6f9686}.ds-index-link.ds-index-active{background:#edf3ef;color:var(--petrol,#163d3a);font-weight:650;border-color:#edf3ef}.ds-index-link:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}@media(max-width:1190px){.ds-report-index{padding:25px 14px}}@media(max-width:780px){.ds-report-index{padding:17px 20px}.ds-index-nav{display:flex;flex-wrap:wrap;gap:5px}.ds-index-link{min-height:38px;padding:6px 10px;font-size:12px;gap:10px}}"
+    },
+    {
+      "name": "Hosting file tabs",
+      "kind": "nav",
+      "refersTo": "scope-tab-selected",
+      "description": "Square-bodied all/Arc/Azure filters joined to the register edge.",
+      "html": "<div class=\"ds-scope-tabs\" aria-label=\"Hosting scope\"><button type=\"button\" aria-pressed=\"true\">All resources</button><button type=\"button\" aria-pressed=\"false\">Arc</button><button type=\"button\" aria-pressed=\"false\">Azure</button></div>",
+      "css": ".ds-scope-tabs{display:flex;gap:0;flex-wrap:wrap;margin:18px 0 0;font:15px/1.5 \"Segoe UI\",system-ui,sans-serif}.ds-scope-tabs button{font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation;min-height:39px;padding:8px 17px;margin-right:5px;border:1px solid var(--line,#c8d2cd);border-bottom:0;border-radius:3px 3px 0 0;background:var(--sheet,#ffffff);color:var(--ink,#18312e)}.ds-scope-tabs button:hover:not(:disabled){background:var(--wash,#e7efeb)}.ds-scope-tabs button:active:not(:disabled){background:#d8e5de}.ds-scope-tabs button[aria-pressed=true],.ds-scope-tabs button[aria-pressed=true]:hover,.ds-scope-tabs button[aria-pressed=true]:active{background:var(--petrol,#163d3a);color:var(--sheet,#ffffff);border-color:var(--petrol,#163d3a)}.ds-scope-tabs button:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}.ds-scope-tabs button:disabled{cursor:not-allowed;opacity:.58}@media(max-width:780px){.ds-scope-tabs button{padding:7px 12px;font-size:13px}}"
+    },
+    {
+      "name": "Named evidence stamps",
+      "kind": "chip",
+      "refersTo": "stamp-review",
+      "description": "Noninteractive status labels; color never substitutes for the state name.",
+      "html": "<span class=\"ds-stamp ds-stamp-review\">Review</span> <span class=\"ds-stamp ds-stamp-unknown\">Unknown</span> <span class=\"ds-stamp ds-stamp-observed\">Observed</span>",
+      "css": ".ds-stamp{display:inline-flex;gap:6px;align-items:center;border:1px solid currentColor;padding:2px 7px;border-radius:2px;font:600 12px/1.6 \"Segoe UI\",system-ui,sans-serif;white-space:nowrap}.ds-stamp-review{color:var(--warning,#875022);background:var(--warning-wash,#f6eadb)}.ds-stamp-unknown{color:var(--unknown,#535d68);background:var(--unknown-wash,#e9edf0)}.ds-stamp-observed{color:var(--petrol,#163d3a);background:var(--wash,#e7efeb)}"
+    },
+    {
+      "name": "Ruled work sheet",
+      "kind": "custom",
+      "refersTo": "ledger-sheet",
+      "description": "A flat, ruled container for evidence-linked work, not a metric card.",
+      "html": "<section class=\"ds-work-sheet\" aria-labelledby=\"ds-owner-review-title\"><div class=\"ds-section-head\"><div><h2 id=\"ds-owner-review-title\">Owner review</h2><p>Evidence-linked checks. No remediation runs from this report.</p></div></div></section>",
+      "css": ".ds-work-sheet{font:15px/1.5 \"Segoe UI\",system-ui,sans-serif;background:var(--sheet,#ffffff);color:var(--ink,#18312e);border:1px solid var(--line,#c8d2cd);min-width:0}.ds-section-head{padding:20px 19px 15px;display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line,#c8d2cd)}.ds-section-head h2{font-size:21px;line-height:1.25;font-weight:650;margin:0}.ds-section-head p{font-size:13px;color:var(--muted,#526660);margin:5px 0 0}@media(max-width:780px){.ds-section-head{padding:17px 15px 12px;align-items:flex-start}.ds-section-head h2{font-size:19px}}"
+    },
+    {
+      "name": "Resource inspector empty state",
+      "kind": "custom",
+      "description": "The annotation sheet before resource selection; no fabricated measurements.",
+      "html": "<aside class=\"ds-inspector\" aria-label=\"Selected resource evidence\"><div class=\"ds-inspector-empty\"><strong>Select a resource.</strong>Its actual sources, units, ownership and review evidence will appear here.</div></aside>",
+      "css": ".ds-inspector{font:15px/1.5 \"Segoe UI\",system-ui,sans-serif;color:var(--ink,#18312e);border-left:1px solid var(--line,#c8d2cd);padding:21px 22px;min-width:0;background:#f8faf9}.ds-inspector-empty{padding:24px 19px;color:var(--muted,#526660);max-width:72ch}.ds-inspector-empty strong{display:block;color:var(--ink,#18312e);margin-bottom:6px}@media(max-width:1190px){.ds-inspector{border-left:0;border-top:1px solid var(--line,#c8d2cd)}}@media(max-width:780px){.ds-inspector{padding:19px 16px}}"
+    },
+    {
+      "name": "Recorded-bin readout",
+      "kind": "custom",
+      "description": "A native keyboard-operable range field with an honest empty state.",
+      "html": "<div class=\"ds-bin-inspector\"><label for=\"ds-bin-slider\">Inspect a recorded bin</label><input id=\"ds-bin-slider\" class=\"ds-bin-slider\" type=\"range\" min=\"0\" max=\"0\" value=\"0\" step=\"1\" disabled><div class=\"ds-bin-readout\" aria-live=\"polite\">No recorded bins for this selection. Missing is not zero.</div></div>",
+      "css": ".ds-bin-inspector{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 20px;padding:16px 19px;background:#f5f8f6;margin-top:13px;border-top:1px solid var(--line,#c8d2cd);font:13px/1.5 \"Segoe UI\",system-ui,sans-serif;color:var(--ink,#18312e)}.ds-bin-inspector label{font-weight:600}.ds-bin-slider{font:inherit;touch-action:manipulation;padding:0;min-height:32px;accent-color:var(--petrol,#163d3a);border:0;border-radius:var(--radius,3px);background:transparent;width:100%;color:var(--ink,#18312e)}.ds-bin-slider:focus-visible{outline:3px solid var(--focus,#156dc0);outline-offset:3px}.ds-bin-readout{grid-column:1/-1;color:var(--muted,#526660);font-variant-numeric:tabular-nums;min-height:24px}@media(max-width:780px){.ds-bin-inspector{grid-template-columns:1fr;padding:13px 15px;gap:5px}.ds-bin-readout{font-size:12px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Operations dispatch ledger",
+    "overview": "Cool technical paper, petrol ink and ruled registers make infrastructure evidence readable without suggesting certainty the sources cannot support. Square file tabs and compact status stamps provide personality through filing and annotation, not dashboard decoration.\n\nDesign for an operator and customer reviewing a laptop in a normally lit meeting room: readable system type, aligned measurements, explicit labels and persistent context. The world is customer-neutral and self-contained; it uses no external fonts, imagery or libraries.\n\nThis is the finished scenario-local system extracted from the CSS, markup and JavaScript of `REPORT_HTML` in `generate-infrastructure-operations-report.py`, including its opening five-block direction contract. Frontmatter is normative; `.impeccable/design.json` supplies preview snippets and extensions, not a second token authority.",
+    "keyCharacteristics": [
+      "Cool paper and restrained petrol ink.",
+      "Ruled sheets, square-bodied tabs and compact status stamps.",
+      "System sans with tabular measurements and monospace identifiers.",
+      "Visible source, units, recorded time, coverage and unknowns.",
+      "Immediate, read-only interactions within a dated offline snapshot."
+    ],
+    "rules": [
+      {
+        "name": "The Label Before Hue Rule",
+        "body": "Every evidence state is named; trace color identifies a resource, not a health grade.",
+        "section": "colors"
+      },
+      {
+        "name": "The Measurement Context Rule",
+        "body": "Tabular numbers stay attached to visible units, measurement scope and recorded time.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ruled Sheet Rule",
+        "body": "Use borders and tonal fields to group evidence; do not substitute shadows or floating tiles for the ledger.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep units, source, recorded time and unknown labels adjacent to measurements.",
+      "Do use ruled sheets, aligned registers and compact named status stamps.",
+      "Do preserve keyboard focus and announce local interaction outcomes.",
+      "Do keep component previews free of invented telemetry, brands and deployment claims."
+    ],
+    "donts": [
+      "Don't replace evidence with decorated scores or imply that an observed state certifies health.",
+      "Don't turn missing data into zero, connect gaps or invent maxima.",
+      "Don't introduce gradients, floating card grids, pill-shaped file tabs or external assets.",
+      "Don't label source replay as live validation or publish private replay screenshots as product assets."
+    ]
+  }
+}

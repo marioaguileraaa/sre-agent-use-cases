@@ -1,0 +1,5 @@
+__pycache__/
+azure-backup-reports/
+test-results/
+*.private.json
+*.private.py

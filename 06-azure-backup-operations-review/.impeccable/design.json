@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T19:04:08Z",
+  "title": "Design System: Azure Backup operations review",
+  "extensions": {
+    "colorMeta": {
+      "primary": {"role": "primary", "displayName": "Supplied-pixel yellow", "canonical": "#FBC807"},
+      "charcoal": {"role": "neutral", "displayName": "Supplied-pixel charcoal", "canonical": "#1E1C18"}
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      {"name": "stacked-introduction", "value": "1000px"},
+      {"name": "labeled-mobile-records", "value": "640px"}
+    ]
+  },
+  "components": [
+    {
+      "name": "Full-file action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Complete download, independent of visible filters.",
+      "html": "<button class=\"ds-primary\">Full source JSON</button>",
+      "css": ".ds-primary{font:600 16px/1.5 'Segoe UI',system-ui,sans-serif;min-height:44px;padding:8px 12px;border:1px solid #1E1C18;border-radius:3px;background:#FBC807;color:#1E1C18;cursor:pointer}.ds-primary:hover{background:#EDB900}.ds-primary:active{background:#DCE2E6}.ds-primary:focus-visible{outline:3px solid #18577D;outline-offset:3px}.ds-primary:disabled{cursor:not-allowed;color:#636C75;background:#E8ECEF}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral print or navigation action.",
+      "html": "<button class=\"ds-secondary\">Print matching evidence</button>",
+      "css": ".ds-secondary{font:600 16px/1.5 'Segoe UI',system-ui,sans-serif;min-height:44px;padding:8px 12px;border:1px solid #6C7680;border-radius:3px;background:#FFFFFF;color:#24272B;cursor:pointer}.ds-secondary:hover{background:#EDF0F2}.ds-secondary:active{background:#DCE2E6}.ds-secondary:focus-visible{outline:3px solid #18577D;outline-offset:3px}"
+    },
+    {
+      "name": "Local filter",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Native, labeled search inside the recorded snapshot.",
+      "html": "<label class=\"ds-label\">Job ID / entity text<input class=\"ds-field\" type=\"search\" placeholder=\"Filter the recorded jobs\"></label>",
+      "css": ".ds-label{display:flex;flex-direction:column;gap:6px;font:600 14px/1.5 'Segoe UI',system-ui,sans-serif}.ds-field{font:400 16px/1.5 'Segoe UI',system-ui,sans-serif;min-height:44px;padding:8px 12px;border:1px solid #6C7680;border-radius:3px;background:#FFFFFF;color:#24272B}.ds-field:hover{background:#EDF0F2}.ds-field:focus-visible{outline:3px solid #18577D;outline-offset:3px}"
+    },
+    {
+      "name": "Unknown state",
+      "kind": "chip",
+      "refersTo": "unknown",
+      "description": "Named uncertainty, not a healthy zero.",
+      "html": "<span class=\"ds-unknown\">Unknown</span>",
+      "css": ".ds-unknown{display:inline-block;font:650 12px/1.5 'Segoe UI',system-ui,sans-serif;padding:3px 8px;border:1px solid #4F5971;border-radius:3px;color:#4F5971;background:#F0F2F8}"
+    },
+    {
+      "name": "Evidence disclosure",
+      "kind": "custom",
+      "description": "Progressive inline native evidence; no modal or source request.",
+      "html": "<details class=\"ds-evidence\"><summary>Evidence / errors</summary><pre>SIMULATED source text; not a live receipt.</pre></details>",
+      "css": ".ds-evidence{font:14px/1.5 'Segoe UI',system-ui,sans-serif}.ds-evidence summary{cursor:pointer;color:#18577D;font-weight:600;min-height:44px;padding:8px 0}.ds-evidence summary:hover{text-decoration:underline}.ds-evidence summary:focus-visible{outline:3px solid #18577D;outline-offset:3px}.ds-evidence pre{font:12px/1.6 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#F6F8F9;border:1px solid #CCD2D7}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The backup shift workpaper",
+    "overview": "The implemented system is a neutral evidence sheet inside a charcoal mast and sparse customer-selected yellow navigation. It is an operating surface, not a score dashboard. Literal dates, native states and readable source disclosure carry its authority.",
+    "keyCharacteristics": [
+      "Neutral ruled ledgers rather than nested metric cards.",
+      "Brand yellow independent of named operational severity.",
+      "Familiar native controls and inline source disclosure.",
+      "System typography and full offline behavior."
+    ],
+    "rules": [
+      {"name": "Brand Is Not Severity", "section": "colors", "body": "Yellow marks branding/navigation and the primary full-file action. It never means a warning, successful backup or grade."},
+      {"name": "Dark-on-Yellow", "section": "colors", "body": "The brand field uses charcoal text, not white. All evidence uses contrast-preserving text on neutral or named semantic washes."}
+    ],
+    "dos": [
+      "Do preserve the supplied yellow/charcoal identity in generic and private copies.",
+      "Do keep dates, uncertainty and source evidence visible before conclusions.",
+      "Do use full native item/vault identities and distinct named semantic states.",
+      "Do keep mobile controls keyboard-native and at least 44px high."
+    ],
+    "donts": [
+      "Don't use brand yellow as operational warning severity.",
+      "Don't invent scores, success rates, incident outcomes or decorative charts.",
+      "Don't turn a logo, source presence or a blank ledger into health evidence.",
+      "Don't add external assets, libraries, live polling or remote links to source text."
+    ]
+  }
+}

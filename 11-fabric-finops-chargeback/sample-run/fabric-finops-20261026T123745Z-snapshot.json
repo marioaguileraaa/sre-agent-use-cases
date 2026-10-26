@@ -1,0 +1,1207 @@
+{
+  "status": "ok",
+  "version": "5.0",
+  "generated_utc": "2026-10-23T12:41:33Z",
+  "period": "Últimos 30 días",
+  "window_utc": [
+    "2026-09-23",
+    "2026-10-23"
+  ],
+  "currency": "USD",
+  "identities": "masked",
+  "cost_available": true,
+  "cost_unavailable_reason": null,
+  "headline": {
+    "total_cost": 1168.03,
+    "consumed_by_workloads": 151.07,
+    "on_without_use": 997.19,
+    "storage": 19.77,
+    "on_hours": 186.9,
+    "uptime_pct": 25.5,
+    "utilization_pct_while_on": 13.2,
+    "hourly_cost_when_on": 5.76,
+    "on_hours_x_public_price": 1076.7,
+    "idle_after_last_work_hours": 66.7,
+    "monthly_saving_identified": 375.5
+  },
+  "focus_capacity": {
+    "name": "fabriccapprod",
+    "sku": "F32",
+    "region": "westus3",
+    "state": "Active",
+    "price_per_cu_hour": 0.18,
+    "price_source": "Azure Retail Prices API (precio público pago por uso, westus3)",
+    "auto_suspend_utc": "23:37"
+  },
+  "cost_by_category": {
+    "Capacidad encendida sin consumo (Compute Pool)": 997.19,
+    "IA · Copilot y Data Agents": 55.2,
+    "Spark y notebooks": 37.44,
+    "Real-Time Intelligence": 28.57,
+    "Fabric IQ · Ontology y Graph": 21.97,
+    "Warehouse y SQL": 3.28,
+    "Transacciones OneLake": 2.69,
+    "Power BI": 1.91,
+    "Data Factory": 0.02,
+    "Almacenamiento (GB-mes)": 19.77
+  },
+  "meters": [
+    {
+      "meter": "Compute Pool",
+      "category": "Capacidad encendida sin consumo (Compute Pool)",
+      "quantity": 5539.97,
+      "cost": 997.19,
+      "explanation": "Parte de la capacidad encendida que no consumió ninguna carga. Fabric factura la capacidad completa por hora mientras está encendida; lo no usado aparece aquí."
+    },
+    {
+      "meter": "Copilot and AI",
+      "category": "IA · Copilot y Data Agents",
+      "quantity": 306.67,
+      "cost": 55.2,
+      "explanation": "Copilot, Data Agents y experiencias de IA (consultas en lenguaje natural sobre los datos)."
+    },
+    {
+      "meter": "Spark Memory Optimized",
+      "category": "Spark y notebooks",
+      "quantity": 207.97,
+      "cost": 37.44,
+      "explanation": "Cómputo Spark: notebooks, jobs de Spark y cargas en lakehouses."
+    },
+    {
+      "meter": "Ontology Logic and Operations",
+      "category": "Fabric IQ · Ontology y Graph",
+      "quantity": 118.68,
+      "cost": 21.36,
+      "explanation": "Fabric IQ: lógica y operaciones de la ontología (modelado semántico de negocio)."
+    },
+    {
+      "meter": "OneLake Cache Data Stored",
+      "category": "Almacenamiento (GB-mes)",
+      "quantity": 73.05,
+      "cost": 19.43,
+      "explanation": "Caché de OneLake (datos en caché para consultas rápidas, p. ej. KQL)."
+    },
+    {
+      "meter": "Eventhouse",
+      "category": "Real-Time Intelligence",
+      "quantity": 88.37,
+      "cost": 15.91,
+      "explanation": "Eventhouse/KQL: base de datos en tiempo real encendida o consultada."
+    },
+    {
+      "meter": "Eventstream Data Traffic",
+      "category": "Real-Time Intelligence",
+      "quantity": 34.2,
+      "cost": 6.16,
+      "explanation": "Eventstream: ingesta y procesamiento de eventos en streaming."
+    },
+    {
+      "meter": "Eventstream Processor",
+      "category": "Real-Time Intelligence",
+      "quantity": 22.78,
+      "cost": 4.1,
+      "explanation": "Eventstream: ingesta y procesamiento de eventos en streaming."
+    },
+    {
+      "meter": "Eventstream Flat",
+      "category": "Real-Time Intelligence",
+      "quantity": 13.35,
+      "cost": 2.4,
+      "explanation": "Eventstream: ingesta y procesamiento de eventos en streaming."
+    },
+    {
+      "meter": "Data Warehouse",
+      "category": "Warehouse y SQL",
+      "quantity": 12.85,
+      "cost": 2.31,
+      "explanation": "Warehouse y endpoint SQL de lakehouses."
+    },
+    {
+      "meter": "Power BI",
+      "category": "Power BI",
+      "quantity": 10.59,
+      "cost": 1.91,
+      "explanation": "Power BI: refrescos, consultas e informes en la capacidad."
+    },
+    {
+      "meter": "OneLake Other Operations",
+      "category": "Transacciones OneLake",
+      "quantity": 8.82,
+      "cost": 1.59,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "SQL database in Microsoft Fabric",
+      "category": "Warehouse y SQL",
+      "quantity": 5.39,
+      "cost": 0.97,
+      "explanation": "SQL database en Fabric."
+    },
+    {
+      "meter": "OneLake Iterative Read Operations Hot",
+      "category": "Transacciones OneLake",
+      "quantity": 3.51,
+      "cost": 0.63,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "Ontology Modeling",
+      "category": "Fabric IQ · Ontology y Graph",
+      "quantity": 3.4,
+      "cost": 0.61,
+      "explanation": "Fabric IQ: ontología."
+    },
+    {
+      "meter": "OneLake Storage Hot Data Stored",
+      "category": "Almacenamiento (GB-mes)",
+      "quantity": 14.33,
+      "cost": 0.33,
+      "explanation": "Almacenamiento de datos en OneLake."
+    },
+    {
+      "meter": "OneLake Write Operations",
+      "category": "Transacciones OneLake",
+      "quantity": 1.13,
+      "cost": 0.2,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "OneLake Write Operations Hot",
+      "category": "Transacciones OneLake",
+      "quantity": 0.95,
+      "cost": 0.17,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "OneLake Read Operations",
+      "category": "Transacciones OneLake",
+      "quantity": 0.25,
+      "cost": 0.04,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "OneLake Read Operations Hot",
+      "category": "Transacciones OneLake",
+      "quantity": 0.17,
+      "cost": 0.03,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "OneLake Other Operations Hot",
+      "category": "Transacciones OneLake",
+      "quantity": 0.09,
+      "cost": 0.02,
+      "explanation": "Transacciones de lectura/escritura en OneLake."
+    },
+    {
+      "meter": "Data Orchestration",
+      "category": "Data Factory",
+      "quantity": 0.08,
+      "cost": 0.02,
+      "explanation": "Orquestación de pipelines."
+    },
+    {
+      "meter": "SQL Storage Data Stored",
+      "category": "Almacenamiento (GB-mes)",
+      "quantity": 0.05,
+      "cost": 0.01,
+      "explanation": "Medidor de Fabric facturado en la capacidad."
+    }
+  ],
+  "cost_daily": [
+    {
+      "date": "20260923",
+      "on_hours": 14.28,
+      "cost": 89.83,
+      "cu_h_billed": 488.2,
+      "cu_h_used": 57.1,
+      "utilization_pct": 11.7,
+      "cost_pending": false
+    },
+    {
+      "date": "20260924",
+      "on_hours": 16.23,
+      "cost": 112.36,
+      "cu_h_billed": 613.7,
+      "cu_h_used": 142.8,
+      "utilization_pct": 23.3,
+      "cost_pending": false
+    },
+    {
+      "date": "20260925",
+      "on_hours": 15.29,
+      "cost": 100.24,
+      "cu_h_billed": 550.9,
+      "cu_h_used": 126.4,
+      "utilization_pct": 22.9,
+      "cost_pending": false
+    },
+    {
+      "date": "20260926",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20260927",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20260928",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20260929",
+      "on_hours": 16.04,
+      "cost": 94.37,
+      "cu_h_billed": 514.2,
+      "cu_h_used": 1.8,
+      "utilization_pct": 0.3,
+      "cost_pending": false
+    },
+    {
+      "date": "20260930",
+      "on_hours": 15.03,
+      "cost": 93.76,
+      "cu_h_billed": 513.2,
+      "cu_h_used": 48.5,
+      "utilization_pct": 9.5,
+      "cost_pending": false
+    },
+    {
+      "date": "20261001",
+      "on_hours": 15.82,
+      "cost": 103.82,
+      "cu_h_billed": 566.6,
+      "cu_h_used": 95.6,
+      "utilization_pct": 16.9,
+      "cost_pending": false
+    },
+    {
+      "date": "20261002",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261003",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261004",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261005",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261006",
+      "on_hours": 12.77,
+      "cost": 75.28,
+      "cu_h_billed": 408.6,
+      "cu_h_used": 0.3,
+      "utilization_pct": 0.1,
+      "cost_pending": false
+    },
+    {
+      "date": "20261007",
+      "on_hours": 9.6,
+      "cost": 56.89,
+      "cu_h_billed": 309.6,
+      "cu_h_used": 4.9,
+      "utilization_pct": 1.6,
+      "cost_pending": false
+    },
+    {
+      "date": "20261008",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261009",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261010",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261011",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261012",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261013",
+      "on_hours": 11.34,
+      "cost": 66.57,
+      "cu_h_billed": 364.7,
+      "cu_h_used": 3.3,
+      "utilization_pct": 0.9,
+      "cost_pending": false
+    },
+    {
+      "date": "20261014",
+      "on_hours": 15.38,
+      "cost": 102.23,
+      "cu_h_billed": 562.7,
+      "cu_h_used": 120.8,
+      "utilization_pct": 21.5,
+      "cost_pending": false
+    },
+    {
+      "date": "20261015",
+      "on_hours": 16.09,
+      "cost": 114.26,
+      "cu_h_billed": 623.0,
+      "cu_h_used": 203.0,
+      "utilization_pct": 32.6,
+      "cost_pending": false
+    },
+    {
+      "date": "20261016",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261017",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261018",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261019",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": false
+    },
+    {
+      "date": "20261020",
+      "on_hours": 13.71,
+      "cost": 82.88,
+      "cu_h_billed": 454.2,
+      "cu_h_used": 33.8,
+      "utilization_pct": 7.4,
+      "cost_pending": false
+    },
+    {
+      "date": "20261021",
+      "on_hours": 12.8,
+      "cost": 75.38,
+      "cu_h_billed": 409.5,
+      "cu_h_used": 1.0,
+      "utilization_pct": 0.2,
+      "cost_pending": false
+    },
+    {
+      "date": "20261022",
+      "on_hours": 0.0,
+      "cost": 0.01,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": true
+    },
+    {
+      "date": "20261023",
+      "on_hours": 2.56,
+      "cost": 0.0,
+      "cu_h_billed": 0.0,
+      "cu_h_used": 0.0,
+      "utilization_pct": 0,
+      "cost_pending": true
+    }
+  ],
+  "cost_monthly": [
+    {
+      "month": "2026-01",
+      "cost": 138.6,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 138.6
+      }
+    },
+    {
+      "month": "2026-02",
+      "cost": 853.5,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 853.5
+      }
+    },
+    {
+      "month": "2026-03",
+      "cost": 882.2,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 882.2
+      }
+    },
+    {
+      "month": "2026-04",
+      "cost": 1137.99,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 1137.99
+      }
+    },
+    {
+      "month": "2026-05",
+      "cost": 717.9,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 717.9
+      }
+    },
+    {
+      "month": "2026-06",
+      "cost": 993.53,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 993.53
+      }
+    },
+    {
+      "month": "2026-07",
+      "cost": 661.29,
+      "in_progress": false,
+      "by_capacity": {
+        "capacidades Fabric": 661.29
+      }
+    },
+    {
+      "month": "2026-08",
+      "cost": 254.36,
+      "in_progress": false,
+      "by_capacity": {
+        "fabriccapprod": 254.36
+      }
+    },
+    {
+      "month": "2026-09",
+      "cost": 1261.31,
+      "in_progress": false,
+      "by_capacity": {
+        "fabriccapprod": 1261.31
+      }
+    },
+    {
+      "month": "2026-10",
+      "cost": 677.44,
+      "in_progress": true,
+      "by_capacity": {
+        "fabriccapprod": 677.44
+      }
+    }
+  ],
+  "subscription_context": {
+    "total": 1714.66,
+    "fabric_share_pct": 68.1,
+    "by_service": {
+      "Microsoft Fabric": 1168.03,
+      "SQL Managed Instance": 221.07,
+      "Microsoft Purview": 217.09,
+      "Microsoft Defender for Cloud": 81.28,
+      "Azure App Service": 13.05,
+      "SQL Database": 12.22,
+      "Log Analytics": 1.48,
+      "Foundry Tools": 0.23,
+      "Storage": 0.2,
+      "Bandwidth": 0.0
+    },
+    "fabric_named_resources": [
+      {
+        "resource": "res-09",
+        "service": "Foundry Tools",
+        "cost": 0.23
+      }
+    ]
+  },
+  "actions": [
+    {
+      "kind": "save",
+      "title": "Pausar la capacidad cuando deja de usarse",
+      "why": "La pausa actual es automática hacia las 23:37 UTC, pero el trabajo real termina antes. En 10 encendidos con actividad registrada hubo 66,7 h encendida tras la última actividad. Pausando 1 h después de la última actividad se ahorran 58,7 h × 5,76 USD/h.",
+      "evidence": "mar 6/10: última actividad 11:18, pausa 23:36 → 12,3 h; mar 20/10: última actividad 11:57, pausa 23:36 → 11,7 h; mié 21/10: última actividad 12:12, pausa 23:37 → 11,4 h",
+      "value": 375.5,
+      "unit": "/mes estimado",
+      "source": "Activity Log + registro de actividad + Spark + precio público"
+    },
+    {
+      "kind": "save",
+      "title": "Evitar encender la capacidad en días sin carga (5 días)",
+      "why": "En estos días la factura muestra prácticamente solo el medidor «Compute Pool» (capacidad encendida, nada consumido). Validar con el equipo si fueron encendidos para pruebas o demos que podían agruparse.",
+      "evidence": "mar 29/9: 16,0 h, 94,37 USD, mar 6/10: 12,8 h, 75,28 USD, mié 7/10: 9,6 h, 56,89 USD, mar 13/10: 11,3 h, 66,57 USD, mié 21/10: 12,8 h, 75,38 USD",
+      "value": 368.49,
+      "unit": "en el periodo (validar)",
+      "source": "Azure Cost Management + Activity Log"
+    },
+    {
+      "kind": "avoid",
+      "title": "No comprar reserva de capacidad con el patrón de uso actual",
+      "why": "La reserva a 1 año sale a 938 USD por CU/año (30.016 USD para F32). Solo compensa si la capacidad está encendida más del 59 % del tiempo; ahora lo está el 26 %. Al ritmo actual el pago por uso cuesta 13.971 USD/año.",
+      "evidence": "Precio pago por uso 0,1800 USD/CU-h · Azure Retail Prices API (precio público pago por uso, westus3)",
+      "value": 16045.5,
+      "unit": "/año de sobrecoste evitado",
+      "source": "Azure Retail Prices + Cost Management"
+    },
+    {
+      "kind": "scenario",
+      "title": "Escenario: bajar de F32 a F16 (validar picos)",
+      "why": "De media se consumieron 4,6 CU por hora encendida; el día de más carga (jue 15/10) 12,6 CU de media, un 79 % de un F16. Son medias por hora: antes de cambiar, revisar picos y throttling en la app Capacity Metrics, que ya está instalada.",
+      "evidence": "CU-h facturadas − CU-h de «Compute Pool» por día · 184,4 h encendida con coste",
+      "value": 530.97,
+      "unit": "/mes si se confirma",
+      "source": "Cost Management (cantidades CU-h)"
+    },
+    {
+      "kind": "review",
+      "title": "Revisar la frecuencia del notebook programado «Notebook 33»",
+      "why": "25 ejecuciones programadas y 27,3 h de Spark en el periodo (59 % del tiempo Spark). Mientras se ejecuta, la capacidad no puede pausarse.",
+      "evidence": "Workspace Contact Center · primera 30/09 16:32, última 15/10 09:47 UTC",
+      "value": 22.25,
+      "unit": "Spark atribuido en el periodo",
+      "source": "Spark/Livy API + medidor Spark"
+    },
+    {
+      "kind": "risk",
+      "title": "Eliminar o etiquetar la capacidad pausada «fabriccapsec» (F64)",
+      "why": "Está pausada y sin ningún workspace asignado. Si alguien la reanuda por error costaría 11,52 USD/h (8.294 USD/mes encendida).",
+      "evidence": "Grupo de recursos rg_fabric_sec · sin etiquetas",
+      "value": 8294.4,
+      "unit": "/mes de riesgo evitado",
+      "source": "ARM + Fabric Admin API"
+    },
+    {
+      "kind": "review",
+      "title": "Corregir 5 sesiones Spark fallidas",
+      "why": "Consumieron 1,8 h de Spark sin resultado útil.",
+      "evidence": "Notebook 11, Notebook 44",
+      "value": 1.47,
+      "unit": "Spark atribuido",
+      "source": "Spark/Livy API"
+    },
+    {
+      "kind": "gov",
+      "title": "Separar el consumo de IA en una capacidad Copilot designada",
+      "why": "La IA (Copilot, Data Agents, Ontology AI) ya cuesta 55,20 USD (4,7 %). Designar una capacidad para Copilot permite repercutir ese coste con exactitud por equipo.",
+      "evidence": "Ajuste del tenant «Capacities can be designated as Fabric Copilot capacities»: activado",
+      "value": null,
+      "unit": "",
+      "source": "Cost Management + Tenant settings"
+    },
+    {
+      "kind": "gov",
+      "title": "Etiquetar las capacidades con centro de coste",
+      "why": "Sin etiquetas (costCenter, owner, environment) Cost Management no puede repartir ni crear presupuestos por área.",
+      "evidence": "fabriccapsec (F64), fabriccapprod (F32)",
+      "value": null,
+      "unit": "",
+      "source": "ARM"
+    },
+    {
+      "kind": "gov",
+      "title": "Arreglar 2 refresco(s) fallido(s)",
+      "why": "Modelos con el último refresco fallido: datos desactualizados para los usuarios.",
+      "evidence": "Semantic model 13 (Hotels Analytics) ModelRefreshDisabled; Semantic model 04 (Contact Center) CapacityNotActive",
+      "value": null,
+      "unit": "",
+      "source": "Admin API refreshables"
+    },
+    {
+      "kind": "gov",
+      "title": "Planificar el fin de la capacidad de prueba",
+      "why": "Lo que esté en la capacidad trial dejará de funcionar o tendrá que moverse a una de pago al terminar la prueba.",
+      "evidence": "Trial capacity (0 workspaces, 0 items)",
+      "value": null,
+      "unit": "",
+      "source": "Fabric Admin API"
+    },
+    {
+      "kind": "gov",
+      "title": "Limpiar 226 items sin cambios en más de 90 días",
+      "why": "Reduce ruido, riesgo y almacenamiento. Verificar antes que no se consultan (tabla de items más usados).",
+      "evidence": "Notebook: 51, Report: 31, SemanticModel: 27, SQLEndpoint: 24, Lakehouse: 22, DataAgent: 19",
+      "value": null,
+      "unit": "",
+      "source": "Admin API items"
+    }
+  ],
+  "pause_whatif": [
+    {
+      "pause_hour_utc": 17,
+      "hours_saved": 66.3,
+      "saving_per_month": 424.44,
+      "days_with_work_cut": 4
+    },
+    {
+      "pause_hour_utc": 18,
+      "hours_saved": 56.3,
+      "saving_per_month": 360.44,
+      "days_with_work_cut": 4
+    },
+    {
+      "pause_hour_utc": 19,
+      "hours_saved": 46.3,
+      "saving_per_month": 296.44,
+      "days_with_work_cut": 4
+    },
+    {
+      "pause_hour_utc": 20,
+      "hours_saved": 36.3,
+      "saving_per_month": 232.44,
+      "days_with_work_cut": 3
+    },
+    {
+      "pause_hour_utc": 21,
+      "hours_saved": 26.3,
+      "saving_per_month": 168.44,
+      "days_with_work_cut": 2
+    },
+    {
+      "pause_hour_utc": 22,
+      "hours_saved": 16.3,
+      "saving_per_month": 104.44,
+      "days_with_work_cut": 2
+    },
+    {
+      "pause_hour_utc": 23,
+      "hours_saved": 6.3,
+      "saving_per_month": 40.44,
+      "days_with_work_cut": 2
+    }
+  ],
+  "reservation": {
+    "breakeven_uptime_pct": {
+      "1y": 59.5,
+      "3y": 59.5
+    },
+    "annual_payg_current": 13970.5,
+    "annual_reservation": {
+      "1y": 30016.0,
+      "3y": 30016.0
+    }
+  },
+  "size_scenarios": [
+    {
+      "sku": "F16",
+      "avg_load_pct": 28,
+      "peak_day_load_pct": 79,
+      "saving_per_month": 530.97
+    },
+    {
+      "sku": "F8",
+      "avg_load_pct": 57,
+      "peak_day_load_pct": 158,
+      "saving_per_month": 796.46
+    },
+    {
+      "sku": "F4",
+      "avg_load_pct": 114,
+      "peak_day_load_pct": 315,
+      "saving_per_month": 929.2
+    }
+  ],
+  "chargeback_by_workspace": [
+    {
+      "workspace": "Hotels Analytics",
+      "capacity": "fabriccapprod",
+      "operations": 8647,
+      "ai_queries": 6477,
+      "spark_hours": 0.73,
+      "direct": 78.27,
+      "idle_share": 526.04,
+      "total": 604.3
+    },
+    {
+      "workspace": "Contact Center",
+      "capacity": "fabriccapprod",
+      "operations": 9216,
+      "ai_queries": 41,
+      "spark_hours": 27.27,
+      "direct": 51.25,
+      "idle_share": 344.46,
+      "total": 395.71
+    },
+    {
+      "workspace": "Manufacturing RTI",
+      "capacity": "fabriccapprod",
+      "operations": 144,
+      "ai_queries": 118,
+      "spark_hours": 17.51,
+      "direct": 16.64,
+      "idle_share": 111.83,
+      "total": 128.47
+    },
+    {
+      "workspace": "Facilities Demo",
+      "capacity": "fabriccapprod",
+      "operations": 213,
+      "ai_queries": 211,
+      "spark_hours": 0.37,
+      "direct": 2.0,
+      "idle_share": 13.47,
+      "total": 15.47
+    },
+    {
+      "workspace": "Shopping Centers",
+      "capacity": "fabriccapprod",
+      "operations": 4,
+      "ai_queries": 1,
+      "spark_hours": 0.0,
+      "direct": 0.01,
+      "idle_share": 0.05,
+      "total": 0.06
+    }
+  ],
+  "chargeback_not_assignable": {
+    "Workspaces que ya no existen o no inventariados": 1.54,
+    "Plataforma no asignable · Almacenamiento (GB-mes)": 19.77,
+    "Plataforma no asignable · Transacciones OneLake": 2.69,
+    "Plataforma no asignable · Data Factory": 0.02
+  },
+  "top_identities": [
+    {
+      "identity": "u•••@c•••",
+      "kind": "user",
+      "operations": 18395,
+      "active_days": 16,
+      "spark_hours": 45.89,
+      "workspaces": [
+        "Contact Center",
+        "Hotels Analytics",
+        "Facilities Demo"
+      ]
+    },
+    {
+      "identity": "App 00000000…",
+      "kind": "app",
+      "operations": 2,
+      "active_days": 2,
+      "spark_hours": 0,
+      "workspaces": [
+        "3bf7a5ad",
+        "Hotels Analytics"
+      ]
+    }
+  ],
+  "top_items": [
+    {
+      "item": "Semantic model 04",
+      "type": "Model",
+      "workspace": "Contact Center",
+      "operations": 6808,
+      "identities": 1
+    },
+    {
+      "item": "Data agent 14",
+      "type": "LLMPlugin",
+      "workspace": "Hotels Analytics",
+      "operations": 4485,
+      "identities": 1
+    },
+    {
+      "item": "User Data Function 02",
+      "type": "FunctionSet",
+      "workspace": "Contact Center",
+      "operations": 1202,
+      "identities": 1
+    },
+    {
+      "item": "Data agent 22",
+      "type": "LLMPlugin",
+      "workspace": "Hotels Analytics",
+      "operations": 1144,
+      "identities": 1
+    },
+    {
+      "item": "Notebook 33",
+      "type": "SynapseNotebook",
+      "workspace": "Contact Center",
+      "operations": 896,
+      "identities": 1
+    },
+    {
+      "item": "Ontology 11",
+      "type": "Ontology",
+      "workspace": "Hotels Analytics",
+      "operations": 584,
+      "identities": 1
+    },
+    {
+      "item": "Data agent 18",
+      "type": "LLMPlugin",
+      "workspace": "Hotels Analytics",
+      "operations": 336,
+      "identities": 1
+    },
+    {
+      "item": "Lakehouse 06",
+      "type": "SqlAnalyticsEndpoint",
+      "workspace": "Hotels Analytics",
+      "operations": 313,
+      "identities": 1
+    },
+    {
+      "item": "User Data Function 03",
+      "type": "FunctionSet",
+      "workspace": "Hotels Analytics",
+      "operations": 303,
+      "identities": 1
+    },
+    {
+      "item": "Lakehouse 23",
+      "type": "Lakehouse",
+      "workspace": "Hotels Analytics",
+      "operations": 291,
+      "identities": 1
+    }
+  ],
+  "spark_notebooks": [
+    {
+      "notebook": "Notebook 33",
+      "workspace": "Contact Center",
+      "sessions": 29,
+      "scheduled": 25,
+      "failed": 0,
+      "hours": 27.27,
+      "cost": 22.25
+    },
+    {
+      "notebook": "Notebook 36",
+      "workspace": "Manufacturing RTI",
+      "sessions": 9,
+      "scheduled": 0,
+      "failed": 0,
+      "hours": 8.44,
+      "cost": 6.89
+    },
+    {
+      "notebook": "Notebook 44",
+      "workspace": "Manufacturing RTI",
+      "sessions": 7,
+      "scheduled": 0,
+      "failed": 4,
+      "hours": 7.79,
+      "cost": 6.36
+    },
+    {
+      "notebook": "Notebook 11",
+      "workspace": "Manufacturing RTI",
+      "sessions": 8,
+      "scheduled": 0,
+      "failed": 1,
+      "hours": 0.88,
+      "cost": 0.72
+    },
+    {
+      "notebook": "Notebook 29",
+      "workspace": "Manufacturing RTI",
+      "sessions": 2,
+      "scheduled": 0,
+      "failed": 0,
+      "hours": 0.4,
+      "cost": 0.33
+    },
+    {
+      "notebook": "Notebook 16",
+      "workspace": "Facilities Demo",
+      "sessions": 1,
+      "scheduled": 0,
+      "failed": 0,
+      "hours": 0.37,
+      "cost": 0.3
+    },
+    {
+      "notebook": "Notebook 14",
+      "workspace": "Hotels Analytics",
+      "sessions": 1,
+      "scheduled": 0,
+      "failed": 0,
+      "hours": 0.37,
+      "cost": 0.3
+    },
+    {
+      "notebook": "Notebook 15",
+      "workspace": "Hotels Analytics",
+      "sessions": 1,
+      "scheduled": 0,
+      "failed": 0,
+      "hours": 0.36,
+      "cost": 0.3
+    }
+  ],
+  "capacities": [
+    {
+      "name": "fabriccapsec",
+      "sku": "F64",
+      "state": "Suspended",
+      "workspaces": 0,
+      "cost": 0.0,
+      "finding": "Pausada y sin workspaces: candidata a eliminar",
+      "tags": "sin etiquetas"
+    },
+    {
+      "name": "Trial capacity",
+      "sku": "FTL4",
+      "state": "Active",
+      "workspaces": 0,
+      "cost": 0.0,
+      "finding": "Capacidad de prueba (trial)",
+      "tags": "no es recurso Azure"
+    },
+    {
+      "name": "Premium Per User - Reserved",
+      "sku": "PP3",
+      "state": "Active",
+      "workspaces": 0,
+      "cost": 0.0,
+      "finding": "Premium por usuario (licencia, no CU)",
+      "tags": "no es recurso Azure"
+    },
+    {
+      "name": "fabriccapprod",
+      "sku": "F32",
+      "state": "Active",
+      "workspaces": 26,
+      "cost": 1168.03,
+      "finding": "Encendida 26 % del periodo · uso 13 %",
+      "tags": "sin etiquetas"
+    }
+  ],
+  "failed_refreshes": [
+    {
+      "item": "Semantic model 13",
+      "workspace": "Hotels Analytics",
+      "last": "2026-07-04",
+      "error": "ModelRefreshDisabled"
+    },
+    {
+      "item": "Semantic model 04",
+      "workspace": "Contact Center",
+      "last": "2026-10-01",
+      "error": "CapacityNotActive"
+    }
+  ],
+  "idle_workspaces_on_paid_capacity": [],
+  "tenant_settings": [
+    {
+      "setting": "Users can use Copilot, AI Agents and other AI experiences powered by Azure OpenAI",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Capacities can be designated as Fabric Copilot capacities",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Users can create Fabric items",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Service principals can access read-only admin APIs",
+      "enabled": true,
+      "scope": "Grupos: sg-sre-agent-fabric"
+    },
+    {
+      "setting": "Show user data in the Fabric Capacity Metrics app and reports",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Users can access a standalone, cross-item Power BI Copilot experience (preview)",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Enable sending Operations Agents observability data to Agent 365 (preview)",
+      "enabled": false,
+      "scope": "—"
+    },
+    {
+      "setting": "Publish to web",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Guest users can access Microsoft Fabric",
+      "enabled": true,
+      "scope": "Toda la organización"
+    },
+    {
+      "setting": "Users can access data stored in OneLake with apps external to Fabric",
+      "enabled": true,
+      "scope": "Toda la organización"
+    }
+  ],
+  "capacity_metrics_app": "installed; not queryable by service principal (RLS/SSO model)",
+  "sources": {
+    "arm": {
+      "status": "ok",
+      "http": 200,
+      "count": 1
+    },
+    "workspaces": {
+      "status": "ok",
+      "http": 200,
+      "count": 31
+    },
+    "tenant_settings": {
+      "status": "ok",
+      "http": 200,
+      "count": 178
+    },
+    "refreshables": {
+      "status": "ok",
+      "http": 200,
+      "count": 26
+    },
+    "items": {
+      "status": "ok",
+      "http": 200,
+      "count": 329
+    },
+    "capacities": {
+      "status": "ok",
+      "http": 200,
+      "count": 4
+    },
+    "spark": {
+      "status": "ok",
+      "http": "200",
+      "count": 58
+    },
+    "onelake": {
+      "status": "partial",
+      "http": 200,
+      "count": 28
+    },
+    "cost": {
+      "status": "ok",
+      "http": 200,
+      "count": 257
+    },
+    "activity_log": {
+      "status": "ok",
+      "http": 200,
+      "count": 29
+    },
+    "prices": {
+      "status": "ok",
+      "http": 200,
+      "count": 203
+    },
+    "activity": {
+      "status": "ok",
+      "http": 200,
+      "count": 21956
+    },
+    "cost_monthly": {
+      "status": "ok",
+      "http": 200,
+      "count": 10
+    },
+    "sub_costs": {
+      "status": "ok",
+      "http": 200,
+      "count": 26
+    }
+  },
+  "analysis_seconds": 0.3,
+  "raw_counts": {
+    "subscriptions": 1,
+    "workspaces": 31,
+    "tenant_settings": 178,
+    "refreshables": 26,
+    "items": 329,
+    "pbi_capacities": 4,
+    "livy": 58,
+    "onelake": 28,
+    "arm_capacities": 2,
+    "cost_rows": 257,
+    "activity_log": 29,
+    "prices": 203,
+    "events": 21791,
+    "cost_monthly": 10,
+    "sub_costs": 26
+  }
+}

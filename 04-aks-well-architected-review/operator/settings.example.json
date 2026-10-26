@@ -1,0 +1,12 @@
+{
+  "subscription_id": "<APPROVED_LAB_SUBSCRIPTION_ID>",
+  "tenant_id": "<APPROVED_TENANT_ID>",
+  "kubernetes_version": "<SUPPORTED_NON_PREVIEW_REGIONAL_PATCH>",
+  "node_vm_size": "Standard_D4pls_v6",
+  "approved_thirty_day_budget_eur": 0,
+  "approval_reference": "",
+  "audit_principal_id": "",
+  "grant_audit_read_roles": false,
+  "demo_operator_principal_id": "",
+  "grant_demo_operator_role": false
+}

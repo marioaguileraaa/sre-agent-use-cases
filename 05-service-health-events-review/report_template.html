@@ -1,0 +1,551 @@
+<!doctype html>
+<!--
+THESIS: A temporal review register keeps published communications separate from observed workload health; it refuses the health-score dashboard.
+OWN-WORLD: CLIENTE yellow #FBC807 and charcoal #1E1C18 frame neutral sheets; red, brown, blue and slate name evidence states independently.
+STORY: Choose a temporal lane, read a communication, inspect potential resource associations and source receipts, then export the evidence.
+FIRST VIEWPORT: Customer frame and title lead into UTC context, coverage, temporal navigation and a register beside its detail sheet. Export actions remain visible.
+FORM: Grounded structure 7, temporal register with adjacent evidence dossier; surface seed 5605736e. The supplied brand overrides challenger identities. Narrow screens stack without removing evidence.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Service Health review</title>
+<style>
+:root {
+  color-scheme: light;
+  --yellow: #fbc807; --charcoal: #1e1c18; --paper: #f1f2f3; --sheet: #ffffff;
+  --ink: #252722; --muted: #555b61; --line: #c8ccd0; --quiet: #e8ebed;
+  --incident: #9b2f27; --incident-wash: #fceeea; --maintenance: #854a09; --maintenance-wash: #fff1da;
+  --info: #1e5b75; --info-wash: #eaf3f8; --unknown: #535b67; --unknown-wash: #eceef1; --focus: #155da4;
+  --space-1: 6px; --space-2: 12px; --space-3: 18px; --space-4: 24px; --space-5: 36px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 20px; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 "Segoe UI", system-ui, sans-serif; }
+button, input, select { font: inherit; }
+button, select, input, a.download { min-height: 42px; border: 1px solid #858d94; border-radius: 3px; }
+button, select, input { color: var(--ink); background: var(--sheet); }
+button, a.download { padding: 8px 12px; cursor: pointer; }
+button:hover, a.download:hover { background: var(--quiet); }
+button:disabled { color: var(--muted); border-color: var(--line); cursor: default; background: var(--paper); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+a { color: var(--info); text-underline-offset: 3px; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; }
+h1 { font-size: clamp(27px, 3vw, 36px); font-weight: 650; letter-spacing: -0.02em; }
+h2 { font-size: 22px; font-weight: 650; }
+h3 { font-size: 19px; font-weight: 650; }
+p { max-width: 74ch; }
+small, .small { font-size: 13px; }
+.muted { color: var(--muted); }
+.mono { font: 12px/1.6 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.skip { position: absolute; top: -80px; left: 12px; z-index: 4; padding: 12px; color: var(--charcoal); background: var(--yellow); }
+.skip:focus { top: 12px; }
+.mast { display: grid; grid-template-columns: 218px minmax(0, 1fr); background: var(--charcoal); color: white; }
+.brand { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 22px 18px; background: var(--yellow); color: var(--charcoal); }
+.brand strong { font-size: 23px; font-weight: 750; letter-spacing: -0.02em; overflow-wrap: anywhere; max-width: 100%; }
+.logo-frame { min-height: 48px; width: 100%; max-width: 176px; display: grid; place-items: center; border: 1px solid var(--charcoal); padding: 8px; }
+.logo-frame img { max-height: 58px; max-width: 100%; height: auto; width: auto; object-fit: contain; }
+.logo-placeholder { font-size: 13px; }
+.mast-copy { padding: 27px 32px 25px; display: flex; flex-direction: column; justify-content: center; gap: 9px; }
+.mast-copy p { color: #e0dfdc; }
+.provenance { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; }
+.provenance strong { padding: 2px 8px; color: var(--charcoal); background: var(--yellow); border-radius: 2px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 26px; background: var(--sheet); border-bottom: 1px solid var(--line); align-items: center; }
+.toolbar a.download { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); font-size: 13px; }
+.toolbar button { font-size: 13px; }
+.toolbar .ledger-link { margin-left: auto; padding: 8px 2px; min-height: 42px; display: inline-flex; align-items: center; font-weight: 600; }
+main { max-width: 1640px; margin: auto; padding: 24px 26px 40px; }
+.sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: 3px; }
+.window { padding: 20px 22px; }
+.context-grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 24px; margin-top: 14px; }
+dl { margin: 0; }
+dt { font-size: 13px; font-weight: 600; color: var(--muted); }
+dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+.window-label { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); }
+.coverage-line { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.tag { display: inline-flex; align-items: center; font-size: 12px; font-weight: 650; padding: 3px 7px; border-radius: 2px; line-height: 1.5; }
+.tag.incident { background: var(--incident-wash); color: var(--incident); }
+.tag.maintenance, .tag.partial { background: var(--maintenance-wash); color: var(--maintenance); }
+.tag.info { background: var(--info-wash); color: var(--info); }
+.tag.unknown { background: var(--unknown-wash); color: var(--unknown); }
+.limits { margin-top: 9px; font-size: 13px; color: var(--muted); }
+.review { margin-top: 30px; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 15px; }
+.lanes { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--charcoal); }
+.lane { border-radius: 3px 3px 0 0; border: 1px solid var(--line); border-bottom: 0; margin-right: 5px; background: var(--sheet); padding: 11px 15px; }
+.lane[aria-pressed="true"] { background: var(--yellow); color: var(--charcoal); border-color: var(--charcoal); font-weight: 650; }
+.lane:hover { background: #e8e9e8; }
+.lane[aria-pressed="true"]:hover { background: #efbe06; }
+.lane span { margin-left: 7px; font-variant-numeric: tabular-nums; }
+.lane-note { margin-top: 11px; color: var(--muted); font-size: 13px; }
+.filters { display: grid; grid-template-columns: minmax(180px, 1.5fr) repeat(3, minmax(125px, 1fr)) auto; gap: 12px; padding: 18px 0; align-items: end; }
+label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; min-width: 0; }
+input, select { padding: 8px 10px; width: 100%; min-width: 0; font-weight: 400; }
+input::placeholder { color: var(--muted); opacity: 1; }
+.workbench { display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(330px, 1fr); gap: 18px; align-items: start; }
+.register { overflow: hidden; }
+.register-caption { padding: 14px 17px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+th { background: #f2f4f5; color: #454b50; font-size: 12px; font-weight: 650; }
+th, td { padding: 12px; border-bottom: 1px solid #e0e3e5; vertical-align: top; }
+th:first-child, td:first-child { padding-left: 17px; }
+.events-table { min-width: 510px; }
+.events-table td:first-child { width: 49%; min-width: 195px; }
+.events-table td:last-child { min-width: 90px; }
+tr.selected td { background: #fff8dc; }
+tr:hover td { background: #f5f7f8; }
+tr.selected:hover td { background: #fff4ca; }
+.event-open { border: 0; min-height: 0; padding: 0; background: none; text-align: left; font-weight: 650; color: var(--ink); overflow-wrap: anywhere; line-height: 1.45; }
+.event-open:hover { background: none; text-decoration: underline; text-underline-offset: 3px; }
+.event-labels { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+.cell-time { display: block; margin-top: 6px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.empty { padding: 28px 18px; color: var(--muted); }
+.pager { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 17px; }
+.detail { padding: 21px; min-width: 0; }
+.detail h3 { margin: 13px 0 8px; overflow-wrap: anywhere; }
+.detail p { overflow-wrap: anywhere; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 20px; margin-top: 20px; }
+.detail h4 { font-size: 15px; margin: 24px 0 8px; }
+.source-copy { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 240px; overflow: auto; font-size: 14px; }
+.uncertainties { margin: 8px 0 0; padding-left: 20px; font-size: 13px; color: var(--unknown); }
+.uncertainties li { margin: 4px 0; }
+details { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 11px; }
+summary { cursor: pointer; font-weight: 600; font-size: 13px; overflow-wrap: anywhere; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.6 ui-monospace, Consolas, monospace; margin: 12px 0 0; max-height: 420px; overflow: auto; padding: 12px; background: #f4f5f7; color: #30363b; }
+.resource-records { margin-top: 8px; }
+.resource-records details { margin: 9px 0 0; padding: 12px 0 3px; }
+.resource-records summary { font-weight: 400; }
+.resource-records .mono { margin-top: 8px; }
+.detail-note { margin-top: 12px; padding: 10px 12px; background: var(--info-wash); color: var(--info); font-size: 13px; }
+.ledger { margin-top: 34px; }
+.ledger > p { margin-top: 8px; color: var(--muted); font-size: 14px; }
+.ledger-list { margin-top: 16px; }
+.source-entry { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line); }
+.source-entry:first-child { border-top: 0; }
+.source-entry summary { display: list-item; }
+.source-entry summary .tag { margin-left: 8px; }
+.source-stats { font-size: 13px; font-weight: 400; margin-top: 4px; display: block; color: var(--muted); }
+.source-entry p { margin-top: 10px; font-size: 13px; }
+.ledger-context { padding: 17px 20px; border-top: 1px solid var(--line); font-size: 13px; }
+footer { padding-top: 26px; font-size: 13px; color: var(--muted); }
+.error { background: var(--incident-wash); color: var(--incident); padding: 20px; margin-bottom: 20px; }
+[hidden] { display: none !important; }
+@media (max-width: 1100px) {
+  .workbench { grid-template-columns: minmax(0, 1fr); }
+  .context-grid { grid-template-columns: 1.3fr 1fr; }
+  .context-grid > :last-child { grid-column: 1 / -1; }
+  .filters { grid-template-columns: minmax(180px, 1.5fr) 1fr 1fr; }
+  .filters label:last-of-type { grid-column: 1 / 3; }
+}
+@media (max-width: 620px) {
+  .mast { grid-template-columns: 1fr; }
+  .brand { flex-direction: row; justify-content: space-between; padding: 14px 18px; gap: 16px; }
+  .brand strong { font-size: 21px; }
+  .logo-frame { min-height: 40px; max-width: 145px; width: 145px; flex-shrink: 0; padding: 6px; }
+  .logo-frame img { max-height: 44px; }
+  .mast-copy { padding: 22px 18px; }
+  .toolbar { padding: 12px 14px; gap: 8px; }
+  .toolbar .ledger-link { margin-left: 0; }
+  .toolbar a.download, .toolbar button { min-height: 44px; }
+  main { padding: 20px 14px 30px; }
+  .window, .detail { padding: 18px; }
+  .context-grid { grid-template-columns: 1fr; gap: 16px; }
+  .context-grid > :last-child { grid-column: auto; }
+  .section-head { flex-direction: column; gap: 7px; }
+  .lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; border: 0; }
+  .lane { margin: 0; border: 1px solid var(--line); border-radius: 3px; font-size: 13px; min-height: 48px; padding: 10px 8px; }
+  .filters { grid-template-columns: 1fr 1fr; gap: 12px 10px; }
+  .filters label:first-child { grid-column: 1 / -1; }
+  .filters label:last-of-type { grid-column: auto; }
+  .filters button { min-height: 44px; }
+  .workbench { gap: 16px; }
+  .events-table { min-width: 480px; }
+  .detail-grid { grid-template-columns: 1fr; gap: 14px; }
+  .source-entry { padding: 15px 17px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media print {
+  body { background: white; font-size: 11px; }
+  .mast { grid-template-columns: 150px 1fr; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .mast-copy { padding: 15px 20px; }
+  .brand { padding: 14px; }
+  h1 { font-size: 25px; }
+  main { padding: 15px 0; max-width: none; }
+  .toolbar, .filters, .pager, .skip { display: none; }
+  .workbench { grid-template-columns: 1fr; }
+  .window, .detail { padding: 14px; }
+  .context-grid { grid-template-columns: 1fr 1fr; }
+  .context-grid > :last-child { grid-column: 1 / -1; }
+  .lanes { display: flex; }
+  .lane { font-size: 11px; border: 1px solid var(--line); padding: 6px 9px; min-height: 0; print-color-adjust: exact; }
+  .table-scroll { overflow: visible; }
+  .events-table { min-width: 0; }
+  tr { break-inside: avoid; }
+  .source-copy, pre { max-height: none; overflow: visible; }
+  .sheet { border-color: #aaa; }
+  .ledger { break-before: page; }
+  .source-entry { break-inside: avoid; }
+  footer { border-top: 1px solid #aaa; margin-top: 16px; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#review">Skip to event review</a>
+<header class="mast">
+  <div class="brand"><strong>__CLIENT_NAME__</strong><div class="logo-frame">__COMPANY_LOGO__</div></div>
+  <div class="mast-copy">
+    <h1>Service Health review</h1>
+    <p>Published incidents and planned maintenance. Evidence for review, not a workload-health verdict.</p>
+    <div class="provenance"><strong id="provenance">Opening snapshot</strong><span id="reference-line">Reading the recorded UTC context.</span></div>
+  </div>
+</header>
+<nav class="toolbar" aria-label="Report exports and actions">
+  <a class="download" id="full-json" download="service-health-complete.json">Full source JSON</a>
+  <a class="download" id="filtered-json" download="service-health-filtered.json">Filtered JSON</a>
+  <a class="download" id="events-csv" download="service-health-events-filtered.csv">Filtered events CSV</a>
+  <a class="download" id="resources-csv" download="service-health-resources-filtered.csv">Filtered resources CSV</a>
+  <button type="button" id="print-report">Print filtered review</button>
+  <a class="ledger-link" href="#source-ledger">Source ledger</a>
+</nav>
+<main>
+  <div id="render-error" class="error" role="alert" hidden></div>
+  <noscript><div class="error">JavaScript is required for offline filters and exports. Use the separately delivered complete JSON and CSV files; this is not an empty-success report.</div></noscript>
+  <section class="sheet window" aria-labelledby="window-heading">
+    <h2 id="window-heading">The window matters</h2>
+    <div class="context-grid">
+      <dl><dt>Requested update window · UTC, end exclusive</dt><dd id="requested-window"></dd><dd class="window-label">Selection uses lastUpdateTime, not impact start or first publication.</dd></dl>
+      <dl><dt>Observed source reads · UTC</dt><dd id="observed-window"></dd><dd class="window-label">Native status is observed at collection, not a historical as-of state.</dd></dl>
+      <dl><dt>Retained-source queryStartTime · UTC</dt><dd id="query-start"></dd><dd class="window-label">Older Active events are not removed because their impact began before the requested month.</dd></dl>
+    </div>
+    <div class="coverage-line"><span id="coverage-tag" class="tag unknown"></span><span id="coverage-summary" class="small"></span></div>
+    <p class="limits">Historical completeness is not proven. New/changed since last run is not established. A Tracking ID is not a support-case number.</p>
+  </section>
+  <section class="review" id="review" aria-labelledby="review-heading">
+    <div class="section-head"><h2 id="review-heading">Communications to review</h2><span id="record-counts" class="small muted"></span></div>
+    <div class="lanes" role="group" aria-label="Temporal scope">
+      <button class="lane" type="button" data-scope="all" aria-pressed="true">All returned<span id="count-all"></span></button>
+      <button class="lane" type="button" data-scope="requested_updates" aria-pressed="false">Requested updates<span id="count-requested"></span></button>
+      <button class="lane" type="button" data-scope="active_now" aria-pressed="false">Active observed<span id="count-active"></span></button>
+      <button class="lane" type="button" data-scope="future_maintenance" aria-pressed="false">Future maintenance<span id="count-future"></span></button>
+    </div>
+    <p class="lane-note" id="lane-note">All accepted event records in the retained response, including records outside the requested update window. Temporal lanes can overlap.</p>
+    <div class="filters" role="search" aria-label="Filter recorded event evidence">
+      <label>Search communications<input id="search" type="search" maxlength="160" placeholder="Tracking ID, service, region or text"></label>
+      <label>Event type<select id="event-type"><option value="all">Both event types</option><option value="ServiceIssue">Service incidents</option><option value="PlannedMaintenance">Planned maintenance</option></select></label>
+      <label>Native current state<select id="state"><option value="all">All states</option><option>Active</option><option>Resolved</option><option>Unknown</option></select></label>
+      <label>Published region<select id="region"><option value="all">All regions</option><option value="__unknown__">Unknown region</option></select></label>
+      <button type="button" id="reset">Reset filters</button>
+    </div>
+    <div class="workbench">
+      <div class="sheet register">
+        <p class="register-caption" id="results" aria-live="polite"></p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Event register, scroll horizontally if needed">
+          <table class="events-table"><caption hidden>Recorded event communications</caption>
+            <thead><tr><th scope="col">Communication</th><th scope="col">Source state</th><th scope="col">Source times · UTC</th><th scope="col">Resource records</th></tr></thead>
+            <tbody id="event-rows"></tbody>
+          </table>
+        </div>
+        <div class="pager"><span id="visible-count" class="small muted"></span><button type="button" id="show-more">Show 25 more</button></div>
+      </div>
+      <section class="sheet detail" id="event-detail" tabindex="-1" aria-label="Selected communication and resource evidence">
+        <p class="muted">Select a communication to inspect its source record and potential resource associations.</p>
+      </section>
+    </div>
+  </section>
+  <section class="ledger" id="source-ledger" aria-labelledby="ledger-heading">
+    <h2 id="ledger-heading">Source &amp; coverage ledger</h2>
+    <p>Every list and attempted page has its own receipt. A first page or HTTP 200 alone is not completeness. Empty, denied and partial are different outcomes.</p>
+    <div class="sheet ledger-list"><div id="source-entries"></div><div class="ledger-context" id="retention-note"></div></div>
+  </section>
+  <footer><p>Read-only snapshot. Published potential impact is not a measured workload outage. Support cases, owners, root-cause verification and prior-run baselines are not collected. Full JSON retains complete accepted response fields and pagination evidence; filtered exports contain every selected event/resource record, not only the visible page.</p></footer>
+</main>
+<script id="complete-json-bytes" type="application/octet-stream">__FULL_JSON_BASE64__</script>
+<script id="report-model" type="application/json">__UI_MODEL_JSON__</script>
+<script>
+(() => {
+  "use strict";
+  const errorBox = document.getElementById("render-error");
+  try {
+    const data = JSON.parse(document.getElementById("report-model").textContent);
+    const fullJSONBase64 = document.getElementById("complete-json-bytes").textContent.trim();
+    if (!Number.isSafeInteger(data.source_json_bytes) || data.source_json_bytes < 1 || data.source_json_bytes > 4800000 ||
+        fullJSONBase64.length !== 4 * Math.ceil(data.source_json_bytes / 3)) throw new Error("Invalid complete JSON byte bound.");
+    const binaryJSON = atob(fullJSONBase64);
+    const sourceJSONBytes = Uint8Array.from(binaryJSON, character => character.charCodeAt(0));
+    if (sourceJSONBytes.length !== data.source_json_bytes) throw new Error("Complete JSON byte length differs from its references.");
+    const decoder = new TextDecoder("utf-8", {fatal: true});
+    const rangeText = range => {
+      if (!Array.isArray(range) || range.length !== 2 || !range.every(Number.isSafeInteger) ||
+          range[0] < 0 || range[1] <= range[0] || range[1] > sourceJSONBytes.length) throw new Error("Invalid source JSON byte reference.");
+      return decoder.decode(sourceJSONBytes.subarray(range[0], range[1]));
+    };
+    const completeJSON = record => {
+      const normalized = rangeText(record.record_range);
+      const original = rangeText(record.source_record_range);
+      if (normalized[0] !== "{" || !normalized.endsWith("}") || original[0] !== "{" || !original.endsWith("}")) throw new Error("Referenced records must be JSON objects.");
+      return normalized.slice(0, -1) + ',"source_record":' + original + "}";
+    };
+    const prettyJSON = value => {
+      const pieces = [];
+      let quoted = false, escaped = false, depth = 0;
+      const line = () => "\n" + "  ".repeat(depth);
+      for (const character of value) {
+        if (quoted) {
+          pieces.push(character);
+          if (escaped) escaped = false;
+          else if (character === "\\") escaped = true;
+          else if (character === '"') quoted = false;
+        } else if (character === '"') {
+          quoted = true;
+          pieces.push(character);
+        } else if (character === "{" || character === "[") {
+          if (++depth > 100) throw new Error("Source JSON display exceeds the nesting bound.");
+          pieces.push(character, line());
+        } else if (character === "}" || character === "]") {
+          if (--depth < 0) throw new Error("Unbalanced source JSON display.");
+          pieces.push(line(), character);
+        } else if (character === ",") pieces.push(character, line());
+        else if (character === ":") pieces.push(": ");
+        else pieces.push(character);
+      }
+      if (quoted || escaped || depth) throw new Error("Incomplete source JSON display.");
+      return pieces.join("");
+    };
+    data.events.concat(data.resources).forEach(record => {
+      rangeText(record.record_range);
+      rangeText(record.source_record_range);
+    });
+    const context = data.context;
+    const byId = id => document.getElementById(id);
+    const el = (tag, text, className) => {
+      const node = document.createElement(tag);
+      if (text !== undefined && text !== null) node.textContent = String(text);
+      if (className) node.className = className;
+      return node;
+    };
+    const text = value => value === null || value === undefined || value === "" ? "Unknown / not supplied" : String(value);
+    const utc = value => value || "Unknown (original retained)";
+    const tag = (label, kind) => el("span", label, "tag " + kind);
+    const typeName = event => event.event_type === "ServiceIssue" ? "Service incident" : "Planned maintenance";
+    const typeClass = event => event.event_type === "ServiceIssue" ? "incident" : "maintenance";
+    const statusClass = status => status === "Active" ? "info" : "unknown";
+    const goodSource = source => ["complete", "successful_empty", "successful_empty_in_scope"].includes(source.status);
+    const sourceById = id => data.sources.find(source => source.source_id === id);
+    const fields = (items, parent) => {
+      const grid = el("div", null, "detail-grid");
+      items.forEach(([label, value, mono]) => {
+        const group = el("dl");
+        group.append(el("dt", label), el("dd", text(value), mono ? "mono" : ""));
+        grid.append(group);
+      });
+      parent.append(grid);
+    };
+    const rawDetails = (label, value) => {
+      const details = el("details");
+      details.append(el("summary", label), el("pre", value));
+      return details;
+    };
+    const encoded = string => {
+      const bytes = new TextEncoder().encode(string);
+      let binary = "";
+      for (let index = 0; index < bytes.length; index += 8192) binary += String.fromCharCode(...bytes.subarray(index, index + 8192));
+      return btoa(binary);
+    };
+    const download = (id, content, mime, base64 = false) => {
+      byId(id).href = "data:" + mime + ";base64," + (base64 ? content : encoded(content));
+    };
+    const csv = (columns, rows) => {
+      const cell = value => '"' + String(value).replace(/"/g, '""') + '"';
+      return "\ufeff" + [columns, ...rows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+    };
+    let scope = "all";
+    let selectedKey = null;
+    let shown = 25;
+    let filtered = [];
+    let printing = false;
+    const laneNotes = {
+      all: "All accepted event records in the retained response, including records outside the requested update window. Temporal lanes can overlap.",
+      requested_updates: "lastUpdateTime falls inside the requested UTC interval. This is not impact-start history, first publication or newness since last run.",
+      active_now: "The native source reported Active when read. Old impact-start dates remain visible. This is not reconstructed historical status or workload-outage proof.",
+      future_maintenance: "PlannedMaintenance with a future impactStartTime and not reported Resolved. Future communication is not guaranteed execution, first publication or measured impact."
+    };
+    byId("provenance").textContent = context.provenance;
+    byId("reference-line").textContent = (context.provenance === "SIMULATED" ? "Offline test evidence, not live. " : context.provenance === "PRIVATE_REPLAY" ? "Replayed source evidence, not a fresh run. " : "Dated source snapshot. ") + "Reference " + context.reference_utc;
+    byId("requested-window").textContent = context.requested_window.start_utc + " to " + context.requested_window.end_utc_exclusive;
+    byId("observed-window").textContent = text(context.collection_observed_utc.first) + " to " + text(context.collection_observed_utc.last);
+    byId("query-start").textContent = context.source_query.query_start_utc;
+    const partial = context.coverage.status === "partial";
+    byId("coverage-tag").className = "tag " + (partial ? "partial" : "unknown");
+    byId("coverage-tag").textContent = partial ? "Partial source coverage" : "Returned pages complete";
+    byId("coverage-summary").textContent = data.summary.incomplete_sources + " incomplete source(s); historical completeness is not proven."
+      + (context.coverage.event_source_successful_empty ? " No in-scope event records returned: source validation only, not resilience." : "");
+    byId("record-counts").textContent = data.summary.native_event_records_received + " received · " + data.summary.event_records + " in scope · " + data.summary.excluded_category_records + " other-category records excluded";
+    const regions = [...new Set(data.events.flatMap(event => event.regions))].sort((a, b) => a.localeCompare(b));
+    regions.forEach(region => { const option = el("option", region); option.value = region; byId("region").append(option); });
+    byId("count-all").textContent = data.summary.event_records;
+    byId("count-requested").textContent = data.summary.requested_update_records;
+    byId("count-active").textContent = data.summary.active_observed_records;
+    byId("count-future").textContent = data.summary.future_maintenance_records;
+    download("full-json", fullJSONBase64, "application/json;charset=utf-8", true);
+    byId("retention-note").textContent = context.source_query.retention + " The explicit " + context.source_query.lookback_days + "-day lookback is a request, not a guarantee. Accepted record lastUpdateTime extent: " + text(context.observed_last_update_extent.first_original) + " to " + text(context.observed_last_update_extent.last_original) + "; " + context.observed_last_update_extent.missing_or_invalid + " missing/invalid. This extent is not complete history. No historical daily as-of status, workload outage measurement or previous-run baseline is available.";
+    data.sources.forEach((source, index) => {
+      const entry = el("details", null, "source-entry");
+      entry.id = "source-" + index;
+      const heading = el("summary", source.source_id);
+      heading.append(tag(source.status.replace(/_/g, " "), goodSource(source) ? "unknown" : "partial"));
+      heading.append(el("span", source.records_accepted + " in scope / " + source.records_received + " received · " + source.records_excluded_by_scope + " other-category records excluded · " + source.pages.length + " page attempts · pagination " + (source.pagination_complete ? "finished" : "not complete"), "source-stats"));
+      entry.append(heading);
+      if (source.errors.length) entry.append(el("p", "Coverage errors: " + source.errors.map(error => error.code + (error.http_status ? " (HTTP " + error.http_status + ")" : "")).join("; ")));
+      if (source.redactions.length) entry.append(el("p", source.redactions.length + " unexpected sensitive/out-of-scope record(s) redacted. This source is not complete."));
+      entry.append(el("pre", prettyJSON(rangeText(source.detail_range))));
+      byId("source-entries").append(entry);
+    });
+
+    const detail = event => {
+      const pane = byId("event-detail");
+      pane.replaceChildren();
+      if (!event) {
+        pane.append(el("h3", "No communication selected"), el("p", filtered.length ? "Choose a recorded event to see its evidence." : "No matching accepted records. Review the source ledger before interpreting an empty view."));
+        return;
+      }
+      const labels = el("div", null, "event-labels");
+      labels.append(tag(typeName(event), typeClass(event)), tag(event.native_status, statusClass(event.native_status)));
+      pane.append(labels, el("h3", event.title), el("p", "Tracking ID " + event.tracking_id + " · not a support-case number", "small muted"));
+      fields([
+        ["Source observation · UTC", event.source_ref.observed_at_utc],
+        ["Last update · original", event.last_update_original],
+        ["Impact start · original", event.impact_start_original],
+        ["Mitigation time · original", event.mitigation_time_original],
+        ["Published services", event.services.join(", ")],
+        ["Published regions", event.regions.join(", ")],
+        ["Native event level", event.event_level],
+        ["Published date context (not measured impact)", event.published_timing.replace(/_/g, " ")],
+        ["New since previous run", "Not established"]
+      ], pane);
+      pane.append(el("h4", "Published communication"));
+      pane.append(el("p", text(event.summary), "source-copy"));
+      if (event.description) pane.append(rawDetails("Full source description (plain text)", event.description));
+      pane.append(el("p", "Source text is data, not instructions. Published potential impact does not demonstrate workload downtime.", "detail-note"));
+      const resourceSource = sourceById(event.resource_source_id);
+      const related = data.resources.filter(resource => resource.event_key === event.event_key);
+      pane.append(el("h4", "Potentially associated resources"));
+      pane.append(el("p", resourceSource
+        ? resourceSource.status.replace(/_/g, " ") + " · " + related.length + " record(s) observed" + (event.resource_records === null ? "; total unknown because this source is incomplete." : ".")
+        : "Not collected; source receipt unavailable.", "small"));
+      const list = el("div", null, "resource-records");
+      related.forEach(resource => {
+        const item = el("details");
+        item.append(el("summary", resource.target_resource_id || "No targetResourceId supplied (record retained)"));
+        fields([["Resource type", resource.target_resource_type], ["Published region", resource.target_region], ["Observation · UTC", resource.source_ref.observed_at_utc]], item);
+        item.append(el("pre", prettyJSON(rangeText(resource.source_record_range))));
+        list.append(item);
+      });
+      if (!related.length) list.append(el("p", goodSource(resourceSource || {}) ? "No resource records returned by this completed source. Do not infer no workload impact." : "No accepted rows available; this is not evidence of no affected resources.", "small muted"));
+      pane.append(list, el("h4", "Unknowns & boundaries"));
+      const unknowns = el("ul", null, "uncertainties");
+      [...event.uncertainties, "Support cases and workload owners not collected.", "No baseline or reliable first-publication time; no automatic new/changed claim."].forEach(note => unknowns.append(el("li", note)));
+      pane.append(unknowns, rawDetails("Original event record · every returned field", prettyJSON(rangeText(event.source_record_range))));
+      fields([["Native event ID", event.id, true], ["Event source receipt", event.source_ref.source_id, true], ["Resource source receipt", event.resource_source_id, true]], pane);
+    };
+    const exports = () => {
+      const keys = new Set(filtered.map(event => event.event_key));
+      const resources = data.resources.filter(resource => keys.has(resource.event_key));
+      const sourceIds = new Set(filtered.flatMap(event => [event.source_ref.source_id, event.resource_source_id]));
+      const receipts = data.sources.filter(source => sourceIds.has(source.source_id));
+      const content = '{"context":' + JSON.stringify(context)
+        + ',"export_scope":"All selected complete records; unfiltered original page envelopes remain in Full source JSON."'
+        + ',"events":[' + filtered.map(completeJSON).join(",") + ']'
+        + ',"impacted_resources":[' + resources.map(completeJSON).join(",") + ']'
+        + ',"source_receipts":[' + receipts.map(source => source.receipt_json).join(",") + "]}\n";
+      download("filtered-json", content, "application/json;charset=utf-8");
+      download("events-csv", csv(data.event_csv_fields, filtered.map(event => [...event.csv_cells, completeJSON(event)])), "text/csv;charset=utf-8");
+      download("resources-csv", csv(data.resource_csv_fields, resources.map(resource => [...resource.csv_cells, completeJSON(resource)])), "text/csv;charset=utf-8");
+    };
+    const render = () => {
+      const search = byId("search").value.toLocaleLowerCase();
+      const kind = byId("event-type").value;
+      const state = byId("state").value;
+      const region = byId("region").value;
+      filtered = data.events.filter(event =>
+        (scope === "all" || event.temporal[scope]) &&
+        (kind === "all" || event.event_type === kind) &&
+        (state === "all" || event.native_status === state) &&
+        (region === "all" || (region === "__unknown__" ? !event.regions.length : event.regions.includes(region))) &&
+        [event.title, event.summary || "", event.description || "", event.tracking_id, event.id, ...event.services, ...event.regions].join(" ").toLocaleLowerCase().includes(search)
+      );
+      filtered.sort((a, b) => (new Date(b.last_update_original).getTime() || 0) - (new Date(a.last_update_original).getTime() || 0));
+      const body = byId("event-rows");
+      body.replaceChildren();
+      if (!filtered.some(event => event.event_key === selectedKey)) selectedKey = filtered[0]?.event_key || null;
+      const visible = printing ? filtered : filtered.slice(0, shown);
+      visible.forEach(event => {
+        const row = el("tr", null, event.event_key === selectedKey ? "selected" : "");
+        const communication = el("td");
+        const open = el("button", event.title, "event-open");
+        open.type = "button";
+        open.setAttribute("aria-controls", "event-detail");
+        open.setAttribute("aria-pressed", String(event.event_key === selectedKey));
+        open.addEventListener("click", () => {
+          selectedKey = event.event_key;
+          render();
+          const dossier = byId("event-detail");
+          dossier.focus({preventScroll: true});
+          dossier.scrollIntoView({block: "start"});
+        });
+        communication.append(open, el("span", event.tracking_id, "cell-time mono"));
+        const labels = el("div", null, "event-labels");
+        labels.append(tag(typeName(event), typeClass(event)));
+        communication.append(labels);
+        const stateCell = el("td");
+        stateCell.append(tag(event.native_status, statusClass(event.native_status)));
+        const times = el("td");
+        times.append(el("span", "Start " + utc(event.impact_start_utc)), el("span", "Updated " + utc(event.last_update_utc), "cell-time"));
+        const resourceCell = el("td", event.resource_records === null ? event.resource_records_observed + " observed; total unknown" : String(event.resource_records));
+        row.append(communication, stateCell, times, resourceCell);
+        body.append(row);
+      });
+      if (!filtered.length) {
+        const row = el("tr");
+        const cell = el("td", data.events.length
+          ? "No records match these filters. Reset filters to review all returned evidence."
+          : partial ? "No event records accepted. Collection is partial; inspect the source ledger."
+          : "Successful-empty event reads. This validates the source, not workload health or resilience.", "empty");
+        cell.colSpan = 4;
+        row.append(cell);
+        body.append(row);
+      }
+      byId("results").textContent = filtered.length + " matching / " + data.events.length + " accepted event records. Exports include all matches and related resource rows.";
+      byId("visible-count").textContent = "Showing " + visible.length + " of " + filtered.length + " matches";
+      byId("show-more").disabled = visible.length >= filtered.length;
+      byId("show-more").hidden = filtered.length <= 25;
+      byId("lane-note").textContent = laneNotes[scope];
+      document.querySelectorAll(".lane").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scope === scope)));
+      detail(filtered.find(event => event.event_key === selectedKey));
+      exports();
+    };
+    document.querySelectorAll(".lane").forEach(button => button.addEventListener("click", () => { scope = button.dataset.scope; shown = 25; render(); }));
+    ["event-type", "state", "region"].forEach(id => byId(id).addEventListener("change", () => { shown = 25; render(); }));
+    byId("search").addEventListener("input", () => { shown = 25; render(); });
+    byId("reset").addEventListener("click", () => {
+      byId("search").value = "";
+      ["event-type", "state", "region"].forEach(id => byId(id).value = "all");
+      scope = "all"; shown = 25; render();
+    });
+    byId("show-more").addEventListener("click", () => { shown += 25; render(); });
+    byId("print-report").addEventListener("click", () => window.print());
+    window.addEventListener("beforeprint", () => { printing = true; render(); });
+    window.addEventListener("afterprint", () => { printing = false; render(); });
+    render();
+  } catch (error) {
+    errorBox.hidden = false;
+    errorBox.textContent = "The offline report could not initialize. Do not interpret this as an empty source. Open the separately delivered complete JSON/CSV files and report the render error to the operator.";
+    console.error("Offline report initialization failed", error);
+  }
+})();
+</script>
+</body>
+</html>

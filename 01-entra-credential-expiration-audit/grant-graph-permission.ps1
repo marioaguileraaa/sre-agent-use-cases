@@ -9,6 +9,9 @@
 #
 # Version 1.1 · October 2026
 
+[CmdletBinding()]
+param()
+
 # ---------------------------------------------------------------------------
 # REQUIRED CONFIGURATION
 # Replace the value with the Client ID of the user-assigned managed identity
@@ -20,50 +23,93 @@ if ($managedIdentityClientId -like "<*") {
     throw "Replace <YOUR_AGENT_CLIENT_ID> with the Client ID of your agent's managed identity before you run this script."
 }
 
-Install-Module Microsoft.Graph -Scope CurrentUser -Force
-Import-Module Microsoft.Graph.Applications
+Write-Host "[1/7] Installing Microsoft.Graph for the current user; first-time installation can take several minutes..."
+Write-Verbose "The module is installed with CurrentUser scope; no machine-wide installation is requested."
+Install-Module Microsoft.Graph -Scope CurrentUser -Force -ErrorAction Stop
+Write-Host "[1/7] Microsoft.Graph installation completed."
 
-Connect-MgGraph -Scopes "Application.Read.All", "AppRoleAssignment.ReadWrite.All"
+Write-Host "[2/7] Importing Microsoft.Graph.Applications; this can take a moment..."
+Import-Module Microsoft.Graph.Applications -ErrorAction Stop
+Write-Host "[2/7] Microsoft.Graph.Applications imported."
 
-# Microsoft Graph App ID (identical in every tenant).
-$graphAppId = "00000003-0000-0000-c000-000000000000"
+$graphConnected = $false
+$operationFailed = $false
 
-$managedIdentitySp = Get-MgServicePrincipal -Filter "appId eq '$managedIdentityClientId'"
-$graphSp = Get-MgServicePrincipal -Filter "appId eq '$graphAppId'"
+try {
+    Write-Host "[3/7] Signing in to Microsoft Graph; complete the interactive sign-in prompt..."
+    Write-Verbose "The operator requests delegated Application.Read.All and AppRoleAssignment.ReadWrite.All; the identity receives only the read-only application role."
+    Connect-MgGraph -Scopes "Application.Read.All", "AppRoleAssignment.ReadWrite.All" -ErrorAction Stop | Out-Null
+    $graphConnected = $true
+    Write-Host "[3/7] Microsoft Graph sign-in completed."
 
-if (-not $managedIdentitySp) {
-    throw "Managed identity service principal not found. Verify the Client ID."
-}
+    # Microsoft Graph App ID (identical in every tenant).
+    $graphAppId = "00000003-0000-0000-c000-000000000000"
 
-$appRole = $graphSp.AppRoles | Where-Object {
-    $_.Value -eq "Application.Read.All" -and
-    $_.AllowedMemberTypes -contains "Application"
-}
+    Write-Host "[4/7] Looking up the managed identity and Microsoft Graph application role..."
+    Write-Verbose "Resolve the identity by Client ID, not Object ID, and select Application.Read.All with AllowedMemberTypes containing Application."
+    $managedIdentitySp = Get-MgServicePrincipal -Filter "appId eq '$managedIdentityClientId'" -ErrorAction Stop
+    $graphSp = Get-MgServicePrincipal -Filter "appId eq '$graphAppId'" -ErrorAction Stop
 
-if (-not $appRole) {
-    throw "Microsoft Graph Application.Read.All app role was not found."
-}
-
-$existingAssignment = Get-MgServicePrincipalAppRoleAssignment `
-    -ServicePrincipalId $managedIdentitySp.Id -All | Where-Object {
-        $_.ResourceId -eq $graphSp.Id -and $_.AppRoleId -eq $appRole.Id
+    if (-not $managedIdentitySp) {
+        throw "Managed identity service principal not found. Verify the Client ID."
     }
 
-if (-not $existingAssignment) {
-    $params = @{
-        principalId = $managedIdentitySp.Id
-        resourceId  = $graphSp.Id
-        appRoleId   = $appRole.Id
+    $appRole = $graphSp.AppRoles | Where-Object {
+        $_.Value -eq "Application.Read.All" -and
+        $_.AllowedMemberTypes -contains "Application"
     }
 
-    New-MgServicePrincipalAppRoleAssignment `
-        -ServicePrincipalId $managedIdentitySp.Id `
-        -BodyParameter $params
+    if (-not $appRole) {
+        throw "Microsoft Graph Application.Read.All app role was not found."
+    }
+    Write-Host "[4/7] Managed identity and Application.Read.All application role found."
 
-    Write-Host "Application.Read.All granted to the managed identity." -ForegroundColor Green
-}
-else {
-    Write-Host "Application.Read.All is already assigned." -ForegroundColor Yellow
-}
+    Write-Host "[5/7] Checking for an existing Application.Read.All assignment..."
+    Write-Verbose "Read all assignment pages and compare both the Microsoft Graph resource ID and the selected application-role ID."
+    $existingAssignment = Get-MgServicePrincipalAppRoleAssignment `
+        -ServicePrincipalId $managedIdentitySp.Id -All -ErrorAction Stop | Where-Object {
+            $_.ResourceId -eq $graphSp.Id -and $_.AppRoleId -eq $appRole.Id
+        }
+    Write-Host "[5/7] Existing-assignment check completed."
 
-Disconnect-MgGraph
+    if (-not $existingAssignment) {
+        $params = @{
+            principalId = $managedIdentitySp.Id
+            resourceId  = $graphSp.Id
+            appRoleId   = $appRole.Id
+        }
+
+        Write-Host "[6/7] Granting Application.Read.All to the managed identity..."
+        New-MgServicePrincipalAppRoleAssignment `
+            -ServicePrincipalId $managedIdentitySp.Id `
+            -BodyParameter $params -ErrorAction Stop | Out-Null
+
+        Write-Host "Application.Read.All granted to the managed identity." -ForegroundColor Green
+    }
+    else {
+        Write-Host "[6/7] No permission change required."
+        Write-Host "Application.Read.All is already assigned." -ForegroundColor Yellow
+    }
+}
+catch {
+    $operationFailed = $true
+    throw
+}
+finally {
+    if ($graphConnected) {
+        Write-Host "[7/7] Disconnecting the Microsoft Graph operator session..."
+        try {
+            Disconnect-MgGraph -ErrorAction Stop | Out-Null
+            Write-Host "[7/7] Microsoft Graph operator session disconnected."
+        }
+        catch {
+            if ($operationFailed) {
+                # Report cleanup failure without replacing the original operation error.
+                Write-Error -ErrorRecord $_ -ErrorAction Continue
+            }
+            else {
+                throw
+            }
+        }
+    }
+}
