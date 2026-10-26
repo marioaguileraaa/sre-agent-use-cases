@@ -1,0 +1,3 @@
+__pycache__/
+aks-waf-reports/
+.pytest_cache/

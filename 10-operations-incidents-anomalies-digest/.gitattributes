@@ -1,0 +1,5 @@
+*.py text eol=lf
+report_template.html text eol=lf
+tool-parameters.schema.json text eol=lf
+*.md text eol=lf
+*.png binary

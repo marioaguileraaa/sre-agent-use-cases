@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "General Defender / offline Arc demo report-query parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": ["report", "query"],
+      "default": "report",
+      "description": "report exports the complete fixed scope; query returns filtered structured evidence."
+    },
+    "view": {
+      "type": "string",
+      "enum": ["inventory", "findings", "actions", "resource_details", "posture", "attack_paths", "software", "controls", "compliance", "vulnerabilities"],
+      "default": "inventory"
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["all", "onprem", "gcp", "azure", "aws", "unknown"],
+      "default": "all"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["all", "Production", "Preproduction", "Dev", "DMZ", "Backup", "Unknown"],
+      "default": "all"
+    },
+    "resource_group": {
+      "type": "string",
+      "maxLength": 90,
+      "default": "",
+      "description": "Case-insensitive exact resource-group match, evaluated locally."
+    },
+    "server_name": {
+      "type": "string",
+      "maxLength": 80,
+      "default": "",
+      "description": "Case-insensitive resource-name substring, evaluated locally; not KQL or a URL. The legacy parameter name is retained."
+    },
+    "connectivity": {
+      "type": "string",
+      "enum": ["all", "Connected", "Disconnected", "Expired", "Unknown"],
+      "default": "all"
+    },
+    "mde": {
+      "type": "string",
+      "enum": ["all", "failed-extension", "missing-extension", "unverified", "healthy", "unhealthy"],
+      "default": "all",
+      "description": "Installation and sensor health are distinct. healthy requires independent sensor evidence."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["all", "Critical", "High", "Medium", "Low", "Informational", "Unknown"],
+      "default": "all"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 25,
+      "description": "Requested query page size. The 3500-byte serialized transport budget can return fewer rows; responses disclose total_matched, returned, has_more and transport_capped."
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50000,
+      "default": 0,
+      "description": "Query page offset. A later tool call collects a new snapshot, not a stored cursor."
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["all", "Critical", "High", "Medium", "Low", "Not evaluated", "Unknown"],
+      "default": "all",
+      "description": "Native Defender risk.level / observed path risk, never metadata.severity."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["all", "Unhealthy", "Healthy", "NotApplicable", "Active", "Resolved", "Dismissed", "Unknown"],
+      "default": "all"
+    },
+    "association": {
+      "type": "string",
+      "enum": ["all", "arc", "context"],
+      "default": "all",
+      "description": "For attack_paths/software: all context, exact Arc-related rows or other subscription resources."
+    },
+    "resource_type": {
+      "type": "string",
+      "maxLength": 180,
+      "default": "",
+      "description": "Exact case-insensitive provider/type or native assessed kind, e.g. Microsoft.KeyVault/vaults or sqlOnMachineDatabase. Fixed local filter, not arbitrary KQL."
+    }
+  }
+}

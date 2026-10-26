@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Infrastructure operations report and evidence query",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {"type": "string", "enum": ["report", "query"], "default": "report"},
+    "view": {
+      "type": "string",
+      "enum": ["summary", "resources", "extensions", "metrics", "timeline", "signals", "actions", "coverage"],
+      "default": "summary",
+      "description": "A query view. extensions pages safe Arc machine extension metadata, not extra machines; metric must be all. Full collected evidence is retained in the report JSON."
+    },
+    "hosting": {"type": "string", "enum": ["all", "arc", "azure"], "default": "all"},
+    "resource_group": {
+      "type": "string", "maxLength": 90, "default": "",
+      "description": "Case-insensitive exact local resource-group match; not KQL."
+    },
+    "resource_name": {
+      "type": "string", "maxLength": 160, "default": "",
+      "description": "Case-insensitive resource-name substring matched against fixed-scope inventory."
+    },
+    "resource_id": {
+      "type": "string", "maxLength": 2048, "default": "",
+      "description": "Exact local ARM ID match within the configured subscription; never a request URL."
+    },
+    "resource_type": {
+      "type": "string", "maxLength": 180, "default": "",
+      "description": "Case-insensitive exact provider/type match against the supported infrastructure inventory."
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "all", "cpu_percent", "memory_available_percent", "memory_available_bytes",
+        "memory_used_percent", "memory_commit_percent", "disk_free_percent",
+        "disk_iops_percent", "disk_bandwidth_percent", "vm_availability",
+        "storage_used_bytes", "service_availability_percent", "service_latency_ms",
+        "service_requests", "service_errors", "node_cpu_percent", "node_memory_percent", "node_disk_percent",
+        "app_cpu_time_seconds", "app_memory_bytes", "container_cpu_cores",
+        "container_memory_bytes", "container_cpu_percent", "container_memory_percent", "container_replicas",
+        "plan_cpu_percent", "plan_memory_percent", "sql_cpu_percent", "sql_memory_percent", "sql_storage_percent"
+      ],
+      "default": "all",
+      "description": "Exact normalized metric. Different service/guest semantics remain separate."
+    },
+    "state": {
+      "type": "string", "enum": ["all", "review", "unknown", "observed"],
+      "default": "all",
+      "description": "Resource assessment or signal state. observed means observations without a configured review flag, not proof of health."
+    },
+    "severity": {
+      "type": "string", "enum": ["all", "critical", "warning", "info"], "default": "all",
+      "description": "Only signals, timeline and actions accept this filter."
+    },
+    "period": {
+      "type": "string",
+      "enum": ["auto", "last_2h", "last_24h", "last_7d", "last_30d", "previous_month", "custom"],
+      "default": "auto",
+      "description": "auto selects the previous UTC calendar month for a report and the last 24 hours for a query."
+    },
+    "start_utc": {
+      "type": "string", "maxLength": 40, "default": "",
+      "description": "Required only for custom; ISO 8601 with an explicit UTC offset. No more than 31 days."
+    },
+    "end_utc": {
+      "type": "string", "maxLength": 40, "default": "",
+      "description": "Required only for custom; after start_utc and no later than collection time."
+    },
+    "grain": {
+      "type": "string", "enum": ["auto", "PT5M", "PT1H"], "default": "auto",
+      "description": "auto uses 5-minute bins up to 48 hours, otherwise hourly. At most 800 bins; no data truncation."
+    },
+    "limit": {
+      "type": "integer", "minimum": 1, "maximum": 100, "default": 20,
+      "description": "Requested query page size; the default-serialized 3500-byte transport budget may return fewer rows."
+    },
+    "offset": {
+      "type": "integer", "minimum": 0, "maximum": 50000, "default": 0,
+      "description": "Query offset. Use next_offset; each live invocation is a fresh collection, not a stable stored cursor."
+    }
+  }
+}

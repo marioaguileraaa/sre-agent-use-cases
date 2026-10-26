@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "generate-fabric-chargeback-report parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": ["report", "summary"],
+      "default": "report",
+      "description": "report writes 4 files (HTML, snapshot JSON, chargeback CSV, daily cost per meter CSV); summary returns the same analysis as JSON only, faster."
+    },
+    "period": {
+      "type": "string",
+      "enum": ["last_30d", "last_14d", "last_7d"],
+      "default": "last_30d",
+      "description": "Evaluation window."
+    },
+    "identities": {
+      "type": "string",
+      "enum": ["masked", "visible"],
+      "default": "masked",
+      "description": "masked by default in every file; visible only when explicitly requested and the recipient is authorized."
+    }
+  }
+}

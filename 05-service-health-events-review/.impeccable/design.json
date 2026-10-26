@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T19:25:05.359Z",
+  "title": "Design System: CLIENTE Service Health review",
+  "extensions": {
+    "colorMeta": {
+      "yellow": { "role": "primary", "displayName": "Client Yellow" },
+      "charcoal": { "role": "primary", "displayName": "Client Charcoal" },
+      "paper": { "role": "neutral", "displayName": "Paper" },
+      "sheet": { "role": "neutral", "displayName": "Sheet White" },
+      "ink": { "role": "neutral", "displayName": "Reading Ink" },
+      "muted": { "role": "neutral", "displayName": "Muted Text" },
+      "line": { "role": "neutral", "displayName": "Sheet Rule" },
+      "quiet": { "role": "neutral", "displayName": "Quiet Hover" },
+      "incident": { "role": "secondary", "displayName": "Incident Red" },
+      "incident-wash": { "role": "secondary", "displayName": "Incident Wash" },
+      "maintenance": { "role": "secondary", "displayName": "Maintenance Brown" },
+      "maintenance-wash": { "role": "secondary", "displayName": "Maintenance Wash" },
+      "info": { "role": "secondary", "displayName": "Evidence Blue" },
+      "info-wash": { "role": "secondary", "displayName": "Evidence Blue Wash" },
+      "unknown": { "role": "secondary", "displayName": "Unknown Slate" },
+      "unknown-wash": { "role": "secondary", "displayName": "Unknown Wash" },
+      "focus": { "role": "secondary", "displayName": "Focus Blue" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Fluid report heading." },
+      "headline": { "displayName": "Headline", "purpose": "Major section headings." },
+      "title": { "displayName": "Title", "purpose": "Dossier and communication headings." },
+      "body": { "displayName": "Body", "purpose": "Default reading text and ordinary buttons." },
+      "label": { "displayName": "Label", "purpose": "Field names and disclosure summaries." },
+      "small": { "displayName": "Small", "purpose": "Supporting text, toolbar actions and field values." },
+      "record-title": { "displayName": "Record Title", "purpose": "Repeated communication-title buttons in the register." },
+      "tag": { "displayName": "Tag", "purpose": "Compact evidence-state labels." },
+      "mono": { "displayName": "Receipt Mono", "purpose": "Wrapping identifiers and original records." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "document-scroll", "value": "smooth", "purpose": "Authored document scrolling, including navigation to the refreshed dossier; no duration or easing token is defined." },
+      { "name": "reduced-motion-scroll", "value": "auto", "purpose": "Document scrolling when prefers-reduced-motion is reduce." }
+    ],
+    "breakpoints": [
+      { "name": "stack-workbench", "value": "1100px" },
+      { "name": "compact", "value": "620px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Neutral action with the built hover, disabled and keyboard-focus treatments.",
+      "html": "<button class=\"ds-button\" type=\"button\">Reset filters</button> <button class=\"ds-button\" type=\"button\" disabled>Show 25 more</button>",
+      "css": ".ds-button { font: 15px/1.5 \"Segoe UI\", system-ui, sans-serif; color: var(--ink, #252722); background: var(--sheet, #ffffff); min-height: 42px; border: 1px solid #858d94; border-radius: 3px; padding: 8px 12px; cursor: pointer; } .ds-button:hover { background: var(--quiet, #e8ebed); } .ds-button:disabled { color: var(--muted, #555b61); border-color: var(--line, #c8ccd0); cursor: default; background: var(--paper, #f1f2f3); } .ds-button:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; } @media (max-width: 620px) { .ds-button { min-height: 44px; } }"
+    },
+    {
+      "name": "Download Action",
+      "kind": "button",
+      "refersTo": "download-action",
+      "description": "A bordered toolbar link; the specimen has an empty data URL and contains no report evidence.",
+      "html": "<a class=\"ds-download\" href=\"data:application/json;base64,\" download=\"service-health-complete.json\">Full source JSON</a>",
+      "css": ".ds-download { display: inline-flex; align-items: center; font: 13px/1.5 \"Segoe UI\", system-ui, sans-serif; color: var(--ink, #252722); background: var(--sheet, #ffffff); min-height: 42px; border: 1px solid #858d94; border-radius: 3px; padding: 8px 12px; text-decoration: none; cursor: pointer; } .ds-download:hover { background: var(--quiet, #e8ebed); } .ds-download:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; } @media (max-width: 620px) { .ds-download { min-height: 44px; } }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Native search with a semibold label and smaller, regular-weight value typography.",
+      "html": "<label class=\"ds-field\">Search communications<input type=\"search\" maxlength=\"160\" placeholder=\"Tracking ID, service, region or text\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: var(--ink, #252722); font: 600 13px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-field input { width: 100%; min-width: 0; min-height: 42px; padding: 8px 10px; border: 1px solid #858d94; border-radius: 3px; color: var(--ink, #252722); background: var(--sheet, #ffffff); font: 400 13px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-field input::placeholder { color: var(--muted, #555b61); opacity: 1; } .ds-field input:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; }"
+    },
+    {
+      "name": "Select Field",
+      "kind": "input",
+      "refersTo": "select-field",
+      "description": "Native select using the same label, surface, border and focus language as search.",
+      "html": "<label class=\"ds-select-field\">Event type<select><option>Both event types</option><option>Service incidents</option><option>Planned maintenance</option></select></label>",
+      "css": ".ds-select-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: var(--ink, #252722); font: 600 13px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-select-field select { width: 100%; min-width: 0; min-height: 42px; padding: 8px 10px; border: 1px solid #858d94; border-radius: 3px; color: var(--ink, #252722); background: var(--sheet, #ffffff); font: 400 13px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-select-field select:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; }"
+    },
+    {
+      "name": "Temporal Navigation",
+      "kind": "nav",
+      "refersTo": "temporal-lane",
+      "description": "The report's pressed-state navigation; selected and unselected specimens retain their authored hover and compact-layout treatments.",
+      "html": "<div class=\"ds-lanes\" role=\"group\" aria-label=\"Temporal scope\"><button class=\"ds-lane\" type=\"button\" aria-pressed=\"true\">All returned</button><button class=\"ds-lane\" type=\"button\" aria-pressed=\"false\">Requested updates</button><button class=\"ds-lane\" type=\"button\" aria-pressed=\"false\">Active observed</button><button class=\"ds-lane\" type=\"button\" aria-pressed=\"false\">Future maintenance</button></div>",
+      "css": ".ds-lanes { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--charcoal, #1e1c18); } .ds-lane { font: 15px/1.5 \"Segoe UI\", system-ui, sans-serif; color: var(--ink, #252722); background: var(--sheet, #ffffff); min-height: 42px; border: 1px solid var(--line, #c8ccd0); border-bottom: 0; border-radius: 3px 3px 0 0; margin-right: 5px; padding: 11px 15px; cursor: pointer; } .ds-lane[aria-pressed=\"true\"] { background: var(--yellow, #fbc807); color: var(--charcoal, #1e1c18); border-color: var(--charcoal, #1e1c18); font-weight: 650; } .ds-lane:hover { background: #e8e9e8; } .ds-lane[aria-pressed=\"true\"]:hover { background: #efbe06; } .ds-lane:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; } .ds-lane span { margin-left: 7px; font-variant-numeric: tabular-nums; } @media (max-width: 620px) { .ds-lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; border: 0; } .ds-lane { margin: 0; border: 1px solid var(--line, #c8ccd0); border-radius: 3px; font-size: 13px; min-height: 48px; padding: 10px 8px; } }"
+    },
+    {
+      "name": "Evidence Tags",
+      "kind": "chip",
+      "refersTo": "evidence-tag",
+      "description": "Non-interactive category, native-state and coverage label specimens; they are not collected event data.",
+      "html": "<div class=\"ds-tags\"><span class=\"ds-tag ds-incident\">Service incident</span><span class=\"ds-tag ds-maintenance\">Planned maintenance</span><span class=\"ds-tag ds-info\">Active</span><span class=\"ds-tag ds-unknown\">Unknown</span><span class=\"ds-tag ds-partial\">Partial source coverage</span></div>",
+      "css": ".ds-tags { display: flex; flex-wrap: wrap; gap: 5px; } .ds-tag { display: inline-flex; align-items: center; font: 650 12px/1.5 \"Segoe UI\", system-ui, sans-serif; padding: 3px 7px; border-radius: 2px; } .ds-incident { background: var(--incident-wash, #fceeea); color: var(--incident, #9b2f27); } .ds-maintenance, .ds-partial { background: var(--maintenance-wash, #fff1da); color: var(--maintenance, #854a09); } .ds-info { background: var(--info-wash, #eaf3f8); color: var(--info, #1e5b75); } .ds-unknown { background: var(--unknown-wash, #eceef1); color: var(--unknown, #535b67); }"
+    },
+    {
+      "name": "Evidence Sheet",
+      "kind": "card",
+      "refersTo": "evidence-sheet",
+      "description": "The shared flat sheet silhouette, shown with the existing context-sheet padding rather than a new universal card inset.",
+      "html": "<section class=\"ds-sheet ds-window\"><h2>The window matters</h2><p class=\"ds-window-label\">UTC context and source coverage</p></section>",
+      "css": ".ds-sheet { background: var(--sheet, #ffffff); color: var(--ink, #252722); border: 1px solid var(--line, #c8ccd0); border-radius: 3px; font: 15px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-window { padding: 20px 22px; } .ds-window h2 { margin: 0; font-size: 22px; font-weight: 650; line-height: 1.2; text-wrap: balance; } .ds-window-label { margin: 6px 0 0; max-width: 74ch; font-size: 13px; color: var(--muted, #555b61); } @media (max-width: 620px) { .ds-window { padding: 18px; } }"
+    },
+    {
+      "name": "Communication Register",
+      "kind": "custom",
+      "refersTo": "event-open",
+      "description": "A generic selected-row specimen with a native title button and focusable horizontal-scroll region; no live communication or resource identifier is supplied.",
+      "html": "<div class=\"ds-register\"><div class=\"ds-table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Event register, scroll horizontally if needed\"><table class=\"ds-events\"><thead><tr><th scope=\"col\">Communication</th><th scope=\"col\">Source state</th><th scope=\"col\">Source times · UTC</th><th scope=\"col\">Resource records</th></tr></thead><tbody><tr class=\"ds-selected\"><td><button class=\"ds-event-open\" type=\"button\" aria-pressed=\"true\">Communication title</button><span class=\"ds-cell-time ds-mono\">Unknown / not supplied</span></td><td><span class=\"ds-register-tag\">Unknown</span></td><td>Unknown (original retained)</td><td>Total unknown</td></tr></tbody></table></div></div>",
+      "css": ".ds-register { overflow: hidden; background: var(--sheet, #ffffff); color: var(--ink, #252722); border: 1px solid var(--line, #c8ccd0); border-radius: 3px; font: 15px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-table-scroll { overflow-x: auto; } .ds-table-scroll:focus-visible, .ds-event-open:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; } .ds-events { width: 100%; min-width: 510px; border-collapse: collapse; text-align: left; font-size: 13px; } .ds-events th { background: #f2f4f5; color: #454b50; font-size: 12px; font-weight: 650; } .ds-events th, .ds-events td { padding: 12px; border-bottom: 1px solid #e0e3e5; vertical-align: top; } .ds-events th:first-child, .ds-events td:first-child { padding-left: 17px; } .ds-events td:first-child { width: 49%; min-width: 195px; } .ds-events td:last-child { min-width: 90px; } .ds-events tr.ds-selected td { background: #fff8dc; } .ds-events tr:hover td { background: #f5f7f8; } .ds-events tr.ds-selected:hover td { background: #fff4ca; } .ds-event-open { border: 0; border-radius: 3px; min-height: 0; padding: 0; background: none; color: var(--ink, #252722); text-align: left; font: 650 13px/1.45 \"Segoe UI\", system-ui, sans-serif; overflow-wrap: anywhere; cursor: pointer; } .ds-event-open:hover { background: none; text-decoration: underline; text-underline-offset: 3px; } .ds-cell-time { display: block; margin-top: 6px; color: var(--muted, #555b61); font-variant-numeric: tabular-nums; } .ds-mono { font: 12px/1.6 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; } .ds-register-tag { display: inline-flex; align-items: center; font: 650 12px/1.5 \"Segoe UI\", system-ui, sans-serif; padding: 3px 7px; border-radius: 2px; background: var(--unknown-wash, #eceef1); color: var(--unknown, #535b67); } @media (max-width: 620px) { .ds-events { min-width: 480px; } }"
+    },
+    {
+      "name": "Source Disclosure",
+      "kind": "custom",
+      "description": "Native expandable source-receipt treatment with wrapping record text; the specimen contains only a generic missing-value label.",
+      "html": "<div class=\"ds-ledger-sheet\"><details class=\"ds-source\"><summary>Source receipt<span class=\"ds-source-stats\">Unknown / not supplied</span></summary><pre>Unknown / not supplied</pre></details></div>",
+      "css": ".ds-ledger-sheet { background: var(--sheet, #ffffff); color: var(--ink, #252722); border: 1px solid var(--line, #c8ccd0); border-radius: 3px; font: 15px/1.5 \"Segoe UI\", system-ui, sans-serif; } .ds-source { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line, #c8ccd0); } .ds-source:first-child { border-top: 0; } .ds-source summary { display: list-item; cursor: pointer; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; } .ds-source summary:focus-visible { outline: 3px solid var(--focus, #155da4); outline-offset: 3px; } .ds-source-stats { display: block; font-size: 13px; font-weight: 400; margin-top: 4px; color: var(--muted, #555b61); } .ds-source pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.6 ui-monospace, Consolas, monospace; margin: 12px 0 0; max-height: 420px; overflow: auto; padding: 12px; background: #f4f5f7; color: #30363b; } @media (max-width: 620px) { .ds-source { padding: 15px 17px; } } @media print { .ds-source { break-inside: avoid; } .ds-source pre { max-height: none; overflow: visible; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Evidence Workpaper",
+    "overview": "The built system is a readable yellow/charcoal customer frame around flat neutral evidence sheets. Its character is compact, practical and restrained: branding establishes identity, typography organizes reading, and independently named evidence colors distinguish states without painting the whole workpaper yellow.\n\nThe generic presentation keeps CLIENTE and an empty Customer logo frame. The supplied, source-sampled identity colors are visual authority, not an official customer brand specification; the same readable identity applies to generic Git and authorized private rendering. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` retains the local task sequence and composition decisions; those are not global design tokens.",
+    "keyCharacteristics": [
+      "Sparse yellow branding and selected navigation; charcoal text on yellow.",
+      "White, thin-bordered sheets on a pale neutral field; no shadows.",
+      "Native system type for reading, wrapping monospace for receipts.",
+      "Explicit text labels alongside independent evidence-state colors.",
+      "Visible keyboard focus and responsive evidence access."
+    ],
+    "rules": [
+      { "name": "The Dark-on-Yellow Rule", "body": "Use charcoal lettering on yellow identity and selected-navigation surfaces, never white lettering.", "section": "colors" },
+      { "name": "The Separate Semantics Rule", "body": "Yellow identifies branding and selection; evidence states retain their named foreground/wash pairs and explicit text labels.", "section": "colors" },
+      { "name": "The Reading-and-Receipts Rule", "body": "Use the native sans-serif for reading and controls, and wrapping monospace for identifiers and original records.", "section": "typography" },
+      { "name": "The Flat Sheet Rule", "body": "Separate work areas with neutral surfaces and fine rules rather than shadow elevation.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use yellow sparsely for branding and pressed navigation, with charcoal lettering.",
+      "Do pair incident, maintenance, information and Unknown foregrounds with their matching washes and explicit labels.",
+      "Do keep evidence sheets flat and reserve monospace for records and identifiers.",
+      "Do preserve visible keyboard focus, native controls and focus transfer to the refreshed dossier.",
+      "Do retain wrapping, disclosures and local table scrolling in compact layouts instead of dropping evidence."
+    ],
+    "donts": [
+      "Don't put white lettering on yellow.",
+      "Don't recolor all evidence yellow or replace Unknown with a reassuring success color.",
+      "Don't embed real customer branding in the generic CLIENTE name or empty Customer logo frame.",
+      "Don't promote the local temporal strategy, composition choice or surface seed into global design tokens.",
+      "Don't describe these source-sampled colors as an official customer brand specification or this template as live evidence."
+    ]
+  }
+}

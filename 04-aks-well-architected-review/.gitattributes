@@ -1,0 +1,2 @@
+*.py text eol=lf
+aks_checklist.en.json -text whitespace=-blank-at-eol

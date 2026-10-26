@@ -1,0 +1,2 @@
+requests>=2.31,<3
+azure-identity>=1.16,<2

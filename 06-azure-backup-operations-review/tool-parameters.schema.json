@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "generate-azure-backup-report parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "period": {
+      "type": "string",
+      "enum": ["last_14d", "last_24h"],
+      "default": "last_14d",
+      "description": "One full read-only report for the fixed approved vaults. UTC half-open job-start window [collection reference minus 14 days or 24 hours, reference). Monthly is schedule cadence, not a full-month history claim. Source history availability remains independently qualified. No previous_month, identity, scope, path or URL overrides."
+    }
+  }
+}
