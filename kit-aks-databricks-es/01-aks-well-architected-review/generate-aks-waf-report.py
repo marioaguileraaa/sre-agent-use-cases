@@ -3128,6 +3128,12 @@ def arm_id(value, subscription=None):
     return value
 
 
+def same_subscription_id(value):
+    """Validated ARM ID inside the fixed subscription, or None for a well-formed cross-subscription reference (never read)."""
+    value = arm_id(value)
+    return value if value.split("/")[2].lower() == SUBSCRIPTION_ID.lower() else None
+
+
 def resource_type(resource_id):
     parts = arm_id(resource_id).split("/")
     return (parts[6] + "/" + "/".join(parts[7::2])).lower()
@@ -3596,16 +3602,16 @@ def normalize_cluster(raw, source_id, reference, config):
     row["storage_profile"] = {key: boolean(pick(properties, "storageProfile", native, "enabled"), source_id)
                               for key, native in {"disk_csi": "diskCSIDriver", "file_csi": "fileCSIDriver",
                                                   "snapshot_controller": "snapshotController"}.items()}
-    row["effective_outbound_ip_ids"] = [
-        arm_id(item.get("id"), SUBSCRIPTION_ID)
+    row["effective_outbound_ip_ids"] = [value for value in (
+        same_subscription_id(item.get("id"))
         for item in array(pick(properties, "networkProfile", "loadBalancerProfile", "effectiveOutboundIPs") or [], source_id)
-    ]
+    ) if value]
     row["kubelet_identity_resource_id"] = text(pick(properties, "identityProfile", "kubeletidentity", "resourceId"), source_id)
     row["identity"] = {
         "type": row["identity_type"], "principal_id": text(pick(raw, "identity", "principalId"), source_id),
-        "user_assigned_resource_ids": [
-            arm_id(value, SUBSCRIPTION_ID) for value in obj(pick(raw, "identity", "userAssignedIdentities") or {}, source_id)
-        ],
+        "user_assigned_resource_ids": [value for value in (
+            same_subscription_id(item) for item in obj(pick(raw, "identity", "userAssignedIdentities") or {}, source_id)
+        ) if value],
         "kubelet_principal_id": text(pick(properties, "identityProfile", "kubeletidentity", "objectId"), source_id),
     }
     embedded = properties.get("agentPoolProfiles")
@@ -3964,7 +3970,9 @@ def referenced_resource_ids(row):
     if row.get("resource_kind") == "microsoft.network/virtualnetworks/subnets":
         references.append((re.split(r"/subnets/", row["id"], flags=re.IGNORECASE)[0], "parent_virtual_network_id"))
     for value, field in references:
-        value = arm_id(value, SUBSCRIPTION_ID)
+        value = same_subscription_id(value)
+        if not value:
+            continue
         if resource_type(value) == "microsoft.network/loadbalancers/backendaddresspools":
             value = re.split(r"/backendaddresspools/", value, flags=re.IGNORECASE)[0]
         if resource_type(value) in RESOURCE_APIS:
@@ -4121,16 +4129,16 @@ def collect_live(config, reference, deadline=None):
         for pool in pools:
             for field in ("vnet_subnet_id", "pod_subnet_id"):
                 value = pool[field]
-                if value:
-                    related_ids[arm_id(value, SUBSCRIPTION_ID).lower()] = (value, {"type": "direct_reference", "source_id": pool["source_id"], "field": field})
+                if value and same_subscription_id(value):
+                    related_ids[value.lower()] = (value, {"type": "direct_reference", "source_id": pool["source_id"], "field": field})
         for value in cluster["effective_outbound_ip_ids"]:
             related_ids[value.lower()] = (value, {"type": "direct_reference", "source_id": "arm_cluster", "field": "effective_outbound_ip_ids"})
         for field in ("private_dns_zone", "kubelet_identity_resource_id"):
             value = cluster.get(field)
-            if value and value.startswith("/subscriptions/"):
-                related_ids[arm_id(value, SUBSCRIPTION_ID).lower()] = (value, {"type": "direct_reference", "source_id": "arm_cluster", "field": field})
+            if value and value.startswith("/subscriptions/") and same_subscription_id(value):
+                related_ids[value.lower()] = (value, {"type": "direct_reference", "source_id": "arm_cluster", "field": field})
         for value in cluster["identity"]["user_assigned_resource_ids"]:
-            related_ids[arm_id(value, SUBSCRIPTION_ID).lower()] = (value, {
+            related_ids[value.lower()] = (value, {
                 "type": "direct_reference", "source_id": "arm_cluster", "field": "identity.user_assigned_resource_ids"})
         node_rg = cluster["node_resource_group"]
         if config["include_node_resource_group"] and node_rg:
@@ -4150,7 +4158,9 @@ def collect_live(config, reference, deadline=None):
         pending = list(related_ids.values())
         next_related = 0
         def queue_related(value, association):
-            value = arm_id(value, SUBSCRIPTION_ID)
+            value = same_subscription_id(value)
+            if not value:
+                return
             if value.lower() in related_ids:
                 return
             if len(related_ids) >= MAX_RELATED_RESOURCES:
@@ -4231,8 +4241,8 @@ def collect_live(config, reference, deadline=None):
         for pv in raw["inventory"]["pvs"]:
             handle = pv.get("csi_volume_handle")
             if pv.get("csi_driver") == "disk.csi.azure.com" and handle and handle.lower().startswith("/subscriptions/"):
-                value = arm_id(handle, SUBSCRIPTION_ID)
-                if resource_type(value) == "microsoft.compute/disks":
+                value = same_subscription_id(handle)
+                if value and resource_type(value) == "microsoft.compute/disks":
                     queue_related(value, {"type": "direct_reference", "source_id": pv["source_id"],
                                           "kubernetes_uid": pv["uid"], "field": "csi_volume_handle"})
         read_related()
