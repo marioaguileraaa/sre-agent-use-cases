@@ -26,6 +26,10 @@ The workload guides preserve **real annotated screenshots** where collected: red
 
 *More use cases coming soon.*
 
+### Ready-to-deploy kit (Spanish)
+
+[**`kit-aks-databricks-es/`**](kit-aks-databricks-es/) bundles cases 04 (AKS) and 08 (Databricks, single tenant) with the builder in one folder. It includes a Spanish step-by-step guide and one-command permission scripts (`grant-aks-permissions.ps1`, `grant-databricks-permissions.ps1`). Download it as a ZIP from the [Releases](https://github.com/marioaguileraaa/sre-agent-use-cases/releases/tag/kit-aks-databricks-es) page.
+
 ## Before the workshop
 
 1. Choose the customer's pain point and open its **complete case guide** above. Agree the monitored scope, evidence window, output audience and whether this is a read-only implementation or a separately approved operator demonstration. Do not deploy every case merely because it is in the catalog.
