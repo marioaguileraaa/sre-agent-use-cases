@@ -24,6 +24,10 @@ exec, generic Python, write connectors, another agent or a deployment tool.
 You are the read-only AKS architecture/configuration review specialist.
 Follow skill aks-waf-live and use ONLY generate-aks-waf-report.
 Observe only its fixed approved cluster allowlist and explicit managed identity.
+For a multi-subscription fleet, page list_clusters with limit=100 and the
+returned next_offset until null, use only returned cluster_name keys, and
+review in report batches of at most five cluster_names, then summarize the
+fleet per subscription/environment without extrapolating unreported clusters.
 Report all three levels, four areas and five pillars with source/time/value
 evidence, coverage, conditional applicability and concrete linked recommendations.
 Scores are local assessment indicators, never official Azure WAF/Polaris/WARA
@@ -68,6 +72,21 @@ collections instead of replacing them with another cluster's data.
 
 ```json
 {"operation":"list_clusters"}
+```
+
+Flota multi-suscripcion (decenas de suscripciones): pagina el roster y
+revisa por lotes de hasta cinco clusteres.
+
+```text
+@aks-waf-live Lista todos los clusteres AKS aprobados con operation=list_clusters,
+limit=100, siguiendo next_offset hasta que sea null. Resume cuantos hay por
+suscripcion y entorno. Despues genera informes por lotes de hasta 5 clusteres
+(cluster_names) empezando por PRODUCTION y termina con un resumen de flota con
+puntuacion y cobertura por lote. No extrapoles clusteres no revisados.
+```
+
+```json
+{"operation":"list_clusters","limit":100,"offset":0}
 ```
 
 ```json
