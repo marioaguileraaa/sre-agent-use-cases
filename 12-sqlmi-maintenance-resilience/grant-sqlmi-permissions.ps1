@@ -10,6 +10,10 @@
   For every Log Analytics workspace where the applications' Application Insights write:
     - Log Analytics Reader (AppDependencies and AppRequests to measure user impact)
 
+  If you omit -WorkspaceResourceIds the script discovers them: it lists the Application Insights
+  components in the subscriptions (-AppSubscriptionIds or, by default, -SubscriptionIds) and takes the
+  workspace each one writes to. -DiscoverOnly only shows what it would find, without granting anything.
+
   None of these roles can change resources. Idempotent: existing assignments are skipped.
   At the end it writes sqlmi-tool-config.txt with the values for the tool (guide, step 4).
 
@@ -17,13 +21,24 @@
   ./grant-sqlmi-permissions.ps1 -AgentIdentityName "<SRE_AGENT_UAMI_NAME>" -AgentIdentityResourceGroup "<UAMI_RG>" `
       -SubscriptionIds "<SUB_ID_1>","<SUB_ID_2>" `
       -WorkspaceResourceIds "/subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.OperationalInsights/workspaces/<WS>"
+
+.EXAMPLE
+  # Discover the Application Insights workspaces automatically
+  ./grant-sqlmi-permissions.ps1 -AgentIdentityName "<SRE_AGENT_UAMI_NAME>" -AgentIdentityResourceGroup "<UAMI_RG>" `
+      -SubscriptionIds "<SUB_ID_1>","<SUB_ID_2>"
+
+.EXAMPLE
+  # Only show which workspaces it would find (no identity needed, nothing granted)
+  ./grant-sqlmi-permissions.ps1 -SubscriptionIds "<SUB_ID_1>" -DiscoverOnly
 #>
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = "Grant")]
 param(
-  [Parameter(Mandatory)] [string] $AgentIdentityName,
-  [Parameter(Mandatory)] [string] $AgentIdentityResourceGroup,
+  [Parameter(Mandatory, ParameterSetName = "Grant")] [string] $AgentIdentityName,
+  [Parameter(Mandatory, ParameterSetName = "Grant")] [string] $AgentIdentityResourceGroup,
   [Parameter(Mandatory)] [string[]] $SubscriptionIds,
   [string[]] $WorkspaceResourceIds = @(),
+  [string[]] $AppSubscriptionIds = @(),
+  [Parameter(Mandatory, ParameterSetName = "Discover")] [switch] $DiscoverOnly,
   [string] $IdentitySubscriptionId = "",
   [string] $OutputFile = "sqlmi-tool-config.txt"
 )
@@ -34,6 +49,41 @@ function Invoke-Az {
   $out = & az @Arguments 2>&1
   if ($LASTEXITCODE -ne 0) { throw "az $($Arguments -join ' ') failed:`n$out" }
   return $out
+}
+
+function Find-AppInsightsWorkspaces([string[]] $Subscriptions) {
+  Write-Host "   Looking for Application Insights in: $($Subscriptions -join ', ')"
+  $found = [ordered]@{}
+  foreach ($sub in $Subscriptions) {
+    $url = "https://management.azure.com/subscriptions/$sub/providers/Microsoft.Insights/components?api-version=2020-02-02"
+    while ($url) {
+      try {
+        $page = (Invoke-Az @("rest", "--method", "get", "--url", $url, "-o", "json")) -join "`n" | ConvertFrom-Json
+      } catch {
+        Write-Warning "No access to list Application Insights in $sub"; break
+      }
+      foreach ($c in $page.value) {
+        $ws = $c.properties.WorkspaceResourceId
+        if (-not $ws) { Write-Warning "   $($c.name): classic Application Insights (no workspace); the tool cannot measure it."; continue }
+        $key = $ws.ToLowerInvariant()
+        if (-not $found.Contains($key)) { $found[$key] = [pscustomobject]@{ Id = $ws; Apps = [System.Collections.Generic.List[string]]::new() } }
+        $found[$key].Apps.Add($c.name)
+      }
+      $url = $page.nextLink
+    }
+  }
+  Write-Host "   Workspaces found: $($found.Count)"
+  foreach ($f in $found.Values) { Write-Host "   - $(($f.Id -split '/')[-1])  <-  $($f.Apps -join ', ')" }
+  if ($found.Count -eq 0) { Write-Warning "No workspace-based Application Insights found: the tool cannot measure user impact per application." }
+  return @($found.Values | ForEach-Object { $_.Id })
+}
+
+$appSubs = if ($AppSubscriptionIds) { $AppSubscriptionIds } else { $SubscriptionIds }
+if ($DiscoverOnly) {
+  if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Install Azure CLI and run 'az login'." }
+  $null = Find-AppInsightsWorkspaces $appSubs
+  Write-Host "`n-DiscoverOnly mode: nothing was granted. Run it again without -DiscoverOnly to apply." -ForegroundColor Yellow
+  return
 }
 
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Install Azure CLI and run 'az login'." }
@@ -65,7 +115,8 @@ foreach ($sub in $SubscriptionIds) {
 $workspaceIds = @()
 Write-Host "3) Log Analytics workspace roles (Log Analytics Reader)" -ForegroundColor Cyan
 if (-not $WorkspaceResourceIds) {
-  Write-Warning "Without -WorkspaceResourceIds the tool cannot measure user impact per application."
+  Write-Host "   No -WorkspaceResourceIds: automatic discovery."
+  $WorkspaceResourceIds = Find-AppInsightsWorkspaces $appSubs
 }
 foreach ($ws in $WorkspaceResourceIds) {
   Grant-Role "Log Analytics Reader" $ws

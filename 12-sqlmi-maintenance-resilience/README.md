@@ -256,16 +256,24 @@ Every command in the following steps runs **from this folder**.
 
 ## Step 3 - Grant the read-only permissions
 
-### 3.1 Find the Application Insights workspaces
+### 3.1 (Optional) Check which workspaces it will find
 
-The tool measures impact per application by reading `AppDependencies` and `AppRequests` in the Log Analytics workspaces where the Application Insights of the SQL MI applications write. To list them:
+The tool measures impact per application by reading `AppDependencies` and `AppRequests` in the Log Analytics workspaces where the Application Insights of the SQL MI applications write. **You don't have to look them up**: the script discovers them from the subscription. To see them before granting anything (no changes, no identity needed):
 
 ```powershell
-az resource list --resource-type "microsoft.insights/components" --subscription "<APPS_SUBSCRIPTION_ID>" `
-  --query "[].{application:name, workspace:properties.WorkspaceResourceId}" -o table
+./grant-sqlmi-permissions.ps1 -SubscriptionIds "<APPS_SUBSCRIPTION_ID>" -DiscoverOnly
 ```
 
-You need the **full resourceId** of each distinct workspace (`/subscriptions/.../workspaces/<name>`). An application with no workspace uses classic Application Insights: the tool cannot measure it until it is migrated to a workspace.
+```text
+   Looking for Application Insights in: <subscription-id>
+   Workspaces found: 2
+   - law-apps-prd  <-  appi-customer-portal, appi-pricing-api
+   - law-apps-pre  <-  appi-customer-portal-pre
+
+-DiscoverOnly mode: nothing was granted. Run it again without -DiscoverOnly to apply.
+```
+
+Each line is a workspace and, on the right, the Application Insights components that write to it. An application reported as **"classic Application Insights (no workspace)"** cannot be measured until it is migrated to a workspace.
 
 ### 3.2 Run the script
 
@@ -275,12 +283,12 @@ With an Owner, User Access Administrator or RBAC Administrator account:
 ./grant-sqlmi-permissions.ps1 `
   -AgentIdentityName "<identity-name>" `
   -AgentIdentityResourceGroup "<identity-rg>" `
-  -SubscriptionIds "<SQLMI_SUBSCRIPTION_ID_1>","<SQLMI_SUBSCRIPTION_ID_2>" `
-  -WorkspaceResourceIds "/subscriptions/<ID>/resourceGroups/<RG>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE>"
+  -SubscriptionIds "<SQLMI_SUBSCRIPTION_ID_1>","<SQLMI_SUBSCRIPTION_ID_2>"
 ```
 
-- `-SubscriptionIds`: every subscription with SQL MI (production, DR and pre-production).
-- `-WorkspaceResourceIds`: one or more, comma separated.
+- `-SubscriptionIds`: every subscription with SQL MI (production, DR and pre-production). The script also looks there for Application Insights and grants **Log Analytics Reader** on their workspaces.
+- If the applications (their Application Insights) live in **other subscriptions**, add `-AppSubscriptionIds "<APPS_SUBSCRIPTION_ID_1>","<APPS_SUBSCRIPTION_ID_2>"`.
+- To pin the workspaces yourself, add `-WorkspaceResourceIds "/subscriptions/<ID>/resourceGroups/<RG>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE>"` (one or more, comma separated); discovery is then skipped.
 - If the agent identity lives in a different subscription than the first one in the list, add `-IdentitySubscriptionId "<IDENTITY_SUBSCRIPTION_ID>"`.
 
 The script is **idempotent** (safe to rerun). Expected output:
@@ -295,6 +303,10 @@ The script is **idempotent** (safe to rerun). Expected output:
    + Reader on /subscriptions/<id-2>
    + Monitoring Reader on /subscriptions/<id-2>
 3) Log Analytics workspace roles (Log Analytics Reader)
+   No -WorkspaceResourceIds: automatic discovery.
+   Looking for Application Insights in: <id-1>, <id-2>
+   Workspaces found: 1
+   - <ws>  <-  <appi-1>, <appi-2>
    + Log Analytics Reader on /subscriptions/<id>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<ws>
 4) Tool configuration file: sqlmi-tool-config.txt
    MANAGED_IDENTITY_CLIENT_ID = "<client-id>"
