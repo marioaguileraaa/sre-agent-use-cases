@@ -76,8 +76,8 @@ Before the meeting:
    copy of this complete case with its relative folders. Use the file links
    below and **Raw / Download raw file**; verify Python/JSON/Markdown rather
    than an HTML sign-in page.
-2. Have an **existing SRE Agent**, its attached reporting UAMI, and one to five
-   exact approved clusters. Record the SRE-hosting subscription separately
+2. Have an **existing SRE Agent**, its attached reporting UAMI, and one or more (up to
+   500, across subscriptions of one tenant) exact approved clusters. Record the SRE-hosting subscription separately
    from the monitored subscription and verify compatible tenant/access.
 3. Agree associated-resource and optional billing scopes, source expectations,
    intended report audience and customer-admin availability. A running ARM
@@ -125,7 +125,7 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 |---|---|
 | SRE Agent resource, hosting subscription and tenant; implementer's user/group | [Prerequisites](#prerequisites) and [Step 0](#step-0---identify-the-reporting-identity-and-approve-scope): human Author + Standard User access is on this resource, separate from source permissions. |
 | Attached reporting UAMI **Client ID** and **Object/principal ID** | Client ID goes into `MANAGED_IDENTITY_CLIENT_ID`; the principal identifies the role-assignment member. They are not interchangeable and neither is the browser user's identity. |
-| Monitored tenant/subscription, exact approved AKS names/resource groups and environment | [Step 1](#step-1---configure-the-private-standalone-file): configure one to five existing clusters and the same exact names in the private schema allowlist; do not copy the demonstration's cluster IDs. |
+| Monitored tenant/subscription, exact approved AKS names/resource groups and environment | [Step 1](#step-1---configure-the-private-standalone-file): configure the existing clusters (up to 500, any subscription of the tenant) in the private allowlist; do not copy the demonstration's cluster IDs. |
 | Approved associated-resource IDs, node-RG inventory choice and optional billing scope/timeframe | Agree which reads are in scope and which remain disabled. Node-RG inventory, resource-detail access and billing-query authorization are not the same permission. |
 | Four independent read-boundary results and any source exclusions | [Step 0](#step-0---identify-the-reporting-identity-and-approve-scope): ARM, clusterUser, Kubernetes data and billing. Record denied/unavailable kinds explicitly; do not ask for Cluster Admin to make a demo green. |
 | Availability, scaling, segmentation and other actual workload requirements | Unknown requirements stay unknown; they are not invented from the report's reference architecture. |
@@ -250,7 +250,7 @@ Before opening Builder, confirm these separately:
 | An existing Azure SRE Agent and an approved AKS scope | This guide does not deploy a new SRE Agent or AKS cluster |
 | **SRE Agent Author + SRE Agent Standard User** on the **SRE Agent resource** | Authoring and chat are different data actions; **SRE Agent Administrator** is the full-management alternative |
 | The reporting agent's **user-assigned managed identity Client ID** | The Python code uses that exact UAMI, not your browser identity, Object ID or cached Azure CLI login |
-| Fixed tenant/subscription and one to five approved cluster names/resource groups | Requests cannot expand the allowlist or discover the subscription |
+| Fixed tenant, default subscription and approved cluster names/resource groups/subscriptions (up to 500) | Requests cannot expand the allowlist or discover the subscription |
 | An authorized operator who can verify each source read | Reader, clusterUser credentials, Kubernetes data reads and billing access are separate boundaries |
 | A private working copy and a browser | Configured source, real snapshots and customer logos must remain outside Git |
 
@@ -406,6 +406,17 @@ MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
 CLIENT_NAME = "CLIENTE"
 CLIENT_LOGO_DATA_URI = ""
 CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLUSTER_DEFAULTS = {
+    "environment": "UNSPECIFIED",
+    "kubernetes_enabled": True,
+    "include_node_resource_group": True,
+    "advisor_enabled": True,
+    "approved_related_resource_ids": [],
+    "approved_cost_resource_ids": [],
+    "cost_scope": "disabled",
+    "cost_timeframe": "month_to_date",
+    "requirements": {},
+}
 APPROVED_CLUSTERS = {
     "<APPROVED_AKS_NAME>": {
         "resource_group": "<APPROVED_AKS_RESOURCE_GROUP>",
@@ -439,9 +450,11 @@ and resource-group placeholders, set `environment` only to confirmed `LAB`,
 `PRODUCTION` or `UNSPECIFIED`, and keep boolean source flags deliberate.
 `CLIENT_NAME` is 1..120 plain characters. The fixed global identity/tenant/
 subscription and each approved cluster/resource ID are not chat overrides.
-Privately update `cluster_name.enum` in the linked schema to `""` plus the
-**same exact approved names** as `APPROVED_CLUSTERS`; preserve all other
-types/defaults/bounds. There is no `period` or arbitrary snapshot-path input.
+For a handful of clusters you may privately set `cluster_name.enum` in the
+linked schema to `""` plus the **same exact approved names** as
+`APPROVED_CLUSTERS`; for a large fleet keep it as the shipped free string with
+pattern (the code still rejects any name outside the allowlist). Preserve all
+other types/defaults/bounds. There is no `period` or arbitrary snapshot-path input.
 
 ![Actual Builder preview of operation, view and exact masked cluster choice](images/aks04-step01-cluster-choice.png)
 
@@ -469,6 +482,35 @@ and leave `cluster_name=""`.
 |---|---|---|---|
 | **Single cluster** (`aks-prod-01`) | `APPROVED_CLUSTERS = {"aks-prod-01": {"resource_group": "rg-aks-prod-01", "environment": "PRODUCTION", ...}}` *(abbreviated; use full 10-key dict above)* | `"enum": ["", "aks-prod-01"]` | `{"operation":"report","cluster_name":"aks-prod-01"}` (or `cluster_name=""` for the first key) |
 | **Two clusters** (`aks-prod-01`, `aks-prod-02`) | `APPROVED_CLUSTERS = {"aks-prod-01": {"resource_group": "rg-aks-prod-01", ...}, "aks-prod-02": {"resource_group": "rg-aks-prod-02", ...}}` *(abbreviated; use full 10-key dict above)* | `"enum": ["", "aks-prod-01", "aks-prod-02"]` | Single: `{"operation":"report","cluster_name":"aks-prod-02"}`<br/>Combined (no spaces): `{"operation":"report","cluster_names":"aks-prod-01,aks-prod-02"}` |
+
+### Multi-subscription fleet (tens of subscriptions, hundreds of clusters)
+
+The allowlist accepts up to **500 clusters** in **any number of subscriptions
+of the same tenant**. Every entry inherits `CLUSTER_DEFAULTS`, so a fleet entry
+only needs its resource group and, when it is not in `SUBSCRIPTION_ID`, its
+`subscription_id`. When two clusters share a name in different subscriptions,
+use a unique key and set `aks_name` to the real AKS name:
+
+```python
+APPROVED_CLUSTERS = {
+    "aks-prod-01": {"resource_group": "rg-aks-prod-01", "environment": "PRODUCTION"},
+    "aks-prod-02": {"resource_group": "rg-aks", "environment": "PRODUCTION",
+                    "subscription_id": "<SECOND_SUBSCRIPTION_ID>"},
+    "9f3c1a2b-aks-api": {"resource_group": "rg-api", "aks_name": "aks-api",
+                         "subscription_id": "<THIRD_SUBSCRIPTION_ID>"},
+}
+```
+
+- `grant-aks-permissions.ps1 -ManagementGroupId <mg>` (or `-AllSubscriptions` /
+  `-SubscriptionIds a,b,c`) assigns the read roles once per scope, enumerates
+  every AKS and writes this block to `approved-clusters.generated.py`.
+- Remove any `cluster_name` enum in the portal for large fleets.
+- `list_clusters` is paged: `{"operation":"list_clusters","limit":100,"offset":0}`
+  returns `total`, `subscription_count`, `returned` and `next_offset`.
+- A report still covers at most five clusters (`cluster_names`); the skill
+  reviews a fleet in batches of five and then summarizes per subscription.
+- Every collection reads only the selected cluster's own subscription; a
+  reference into another subscription is skipped, never followed.
 
 ### Optional private branding
 

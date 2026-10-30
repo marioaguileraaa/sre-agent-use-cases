@@ -29,6 +29,20 @@ MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
 CLIENT_NAME = "CLIENTE"
 CLIENT_LOGO_DATA_URI = ""
 CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+# Multi-subscription fleet: every APPROVED_CLUSTERS entry inherits CLUSTER_DEFAULTS, so an entry only needs
+# "resource_group" plus "subscription_id" when the cluster is outside SUBSCRIPTION_ID. Use "aks_name" when the
+# allowlist key is an alias (for example two clusters with the same name in different subscriptions).
+CLUSTER_DEFAULTS = {
+    "environment": "UNSPECIFIED",
+    "kubernetes_enabled": True,
+    "include_node_resource_group": True,
+    "advisor_enabled": True,
+    "approved_related_resource_ids": [],
+    "approved_cost_resource_ids": [],
+    "cost_scope": "disabled",
+    "cost_timeframe": "month_to_date",
+    "requirements": {},
+}
 APPROVED_CLUSTERS = {
     "<APPROVED_AKS_NAME>": {
         "resource_group": "<APPROVED_AKS_RESOURCE_GROUP>",
@@ -377,11 +391,11 @@ def main(operation: str = "report", view: str = "summary", cluster_name: str = "
     """Collect one or several fixed approved clusters; never change source scope or identity."""
     try:
         params = validate_parameters(operation, view, cluster_name, namespace, workload_name, area, level, severity, status, limit, offset, cluster_names)
-        configs, roster = selection_configs(cluster_name, cluster_names)
+        configs, configured = selection_configs(cluster_name, cluster_names)
         if operation == "list_clusters":
-            return ensure_response({"status": "ok", "operation": operation, "fresh_collection": False,
-                                    "roster_basis": "fixed_operator_configuration_not_observed_inventory",
-                                    "available_clusters": roster, "total": len(roster)})
+            return list_clusters_page(configured, limit, offset)
+        selected = {config["name"] for config in configs}
+        roster = [roster_row(config) for config in configured if len(configured) <= 5 or config["name"] in selected]
         if not CATALOG.get("rules"):
             raise EvidenceError("catalog_missing", "Use the build-generated whole-file tool, not unbuilt engine.py.", "rule_catalog")
         reference = utc_now()
@@ -432,6 +446,9 @@ HTTP_BYTES = 8_000_000
 MAX_PAGES = 100
 MAX_ROWS = 20000
 MAX_RELATED_RESOURCES = 200
+MAX_APPROVED_CLUSTERS = 500
+MAX_REPORT_CLUSTERS = 5
+ACTIVE_SUBSCRIPTION_ID = None
 MAX_COLLECTION_SECONDS = 240
 MAX_HTTP_ATTEMPTS = 300
 KUBE_PAGE_SIZE = 500
@@ -577,9 +594,29 @@ def arm_id(value, subscription=None):
     return value
 
 
+def scope_subscription(config=None):
+    """Subscription of the cluster being collected: per-cluster config, the active collection, then the default."""
+    return (config or {}).get("subscription_id") or ACTIVE_SUBSCRIPTION_ID or SUBSCRIPTION_ID
+
+
+def same_subscription_id(value):
+    """Validated ARM ID inside the collected cluster's subscription, or None for a cross-subscription reference (never read)."""
+    value = arm_id(value)
+    return value if value.split("/")[2].lower() == scope_subscription().lower() else None
+
+
 def resource_type(resource_id):
     parts = arm_id(resource_id).split("/")
     return (parts[6] + "/" + "/".join(parts[7::2])).lower()
+
+
+def guid_setting(key, value):
+    try:
+        if not isinstance(value, str) or str(UUID(value)) != value.lower():
+            raise ValueError
+    except (ValueError, AttributeError) as exc:
+        raise EvidenceError("configuration_required", "Configure the explicit " + key + " before authentication.", "configuration") from exc
+    return value.lower()
 
 
 def validate_config(cluster_name):
@@ -587,18 +624,17 @@ def validate_config(cluster_name):
         ("SUBSCRIPTION_ID", SUBSCRIPTION_ID), ("TENANT_ID", TENANT_ID),
         ("MANAGED_IDENTITY_CLIENT_ID", MANAGED_IDENTITY_CLIENT_ID),
     ):
-        try:
-            if not isinstance(value, str) or str(UUID(value)) != value.lower():
-                raise ValueError
-        except (ValueError, AttributeError) as exc:
-            raise EvidenceError("configuration_required", "Configure the explicit " + key + " before authentication.", "configuration") from exc
-    if not isinstance(APPROVED_CLUSTERS, dict) or not 1 <= len(APPROVED_CLUSTERS) <= 5:
-        raise EvidenceError("configuration_required", "Configure one to five fixed approved clusters.", "configuration")
+        guid_setting(key, value)
+    if not isinstance(APPROVED_CLUSTERS, dict) or not 1 <= len(APPROVED_CLUSTERS) <= MAX_APPROVED_CLUSTERS:
+        raise EvidenceError("configuration_required", "Configure one to " + str(MAX_APPROVED_CLUSTERS) + " fixed approved clusters.", "configuration")
     name = cluster_name or next(iter(APPROVED_CLUSTERS))
     if name not in APPROVED_CLUSTERS:
         raise EvidenceError("invalid_parameter", "cluster_name must exactly match the fixed operator allowlist.", "parameters")
-    config = obj(APPROVED_CLUSTERS[name], "configuration")
-    for field, value, maximum in (("name", name, 63), ("resource_group", config.get("resource_group"), 90)):
+    defaults = globals().get("CLUSTER_DEFAULTS") or {}
+    config = {**json.loads(json.dumps(obj(defaults, "configuration"))), **obj(APPROVED_CLUSTERS[name], "configuration")}
+    subscription = guid_setting("subscription_id of " + name, config.get("subscription_id") or SUBSCRIPTION_ID)
+    aks_name = config.get("aks_name") or name
+    for field, value, maximum in (("name", name, 63), ("aks_name", aks_name, 63), ("resource_group", config.get("resource_group"), 90)):
         if not isinstance(value, str) or not 1 <= len(value) <= maximum or not re.fullmatch(r"[A-Za-z0-9_.()-]+", value):
             raise EvidenceError("configuration_required", "Configure a bounded approved " + field + ".", "configuration")
     if config.get("environment") not in ("LAB", "PRODUCTION", "UNSPECIFIED"):
@@ -615,7 +651,7 @@ def validate_config(cluster_name):
         if not isinstance(ids, list) or len(ids) > MAX_RELATED_RESOURCES or len({str(i).lower() for i in ids}) != len(ids):
             raise EvidenceError("configuration_required", "Configure distinct bounded fixed resource IDs.", "configuration")
         for value in ids:
-            arm_id(value, SUBSCRIPTION_ID)
+            arm_id(value, subscription)
     requirements = obj(config.get("requirements"), "configuration")
     allowed = {
         "sla_required", "availability_zones_required", "network_policy_required", "workload_identity_required",
@@ -638,20 +674,49 @@ def validate_config(cluster_name):
     validate_logo(CLIENT_LOGO_DATA_URI, CLIENT_LOGO_ALT)
     if not isinstance(CLIENT_NAME, str) or not 1 <= len(CLIENT_NAME) <= 120 or any(ord(c) < 32 for c in CLIENT_NAME):
         raise EvidenceError("configuration_required", "Client label must be bounded plain text.", "configuration")
-    return {**config, "name": name, "id": "/subscriptions/" + SUBSCRIPTION_ID + "/resourceGroups/"
-            + config["resource_group"] + "/providers/Microsoft.ContainerService/managedClusters/" + name}
+    return {**config, "name": name, "aks_name": aks_name, "subscription_id": subscription,
+            "id": "/subscriptions/" + subscription + "/resourceGroups/"
+            + config["resource_group"] + "/providers/Microsoft.ContainerService/managedClusters/" + aks_name}
+
+
+def roster_row(config):
+    return {"cluster_id": config["id"], "cluster_name": config["name"],
+            "resource_group": config["resource_group"], "environment": config["environment"]}
 
 
 def selection_configs(cluster_name, cluster_names):
     first = validate_config(cluster_name)
     configured = [validate_config(name) for name in APPROVED_CLUSTERS]
+    if len({config["id"].lower() for config in configured}) != len(configured):
+        raise EvidenceError("configuration_required", "Two allowlist entries point to the same AKS resource ID.", "configuration")
     names = cluster_names.split(",") if cluster_names else [first["name"]]
     if len(set(names)) != len(names) or any(name not in APPROVED_CLUSTERS for name in names):
         raise EvidenceError("invalid_parameter", "Select distinct exact fixed allowlisted cluster names only.", "parameters")
     by_name = {config["name"]: config for config in configured}
-    roster = [{"cluster_id": config["id"], "cluster_name": config["name"],
-               "resource_group": config["resource_group"], "environment": config["environment"]} for config in configured]
-    return [by_name[name] for name in names], roster
+    return [by_name[name] for name in names], configured
+
+
+def list_clusters_page(configured, limit, offset):
+    """Paged fixed roster (configuration, not observed health) that always fits the 3500-byte transport budget."""
+    rows = [{"cluster_name": config["name"], "resource_group": config["resource_group"],
+             "subscription_id": config["subscription_id"], "environment": config["environment"]}
+            for config in configured]
+    if len(configured) <= MAX_REPORT_CLUSTERS:
+        for row, config in zip(rows, configured):
+            row["cluster_id"] = config["id"]
+    page = rows[offset:offset + limit]
+    response = {"status": "ok", "operation": "list_clusters", "fresh_collection": False,
+                "roster_basis": "fixed_operator_configuration_not_observed_inventory",
+                "total": len(rows), "subscription_count": len({row["subscription_id"] for row in rows}),
+                "offset": offset, "returned": 0, "next_offset": None,
+                "report_batch_limit": MAX_REPORT_CLUSTERS, "available_clusters": page}
+    while True:
+        response["returned"] = len(response["available_clusters"])
+        end = offset + response["returned"]
+        response["next_offset"] = end if end < len(rows) else None
+        if response_bytes(response) <= TRANSPORT_BYTES or len(response["available_clusters"]) <= 1:
+            return ensure_response(response)
+        response["available_clusters"] = response["available_clusters"][:-1]
 
 
 def validate_parameters(operation, view, cluster_name, namespace, workload_name, area, level, severity, status, limit, offset, cluster_names=""):
@@ -676,8 +741,10 @@ def validate_parameters(operation, view, cluster_name, namespace, workload_name,
     if cluster_name and cluster_names:
         raise EvidenceError("invalid_combination", "Use cluster_name or cluster_names, not both.", "parameters")
     filters = any((namespace, workload_name, area != "all", level != "all", severity != "all", status != "all"))
-    if operation in ("report", "list_clusters") and (view != "summary" or filters or limit != 25 or offset != 0):
-        raise EvidenceError("invalid_combination", "report/list_clusters cannot be narrowed by query filters or paging.", "parameters")
+    if operation == "report" and (view != "summary" or filters or limit != 25 or offset != 0):
+        raise EvidenceError("invalid_combination", "report cannot be narrowed by query filters or paging.", "parameters")
+    if operation == "list_clusters" and (view != "summary" or filters):
+        raise EvidenceError("invalid_combination", "list_clusters accepts only limit/offset roster paging, not query filters.", "parameters")
     if operation == "list_clusters" and (cluster_name or cluster_names):
         raise EvidenceError("invalid_combination", "list_clusters lists the complete fixed roster; do not select a cluster.", "parameters")
     if operation == "query":
@@ -963,7 +1030,7 @@ def common_row(raw, source_id, reference, config, kubernetes=False, metrics_snap
                 "labels": labels(metadata.get("labels"), source_id), "owner_references": owners,
                 "resource_version": text(metadata.get("resourceVersion"), source_id),
                 "source_id": source_id, "observed_at": reference, "cluster_name": config["name"], "cluster_id": config["id"]}
-    resource_id = arm_id(raw.get("id"), SUBSCRIPTION_ID)
+    resource_id = arm_id(raw.get("id"), scope_subscription(config))
     return {"id": resource_id, "resource_id": resource_id, "name": text(raw.get("name"), source_id),
             "resource_type": text(raw.get("type"), source_id), "region": text(raw.get("location"), source_id),
             "source_id": source_id, "observed_at": reference, "cluster_name": config["name"], "cluster_id": config["id"]}
@@ -1001,7 +1068,7 @@ def normalize_cluster(raw, source_id, reference, config):
     if row["id"].lower() != config["id"].lower():
         raise EvidenceError("scope_mismatch", "ARM returned a different cluster ID.", source_id)
     properties = obj(raw.get("properties"), source_id)
-    row.update(resource_group=config["resource_group"], subscription_id=SUBSCRIPTION_ID,
+    row.update(resource_group=config["resource_group"], subscription_id=scope_subscription(config),
                version=text(properties.get("currentKubernetesVersion") or properties.get("kubernetesVersion"), source_id),
                power_state=text(pick(properties, "powerState", "code"), source_id),
                provisioning_state=text(properties.get("provisioningState"), source_id),
@@ -1045,16 +1112,16 @@ def normalize_cluster(raw, source_id, reference, config):
     row["storage_profile"] = {key: boolean(pick(properties, "storageProfile", native, "enabled"), source_id)
                               for key, native in {"disk_csi": "diskCSIDriver", "file_csi": "fileCSIDriver",
                                                   "snapshot_controller": "snapshotController"}.items()}
-    row["effective_outbound_ip_ids"] = [
-        arm_id(item.get("id"), SUBSCRIPTION_ID)
+    row["effective_outbound_ip_ids"] = [value for value in (
+        same_subscription_id(item.get("id"))
         for item in array(pick(properties, "networkProfile", "loadBalancerProfile", "effectiveOutboundIPs") or [], source_id)
-    ]
+    ) if value]
     row["kubelet_identity_resource_id"] = text(pick(properties, "identityProfile", "kubeletidentity", "resourceId"), source_id)
     row["identity"] = {
         "type": row["identity_type"], "principal_id": text(pick(raw, "identity", "principalId"), source_id),
-        "user_assigned_resource_ids": [
-            arm_id(value, SUBSCRIPTION_ID) for value in obj(pick(raw, "identity", "userAssignedIdentities") or {}, source_id)
-        ],
+        "user_assigned_resource_ids": [value for value in (
+            same_subscription_id(item) for item in obj(pick(raw, "identity", "userAssignedIdentities") or {}, source_id)
+        ) if value],
         "kubelet_principal_id": text(pick(properties, "identityProfile", "kubeletidentity", "objectId"), source_id),
     }
     embedded = properties.get("agentPoolProfiles")
@@ -1413,7 +1480,9 @@ def referenced_resource_ids(row):
     if row.get("resource_kind") == "microsoft.network/virtualnetworks/subnets":
         references.append((re.split(r"/subnets/", row["id"], flags=re.IGNORECASE)[0], "parent_virtual_network_id"))
     for value, field in references:
-        value = arm_id(value, SUBSCRIPTION_ID)
+        value = same_subscription_id(value)
+        if not value:
+            continue
         if resource_type(value) == "microsoft.network/loadbalancers/backendaddresspools":
             value = re.split(r"/backendaddresspools/", value, flags=re.IGNORECASE)[0]
         if resource_type(value) in RESOURCE_APIS:
@@ -1432,7 +1501,7 @@ def normalize_registry_role(raw, source_id, reference, config, registry_id, prin
                           assignment_id, re.IGNORECASE):
         raise EvidenceError("scope_mismatch", "Registry role metadata must match the fixed kubelet principal and registry/ancestor scope.", source_id)
     if not role_id or not re.fullmatch(
-        r"/(?:subscriptions/" + re.escape(SUBSCRIPTION_ID) + r"/)?providers/Microsoft\.Authorization/roleDefinitions/[0-9a-f-]{36}",
+        r"/(?:subscriptions/" + re.escape(scope_subscription(config)) + r"/)?providers/Microsoft\.Authorization/roleDefinitions/[0-9a-f-]{36}",
         role_id, re.IGNORECASE,
     ):
         raise EvidenceError("invalid_role_definition", "Role metadata has an unexpected definition ID; no alternate scope is read.", source_id)
@@ -1503,6 +1572,15 @@ def kube_reader(arm, identity, cluster, config):
 
 
 def collect_live(config, reference, deadline=None):
+    global ACTIVE_SUBSCRIPTION_ID
+    previous, ACTIVE_SUBSCRIPTION_ID = ACTIVE_SUBSCRIPTION_ID, scope_subscription(config)
+    try:
+        return _collect_live(config, reference, deadline)
+    finally:
+        ACTIVE_SUBSCRIPTION_ID = previous
+
+
+def _collect_live(config, reference, deadline=None):
     identity = Identity()
     try:
         if deadline is not None:
@@ -1541,7 +1619,7 @@ def collect_live(config, reference, deadline=None):
                                       key, reference, normalized)
             raw[key] = rows
             raw["sources"].append(receipt)
-        versions_url = (ARM_ORIGIN + "/subscriptions/" + SUBSCRIPTION_ID + "/providers/Microsoft.ContainerService/locations/"
+        versions_url = (ARM_ORIGIN + "/subscriptions/" + scope_subscription(config) + "/providers/Microsoft.ContainerService/locations/"
                         + quote(cluster["region"] or "", safe="") + "/kubernetesVersions?api-version=" + AKS_API)
         def version_row(item):
             return {"id": text(item.get("version"), "arm_regional_versions"), "version": text(item.get("version"), "arm_regional_versions"),
@@ -1570,22 +1648,22 @@ def collect_live(config, reference, deadline=None):
         for pool in pools:
             for field in ("vnet_subnet_id", "pod_subnet_id"):
                 value = pool[field]
-                if value:
-                    related_ids[arm_id(value, SUBSCRIPTION_ID).lower()] = (value, {"type": "direct_reference", "source_id": pool["source_id"], "field": field})
+                if value and same_subscription_id(value):
+                    related_ids[value.lower()] = (value, {"type": "direct_reference", "source_id": pool["source_id"], "field": field})
         for value in cluster["effective_outbound_ip_ids"]:
             related_ids[value.lower()] = (value, {"type": "direct_reference", "source_id": "arm_cluster", "field": "effective_outbound_ip_ids"})
         for field in ("private_dns_zone", "kubelet_identity_resource_id"):
             value = cluster.get(field)
-            if value and value.startswith("/subscriptions/"):
-                related_ids[arm_id(value, SUBSCRIPTION_ID).lower()] = (value, {"type": "direct_reference", "source_id": "arm_cluster", "field": field})
+            if value and value.startswith("/subscriptions/") and same_subscription_id(value):
+                related_ids[value.lower()] = (value, {"type": "direct_reference", "source_id": "arm_cluster", "field": field})
         for value in cluster["identity"]["user_assigned_resource_ids"]:
-            related_ids[arm_id(value, SUBSCRIPTION_ID).lower()] = (value, {
+            related_ids[value.lower()] = (value, {
                 "type": "direct_reference", "source_id": "arm_cluster", "field": "identity.user_assigned_resource_ids"})
         node_rg = cluster["node_resource_group"]
         if config["include_node_resource_group"] and node_rg:
             if not re.fullmatch(r"[A-Za-z0-9_.()-]{1,90}", node_rg):
                 raise EvidenceError("unsafe_scope", "ARM nodeResourceGroup has unsafe syntax.", "arm_related_inventory")
-            url = ARM_ORIGIN + "/subscriptions/" + SUBSCRIPTION_ID + "/resourceGroups/" + node_rg + "/resources?api-version=2021-04-01"
+            url = ARM_ORIGIN + "/subscriptions/" + scope_subscription(config) + "/resourceGroups/" + node_rg + "/resources?api-version=2021-04-01"
             items, inventory_receipt = read_pages(arm, url, "arm_related_inventory", reference,
                                                    lambda item: common_row(item, "arm_related_inventory", reference, config))
             raw["inventory"]["related_resource_index"] = items
@@ -1599,7 +1677,9 @@ def collect_live(config, reference, deadline=None):
         pending = list(related_ids.values())
         next_related = 0
         def queue_related(value, association):
-            value = arm_id(value, SUBSCRIPTION_ID)
+            value = same_subscription_id(value)
+            if not value:
+                return
             if value.lower() in related_ids:
                 return
             if len(related_ids) >= MAX_RELATED_RESOURCES:
@@ -1680,19 +1760,19 @@ def collect_live(config, reference, deadline=None):
         for pv in raw["inventory"]["pvs"]:
             handle = pv.get("csi_volume_handle")
             if pv.get("csi_driver") == "disk.csi.azure.com" and handle and handle.lower().startswith("/subscriptions/"):
-                value = arm_id(handle, SUBSCRIPTION_ID)
-                if resource_type(value) == "microsoft.compute/disks":
+                value = same_subscription_id(handle)
+                if value and resource_type(value) == "microsoft.compute/disks":
                     queue_related(value, {"type": "direct_reference", "source_id": pv["source_id"],
                                           "kubernetes_uid": pv["uid"], "field": "csi_volume_handle"})
         read_related()
         advisor_source = source_receipt("arm_advisor", reference, "not_configured", "Cached recommendations only; no generateRecommendations action.")
         raw["advisor"] = []
         if config["advisor_enabled"]:
-            url = ARM_ORIGIN + "/subscriptions/" + SUBSCRIPTION_ID + "/providers/Microsoft.Advisor/recommendations?" + urlencode({
+            url = ARM_ORIGIN + "/subscriptions/" + scope_subscription(config) + "/providers/Microsoft.Advisor/recommendations?" + urlencode({
                 "api-version": "2025-01-01", "$filter": "ResourceId eq '" + config["id"] + "'", "$top": "100"})
             def advisor_row(item):
                 advisory_id = text(item.get("id"), "arm_advisor", 2048)
-                if not advisory_id or not advisory_id.lower().startswith("/subscriptions/" + SUBSCRIPTION_ID.lower() + "/"):
+                if not advisory_id or not advisory_id.lower().startswith("/subscriptions/" + scope_subscription(config).lower() + "/"):
                     raise EvidenceError("scope_mismatch", "Advisor ID changed subscription scope.", "arm_advisor")
                 row = {"id": advisory_id, "resource_id": config["id"], "name": text(item.get("name"), "arm_advisor"),
                        "source_id": "arm_advisor", "observed_at": reference, "cluster_name": config["name"]}
@@ -1726,7 +1806,7 @@ def collect_cost(reader, config, reference, related, cluster=None):
                              granularity="None" if monthly else "Daily", cost_type="ActualCost", unit="billing_currency", pagination_complete=False)
     if mode == "disabled":
         return [], receipt
-    scope = "/subscriptions/" + SUBSCRIPTION_ID
+    scope = "/subscriptions/" + scope_subscription(config)
     node_rg = pick(cluster, "node_resource_group")
     observed_cluster_id = pick(cluster, "id")
     if mode == "node_resource_group":
@@ -1782,7 +1862,7 @@ def collect_cost(reader, config, reference, related, cluster=None):
                 if not isinstance(value, list) or len(value) != len(names):
                     raise EvidenceError("invalid_cost_shape", "Cost row/column lengths differ.", "azure_cost")
                 record = dict(zip(names, value))
-                resource_id = arm_id(record["ResourceId"], SUBSCRIPTION_ID)
+                resource_id = arm_id(record["ResourceId"], scope_subscription(config))
                 if (mode == "resource_ids" and resource_id.lower() not in {item.lower() for item in ids}) or (
                     mode == "node_resource_group" and resource_id.split("/")[4].lower() != node_rg.lower()
                 ):

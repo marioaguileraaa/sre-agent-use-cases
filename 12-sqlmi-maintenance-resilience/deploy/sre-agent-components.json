@@ -1,0 +1,49 @@
+{
+  "sqlmi": {
+    "folder": ".",
+    "tool": {
+      "name": "generate-sqlmi-maintenance-report",
+      "code": "generate-sqlmi-maintenance-report.py",
+      "timeoutSeconds": 180,
+      "description": "Read-only Azure SQL Managed Instance maintenance resilience report: maintenance windows, connection type, failover groups, real reconfigurations (Resource Health, Activity Log), upcoming planned maintenance (Service Health), per-application user impact from Application Insights and recommended window from real load. HTML + JSON + 2 CSV. Never changes anything.",
+      "parameters": [
+        {
+          "name": "operation",
+          "type": "string",
+          "description": "report (HTML+JSON+2 CSV, default), summary (KPIs, findings, apps) or upcoming (next planned maintenance and at-risk apps).",
+          "required": false
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "description": "History window: last_30d (default), last_14d or last_7d.",
+          "required": false
+        },
+        {
+          "name": "data_source",
+          "type": "string",
+          "description": "auto (default: live if configured, otherwise demo), live or demo (simulated data).",
+          "required": false
+        }
+      ]
+    },
+    "skill": {
+      "name": "sqlmi-maintenance-resilience",
+      "file": "skills/sqlmi-maintenance-resilience/SKILL.md",
+      "description": "Azure SQL Managed Instance resilience to maintenance windows: windows, reconfigurations, upcoming maintenance, per-application user impact and recommended window. Read-only."
+    },
+    "agent": {
+      "name": "sqlmi-maintenance-advisor",
+      "file": "subagent-instructions.txt",
+      "handoffDescription": "Read-only advisor for Azure SQL Managed Instance maintenance windows, reconfiguration impact on applications and retry readiness.",
+      "allowParallelToolCalls": false,
+      "disableDocumentRetrieval": true
+    },
+    "schedule": {
+      "name": "SQL MI - Weekly maintenance resilience report",
+      "cronExpression": "0 7 * * 1",
+      "description": "Every Monday: last week's SQL MI reconfigurations, user impact, applications without retries and upcoming maintenance (read-only).",
+      "agentPrompt": "@sqlmi-maintenance-advisor Generate the weekly SQL Managed Instance maintenance resilience report (operation=report, period=last_7d). Deliver the 4 download links (HTML, JSON, instances CSV and impact CSV), the short answer, the next maintenance with the applications at risk and the High priority actions."
+    }
+  }
+}

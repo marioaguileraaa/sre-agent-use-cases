@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "generate-sqlmi-maintenance-report parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": ["report", "summary", "upcoming"],
+      "default": "report",
+      "description": "report writes 4 files (HTML, JSON, instances CSV, impact CSV); summary returns KPIs, findings and applications as JSON; upcoming returns the next planned maintenance and the applications at risk."
+    },
+    "period": {
+      "type": "string",
+      "enum": ["last_30d", "last_14d", "last_7d"],
+      "default": "last_30d",
+      "description": "Historical analysis window."
+    },
+    "data_source": {
+      "type": "string",
+      "enum": ["auto", "live", "demo"],
+      "default": "auto",
+      "description": "auto uses live data when the tool is configured, otherwise demo; demo forces deterministic simulated data."
+    }
+  }
+}

@@ -11,8 +11,9 @@ generic Python, other agents, remediation connectors or role-grant tools.
 
 ## Scope and evidence
 
-The code contains a fixed managed identity, tenant, subscription and approved
-cluster-name allowlist. Tool parameters cannot change credentials, endpoints,
+The code contains a fixed managed identity, tenant, default subscription and
+an approved cluster allowlist (up to 500 clusters; each entry may carry its own
+`subscription_id` inside the same tenant). Tool parameters cannot change credentials, endpoints,
 KQL, filesystem paths, billing IDs or resource scope. `cluster_name=""` selects
 the first configured approved cluster. Queries filter a fresh collection
 locally, not a stored report or a stable cross-call cursor.
@@ -25,6 +26,20 @@ Multi-cluster files preserve every full per-cluster snapshot and failed run.
 Unknown/failed clusters do not acquire empty inventories or scores from
 another cluster. Aggregate scores apply only to available unique
 cluster/rule/resource checks; disclose excluded failed clusters.
+
+## Large fleets (many subscriptions)
+
+For a fleet, first page the roster: `operation="list_clusters"` with
+`limit=100` and `offset=0`, then repeat with the returned `next_offset` until
+it is null. Report `total`, `subscription_count` and the clusters per
+subscription and environment. Never guess names: use only returned
+`cluster_name` keys. A report covers at most five clusters (`cluster_names`),
+so for a fleet review run successive reports in batches of up to five (for
+example grouped by subscription or environment), deliver the four files of
+every batch, and finish with a fleet summary that lists each batch's scores
+with their coverage and any failed cluster. Never extrapolate an unreported
+cluster's state from another batch. Do not start more than the batches the
+user asked for; ask before a full-fleet sweep.
 
 The report covers cluster, workload and associated-resource configuration,
 four areas (`best_practices`, `security`, `finops`, `optimization`) and five
