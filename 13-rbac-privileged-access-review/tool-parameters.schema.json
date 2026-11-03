@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "generate-rbac-privileged-review parameters",
+  "description": "The tool takes no parameters: call it with {}. Scope (subscriptions) and thresholds are set in the CONFIGURE block of the tool code.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}

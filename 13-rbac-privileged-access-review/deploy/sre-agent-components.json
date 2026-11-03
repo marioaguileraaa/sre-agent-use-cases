@@ -1,0 +1,30 @@
+{
+  "rbac": {
+    "folder": ".",
+    "tool": {
+      "name": "generate-rbac-privileged-review",
+      "code": "generate-rbac-privileged-review.py",
+      "timeoutSeconds": 300,
+      "description": "Read-only Azure RBAC privileged access review (Reader + Microsoft Graph read) that classifies Owner, User Access Administrator, Contributor and administrative role assignments as orphaned, redundant, individual review or compliant, and writes an HTML report plus CSV and JSON. Never changes anything.",
+      "parameters": []
+    },
+    "skill": {
+      "name": "rbac-privileged-access-review",
+      "file": "skills/rbac-privileged-access-review/SKILL.md",
+      "description": "Read-only monthly review of privileged Azure RBAC role assignments (Owner, User Access Administrator, Contributor and administrative roles) with a cleanup proposal and individual review."
+    },
+    "agent": {
+      "name": "rbac-access-reviewer",
+      "file": "subagent-instructions.txt",
+      "handoffDescription": "Read-only Azure RBAC privileged access reviewer (Owner, User Access Administrator, Contributor and administrative roles): orphaned, redundant and individual-review assignments.",
+      "allowParallelToolCalls": false,
+      "disableDocumentRetrieval": true
+    },
+    "schedule": {
+      "name": "Azure RBAC - Monthly privileged access review",
+      "cronExpression": "0 8 1 * *",
+      "description": "First day of every month: read-only review of privileged Azure RBAC role assignments with cleanup proposal (orphaned, redundant) and individual review list.",
+      "agentPrompt": "@rbac-access-reviewer Run the monthly Azure RBAC privileged access review and give me the links to the HTML report, CSV and JSON with the executive summary, Owner decisions, coverage and required actions."
+    }
+  }
+}
