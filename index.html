@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A field guide to Azure SRE Agent use cases</title>
+  <meta name="description" content="Real Azure SRE Agent use cases, built and tested with customers. Find the problem your customer describes, read the plate, and open the step-by-step guide on GitHub.">
+  <meta name="author" content="Mario Aguilera">
+  <meta name="theme-color" content="#173A30">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="A field guide to Azure SRE Agent use cases">
+  <meta property="og:description" content="Real use cases, built and tested with customers. Each one is a read-only routine your SRE Agent runs on its own, ending in a finished report.">
+  <meta property="og:image" content="https://marioaguileraaa.github.io/sre-agent-use-cases/site/img/og.jpg">
+  <meta property="og:url" content="https://marioaguileraaa.github.io/sre-agent-use-cases/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="site/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="site/fonts/bricolage-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="site/fonts/sourceserif-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="site/styles.css">
+  <script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+  <a class="skip" href="#plates">Skip to the plates</a>
+
+  <header class="masthead">
+    <a class="wordmark" href="#top" aria-label="SRE Agent Field Guide, back to top">
+      <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2" width="15" height="20" rx="1.5"/><path d="M18 5h3v4h-3zM18 10h3v4h-3z"/></svg>
+      <span>SRE Agent Field Guide</span>
+    </a>
+    <nav class="masthead-nav" aria-label="Site">
+      <a href="#key">Quick-find index</a>
+      <a href="#about">About this guide</a>
+      <a class="repo-link" data-repo href="https://github.com/marioaguileraaa/sre-agent-use-cases" rel="noopener">GitHub repository<svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3h8v8M13 3 3 13"/></svg></a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="spread" aria-labelledby="title">
+      <div class="cover">
+        <div class="cover-frame">
+          <h1 id="title">A field guide to Azure SRE Agent use&nbsp;cases</h1>
+          <p class="promise">Real use cases, built and tested with customers. Each one is a routine your SRE&nbsp;Agent runs on its own, read-only, and it ends with a finished report.</p>
+          <ol class="howto">
+            <li><span><b>Find the symptom</b> your customer describes in the <a href="#key">quick-find index</a>.</span></li>
+            <li><span><b>Read the plate</b>: what the agent does, when it runs and what you get.</span></li>
+            <li><span><b>Open the guide</b> on GitHub and follow it step by step.</span></li>
+          </ol>
+          <p class="author">Compiled by <a href="https://www.linkedin.com/in/mario-aguilera-alcalde/" rel="noopener">Mario Aguilera</a><span>Solution Engineer, Microsoft</span></p>
+        </div>
+      </div>
+
+      <div class="key" id="key" tabindex="-1">
+        <h2>Quick-find index</h2>
+        <p class="key-lede">What is your customer struggling with?</p>
+        <div class="key-groups" data-key aria-live="polite"></div>
+        <noscript><p class="fallback">This guide lists its use cases with JavaScript. <a href="https://github.com/marioaguileraaa/sre-agent-use-cases">Browse them on GitHub</a>.</p></noscript>
+      </div>
+    </section>
+
+    <nav class="thumbs" data-thumbs aria-label="Families of use cases"></nav>
+
+    <div id="plates" class="plates" data-plates tabindex="-1"></div>
+
+    <section class="colophon" id="about" aria-labelledby="about-title">
+      <div class="colophon-inner">
+        <h2 id="about-title">About this guide</h2>
+        <div class="colophon-cols">
+          <div class="colophon-text">
+            <p>Every plate is a real use case of <a href="https://learn.microsoft.com/azure/sre-agent/overview" rel="noopener">Azure SRE Agent</a>, built and tested with customers and written up as a step-by-step guide with annotated screenshots.</p>
+            <p>All of them are read-only by design. The agent reads, explains and proposes; a person decides and makes any change.</p>
+            <p>The guide keeps itself up to date: a new use case appears here as soon as it is added to the repository.</p>
+          </div>
+          <div>
+            <h3>How every use case is built</h3>
+            <ol class="anatomy">
+              <li><b>Python tool</b><span>reads the data and writes the report</span></li>
+              <li><b>Skill</b><span>the rules for running it and presenting the result</span></li>
+              <li><b>Subagent</b><span>a dedicated specialist with only that skill and tool</span></li>
+              <li><b>Scheduled task</b><span>runs it every month or week, on its own</span></li>
+            </ol>
+          </div>
+        </div>
+        <div class="colophon-foot">
+          <p>Compiled by <a href="https://www.linkedin.com/in/mario-aguilera-alcalde/" rel="noopener">Mario Aguilera</a>, Solution Engineer, Microsoft. Not an official Microsoft publication.</p>
+          <p>Screenshots come from lab runs with identifiers redacted, or from sample data. <a data-repo href="https://github.com/marioaguileraaa/sre-agent-use-cases" rel="noopener">Open the repository on GitHub</a>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <template id="icon-out"><svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3h8v8M13 3 3 13"/></svg></template>
+  <script src="site/app.js" defer></script>
+</body>
+</html>

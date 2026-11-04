@@ -1,0 +1,6 @@
+Fonts in this folder are self-hosted subsets of:
+
+- Bricolage Grotesque, Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
+- Source Serif 4, Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'
+
+Both are licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org
