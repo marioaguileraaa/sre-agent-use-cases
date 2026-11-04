@@ -6,6 +6,8 @@ English, **step-by-step implementation guides for [Azure SRE Agent](https://lear
 
 The workload guides preserve **real annotated screenshots** where collected: red boxes and numbers identify the controls, and captions distinguish dated live evidence, historical replay and synthetic samples. Use the linked code, schemas, skills and prompts, not code transcribed from an image.
 
+**Browse the use cases visually:** [A field guide to Azure SRE Agent use cases](https://marioaguileraaa.github.io/sre-agent-use-cases/), a plain-language page for less technical readers that links to every guide below and updates itself when a new case is added to this table.
+
 **Quick navigation:** [Use cases](#use-cases) · [Before the workshop](#before-the-workshop) · [Inputs and outputs](#inputs-and-outputs-at-a-glance) · [Permissions](#common-prerequisites) · [Acceptance](#implementation-and-acceptance-checkpoints).
 
 ## Use cases

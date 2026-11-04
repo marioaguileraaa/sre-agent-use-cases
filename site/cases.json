@@ -1,0 +1,294 @@
+{
+  "repository": "https://github.com/marioaguileraaa/sre-agent-use-cases",
+  "families": [
+    {
+      "id": "security",
+      "name": "Security & access",
+      "short": "Security",
+      "fill": "#B73A2B",
+      "ink": "#B73A2B",
+      "on": "#FFFFFF",
+      "about": "Identities, secrets and permissions: who can get in, with what, and for how long."
+    },
+    {
+      "id": "operations",
+      "name": "Operations & reliability",
+      "short": "Operations",
+      "fill": "#E5A823",
+      "ink": "#8A5D00",
+      "on": "#1B201D",
+      "about": "The routine checks that keep servers, backups, patching and databases healthy."
+    },
+    {
+      "id": "platform",
+      "name": "Platform reviews",
+      "short": "Platform",
+      "fill": "#6B4FA1",
+      "ink": "#6B4FA1",
+      "on": "#FFFFFF",
+      "about": "Configuration reviews of the platforms your workloads run on."
+    },
+    {
+      "id": "cost",
+      "name": "Cost & FinOps",
+      "short": "Cost",
+      "fill": "#2A7B84",
+      "ink": "#2A7B84",
+      "on": "#FFFFFF",
+      "about": "What the platform really costs, what is actually used, and where to save."
+    },
+    {
+      "id": "build",
+      "name": "Build your own",
+      "short": "Build",
+      "fill": "#1F5AA8",
+      "ink": "#1F5AA8",
+      "on": "#FFFFFF",
+      "about": "When none of the plates fits your customer, make a new one."
+    },
+    {
+      "id": "new",
+      "name": "New in the guide",
+      "short": "New",
+      "fill": "#3A403C",
+      "ink": "#3A403C",
+      "on": "#FFFFFF",
+      "about": "Recently added to the repository. Open the guide for the full story."
+    }
+  ],
+  "cases": {
+    "01-entra-credential-expiration-audit": {
+      "family": "security",
+      "name": "Expiring secrets and certificates",
+      "latin": "credential-monitor-full",
+      "key": "Secrets and certificates expire without warning",
+      "symptom": "An app stopped working overnight because a secret or a certificate expired, and nobody saw it coming.",
+      "does": "Every month it checks every app registration and service principal in Microsoft Entra ID and lists the secrets and certificates that have expired or are about to, sorted by urgency, so they can be renewed in time.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Microsoft Entra ID",
+      "delivers": "Interactive HTML report with filters and CSV export",
+      "image": "site/img/plates/01.webp",
+      "thumb": "site/img/plates/01-thumb.webp",
+      "full": "01-entra-credential-expiration-audit/sample-report/entra-credential-expiration-audit-SAMPLE.html",
+      "caption": "Sample report with fictitious data.",
+      "compare": [
+        "13-rbac-privileged-access-review"
+      ]
+    },
+    "02-arc-defender-posture-audit": {
+      "family": "security",
+      "name": "Security posture from Defender for Cloud",
+      "latin": "defender-cloud-live",
+      "key": "Too many security findings to know where to start",
+      "symptom": "Defender for Cloud shows hundreds of recommendations and we don't know which ones matter first.",
+      "does": "It reads the live Defender for Cloud evidence of a subscription (risks, recommendations, attack paths, vulnerabilities and secure score) and turns it into one report that shows what to review first. Then you can ask follow-up questions grounded in that evidence.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Microsoft Defender for Cloud",
+      "delivers": "HTML report, CSV and JSON",
+      "image": "site/img/plates/02.webp",
+      "thumb": "site/img/plates/02-thumb.webp",
+      "full": "02-arc-defender-posture-audit/images/v2-live-overview.png",
+      "caption": "Lab run. Field marks: 1 report title and live scope · 2 the sections (posture, attack paths, resources, recommendations, CVEs, compliance, sources).",
+      "compare": [
+        "13-rbac-privileged-access-review"
+      ]
+    },
+    "13-rbac-privileged-access-review": {
+      "family": "security",
+      "name": "Privileged access review",
+      "latin": "rbac-access-reviewer",
+      "key": "Too many people have Owner on our subscriptions",
+      "symptom": "Too many people and apps are Owner on our subscriptions, and nobody knows who still needs it.",
+      "does": "It reviews every privileged Azure role assignment, checks each identity in Microsoft Entra ID, and separates what can be removed today without anyone losing access from what needs an owner's decision.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure role assignments and Microsoft Entra ID",
+      "delivers": "HTML report, CSV and JSON",
+      "image": "site/img/plates/13.webp",
+      "thumb": "site/img/plates/13-thumb.webp",
+      "full": "13-rbac-privileged-access-review/sample-run/rbac-privileged-access-review-2026-11-03.html",
+      "caption": "Real lab run with names and identifiers replaced.",
+      "compare": [
+        "01-entra-credential-expiration-audit",
+        "02-arc-defender-posture-audit"
+      ]
+    },
+    "03-infrastructure-operations-health": {
+      "family": "operations",
+      "name": "Server health and capacity",
+      "latin": "infra-ops-live",
+      "key": "No single view of server health, in Azure and on-premises",
+      "symptom": "We run servers in Azure and on-premises, and nobody has one view of CPU, memory and what is about to run out.",
+      "does": "It collects CPU, memory, capacity, health and alerts for Azure virtual machines and Azure Arc servers, and explains them in one monthly operations review that flags unusual behaviour and says clearly where data is missing.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure Monitor, Log Analytics and Azure Arc",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/03.webp",
+      "thumb": "site/img/plates/03-thumb.webp",
+      "full": "03-infrastructure-operations-health/images/infra03-current-overview.png",
+      "caption": "Lab run. Field marks: 1 report title and time window · 2 the fleet register of Azure and Arc machines.",
+      "compare": [
+        "10-operations-incidents-anomalies-digest",
+        "09-update-manager-patching-failure-investigation"
+      ]
+    },
+    "05-service-health-events-review": {
+      "family": "operations",
+      "name": "Azure incidents and planned maintenance",
+      "latin": "service-health-live",
+      "key": "We hear about Azure incidents from our users",
+      "symptom": "Azure had an incident, or planned maintenance, and we found out from our own users.",
+      "does": "It gathers the service incidents and planned maintenance that Microsoft has published for your subscriptions, the resources that may be affected and what is coming next, in one monthly review.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure Service Health",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/05.webp",
+      "thumb": "site/img/plates/05-thumb.webp",
+      "full": "05-service-health-events-review/images/report-01-overview.png",
+      "caption": "Lab run. Field marks: 1 the review window, stated before any result · 2 communications to review, by lane.",
+      "compare": [
+        "10-operations-incidents-anomalies-digest",
+        "12-sqlmi-maintenance-resilience"
+      ]
+    },
+    "06-azure-backup-operations-review": {
+      "family": "operations",
+      "name": "Backup jobs review",
+      "latin": "azure-backup-live",
+      "key": "Nobody reviews the failed backup jobs",
+      "symptom": "We assume backups work, but nobody looks at the failed jobs until the day we need a restore.",
+      "does": "It reviews the backup jobs, errors and warnings of your Recovery Services vaults and which items are protected, so IT operations can decide what needs action. It never starts, stops or changes a backup.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure Backup",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/06.webp",
+      "thumb": "site/img/plates/06-thumb.webp",
+      "full": "06-azure-backup-operations-review/images/step5-01-actual-report-overview.png",
+      "caption": "Lab run. Field marks: 1 requested window · 2 approved vaults and coverage note · 3 full downloads · 4 expected protection shown as Unknown, never guessed.",
+      "compare": [
+        "10-operations-incidents-anomalies-digest"
+      ]
+    },
+    "09-update-manager-patching-failure-investigation": {
+      "family": "operations",
+      "name": "Patching results and failed machines",
+      "latin": "patching-investigation-live",
+      "key": "Patching failed and nobody knows why",
+      "symptom": "After every patching window someone has to log in to each failed server to find out why it didn't patch.",
+      "does": "After each patching cycle it checks every Azure virtual machine and Azure Arc server in Azure Update Manager and, for each machine that failed, explains the most likely cause from the evidence Azure already has.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure Update Manager",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/09.webp",
+      "thumb": "site/img/plates/09-thumb.webp",
+      "full": "09-update-manager-patching-failure-investigation/images/04-report-cover-and-cycle-summary.png",
+      "caption": "Lab run, report in Spanish. Field marks: 1 exports · 2 report cover and scope · 3 summary of the patching cycle.",
+      "compare": [
+        "03-infrastructure-operations-health"
+      ]
+    },
+    "10-operations-incidents-anomalies-digest": {
+      "family": "operations",
+      "name": "Monthly operations digest",
+      "latin": "operations-digest-live",
+      "key": "Operations signals are scattered in five places",
+      "symptom": "Alerts, health events and Advisor tips live in five different places, and management wants one monthly picture with actions.",
+      "does": "It brings together Azure Monitor alerts, Service Health, failed extensions, telemetry anomalies and Azure Advisor into one operations report with a prioritised list of recommended actions.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure Monitor, Service Health, Log Analytics and Azure Advisor",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/10.webp",
+      "thumb": "site/img/plates/10-thumb.webp",
+      "full": "10-operations-incidents-anomalies-digest/images/04-report-cover-and-executive-synthesis.png",
+      "caption": "Lab run, report in Spanish. Field marks: 1 report header · 2 exports and sections · 3 executive synthesis with the counts.",
+      "compare": [
+        "03-infrastructure-operations-health",
+        "05-service-health-events-review"
+      ]
+    },
+    "12-sqlmi-maintenance-resilience": {
+      "family": "operations",
+      "name": "SQL Managed Instance maintenance",
+      "latin": "sqlmi-maintenance-advisor",
+      "key": "Users see errors when Azure patches our databases",
+      "symptom": "Every time Azure patches our SQL Managed Instances, users see errors, and we want to choose the hour like we did on-premises.",
+      "does": "It shows each instance's maintenance window, the real interruptions and how long they lasted, the next planned maintenance, which applications show errors to users and which recover on their own, and the best window based on real load.",
+      "runs": "Weekly, on Mondays",
+      "reads": "Azure SQL, Service Health, Azure Monitor and Application Insights",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/12.webp",
+      "thumb": "site/img/plates/12-thumb.webp",
+      "full": "12-sqlmi-maintenance-resilience/sample-run/sqlmi-mantenimiento-20261030T094210Z.html",
+      "caption": "Sample report in demo mode (simulated data), in Spanish.",
+      "compare": [
+        "05-service-health-events-review"
+      ]
+    },
+    "04-aks-well-architected-review": {
+      "family": "platform",
+      "name": "AKS cluster review",
+      "latin": "aks-waf-live",
+      "key": "Our Kubernetes clusters may not follow best practices",
+      "symptom": "Our Kubernetes clusters grew fast, and we are not sure they follow best practices or what they really cost.",
+      "does": "It reviews the configuration of approved AKS clusters, their workloads and related resources against best practices for security, cost and optimisation, and proposes an improved reference design without deploying anything.",
+      "runs": "Monthly, on the 1st",
+      "reads": "Azure Kubernetes Service and related resources",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/04.webp",
+      "thumb": "site/img/plates/04-thumb.webp",
+      "full": "04-aks-well-architected-review/images/aks04-report-00-cover.png",
+      "caption": "Lab run, report in Spanish. Field marks: 1 report cover · 2 evidence labels (observed, lab) · 3 cluster facts: region, AKS version, state.",
+      "compare": [
+        "08-databricks-dependency-configuration-review"
+      ]
+    },
+    "08-databricks-dependency-configuration-review": {
+      "family": "platform",
+      "name": "Databricks dependencies and configuration",
+      "latin": "databricks-dependency-live",
+      "key": "No map of what our Databricks workspace depends on",
+      "symptom": "Our Databricks workspace connects to many things, and nobody has the full map or knows whether it is secure and cost-efficient.",
+      "does": "It maps how an Azure Databricks workspace connects to networks, storage, Key Vault, jobs, pipelines and Unity Catalog, marking what is observed, inferred or unknown, and checks 36 best practices for security, cost and optimisation.",
+      "runs": "On demand",
+      "reads": "Azure Databricks and Unity Catalog",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/08.webp",
+      "thumb": "site/img/plates/08-thumb.webp",
+      "full": "08-databricks-dependency-configuration-review/images/13-report-overview-and-pillars.png",
+      "caption": "Lab run, report in Spanish. Field marks: 1 exports (JSON, dependencies, findings) · 2 workspace cover and scope · 3 executive reading and coverage.",
+      "compare": [
+        "04-aks-well-architected-review"
+      ]
+    },
+    "11-fabric-finops-chargeback": {
+      "family": "cost",
+      "name": "Microsoft Fabric costs and savings",
+      "latin": "fabric-chargeback-live",
+      "key": "Fabric capacity costs more than it is used",
+      "symptom": "We pay for Microsoft Fabric every month, but we don't know what is really used, by whom, or how much we could save.",
+      "does": "It reads the real bill, the hours the capacity is switched on and who uses what, then shows idle time, savings options (pause, resize or reserve) and a cost split per workspace.",
+      "runs": "Monthly, on the 2nd",
+      "reads": "Azure Cost Management and Microsoft Fabric",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/11.webp",
+      "thumb": "site/img/plates/11-thumb.webp",
+      "full": "11-fabric-finops-chargeback/sample-run/fabric-finops-20261026T123745Z.html",
+      "caption": "Sample report with anonymised data, in Spanish."
+    },
+    "case_0_v3": {
+      "family": "build",
+      "name": "The use-case builder",
+      "latin": "sre-usecase-builder",
+      "key": "We need a report nobody has built yet",
+      "symptom": "We need a monthly report that none of these use cases covers yet.",
+      "does": "Describe the idea in one sentence. The agent writes the tool, tests it against your real data and hands back everything needed to run it as a new use case: the four building blocks, the exact permissions and a setup guide.",
+      "runs": "On demand",
+      "reads": "Whatever your idea needs, read-only",
+      "delivers": "A tested tool, skill, subagent and scheduled task",
+      "changes": "Nothing. The use cases it builds are read-only too",
+      "image": "site/img/builder-engineer.webp",
+      "thumb": "site/img/builder-engineer-320.webp",
+      "illustration": true,
+      "caption": "The builder at work."
+    }
+  }
+}
