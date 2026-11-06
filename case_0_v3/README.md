@@ -15,6 +15,25 @@ It asks no questions unless it cannot know where the data lives.
 | **Permissions it needs** | None of its own. It reads only what the agent managed identity can already read, so it can live-check the generated tool |
 | **Status** | Deployed and run live end to end: builder → generated tool → generated subagent → report → scheduled task (evidence below) |
 
+
+### Watch it: from one sentence to a scheduled use case (3 minutes)
+
+[![Tutorial video: the SRE use-case builder from one sentence to a scheduled use case](docs/video/sre-usecase-builder-tutorial-poster.jpg)](docs/video/sre-usecase-builder-tutorial.mp4)
+
+*Click the image to play the video (MP4, 3:09, no voice-over: every step is captioned on screen). It is also on the [use-case field guide](https://marioaguileraaa.github.io/sre-agent-use-cases/#tutorial).*
+
+A real, uncut run on a lab Azure SRE Agent (names and identifiers replaced), sped up only while the agent works:
+
+| Step | What you see |
+|---|---|
+| 1 | **Describe the idea.** New chat, `/agent sre-usecase-builder`, and one sentence: *"I need a weekly report of Azure resources that are missing the mandatory tags owner and environment, grouped by resource group and resource type, so each team can fix its own resources."* |
+| 2 | **The builder works on its own.** No questions: recipe, environment, JSON spec, code generation, lint, self-test and a live read. About 2 minutes |
+| 3 | **Review the answer.** Status `READY_LIVE_VERIFIED`, the permissions with exact `az` commands, and the 4 Builder blocks |
+| 4 | **Create it in Builder.** Python tool (paste the code, Identity off, `mode=self_test` test, Create), then the skill and the subagent with their blocks |
+| 5 | **Run it.** `/agent missing-mandatory-tags`: 463 resources in 34 resource groups missing tags, with the verdict, indicators and top findings |
+| 6 | **Open the report.** The HTML report with CSVs and JSON, written by the generated tool |
+| 7 | **Schedule it.** Automation > Scheduled task, with the cron from block 4 (`0 7 * * 1`, Mondays 07:00 UTC) |
+
 ---
 
 ## Contents

@@ -1460,6 +1460,10 @@ def _check_condition(cond, where, errors):
                 errors.append({"path": where, "error": f"invalid regex: {exc}", "fix": "escape special characters"})
 
 
+KPI_FIELDS = {"id", "label", "dataset", "agg", "field", "where", "good", "unit"}
+KPI_AGG_ALIASES = ("aggregation", "aggregate", "agg_type", "function")
+
+
 def _validate(spec):
     errors, warnings = [], []
     if not isinstance(spec, dict):
@@ -1542,6 +1546,18 @@ def _validate(spec):
         _check_condition(r.get("when"), f"rules[{i}].when", errors)
     kpis = spec.get("kpis") or []
     for i, k in enumerate(kpis):
+        if not isinstance(k, dict):
+            errors.append({"path": f"kpis[{i}]", "error": "kpi must be an object", "fix": "{id, label, dataset, agg, field?, where?, good?}"})
+            continue
+        for alias in KPI_AGG_ALIASES:
+            if alias in k:
+                value = k.pop(alias)
+                if "agg" not in k:
+                    k["agg"] = value
+                warnings.append(f"kpis[{i}]: '{alias}' renamed to 'agg'.")
+        for field in list(k):
+            if field not in KPI_FIELDS:
+                warnings.append(f"kpis[{i}]: field '{field}' is not used (allowed: {', '.join(sorted(KPI_FIELDS))}).")
         ds(k, f"kpis[{i}]")
         if k.get("agg", "count") not in AGGREGATIONS:
             errors.append({"path": f"kpis[{i}].agg", "error": f"unknown agg '{k.get('agg')}'", "fix": "use " + ", ".join(AGGREGATIONS)})

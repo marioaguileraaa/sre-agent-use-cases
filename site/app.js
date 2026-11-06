@@ -35,6 +35,15 @@
     return node;
   };
   const icon = () => iconOut.content.firstElementChild.cloneNode(true);
+  const svg = (paths, cls) => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    node.setAttribute("viewBox", "0 0 24 24");
+    node.setAttribute("aria-hidden", "true");
+    node.setAttribute("class", cls);
+    node.innerHTML = paths;
+    return node;
+  };
+  let player = null;
 
   const stripMd = (s) => s
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
@@ -175,9 +184,60 @@
         marks.map(([k, v]) => el("div", {}, el("dt", {}, k), el("dd", {}, v))),
         compareWith.length ? el("div", { class: "compare" }, el("dt", {}, "Compare with"),
           el("dd", {}, compareWith.map((o, i) => [i ? ", " : "", el("a", { href: `#plate-${o.no}` }, `No. ${o.no} ${o.name}`)]))) : null),
-      el("a", { class: "guide", href: guideUrl, rel: "noopener" }, "Open the step-by-step guide", icon()));
+      el("a", { class: "guide", href: guideUrl, rel: "noopener" }, "Open the step-by-step guide", icon()),
+      c.tutorial ? tutorialCard(c) : null);
 
     return el("article", { class: "plate", id: `plate-${c.no}`, "aria-labelledby": `plate-${c.no}-title`, "data-folder": c.folder, style: famStyle(f) }, text, figure);
+  }
+
+  function tutorialCard(c) {
+    const t = c.tutorial;
+    const card = el("button", { class: "tutorial", type: "button", "aria-haspopup": "dialog", "data-tutorial": "" },
+      el("span", { class: "tutorial-thumb" },
+        el("img", { src: t.thumb || t.poster, alt: "", width: 208, height: 117, loading: "lazy", decoding: "async" }),
+        el("span", { class: "tutorial-play" }, svg('<path d="M8.5 5.8v12.4c0 .6.7 1 1.2.6l9.3-6.2c.5-.3.5-1 0-1.3L9.7 5.2c-.5-.4-1.2 0-1.2.6z"/>', "play")),
+        el("span", { class: "tutorial-time" }, el("span", { class: "vh" }, "Length "), t.duration)),
+      el("span", { class: "tutorial-text" },
+        el("b", {}, "Watch the tutorial"),
+        el("span", {}, t.teaser)));
+    card.addEventListener("click", () => openPlayer(c, card));
+    return card;
+  }
+
+  function buildPlayer(c) {
+    const t = c.tutorial;
+    const video = el("video", { controls: true, playsinline: true, muted: true, preload: "none", poster: t.poster, width: 1920, height: 1080 },
+      el("source", { src: t.video, type: "video/mp4" }));
+    video.muted = true;
+    const close = el("button", { class: "player-close", type: "button", "aria-label": "Close the tutorial" },
+      svg('<path d="M6 6l12 12M18 6 6 18"/>', "icon"));
+    const dlg = el("dialog", { class: "player", "aria-labelledby": "player-title" },
+      el("div", { class: "player-head" },
+        el("h2", { id: "player-title" }, t.title),
+        close),
+      el("div", { class: "player-screen" }, video),
+      el("p", { class: "player-foot" },
+        `Plate ${c.no}, ${c.name.toLowerCase()} · ${t.duration} · no voice-over, every step is captioned on screen · `,
+        el("a", { href: t.video, download: "" }, "Download the video"),
+        " · ",
+        el("a", { href: `${repoUrl}/tree/main/${c.folder}`, rel: "noopener" }, "Step-by-step guide")));
+    close.addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", () => {
+      video.pause();
+      if (location.hash === "#tutorial") history.replaceState(null, "", location.pathname + location.search);
+    });
+    document.body.append(dlg);
+    return { dlg, video };
+  }
+
+  function openPlayer(c, opener) {
+    if (!player) player = buildPlayer(c);
+    if (player.dlg.open) return;
+    player.dlg.showModal();
+    player.opener = opener;
+    const p = player.video.play();
+    if (p && p.catch) p.catch(() => {});
   }
 
   function renderPlates(families, cases) {
@@ -271,7 +331,14 @@
     addEventListener("resize", more, { passive: true });
     more();
     cases.filter((c) => !c.curated).forEach(enrich);
-    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+    if (location.hash === "#tutorial") {
+      const withVideo = cases.find((c) => c.tutorial);
+      const card = platesEl.querySelector("[data-tutorial]");
+      if (withVideo && card) {
+        card.closest(".plate")?.scrollIntoView();
+        openPlayer(withVideo, card);
+      }
+    } else if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
   }
 
   main();

@@ -559,6 +559,152 @@ p { margin: 0; text-wrap: pretty; }
 .guide .icon { transition: transform 0.35s var(--ease); }
 .guide:hover .icon { transform: translate(2px, -2px); }
 
+/* Tutorial video: a card in the plate text, played in a dialog */
+.tutorial {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 10px 18px 10px 10px;
+  max-width: 560px;
+  width: 100%;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.3s var(--ease), box-shadow 0.35s var(--ease);
+}
+.tutorial:hover {
+  border-color: var(--ink-soft);
+  box-shadow: 0 10px 24px -14px rgba(17, 45, 37, 0.45);
+}
+.tutorial-thumb {
+  position: relative;
+  display: block;
+  width: 176px;
+  aspect-ratio: 16 / 9;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--cloth-deep);
+}
+.tutorial-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+.tutorial:hover .tutorial-thumb img { transform: scale(1.04); }
+.tutorial-play {
+  position: absolute;
+  left: 34%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  background: var(--brass);
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.55);
+  transition: transform 0.35s var(--ease), background-color 0.3s var(--ease);
+}
+.tutorial-play .play { width: 22px; height: 22px; fill: var(--ink); margin-left: 2px; }
+.tutorial:hover .tutorial-play { transform: scale(1.08); background: var(--brass-soft); }
+.tutorial-time {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(17, 45, 37, 0.88);
+  color: var(--cloth-ink);
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.tutorial-text { display: grid; gap: 4px; }
+.tutorial-text b {
+  font-family: var(--display);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+.tutorial-text span {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.player {
+  width: min(1240px, 94vw);
+  max-height: 94vh;
+  padding: clamp(16px, 2vw, 24px);
+  border: 0;
+  border-radius: 10px;
+  background: var(--cloth-deep);
+  color: var(--cloth-soft);
+  box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.6);
+  overflow: auto;
+}
+.player::backdrop { background: rgba(17, 45, 37, 0.86); }
+.player[open] { animation: player-in 0.45s var(--ease) both; }
+.player[open]::backdrop { animation: backdrop-in 0.35s var(--ease) both; }
+@keyframes player-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } }
+@keyframes backdrop-in { from { opacity: 0; } }
+html:has(.player[open]) { overflow: hidden; }
+.player :focus-visible { outline-color: var(--brass); }
+.player-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.player h2 {
+  align-self: center;
+  color: var(--cloth-ink);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+.player-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(201, 164, 76, 0.5);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cloth-ink);
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease);
+}
+.player-close:hover { background: var(--cloth); }
+.player-close .icon { width: 18px; height: 18px; }
+.player-screen {
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+.player-screen video { display: block; width: 100%; height: 100%; }
+.player-foot {
+  margin-top: 12px;
+  font-family: var(--display);
+  font-size: 0.9375rem;
+}
+.player-foot a { color: var(--cloth-ink); text-decoration-color: var(--brass); }
+
+@media (max-width: 520px) {
+  .tutorial { grid-template-columns: 1fr; padding: 10px; }
+  .tutorial-thumb { width: 100%; }
+}
+
 .plate-fig {
   margin: 0;
   padding: clamp(36px, 5vw, 72px) calc(var(--edge) + var(--tabs)) clamp(36px, 5vw, 64px) clamp(24px, 4vw, 56px);

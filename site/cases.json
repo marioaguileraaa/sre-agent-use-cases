@@ -307,7 +307,15 @@
       "image": "site/img/builder-engineer.webp",
       "thumb": "site/img/builder-engineer-320.webp",
       "illustration": true,
-      "caption": "The builder at work."
+      "caption": "The builder at work.",
+      "tutorial": {
+        "video": "case_0_v3/docs/video/sre-usecase-builder-tutorial.mp4",
+        "poster": "site/img/tutorial-builder.webp",
+        "thumb": "site/img/tutorial-builder-thumb.webp",
+        "duration": "3:09",
+        "title": "From one sentence to a scheduled use case",
+        "teaser": "A real run, start to finish: describe the idea, let the builder generate and test it, create it in Builder, run it and schedule it."
+      }
     }
   }
 }
