@@ -1,8 +1,8 @@
 # generate-fabric-chargeback-report
 # Microsoft Fabric FinOps: real cost, who consumes what, idle capacity and savings, from the customer's own tenant.
-# Two auth modes, zero secrets in both:
+# Two auth modes, no secrets in the code:
 #   A) Same tenant (default): the SRE Agent managed identity reads Fabric/Azure directly.
-#   B) Cross-tenant: managed identity -> Federated Identity Credential -> multi-tenant app in the Fabric tenant.
+#   B) Cross-tenant: a multi-tenant app in the Fabric tenant, signed in with its certificate from Key Vault (or a federated credential).
 # Sources (all live, read-only): Power BI/Fabric admin APIs (activity log, workspaces, items, refreshables, tenant settings),
 #   Fabric Spark (Livy sessions), OneLake (DFS), Azure Cost Management (daily cost per meter), Azure Activity Log
 #   (capacity suspend/resume) and the public Azure Retail Prices API. Nothing is simulated or estimated without a source.
@@ -39,6 +39,8 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     # federated client assertion (Entra rejects them with AADSTS5002723). Leave empty to try the federated credential.
     CROSS_TENANT_CERT_KEYVAULT_URL = ""   # e.g. "https://<vault>.vault.azure.net"
     CROSS_TENANT_CERT_NAME = ""           # e.g. "sre-agent-fabric-cross-tenant"
+    # Time zone shown next to UTC in pause recommendations (IANA name, e.g. "Europe/Madrid", "Europe/Berlin").
+    LOCAL_TIMEZONE = "Europe/Madrid"
     # ------------------------------------------------------------------------------------------------
 
     def _configured(v):
@@ -54,7 +56,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
 
     operation = (operation or "report").strip().lower()
     show_ids = (identities or "masked").strip().lower() in ("full", "show", "visible", "yes", "true")
-    period_map = {"last_30d": ("Últimos 30 días", 30), "last_14d": ("Últimos 14 días", 14), "last_7d": ("Últimos 7 días", 7)}
+    period_map = {"last_30d": ("Last 30 days", 30), "last_14d": ("Last 14 days", 14), "last_7d": ("Last 7 days", 7)}
     period_key = (period or "last_30d").strip().lower()
     if period_key not in period_map:
         period_key = "last_30d"
@@ -73,6 +75,32 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     if replay:
         raw = json.loads(Path(replay).read_text(encoding='utf-8'))
         sources = raw.get('sources', {})
+        # Raw dumps recorded by the earlier Spanish collector carry Spanish status notes; show them in English.
+        LEGACY_NOTES = [
+            (r"^Certificado de la app puente leído de Key Vault$", "Bridge app certificate read from Key Vault"),
+            (r"^Key Vault no devolvió el certificado: ", "Key Vault did not return the certificate: "),
+            (r"^(\d+/\d+) días$", r"\1 days"),
+            (r"^Capacidad en pausa \(CapacityNotActive\): las sesiones Spark solo se pueden leer con la capacidad encendida$",
+             "Capacity paused (CapacityNotActive): Spark sessions can only be read while the capacity is running"),
+            (r"^Capacidad en pausa \(CapacityNotActive\): OneLake solo se puede leer con la capacidad encendida$",
+             "Capacity paused (CapacityNotActive): OneLake can only be read while the capacity is running"),
+            (r"^(\d+/\d+) lakehouses/warehouses leídos$", r"\1 lakehouses/warehouses read"),
+            (r"^Cost Management limitó las peticiones \(HTTP 429, ", "Cost Management throttled the requests (HTTP 429, "),
+            (r"; volver a pedir el informe más tarde$", "; request the report again later"),
+            (r"^(\d+/\d+) workspaces examinados", r"\1 workspaces scanned"),
+            (r" · sin tiempo$", " · out of time"),
+            (r" · examen no terminado$", " · scan not finished"),
+            (r"^No hay grupos con acceso$", "No groups with access"),
+            (r"^(\d+/\d+) grupos$", r"\1 groups"),
+            (r"^Pendiente: concede GroupMember\.Read\.All y User\.Read\.All \(permisos de aplicación de Microsoft Graph\) a la identidad "
+             r"en el tenant de Fabric para atribuir el consumo a los miembros de cada grupo$",
+             "Pending: grant GroupMember.Read.All and User.Read.All (Microsoft Graph application permissions) to the identity "
+             "in the Fabric tenant to attribute usage to the members of each group"),
+        ]
+        for _sv in sources.values():
+            if isinstance(_sv, dict) and isinstance(_sv.get("note"), str):
+                for _pat, _rep in LEGACY_NOTES:
+                    _sv["note"] = re.sub(_pat, _rep, _sv["note"])
     else:
         # ================================================================== 1. COLLECT (real tenant data only)
         T0 = time.monotonic()
@@ -132,10 +160,10 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                 if kv_r.status_code == 200:
                     cred = CertificateCredential(tenant_id=TARGET_FABRIC_TENANT_ID, client_id=FEDERATED_APP_CLIENT_ID,
                                                  certificate_data=kv_r.json()["value"].encode("utf-8"))
-                    src("cross_tenant_auth", "ok", 200, note="Certificado de la app multi-tenant leído de Key Vault")
+                    src("cross_tenant_auth", "ok", 200, note="Multi-tenant app certificate read from Key Vault")
                 else:
                     src("cross_tenant_auth", "error", kv_r.status_code,
-                        note="Key Vault no devolvió el certificado: " + " ".join(kv_r.text.split())[:240])
+                        note="Key Vault did not return the certificate: " + " ".join(kv_r.text.split())[:240])
             except Exception as exc:
                 src("cross_tenant_auth", "error", note=type(exc).__name__ + ": " + " ".join(str(exc).split())[:240])
         if cred is None and CROSS_TENANT:
@@ -147,7 +175,8 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
         for key, scope in (("fab", "https://api.fabric.microsoft.com/.default"),
                            ("pbi", "https://analysis.windows.net/powerbi/api/.default"),
                            ("arm", "https://management.azure.com/.default"),
-                           ("sto", "https://storage.azure.com/.default")):
+                           ("sto", "https://storage.azure.com/.default"),
+                           ("gr", "https://graph.microsoft.com/.default")):
             try:
                 tokens[key] = cred.get_token(scope).token
             except Exception as exc:
@@ -261,7 +290,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
             raw["activity_days_ok"] = ok_days
             raw["activity_days_requested"] = days
             src("activity", "ok" if ok_days == days else ("partial" if ok_days else "error"), last_st or 200, len(events),
-                note=f"{ok_days}/{days} días", started=t)
+                note=f"{ok_days}/{days} days", started=t)
 
         def c_refreshables():
             t = time.monotonic()
@@ -289,10 +318,11 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
             win = [w for w in workspaces if w.get("capacity_id")]
 
             def one(w):
-                url, out, st = f"{FABRIC_API}/workspaces/{w['id']}/spark/livySessions", [], None
+                url, out, st, err = f"{FABRIC_API}/workspaces/{w['id']}/spark/livySessions", [], None, None
                 for _ in range(6):
                     st, d, _ = req("GET", url, tokens["fab"], timeout=20, retries=1)
                     if st != 200 or not isinstance(d, dict):
+                        err = d.get("errorCode") if isinstance(d, dict) else None
                         break
                     for s in d.get("value", []) or []:
                         out.append({"ws": w["id"], "item": s.get("itemName"), "item_id": ((s.get("item") or {}).get("itemId") or "").lower(),
@@ -308,24 +338,28 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                     url = d.get("continuationUri")
                     if not url:
                         break
-                return st, out
+                return st, out, err
 
-            sessions, codes = [], Counter()
+            sessions, codes, errs = [], Counter(), Counter()
             with ThreadPoolExecutor(max_workers=8) as ex:
-                for st, out in ex.map(one, win):
+                for st, out, err in ex.map(one, win):
                     codes[str(st)] += 1
+                    errs[err or str(st)] += 1
                     sessions.extend(out)
             raw["livy"] = sessions
             raw["livy_http"] = dict(codes)
-            src("spark", "ok" if codes.get("200") else "error", "200" if codes.get("200") else None, len(sessions),
-                note=f"{codes.get('200', 0)}/{len(win)} workspaces", started=t)
+            if not codes.get("200") and errs and set(errs) == {"CapacityNotActive"}:
+                src("spark", "paused", 404, 0, note="Capacity paused (CapacityNotActive): Spark sessions can only be read while the capacity is running", started=t)
+            else:
+                src("spark", "ok" if codes.get("200") else "error", "200" if codes.get("200") else None, len(sessions),
+                    note=f"{codes.get('200', 0)}/{len(win)} workspaces" + ("" if codes.get("200") else " · " + ", ".join(f"{k} ×{v}" for k, v in errs.most_common(3))), started=t)
 
         def c_onelake(items):
             t = time.monotonic()
             targets = [i for i in items if i.get("type") in ("Lakehouse", "Warehouse") and i.get("ws")][:60]
 
             def one(it):
-                tot, files, cont, st, pages = 0, 0, None, None, 0
+                tot, files, cont, st, pages, err = 0, 0, None, None, 0, None
                 for _ in range(10):
                     if left() < 12:
                         break
@@ -339,6 +373,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                         break
                     st = r.status_code
                     if st != 200:
+                        err = r.headers.get("x-ms-error-code") or r.text[:200]
                         break
                     pages += 1
                     for p in (r.json() or {}).get("paths", []) or []:
@@ -349,14 +384,17 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                     if not cont:
                         break
                 return {"ws": it["ws"], "item": it["name"], "item_id": it["id"], "type": it["type"], "bytes": tot,
-                        "files": files, "http": st, "truncated": bool(cont)}
+                        "files": files, "http": st, "truncated": bool(cont), "err": err}
 
             with ThreadPoolExecutor(max_workers=8) as ex:
                 out = list(ex.map(one, targets))
             raw["onelake"] = out
             okn = sum(1 for o in out if o["http"] == 200)
+            if out and not okn and all("capacitynotactive" in (o.get("err") or "").replace(" ", "").lower() for o in out):
+                src("onelake", "paused", 404, len(out), note="Capacity paused (CapacityNotActive): OneLake can only be read while the capacity is running", started=t)
+                return
             src("onelake", "ok" if okn == len(out) and out else ("partial" if okn else "error"), 200 if okn else None, len(out),
-                note=f"{okn}/{len(out)} lakehouses/warehouses leídos", started=t)
+                note=f"{okn}/{len(out)} lakehouses/warehouses read", started=t)
 
         def c_arm():
             t = time.monotonic()
@@ -390,7 +428,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                     cost_st, d, _ = req("POST", url, tokens["arm"], body=body, timeout=40, retries=3)
                     if cost_st != 200 or not isinstance(d, dict):
                         if cost_st == 429:
-                            notes["cost"] = "Cost Management limitó las peticiones (HTTP 429, %s); volver a pedir el informe más tarde" % d
+                            notes["cost"] = "Cost Management throttled the requests (HTTP 429, %s); request the report again later" % d
                         break
                     pr = d.get("properties") or {}
                     cols = [c.get("name") for c in pr.get("columns") or []]
@@ -420,7 +458,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                                      tokens["arm"], body=bdy, timeout=40, retries=4)
                     extra_st[key] = st_x
                     if st_x == 429:
-                        notes[key] = "Cost Management limitó las peticiones (HTTP 429, %s)" % d
+                        notes[key] = "Cost Management throttled the requests (HTTP 429, %s)" % d
                     if st_x == 200 and isinstance(d, dict):
                         pr = d.get("properties") or {}
                         cols = [c.get("name") for c in pr.get("columns") or []]
@@ -485,6 +523,105 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                                        "excluded": len(s.get("excludedSecurityGroups") or [])} for s in ts]
             src("tenant_settings", "ok" if st == 200 else "error", st, len(ts), started=t)
 
+        def _acc_row(wid, iid, iname, itype, u, right):
+            return {"ws": wid, "item_id": iid, "item": iname, "item_type": itype, "ptype": u.get("principalType") or "",
+                    "name": u.get("displayName") or "", "email": (u.get("emailAddress") or "").lower(),
+                    "gid": (u.get("graphId") or u.get("identifier") or "").lower(), "right": right or ""}
+
+        def c_access():
+            # Who can use what: workspace roles (Power BI admin API) + item permissions (admin scanner API), read only.
+            t = time.monotonic()
+            st, d, _ = req("GET", f"{PBI_API}/admin/groups", tokens["pbi"],
+                           params={"$top": 5000, "$expand": "users", "$filter": "state eq 'Active'"}, timeout=40)
+            wsl = d.get("value", []) if isinstance(d, dict) else []
+            acc = []
+            for w in wsl:
+                wid = (w.get("id") or "").lower()
+                for u in w.get("users") or []:
+                    acc.append(_acc_row(wid, None, None, None, u, u.get("groupUserAccessRight")))
+            src("access_workspaces", "ok" if st == 200 else "error", st, len(acc), started=t)
+            t2 = time.monotonic()
+            ids = [w.get("id") for w in wsl if w.get("id")]
+            n_art, done, scan_err = 0, 0, None
+            for i in range(0, len(ids), 100):
+                if left() < 25:
+                    scan_err = "out of time"
+                    break
+                st1, s, _ = req("POST", f"{PBI_API}/admin/workspaces/getInfo", tokens["pbi"],
+                                params={"lineage": "false", "datasourceDetails": "false", "datasetSchema": "false",
+                                        "datasetExpressions": "false", "getArtifactUsers": "true"},
+                                body={"workspaces": ids[i:i + 100]}, timeout=30)
+                if st1 not in (200, 202) or not isinstance(s, dict) or not s.get("id"):
+                    scan_err = f"getInfo HTTP {st1}"
+                    break
+                ok = False
+                for _ in range(25):
+                    if left() < 15:
+                        break
+                    time.sleep(2)
+                    st2, s2, _ = req("GET", f"{PBI_API}/admin/workspaces/scanStatus/{s['id']}", tokens["pbi"], timeout=15)
+                    status = (s2 or {}).get("status") if isinstance(s2, dict) else None
+                    if status in ("Succeeded", "Failed"):
+                        ok = status == "Succeeded"
+                        break
+                if not ok:
+                    scan_err = "scan not finished"
+                    break
+                st3, res, _ = req("GET", f"{PBI_API}/admin/workspaces/scanResult/{s['id']}", tokens["pbi"], timeout=40)
+                if st3 != 200 or not isinstance(res, dict):
+                    scan_err = f"scanResult HTTP {st3}"
+                    break
+                for w in res.get("workspaces") or []:
+                    wid = (w.get("id") or "").lower()
+                    for kind, arts in w.items():
+                        if kind == "users" or not isinstance(arts, list):
+                            continue
+                        for a in arts:
+                            if not isinstance(a, dict) or not a.get("users"):
+                                continue
+                            n_art += 1
+                            for u in a["users"]:
+                                right = next((v for k2, v in u.items() if k2.endswith("UserAccessRight")), "")
+                                acc.append(_acc_row(wid, (a.get("id") or "").lower(), a.get("name") or "", a.get("type") or kind, u, right))
+                done += len(ids[i:i + 100])
+            src("access_items", "ok" if not scan_err else ("partial" if done else "error"), 200 if not scan_err else None, n_art,
+                note=f"{done}/{len(ids)} workspaces scanned" + (f" · {scan_err}" if scan_err else ""), started=t2)
+            raw["access"] = acc
+            # Optional: Entra ID group members (needs GroupMember.Read.All application permission in the Fabric tenant)
+            t3 = time.monotonic()
+            guid_re = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+            gids = sorted({r["gid"] for r in acc if r["ptype"] == "Group" and guid_re.match(r["gid"] or "")})
+            members, gst = {}, None
+            if tokens.get("gr"):
+                for gid in gids[:60]:
+                    if left() < 12:
+                        break
+                    out, url = [], (f"https://graph.microsoft.com/v1.0/groups/{gid}/transitiveMembers/microsoft.graph.user"
+                                    "?$select=id,userPrincipalName,displayName,createdDateTime&$top=999")
+                    for _ in range(10):
+                        gst, gd, _ = req("GET", url, tokens["gr"], timeout=20)
+                        if gst != 200 or not isinstance(gd, dict):
+                            break
+                        out.extend({"upn": (m.get("userPrincipalName") or "").lower(), "created": m.get("createdDateTime")}
+                                   for m in gd.get("value") or [])
+                        url = gd.get("@odata.nextLink")
+                        if not url:
+                            break
+                    if gst in (401, 403):
+                        break
+                    if gst == 200:
+                        members[gid] = out
+            raw["group_members"] = members
+            if not gids:
+                src("group_members", "ok", None, 0, note="No groups with access", started=t3)
+            elif members:
+                src("group_members", "ok" if len(members) == len(gids) else "partial", 200, sum(len(v) for v in members.values()),
+                    note=f"{len(members)}/{len(gids)} groups", started=t3)
+            else:
+                src("group_members", "pending", gst, 0,
+                    note="Pending: grant GroupMember.Read.All and User.Read.All (Microsoft Graph application permissions) to the identity "
+                         "in the Fabric tenant to attribute usage to the members of each group", started=t3)
+
         def chain_workspace_livy():
             ws = c_workspaces()
             c_livy(ws)
@@ -494,9 +631,9 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
             c_onelake(its)
 
         if tokens.get("fab") and tokens.get("pbi"):
-            with ThreadPoolExecutor(max_workers=7) as ex:
+            with ThreadPoolExecutor(max_workers=8) as ex:
                 futs = [ex.submit(f) for f in (c_activity, chain_workspace_livy, chain_items_onelake, c_arm,
-                                               c_capacities, c_refreshables, c_tenant_settings)]
+                                               c_capacities, c_refreshables, c_tenant_settings, c_access)]
                 for f in futs:
                     try:
                         f.result()
@@ -509,7 +646,12 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     t_an = time.monotonic()
     E = html.escape
     GUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
-    WD = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
+    WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    def dmon(t, fmt=""):
+        # locale-independent "06 Oct" (+ optional strftime suffix such as " %H:%M" or " %Y")
+        return f"{t.day:02d} {MON[t.month - 1]}" + (t.strftime(fmt) if fmt else "")
 
     def P(s):
         if not s:
@@ -520,11 +662,10 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
             return None
 
     def fn(v, d=0):
-        s = f"{(v or 0):,.{d}f}"
-        return s.replace(",", "§").replace(".", ",").replace("§", ".")
+        return f"{(v or 0):,.{d}f}"
 
     def pc(v, d=1):
-        return f"{fn((v or 0) * 100, d)} %"
+        return f"{fn((v or 0) * 100, d)}%"
 
     def hhmm(t):
         return t.strftime("%H:%M") if t else "—"
@@ -596,7 +737,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     def plabel(k):
         kind = pkind(k)
         if kind == "sre":
-            return "SRE Agent (esta lectura)"
+            return "SRE Agent (this read)"
         if kind == "user":
             if show_ids:
                 nm = upn_name.get(k)
@@ -605,8 +746,8 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
         if kind == "app":
             return f"App {k}" if show_ids else f"App {k[:8]}…"
         if kind == "unknown":
-            return "Sin identidad en el evento"
-        return f"{orig_label.get(k, k)} (sistema)"
+            return "No identity in the event"
+        return f"{orig_label.get(k, k)} (system)"
 
     def ev_cat(a, itt):
         al, t = (a or "").lower(), (itt or "").lower()
@@ -650,7 +791,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
             wsid = item_ws.get(it.lower(), "")
         itt = e.get("itt") or item_type_by_name.get(it.lower(), "")
         if it.strip().lower() in ("unknown", "none", "null"):
-            it = "(sin nombre en el registro)"
+            it = "(no name in the log)"
         work = kind in ("user", "app") and not is_admin_act(a)
         evs.append({"t": t, "k": k, "kind": kind, "a": a, "ws": wsid, "it": it, "itt": itt, "cat": ev_cat(a, itt), "work": work})
     work_ev = [e for e in evs if e["work"]]
@@ -663,7 +804,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
         if not ref or ref < win0:
             continue
         op = s.get("op") or ""
-        livy.append({"ws": (s.get("ws") or "").lower(), "item": (s.get("item") if (s.get("item") or "").strip().lower() not in ("", "unknown", "none", "null") else "(sin nombre en el registro)"), "op": op, "user": pkey(s.get("user_id")),
+        livy.append({"ws": (s.get("ws") or "").lower(), "item": (s.get("item") if (s.get("item") or "").strip().lower() not in ("", "unknown", "none", "null") else "(no name in the log)"), "op": op, "user": pkey(s.get("user_id")),
                      "state": s.get("state") or "", "start": st, "end": en, "run": float(s.get("running_s") or 0),
                      "queued": float(s.get("queued_s") or 0), "sched": "schedul" in op.lower(), "pipe": "pipeline" in op.lower(),
                      "cap": (s.get("cap") or "").lower()})
@@ -671,19 +812,19 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
 
     # ---------------------------------------------------------------- cost (Azure Cost Management, real invoice meters)
     CATS = {
-        "idle": ("Capacidad encendida sin consumo (Compute Pool)", "#d99a2b"),
-        "ai": ("IA · Copilot y Data Agents", "#7b3fa0"),
-        "spark": ("Spark y notebooks", "#117865"),
-        "iq": ("Fabric IQ · Ontology y Graph", "#2f6fb3"),
+        "idle": ("Idle running capacity (Compute Pool)", "#d99a2b"),
+        "ai": ("AI · Copilot and Data Agents", "#7b3fa0"),
+        "spark": ("Spark and notebooks", "#117865"),
+        "iq": ("Fabric IQ · Ontology and Graph", "#2f6fb3"),
         "rti": ("Real-Time Intelligence", "#c4532b"),
-        "db": ("Warehouse y SQL", "#0f7c8c"),
+        "db": ("Warehouse and SQL", "#0f7c8c"),
         "pbi": ("Power BI", "#b8860b"),
         "df": ("Data Factory", "#5a7d1a"),
-        "api": ("APIs y funciones", "#a23b72"),
-        "onelake": ("Transacciones OneLake", "#7d8fa3"),
-        "storage": ("Almacenamiento (GB-mes)", "#4f6378"),
-        "overage": ("Exceso de capacidad (overage)", "#b42318"),
-        "other": ("Otros medidores", "#9aa5b1"),
+        "api": ("APIs and functions", "#a23b72"),
+        "onelake": ("OneLake transactions", "#7d8fa3"),
+        "storage": ("Storage (GB-month)", "#4f6378"),
+        "overage": ("Capacity overage", "#b42318"),
+        "other": ("Other meters", "#9aa5b1"),
     }
 
     def meter_cat(m):
@@ -756,11 +897,11 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     prices = raw.get("prices") or []
     price_cu = next((p.get("price") for p in prices if p.get("region") == focus_region and p.get("type") == "Consumption"
                      and p.get("meter") == "Compute Pool Capacity Usage CU"), None)
-    price_src = "Azure Retail Prices API (precio público pago por uso, " + (focus_region or "región") + ")"
+    price_src = "Azure Retail Prices API (public pay-as-you-go price, " + (focus_region or "region") + ")"
     pool_rows = [c for c in crow if c["rid"] == focus_rid and meter_cat(c["meter"]) == "idle" and c["qty"] > 0]
     eff_price = (sum(c["cost"] for c in pool_rows) / sum(c["qty"] for c in pool_rows)) if pool_rows else None
     if price_cu is None and eff_price:
-        price_cu, price_src = eff_price, "precio efectivo de la factura (coste ÷ CU-h del medidor Compute Pool)"
+        price_cu, price_src = eff_price, "effective invoice price (cost ÷ CU-h of the Compute Pool meter)"
     price_cu = float(price_cu or 0)
     hourly = focus_cu * price_cu
     res = {}
@@ -799,7 +940,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
         basis = "Activity Log"
         if not evl:
             out = [(win0, gen)] if (state or "").lower() == "active" else []
-            basis = "sin eventos de pausa/reanudación en el periodo"
+            basis = "no suspend/resume events in the period"
         clipped = [(max(a, win0), min(b, gen)) for a, b in out if b > win0 and a < gen]
         return clipped, ops, basis
 
@@ -921,9 +1062,9 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     cost_src = sources.get("cost") or {}
     cost_ok = cost_src.get("status") == "ok"
     cost_http = cost_src.get("http")
-    cost_why = ("Azure Cost Management limitó las peticiones (HTTP 429). Es temporal: vuelve a pedir el informe en unos minutos." if cost_http == 429 else
-                "La app no tiene permiso de lectura de costes (HTTP 403): asigna Cost Management Reader en la suscripción." if cost_http in (401, 403) else
-                f"Azure Cost Management no respondió (HTTP {cost_http or 'sin respuesta'}). Vuelve a pedir el informe en unos minutos.")
+    cost_why = ("Azure Cost Management throttled the requests (HTTP 429). This is temporary: request the report again in a few minutes." if cost_http == 429 else
+                "The app has no permission to read costs (HTTP 403): assign Cost Management Reader on the subscription." if cost_http in (401, 403) else
+                f"Azure Cost Management did not respond (HTTP {cost_http or 'no response'}). Request the report again in a few minutes.")
     annual_payg_cu = cu_cost_focus * 365.0 / max(days_n, 1) if cost_ok else hourly * on_hours * 365.0 / max(days_n, 1)
     annual_res = {y: focus_cu * v for y, v in res.items()}
     avg_cu_on = (cu_consumed / on_billed_hours) if on_billed_hours else 0
@@ -960,10 +1101,10 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     livy_failed = [x for x in livy if x["state"].lower() == "failed"]
 
     # ---------------------------------------------------------------- chargeback by workspace (real meter cost x real usage driver)
-    DRIVER = {"spark": "segundos de ejecución Spark (Livy)", "ai": "consultas IA/Copilot/Data Agent del log de actividad",
-              "iq": "operaciones Ontology/Graph del log de actividad", "rti": "operaciones Eventhouse/Eventstream/KQL",
-              "db": "operaciones Warehouse/SQL", "pbi": "operaciones Power BI", "df": "operaciones de pipelines/dataflows",
-              "api": "invocaciones de funciones/APIs"}
+    DRIVER = {"spark": "Spark execution seconds (Livy)", "ai": "AI/Copilot/Data Agent queries in the activity log",
+              "iq": "Ontology/Graph operations in the activity log", "rti": "Eventhouse/Eventstream/KQL operations",
+              "db": "Warehouse/SQL operations", "pbi": "Power BI operations", "df": "pipeline/dataflow operations",
+              "api": "function/API invocations"}
     drv = defaultdict(Counter)
     for x in livy:
         drv["spark"][x["ws"] or "?"] += x["run"]
@@ -1014,6 +1155,114 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     unassigned_total = sum(unassigned.values())
     paid_caps = {(c.get("id") or "").lower() for c in pbi_caps if (c.get("sku") or "").upper().startswith("F") and (c.get("state") or "").lower() == "active"}
     idle_ws = [r for r in cb if r["events"] == 0 and r["spark_h"] == 0 and ws_cap.get(r["id"]) in paid_caps and r["type"] != "Personal"]
+
+    # ---------------------------------------------------------------- access and consumption by group (real access lists)
+    drv_tot = {c_: sum(w_.values()) for c_, w_ in drv.items()}
+    idle_factor = (idle_cost / direct_total) if direct_total else 0.0
+    item_direct, ident_direct, ident_ops, ident_last = Counter(), Counter(), Counter(), {}
+    ires_ops, ires_cost = defaultdict(Counter), defaultdict(Counter)
+    for e in work_ev:
+        c_ = e["cat"]
+        share = cat_cost.get(c_, 0.0) / drv_tot[c_] if (c_ in DRIVER and c_ != "spark" and drv_tot.get(c_)) else 0.0
+        if e["it"]:
+            item_direct[(e["ws"], e["it"].lower())] += share
+        ident_direct[e["k"]] += share
+        ident_ops[e["k"]] += 1
+        ident_last[e["k"]] = max(ident_last.get(e["k"], e["t"]), e["t"])
+        _rk = (e["ws"], e["it"] or "(no item)")
+        ires_ops[e["k"]][_rk] += 1
+        ires_cost[e["k"]][_rk] += share
+    for x in livy:
+        sh = cat_cost.get("spark", 0.0) * x["run"] / drv_tot["spark"] if drv_tot.get("spark") else 0.0
+        item_direct[(x["ws"], (x["item"] or "").lower())] += sh
+        ident_direct[x["user"]] += sh
+        _rk = (x["ws"], x["item"] or "(no item)")
+        ires_ops[x["user"]][_rk] += 1
+        ires_cost[x["user"]][_rk] += sh
+    access = raw.get("access") or []
+    gmembers = raw.get("group_members") or {}
+    cb_by_id = {r["id"]: r for r in cb}
+    SRE_GROUP = "sg-sre-agent-fabric"
+    grp = {}
+    people = {}
+    for a in access:
+        wid, pt = a["ws"], a["ptype"]
+        where = ("ws", wid) if not a["item_id"] else ("it", wid, (a["item"] or "").lower(), a["item"] or "", a["item_type"] or "")
+        if pt == "Group":
+            g = grp.setdefault(a["gid"] or a["name"].lower(), {"id": a["gid"], "name": a["name"] or a["gid"], "ws": {}, "items": {},
+                                                             "technical": (a["name"] or "").lower() == SRE_GROUP})
+            if where[0] == "ws":
+                g["ws"][wid] = a["right"]
+            else:
+                g["items"][(wid, where[2])] = (where[3], where[4], a["right"])
+        elif pt == "User" and a["email"]:
+            p_ = people.setdefault(a["email"], {"via": set(), "ws": set(), "items": set(), "created": None})
+            p_["via"].add("direct")
+            (p_["ws"] if where[0] == "ws" else p_["items"]).add(wid if where[0] == "ws" else (wid, where[2]))
+    members_known = bool(gmembers)
+    for g in grp.values():
+        mem = gmembers.get(g["id"]) if g["id"] else None
+        g["members"] = mem
+        if mem is not None and not g["technical"]:
+            for m in mem:
+                if not m["upn"]:
+                    continue
+                p_ = people.setdefault(m["upn"], {"via": set(), "ws": set(), "items": set(), "created": None})
+                p_["via"].add(g["name"])
+                p_["ws"].update(g["ws"])
+                p_["items"].update(g["items"])
+                p_["created"] = p_["created"] or P(m.get("created"))
+        exp_ws = sum(cb_by_id[w]["total"] for w in g["ws"] if w in cb_by_id)
+        exp_it = sum(item_direct.get(k, 0.0) for k in g["items"] if k[0] not in g["ws"]) * (1 + idle_factor)
+        g["exposure"] = exp_ws + exp_it
+        g["item_ops"] = sum(1 for e in work_ev if e["it"] and ((e["ws"], e["it"].lower()) in g["items"] or e["ws"] in g["ws"]))
+        if mem is not None:
+            upns = {m["upn"] for m in mem if m["upn"]}
+            g["n_members"] = len(upns)
+            g["active"] = sum(1 for u in upns if ident_ops.get(u))
+            g["member_ops"] = sum(ident_ops.get(u, 0) for u in upns)
+            g["member_cost"] = sum(ident_direct.get(u, 0.0) for u in upns) * (1 + idle_factor)
+            g["new"] = sum(1 for m in mem if P(m.get("created")) and P(m.get("created")) >= win0)
+
+            def _in_scope(rk, g=g):
+                return rk[0] in g["ws"] or (rk[0], rk[1].lower()) in g["items"]
+            gr_ops, gr_cost, mdet = Counter(), Counter(), []
+            for u in upns:
+                own = [rk for rk in ires_ops.get(u, {}) if _in_scope(rk)]
+                if not own:
+                    continue
+                for rk in own:
+                    gr_ops[rk] += ires_ops[u][rk]
+                    gr_cost[rk] += ires_cost[u][rk]
+                top = sorted(own, key=lambda rk: (-ires_cost[u][rk], -ires_ops[u][rk]))[:5]
+                mdet.append({"k": u, "ops": sum(ires_ops[u][rk] for rk in own),
+                             "cost": sum(ires_cost[u][rk] for rk in own) * (1 + idle_factor),
+                             "total_ops": ident_ops.get(u, 0), "total_cost": ident_direct.get(u, 0.0) * (1 + idle_factor),
+                             "top": [(rk, ires_ops[u][rk], ires_cost[u][rk] * (1 + idle_factor)) for rk in top]})
+            mdet.sort(key=lambda r: (-r["cost"], -r["ops"], r["k"]))
+            g["res"] = sorted(((rk, gr_ops[rk], gr_cost[rk] * (1 + idle_factor)) for rk in gr_ops), key=lambda t: (-t[2], -t[1]))
+            g["mdetail"] = mdet
+            g["member_ops"] = sum(m["ops"] for m in mdet)
+            g["member_cost"] = sum(m["cost"] for m in mdet)
+            g["active"] = len(mdet)
+        else:
+            g["n_members"] = g["active"] = g["member_ops"] = g["member_cost"] = g["new"] = None
+            g["res"] = g["mdetail"] = None
+    grp_list = sorted([g for g in grp.values() if not g["technical"]], key=lambda g: (-(g["member_cost"] or 0), -g["exposure"], g["name"].lower()))
+    grp_tech = [g for g in grp.values() if g["technical"]]
+    people_list = []
+    for upn, p_ in people.items():
+        ops = ident_ops.get(upn, 0)
+        new = bool(p_["created"] and p_["created"] >= win0)
+        people_list.append({"k": upn, "via": sorted(p_["via"], key=lambda v: (v != "direct", v.lower())), "n_ws": len(p_["ws"]), "n_items": len(p_["items"]),
+                            "ops": ops, "cost": ident_direct.get(upn, 0.0) * (1 + idle_factor), "last": ident_last.get(upn), "new": new,
+                            "top": [(rk, ires_ops[upn][rk], ires_cost[upn][rk] * (1 + idle_factor))
+                                    for rk in sorted(ires_ops.get(upn, {}), key=lambda rk: (-ires_cost[upn][rk], -ires_ops[upn][rk]))[:3]],
+                            "created": p_["created"]})
+    people_list.sort(key=lambda r: (r["ops"] == 0, -r["ops"], r["k"]))
+    no_activity = [r for r in people_list if not r["ops"]]
+    new_people = [r for r in people_list if r["new"]]
+    gm_src = sources.get("group_members") or {}
 
     # ---------------------------------------------------------------- who: principals, items, heatmap
     princ = {}
@@ -1078,29 +1327,29 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
             _l, _, _d = _rws.partition("@")
             _rws = f"Personal · {_l[:1]}•••@{_d[:1]}•••"
         refs.append({"name": r.get("name") or "", "ws": _rws, "kind": r.get("kind") or "", "type": r.get("last_type") or "",
-                     "last": ls, "age": age, "status": {"completed": "Correcto", "failed": "Fallido", "disabled": "Deshabilitado", "unknown": "En curso"}.get(status, r.get("last_status") or "—"),
+                     "last": ls, "age": age, "status": {"completed": "Succeeded", "failed": "Failed", "disabled": "Disabled", "unknown": "In progress"}.get(status, r.get("last_status") or "—"),
                      "sched": bool(r.get("sched_enabled")), "level": level, "err": err})
     refs.sort(key=lambda r: ({"crit": 0, "warn": 1, "ok": 2}[r["level"]], -(r["age"] or 0)))
     ref_failed = [r for r in refs if r["level"] == "crit"]
     ref_stale = [r for r in refs if r["level"] == "warn"]
     ts = raw.get("tenant_settings") or []
     TS_RULES = [
-        ("copilot, ai agents and other ai experiences powered by azure openai", "Habilita Copilot y Data Agents: es el origen del medidor «Copilot and AI»."),
-        ("designated as fabric copilot capacities", "Permite separar el consumo de IA en una capacidad dedicada y repercutirlo con exactitud."),
-        ("users can create fabric items", "Quién puede crear items que consumen CU en capacidades de pago."),
-        ("service principals can access read-only admin apis", "Necesario para este informe (lectura de auditoría e inventario)."),
-        ("show user data in the fabric capacity metrics", "Permite ver usuarios en Capacity Metrics para chargeback por persona."),
-        ("standalone, cross-item power bi copilot", "Experiencia Copilot transversal: más consumo de IA posible."),
-        ("operations agents", "Agentes de operaciones: nuevos medidores de IA."),
-        ("publish to web", "Riesgo de exposición pública de informes."),
-        ("guest users can access microsoft fabric", "Invitados consumiendo capacidad del tenant."),
-        ("users can access data stored in onelake with apps external", "Lecturas externas de OneLake generan transacciones facturables."),
+        ("copilot, ai agents and other ai experiences powered by azure openai", "Enables Copilot and Data Agents: this is the source of the “Copilot and AI” meter."),
+        ("designated as fabric copilot capacities", "Lets AI usage run on a dedicated capacity so it can be charged back accurately."),
+        ("users can create fabric items", "Who can create items that consume CUs on paid capacities."),
+        ("service principals can access read-only admin apis", "Required by this report (audit and inventory reads)."),
+        ("show user data in the fabric capacity metrics", "Shows users in Capacity Metrics for per-person chargeback."),
+        ("standalone, cross-item power bi copilot", "Cross-item Copilot experience: potentially more AI usage."),
+        ("operations agents", "Operations agents: new AI meters."),
+        ("publish to web", "Risk of reports being exposed publicly."),
+        ("guest users can access microsoft fabric", "Guest users consuming tenant capacity."),
+        ("users can access data stored in onelake with apps external", "External OneLake reads generate billable transactions."),
     ]
     ts_rows = []
     for key, why in TS_RULES:
         for s_ in ts:
             if key in (s_.get("title") or "").lower():
-                scope = ("Grupos: " + ", ".join(s_.get("groups") or [])) if s_.get("groups") else ("Toda la organización" if s_.get("enabled") else "—")
+                scope = ("Groups: " + ", ".join(s_.get("groups") or [])) if s_.get("groups") else ("Entire organization" if s_.get("enabled") else "—")
                 ts_rows.append({"title": s_.get("title"), "group": s_.get("group"), "enabled": s_.get("enabled"), "scope": scope, "why": why})
                 break
     ts_enabled = sum(1 for s_ in ts if s_.get("enabled"))
@@ -1117,23 +1366,23 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
         st = c.get("state") or ""
         nws = ws_on_cap.get(cid, 0)
         if arm and not (arm.get("tags") or {}):
-            tagnote = "sin etiquetas"
+            tagnote = "no tags"
         elif arm:
             tagnote = ", ".join(f"{k}={v}" for k, v in (arm.get("tags") or {}).items())[:60]
         else:
-            tagnote = "no es recurso Azure"
+            tagnote = "not an Azure resource"
         if sku.upper().startswith("FT"):
-            find, lvl = "Capacidad de prueba (trial)", "info"
+            find, lvl = "Trial capacity", "info"
         elif sku.upper().startswith("PP"):
-            find, lvl = "Premium por usuario (licencia, no CU)", "neutral"
+            find, lvl = "Premium Per User (license, not CUs)", "neutral"
         elif st.lower() in ("suspended", "paused") and nws == 0:
-            find, lvl = "Pausada y sin workspaces: candidata a eliminar", "warn"
+            find, lvl = "Paused with no workspaces: candidate for deletion", "warn"
         elif st.lower() in ("suspended", "paused"):
-            find, lvl = "Pausada (sin coste de cómputo)", "ok"
+            find, lvl = "Paused (no compute cost)", "ok"
         elif cid == focus_pbi_id:
-            find, lvl = f"Encendida {pc(uptime, 0)} del periodo · uso {pc(util_all, 0)}", "warn" if util_all < 0.3 else "ok"
+            find, lvl = f"Running {pc(uptime, 0)} of the period · {pc(util_all, 0)} used", "warn" if util_all < 0.3 else "ok"
         else:
-            find, lvl = "Activa", "ok"
+            find, lvl = "Active", "ok"
         mcu = re.search(r"(\d+)", sku)
         caps_tbl.append({"name": c.get("name") or "", "sku": sku, "state": st, "region": c.get("region") or "", "admins": c.get("admins"),
                          "ws": nws, "items": sum(1 for i in items if (i.get("cap") or "").lower() == cid), "cost": cost, "tags": tagnote,
@@ -1141,7 +1390,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                          "hourly_if_on": (int(mcu.group(1)) * price_cu) if (mcu and sku.upper().startswith("F") and not sku.upper().startswith("FT")) else None})
     paused_empty = [c for c in caps_tbl if c["lvl"] == "warn" and c["state"].lower() in ("suspended", "paused")]
     trials = [c for c in caps_tbl if c["sku"].upper().startswith("FT")]
-    untagged = [c for c in caps_tbl if c["arm"] and c["tags"] == "sin etiquetas"]
+    untagged = [c for c in caps_tbl if c["arm"] and c["tags"] == "no tags"]
     cm_ws = next((w for w in workspaces if "capacity metrics" in (w.get("name") or "").lower()), None)
     cm_items = [i for i in items if cm_ws and (i.get("ws") or "").lower() == (cm_ws.get("id") or "").lower()]
     cm_installed = bool(cm_ws) and any((i.get("type") or "") in ("SemanticModel", "App") for i in cm_items)
@@ -1282,7 +1531,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
         rows.sort(function(a,b){
           var x=a.cells[col].dataset.v||a.cells[col].textContent, y=b.cells[col].dataset.v||b.cells[col].textContent;
           if(num){x=parseFloat(x)||0;y=parseFloat(y)||0;return dir==='ascending'?x-y:y-x;}
-          return dir==='ascending'?x.localeCompare(y,'es'):y.localeCompare(x,'es');
+          return dir==='ascending'?x.localeCompare(y,'en'):y.localeCompare(x,'en');
         });
         rows.forEach(function(r){tb.appendChild(r);});
       });
@@ -1298,7 +1547,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
   });
   document.querySelectorAll('[data-copy]').forEach(function(b){
     b.addEventListener('click',function(){
-      var t=b.dataset.copy, o=b.textContent, done=function(){b.textContent='Copiada';setTimeout(function(){b.textContent=o;},1500);};
+      var t=b.dataset.copy, o=b.textContent, done=function(){b.textContent='Copied';setTimeout(function(){b.textContent=o;},1500);};
       if(navigator.clipboard) navigator.clipboard.writeText(t).then(done,done); else done();
     });
   });
@@ -1319,23 +1568,23 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
 
     def ws_label(wid):
         if not wid or wid == "?":
-            return "Sin workspace en el evento"
+            return "No workspace in the event"
         return ws_name.get(wid) or wid[:8]
 
     def dlabel(k):
         dt = datetime.strptime(k, "%Y%m%d")
-        return f"{WD[dt.weekday()]} {dt.day}/{dt.month}"
+        return f"{WD[dt.weekday()]} {dmon(dt)}"
 
     # ================================================================== v5 ACTIONS (every figure comes from the analysis above)
     try:
         from zoneinfo import ZoneInfo
-        mad_off = int(gen.astimezone(ZoneInfo("Europe/Madrid")).utcoffset().total_seconds() // 3600)
+        mad_off = int(gen.astimezone(ZoneInfo(LOCAL_TIMEZONE)).utcoffset().total_seconds() // 3600)
     except Exception:
-        mad_off = 2 if 3 < gen.month < 11 else 1
+        mad_off = 0
     mad_lbl = f"UTC+{mad_off}"
 
     def hmad(H):
-        return f"{H:02d}:00 UTC ({(H + mad_off) % 24:02d}:00 Madrid)"
+        return f"{H:02d}:00 UTC ({(H + mad_off) % 24:02d}:00 {LOCAL_TIMEZONE.split('/')[-1].replace('_', ' ')})"
 
     actions = []
     headline_save = 0.0
@@ -1343,100 +1592,100 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
         m_tail = tail_save * per_month
         headline_save += m_tail
         worst = sorted(cov_runs, key=lambda r: -(r["tail"] or 0))[:3]
-        ev = "; ".join(f"{dlabel(r['b'].strftime('%Y%m%d'))}: última actividad {hhmm(r['last'])}, pausa {hhmm(r['b'])} → {fn(r['tail'], 1)} h" for r in worst)
-        actions.append({"kind": "save", "title": "Pausar la capacidad cuando deja de usarse",
-                        "why": (f"La pausa actual es {'automática' if auto_suspend else 'manual'} hacia las {hhmm(susp_times[-1]) if susp_times else '—'} UTC, "
-                                f"pero el trabajo real termina antes. En {len(cov_runs)} encendidos con actividad registrada hubo "
-                                f"{fn(tail_h, 1)} h encendida tras la última actividad. Pausando 1 h después de la última actividad se ahorran "
+        ev = "; ".join(f"{dlabel(r['b'].strftime('%Y%m%d'))}: last activity {hhmm(r['last'])}, paused {hhmm(r['b'])} → {fn(r['tail'], 1)} h" for r in worst)
+        actions.append({"kind": "save", "title": "Pause the capacity once it is no longer in use",
+                        "why": (f"The capacity is currently paused {'automatically' if auto_suspend else 'manually'} at around {hhmm(susp_times[-1]) if susp_times else '—'} UTC, "
+                                f"but real work finishes earlier. Across {len(cov_runs)} running periods with recorded activity, the capacity stayed on for "
+                                f"{fn(tail_h, 1)} h after the last activity. Pausing 1 h after the last activity saves "
                                 f"{fn(tail_save_h, 1)} h × {money(hourly)}/h."),
-                        "evidence": ev, "value": m_tail, "unit": "/mes estimado", "src": "Activity Log + registro de actividad + Spark + precio público"})
+                        "evidence": ev, "value": m_tail, "unit": "/month estimated", "src": "Activity Log + Fabric activity log + Spark + public price"})
     if best_safe and best_safe["save"] > 0:
-        actions.append({"kind": "save", "title": f"Alternativa simple: adelantar la pausa automática a las {hmad(best_safe['hour'])}",
-                        "why": (f"Con esa hora fija no se habría cortado ningún trabajo en el periodo observado y se habrían evitado "
-                                f"{fn(best_safe['saved_h'], 1)} h encendida. No se suma al total porque se solapa con la acción anterior."),
-                        "evidence": " · ".join(f"{hmad(w['hour']).split(' (')[0]}: {fn(w['saved_h'], 1)} h, {w['conflicts']} día(s) con trabajo cortado" for w in whatif if w["saved_h"] > 0),
-                        "value": best_safe["save"] * per_month, "unit": "/mes (alternativa)", "src": "Activity Log + registro de actividad"})
+        actions.append({"kind": "save", "title": f"Simpler alternative: bring the automatic pause forward to {hmad(best_safe['hour'])}",
+                        "why": (f"With that fixed time, no work would have been cut off in the observed period and "
+                                f"{fn(best_safe['saved_h'], 1)} running hours would have been avoided. Not added to the total because it overlaps with the previous action."),
+                        "evidence": " · ".join(f"{hmad(w['hour']).split(' (')[0]}: {fn(w['saved_h'], 1)} h, {w['conflicts']} day(s) with work cut off" for w in whatif if w["saved_h"] > 0),
+                        "value": best_safe["save"] * per_month, "unit": "/month (alternative)", "src": "Activity Log + Fabric activity log"})
     if lowuse_days:
-        actions.append({"kind": "save", "title": f"Evitar encender la capacidad en días sin carga ({len(lowuse_days)} días)",
-                        "why": ("En estos días la factura muestra prácticamente solo el medidor «Compute Pool» (capacidad encendida, nada consumido). "
-                                "Validar con el equipo si fueron encendidos para pruebas o demos que podían agruparse."),
+        actions.append({"kind": "save", "title": f"Avoid starting the capacity on days with no load ({len(lowuse_days)} days)",
+                        "why": ("On these days the invoice shows practically only the “Compute Pool” meter (capacity running, nothing consumed). "
+                                "Check with the team whether it was started for tests or demos that could have been grouped together."),
                         "evidence": ", ".join(f"{dlabel(x['date'])}: {fn(x['on_h'], 1)} h, {money(x['cost'])}" for x in lowuse_days),
-                        "value": lowuse_cost, "unit": "en el periodo (validar)", "src": "Azure Cost Management + Activity Log"})
+                        "value": lowuse_cost, "unit": "in the period (to validate)", "src": "Azure Cost Management + Activity Log"})
     if res.get(1) and breakeven.get(1):
         be = breakeven[1]
         if uptime < be:
             extra = annual_res[1] - annual_payg_cu
-            actions.append({"kind": "avoid", "title": "No comprar reserva de capacidad con el patrón de uso actual",
-                            "why": (f"La reserva a 1 año sale a {money(res[1], 0)} por CU/año ({money(annual_res[1], 0)} para {focus_sku}). "
-                                    f"Solo compensa si la capacidad está encendida más del {pc(be, 0)} del tiempo; ahora lo está el {pc(uptime, 0)}. "
-                                    f"Al ritmo actual el pago por uso cuesta {money(annual_payg_cu, 0)}/año"
-                                    f"{'' if cost_ok else ' (horas encendida × precio público, sin factura en esta ejecución)'}."),
-                            "evidence": f"Precio pago por uso {money(price_cu, 4)}/CU-h · {price_src}",
-                            "value": max(extra, 0), "unit": "/año de sobrecoste evitado",
+            actions.append({"kind": "avoid", "title": "Do not buy a capacity reservation with the current usage pattern",
+                            "why": (f"A 1-year reservation costs {money(res[1], 0)} per CU/year ({money(annual_res[1], 0)} for {focus_sku}). "
+                                    f"It only pays off if the capacity runs more than {pc(be, 0)} of the time; it currently runs {pc(uptime, 0)} of the time. "
+                                    f"At the current rate, pay-as-you-go costs {money(annual_payg_cu, 0)}/year"
+                                    f"{'' if cost_ok else ' (running hours × public price, no invoice in this run)'}."),
+                            "evidence": f"Pay-as-you-go price {money(price_cu, 4)}/CU-h · {price_src}",
+                            "value": max(extra, 0), "unit": "/year of overspend avoided",
                             "src": "Azure Retail Prices + Cost Management" if cost_ok else "Azure Retail Prices + Activity Log"})
         else:
             sav = annual_payg_cu - annual_res[1]
-            actions.append({"kind": "save", "title": "Valorar reserva de capacidad a 1 año",
-                            "why": f"La capacidad está encendida el {pc(uptime, 0)} del tiempo, por encima del umbral del {pc(be, 0)}.",
-                            "evidence": f"Pago por uso anualizado {money(annual_payg_cu, 0)} vs reserva {money(annual_res[1], 0)}",
-                            "value": sav, "unit": "/año", "src": "Azure Retail Prices + Cost Management"})
+            actions.append({"kind": "save", "title": "Consider a 1-year capacity reservation",
+                            "why": f"The capacity runs {pc(uptime, 0)} of the time, above the {pc(be, 0)} break-even threshold.",
+                            "evidence": f"Annualized pay-as-you-go {money(annual_payg_cu, 0)} vs reservation {money(annual_res[1], 0)}",
+                            "value": sav, "unit": "/year", "src": "Azure Retail Prices + Cost Management"})
     if sizes and peak_day_avg and sizes[0]["peak_load"] < 0.8:
         s0 = sizes[0]
-        actions.append({"kind": "scenario", "title": f"Escenario: bajar de {focus_sku} a {s0['sku']} (validar picos)",
-                        "why": (f"De media se consumieron {fn(avg_cu_on, 1)} CU por hora encendida; el día de más carga "
-                                f"({dlabel(peak_day['date'])}) {fn(peak_day_avg, 1)} CU de media, un {pc(s0['peak_load'], 0)} de un {s0['sku']}. "
-                                "Son medias por hora: antes de cambiar, revisar picos y throttling en la app Capacity Metrics"
-                                + (", que ya está instalada." if cm_installed else " (conviene instalarla).")),
-                        "evidence": f"CU-h facturadas − CU-h de «Compute Pool» por día · {fn(on_billed_hours, 1)} h encendida con coste",
-                        "value": s0["save_month"], "unit": "/mes si se confirma", "src": "Cost Management (cantidades CU-h)"})
+        actions.append({"kind": "scenario", "title": f"Scenario: downsize from {focus_sku} to {s0['sku']} (validate peaks)",
+                        "why": (f"On average {fn(avg_cu_on, 1)} CUs were consumed per running hour; on the busiest day "
+                                f"({dlabel(peak_day['date'])}) the average was {fn(peak_day_avg, 1)} CUs, {pc(s0['peak_load'], 0)} of an {s0['sku']}. "
+                                "These are hourly averages: before changing, review peaks and throttling in the Capacity Metrics app"
+                                + (", which is already installed." if cm_installed else " (worth installing).")),
+                        "evidence": f"Billed CU-h − “Compute Pool” CU-h per day · {fn(on_billed_hours, 1)} running hours with cost",
+                        "value": s0["save_month"], "unit": "/month if confirmed", "src": "Cost Management (CU-h quantities)"})
     sched_nb = [n for n in nb_list if n["sched"] >= 3]
     for n in sched_nb[:2]:
-        actions.append({"kind": "review", "title": f"Revisar la frecuencia del notebook programado «{n['item']}»",
-                        "why": (f"{n['sched']} ejecuciones programadas y {fn(n['run'] / 3600, 1)} h de Spark en el periodo "
-                                f"({pc(n['share'], 0)} del tiempo Spark). Mientras se ejecuta, la capacidad no puede pausarse."),
-                        "evidence": f"Workspace {ws_label(n['ws'])} · primera {n['first'].strftime('%d/%m %H:%M') if n['first'] else '—'}, última {n['last'].strftime('%d/%m %H:%M') if n['last'] else '—'} UTC",
-                        "value": n["cost"], "unit": "Spark atribuido en el periodo", "src": "Spark/Livy API + medidor Spark"})
+        actions.append({"kind": "review", "title": f"Review the frequency of the scheduled notebook “{n['item']}”",
+                        "why": (f"{n['sched']} scheduled runs and {fn(n['run'] / 3600, 1)} h of Spark in the period "
+                                f"({pc(n['share'], 0)} of Spark time). While it runs, the capacity cannot be paused."),
+                        "evidence": f"Workspace {ws_label(n['ws'])} · first {dmon(n['first'], ' %H:%M') if n['first'] else '—'}, last {dmon(n['last'], ' %H:%M') if n['last'] else '—'} UTC",
+                        "value": n["cost"], "unit": "Spark attributed in the period", "src": "Spark/Livy API + Spark meter"})
     for c in paused_empty:
         if c["hourly_if_on"]:
-            actions.append({"kind": "risk", "title": f"Eliminar o etiquetar la capacidad pausada «{c['name']}» ({c['sku']})",
-                            "why": (f"Está pausada y sin ningún workspace asignado. Si alguien la reanuda por error costaría "
-                                    f"{money(c['hourly_if_on'])}/h ({money(c['hourly_if_on'] * 24 * 30, 0)}/mes encendida)."),
-                            "evidence": f"Grupo de recursos {c['rg'] or '—'} · {c['tags']}",
-                            "value": c["hourly_if_on"] * 24 * 30, "unit": "/mes de riesgo evitado", "src": "ARM + Fabric Admin API"})
+            actions.append({"kind": "risk", "title": f"Delete or tag the paused capacity “{c['name']}” ({c['sku']})",
+                            "why": (f"It is paused and has no workspaces assigned. If someone resumed it by mistake it would cost "
+                                    f"{money(c['hourly_if_on'])}/h ({money(c['hourly_if_on'] * 24 * 30, 0)}/month while running)."),
+                            "evidence": f"Resource group {c['rg'] or '—'} · {c['tags']}",
+                            "value": c["hourly_if_on"] * 24 * 30, "unit": "/month of risk avoided", "src": "ARM + Fabric Admin API"})
     if livy_failed:
         wasted = sum(x["run"] for x in livy_failed) / 3600
-        actions.append({"kind": "review", "title": f"Corregir {len(livy_failed)} sesiones Spark fallidas",
-                        "why": f"Consumieron {fn(wasted, 1)} h de Spark sin resultado útil.",
+        actions.append({"kind": "review", "title": f"Fix {len(livy_failed)} failed Spark sessions",
+                        "why": f"They consumed {fn(wasted, 1)} h of Spark without a useful result.",
                         "evidence": ", ".join(sorted({x['item'] for x in livy_failed}))[:240],
                         "value": spark_cost * (sum(x["run"] for x in livy_failed) / livy_total_s) if livy_total_s else None,
-                        "unit": "Spark atribuido", "src": "Spark/Livy API"})
+                        "unit": "Spark attributed", "src": "Spark/Livy API"})
     ai_cost = cat_cost.get("ai", 0.0)
     cop_set = next((r for r in ts_rows if "copilot capacities" in (r["title"] or "").lower()), None)
     if ai_cost > 0:
-        actions.append({"kind": "gov", "title": "Separar el consumo de IA en una capacidad Copilot designada",
-                        "why": (f"La IA (Copilot, Data Agents, Ontology AI) ya cuesta {money(ai_cost)} ({pc(ai_cost / total_cost if total_cost else 0, 1)}). "
-                                "Designar una capacidad para Copilot permite repercutir ese coste con exactitud por equipo."),
-                        "evidence": f"Ajuste del tenant «{cop_set['title']}»: {'activado' if cop_set['enabled'] else 'desactivado'}" if cop_set else "Medidores de IA en Cost Management",
+        actions.append({"kind": "gov", "title": "Move AI usage to a designated Copilot capacity",
+                        "why": (f"AI (Copilot, Data Agents, Ontology AI) already costs {money(ai_cost)} ({pc(ai_cost / total_cost if total_cost else 0, 1)}). "
+                                "Designating a capacity for Copilot lets you charge that cost back to each team accurately."),
+                        "evidence": f"Tenant setting “{cop_set['title']}”: {'enabled' if cop_set['enabled'] else 'disabled'}" if cop_set else "AI meters in Cost Management",
                         "value": None, "unit": "", "src": "Cost Management + Tenant settings"})
     if untagged:
-        actions.append({"kind": "gov", "title": "Etiquetar las capacidades con centro de coste",
-                        "why": "Sin etiquetas (costCenter, owner, environment) Cost Management no puede repartir ni crear presupuestos por área.",
+        actions.append({"kind": "gov", "title": "Tag the capacities with a cost center",
+                        "why": "Without tags (costCenter, owner, environment), Cost Management cannot allocate costs or create budgets per business area.",
                         "evidence": ", ".join(f"{c['name']} ({c['sku']})" for c in untagged), "value": None, "unit": "", "src": "ARM"})
     if ref_failed:
-        actions.append({"kind": "gov", "title": f"Arreglar {len(ref_failed)} refresco(s) fallido(s)",
-                        "why": "Modelos con el último refresco fallido: datos desactualizados para los usuarios.",
+        actions.append({"kind": "gov", "title": f"Fix {len(ref_failed)} failed refresh{'es' if len(ref_failed) != 1 else ''}",
+                        "why": "Models whose last refresh failed: users are working with stale data.",
                         "evidence": "; ".join(f"{r['name']} ({r['ws']}) {r['err']}" for r in ref_failed), "value": None, "unit": "", "src": "Admin API refreshables"})
     if idle_ws:
-        actions.append({"kind": "gov", "title": f"Revisar {len(idle_ws)} workspaces en capacidad de pago sin uso en el periodo",
-                        "why": "Sin actividad ni Spark en el periodo. Candidatos a archivar, moverse a capacidad de prueba o limpiar.",
-                        "evidence": ", ".join(r["name"] for r in idle_ws[:12]) + (" …" if len(idle_ws) > 12 else ""), "value": None, "unit": "", "src": "Admin API + registro de actividad"})
+        actions.append({"kind": "gov", "title": f"Review {len(idle_ws)} workspaces on paid capacity with no use in the period",
+                        "why": "No activity or Spark in the period. Candidates to archive, move to a trial capacity or clean up.",
+                        "evidence": ", ".join(r["name"] for r in idle_ws[:12]) + (" …" if len(idle_ws) > 12 else ""), "value": None, "unit": "", "src": "Admin API + Fabric activity log"})
     if trials:
-        actions.append({"kind": "gov", "title": "Planificar el fin de la capacidad de prueba",
-                        "why": "Lo que esté en la capacidad trial dejará de funcionar o tendrá que moverse a una de pago al terminar la prueba.",
+        actions.append({"kind": "gov", "title": "Plan for the end of the trial capacity",
+                        "why": "Anything on the trial capacity will stop working, or will have to be moved to a paid capacity, when the trial ends.",
                         "evidence": ", ".join(f"{c['name']} ({c['ws']} workspaces, {c['items']} items)" for c in trials), "value": None, "unit": "", "src": "Fabric Admin API"})
     if stale_items:
-        actions.append({"kind": "gov", "title": f"Limpiar {len(stale_items)} items sin cambios en más de 90 días",
-                        "why": "Reduce ruido, riesgo y almacenamiento. Verificar antes que no se consultan (tabla de items más usados).",
+        actions.append({"kind": "gov", "title": f"Clean up {len(stale_items)} items unchanged for more than 90 days",
+                        "why": "Reduces clutter, risk and storage. First check that they are not being queried (see the most-used items table).",
                         "evidence": ", ".join(f"{t}: {n}" for t, n in stale_types.most_common(6)), "value": None, "unit": "", "src": "Admin API items"})
 
     # ================================================================== v5 CHARTS (inline SVG, no external libraries)
@@ -1459,7 +1708,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
         vals = [sum(day_cat[k].values()) for k in all_days]
         ym = nice_max(max(vals) if vals else 1)
         bw = (W - L - R) / n
-        g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="dct"><title id="dct">Coste diario por pieza de Fabric</title>']
+        g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="dct"><title id="dct">Daily cost by Fabric component</title>']
         for i in range(5):
             y = T + (H - T - B) * i / 4
             g.append(f'<line x1="{L}" x2="{W - R}" y1="{y:.1f}" y2="{y:.1f}" stroke="#e3ebf1"/>'
@@ -1479,15 +1728,15 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
                 g.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{max(h, .5):.1f}" fill="{CATS[c][1]}"/>')
                 tip.append(f"{CATS[c][0]}: {money(v)}")
             on = on_day.get(k, 0)
-            g.append(f'<rect x="{L + i * bw:.1f}" y="{T}" width="{bw:.1f}" height="{H - T - B}" fill="transparent"><title>{E(chr(10).join(tip))}{E(chr(10) + "Encendida " + fn(on, 1) + " h") if on else ""}</title></rect>')
+            g.append(f'<rect x="{L + i * bw:.1f}" y="{T}" width="{bw:.1f}" height="{H - T - B}" fill="transparent"><title>{E(chr(10).join(tip))}            {E(chr(10) + "Running " + fn(on, 1) + " h") if on else ""}</title></rect>')
             dt = datetime.strptime(k, "%Y%m%d")
             if i % 2 == 0 or n <= 16:
-                g.append(f'<text x="{L + i * bw + bw / 2:.1f}" y="{H - B + 15}" text-anchor="middle">{dt.day}/{dt.month}</text>')
+                            g.append(f'<text x="{L + i * bw + bw / 2:.1f}" y="{H - B + 15}" text-anchor="middle">{dmon(dt)}</text>')
             if dt.weekday() == 0:
-                g.append(f'<text x="{L + i * bw + bw / 2:.1f}" y="{H - B + 30}" text-anchor="middle" class="lbl">lun</text>')
+                            g.append(f'<text x="{L + i * bw + bw / 2:.1f}" y="{H - B + 30}" text-anchor="middle" class="lbl">Mon</text>')
             if on > 0.05:
                 g.append(f'<rect x="{L + i * bw + bw * .14:.1f}" y="{H - B + 36}" width="{bw * .72:.1f}" height="4" rx="2" fill="#117865" opacity="{min(.25 + on / 24, 1):.2f}"/>')
-        g.append(f'<text x="{L}" y="{H - 4}" class="lbl">Barra fina inferior: horas encendida ese día (más oscura = más horas)</text>')
+        g.append(f'<text x="{L}" y="{H - 4}" class="lbl">Thin bottom bar: hours the capacity was running that day (darker = more hours)</text>')
         g.append(f'<text x="{L - 50}" y="{T + 2}" class="lbl">{E(CUR)}</text></svg>')
         return "".join(g)
 
@@ -1508,14 +1757,14 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
         W = 1100
         PX = (W - L - R) / 24
         H = T + len(tl_days) * (RH + G) + 14
-        g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="tlt"><title id="tlt">Horas encendida frente a horas con trabajo, por día</title>',
+        g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="tlt"><title id="tlt">Hours running versus hours with work, by day</title>',
              '<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
              '<rect width="6" height="6" fill="#eef2f5"/><line x1="0" y1="0" x2="0" y2="6" stroke="#c9d4dd" stroke-width="2"/></pattern></defs>']
         for hh in range(0, 25, 3):
             x = L + hh * PX
             g.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{T - 6}" y2="{H - 10}" stroke="#e3ebf1"/>'
                      f'<text x="{x:.1f}" y="{T - 10}" text-anchor="middle">{hh:02d}h</text>')
-        g.append(f'<text x="{W - 4}" y="{T - 10}" text-anchor="end" class="lbl">h encendida</text>')
+        g.append(f'<text x="{W - 4}" y="{T - 10}" text-anchor="end" class="lbl">h running</text>')
         for i, k in enumerate(tl_days):
             y = T + i * (RH + G)
             d0_ = datetime.strptime(k, "%Y%m%d").replace(tzinfo=timezone.utc)
@@ -1529,20 +1778,20 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
                 x0 = L + (s_ - d0_).total_seconds() / 3600 * PX
                 x1 = L + (e_ - d0_).total_seconds() / 3600 * PX
                 g.append(f'<rect x="{x0:.1f}" y="{y}" width="{max(x1 - x0, 1):.1f}" height="{RH}" fill="{"url(#hatch)" if pre else "#cfe9e3"}">'
-                         f'<title>Encendida {hhmm(s_)}–{hhmm(e_)} UTC{" · antes del inicio del registro de actividad" if pre else ""}</title></rect>')
+                         f'<title>Running {hhmm(s_)}–{hhmm(e_)} UTC{" · before the start of the activity log" if pre else ""}</title></rect>')
             for a, b in tail_by_day.get(k, []):
                 s_, e_ = max(a, d0_), min(b, d0_ + timedelta(days=1))
                 if e_ > s_:
                     x0 = L + (s_ - d0_).total_seconds() / 3600 * PX
                     x1 = L + (e_ - d0_).total_seconds() / 3600 * PX
                     g.append(f'<rect x="{x0:.1f}" y="{y}" width="{max(x1 - x0, 1):.1f}" height="{RH}" fill="#d99a2b" opacity=".38">'
-                             f'<title>Encendida sin trabajo: {hhmm(s_)}–{hhmm(e_)} UTC ({fn((e_ - s_).total_seconds() / 3600, 1)} h)</title></rect>')
+                             f'<title>Running with no work: {hhmm(s_)}–{hhmm(e_)} UTC ({fn((e_ - s_).total_seconds() / 3600, 1)} h)</title></rect>')
             for hh in range(24):
                 n_ = act_hour.get((k, hh), 0)
                 if n_:
                     hgt = 3 + (RH - 7) * math.sqrt(n_ / ah_max)
                     g.append(f'<rect x="{L + hh * PX + PX * .2:.1f}" y="{y + RH - 4 - hgt:.1f}" width="{PX * .6:.1f}" height="{hgt:.1f}" rx="1.5" fill="#0b5345">'
-                             f'<title>{dlabel(k)} {hh:02d}h UTC · {n_} operaciones de usuarios/apps</title></rect>')
+                             f'<title>{dlabel(k)} {hh:02d}h UTC · {n_} user/app operations</title></rect>')
             for x in livy_focus:
                 s_, e_ = max(x["start"], d0_), min(x["end"] or gen, d0_ + timedelta(days=1))
                 if e_ > s_:
@@ -1562,38 +1811,38 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
             for hh in range(24):
                 v = heat[d_][hh]
                 op = 0 if not v else .15 + .85 * math.sqrt(v / max(heat_max, 1))
-                cells.append(f'<td title="{WD[d_]} {hh:02d}h UTC · {v} operaciones"><span style="background:rgba(11,83,69,{op:.2f});{"outline:1px solid #e3ebf1" if not v else ""}"></span></td>')
+                cells.append(f'<td title="{WD[d_]} {hh:02d}h UTC · {v} operations"><span style="background:rgba(11,83,69,{op:.2f});{"outline:1px solid #e3ebf1" if not v else ""}"></span></td>')
             rows_.append(f"<tr><th scope=row>{WD[d_]}</th>{''.join(cells)}</tr>")
         head = "".join(f"<th>{hh:02d}</th>" if hh % 3 == 0 else "<th></th>" for hh in range(24))
         return f'<div class="chart"><table class="heat" style="min-width:720px"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows_)}</tbody></table></div>'
 
     # ================================================================== v5 HTML · part 1 (summary, actions, pieces)
     MEXPL = [
-        ("compute pool", "Parte de la capacidad encendida que no consumió ninguna carga. Fabric factura la capacidad completa por hora mientras está encendida; lo no usado aparece aquí."),
-        ("capacity overage", "Consumo por encima del tamaño de la capacidad (sobreconsumo) facturado a precio de overage."),
-        ("copilot and ai", "Copilot, Data Agents y experiencias de IA (consultas en lenguaje natural sobre los datos)."),
-        ("ontology ai", "Funciones de IA de Fabric IQ sobre la ontología."),
-        ("operations agents", "Agentes de operaciones de Real-Time Intelligence."),
-        ("spark memory optimized", "Cómputo Spark: notebooks, jobs de Spark y cargas en lakehouses."),
-        ("spark", "Cómputo Spark."),
-        ("ontology logic", "Fabric IQ: lógica y operaciones de la ontología (modelado semántico de negocio)."),
-        ("ontology", "Fabric IQ: ontología."),
+        ("compute pool", "Share of the running capacity that no workload consumed. Fabric bills the whole capacity per hour while it is running; the unused part appears here."),
+        ("capacity overage", "Consumption above the capacity size (overconsumption), billed at the overage rate."),
+        ("copilot and ai", "Copilot, Data Agents and AI experiences (natural-language questions over the data)."),
+        ("ontology ai", "Fabric IQ AI functions over the ontology."),
+        ("operations agents", "Real-Time Intelligence operations agents."),
+        ("spark memory optimized", "Spark compute: notebooks, Spark jobs and lakehouse loads."),
+        ("spark", "Spark compute."),
+        ("ontology logic", "Fabric IQ: ontology logic and operations (semantic business modelling)."),
+        ("ontology", "Fabric IQ: ontology."),
         ("graph", "Fabric IQ: Graph."),
-        ("onelake cache", "Caché de OneLake (datos en caché para consultas rápidas, p. ej. KQL)."),
-        ("onelake storage", "Almacenamiento de datos en OneLake."),
-        ("onelake", "Transacciones de lectura/escritura en OneLake."),
-        ("eventhouse", "Eventhouse/KQL: base de datos en tiempo real encendida o consultada."),
-        ("eventstream", "Eventstream: ingesta y procesamiento de eventos en streaming."),
-        ("activator", "Activator: reglas y alertas en tiempo real."),
-        ("data warehouse", "Warehouse y endpoint SQL de lakehouses."),
-        ("sql database", "SQL database en Fabric."),
-        ("power bi", "Power BI: refrescos, consultas e informes en la capacidad."),
-        ("data movement", "Copy activities de pipelines (movimiento de datos)."),
-        ("data orchestration", "Orquestación de pipelines."),
+        ("onelake cache", "OneLake cache (cached data for fast queries, e.g. KQL)."),
+        ("onelake storage", "Data storage in OneLake."),
+        ("onelake", "Read/write transactions in OneLake."),
+        ("eventhouse", "Eventhouse/KQL: real-time database running or being queried."),
+        ("eventstream", "Eventstream: streaming event ingestion and processing."),
+        ("activator", "Activator: real-time rules and alerts."),
+        ("data warehouse", "Warehouse and the lakehouse SQL analytics endpoint."),
+        ("sql database", "SQL database in Fabric."),
+        ("power bi", "Power BI: refreshes, queries and reports on the capacity."),
+        ("data movement", "Pipeline copy activities (data movement)."),
+        ("data orchestration", "Pipeline orchestration."),
         ("dataflow", "Dataflows Gen2."),
         ("user data functions", "User data functions."),
         ("graphql", "API for GraphQL."),
-        ("mirroring", "Mirroring de bases de datos."),
+        ("mirroring", "Database mirroring."),
     ]
 
     def mexpl(name):
@@ -1601,13 +1850,13 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
         for k, v in MEXPL:
             if k in nl:
                 return v
-        return "Medidor de Fabric facturado en la capacidad."
+        return "Fabric meter billed on the capacity."
 
-    MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+    MES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     mon = defaultdict(Counter)
     for r in raw.get("cost_monthly") or []:
         if r.get("month"):
-            nm = (r.get("rid") or "").rsplit("/", 1)[-1] or "capacidades Fabric"
+            nm = (r.get("rid") or "").rsplit("/", 1)[-1] or "Fabric capacities"
             mon[r["month"]][nm] += r.get("cost") or 0
     mon_keys = sorted(mon)
     cur_month = gen.strftime("%Y-%m")
@@ -1618,7 +1867,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
     MON_COL = ["#117865", "#1d5c8f", "#6a3d9a", "#a14306", "#4f6378"]
 
     def mlabel(k):
-        return f"{MES[int(k[5:7]) - 1]} {k[2:4]}"
+        return f"{MES[int(k[5:7]) - 1]} {k[:4]}"
 
     def svg_monthly():
         if not mon_keys:
@@ -1626,14 +1875,14 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
         W, H, L, R, T, B = 1100, 250, 64, 16, 22, 40
         mx = nice_max(max(mon_tot.values()))
         bw = (W - L - R) / len(mon_keys)
-        g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="mtt"><title id="mtt">Coste mensual de Fabric en Cost Management</title>']
+        g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="mtt"><title id="mtt">Monthly Fabric cost in Cost Management</title>']
         for i in range(5):
             v = mx * i / 4
             y = H - B - (H - B - T) * i / 4
             g.append(f'<line x1="{L}" x2="{W - R}" y1="{y:.1f}" y2="{y:.1f}" stroke="#e3ebf1"/><text x="{L - 8}" y="{y + 4:.1f}" text-anchor="end">{fn(v, 0)}</text>')
         if mon_avg:
             ya = H - B - (H - B - T) * mon_avg / mx
-            g.append(f'<line x1="{L}" x2="{W - R}" y1="{ya:.1f}" y2="{ya:.1f}" stroke="#a14306" stroke-dasharray="4 4"><title>Media meses cerrados {money(mon_avg, 0)}</title></line>')
+            g.append(f'<line x1="{L}" x2="{W - R}" y1="{ya:.1f}" y2="{ya:.1f}" stroke="#a14306" stroke-dasharray="4 4"><title>Average of closed months {money(mon_avg, 0)}</title></line>')
         for i, k in enumerate(mon_keys):
             x = L + i * bw + bw * .18
             y0 = H - B
@@ -1645,11 +1894,11 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
                 y0 -= h
                 op = ' opacity=".55"' if k == cur_month else ""
                 g.append(f'<rect x="{x:.1f}" y="{y0:.1f}" width="{bw * .64:.1f}" height="{h:.1f}" fill="{MON_COL[j % len(MON_COL)]}"{op}>'
-                         f'<title>{mlabel(k)} · {E(c)}: {money(v)}{" (mes en curso)" if k == cur_month else ""}</title></rect>')
+                         f'<title>{mlabel(k)} · {E(c)}: {money(v)}{" (current month)" if k == cur_month else ""}</title></rect>')
             g.append(f'<text x="{x + bw * .32:.1f}" y="{y0 - 6:.1f}" text-anchor="middle" class="lbl">{fn(mon_tot[k], 0)}</text>'
                      f'<text x="{x + bw * .32:.1f}" y="{H - B + 16}" text-anchor="middle">{mlabel(k)}</text>')
             if k == cur_month:
-                g.append(f'<text x="{x + bw * .32:.1f}" y="{H - B + 30}" text-anchor="middle" class="lbl">en curso</text>')
+                g.append(f'<text x="{x + bw * .32:.1f}" y="{H - B + 30}" text-anchor="middle" class="lbl">in progress</text>')
         g.append(f'<text x="{L - 50}" y="{T - 6}" class="lbl">{E(CUR)}</text></svg>')
         return "".join(g)
 
@@ -1680,97 +1929,97 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
     for x in livy:
         item_by_cat["spark"][x["item"]] += x["run"]
 
-    nav = [("resumen", "Resumen"), ("acciones", "Acciones FinOps"), ("piezas", "Dónde va el dinero"), ("uso", "Encendida vs usada"),
-           ("quien", "Quién consume"), ("reparto", "Reparto por workspace"), ("compromisos", "Reserva y tamaño"),
-           ("gobierno", "Gobierno"), ("preguntas", "Preguntas"), ("fuentes", "Fuentes")]
+    nav = [("resumen", "Summary"), ("acciones", "FinOps actions"), ("piezas", "Where the money goes"), ("uso", "Running vs used"),
+           ("quien", "Who consumes"), ("reparto", "Chargeback"), ("acceso", "Access and groups"), ("compromisos", "Reservation and size"),
+           ("gobierno", "Governance"), ("preguntas", "Questions"), ("fuentes", "Sources")]
     ok_src = sum(1 for v in sources.values() if v.get("status") == "ok")
     parts = []
-    parts.append(f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FinOps de Microsoft Fabric · {E(period_label)} · datos reales</title><style>{CSS}</style></head><body>
-<header class="top"><div class="wrap"><h1>FinOps de Microsoft Fabric: qué se paga, qué se usa y qué se puede ahorrar</h1>
-<p class="lede">Informe generado por Azure SRE Agent leyendo en directo el tenant: factura de Azure Cost Management, horas de encendido del
-Activity Log, actividad de usuarios, ejecuciones Spark, inventario y configuración de Fabric. Ningún dato es de ejemplo.</p>
-<ul class="chips"><li><b>{E(period_label)}</b> · {win0.strftime('%d/%m')} → {gen.strftime('%d/%m/%Y %H:%M')} UTC</li>
-<li>Capacidad principal <b>{E(focus_name)}</b> ({E(focus_sku)} · {E(focus.get('location') or '')})</li>
-<li><b>{ok_src}/{len(sources)}</b> fuentes leídas</li><li>Identidades {'visibles' if show_ids else 'enmascaradas'}</li></ul></div></header>
-<nav class="toc" aria-label="Secciones"><ol>{''.join(f'<li><a href="#{a}">{b}</a></li>' for a, b in nav)}</ol></nav><main><div class="wrap">""")
+    parts.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microsoft Fabric FinOps · {E(period_label)} · real data</title><style>{CSS}</style></head><body>
+<header class="top"><div class="wrap"><h1>Microsoft Fabric FinOps: what you pay for, what you use and what you can save</h1>
+<p class="lede">Report generated by Azure SRE Agent from a live read of the tenant: the Azure Cost Management invoice, running hours from the
+Activity Log, user activity, Spark runs, and Fabric inventory and configuration. No sample data.</p>
+<ul class="chips"><li><b>{E(period_label)}</b> · {dmon(win0)} → {dmon(gen, ' %Y %H:%M')} UTC</li>
+<li>Main capacity <b>{E(focus_name)}</b> ({E(focus_sku)} · {E(focus.get('location') or '')})</li>
+<li><b>{ok_src}/{len(sources)}</b> sources read</li><li>Identities {'visible' if show_ids else 'masked'}</li></ul></div></header>
+<nav class="toc" aria-label="Sections"><ol>{''.join(f'<li><a href="#{a}">{b}</a></li>' for a, b in nav)}</ol></nav><main><div class="wrap">""")
 
     def no_cost(sec_id, title, what):
-        return (f'<section id="{sec_id}"><h2>{title}</h2><div class="notice warn"><div><b>Necesita la factura de Cost Management</b>'
+        return (f'<section id="{sec_id}"><h2>{title}</h2><div class="notice warn"><div><b>Requires the Cost Management invoice</b>'
                 f'<p>{what} {E(cost_why)}</p></div></div></section>')
 
     if not cost_ok:
-        parts.append(f'<div class="notice warn"><div><b>Coste facturado no disponible en esta ejecución</b><p>{E(cost_why)} '
-                     'Las horas encendida, la actividad, Spark, el gobierno y los ahorros por pausa sí son reales y están completos; '
-                     'los importes de ahorro usan el precio público de Azure.</p></div></div>')
+        parts.append(f'<div class="notice warn"><div><b>Billed cost not available in this run</b><p>{E(cost_why)} '
+                     'Running hours, activity, Spark, governance and pause savings are real and complete; '
+                     'savings amounts use the public Azure price.</p></div></div>')
     elif not crow:
-        parts.append('<div class="notice warn"><div><b>Sin coste en el periodo</b><p>Cost Management no devolvió importes para capacidades de Fabric. '
-                     'Revisa el rol Cost Management Reader en la suscripción o si las capacidades se facturan en otra suscripción.</p></div></div>')
+        parts.append('<div class="notice warn"><div><b>No cost in the period</b><p>Cost Management returned no amounts for Fabric capacities. '
+                     'Check the Cost Management Reader role on the subscription, or whether the capacities are billed to another subscription.</p></div></div>')
     idle_pct = idle_cost / total_cost if total_cost else 0
     stor = cat_cost.get("storage", 0.0)
-    seg = [("Consumido por cargas", consumption_cost, "#117865"), ("Encendida sin consumo", idle_cost, "#d99a2b"), ("Almacenamiento", stor, "#4f6378")]
+    seg = [("Consumed by workloads", consumption_cost, "#117865"), ("Running with no load", idle_cost, "#d99a2b"), ("Storage", stor, "#4f6378")]
     stack = "".join(f'<span style="width:{(v / total_cost * 100) if total_cost else 0:.2f}%;background:{c}" title="{E(lbl)}: {money(v)}"></span>' for lbl, v, c in seg if v > 0)
     legend = "".join(f'<li><span class="sw" style="background:{c}"></span>{E(lbl)}<strong>{money(v)}</strong>{pc(v / total_cost if total_cost else 0)}</li>' for lbl, v, c in seg)
-    verdict = (f"La capacidad {E(focus_sku)} estuvo encendida <b>{fn(on_hours, 0)} h</b> ({pc(uptime, 0)} del periodo) y en ese tiempo "
-               f"solo se usó el <b>{pc(util_all, 0)}</b> de lo que se pagó. El <b>{pc(idle_pct, 0)}</b> de la factura es capacidad encendida sin carga.") \
-        if focus_cu and cu_billed else "Resumen del coste facturado en el periodo."
+    verdict = (f"The {E(focus_sku)} capacity was running for <b>{fn(on_hours, 0)} h</b> ({pc(uptime, 0)} of the period), and during that time "
+               f"only <b>{pc(util_all, 0)}</b> of what was paid for was used. <b>{pc(idle_pct, 0)}</b> of the invoice is capacity running with no load.") \
+        if focus_cu and cu_billed else "Summary of the cost billed in the period."
     est_on = hourly * on_hours
     if cost_ok:
-        hero_l = (f'<p class="total-label">Coste real en {E(period_label.lower())}</p><p class="total-figure">{fn(total_cost, 2)}<small>{E(CUR)}</small></p>'
-                  f'<p class="total-meta">Azure Cost Management · ActualCost · {len(meters)} medidores · {len({c["rid"] for c in crow})} capacidad(es) con cargo</p>')
+        hero_l = (f'<p class="total-label">Actual cost in the {E(period_label.lower())}</p><p class="total-figure">{fn(total_cost, 2)}<small>{E(CUR)}</small></p>'
+                  f'<p class="total-meta">Azure Cost Management · ActualCost · {len(meters)} meters · {len({c["rid"] for c in crow})} capacity(ies) with charges</p>')
         hero_r = f'<p class="verdict">{verdict}</p><div class="stack">{stack}</div><ul class="legend">{legend}</ul>'
-        kv_cu = f'<li>CU-h pagadas vs usadas<b>{fn(cu_billed, 0)} / {fn(cu_consumed, 0)}</b>uso medio {fn(avg_cu_on, 1)} CU por hora encendida</li>'
+        kv_cu = f'<li>CU-h paid vs used<b>{fn(cu_billed, 0)} / {fn(cu_consumed, 0)}</b>average {fn(avg_cu_on, 1)} CU used per running hour</li>'
     else:
-        hero_l = (f'<p class="total-label">Coste facturado en {E(period_label.lower())}</p><p class="total-figure">—</p>'
-                  f'<p class="total-meta">No disponible en esta ejecución</p>')
-        hero_r = (f'<p class="verdict">Con el precio público, las <b>{fn(on_hours, 0)} h</b> encendida de {E(focus_sku)} equivalen a unos <b>{money(est_on, 0)}</b> '
-                  f'({money(hourly)}/h). Es una referencia, no la factura: no incluye almacenamiento ni las operaciones que Fabric factura al pausar.</p>')
-        kv_cu = '<li>CU-h pagadas vs usadas<b>—</b>requiere la factura de Cost Management</li>'
-    parts.append(f"""<section id="resumen"><h2>Resumen</h2><p class="sub">Importe real facturado por Azure para las capacidades de Fabric y cómo se reparte entre uso real y capacidad ociosa.</p>
+        hero_l = (f'<p class="total-label">Billed cost in the {E(period_label.lower())}</p><p class="total-figure">—</p>'
+                  f'<p class="total-meta">Not available in this run</p>')
+        hero_r = (f'<p class="verdict">At the public price, the <b>{fn(on_hours, 0)} h</b> that {E(focus_sku)} was running come to about <b>{money(est_on, 0)}</b> '
+                  f'({money(hourly)}/h). This is a reference, not the invoice: it excludes storage and the operations Fabric bills when the capacity is paused.</p>')
+        kv_cu = '<li>CU-h paid vs used<b>—</b>requires the Cost Management invoice</li>'
+    parts.append(f"""<section id="resumen"><h2>Summary</h2><p class="sub">Actual amount billed by Azure for the Fabric capacities, and how it splits between real usage and idle capacity.</p>
 <div class="panel hero"><div>{hero_l}</div>
 <div>{hero_r}</div></div>
 <ul class="kv" style="margin-top:18px">
-<li>Horas encendida<b>{fn(on_hours, 1)} h</b>de {fn(win_hours, 0)} h del periodo</li>
-<li>Coste por hora encendida<b>{money(hourly)}</b>{focus_cu} CU × {money(price_cu, 4)}/CU-h</li>
+<li>Running hours<b>{fn(on_hours, 1)} h</b>of {fn(win_hours, 0)} h in the period</li>
+<li>Cost per running hour<b>{money(hourly)}</b>{focus_cu} CU × {money(price_cu, 4)}/CU-h</li>
 {kv_cu}
-<li>Ahorro identificado<b>{money(headline_save, 0)}/mes</b>sin cambiar de SKU ni tocar cargas</li></ul></section>""")
+<li>Savings identified<b>{money(headline_save, 0)}/month</b>without changing SKU or touching workloads</li></ul></section>""")
 
     # actions
-    kind_lbl = {"save": ("Ahorro", "ok"), "avoid": ("Evitar gasto", "info"), "scenario": ("Escenario", "info"), "review": ("Revisar", "warn"),
-                "risk": ("Riesgo", "crit"), "gov": ("Gobierno", "neutral")}
+    kind_lbl = {"save": ("Saving", "ok"), "avoid": ("Avoided spend", "info"), "scenario": ("Scenario", "info"), "review": ("Review", "warn"),
+                "risk": ("Risk", "crit"), "gov": ("Governance", "neutral")}
     ali = []
     for a in actions:
         kl, kc = kind_lbl.get(a["kind"], ("", "neutral"))
         val = f'<b>{money(a["value"], 0)}</b><span>{E(a["unit"])}</span>' if a.get("value") else f'<span>{pill(kc, kl)}</span>'
         ali.append(f'<li><div><h3>{E(a["title"])} {pill(kc, kl) if a.get("value") else ""}</h3><p>{E(a["why"])}</p></div>'
-                   f'<div class="val">{val}</div><div class="ev"><b>Evidencia:</b> {E(a["evidence"] or "—")} · <i>{E(a["src"])}</i></div></li>')
-    parts.append(f"""<section id="acciones"><h2>Acciones FinOps priorizadas</h2>
-<p class="sub">Cada acción se calcula con los datos de este tenant y muestra la evidencia. Las cifras mensuales proyectan el periodo observado a 30 días.</p>
-<div class="save-strip"><span class="big">{money(headline_save, 0)}/mes</span><p>Ahorro directo estimado ajustando la pausa de la capacidad, con 1 h de margen tras la última actividad.
-Las demás acciones evitan gasto o riesgo y no se suman.</p></div>
-<ol class="actions">{''.join(ali) or '<li><div><h3>Sin acciones</h3><p>No se detectan oportunidades con los datos disponibles.</p></div></li>'}</ol></section>""")
+                   f'<div class="val">{val}</div><div class="ev"><b>Evidence:</b> {E(a["evidence"] or "—")} · <i>{E(a["src"])}</i></div></li>')
+    parts.append(f"""<section id="acciones"><h2>Prioritized FinOps actions</h2>
+<p class="sub">Each action is calculated from this tenant's data and shows its evidence. Monthly figures project the observed period to 30 days.</p>
+<div class="save-strip"><span class="big">{money(headline_save, 0)}/month</span><p>Estimated direct saving from adjusting when the capacity is paused, with a 1 h buffer after the last activity.
+The other actions avoid spend or risk and are not added to this figure.</p></div>
+<ol class="actions">{''.join(ali) or '<li><div><h3>No actions</h3><p>No opportunities were detected with the available data.</p></div></li>'}</ol></section>""")
 
     # pieces
     cat_rows = []
     for c in cat_order:
         v = cat_cost[c]
         tops = DRV_TOP.get(c)
-        who = ", ".join(f"{E(n)} {pc(s, 0)}" for n, s in tops) if tops else ("No asignable a un workspace" if c in ("idle", "storage", "onelake", "overage", "other") else "Sin actividad registrada")
+        who = ", ".join(f"{E(n)} {pc(s, 0)}" for n, s in tops) if tops else ("Not assignable to a workspace" if c in ("idle", "storage", "onelake", "overage", "other") else "No recorded activity")
         cat_rows.append(f'<li><span>{cat_sw(c)}{E(CATS[c][0])}</span><b>{money(v)} · {pc(v / total_cost if total_cost else 0)}</b>'
                         f'<span class="track"><span class="fill" style="display:block;width:{(v / max(cat_cost.values()) * 100):.1f}%;background:{CATS[c][1]}"></span></span>'
-                        f'<span class="cell-sub" style="grid-column:1/-1">Generado en: {who}</span></li>')
+                        f'<span class="cell-sub" style="grid-column:1/-1">Generated in: {who}</span></li>')
     mrows = []
     for m in sorted(meters.values(), key=lambda m: -m["cost"]):
         if m["cost"] < 0.005:
             continue
         tops = item_by_cat.get(m["cat"])
         top_it = ", ".join(E(k) for k, _ in tops.most_common(3)) if tops and m["cat"] in DRIVER else "—"
-        unit = "GB-mes" if m["cat"] == "storage" else "CU-h"
+        unit = "GB-month" if m["cat"] == "storage" else "CU-h"
         mrows.append(f'<tr><td><span class="cell-strong">{cat_sw(m["cat"])}{E(m["name"])}</span><span class="cell-sub">{E(mexpl(m["name"]))}</span></td>'
                      f'<td>{E(CATS[m["cat"]][0])}</td><td class="num" data-v="{m["qty"]:.3f}">{fn(m["qty"], 1)} {unit}</td>'
                      f'<td class="num" data-v="{len(m["days"])}">{len(m["days"])}</td><td class="num" data-v="{m["cost"]:.4f}">{money(m["cost"])}</td>'
                      f'<td class="num" data-v="{m["cost"] / total_cost if total_cost else 0:.5f}">{pc(m["cost"] / total_cost if total_cost else 0)}</td><td>{top_it}</td></tr>')
-    lag_note = f" Los días posteriores al {dlabel(last_cost_day)} aún no tienen coste: Cost Management publica con 24–48 h de retraso." if last_cost_day and last_cost_day < gen.strftime("%Y%m%d") else ""
+    lag_note = f" Days after {dlabel(last_cost_day)} have no cost yet: Cost Management publishes costs with a 24–48 h delay." if last_cost_day and last_cost_day < gen.strftime("%Y%m%d") else ""
     svc_rows = "".join(f'<li><span>{E(s)}</span><b>{money(v)} · {pc(v / sub_total if sub_total else 0, 0)}</b>'
                        f'<span class="track"><span class="fill" style="display:block;width:{(v / max(sub_svc.values()) * 100) if sub_svc else 0:.1f}%;background:{"#117865" if s == "Microsoft Fabric" else "#8aa1b4"}"></span></span></li>'
                        for s, v in sub_svc.most_common(6) if v >= 0.5)
@@ -1778,37 +2027,37 @@ Las demás acciones evitan gasto o riesgo y no se suman.</p></div>
     trend_html = ""
     if mon_keys or subc:
         prev = full_months[-1] if full_months else None
-        trend_html = f"""<div class="panel" style="margin-top:18px"><h3>Tendencia mensual de Fabric</h3>
-<p class="muted" style="margin:0 0 8px">Factura mensual de las capacidades de Fabric (incluye capacidades ya eliminadas).{f' Último mes cerrado ({mlabel(prev)}): <b>{money(mon_tot[prev])}</b>.' if prev else ''}
-{f' Mes en curso hasta hoy: <b>{money(mon_tot.get(cur_month, 0))}</b>.' if cur_month in mon_tot else ''}</p>
-<div class="chart">{svg_monthly()}</div><ul class="keys">{''.join(f'<li><span class="sw" style="background:{MON_COL[j % len(MON_COL)]}"></span>{E(c)}</li>' for j, c in enumerate(mon_caps)) if len(mon_caps) > 1 else ''}{f'<li><span class="sw" style="background:none;border-top:2px dashed #a14306;height:0;width:16px"></span>Media de los meses cerrados: <b>{money(mon_avg, 0)}</b></li>' if mon_avg else ''}</ul></div>
-<div class="split" style="margin-top:18px"><div class="panel"><h3>Fabric dentro de la suscripción</h3>
-<p class="muted" style="margin:0 0 12px">Mismo periodo, toda la suscripción: Fabric es el <b>{pc(fabric_sub / sub_total if sub_total else 0, 0)}</b> de {money(sub_total)}.</p>
+        trend_html = f"""<div class="panel" style="margin-top:18px"><h3>Monthly Fabric trend</h3>
+<p class="muted" style="margin:0 0 8px">Monthly invoice for the Fabric capacities (includes capacities that have since been deleted).{f' Last closed month ({mlabel(prev)}): <b>{money(mon_tot[prev])}</b>.' if prev else ''}
+{f' Current month to date: <b>{money(mon_tot.get(cur_month, 0))}</b>.' if cur_month in mon_tot else ''}</p>
+<div class="chart">{svg_monthly()}</div><ul class="keys">{''.join(f'<li><span class="sw" style="background:{MON_COL[j % len(MON_COL)]}"></span>{E(c)}</li>' for j, c in enumerate(mon_caps)) if len(mon_caps) > 1 else ''}{f'<li><span class="sw" style="background:none;border-top:2px dashed #a14306;height:0;width:16px"></span>Average of closed months: <b>{money(mon_avg, 0)}</b></li>' if mon_avg else ''}</ul></div>
+<div class="split" style="margin-top:18px"><div class="panel"><h3>Fabric within the subscription</h3>
+<p class="muted" style="margin:0 0 12px">Same period, whole subscription: Fabric is <b>{pc(fabric_sub / sub_total if sub_total else 0, 0)}</b> of {money(sub_total)}.</p>
 <ul class="bars">{svc_rows}</ul></div>
-{f'<div class="panel"><h3>Otros recursos Azure con «fabric» en el nombre o en su grupo de recursos ({money(fab_adj_total)})</h3><p class="muted" style="margin:0 0 8px">No se facturan en la capacidad. Revisar si forman parte de la solución (p. ej. apps de Data Agent o mirroring) o si son recursos ajenos en el mismo grupo.</p><ul class="bars">{adj_rows}</ul></div>' if fab_adj else ''}</div>"""
+{f'<div class="panel"><h3>Other Azure resources with “fabric” in their name or resource group ({money(fab_adj_total)})</h3><p class="muted" style="margin:0 0 8px">They are not billed on the capacity. Check whether they are part of the solution (e.g. Data Agent apps or mirroring) or unrelated resources in the same group.</p><ul class="bars">{adj_rows}</ul></div>' if fab_adj else ''}</div>"""
     if not cost_ok:
-        parts.append(no_cost("piezas", "Dónde va el dinero, pieza a pieza",
-                             "El desglose por medidor, la tendencia mensual y el peso de Fabric en la suscripción salen de la factura."))
+        parts.append(no_cost("piezas", "Where the money goes, component by component",
+                             "The breakdown by meter, the monthly trend and Fabric's share of the subscription all come from the invoice."))
     else:
-        parts.append(f"""<section id="piezas"><h2>Dónde va el dinero, pieza a pieza</h2>
-<p class="sub">Cada medidor de la factura de Fabric con su cantidad, importe y qué lo generó. La suma de todos los medidores es el coste total.{lag_note}</p>
+        parts.append(f"""<section id="piezas"><h2>Where the money goes, component by component</h2>
+<p class="sub">Each meter on the Fabric invoice with its quantity, amount and what generated it. The meters add up to the total cost.{lag_note}</p>
 <div class="panel"><div class="chart">{svg_daily_cost()}</div>
 <ul class="keys">{''.join(f'<li>{cat_sw(c)}{E(CATS[c][0])}</li>' for c in cat_order)}</ul></div>
-<div class="split"><div class="panel"><h3>Por tipo de carga</h3><ul class="bars">{''.join(cat_rows)}</ul></div>
-<div class="panel"><h3>Cómo leer la factura de Fabric</h3><p class="muted" style="margin:0 0 10px">Una capacidad {E(focus_sku or 'F')} se paga por hora encendida
-({money(hourly)}/h). Microsoft desglosa ese importe en medidores: cada carga (Spark, IA, Real-Time…) factura las CU que usó y el resto aparece como
-«Compute Pool». Por eso el Compute Pool alto significa capacidad encendida sin uso, no una carga concreta.</p>
-<p class="muted" style="margin:0">Al pausar, Fabric factura de golpe las operaciones suavizadas pendientes; por eso algunos días el total supera {focus_cu or 'las'} CU × horas encendida.
-En los días sin carga la factura coincide con las horas encendida{f' con un error máximo del {pc(match_err, 1)}' if match_err is not None else ''}, lo que valida el cálculo de horas.</p></div></div>
+<div class="split"><div class="panel"><h3>By workload type</h3><ul class="bars">{''.join(cat_rows)}</ul></div>
+<div class="panel"><h3>How to read the Fabric invoice</h3><p class="muted" style="margin:0 0 10px">An {E(focus_sku or 'F')} capacity is paid for by the running hour
+({money(hourly)}/h). Microsoft breaks that amount down into meters: each workload (Spark, AI, Real-Time…) bills the CUs it used and the rest appears as
+“Compute Pool”. That is why a high Compute Pool means capacity running unused, not a specific workload.</p>
+<p class="muted" style="margin:0">When the capacity is paused, Fabric bills all pending smoothed operations at once; that is why on some days the total exceeds {focus_cu or 'the'} CUs × running hours.
+On days with no load the invoice matches the running hours{f' with a maximum error of {pc(match_err, 1)}' if match_err is not None else ''}, which validates the running-hours calculation.</p></div></div>
 {trend_html}
-<div class="toolbar" style="margin-top:18px"><button class="btn" type="button" data-csv="csv-meters" data-name="fabric-coste-diario-medidores.csv">Descargar CSV diario por medidor</button></div>
-<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Medidor', 0)}{th('Tipo', 1)}{th('Cantidad', 2, 'num', 'num')}{th('Días con cargo', 3, 'num', 'num')}{th('Coste', 4, 'num', 'num')}{th('%', 5, 'num', 'num')}<th>Items que más lo usan</th></tr></thead>
-<tbody>{''.join(mrows)}</tbody><tfoot><tr><td colspan="4">Total</td><td class="num">{money(total_cost)}</td><td class="num">100 %</td><td></td></tr></tfoot></table></div></section>""")
+<div class="toolbar" style="margin-top:18px"><button class="btn" type="button" data-csv="csv-meters" data-name="fabric-daily-cost-by-meter.csv">Download daily CSV by meter</button></div>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Meter', 0)}{th('Type', 1)}{th('Quantity', 2, 'num', 'num')}{th('Days with charges', 3, 'num', 'num')}{th('Cost', 4, 'num', 'num')}{th('%', 5, 'num', 'num')}<th>Items that use it most</th></tr></thead>
+<tbody>{''.join(mrows)}</tbody><tfoot><tr><td colspan="4">Total</td><td class="num">{money(total_cost)}</td><td class="num">100%</td><td></td></tr></tfoot></table></div></section>""")
 
     # ================================================================== v5 HTML · part 2 (on vs used, who, chargeback, commitments)
     wrows = "".join(f'<tr><td class="nw">{hmad(w["hour"])}</td><td class="num">{fn(w["saved_h"], 1)} h</td><td class="num">{money(w["save"])}</td>'
                     f'<td class="num">{money(w["save"] * per_month, 0)}</td><td class="num">{w["days"]}</td>'
-                    f'<td>{pill("ok", "Sin cortar trabajo") if w["conflicts"] == 0 else pill("crit", str(w["conflicts"]) + " día(s) con trabajo cortado")}</td></tr>'
+                    f'<td>{pill("ok", "No work cut off") if w["conflicts"] == 0 else pill("crit", str(w["conflicts"]) + " day(s) with work cut off")}</td></tr>'
                     for w in whatif)
     drows = []
     for x in daily:
@@ -1817,32 +2066,32 @@ En los días sin carga la factura coincide con las horas encendida{f' con un err
         drows.append(f'<tr><td class="nw" data-v="{x["date"]}">{dlabel(x["date"])}</td><td class="num" data-v="{x["on_h"]:.2f}">{fn(x["on_h"], 1)} h</td>'
                      f'<td class="num" data-v="{x["billed"]:.1f}">{fn(x["billed"], 0)}</td><td class="num" data-v="{x["consumed"]:.1f}">{fn(x["consumed"], 0)}</td>'
                      f'<td class="num" data-v="{x["util"] or 0:.4f}">{pc(x["util"], 0) if x["util"] is not None else "—"}</td>'
-                     f'<td class="num" data-v="{x["cost"]:.2f}">{money(x["cost"]) if not x["lag"] else "pendiente"}</td>'
+                     f'<td class="num" data-v="{x["cost"]:.2f}">{money(x["cost"]) if not x["lag"] else "pending"}</td>'
                      f'<td class="num">{fn(x["ratio"], 2) if x["ratio"] is not None else "—"}</td></tr>')
-    pre_note = (f"Las franjas rayadas son anteriores al {act0.strftime('%d/%m')}: el registro de actividad de Fabric solo guarda {act_days} días, "
-                "así que ahí se ve el encendido pero no el trabajo.") if act0 and act0 > win0 else ""
+    pre_note = (f"Hatched bands are before {dmon(act0)}: the Fabric activity log only keeps {act_days} days, "
+                "so those bands show when the capacity was running but not the work done.") if act0 and act0 > win0 else ""
     if cost_ok:
-        bill_col = f"""<div><h3>Factura frente a horas encendida, día a día</h3><p class="muted" style="margin:0 0 10px">CU-h facturadas, CU-h usadas por cargas y ratio factura ÷ (horas × {focus_cu or '—'} CU).
-Ratio 1,00 = la factura cuadra con las horas encendida.</p>
-<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Día', 0)}{th('Encendida', 1, 'num', 'num')}{th('CU-h pagadas', 2, 'num', 'num')}{th('CU-h usadas', 3, 'num', 'num')}{th('Uso', 4, 'num', 'num')}{th('Coste', 5, 'num', 'num')}<th class="num">Ratio</th></tr></thead>
+        bill_col = f"""<div><h3>Invoice versus running hours, day by day</h3><p class="muted" style="margin:0 0 10px">Billed CU-h, CU-h used by workloads, and the ratio invoice ÷ (hours × {focus_cu or '—'} CU).
+Ratio 1.00 = the invoice matches the running hours.</p>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Day', 0)}{th('Running', 1, 'num', 'num')}{th('CU-h paid', 2, 'num', 'num')}{th('CU-h used', 3, 'num', 'num')}{th('Use', 4, 'num', 'num')}{th('Cost', 5, 'num', 'num')}<th class="num">Ratio</th></tr></thead>
 <tbody>{''.join(drows)}</tbody></table></div></div>"""
     else:
-        bill_col = (f'<div><h3>Factura frente a horas encendida, día a día</h3><div class="notice warn"><div><b>Necesita la factura de Cost Management</b>'
-                    f'<p>Las CU-h pagadas y usadas por día salen de la factura. {E(cost_why)}</p></div></div></div>')
-    parts.append(f"""<section id="uso"><h2>Encendida frente a usada</h2>
-<p class="sub">Cada fila es un día (UTC). La franja verde es la capacidad encendida (Activity Log), las barras oscuras son operaciones de usuarios y apps,
-la línea morada son sesiones Spark y el ámbar marca la cola encendida después del último trabajo. {pre_note}</p>
-<ul class="kv"><li>Encendida<b>{fn(on_hours, 1)} h</b>{len(focus_iv)} encendidos en el periodo</li>
-<li>Tras el último trabajo<b>{fn(tail_h, 1)} h</b>{len(cov_runs)} encendidos con actividad registrada</li>
-<li>Pausa {'automática' if auto_suspend else 'manual'}<b>{hhmm(susp_times[-1]) if susp_times else '—'} UTC</b>{f'mediana {int(suspend_hour_med):02d}:{int((suspend_hour_med % 1) * 60):02d} UTC' if suspend_hour_med is not None else 'sin pausas en el periodo'}</li>
-<li>Quién la enciende<b>{len(callers_resume)}</b>{E(', '.join(plabel(pkey(c)) for c, _ in callers_resume.most_common(2))) or '—'}</li></ul>
+        bill_col = (f'<div><h3>Invoice versus running hours, day by day</h3><div class="notice warn"><div><b>Requires the Cost Management invoice</b>'
+                    f'<p>The CU-h paid and used per day come from the invoice. {E(cost_why)}</p></div></div></div>')
+    parts.append(f"""<section id="uso"><h2>Running versus used</h2>
+<p class="sub">Each row is one day (UTC). The green band is the capacity running (Activity Log), the dark bars are user and app operations,
+the purple line is Spark sessions and amber marks the time the capacity stayed on after the last work. {pre_note}</p>
+<ul class="kv"><li>Running<b>{fn(on_hours, 1)} h</b>{len(focus_iv)} running periods in the period</li>
+<li>After the last work<b>{fn(tail_h, 1)} h</b>{len(cov_runs)} running periods with recorded activity</li>
+<li>{'Automatic' if auto_suspend else 'Manual'} pause<b>{hhmm(susp_times[-1]) if susp_times else '—'} UTC</b>{f'median {int(suspend_hour_med):02d}:{int((suspend_hour_med % 1) * 60):02d} UTC' if suspend_hour_med is not None else 'no pauses in the period'}</li>
+<li>Who starts it<b>{len(callers_resume)}</b>{E(', '.join(plabel(pkey(c)) for c, _ in callers_resume.most_common(2))) or '—'}</li></ul>
 <div class="panel" style="margin-top:18px"><div class="chart">{svg_timeline()}</div>
-<ul class="keys"><li><span class="sw" style="background:#cfe9e3"></span>Encendida</li><li><span class="sw" style="background:#d99a2b;opacity:.6"></span>Encendida tras el último trabajo</li>
-<li><span class="sw" style="background:#0b5345"></span>Operaciones por hora</li><li><span class="sw" style="background:#6a3d9a"></span>Spark</li>
-{'<li><span class="sw" style="background:#c9d4dd"></span>Sin registro de actividad</li>' if pre_note else ''}</ul></div>
-<div class="split" style="margin-top:18px"><div><h3>¿Y si la pausa automática fuera antes?</h3>
-<p class="muted" style="margin:0 0 10px">Horas que se habrían evitado en los {len(cov_runs)} encendidos con actividad registrada, y si se habría cortado algún trabajo real.</p>
-<div class="tbl-wrap"><table class="dense"><thead><tr><th>Pausa a las</th><th class="num">Horas evitadas</th><th class="num">Ahorro observado</th><th class="num">Al mes</th><th class="num">Días</th><th>Impacto</th></tr></thead>
+<ul class="keys"><li><span class="sw" style="background:#cfe9e3"></span>Running</li><li><span class="sw" style="background:#d99a2b;opacity:.6"></span>Running after the last work</li>
+<li><span class="sw" style="background:#0b5345"></span>Operations per hour</li><li><span class="sw" style="background:#6a3d9a"></span>Spark</li>
+{'<li><span class="sw" style="background:#c9d4dd"></span>No activity log</li>' if pre_note else ''}</ul></div>
+<div class="split" style="margin-top:18px"><div><h3>What if the automatic pause were earlier?</h3>
+<p class="muted" style="margin:0 0 10px">Hours that would have been avoided across the {len(cov_runs)} running periods with recorded activity, and whether any real work would have been cut off.</p>
+<div class="tbl-wrap"><table class="dense"><thead><tr><th>Pause at</th><th class="num">Hours avoided</th><th class="num">Observed saving</th><th class="num">Per month</th><th class="num">Days</th><th>Impact</th></tr></thead>
 <tbody>{wrows}</tbody></table></div></div>
 {bill_col}</div></section>""")
 
@@ -1854,27 +2103,27 @@ la línea morada son sesiones Spark y el ámbar marca la cola encendida después
     prow = []
     for p in humans[:25]:
         top_ws = ", ".join(E(ws_label(w)) for w, _ in p["ws"].most_common(2)) or "—"
-        prow.append(f'<tr><td><span class="cell-strong">{E(plabel(p["k"]))}</span><span class="cell-sub">{"Persona" if p["kind"] == "user" else "Aplicación / service principal"}</span></td>'
+        prow.append(f'<tr><td><span class="cell-strong">{E(plabel(p["k"]))}</span><span class="cell-sub">{"Person" if p["kind"] == "user" else "Application / service principal"}</span></td>'
                     f'<td class="num" data-v="{p["work"]}">{fn(p["work"])}</td><td class="num" data-v="{len(p["days"])}">{len(p["days"])}</td>'
                     f'<td>{topcat(p)}</td><td>{top_ws}</td><td class="num" data-v="{p.get("spark_h", 0):.2f}">{fn(p.get("spark_h", 0), 1)} h</td>'
-                    f'<td class="nw" data-v="{p["last"].isoformat()}">{p["last"].strftime("%d/%m %H:%M")}</td></tr>')
+                    f'<td class="nw" data-v="{p["last"].isoformat()}">{dmon(p["last"], " %H:%M")}</td></tr>')
     nh = "".join(f'<tr><td>{E(plabel(p["k"]))}</td><td class="num">{fn(p["events"])}</td><td>{E(", ".join(a for a, _ in p["acts"].most_common(3)))}</td></tr>' for p in nonhuman[:8])
     irows = "".join(f'<tr><td><span class="cell-strong">{E(r["it"])}</span><span class="cell-sub">{E(r["itt"] or "")}</span></td><td>{E(ws_label(r["ws"]))}</td>'
                     f'<td class="num" data-v="{r["n"]}">{fn(r["n"])}</td><td class="num" data-v="{len(r["users"])}">{len(r["users"])}</td><td>{topcat(r)}</td>'
-                    f'<td class="nw" data-v="{r["last"].isoformat()}">{r["last"].strftime("%d/%m %H:%M")}</td></tr>' for r in top_items)
+                    f'<td class="nw" data-v="{r["last"].isoformat()}">{dmon(r["last"], " %H:%M")}</td></tr>' for r in top_items)
     n_users = sum(1 for p in humans if p["kind"] == "user")
-    parts.append(f"""<section id="quien"><h2>Quién consume</h2>
-<p class="sub">Operaciones de trabajo (consultas, ejecuciones, IA, refrescos, lecturas) del registro de actividad de Fabric{f' de los últimos {act_ok} días' if act_ok else ''} y sesiones Spark.
-Las operaciones de administración y lecturas de este propio informe no cuentan. Identidades {'visibles' if show_ids else 'enmascaradas; pide el informe con identidades visibles si el destinatario está autorizado'}.</p>
-<ul class="kv"><li>Personas activas<b>{n_users}</b>con operaciones de trabajo</li><li>Apps y service principals<b>{len(humans) - n_users}</b>con operaciones</li>
-<li>Operaciones de trabajo<b>{fn(len(work_ev))}</b>de {fn(len(evs))} eventos auditados</li><li>Sesiones Spark<b>{len(livy)}</b>{fn(livy_total_s / 3600, 1)} h de ejecución</li></ul>
-<div class="tbl-wrap" style="margin-top:18px"><table data-sortable class="dense"><thead><tr>{th('Identidad', 0)}{th('Operaciones', 1, 'num', 'num')}{th('Días activos', 2, 'num', 'num')}<th>Tipo de carga</th><th>Workspaces</th>{th('Spark', 5, 'num', 'num')}{th('Última', 6)}</tr></thead>
-<tbody>{''.join(prow) or '<tr><td colspan="7">Sin operaciones de trabajo en el periodo.</td></tr>'}</tbody></table></div>
-<div class="panel" style="margin-top:18px"><h3>Cuándo se trabaja (día × hora UTC)</h3>{heat_html()}</div>
-<div class="panel" style="margin-top:18px"><h3>Identidades de sistema</h3><p class="muted" style="margin:0 0 10px">Procesos de Fabric y Power BI sin persona detrás.</p>
-<div class="tbl-wrap"><table class="dense"><thead><tr><th>Identidad</th><th class="num">Eventos</th><th>Operaciones</th></tr></thead><tbody>{nh or '<tr><td colspan="3">—</td></tr>'}</tbody></table></div></div>
-<h3 style="margin-top:22px">Items más usados</h3>
-<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Item', 0)}{th('Workspace', 1)}{th('Operaciones', 2, 'num', 'num')}{th('Identidades', 3, 'num', 'num')}<th>Carga</th>{th('Última', 5)}</tr></thead>
+    parts.append(f"""<section id="quien"><h2>Who consumes</h2>
+<p class="sub">Work operations (queries, runs, AI, refreshes, reads) from the Fabric activity log{f' for the last {act_ok} days' if act_ok else ''}, plus Spark sessions.
+Administrative operations and this report's own reads are excluded. Identities {'visible' if show_ids else 'masked; request the report with visible identities if the recipient is authorized'}.</p>
+<ul class="kv"><li>Active people<b>{n_users}</b>with work operations</li><li>Apps and service principals<b>{len(humans) - n_users}</b>with operations</li>
+<li>Work operations<b>{fn(len(work_ev))}</b>out of {fn(len(evs))} audited events</li><li>Spark sessions<b>{len(livy)}</b>{fn(livy_total_s / 3600, 1)} h of execution</li></ul>
+<div class="tbl-wrap" style="margin-top:18px"><table data-sortable class="dense"><thead><tr>{th('Identity', 0)}{th('Operations', 1, 'num', 'num')}{th('Active days', 2, 'num', 'num')}<th>Workload type</th><th>Workspaces</th>{th('Spark', 5, 'num', 'num')}{th('Last', 6)}</tr></thead>
+<tbody>{''.join(prow) or '<tr><td colspan="7">No work operations in the period.</td></tr>'}</tbody></table></div>
+<div class="panel" style="margin-top:18px"><h3>When people work (day × hour, UTC)</h3>{heat_html()}</div>
+<div class="panel" style="margin-top:18px"><h3>System identities</h3><p class="muted" style="margin:0 0 10px">Fabric and Power BI processes with no person behind them.</p>
+<div class="tbl-wrap"><table class="dense"><thead><tr><th>Identity</th><th class="num">Events</th><th>Operations</th></tr></thead><tbody>{nh or '<tr><td colspan="3">—</td></tr>'}</tbody></table></div></div>
+<h3 style="margin-top:22px">Most-used items</h3>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Item', 0)}{th('Workspace', 1)}{th('Operations', 2, 'num', 'num')}{th('Identities', 3, 'num', 'num')}<th>Workload</th>{th('Last', 5)}</tr></thead>
 <tbody>{irows or '<tr><td colspan="6">—</td></tr>'}</tbody></table></div></section>""")
 
     # chargeback
@@ -1896,83 +2145,187 @@ Las operaciones de administración y lecturas de este propio informe no cuentan.
                       f'<td class="num" data-v="{r["total"] / total_cost if total_cost else 0:.5f}">{pc(r["total"] / total_cost if total_cost else 0)}</td></tr>')
     extra_rows = []
     if no_ws_cost > 0.005:
-        extra_rows.append(("Operaciones sin workspace en el evento", no_ws_cost))
+        extra_rows.append(("Operations with no workspace in the event", no_ws_cost))
     if abs(residual) > 0.005:
-        extra_rows.append(("Workspaces que ya no existen o no inventariados", residual))
+        extra_rows.append(("Workspaces that no longer exist or are not in the inventory", residual))
     for c, v in unassigned.most_common():
         if v > 0.005:
-            extra_rows.append((f"Plataforma no asignable · {CATS[c][0]}", v))
+            extra_rows.append((f"Unallocatable platform cost · {CATS[c][0]}", v))
     ex_html = "".join(f'<tr><td colspan="4"><span class="muted">{E(n)}</span></td><td class="num">{money(v)}</td><td></td><td class="num">{money(v)}</td>'
                       f'<td class="num">{pc(v / total_cost if total_cost else 0)}</td></tr>' for n, v in extra_rows)
-    drv_list = "".join(f'<li>{cat_sw(c)}<b>{E(CATS[c][0])}</b> ({money(cat_cost[c])}) → por {E(d)}</li>' for c, d in DRIVER.items() if cat_cost.get(c, 0) > 0.005)
+    drv_list = "".join(f'<li>{cat_sw(c)}<b>{E(CATS[c][0])}</b> ({money(cat_cost[c])}) → by {E(d)}</li>' for c, d in DRIVER.items() if cat_cost.get(c, 0) > 0.005)
     nbrows = "".join(f'<tr><td><span class="cell-strong">{E(n["item"])}</span><span class="cell-sub">{E(ws_label(n["ws"]))}</span></td>'
                      f'<td class="num" data-v="{n["sessions"]}">{n["sessions"]}</td><td class="num" data-v="{n["sched"]}">{n["sched"]}</td>'
                      f'<td class="num" data-v="{n["failed"]}">{pill("crit", str(n["failed"])) if n["failed"] else "0"}</td>'
                      f'<td class="num" data-v="{n["run"]:.0f}">{fn(n["run"] / 3600, 2)} h</td><td class="num" data-v="{n["share"]:.4f}">{pc(n["share"], 0)}</td>'
                      f'<td class="num" data-v="{n["cost"]:.4f}">{money(n["cost"]) if cost_ok else "—"}</td>'
-                     f'<td class="nw">{n["last"].strftime("%d/%m %H:%M") if n["last"] else "—"}</td></tr>' for n in nb_list[:15])
+                     f'<td class="nw">{dmon(n["last"], " %H:%M") if n["last"] else "—"}</td></tr>' for n in nb_list[:15])
     if cost_ok:
-        cb_block = f"""<p class="sub">Cada medidor de la factura se reparte con su propio uso real. El tiempo encendido sin consumo se reparte en proporción al consumo directo de cada workspace.
-La suma cuadra exactamente con el total facturado.</p>
-<div class="split"><div class="panel"><h3>Cómo se reparte cada medidor</h3><ul class="method" style="display:block;padding-left:0;list-style:none">{drv_list}
-<li>{cat_sw('idle')}<b>{E(CATS['idle'][0])}</b> ({money(idle_cost)}) → en proporción al coste directo</li>
-<li>{cat_sw('storage')}<b>Almacenamiento, transacciones OneLake y otros</b> → plataforma, no asignable con los datos disponibles</li></ul></div>
-<div class="panel"><h3>Cuadre con la factura</h3><ul class="facts" style="border:0;margin:0;padding:0">
-<li>Workspaces<b>{money(cb_sum)}</b></li><li>No asignable<b>{money(total_cost - cb_sum)}</b></li><li>Total facturado<b>{money(total_cost)}</b></li></ul>
-<p class="muted" style="margin:14px 0 0">Para facturar internamente con precisión por persona, la referencia es la app Capacity Metrics{' (instalada en el tenant)' if cm_installed else ''} con el ajuste «Show user data» activado.</p></div></div>
-<div class="toolbar" style="margin-top:18px"><button class="btn" type="button" data-csv="csv-chargeback" data-name="fabric-chargeback-workspaces.csv">Descargar CSV de reparto</button></div>
-<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Workspace', 0)}{th('Operaciones', 1, 'num', 'num')}{th('Consultas IA', 2, 'num', 'num')}{th('Spark', 3, 'num', 'num')}{th('Coste directo', 4, 'num', 'num')}{th('Encendida sin uso', 5, 'num', 'num')}{th('Total', 6, 'num', 'num')}{th('%', 7, 'num', 'num')}</tr></thead>
-<tbody>{''.join(cbrows)}</tbody><tfoot>{ex_html}<tr><td colspan="6">Total</td><td class="num">{money(total_cost)}</td><td class="num">100 %</td></tr></tfoot></table></div>
-{f'<p class="muted" style="margin:10px 0 0"><b>{len(cb_zero)} workspaces sin consumo facturable en el periodo:</b> {E(", ".join(sorted(cb_zero, key=str.lower)))}.</p>' if cb_zero else ''}
+        cb_block = f"""<p class="sub">Each meter on the invoice is allocated using its own real usage. Running time with no consumption is allocated in proportion to each workspace's direct consumption.
+The total reconciles exactly with the billed amount.</p>
+<div class="split"><div class="panel"><h3>How each meter is allocated</h3><ul class="method" style="display:block;padding-left:0;list-style:none">{drv_list}
+<li>{cat_sw('idle')}<b>{E(CATS['idle'][0])}</b> ({money(idle_cost)}) → in proportion to direct cost</li>
+<li>{cat_sw('storage')}<b>Storage, OneLake transactions and other</b> → platform, not assignable with the available data</li></ul></div>
+<div class="panel"><h3>Reconciliation with the invoice</h3><ul class="facts" style="border:0;margin:0;padding:0">
+<li>Workspaces<b>{money(cb_sum)}</b></li><li>Not assignable<b>{money(total_cost - cb_sum)}</b></li><li>Total billed<b>{money(total_cost)}</b></li></ul>
+<p class="muted" style="margin:14px 0 0">For precise per-person internal billing, the reference is the Capacity Metrics app{' (installed in the tenant)' if cm_installed else ''} with the “Show user data” setting enabled.</p></div></div>
+<div class="toolbar" style="margin-top:18px"><button class="btn" type="button" data-csv="csv-chargeback" data-name="fabric-chargeback-workspaces.csv">Download chargeback CSV</button></div>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Workspace', 0)}{th('Operations', 1, 'num', 'num')}{th('AI queries', 2, 'num', 'num')}{th('Spark', 3, 'num', 'num')}{th('Direct cost', 4, 'num', 'num')}{th('Idle running share', 5, 'num', 'num')}{th('Total', 6, 'num', 'num')}{th('%', 7, 'num', 'num')}</tr></thead>
+<tbody>{''.join(cbrows)}</tbody><tfoot>{ex_html}<tr><td colspan="6">Total</td><td class="num">{money(total_cost)}</td><td class="num">100%</td></tr></tfoot></table></div>
+{f'<p class="muted" style="margin:10px 0 0"><b>{len(cb_zero)} workspaces with no billable consumption in the period:</b> {E(", ".join(sorted(cb_zero, key=str.lower)))}.</p>' if cb_zero else ''}
 """
     else:
-        cb_block = ('<div class="notice warn"><div><b>Necesita la factura de Cost Management</b><p>El reparto por workspace distribuye el importe facturado de cada medidor. '
-                    f'{E(cost_why)} Mientras tanto, «Quién consume» muestra el uso real por workspace, identidad e item.</p></div></div>\n')
-    parts.append(f"""<section id="reparto"><h2>Reparto del coste por workspace (chargeback)</h2>
-{cb_block}<h3 style="margin-top:22px">Notebooks y jobs Spark</h3><p class="muted" style="margin:0 0 10px">{f"Coste Spark ({money(spark_cost)}) repartido por segundos de ejecución reales de cada sesión." if cost_ok else "Horas de ejecución reales de cada sesión; el coste aparece cuando hay factura."}</p>
-<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Notebook', 0)}{th('Sesiones', 1, 'num', 'num')}{th('Programadas', 2, 'num', 'num')}{th('Fallidas', 3, 'num', 'num')}{th('Ejecución', 4, 'num', 'num')}{th('% Spark', 5, 'num', 'num')}{th('Coste', 6, 'num', 'num')}<th>Última (UTC)</th></tr></thead>
-<tbody>{nbrows or '<tr><td colspan="8">Sin sesiones Spark en el periodo.</td></tr>'}</tbody></table></div></section>""")
+        cb_block = ('<div class="notice warn"><div><b>Requires the Cost Management invoice</b><p>The chargeback by workspace distributes the billed amount of each meter. '
+                    f'{E(cost_why)} In the meantime, “Who consumes” shows real usage by workspace, identity and item.</p></div></div>\n')
+    parts.append(f"""<section id="reparto"><h2>Cost chargeback by workspace</h2>
+{cb_block}<h3 style="margin-top:22px">Spark notebooks and jobs</h3><p class="muted" style="margin:0 0 10px">{f"Spark cost ({money(spark_cost)}) allocated by the real execution seconds of each session." if cost_ok else "Real execution hours of each session; the cost appears when the invoice is available."}</p>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Notebook', 0)}{th('Sessions', 1, 'num', 'num')}{th('Scheduled', 2, 'num', 'num')}{th('Failed', 3, 'num', 'num')}{th('Execution', 4, 'num', 'num')}{th('% Spark', 5, 'num', 'num')}{th('Cost', 6, 'num', 'num')}<th>Last (UTC)</th></tr></thead>
+<tbody>{nbrows or '<tr><td colspan="8">No Spark sessions in the period.</td></tr>'}</tbody></table></div></section>""")
+
+    # ---------------------------------------------------------------- access & groups section
+    acc_ok = (sources.get("access_workspaces") or {}).get("status") == "ok"
+    items_src = sources.get("access_items") or {}
+
+    def wlist(keys, n=3):
+        names_ = sorted({ws_label(k) for k in keys}, key=str.lower)
+        return ", ".join(names_[:n]) + (f" and {len(names_) - n} more" if len(names_) > n else "")
+
+    grows = []
+    for g in grp_list:
+        it_names = sorted({v[0] for v in g["items"].values()}, key=str.lower)
+        where = []
+        if g["ws"]:
+            where.append(f'{len(g["ws"])} workspace{"s" if len(g["ws"]) != 1 else ""} ({E(wlist(g["ws"]))})')
+        if g["items"]:
+            where.append(f'{len(g["items"])} item{"s" if len(g["items"]) != 1 else ""} in {E(wlist({k[0] for k in g["items"]}))}'
+                         f'<span class="cell-sub">{E(", ".join(it_names[:4]) + (" …" if len(it_names) > 4 else ""))}</span>')
+        mem_txt = (f'{g["active"]} of {g["n_members"]}' + (f'<span class="cell-sub">{g["new"]} new</span>' if g["new"] else "")) if g["n_members"] is not None else "—"
+        grows.append(f'<tr><td class="cell-strong">{E(g["name"])}</td><td>{"<br>".join(where) or "—"}</td>'
+                     f'<td class="num" data-v="{g["active"] if g["active"] is not None else -1}">{mem_txt}</td>'
+                     f'<td class="num" data-v="{g["member_ops"] if g["member_ops"] is not None else g["item_ops"]}">{fn(g["member_ops"]) if g["member_ops"] is not None else fn(g["item_ops"])}'
+                     f'<span class="cell-sub">{"by its members on its resources" if g["member_ops"] is not None else "on what it can use"}</span></td>'
+                     f'<td class="num" data-v="{(g["member_cost"] or 0):.4f}">{money(g["member_cost"]) if (g["member_cost"] is not None and cost_ok) else "—"}</td>'
+                     f'<td class="num" data-v="{g["exposure"]:.4f}">{money(g["exposure"]) if cost_ok else "—"}</td></tr>')
+    def res_list(top, with_nums=False):
+        if not top:
+            return "—"
+        out_ = []
+        for rk, o, c in top:
+            extra = (" · " + fn(o) + " ops" + (" · " + money(c) if cost_ok else "")) if with_nums else ""
+            out_.append(E(rk[1]) + ' <span class="cell-sub" style="display:inline">· ' + E(ws_label(rk[0])) + extra + "</span>")
+        return "<br>".join(out_)
+
+    gdet = []
+    for g in grp_list:
+        if g.get("res") is None:
+            continue
+        head = ('<summary style="cursor:pointer"><b>' + E(g["name"]) + "</b> · " + str(g["active"]) + " of " + str(g["n_members"])
+                + " members used its resources" + ((" · " + money(g["member_cost"])) if cost_ok else "") + "</summary>")
+        if not g["res"]:
+            gdet.append('<details class="panel" style="margin-top:10px">' + head
+                        + '<p class="muted" style="margin:10px 0 0">No member used the resources granted to this group in the period.</p></details>')
+            continue
+        rrows = "".join('<tr><td class="cell-strong">' + E(rk[1]) + "</td><td>" + E(ws_label(rk[0])) + '</td><td class="num">' + fn(o)
+                        + '</td><td class="num">' + (money(c) if cost_ok else "—") + "</td></tr>" for rk, o, c in g["res"][:12])
+        mrows = "".join('<tr><td class="cell-strong">' + E(plabel(m["k"])) + '</td><td class="num">' + fn(m["ops"]) + '</td><td class="num">'
+                        + (money(m["cost"]) if cost_ok else "—") + "</td><td>" + res_list(m["top"], True) + '</td><td class="num">'
+                        + fn(m["total_ops"]) + ' ops<span class="cell-sub">' + (money(m["total_cost"]) if cost_ok else "") + "</span></td></tr>"
+                        for m in g["mdetail"][:25])
+        gdet.append('<details class="panel" style="margin-top:10px">' + head
+                    + '<h3 style="margin-top:14px">Group resources used by its members</h3>'
+                    + '<div class="tbl-wrap"><table class="dense"><thead><tr><th>Item</th><th>Workspace</th><th class="num">Operations</th><th class="num">Cost</th></tr></thead><tbody>'
+                    + rrows + "</tbody></table></div>"
+                    + '<h3 style="margin-top:14px">What each group member consumes</h3>'
+                    + '<div class="tbl-wrap"><table class="dense"><thead><tr><th>Person</th><th class="num">Operations</th><th class="num">Cost</th>'
+                    + '<th>Resources used</th><th class="num">Person’s total</th></tr></thead><tbody>' + mrows + "</tbody></table></div>"
+                    + ('<p class="muted" style="margin:8px 0 0">Showing the 25 members with the highest consumption out of ' + str(len(g["mdetail"])) + ".</p>" if len(g["mdetail"]) > 25 else "")
+                    + "</details>")
+    grp_detail = ('<h3 style="margin-top:22px">Detail by group: which resources are consumed and by whom</h3>'
+                  '<p class="muted" style="margin:0 0 6px">Expand a group to see which of the resources granted to it are used by its members, and how much each person consumes. '
+                  '“Person’s total” includes everything that person did in Fabric, including outside the group’s resources.</p>' + "".join(gdet)) if gdet else ""
+
+    pmax = 40
+    prow_acc = []
+    for r in people_list[:pmax]:
+        state = pill("ok", "Active") if r["ops"] else pill("warn", "No activity")
+        if r["new"]:
+            state += " " + pill("neutral", "New")
+        prow_acc.append(f'<tr><td class="cell-strong">{E(plabel(r["k"]))}</td><td>{E(", ".join(r["via"]))}</td>'
+                        f'<td class="num" data-v="{r["n_ws"] + r["n_items"]}">{r["n_ws"]} ws · {r["n_items"]} item{"s" if r["n_items"] != 1 else ""}</td>'
+                        f'<td class="num" data-v="{r["ops"]}">{fn(r["ops"])}</td><td class="num" data-v="{r["cost"]:.4f}">{money(r["cost"]) if cost_ok else "—"}</td>'
+                        f'<td>{res_list(r["top"])}</td><td class="nw">{dmon(r["last"], " %H:%M") if r["last"] else "—"}</td><td>{state}</td></tr>')
+    if gm_src.get("status") == "pending":
+        gm_notice = ('<div class="notice warn"><div><b>A permission is missing to attribute usage to the members of each group</b>'
+                     '<p>The report already sees which groups have access to each workspace and item, but not who belongs to each group. '
+                     'In the Fabric tenant, grant the SRE Agent identity the Microsoft Graph application permissions '
+                     '<strong>GroupMember.Read.All</strong> (members) and <strong>User.Read.All</strong> (creation date, to detect new users), with admin consent. '
+                     'Both are read-only. In the meantime, the “Cost of what it can use” column allocates cost by the resources each group has access to.</p></div></div>')
+    else:
+        gm_notice = ""
+    tech_note = (f'<p class="muted" style="margin:10px 0 0">{E(", ".join(g["name"] for g in grp_tech))} is not shown: it is the technical group that gives the SRE Agent read access '
+                 f'({len(grp_tech[0]["ws"])} workspaces and {len(grp_tech[0]["items"])} items).</p>') if grp_tech else ""
+    if acc_ok:
+        acc_block = f"""<p class="sub">Who has access to each workspace (roles) and to each item (shared permissions), including groups, read from the Fabric admin APIs
+in read-only mode{f" ({E(items_src.get('note') or '')})" if items_src.get("note") else ""}. Groups are shown by name; people are shown {'with their identity' if show_ids else 'masked'}.</p>
+<ul class="kv"><li>Groups with access<b>{len(grp_list)}</b>to workspaces or items</li><li>People with access<b>{len(people_list)}</b>{'directly or through a group' if members_known else 'assigned directly'}</li>
+<li>With access but no activity<b>{len(no_activity)}</b>in the last {act_ok or act_days} days</li><li>New users<b>{len(new_people) if members_known else '—'}</b>{'created in the period' if members_known else 'requires permission to read users'}</li></ul>
+{gm_notice}
+<h3 style="margin-top:22px">Consumption by group</h3>
+<p class="muted" style="margin:0 0 10px"><strong>Member consumption</strong>: cost of what the group's members did in the workspaces and items granted to the group (same per-meter allocation as the chargeback). If someone also has access directly or through another group, their use of a resource counts in every group that grants it.
+<strong>Cost of what it can use</strong>: cost of the workspaces where the group has a role plus the items shared with it. These columns cannot be added up across groups.</p>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Group', 0)}<th>Access</th>{th('Active members', 2, 'num', 'num')}{th('Operations', 3, 'num', 'num')}{th('Member consumption', 4, 'num', 'num')}{th('Cost of what it can use', 5, 'num', 'num')}</tr></thead>
+<tbody>{''.join(grows) or '<tr><td colspan="6">No groups have access to workspaces or items (apart from the SRE Agent technical group).</td></tr>'}</tbody></table></div>{tech_note}
+{grp_detail}
+<h3 style="margin-top:22px">People with access</h3>
+<p class="muted" style="margin:0 0 10px">A person can have access and not appear in “Who consumes” because they have not worked in the period{'' if members_known else ', or because they get access through a group whose members cannot be read yet'}.{f' Showing the first {pmax} of {len(people_list)}.' if len(people_list) > pmax else ''}</p>
+<div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Person', 0)}<th>Via</th>{th('Access', 2, 'num', 'num')}{th('Operations', 3, 'num', 'num')}{th('Consumption', 4, 'num', 'num')}<th>What they consume</th><th>Last (UTC)</th><th>Status</th></tr></thead>
+<tbody>{''.join(prow_acc) or '<tr><td colspan="8">No people with access.</td></tr>'}</tbody></table></div>"""
+    else:
+        acc_block = ('<div class="notice warn"><div><b>Could not read who has access</b><p>The workspace admin API did not respond '
+                     f'({E(str((sources.get("access_workspaces") or {}).get("http") or "no response"))}). Check the “Service principals can access read-only admin APIs” setting.</p></div></div>')
+    parts.append(f"""<section id="acceso"><h2>Access and consumption by group</h2>
+{acc_block}</section>""")
 
     # ================================================================== v5 HTML · part 3 (commitments, governance, questions, sources)
     cmp_items = []
     same_res = bool(annual_res.get(1) and annual_res.get(3) and abs(annual_res[3] - annual_res[1]) / annual_res[1] < 0.01)
     if annual_payg_cu:
-        cmp_items.append(("Pago por uso al ritmo actual" + ("" if cost_ok else " (horas encendida × precio público)"), annual_payg_cu, "#117865"))
+        cmp_items.append(("Pay-as-you-go at the current rate" + ("" if cost_ok else " (running hours × public price)"), annual_payg_cu, "#117865"))
     if same_res:
-        cmp_items.append((f"Reserva 1 o 3 años ({focus_sku}) · mismo precio anual en la lista pública", annual_res[1], "#8aa1b4"))
+        cmp_items.append((f"1- or 3-year reservation ({focus_sku}) · same annual price in the public price list", annual_res[1], "#8aa1b4"))
     else:
         for y in (1, 3):
             if annual_res.get(y):
-                cmp_items.append((f"Reserva {y} año{'s' if y > 1 else ''} ({focus_sku})", annual_res[y], "#8aa1b4"))
+                cmp_items.append((f"{y}-year reservation ({focus_sku})", annual_res[y], "#8aa1b4"))
     if hourly:
-        cmp_items.append((f"Pago por uso 24×7 ({focus_sku})", hourly * 8760, "#d99a2b"))
+        cmp_items.append((f"Pay-as-you-go 24×7 ({focus_sku})", hourly * 8760, "#d99a2b"))
     cmp_max = max((v for _, v, _ in cmp_items), default=1)
-    cmp_html = "".join(f'<li><span>{E(n)}</span><b>{money(v, 0)}/año</b><span class="track"><span class="fill" style="display:block;width:{v / cmp_max * 100:.1f}%;background:{c}"></span></span></li>'
+    cmp_html = "".join(f'<li><span>{E(n)}</span><b>{money(v, 0)}/year</b><span class="track"><span class="fill" style="display:block;width:{v / cmp_max * 100:.1f}%;background:{c}"></span></span></li>'
                        for n, v, c in cmp_items)
     if same_res and 1 in breakeven:
-        be_html = f'<li>Reserva 1 o 3 años<b>{pc(breakeven[1], 0)}</b>del tiempo encendida para compensar</li>'
+        be_html = f'<li>1- or 3-year reservation<b>{pc(breakeven[1], 0)}</b>of the time running needed to break even</li>'
     else:
-        be_html = "".join(f'<li>Reserva {y} año{"s" if y > 1 else ""}<b>{pc(b, 0)}</b>del tiempo encendida para compensar</li>' for y, b in sorted(breakeven.items()))
+        be_html = "".join(f'<li>{y}-year reservation<b>{pc(b, 0)}</b>of the time running needed to break even</li>' for y, b in sorted(breakeven.items()))
     srows = "".join(f'<tr><td class="cell-strong">{E(s_["sku"])}</td><td class="num">{s_["cu"]}</td><td class="num">{pc(s_["avg_load"], 0)}</td>'
                     f'<td class="num">{pc(s_["peak_load"], 0)}</td><td class="num">{money(s_["save_month"], 0)}</td>'
-                    f'<td>{pill("ok", "Viable en media") if s_["peak_load"] < 0.6 else (pill("warn", "Ajustado") if s_["peak_load"] < 0.9 else pill("crit", "Insuficiente"))}</td></tr>'
+                    f'<td>{pill("ok", "Viable on average") if s_["peak_load"] < 0.6 else (pill("warn", "Tight") if s_["peak_load"] < 0.9 else pill("crit", "Insufficient"))}</td></tr>'
                     for s_ in sizes)
     if cost_ok:
-        size_html = f"""<h3 style="margin-top:22px">Escenarios de tamaño</h3>
-<p class="muted" style="margin:0 0 10px">Carga = CU usadas por hora encendida ÷ CU del SKU. «Pico» es el día de más carga en media horaria{f" ({dlabel(peak_day['date'])})" if peak_day else ''}.
-No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar de tamaño.</p>
-<div class="tbl-wrap"><table class="dense"><thead><tr><th>SKU</th><th class="num">CU</th><th class="num">Carga media</th><th class="num">Carga día pico</th><th class="num">Ahorro/mes</th><th>Lectura</th></tr></thead>
-<tbody><tr><td class="cell-strong">{E(focus_sku)} (actual)</td><td class="num">{focus_cu}</td><td class="num">{pc(avg_cu_on / focus_cu if focus_cu else 0, 0)}</td><td class="num">{pc(peak_day_avg / focus_cu if focus_cu else 0, 0)}</td><td class="num">—</td><td>{pill("neutral", "Actual")}</td></tr>{srows}</tbody></table></div>"""
+        size_html = f"""<h3 style="margin-top:22px">Size scenarios</h3>
+<p class="muted" style="margin:0 0 10px">Load = CUs used per running hour ÷ CUs of the SKU. “Peak” is the busiest day by hourly average{f" ({dlabel(peak_day['date'])})" if peak_day else ''}.
+It does not capture bursts lasting a few minutes: confirm in Capacity Metrics before changing size.</p>
+<div class="tbl-wrap"><table class="dense"><thead><tr><th>SKU</th><th class="num">CU</th><th class="num">Average load</th><th class="num">Peak-day load</th><th class="num">Saving/month</th><th>Assessment</th></tr></thead>
+<tbody><tr><td class="cell-strong">{E(focus_sku)} (current)</td><td class="num">{focus_cu}</td><td class="num">{pc(avg_cu_on / focus_cu if focus_cu else 0, 0)}</td><td class="num">{pc(peak_day_avg / focus_cu if focus_cu else 0, 0)}</td><td class="num">—</td><td>{pill("neutral", "Current")}</td></tr>{srows}</tbody></table></div>"""
     else:
-        size_html = ('<h3 style="margin-top:22px">Escenarios de tamaño</h3><div class="notice warn"><div><b>Necesita la factura de Cost Management</b>'
-                     f'<p>La carga por hora se calcula con las CU-h facturadas y consumidas. {E(cost_why)}</p></div></div>')
-    parts.append(f"""<section id="compromisos"><h2>Reserva y tamaño de la capacidad</h2>
-<p class="sub">Precios públicos de Azure para {E(focus_region or 'la región')} y horas reales encendida. Una reserva se paga las 24 h del día; solo compensa si la capacidad está encendida casi siempre.</p>
-<div class="split"><div class="panel"><h3>Coste anual comparado</h3><ul class="bars">{cmp_html or '<li>Sin precios disponibles.</li>'}</ul>
-<p class="muted" style="margin:14px 0 0">Precio pago por uso: {money(price_cu, 4)}/CU-h · {E(price_src)}.</p></div>
-<div class="panel"><h3>Umbral de rentabilidad</h3><ul class="kv" style="grid-template-columns:1fr 1fr">
-<li>Encendida ahora<b>{pc(uptime, 0)}</b>{fn(on_hours, 0)} h de {fn(win_hours, 0)} h</li>{be_html}</ul>
-<p class="muted" style="margin:14px 0 0">{'Con el uso actual, pagar por uso y pausar es más barato que cualquier reserva.' if breakeven and uptime < min(breakeven.values()) else 'El uso actual supera el umbral de al menos una reserva.'}</p></div></div>
+        size_html = ('<h3 style="margin-top:22px">Size scenarios</h3><div class="notice warn"><div><b>Requires the Cost Management invoice</b>'
+                     f'<p>The hourly load is calculated from the billed and consumed CU-h. {E(cost_why)}</p></div></div>')
+    parts.append(f"""<section id="compromisos"><h2>Capacity reservation and size</h2>
+<p class="sub">Public Azure prices for {E(focus_region or 'the region')} and real running hours. A reservation is paid for 24 hours a day; it only pays off if the capacity is running almost all the time.</p>
+<div class="split"><div class="panel"><h3>Annual cost compared</h3><ul class="bars">{cmp_html or '<li>No prices available.</li>'}</ul>
+<p class="muted" style="margin:14px 0 0">Pay-as-you-go price: {money(price_cu, 4)}/CU-h · {E(price_src)}.</p></div>
+<div class="panel"><h3>Break-even threshold</h3><ul class="kv" style="grid-template-columns:1fr 1fr">
+<li>Running now<b>{pc(uptime, 0)}</b>{fn(on_hours, 0)} h of {fn(win_hours, 0)} h</li>{be_html}</ul>
+<p class="muted" style="margin:14px 0 0">{'With current usage, pay-as-you-go plus pausing is cheaper than any reservation.' if breakeven and uptime < min(breakeven.values()) else 'Current usage is above the break-even threshold of at least one reservation.'}</p></div></div>
 {size_html}</section>""")
 
     # governance
@@ -1980,101 +2333,104 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
                     f'<td>{E(c["sku"])}</td><td>{E(c["state"])}</td><td class="num">{c["ws"]}</td><td class="num">{c["items"]}</td>'
                     f'<td class="num">{money(c["cost"]) if c["arm"] else "—"}</td><td>{E(c["tags"])}</td><td>{pill(c["lvl"], c["finding"])}</td></tr>' for c in caps_tbl)
     rrows = "".join(f'<tr><td><span class="cell-strong">{E(r["name"])}</span><span class="cell-sub">{E(r["ws"])}</span></td><td>{E(r["kind"])}</td>'
-                    f'<td class="nw">{r["last"].strftime("%d/%m/%Y") if r["last"] else "—"}</td><td class="num">{r["age"] if r["age"] is not None else "—"}</td>'
-                    f'<td>{(pill("warn", "Sin refrescar &gt;60 días") + "<span class=cell-sub>Último: " + E(r["status"]) + "</span>") if r["level"] == "warn" else pill(r["level"], r["status"])}{("<span class=cell-sub>" + E(r["err"]) + "</span>") if r["err"] else ""}</td>'
-                    f'<td>{"Sí" if r["sched"] else "No"}</td></tr>' for r in refs[:20])
+                    f'<td class="nw">{dmon(r["last"], " %Y") if r["last"] else "—"}</td><td class="num">{r["age"] if r["age"] is not None else "—"}</td>'
+                    f'<td>{(pill("warn", "Not refreshed >60 days") + "<span class=cell-sub>Last: " + E(r["status"]) + "</span>") if r["level"] == "warn" else pill(r["level"], r["status"])}{("<span class=cell-sub>" + E(r["err"]) + "</span>") if r["err"] else ""}</td>'
+                    f'<td>{"Yes" if r["sched"] else "No"}</td></tr>' for r in refs[:20])
     tsrows = "".join(f'<tr><td><span class="cell-strong">{E(r["title"])}</span><span class="cell-sub">{E(r["why"])}</span></td>'
-                     f'<td>{pill("ok" if r["enabled"] else "neutral", "Activado" if r["enabled"] else "Desactivado")}</td><td>{E(r["scope"])}</td></tr>' for r in ts_rows)
+                     f'<td>{pill("ok" if r["enabled"] else "neutral", "Enabled" if r["enabled"] else "Disabled")}</td><td>{E(r["scope"])}</td></tr>' for r in ts_rows)
     itypes = "".join(f'<li>{E(t)}<b>{n}</b></li>' for t, n in item_types.most_common(12))
-    ol_line = (f"{len(ol_ok)} de {len(ol)} lakehouses leídos · {fn(ol_bytes / 1024 ** 3, 2)} GB en tablas y ficheros" if ol else "Sin lakehouses en el inventario")
-    parts.append(f"""<section id="gobierno"><h2>Inventario y gobierno</h2>
-<p class="sub">Lo que hay en el tenant y lo que conviene ordenar para que el coste sea controlable.</p>
-<ul class="kv"><li>Capacidades<b>{len(caps_tbl)}</b>{sum(1 for c in caps_tbl if c['state'].lower() == 'active')} activas</li>
-<li>Workspaces<b>{len(workspaces)}</b>{sum(1 for w in workspaces if (w.get('capacity_id') or '').lower() in paid_caps)} en capacidad de pago</li>
-<li>Items<b>{fn(len(items))}</b>{len(stale_items)} sin cambios en 90 días</li><li>OneLake leído<b>{fn(ol_bytes / 1024 ** 3, 2)} GB</b>{E(ol_line)}</li></ul>
-<h3 style="margin-top:22px">Capacidades</h3>
-<div class="tbl-wrap"><table class="dense"><thead><tr><th>Capacidad</th><th>SKU</th><th>Estado</th><th class="num">Workspaces</th><th class="num">Items</th><th class="num">Coste periodo</th><th>Etiquetas</th><th>Hallazgo</th></tr></thead>
+    ol_line = (f"{len(ol_ok)} of {len(ol)} lakehouses read · {fn(ol_bytes / 1024 ** 3, 2)} GB in tables and files" if ol else "No lakehouses in the inventory")
+    parts.append(f"""<section id="gobierno"><h2>Inventory and governance</h2>
+<p class="sub">What is in the tenant, and what is worth tidying up to keep costs under control.</p>
+<ul class="kv"><li>Capacities<b>{len(caps_tbl)}</b>{sum(1 for c in caps_tbl if c['state'].lower() == 'active')} active</li>
+<li>Workspaces<b>{len(workspaces)}</b>{sum(1 for w in workspaces if (w.get('capacity_id') or '').lower() in paid_caps)} on paid capacity</li>
+<li>Items<b>{fn(len(items))}</b>{len(stale_items)} unchanged in 90 days</li><li>OneLake read<b>{fn(ol_bytes / 1024 ** 3, 2)} GB</b>{E(ol_line)}</li></ul>
+<h3 style="margin-top:22px">Capacities</h3>
+<div class="tbl-wrap"><table class="dense"><thead><tr><th>Capacity</th><th>SKU</th><th>State</th><th class="num">Workspaces</th><th class="num">Items</th><th class="num">Period cost</th><th>Tags</th><th>Finding</th></tr></thead>
 <tbody>{crows}</tbody></table></div>
-<div class="panel" style="margin-top:18px"><h3>Items por tipo</h3><ul class="kv types">{itypes}</ul></div>
-<div class="panel" style="margin-top:18px"><h3>Ajustes del tenant que afectan al coste</h3><div class="tbl-wrap"><table class="dense"><thead><tr><th>Ajuste</th><th>Estado</th><th>Ámbito</th></tr></thead>
+<div class="panel" style="margin-top:18px"><h3>Items by type</h3><ul class="kv types">{itypes}</ul></div>
+<div class="panel" style="margin-top:18px"><h3>Tenant settings that affect cost</h3><div class="tbl-wrap"><table class="dense"><thead><tr><th>Setting</th><th>Status</th><th>Scope</th></tr></thead>
 <tbody>{tsrows or '<tr><td colspan="3">—</td></tr>'}</tbody></table></div></div>
-<h3 style="margin-top:22px">Refrescos de modelos y dataflows</h3>
-<div class="tbl-wrap"><table class="dense"><thead><tr><th>Item</th><th>Tipo</th><th>Último</th><th class="num">Días</th><th>Estado</th><th>Programado</th></tr></thead>
-<tbody>{rrows or '<tr><td colspan="6">Sin elementos refrescables.</td></tr>'}</tbody></table></div></section>""")
+<h3 style="margin-top:22px">Model and dataflow refreshes</h3>
+<div class="tbl-wrap"><table class="dense"><thead><tr><th>Item</th><th>Type</th><th>Last</th><th class="num">Days</th><th>Status</th><th>Scheduled</th></tr></thead>
+<tbody>{rrows or '<tr><td colspan="6">No refreshable items.</td></tr>'}</tbody></table></div></section>""")
 
     # questions
     QS = [
-        ("Coste y factura", [
-            "¿Cuánto me ha costado Fabric en los últimos 30 días y en qué medidores?",
-            "Compara el coste de este mes con el mes anterior y explica la diferencia.",
-            "¿Qué parte de la factura es capacidad encendida sin uso?",
-            "¿Qué días se pagó la capacidad sin que nadie la usara?"]),
-        ("Ahorro y capacidad", [
-            "¿A qué hora debería pausarse la capacidad para no cortar trabajo?",
-            "¿Me compensa una reserva de capacidad con mi uso actual?",
-            "¿Podría bajar de SKU? Dame la carga media y del día pico.",
-            "¿Qué capacidades están pausadas o vacías y cuánto costarían encendidas?"]),
-        ("Quién y qué consume", [
-            "Reparte el coste del periodo por workspace y explícame el método.",
-            "¿Qué usuarios y apps generan más carga y en qué workspaces?",
-            "¿Qué notebooks Spark consumen más y cuáles se ejecutan programados?",
-            "¿Cuánto cuesta la IA (Copilot, Data Agents) y quién la usa?"]),
-        ("Gobierno", [
-            "¿Qué refrescos han fallado y desde cuándo?",
-            "¿Qué workspaces de capacidad de pago no se han usado este mes?",
-            "¿Qué ajustes del tenant afectan al coste y cómo están configurados?",
-            "Genera el informe con identidades visibles para el equipo de FinOps."]),
+        ("Cost and invoice", [
+            "How much has Fabric cost me over the last 30 days, and on which meters?",
+            "Compare this month's cost with last month and explain the difference.",
+            "What share of the invoice is capacity running with no use?",
+            "On which days was the capacity paid for without anyone using it?"]),
+        ("Savings and capacity", [
+            "At what time should the capacity be paused so that no work is cut off?",
+            "Does a capacity reservation pay off with my current usage?",
+            "Could I move to a smaller SKU? Give me the average load and the peak-day load.",
+            "Which capacities are paused or empty, and how much would they cost if running?"]),
+        ("Who consumes what", [
+            "Allocate the period's cost by workspace and explain the method.",
+            "Which users and apps generate the most load, and in which workspaces?",
+            "Which Spark notebooks consume the most, and which run on a schedule?",
+            "How much does AI (Copilot, Data Agents) cost, and who uses it?"]),
+        ("Governance", [
+            "Which refreshes have failed, and since when?",
+            "Which workspaces on paid capacity have not been used this month?",
+            "Which tenant settings affect cost, and how are they configured?",
+            "Generate the report with visible identities for the FinOps team."]),
     ]
-    qhtml = "".join(f'<article><h3>{E(g)}</h3><ul>' + "".join(f'<li><span>{E(q)}</span><button type="button" data-copy="{E(q)}">Copiar</button></li>' for q in qs) + "</ul></article>" for g, qs in QS)
-    parts.append(f"""<section id="preguntas"><h2>Pregúntale al agente</h2>
-<p class="sub">Copia cualquiera de estas preguntas en el chat de Azure SRE Agent (agente <b>fabric-chargeback-live</b>). El agente vuelve a leer el tenant en directo y responde con cifras de este mismo modelo.</p>
+    qhtml = "".join(f'<article><h3>{E(g)}</h3><ul>' + "".join(f'<li><span>{E(q)}</span><button type="button" data-copy="{E(q)}">Copy</button></li>' for q in qs) + "</ul></article>" for g, qs in QS)
+    parts.append(f"""<section id="preguntas"><h2>Ask the agent</h2>
+<p class="sub">Copy any of these questions into the Azure SRE Agent chat (agent <b>fabric-chargeback-live</b>). The agent reads the tenant live again and answers with figures from this same model.</p>
 <div class="qs">{qhtml}</div></section>""")
 
     # sources
-    SRC_LBL = {"capacities": ("Capacidades de Fabric", "Fabric Admin API"), "workspaces": ("Workspaces", "Fabric Admin API"),
-               "items": ("Items", "Fabric Admin API"), "activity": ("Registro de actividad", "Power BI Admin API · activityevents"),
-               "refreshables": ("Refrescos", "Power BI Admin API · refreshables"), "spark": ("Sesiones Spark", "Fabric Spark Livy API"),
-               "onelake": ("Tamaño OneLake", "OneLake DFS API"), "arm": ("Suscripciones", "Azure Resource Manager"),
-               "cost": ("Coste diario por medidor", "Azure Cost Management · ActualCost"), "activity_log": ("Encendido y pausa", "Azure Activity Log"),
-               "cost_monthly": ("Coste mensual (12 meses)", "Azure Cost Management"), "sub_costs": ("Coste de la suscripción por servicio", "Azure Cost Management"),
-               "prices": ("Precios públicos", "Azure Retail Prices API"), "tenant_settings": ("Ajustes del tenant", "Fabric Admin API · tenantsettings")}
-    st_pill = {"ok": ("ok", "Leído"), "partial": ("warn", "Parcial"), "error": ("crit", "Error")}
+    SRC_LBL = {"capacities": ("Fabric capacities", "Fabric Admin API"), "workspaces": ("Workspaces", "Fabric Admin API"),
+               "items": ("Items", "Fabric Admin API"), "activity": ("Activity log", "Power BI Admin API · activityevents"),
+               "refreshables": ("Refreshes", "Power BI Admin API · refreshables"), "spark": ("Spark sessions", "Fabric Spark Livy API"),
+               "onelake": ("OneLake size", "OneLake DFS API"), "arm": ("Subscriptions", "Azure Resource Manager"),
+               "cost": ("Daily cost by meter", "Azure Cost Management · ActualCost"), "activity_log": ("Start and pause", "Azure Activity Log"),
+               "cost_monthly": ("Monthly cost (12 months)", "Azure Cost Management"), "sub_costs": ("Subscription cost by service", "Azure Cost Management"),
+               "prices": ("Public prices", "Azure Retail Prices API"),
+               "access_workspaces": ("Workspace access", "Power BI Admin API · groups + users"), "access_items": ("Item access", "Admin scanner API · getInfo (artifact users)"),
+               "group_members": ("Group members", "Microsoft Graph · transitiveMembers"), "cross_tenant_auth": ("Cross-tenant credential", "Key Vault · app certificate"), "tenant_settings": ("Tenant settings", "Fabric Admin API · tenantsettings")}
+    st_pill = {"ok": ("ok", "Read"), "partial": ("warn", "Partial"), "error": ("crit", "Error"),
+               "paused": ("neutral", "Capacity paused"), "pending": ("warn", "Permission pending")}
     srcrows = []
     for k, v in sources.items():
         if k.startswith("token_"):
-            k_lbl = (f"Token {k[6:]}", "Entra ID · federación sin secretos")
+            k_lbl = (f"Token {k[6:]}", "Entra ID · secretless federation")
         else:
             k_lbl = SRC_LBL.get(k, (k, ""))
         lv, tx = st_pill.get(v.get("status"), ("neutral", v.get("status") or "—"))
         srcrows.append(f'<tr><td><span class="cell-strong">{E(k_lbl[0])}</span><span class="cell-sub">{E(k_lbl[1])}</span></td><td>{pill(lv, tx)}</td>'
                        f'<td class="num">{E(str(v.get("http") or "—"))}</td><td class="num">{fn(v.get("count") or 0)}</td><td class="num">{fn(v.get("seconds") or 0, 1)} s</td>'
                        f'<td>{E(v.get("note") or "")}</td></tr>')
-    srcrows.append(f'<tr><td><span class="cell-strong">App Capacity Metrics</span><span class="cell-sub">Power BI · modelo semántico</span></td>'
-                   f'<td>{pill("info", "Instalada · no consultable") if cm_installed else pill("neutral", "No detectada")}</td><td class="num">—</td>'
+    srcrows.append(f'<tr><td><span class="cell-strong">Capacity Metrics app</span><span class="cell-sub">Power BI · semantic model</span></td>'
+                   f'<td>{pill("info", "Installed · not queryable") if cm_installed else pill("neutral", "Not detected")}</td><td class="num">—</td>'
                    f'<td class="num">{len(cm_items) if cm_installed else 0}</td><td class="num">—</td>'
-                   f'<td>{"Microsoft no permite consultar con service principal los modelos con RLS/SSO como este. Úsala para validar picos y throttling." if cm_installed else "Instálala para ver picos por minuto y throttling."}</td></tr>')
-    parts.append(f"""<section id="fuentes"><h2>Fuentes y método</h2>
-<p class="sub">Todo se lee en el momento de generar el informe, en modo solo lectura, {'con una identidad federada entre tenants, sin secretos' if raw.get('auth_mode', 'cross_tenant') == 'cross_tenant' else 'con la identidad gestionada del SRE Agent, sin secretos'}. Esta es la situación real de cada fuente en esta ejecución.</p>
-<div class="tbl-wrap"><table class="dense"><thead><tr><th>Fuente</th><th>Estado</th><th class="num">HTTP</th><th class="num">Registros</th><th class="num">Tiempo</th><th>Nota</th></tr></thead>
+                   f'<td>{"Microsoft does not allow models with RLS/SSO like this one to be queried with a service principal. Use the app to validate peaks and throttling." if cm_installed else "Install it to see per-minute peaks and throttling."}</td></tr>')
+    parts.append(f"""<section id="fuentes"><h2>Sources and method</h2>
+<p class="sub">Everything is read when the report is generated, in read-only mode, {'with a multi-tenant app identity in the Fabric tenant (certificate in Key Vault or federated credential, no secrets in the code)' if raw.get('auth_mode', 'cross_tenant') == 'cross_tenant' else 'with the SRE Agent managed identity, no secrets'}. This is the actual status of each source in this run.</p>
+<div class="tbl-wrap"><table class="dense"><thead><tr><th>Source</th><th>Status</th><th class="num">HTTP</th><th class="num">Records</th><th class="num">Time</th><th>Note</th></tr></thead>
 <tbody>{''.join(srcrows)}</tbody></table></div>
-<div class="method panel" style="margin-top:18px"><div><h3>Cómo se calcula</h3><ul>
-<li>El coste es el importe real de Cost Management (ActualCost) de los recursos <code>microsoft.fabric/capacities</code>, por día y medidor, en {E(CUR)}.</li>
-<li>Las horas encendida salen de los eventos resume/suspend del Activity Log y se validan contra la factura (ratio factura ÷ horas × CU).</li>
-<li>El trabajo real son operaciones del registro de actividad de Fabric y sesiones Spark; se excluyen operaciones administrativas y las de este informe.</li>
-<li>Las proyecciones mensuales escalan el periodo observado a 30 días.</li></ul></div>
-<div><h3>Límites conocidos</h3><ul>
-<li>El registro de actividad de Fabric guarda {act_days or 28} días: el trabajo anterior no es visible.</li>
-<li>Cost Management publica el coste con 24–48 h de retraso; los últimos días pueden faltar.</li>
-<li>Los medios horarios no muestran ráfagas de minutos: para tamaño y throttling, Capacity Metrics.</li>
-<li>Al pausar, Fabric factura de golpe las operaciones suavizadas pendientes.</li></ul></div></div></section>""")
+<div class="method panel" style="margin-top:18px"><div><h3>How it is calculated</h3><ul>
+<li>Cost is the actual Cost Management amount (ActualCost) for <code>microsoft.fabric/capacities</code> resources, by day and meter, in {E(CUR)}.</li>
+<li>Running hours come from the resume/suspend events in the Activity Log and are validated against the invoice (ratio invoice ÷ hours × CU).</li>
+<li>Real work means operations in the Fabric activity log plus Spark sessions; administrative operations and this report's own operations are excluded.</li>
+<li>Monthly projections scale the observed period to 30 days.</li></ul></div>
+<div><h3>Known limitations</h3><ul>
+<li>The Fabric activity log keeps {act_days or 28} days: earlier work is not visible.</li>
+<li>Cost Management publishes cost with a 24–48 h delay; the most recent days may be missing.</li>
+<li>Hourly averages do not show bursts lasting a few minutes: for sizing and throttling, use Capacity Metrics.</li>
+<li>When the capacity is paused, Fabric bills all pending smoothed operations at once.</li></ul></div></div></section>""")
 
     # ================================================================== v5 OUTPUT (files + agent answer)
     def dec(v, d=4):
-        return f"{(v or 0):.{d}f}".replace(".", ",")
+        return f"{(v or 0):.{d}f}"
 
     def csv_text(header_row, rows_):
         buf = io.StringIO()
-        w = csv.writer(buf, delimiter=";", lineterminator="\n")
+        w = csv.writer(buf, delimiter=",", lineterminator="\n")
         w.writerow(header_row)
         w.writerows(rows_)
         return buf.getvalue()
@@ -2087,10 +2443,10 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
                                                                             dec(r["total"] / total_cost * 100 if total_cost else 0, 2)])
     for n, v in extra_rows:
         cb_csv_rows.append([n, "", "", "", "", "", "", ""] + ["" for _ in cats_cb] + [dec(v), "", dec(v), dec(v / total_cost * 100 if total_cost else 0, 2)])
-    cb_csv = csv_text(["workspace", "workspace_id", "capacidad", "sku", "items", "operaciones", "consultas_ia", "spark_horas"]
-                      + [f"coste_{c}" for c in cats_cb] + ["coste_directo", "encendida_sin_uso", "total", "porcentaje"], cb_csv_rows)
+    cb_csv = csv_text(["workspace", "workspace_id", "capacity", "sku", "items", "operations", "ai_queries", "spark_hours"]
+                      + [f"cost_{c}" for c in cats_cb] + ["direct_cost", "idle_running_share", "total", "percentage"], cb_csv_rows)
     cap_nm = {rid: (c.get("name") or rid.rsplit("/", 1)[-1]) for rid, c in cap_by_rid.items()}
-    mt_csv = csv_text(["fecha", "capacidad", "medidor", "categoria", "cantidad", "coste", "moneda"],
+    mt_csv = csv_text(["date", "capacity", "meter", "category", "quantity", "cost", "currency"],
                       [[f"{c['date'][:4]}-{c['date'][4:6]}-{c['date'][6:8]}", cap_nm.get(c["rid"], c["rid"].rsplit("/", 1)[-1]), c["meter"],
                         CATS[meter_cat(c["meter"])][0], dec(c["qty"]), dec(c["cost"]), c.get("currency") or CUR]
                        for c in sorted(crow, key=lambda c: (c["date"], -c["cost"]))])
@@ -2098,8 +2454,8 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
     def script_block(i, txt):
         return f'<script type="text/plain" id="{i}">{txt.replace("</", "<\\/")}</script>'
 
-    parts.append(f"""</div></main><footer><div class="wrap">Generado por Azure SRE Agent · herramienta generate-fabric-chargeback-report v5.0 ·
-{gen.strftime('%d/%m/%Y %H:%M')} UTC · lectura en {fn(raw.get('collect_seconds') or 0, 1)} s · solo lectura, sin datos de ejemplo.</div></footer>
+    parts.append(f"""</div></main><footer><div class="wrap">Generated by Azure SRE Agent · tool generate-fabric-chargeback-report v5.0 ·
+{dmon(gen, ' %Y %H:%M')} UTC · read in {fn(raw.get('collect_seconds') or 0, 1)} s · read-only, no sample data.</div></footer>
 {script_block('csv-meters', mt_csv)}{script_block('csv-chargeback', cb_csv)}<script>{JS}</script></body></html>""")
     html_doc = "".join(parts)
 
@@ -2107,7 +2463,7 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
         return round(float(v or 0), 2)
 
     answer = {
-        "status": "ok", "version": "5.0", "auth_mode": raw.get("auth_mode", AUTH_MODE), "generated_utc": gen.strftime("%Y-%m-%dT%H:%M:%SZ"), "period": period_label,
+        "status": "ok", "version": "5.1", "auth_mode": raw.get("auth_mode", AUTH_MODE), "generated_utc": gen.strftime("%Y-%m-%dT%H:%M:%SZ"), "period": period_label,
         "window_utc": [win0.strftime("%Y-%m-%d"), gen.strftime("%Y-%m-%d")], "currency": CUR, "identities": "visible" if show_ids else "masked",
         "cost_available": cost_ok, "cost_unavailable_reason": None if cost_ok else cost_why,
         "headline": {"total_cost": r2(total_cost) if cost_ok else None, "consumed_by_workloads": r2(consumption_cost) if cost_ok else None,
@@ -2140,6 +2496,24 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
                                      "spark_hours": round(r["spark_h"], 2), "direct": r2(r["direct"]), "idle_share": r2(r["idle"]), "total": r2(r["total"])}
                                     for r in cb if r["total"] >= 0.01][:25],
         "chargeback_not_assignable": {n: r2(v) for n, v in extra_rows},
+        "access_by_group": [{"group": g["name"], "workspaces": [ws_label(w) for w in g["ws"]],
+                             "items": [{"item": v[0], "type": v[1], "workspace": ws_label(k[0]), "permission": v[2]} for k, v in g["items"].items()],
+                             "members": g["n_members"], "active_members": g["active"], "new_members": g["new"],
+                             "member_operations": g["member_ops"], "member_cost": r2(g["member_cost"]) if (g["member_cost"] is not None and cost_ok) else None,
+                             "member_scope": "operations of the group members on the workspaces and items granted to the group",
+                             "cost_of_accessible_resources": r2(g["exposure"]) if cost_ok else None,
+                             "resources_consumed_by_members": [{"item": rk[1], "workspace": ws_label(rk[0]), "operations": o, "cost": r2(c) if cost_ok else None}
+                                                               for rk, o, c in (g["res"] or [])[:15]],
+                             "members_consumption": [{"person": plabel(m["k"]), "operations": m["ops"], "cost": r2(m["cost"]) if cost_ok else None,
+                                                      "total_operations": m["total_ops"], "total_cost": r2(m["total_cost"]) if cost_ok else None,
+                                                      "top_resources": [{"item": rk[1], "workspace": ws_label(rk[0]), "operations": o, "cost": r2(c) if cost_ok else None}
+                                                                        for rk, o, c in m["top"]]} for m in (g["mdetail"] or [])[:25]]} for g in grp_list],
+        "people_with_access": {"total": len(people_list), "without_activity": len(no_activity), "new": len(new_people) if members_known else None,
+                               "group_membership": "read" if members_known else (gm_src.get("status") or "not_read"),
+                               "without_activity_list": [plabel(r["k"]) for r in no_activity][:25],
+                               "consumers": [{"person": plabel(r["k"]), "via": r["via"], "operations": r["ops"], "cost": r2(r["cost"]) if cost_ok else None,
+                                              "top_resources": [{"item": rk[1], "workspace": ws_label(rk[0]), "operations": o, "cost": r2(c) if cost_ok else None}
+                                                                for rk, o, c in r["top"]]} for r in people_list if r["ops"]][:30]},
         "top_identities": [{"identity": plabel(p["k"]), "kind": p["kind"], "operations": p["work"], "active_days": len(p["days"]),
                             "spark_hours": round(p.get("spark_h", 0), 2), "workspaces": [ws_label(w) for w, _ in p["ws"].most_common(3)]} for p in humans[:10]],
         "top_items": [{"item": r["it"], "type": r["itt"], "workspace": ws_label(r["ws"]), "operations": r["n"], "identities": len(r["users"])} for r in top_items[:10]],
@@ -2157,8 +2531,8 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
         return answer
 
     base = f"fabric-finops-{stamp}"
-    names = {"report": f"{base}.html", "snapshot": f"{base}-snapshot.json", "chargeback_csv": f"{base}-reparto-workspaces.csv",
-             "meters_csv": f"{base}-coste-diario-medidores.csv"}
+    names = {"report": f"{base}.html", "snapshot": f"{base}-snapshot.json", "chargeback_csv": f"{base}-chargeback-by-workspace.csv",
+             "meters_csv": f"{base}-daily-cost-by-meter.csv"}
     snap = dict(answer)
     snap["raw_counts"] = {k: (len(v) if isinstance(v, list) else None) for k, v in raw.items() if isinstance(v, list)}
     blobs = {names["report"]: html_doc.encode("utf-8"),

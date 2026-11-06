@@ -1,14 +1,14 @@
-# Case 11 - Microsoft Fabric FinOps & Chargeback (real cost, idle capacity, savings, per-workspace split)
+# Case 11 - Microsoft Fabric FinOps & Chargeback (real cost, idle capacity, savings, per-workspace and per-group split)
 
 > **Azure SRE Agent** · Read-only Python tool · Runtime skill · Restricted subagent · Monthly task (`0 7 2 * *`) & on-demand (`last_30d`, `last_14d`, `last_7d`) · **Same-tenant (default) or cross-tenant**, zero secrets in both · Offline HTML, full JSON and two CSVs
 
-**What do we really pay for Microsoft Fabric, what is actually used, and how much can we save?** A restricted SRE Agent subagent reads the Fabric tenant live from 14 read-only sources - the **real bill per meter** (Azure Cost Management), the **capacity on/off hours** (Azure Activity Log), **user activity, Spark sessions, inventory and tenant settings** (Fabric / Power BI admin APIs) - and returns an interactive FinOps report with prioritized, evidence-backed savings and a **chargeback split per workspace**.
+**What do we really pay for Microsoft Fabric, what is actually used, who uses it, and how much can we save?** A restricted SRE Agent subagent reads the Fabric tenant live from 17 read-only sources - the **real bill per meter** (Azure Cost Management), the **capacity on/off hours** (Azure Activity Log), **user activity, Spark sessions, inventory and tenant settings** (Fabric / Power BI admin APIs), and **who has access through which group** (admin scanner API and Microsoft Graph) - and returns an interactive FinOps report in English with prioritized, evidence-backed savings, a **chargeback split per workspace**, and **consumption by user group and by person**.
 
 Every figure comes from the tenant. **Nothing is simulated.**
 
 ![Summary: real billed cost, on vs used, identified savings](images/01-summary-real-cost.png)
 
-*Summary from the anonymized sample run: **1,168.03 USD** billed in 30 days, of which **85.4 % was capacity switched on with no workload**, and the actions that recover it.*
+*Summary from the anonymized sample run: **876.15 USD** billed in 30 days, of which **90.2 % was capacity switched on with no workload**, and the actions that recover it.*
 
 | What you get | What it does not claim |
 |---|---|
@@ -17,6 +17,7 @@ Every figure comes from the tenant. **Nothing is simulated.**
 | 10-12 **FinOps actions with amount and evidence**: pause schedule, no-load days, reservation yes/no, SKU right-size, expensive notebooks, risky paused capacities, AI cost, governance | Any automatic change. The tool never pauses, resumes, resizes, re-assigns or edits settings; a person applies the actions |
 | **Chargeback per workspace**: direct consumption of each meter by its real usage + a proportional share of idle time; unassignable cost shown apart | A perfect split: storage, transactions and deleted workspaces stay **unassigned** on purpose |
 | Who consumes what: identities (**masked by default**), top items, Spark notebooks, activity heat map, governance (failed refreshes, stale items, trial capacities, sensitive tenant settings) | User names in clear text unless explicitly requested for an authorized recipient |
+| **Access and consumption by group**: which security groups and people can use each workspace and item, what each group's members consumed on the resources granted to that group, drill-down per person, people with access but no activity, and new users | Group members without the optional Microsoft Graph read permissions (the report then marks them *pending* and still shows each group's access) |
 
 ## Business value
 
@@ -26,11 +27,12 @@ Every figure comes from the tenant. **Nothing is simulated.**
 | **Platform owner** | F-SKU capacities left on overnight and at weekends | Exact idle hours and cost, a pause time backed by evidence, and the monthly saving |
 | **Business units** | "Why am I being charged this?" | Defensible per-workspace chargeback, with the method written in the report |
 | **Procurement** | "Should we buy a reservation?" | Break-even point vs actual uptime: buy only if it pays off |
+| **Data platform / BI owners** | Access is granted to groups (semantic models, reports, data agents) but nobody knows which group drives the cost | Cost per group on the resources granted to it, which person consumes what, and who has access but never uses it |
 | **Governance / Security** | Tenant settings and stale content nobody reviews | Sensitive settings (Publish to web, guests, AI), failed refreshes, items untouched for 90+ days, untagged / trial capacities |
 
-In the anonymized sample run below, the report found **375.5 USD/month** of direct savings from a pause schedule, avoided **16,045 USD/year** of reservation overspend, and flagged an **8,294 USD/month** risk (a paused, empty F64). It runs every month with no human effort.
+In the anonymized sample run below, the report found **472 USD/month** of direct savings from pausing the capacity after the last job, avoided **19,570 USD/year** of reservation overspend, flagged an **8,294 USD/month** risk (a paused, empty F64), and showed that the members of one group (*Finance Analysts*) generated **239 USD** on the items shared with that group. It runs every month with no human effort.
 
-**Contents:** [How it fits together](#how-the-pieces-fit-together) · [14 sources](#14-read-only-sources-and-the-permission-each-needs) · [Choose your option](#choose-your-option-same-tenant-or-cross-tenant) · [Prerequisites](#prerequisites--files-to-download) · [Option A - same tenant](#option-a---same-tenant-recommended-for-customers) · [Option B - cross-tenant](#option-b---cross-tenant-sre-agent-in-tenant-a-fabric-in-tenant-b) · [Build in SRE Agent](#step-3---configure-the-tool-the-3-constants) · [Report tour](#step-9---read-the-report-section-by-section) · [Formulas](#how-each-figure-is-calculated) · [Troubleshooting](#troubleshooting) · [Prompts](#copy-ready-bilingual-qa-prompt-pack-castellano--english)
+**Contents:** [How it fits together](#how-the-pieces-fit-together) · [17 sources](#17-read-only-sources-and-the-permission-each-needs) · [Choose your option](#choose-your-option-same-tenant-or-cross-tenant) · [Prerequisites](#prerequisites--files-to-download) · [Option A - same tenant](#option-a---same-tenant-recommended-for-customers) · [Option B - cross-tenant](#option-b---cross-tenant-sre-agent-in-tenant-a-fabric-in-tenant-b) · [Group members (optional)](#step-2b---optional-let-the-report-read-group-members-both-options) · [Build in SRE Agent](#step-3---configure-the-tool-the-3-constants) · [Report tour](#step-9---read-the-report-section-by-section) · [Formulas](#how-each-figure-is-calculated) · [Troubleshooting](#troubleshooting) · [Prompts](#copy-ready-bilingual-qa-prompt-pack-castellano--english)
 
 ## How the pieces fit together
 
@@ -46,18 +48,20 @@ flowchart LR
     B --> P1["Fabric / Power BI admin APIs<br/>capacities, workspaces, items,<br/>activity, refreshes, settings"]
     B --> P2["Fabric Spark (Livy) + OneLake"]
     B --> P3["ARM: capacities + Activity Log<br/>Cost Management (3 queries)"]
+    B --> P5["Access: workspace roles, item permissions<br/>+ group members (Microsoft Graph, optional)"]
     T --> P4["Azure Retail Prices<br/>(public)"]
-    P1 --> R["FinOps model:<br/>cost, on vs used, actions,<br/>chargeback, governance"]
+    P1 --> R["FinOps model:<br/>cost, on vs used, actions,<br/>chargeback, groups, governance"]
     P2 --> R
     P3 --> R
     P4 --> R
+    P5 --> R
     R --> O["4 files in the chat thread<br/>HTML + JSON + chargeback CSV + meters CSV"]
 ```
 
-- **One tool, no secrets.** The tool reads the 14 sources in parallel (about 60-90 s), builds the model and writes the 4 files. Collection budget 105 s inside a 150 s timeout: a source that does not answer in time is marked, and the rest of the report still renders.
+- **One tool, no secrets.** The tool reads the 17 sources in parallel (about 60-90 s), builds the model and writes the 4 files. Collection budget 105 s inside a 150 s timeout: a source that does not answer in time is marked, and the rest of the report still renders.
 - **Two auth modes in the same file.** If the two cross-tenant constants are left as placeholders, the tool uses the SRE Agent managed identity directly (Option A). If both are set, it signs in as the multi-tenant app in the Fabric tenant (Option B) with the app certificate it reads from Key Vault with the managed identity. The report header shows which mode ran.
 
-## 14 read-only sources and the permission each needs
+## 17 read-only sources and the permission each needs
 
 The **identity** is the SRE Agent UAMI (Option A) or the multi-tenant app service principal (Option B). Both scripts grant exactly this.
 
@@ -77,6 +81,9 @@ The **identity** is the SRE Agent UAMI (Option A) or the multi-tenant app servic
 | 12 | Monthly cost | Same, monthly (current + 11 previous) | Trend | **Cost Management Reader** |
 | 13 | Subscription cost | Same, by `ServiceName` + `ResourceId` | Fabric's weight in the subscription | **Cost Management Reader** |
 | 14 | Retail prices | `prices.azure.com/api/retail/prices` | Price per CU-h, 1-year and 3-year reservations | None (public API) |
+| 15 | Workspace access | Power BI `GET /admin/groups?$expand=users` | Users, groups and apps with a role on each workspace | Tenant setting *read-only admin APIs* (via group) |
+| 16 | Item access | Power BI admin scanner `POST /admin/workspaces/getInfo?getArtifactUsers=true` (100 workspaces per call) | Who has a permission on each item (semantic models, reports, data agents, lakehouses…) | Same. *Detailed metadata* settings are **not** needed |
+| 17 | Group members | Microsoft Graph `GET /groups/{id}/transitiveMembers/microsoft.graph.user` | Members of each group (nested included) and their creation date | **Optional.** Graph application permissions **GroupMember.Read.All** + **User.Read.All** ([step 2b](#step-2b---optional-let-the-report-read-group-members-both-options)). Without them the source shows *Permission pending* |
 
 > **No write permission anywhere.** The scripts never grant *Fabric Administrator*, *capacity admin*, workspace *Admin/Member*, *admin APIs used for updates*, or any Azure write role to the identity.
 
@@ -115,9 +122,10 @@ Download these files with **Raw > Download raw file** (an HTML page saved as `.p
 | [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Tool settings, subagent instructions, scheduled task and chat prompts |
 | [`tool-parameters.schema.json`](tool-parameters.schema.json) | Parameter contract (3 string parameters) |
 | [`grant-fabric-finops-access.ps1`](grant-fabric-finops-access.ps1) | Read-only grants in the Fabric tenant (both options) |
-| [`setup-cross-tenant-app.ps1`](setup-cross-tenant-app.ps1) | Option B only: multi-tenant app + FIC in the SRE Agent tenant |
+| [`setup-cross-tenant-app.ps1`](setup-cross-tenant-app.ps1) | Option B only: multi-tenant app + certificate in Key Vault in the SRE Agent tenant |
+| [`grant-graph-read-permissions.ps1`](grant-graph-read-permissions.ps1) | Optional, both options: Microsoft Graph read permissions to list group members |
 | [`requirements.txt`](requirements.txt) | Packages the tool imports (already present in the SRE Agent Python runtime) |
-| [`sample-run/`](sample-run/) | Anonymized real run: HTML, snapshot JSON and both CSVs |
+| [`sample-run/`](sample-run/) | Anonymized real run (English): HTML, snapshot JSON and both CSVs |
 
 ---
 
@@ -255,9 +263,32 @@ Alternative to create the service principal: a Global Administrator of tenant B 
 
 - **Tenant B > Entra ID > Enterprise applications** > `sre-agent-fabric-cross-tenant-bridge` exists; **Groups** > `sg-sre-agent-fabric` > Members contains it.
 - **Tenant B > subscription > Access control (IAM) > Role assignments**: the app has *Reader* and *Cost Management Reader*.
-- After step 3 and 4, the **Test playground** of the tool (step 4, screenshot `b05`) with `operation=summary` returns `"auth_mode": "cross_tenant"`, a `cross_tenant_auth` source with status OK (*certificate read from Key Vault*) and the other sources with status OK.
+- After step 3 and 4, the **Test playground** of the tool (step 4, screenshot `b05`) with `operation=summary` returns `"auth_mode": "cross_tenant"`, a `cross_tenant_auth` source with status OK (*Bridge app certificate read from Key Vault*) and the other sources with status OK.
 
 ---
+
+## Step 2b - Optional: let the report read group members (both options)
+
+The section **Access and groups** always shows which groups and people have access to each workspace and item. To also list **who belongs to each group**, compute **consumption per group member** and flag **new users**, the identity needs two read-only Microsoft Graph application permissions in the Fabric tenant:
+
+| Permission | Why |
+|---|---|
+| `GroupMember.Read.All` | Members of each group with access, including nested groups |
+| `User.Read.All` | Creation date of each member, to flag new users in the period |
+
+A **Global Administrator** or **Privileged Role Administrator** of the Fabric tenant (activate it first if it is eligible in PIM) runs, in PowerShell or Azure Cloud Shell:
+
+```powershell
+# Option A - same tenant
+./grant-graph-read-permissions.ps1 -FabricTenantId <TENANT_ID> -PrincipalObjectId <UAMI_OBJECT_PRINCIPAL_ID>
+
+# Option B - cross-tenant (in tenant B, after step B2)
+./grant-graph-read-permissions.ps1 -FabricTenantId <TARGET_FABRIC_TENANT_ID> -AppClientId <FEDERATED_APP_CLIENT_ID>
+```
+
+The script is idempotent (`-DryRun` shows what it would do) and assigns the two Graph app roles directly to the service principal. Nothing is added to the app registration and no write permission is granted. **Admin consent in the portal does not work here**: the app declares no API permissions on purpose, so there is nothing to consent; the script is the way to grant them. Wait 10-15 minutes before the next run.
+
+Portal equivalent for Option A (managed identity): not available in the portal UI; use the script or Microsoft Graph PowerShell `New-MgServicePrincipalAppRoleAssignment`.
 
 ## Step 3 - Configure the tool (the constants)
 
@@ -269,6 +300,7 @@ FEDERATED_APP_CLIENT_ID    = "<FEDERATED_APP_CLIENT_ID>"    # Option B only: pri
 TARGET_FABRIC_TENANT_ID    = "<TARGET_FABRIC_TENANT_ID>"    # Option B only: tenant where Fabric lives
 CROSS_TENANT_CERT_KEYVAULT_URL = ""   # Option B only: printed by setup-cross-tenant-app.ps1
 CROSS_TENANT_CERT_NAME = ""           # Option B only: printed by setup-cross-tenant-app.ps1
+LOCAL_TIMEZONE = "Europe/Madrid"      # both options: time zone shown next to UTC in pause recommendations
 ```
 
 | Constant | Option A - same tenant | Option B - cross-tenant |
@@ -278,6 +310,7 @@ CROSS_TENANT_CERT_NAME = ""           # Option B only: printed by setup-cross-te
 | `TARGET_FABRIC_TENANT_ID` | Leave the placeholder (or `""`) | Tenant B ID |
 | `CROSS_TENANT_CERT_KEYVAULT_URL` | Leave `""` | Vault URL from step B1, e.g. `https://<vault>.vault.azure.net` |
 | `CROSS_TENANT_CERT_NAME` | Leave `""` | Certificate name from step B1 (`sre-agent-fabric-cross-tenant`) |
+| `LOCAL_TIMEZONE` | Your IANA time zone, e.g. `Europe/Berlin` | Same |
 
 ![Configure block: the 3 constants and which ones each option fills in](images/b03-python-tool-configure-block.png)
 
@@ -360,7 +393,7 @@ Search `generate-fabric-chargeback-report`, tick it, and save the skill.
 
 *(1) Type `/agent fabric`; (2) select **fabric-chargeback-live**.*
 
-Ask, in Spanish or English (the agent answers in the user's language):
+Ask (the agent answers in English unless you write in another language; the report is always in English):
 
 ```text
 Genera el informe FinOps de Fabric de los últimos 30 días.
@@ -380,14 +413,14 @@ After 1-2 minutes the agent replies with an executive summary and **4 files** in
 |---|---|
 | `fabric-finops-<stamp>.html` | Single-file interactive report: inline SVG, no external dependencies, print and mobile ready |
 | `fabric-finops-<stamp>-snapshot.json` | Every figure, action and source status - for automation and month-to-month comparison |
-| `fabric-finops-<stamp>-reparto-workspaces.csv` | Chargeback per workspace (direct, idle share, total) for Excel |
-| `fabric-finops-<stamp>-coste-diario-medidores.csv` | Daily cost per meter, to reconcile with the invoice |
+| `fabric-finops-<stamp>-chargeback-by-workspace.csv` | Chargeback per workspace (direct, idle share, total) for Excel |
+| `fabric-finops-<stamp>-daily-cost-by-meter.csv` | Daily cost per meter, to reconcile with the invoice |
 
-Open the HTML and go to the **Fuentes** (sources) section: the 14 sources should be **Correcto**. Any **Error** or **Parcial** has its cause in [Troubleshooting](#troubleshooting).
+Open the HTML and go to the **Sources** section: every source should be **OK**. Any **Error**, **Partial**, **Capacity paused** or **Permission pending** has its cause in [Troubleshooting](#troubleshooting).
 
 ![Data sources with status, HTTP code and records](images/10-data-sources.png)
 
-*Sources section: status, HTTP code and record count per source. In the sample run 13 of 14 were read (OneLake *partial* because the identity was Viewer).*
+*Sources section: status, HTTP code and record count per source. In the sample run (cross-tenant) 17 of 18 were read, the 18th being the cross-tenant credential check; OneLake is *partial* because the identity was Viewer.*
 
 ## Step 8 - Schedule the monthly report
 
@@ -408,9 +441,9 @@ Day 2 gives Cost Management the 24-48 h it needs to publish the last days of the
 
 ## Step 9 - Read the report, section by section
 
-> The report UI is in **Spanish** (it was built for a Spanish-speaking customer; same precedent as case 10). The agent's chat answers follow the user's language. All screenshots come from the **anonymized** sample run: capacities, workspaces, users and IDs are pseudonyms.
+> The report, the CSVs and the snapshot are in **English**. All screenshots come from the **anonymized** sample run: capacities, workspaces, items, groups, users and IDs are pseudonyms. The sample was generated with `identities=visible` because every identity in it is fictitious (`userNN@contoso.com`); by default the report masks people.
 
-**View it yourself:** GitHub shows HTML as source. Open [`sample-run/fabric-finops-20261026T123745Z.html`](sample-run/fabric-finops-20261026T123745Z.html), click **Download raw file**, and double-click it. One file, no dependencies.
+**View it yourself:** GitHub shows HTML as source. Open [`sample-run/fabric-finops-20261106T095840Z.html`](sample-run/fabric-finops-20261106T095840Z.html), click **Download raw file**, and double-click it. One file, no dependencies.
 
 <details>
 <summary><b>Full report (whole-page screenshot)</b></summary>
@@ -419,55 +452,65 @@ Day 2 gives Cost Management the 24-48 h it needs to publish the last days of the
 
 </details>
 
-### 9.1 Resumen - the real cost
+### 9.1 Summary - the real cost
 
 ![Summary](images/01-summary-real-cost.png)
 
-Billed cost, consumed / idle / storage bar, hours on, cost per hour, CU-h paid vs used and identified saving. **Sample run:** 1,168.03 USD in 30 days = **151.07 consumed (12.9 %)**, **997.19 idle (85.4 %)**, 19.77 storage. The F32 capacity was on **186.9 h of 733 (26 %)** and used **13 %** while on: **6,379 CU-h paid vs 839 CU-h used**, at 5.76 USD/h.
+Billed cost, consumed / idle / storage bar, hours on, cost per hour, CU-h paid vs used and identified saving. **Sample run:** 876.15 USD in 30 days = **68.60 consumed (7.8 %)**, **790.00 idle (90.2 %)**, 17.55 storage. The F32 capacity was on **142.9 h of 729 (20 %)** and used **8 %** while on: **4,770 CU-h paid vs 381 CU-h used**, at 5.76 USD/h.
 
-### 9.2 Acciones FinOps - what to do, with amount and evidence
+### 9.2 FinOps actions - what to do, with amount and evidence
 
 ![Recommended actions](images/02-recommended-actions.png)
 
-10-12 actions sorted by type (saving, avoided spend, scenario, risk, governance). **Sample run (12 actions):** pause 1 h after the last job → **375.5 USD/month**; do not switch on days with no load → **368.49 USD**; **do not buy a reservation** (break-even 59 % uptime vs 26 % actual) → avoids **16,045.5 USD/year**; F16 right-size scenario → **530.97 USD/month**; one notebook is **59 %** of Spark time; paused, empty, untagged F64 → **8,294 USD/month** risk if resumed by mistake.
+10-12 actions sorted by type (saving, avoided spend, scenario, risk, governance). **Sample run (11 actions):** pause 1 h after the last job → **472.25 USD/month** (or, simpler, bring the automatic pause forward to 21:00 UTC → 168.45 USD/month with no work cut); do not switch the capacity on during the 8 days with no load → **576.61 USD** in the period; **do not buy a reservation** (break-even 59.5 % uptime vs 19.6 % actual) → avoids **19,569.68 USD/year**; F16 right-size scenario → **410.98 USD/month**; paused, empty, untagged F64 → **8,294.40 USD/month** risk if resumed by mistake; plus governance: dedicated Copilot capacity, cost-center tags, 2 failed refreshes, trial capacity end and 230 items unchanged for 90+ days.
 
-### 9.3 Dónde va el dinero - cost breakdown
+### 9.3 Where the money goes - cost breakdown
 
 ![Cost breakdown](images/03-cost-breakdown.png)
 
 Daily cost per meter, cost per workload type with the workspace that generates it, monthly trend (12 months), Fabric's share of the subscription, and the full meters table.
 
-### 9.4 Encendida frente a usada - on vs used
+### 9.4 Running vs used
 
 ![Usage vs capacity](images/04-usage-vs-capacity.png)
 
 Timeline of resume / suspend, hours after the last job of each day, and a fixed-time pause simulation (hours saved and days on which work would have been cut at 17:00 … 23:00 UTC).
 
-### 9.5 Quién consume - who consumes
+### 9.5 Who consumes
 
 ![Who consumes](images/05-who-consumes.png)
 
 Identities (masked by default, `u•••@c•••`), most used items, Spark notebooks (duration, failures, who runs them) and a day × hour activity heat map.
 
-### 9.6 Reparto por workspace - chargeback
+### 9.6 Chargeback by workspace
 
 ![Chargeback by workspace](images/06-chargeback-by-workspace.png)
 
-Direct consumption + proportional idle share = total chargeable, plus the unassigned amount. **Sample run:** *Hotels Analytics* 604.30 USD (51.7 %), *Contact Center* 395.71 (33.9 %), *Manufacturing RTI* 128.47 (11 %). Also exported to the chargeback CSV.
+Direct consumption + proportional idle share = total chargeable, plus the unassigned amount. **Sample run:** *Hotels Analytics* 746.20 USD (85.2 %), *Contact Center* 111.29 (12.7 %); storage and OneLake transactions (18.65 USD) stay unassigned. Also exported to the chargeback CSV.
 
-### 9.7 Reserva y tamaño - reservation and sizing
+### 9.7 Access and groups - who can use what, and what each group consumes
+
+![Access and consumption by group](images/06b-access-by-group.png)
+
+Groups and people with a role on each workspace or a permission on each item, read in read-only mode from the admin APIs. **Member consumption** is the cost of what the group's members did on the workspaces and items granted to that group (same per-meter allocation as the chargeback); **cost of what it can use** is the cost of everything the group can reach. A person in several groups counts in each group that grants the resource, so groups are never added together. The table *People with access* adds who has access but no activity in the window and who is a new user. **Sample run:** 2 groups and 6 people with access; *Finance Analysts* has 2 of 2 members active, who generated **239.31 USD** on the 8 items shared with the group; *Customer Service* has 1 of 2 active (0.05 USD); 3 people have access but no activity and 2 users are new.
+
+![Drill-down per group: resources used and what each member consumes](images/06c-group-drilldown.png)
+
+*Expand a group to see which of its granted resources its members used, and what each member consumed there, next to that person's total across Fabric. The technical group that gives the SRE Agent read access (`sg-sre-agent-fabric`) is never shown as a business group.*
+
+### 9.8 Reservation and size
 
 ![Reservation and sizing](images/07-reservation-and-sizing.png)
 
 Annual pay-as-you-go vs 1-year / 3-year reservation, break-even uptime, and F16 / F8 / F4 scenarios with average and peak CU.
 
-### 9.8 Gobierno - governance
+### 9.9 Governance
 
 ![Governance](images/08-governance.png)
 
 Capacities (state, tags, trial), failed / stale refreshes, items untouched for 90+ days, sensitive tenant settings and whether the Capacity Metrics app is installed.
 
-### 9.9 Preguntas and 9.10 Fuentes
+### 9.10 Questions and sources
 
 ![Questions to ask the agent](images/09-answers-to-questions.png)
 
@@ -493,24 +536,30 @@ Ready-made questions for the agent, and the [sources](#step-7---first-run-in-cha
 | Fixed-time pause | Hours saved and days on which work would be cut if paused at 17, 18 … 23 h UTC | Same |
 | Reservation | Break-even = annual reservation price / (pay-as-you-go × 8,760 h). Pays off only if uptime exceeds it | Retail Prices |
 | SKU scenarios | Average CU per hour on and CU of the busiest day, divided by the CUs of the target SKU | Cost Management (CU-h) |
+| Group member consumption | Sum, over the members of the group, of their allocated cost on the workspaces and items granted to that group (same allocation as the chargeback, idle share included). Not additive across groups | Activity + access + Graph members |
+| Cost of what a group can use | Chargeback total of the workspaces where the group has a role + allocated cost of the items shared with it | Chargeback + access |
 | Chargeback | Each meter split by its own real usage - **Spark:** Livy seconds; **AI:** Copilot / Data Agent queries; **Real-Time, Warehouse, Power BI, IQ:** operations. Idle split in proportion to direct consumption. Storage, transactions and deleted workspaces stay **unassigned** | Cost Management + activity + Spark |
 
 ## Troubleshooting
 
-| Symptom in *Fuentes* | Cause | Fix |
+| Symptom in *Sources* | Cause | Fix |
 |---|---|---|
 | Admin APIs **401/403** (capacities, workspaces, items, activity) | Tenant setting *read-only admin APIs* does not include the group, has not propagated yet, or (Option B) the app has Power BI / Fabric API permissions with admin consent | Re-check step A2 / B2 setting 2, wait 15 min, remove any Power BI / Fabric API permission from the app |
 | Spark **403** | Tenant setting *call Fabric public APIs* missing for the group, or the identity is not on the workspace | Re-run the grant script, or add the group as Viewer in **Manage access** |
-| Cost **429** - banner *"Coste facturado no disponible"* | Cost Management throttles per subscription | Temporary. The tool honours `Retry-After`; ask again in a few minutes. Meanwhile hours, activity, pause saving (at retail price) and governance still show, and amounts are `null`, never an invented 0 |
+| Cost **429** - banner *"Billed cost not available in this run"* | Cost Management throttles per subscription | Temporary. The tool honours `Retry-After`; ask again in a few minutes. Meanwhile hours, activity, pause saving (at retail price) and governance still show, and amounts are `null`, never an invented 0 |
 | Cost **403** | Missing **Cost Management Reader** | Re-run the grant script with that `-SubscriptionId` |
 | No hours on | Missing **Reader** on the subscription, or the capacity has had no state change for 90+ days | Re-run the grant script |
 | Spark or OneLake **partial** | Identity missing on some workspaces; OneLake needs Contributor (or Viewer + OneLake *ReadAll*) | `-WorkspaceRole Contributor` only if you need OneLake size; the report lists which workspaces are missing |
 | Activity **partial** | The activity API keeps about 30 days; the tool reads 27 | Expected with 30-day windows |
 | Capacity Metrics *"no consultable"* | The app's RLS/SSO model does not allow service principals | Expected. Usage is computed from Cost Management CU-h, the same billing data at hourly grain |
 | Option B: all four `token_*` sources in error with `AADSTS5002723` | The certificate constants are empty, so the tool tried the federated credential, which the SRE Agent sandbox cannot use | Run `setup-cross-tenant-app.ps1 -KeyVaultName ...` and fill `CROSS_TENANT_CERT_KEYVAULT_URL` / `CROSS_TENANT_CERT_NAME` |
-| Option B: `cross_tenant_auth` error *Key Vault no devolvió el certificado* (403 / `ForbiddenByConnection`) | The UAMI lacks *Key Vault Secrets User*, or the vault's public network access is disabled (often by Azure Policy) | Re-run the setup script; enable public access or use an exempted resource group |
+| Option B: `cross_tenant_auth` error *Key Vault did not return the certificate* (403 / `ForbiddenByConnection`) | The UAMI lacks *Key Vault Secrets User*, or the vault's public network access is disabled (often by Azure Policy) | Re-run the setup script; enable public access or use an exempted resource group |
 | Option B: `AADSTS700027` / `AADSTS7000222` | Certificate public key missing on the app, or certificate expired | Re-run `setup-cross-tenant-app.ps1 -KeyVaultName ...` (it adds the current certificate to the app) |
 | Option B: `AADSTS7000229` / app not found in tenant B | Service principal not created in tenant B | Re-run the grant script with `-AppClientId`, or use the admin consent URL |
+| Group members **Permission pending** | The identity has no Microsoft Graph `GroupMember.Read.All` / `User.Read.All` in the Fabric tenant | [Step 2b](#step-2b---optional-let-the-report-read-group-members-both-options). Until then the report shows each group's access and the cost of what it can use |
+| `grant-graph-read-permissions.ps1`: *Your account cannot grant Microsoft Graph application permissions* (`Authorization_RequestDenied`) | The account is not Global Administrator or Privileged Role Administrator, or the PIM role is not active | Activate the role (Entra ID > Roles and administrators > My roles) and re-run |
+| A group the customer expects is missing from *Access and groups* | The group has no role on any workspace and no permission on any item (it may be used elsewhere, e.g. in RLS or an app audience) | Expected: the report lists groups with a Fabric grant. Check the workspace **Manage access** and the item **Manage permissions** |
+| Spark or OneLake **Capacity paused** (`CapacityNotActive`) | The capacity was paused when the report ran; Fabric only answers Spark and OneLake while it is running | Expected. Cost, hours, activity and access still render; run again with the capacity on to list Spark sessions and OneLake size |
 | 1-year and 3-year reservation cost the same | Some regions list the same per-CU/year price | Real data; the report says so |
 
 ## Security and limits
@@ -518,7 +567,8 @@ Ready-made questions for the agent, and the [sources](#step-7---first-run-in-cha
 - **Read-only.** Never pauses, resumes or resizes capacities, never changes access, settings or billing. People apply the actions.
 - **No secrets in the code** in either option: managed identity (A), or managed identity → certificate in Key Vault → multi-tenant app (B). The private key never leaves Key Vault except into the tool process for the sign-in; only the managed identity can read it. Tokens, keys and headers are never printed.
 - **Least privilege:** tenant settings scoped to one security group; workspace **Viewer** by default; Reader + Cost Management Reader only on the capacity subscriptions. No Fabric Administrator, capacity admin or write role for the identity.
-- **Identities masked by default** in HTML, JSON and CSV (including personal workspace names). `identities=visible` only on explicit request for an authorized recipient.
+- **Identities masked by default** in HTML, JSON and CSV (including personal workspace names). Group names are shown; people inside groups follow the same masking.
+- **Microsoft Graph is optional and read-only**: `GroupMember.Read.All` and `User.Read.All` only list group members and user creation dates. No directory write permission is ever requested. `identities=visible` only on explicit request for an authorized recipient.
 - **Stateless.** Nothing is stored between runs; each report is built from the data of the moment. Keep the JSON snapshots if you want month-to-month comparison.
 - **Capacity Metrics app:** detected, not queried (service principals cannot read its semantic model).
 - **Budget:** 105 s collection within a 150 s timeout; slow sources are marked and the report still renders.
@@ -548,5 +598,7 @@ Select `/agent fabric-chargeback-live` in **New chat**. The agent decides: a ful
 | Trend | ¿Cómo ha evolucionado la factura de Fabric mes a mes? | How has the Fabric bill evolved month by month? |
 | Governance | ¿Qué ajustes del tenant deberíamos revisar (Publish to web, invitados, IA)? | Which tenant settings should we review (Publish to web, guests, AI)? |
 | Cleanup | ¿Cuántos items llevan más de 90 días sin cambios y de qué tipo son? | How many items have not changed in 90+ days, and of what type? |
+| Groups | ¿Qué recursos consume cada grupo de usuarios y qué persona consume qué? | Which resources does each user group consume, and which person consumes what? |
+| Access | ¿Quién tiene acceso pero no ha usado Fabric, y qué usuarios son nuevos? | Who has access but has not used Fabric, and which users are new? |
 
 > To see real user names, ask explicitly: *"muéstrame las identidades sin enmascarar, el destinatario está autorizado"* / *"show unmasked identities, the recipient is authorized"* (`identities=visible`).

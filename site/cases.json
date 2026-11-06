@@ -264,15 +264,15 @@
       "name": "Microsoft Fabric costs and savings",
       "latin": "fabric-chargeback-live",
       "key": "Fabric capacity costs more than it is used",
-      "symptom": "We pay for Microsoft Fabric every month, but we don't know what is really used, by whom, or how much we could save.",
-      "does": "It reads the real bill, the hours the capacity is switched on and who uses what, then shows idle time, savings options (pause, resize or reserve) and a cost split per workspace.",
+      "symptom": "We pay for Microsoft Fabric every month, but we don't know what is really used, which teams and people use it, or how much we could save.",
+      "does": "It reads the real bill, the hours the capacity is switched on and who uses what, then shows idle time, savings options (pause, resize or reserve), a cost split per workspace, and what each user group and person consumes on the resources they can access.",
       "runs": "Monthly, on the 2nd",
-      "reads": "Azure Cost Management and Microsoft Fabric",
+      "reads": "Azure Cost Management, Microsoft Fabric and Microsoft Graph",
       "delivers": "HTML report, two CSVs and JSON",
       "image": "site/img/plates/11.webp",
       "thumb": "site/img/plates/11-thumb.webp",
-      "full": "11-fabric-finops-chargeback/sample-run/fabric-finops-20261026T123745Z.html",
-      "caption": "Sample report with anonymised data, in Spanish."
+      "full": "11-fabric-finops-chargeback/sample-run/fabric-finops-20261106T095840Z.html",
+      "caption": "Sample report with anonymised data."
     },
     "case_0_v3": {
       "family": "build",

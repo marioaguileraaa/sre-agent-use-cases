@@ -17,7 +17,7 @@ handler.
 | Field | Value |
 |---|---|
 | Name | `generate-fabric-chargeback-report` |
-| Description | `Microsoft Fabric FinOps and chargeback report from REAL tenant data (same-tenant or cross-tenant, read-only): billed cost per meter, monthly trend, idle capacity, savings (pause schedule, reservation, right-size), chargeback by workspace, who consumes what, and governance. Writes HTML + JSON + 2 CSV.` |
+| Description | `Microsoft Fabric FinOps and chargeback report from REAL tenant data (same-tenant or cross-tenant, read-only): billed cost per meter, monthly trend, idle capacity, savings (pause schedule, reservation, right-size), chargeback by workspace, who consumes what, access and consumption by group and by person, and governance. Writes HTML + JSON + 2 CSV (English).` |
 | Code | [`generate-fabric-chargeback-report.py`](generate-fabric-chargeback-report.py) with the 3 constants of the `CONFIGURE` block set (see README, step 4) |
 | Timeout | `150` |
 | Identity tab | Leave the switch **Off**. The tool authenticates with the agent managed identity itself (`MANAGED_IDENTITY_CLIENT_ID`) |
@@ -35,7 +35,7 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 | Field | Value |
 |---|---|
 | Name | `fabric-chargeback-live` |
-| Description | `Microsoft Fabric FinOps and chargeback on real tenant data only: billed cost by meter, idle capacity, savings, who consumes what and governance (same-tenant or cross-tenant, read-only).` |
+| Description | `Microsoft Fabric FinOps and chargeback on real tenant data only: billed cost by meter, idle capacity, savings, who consumes what, access and consumption by group, and governance (same-tenant or cross-tenant, read-only).` |
 | Content | Paste [`skills/fabric-chargeback-live/SKILL.md`](skills/fabric-chargeback-live/SKILL.md) |
 | Tools | Choose tools -> `generate-fabric-chargeback-report` |
 
@@ -44,7 +44,7 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 ```text
 You are the Microsoft Fabric FinOps and chargeback specialist (`fabric-chargeback-live`).
 Use the `fabric-chargeback-live` skill and ONLY the `generate-fabric-chargeback-report` tool.
-Reply in the user's language (Spanish or English).
+Reply in English unless the user writes in another language.
 For a full report call the tool with operation="report" (period last_30d unless the user asks for 7 or 14 days).
 For a targeted question call it with operation="summary" and answer only from the returned JSON.
 Keep identities="masked" unless the user explicitly asks to see identities and says the recipient is authorized.
@@ -56,6 +56,8 @@ For a report finish with an "Artifacts & links" bulleted list of the 4 returned 
 chargeback_csv_url, meters_csv_url) as markdown links, unchanged, never inside a table.
 Never print tokens or credentials. Never modify capacities, workspaces, access, tenant settings or billing.
 Do not create, overwrite or delete memory files while producing a report; it is a read-only, stateless task.
+When asked about groups, teams, people with access, new users or consumption by group, use `access_by_group` and
+`people_with_access` from the tool result and follow the skill section "Access and groups".
 ```
 
 ## Scheduled monthly automation (`0 7 2 * *` UTC)
@@ -75,7 +77,7 @@ Day 2 instead of day 1 because Azure Cost Management publishes cost with a 24-48
 ```text
 Generate the Microsoft Fabric FinOps and chargeback report for the last 30 days (operation="report", period="last_30d", identities="masked").
 Make exactly one tool call. If the tool returns status="error", report the sanitized error and the sources that failed, and stop; never invent figures.
-Otherwise summarize in Spanish: total billed cost, % consumed vs switched on without use, hours on and utilization, the top 5 actions with their value and evidence, the reservation verdict and the chargeback by workspace.
+Otherwise summarize in English: total billed cost, % consumed vs switched on without use, hours on and utilization, the top 5 actions with their value and evidence, the reservation verdict, the chargeback by workspace, and consumption by group (member cost per group, people with access but no activity, new users).
 Finish with an "Artifacts & links" bulleted list with the 4 returned URLs (report_url, snapshot_url, chargeback_csv_url, meters_csv_url) unchanged.
 Do not modify any Fabric or Azure resource.
 ```
@@ -117,6 +119,8 @@ Generate the Fabric FinOps report for the last 30 days.
 | Trend | ¿Cómo ha evolucionado la factura de Fabric mes a mes? | How has the Fabric bill evolved month by month? |
 | Governance | ¿Qué ajustes del tenant deberíamos revisar (Publish to web, invitados, IA)? | Which tenant settings should we review (Publish to web, guests, AI)? |
 | Clean-up | ¿Cuántos items llevan más de 90 días sin cambios y de qué tipo son? | How many items have not changed in 90+ days, and of what type? |
+| Groups | ¿Qué recursos consume cada grupo de usuarios y qué persona consume qué? | Which resources does each user group consume, and which person consumes what? |
+| Access | ¿Quién tiene acceso pero no ha usado Fabric, y qué usuarios son nuevos? | Who has access but has not used Fabric, and which users are new? |
 
 ```json
 {"operation":"summary","period":"last_30d","identities":"masked"}

@@ -1,6 +1,6 @@
 ---
 name: fabric-chargeback-live
-description: Microsoft Fabric FinOps and chargeback on REAL tenant data only - billed cost by meter, idle capacity, who consumes what, savings (pause schedule, reservation, right-size) and governance. Read-only, zero secrets, same-tenant or cross-tenant.
+description: Microsoft Fabric FinOps and chargeback on REAL tenant data only - billed cost by meter, idle capacity, who consumes what, savings (pause schedule, reservation, right-size), access and consumption by group and by person, and governance. Read-only, zero secrets, same-tenant or cross-tenant.
 tools:
   - generate-fabric-chargeback-report
 ---
@@ -68,6 +68,32 @@ Use only `generate-fabric-chargeback-report`:
 - "Which Spark notebooks cost most and which fail?"
 - "Which refreshes fail or have not run for 60+ days?"
 - "Are there paused or empty capacities that are a cost risk?"
+- "Which resources does each user group consume, and which person consumes what?"
+- "Which people have access but no activity, and which users are new?"
+
+## Access and groups (`access_by_group`, `people_with_access`)
+The tool also reads who can use what: workspace roles and item permissions, including security groups (Power BI
+admin groups API and admin scanner API, read-only), and the members of each group (Microsoft Graph, optional).
+When the user asks about groups, teams, people with access, new users or consumption by group, answer from:
+- `access_by_group`: per group, its workspaces and shared items with the permission, members, active members, new
+  members, member operations, `member_cost` (cost of what its members did on the workspaces and items granted to
+  that group) and `cost_of_accessible_resources` (cost of everything the group can use). Not additive across groups.
+- Drill-down per group: `resources_consumed_by_members` (granted items and workspaces its members used, with
+  operations and cost) and `members_consumption` (each member who used them: operations and cost on the group's
+  resources, `top_resources`, and `total_operations` / `total_cost` across all of Fabric). A person in several
+  groups, or with direct access too, counts in every group that grants the resource; never add groups together.
+- `people_with_access`: total, people without activity in the window, new users, and `consumers` (each active
+  person with `via` = direct or group name, and their top resources).
+If `people_with_access.group_membership` is `pending`, say that group members cannot be read yet and that a Global
+Administrator or Privileged Role Administrator of the Fabric tenant must grant the Microsoft Graph application
+permissions GroupMember.Read.All and User.Read.All (read-only) to the identity, with `grant-graph-read-permissions.ps1`;
+until then consumption by group is shown as the cost of the resources each group can use. A person with access but
+no activity in the window is not in "who consumes"; say so instead of treating them as missing. Groups with no grant
+on any workspace or item do not appear; say so if the user asks about a missing group. The technical group that
+gives the SRE Agent read access (`sg-sre-agent-fabric`) is never reported as a business group.
+
+## Language
+The HTML report, CSVs and snapshot text are in English. Reply in English unless the user writes in another language.
 
 ## Guardrails
 Read-only. Never pause, resume, resize or reassign capacities, never change workspace access, never modify
