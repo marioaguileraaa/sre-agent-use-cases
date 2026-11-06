@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "generate-azure-change-digest parameters",
+  "description": "All parameters are optional. The daily scheduled task calls {\"operation\": \"report\", \"period\": \"last_24h\"}. Scope (subscriptions or management group), business hours, production tags and expected automation are set in the CONFIGURE block of the tool code, never by the agent.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": ["report", "query"],
+      "default": "report",
+      "description": "report writes four files (offline HTML report, JSON snapshot, changes CSV, property diffs CSV) and returns links, headline, counts, top items and coverage. query returns one bounded chat view (no files)."
+    },
+    "period": {
+      "type": "string",
+      "enum": ["last_24h", "last_7d", "last_14d"],
+      "default": "last_24h",
+      "description": "Rolling window ending now. 14 days is the Change Analysis retention in Azure Resource Graph."
+    },
+    "min_level": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "default": "medium",
+      "description": "Lowest level listed in detail (report sections and the relevant view). Lower levels are always counted."
+    },
+    "view": {
+      "type": "string",
+      "enum": ["summary", "relevant", "deletes", "security", "actors", "unusual", "rbac", "noise", "coverage"],
+      "default": "summary",
+      "description": "Chat view for operation=query only."
+    },
+    "resource_group": {
+      "type": "string",
+      "maxLength": 90,
+      "pattern": "^[A-Za-z0-9_.()\\-]{0,90}$",
+      "default": "",
+      "description": "Optional focus: resource group name or part of one (case-insensitive). Never a path, URL or query."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 25,
+      "description": "Maximum rows for operation=query; the answer is also capped to 3,500 bytes (transport_capped=true when rows were dropped)."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "operation": { "const": "report" } } },
+      "then": { "properties": { "view": { "const": "summary" }, "limit": { "const": 25 } } }
+    }
+  ]
+}
