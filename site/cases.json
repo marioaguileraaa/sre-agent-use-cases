@@ -223,6 +223,25 @@
         "05-service-health-events-review"
       ]
     },
+    "14-azure-relevant-changes-digest": {
+      "family": "operations",
+      "name": "Daily relevant changes digest",
+      "latin": "change-digest-reviewer",
+      "key": "Hundreds of Azure changes a day, and nobody knows which ones matter",
+      "symptom": "Our Azure environment changes hundreds of times a day, almost all of it platform noise, and we only look at the change history after something breaks.",
+      "does": "Every evening it reads Change Analysis in Azure Resource Graph, filters the noise, and lists the changes that matter with who made them, when, how and the old and new values: rules opened to the Internet, firewalls relaxed, deletes, locks and monitoring removed, new role assignments.",
+      "runs": "Daily, at the end of the business day",
+      "reads": "Change Analysis in Azure Resource Graph and the Activity Log",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/14.webp",
+      "thumb": "site/img/plates/14-thumb.webp",
+      "full": "14-azure-relevant-changes-digest/sample-run/change-digest-20261106T115407Z-07932d59.html",
+      "caption": "Real lab run with names and identifiers replaced.",
+      "compare": [
+        "10-operations-incidents-anomalies-digest",
+        "13-rbac-privileged-access-review"
+      ]
+    },
     "04-aks-well-architected-review": {
       "family": "platform",
       "name": "AKS cluster review",

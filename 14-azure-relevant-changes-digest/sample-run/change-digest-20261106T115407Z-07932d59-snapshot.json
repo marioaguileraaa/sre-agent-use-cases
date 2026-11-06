@@ -1,0 +1,4216 @@
+{
+ "schema": "azure-change-digest/1",
+ "provenance": "LIVE",
+ "tool": "generate-azure-change-digest",
+ "tool_version": "1.0",
+ "generated_utc": "2026-11-06T11:54:07Z",
+ "status": "ok",
+ "client_name": "",
+ "window": {
+  "period": "last_24h",
+  "label": "Last 24 hours",
+  "start_utc": "2026-11-05T11:53:59Z",
+  "end_utc": "2026-11-06T11:53:59Z",
+  "start_local": "2026-11-05 12:53 CET",
+  "end_local": "2026-11-06 12:53 CET",
+  "timezone": "Europe/Madrid",
+  "timezone_source": "zoneinfo",
+  "business_hours": [
+   8,
+   20
+  ],
+  "business_days": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ]
+ },
+ "parameters": {
+  "min_level": "medium",
+  "resource_group": ""
+ },
+ "scope": {
+  "subscriptions": [
+   {
+    "id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+    "name": "Contoso Production"
+   }
+  ],
+  "management_group": ""
+ },
+ "counts": {
+  "total": 105,
+  "by_change_type": {
+   "Update": 78,
+   "Create": 18,
+   "Delete": 9
+  },
+  "by_level": {
+   "high": 8,
+   "medium": 10,
+   "low": 27,
+   "noise": 60
+  },
+  "noise_filtered_pct": 57,
+  "reported": 18,
+  "deletes": 9,
+  "delete_operations": 5,
+  "security": 12,
+  "new_role_assignments": 3,
+  "updated_role_assignments": 0,
+  "privileged_role_assignments": 0,
+  "activity_log_gaps": 6,
+  "failed_attempts": 1,
+  "by_actor_class": {
+   "platform": 24,
+   "human": 17,
+   "automation": 4
+  },
+  "by_client_class": {
+   "script": 17,
+   "sdk": 14,
+   "service": 10,
+   "unspecified": 4
+  },
+  "unusual": {
+   "after_hours": 0,
+   "first_time_actor_rg": 3,
+   "bursts": 1,
+   "click_ops": 0,
+   "click_ops_prod": 0
+  },
+  "excluded_by_configuration": 0
+ },
+ "headline": {
+  "verdict": "18 relevant changes out of 105 in the last 24 hours (8 high, 10 medium), plus 9 RBAC and Activity Log events.",
+  "highlights": [
+   "nsg-app-frontend: Inbound Allow from any source (*) to 22 (SSH) on rule allow-ssh-office",
+   "kv-app-prod-weu: Network ACL default action (not set) -> Allow; Firewall allow rule added: 203.0.113.10/32",
+   "pip-temp-test: New public IP address (Internet exposure)",
+   "diag-kv-audit on kv-app-prod-weu: Diagnostic setting removed (monitoring gap)",
+   "lock-do-not-delete on rg-app-prod-weu: Resource lock removed"
+  ]
+ },
+ "items": [
+  {
+   "kind": "change",
+   "level": "high",
+   "title": "Update nsg-app-frontend",
+   "resource": "nsg-app-frontend",
+   "type": "Network security group",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:43:19Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "Inbound Allow from any source (*) to 22 (SSH) on rule allow-ssh-office",
+   "flags": [
+    "internet-exposed",
+    "burst"
+   ],
+   "ref": "08584076453162955807_5f1479b2-1421-4853-bfdb-df4a47577ed4"
+  },
+  {
+   "kind": "change",
+   "level": "high",
+   "title": "Update kv-app-prod-weu",
+   "resource": "kv-app-prod-weu",
+   "type": "Key Vault",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:39:31Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "Network ACL default action (not set) -> Allow; Firewall allow rule added: 203.0.113.10/32",
+   "flags": [
+    "exposure increased",
+    "burst"
+   ],
+   "ref": "08584076454679975807_77c0ec05-472f-495e-8f64-8fe7a941041f"
+  },
+  {
+   "kind": "change",
+   "level": "high",
+   "title": "Update nsg-app-frontend",
+   "resource": "nsg-app-frontend",
+   "type": "Network security group",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:39:24Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "Inbound Allow from Internet to 3389 (RDP) on rule allow-rdp-from-internet",
+   "flags": [
+    "internet-exposed",
+    "burst"
+   ],
+   "ref": "08584076454156735807_039ce36c-8377-4a22-9184-01046dc9b371"
+  },
+  {
+   "kind": "change",
+   "level": "high",
+   "title": "Create pip-temp-test",
+   "resource": "pip-temp-test",
+   "type": "Public IP address",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:38:03Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new public IP address (Internet exposure)",
+   "flags": [
+    "exposure increased",
+    "burst"
+   ],
+   "ref": "09223372036854775807_ee232ff2-a326-4562-8894-ca70614ccfc6"
+  },
+  {
+   "kind": "change",
+   "level": "high",
+   "title": "Update nsg-app-frontend",
+   "resource": "nsg-app-frontend",
+   "type": "Network security group",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T11:30:20Z",
+   "who": "e888bb96-b481-51fc-bf75-73a0d859562b",
+   "client": "PowerShell",
+   "why": "Security rule allow-rdp-from-internet removed (was Inbound Allow from Internet to 3389 (RDP))",
+   "flags": [
+    "first-time actor on RG"
+   ],
+   "ref": "08584076448796965807_0c9162b4-8227-4636-91f4-db88b94b9b5c"
+  },
+  {
+   "kind": "activity_log",
+   "level": "high",
+   "title": "Diagnostic setting removed (monitoring gap)",
+   "resource": "diag-kv-audit on kv-app-prod-weu",
+   "type": "Activity Log",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:45:02Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Diagnostic setting removed (monitoring gap)",
+   "flags": [],
+   "ref": "a4a5382f-1a49-5a88-bde6-7339f2f59a9f"
+  },
+  {
+   "kind": "delete",
+   "level": "high",
+   "title": "Deleted pip-temp-test",
+   "resource": "pip-temp-test",
+   "type": "Public IP address",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:44:49Z",
+   "who": "alex.ops@contoso.com",
+   "client": "Unspecified",
+   "why": "deleted by a human; actor recovered from the Activity Log (Change Analysis recorded no actor)",
+   "flags": [
+    "burst"
+   ],
+   "ref": "1a2dfc47-50b7-515e-98b9-91beac1057fd"
+  },
+  {
+   "kind": "activity_log",
+   "level": "high",
+   "title": "Resource lock removed",
+   "resource": "lock-do-not-delete on rg-app-prod-weu",
+   "type": "Activity Log",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:44:44Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Resource lock removed",
+   "flags": [],
+   "ref": "fc729483-67f4-50d4-9555-27b2d5d469c5"
+  },
+  {
+   "kind": "change",
+   "level": "high",
+   "title": "Update nsg-app-frontend",
+   "resource": "nsg-app-frontend",
+   "type": "Network security group",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:39:29Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "Security rule allow-ssh-office added: Inbound Allow 198.51.100.0/24 -> 22",
+   "flags": [
+    "burst"
+   ],
+   "ref": "08584076453212875807_b5b0e149-74ec-44b5-85a8-87b08efec8c9"
+  },
+  {
+   "kind": "delete",
+   "level": "high",
+   "title": "Deleted kv-shared-secrets-01",
+   "resource": "kv-shared-secrets-01",
+   "type": "Key Vault",
+   "resource_group": "rg-platform-shared",
+   "when_utc": "2026-11-05T15:54:49Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "deleted by a human",
+   "flags": [],
+   "ref": "d9765bbd-861b-5986-8344-d7324ec1a64c"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create rg-app-prod-weu",
+   "resource": "rg-app-prod-weu",
+   "type": "Resource group",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:46:40Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "created by a human",
+   "flags": [
+    "burst"
+   ],
+   "ref": "09223372036854775807_74d26964-8f43-44cc-b38b-2a2df8bd84b7"
+  },
+  {
+   "kind": "activity_log",
+   "level": "medium",
+   "title": "Diagnostic setting created or changed",
+   "resource": "diag-kv-audit on kv-app-prod-weu",
+   "type": "Activity Log",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:43:36Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Diagnostic setting created or changed",
+   "flags": [],
+   "ref": "1779939a-3e03-55fb-86a7-6f274aec114a"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Update disk-app-data",
+   "resource": "disk-app-data",
+   "type": "Managed disk",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:43:23Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "SKU Standard_LRS -> Premium_LRS; configuration change",
+   "flags": [
+    "burst"
+   ],
+   "ref": "08584076453060275807_c978c3be-4af9-fab2-5098-9b959b314da8"
+  },
+  {
+   "kind": "activity_log",
+   "level": "medium",
+   "title": "Resource lock created or changed",
+   "resource": "lock-do-not-delete on rg-app-prod-weu",
+   "type": "Activity Log",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:39:58Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Resource lock created or changed",
+   "flags": [],
+   "ref": "af3c465c-db8d-55e2-b62a-0c7ef77faf50"
+  },
+  {
+   "kind": "role_assignment",
+   "level": "medium",
+   "title": "Role assignment created: Reader",
+   "resource": "Resource group rg-app-prod-weu",
+   "type": "Role assignment",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:39:52Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Reader for ServicePrincipal id-sre-agent (managed identity)",
+   "flags": [],
+   "ref": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Authorization/RoleAssignments/bc156ee3-60ce-5df9-bece-818c64541369"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Update disk-app-data",
+   "resource": "disk-app-data",
+   "type": "Managed disk",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:39:39Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "Disk size 4 GB -> 8 GB",
+   "flags": [
+    "burst"
+   ],
+   "ref": "08584076454327835807_d6500012-d41e-45f4-8767-926360776ca4"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create stappprodweu",
+   "resource": "stappprodweu",
+   "type": "Storage account",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:37:58Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new security or data resource",
+   "flags": [
+    "burst"
+   ],
+   "ref": "09223372036854775807_8798dac6-ad32-4ea8-9ae3-30b2a8160948"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create nsg-app-frontend",
+   "resource": "nsg-app-frontend",
+   "type": "Network security group",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:37:49Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new security or data resource",
+   "flags": [
+    "burst"
+   ],
+   "ref": "09223372036854775807_870cc495-9b76-4b18-8c78-91e7f90e62d2"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create disk-app-data",
+   "resource": "disk-app-data",
+   "type": "Managed disk",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:37:32Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new security or data resource",
+   "flags": [
+    "burst"
+   ],
+   "ref": "09223372036854775807_8822afea-b212-4740-8a74-e9ceff66f087"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create kv-app-prod-weu",
+   "resource": "kv-app-prod-weu",
+   "type": "Key Vault",
+   "resource_group": "rg-app-prod-weu",
+   "when_utc": "2026-11-06T10:36:57Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new security or data resource",
+   "flags": [
+    "first-time actor on RG",
+    "burst"
+   ],
+   "ref": "09223372036854775807_bf2b4b09-d45b-4515-b1a7-0fce0ed3971e"
+  },
+  {
+   "kind": "activity_log",
+   "level": "medium",
+   "title": "Resource lock created or changed",
+   "resource": "AzureBackupProtectionLock on stbackupprod001",
+   "type": "Activity Log",
+   "resource_group": "rg-backup-prod",
+   "when_utc": "2026-11-05T19:45:37Z",
+   "who": "19a38b2f-a3c4-56c4-8f9e-0308427e6dab",
+   "client": "",
+   "why": "Resource lock created or changed",
+   "flags": [],
+   "ref": "f0bc6da2-35fa-5f80-8e7b-16ba6d5cc65f"
+  },
+  {
+   "kind": "activity_log",
+   "level": "medium",
+   "title": "Resource lock created or changed",
+   "resource": "AzureBackupProtectionLock on stbackupprod001",
+   "type": "Activity Log",
+   "resource_group": "rg-backup-prod",
+   "when_utc": "2026-11-05T19:45:36Z",
+   "who": "19a38b2f-a3c4-56c4-8f9e-0308427e6dab",
+   "client": "",
+   "why": "Resource lock created or changed",
+   "flags": [],
+   "ref": "e28222e1-d6c9-5aca-afaa-454dd8b72308"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create kv-shared-secrets-02",
+   "resource": "kv-shared-secrets-02",
+   "type": "Key Vault",
+   "resource_group": "rg-shared-secrets",
+   "when_utc": "2026-11-05T16:04:39Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new security or data resource",
+   "flags": [],
+   "ref": "09223372036854775807_6f7e937a-df0d-4293-9ccf-d113663d24b0"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create rg-shared-secrets",
+   "resource": "rg-shared-secrets",
+   "type": "Resource group",
+   "resource_group": "rg-shared-secrets",
+   "when_utc": "2026-11-05T16:04:17Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "created by a human",
+   "flags": [
+    "first-time actor on RG"
+   ],
+   "ref": "09223372036854775807_ce05e8af-cad2-4069-88dd-920bcb76a5d3"
+  },
+  {
+   "kind": "role_assignment",
+   "level": "medium",
+   "title": "Role assignment created: Key Vault Secrets User",
+   "resource": "Resource kv-shared-secrets-02",
+   "type": "Role assignment",
+   "resource_group": "rg-shared-secrets",
+   "when_utc": "2026-11-05T15:56:32Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Key Vault Secrets User for ServicePrincipal id-sre-agent (managed identity)",
+   "flags": [],
+   "ref": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02/providers/Microsoft.Authorization/RoleAssignments/4ea043d3-c1ec-5a76-97e1-bb759a3dcbad"
+  },
+  {
+   "kind": "role_assignment",
+   "level": "medium",
+   "title": "Role assignment created: Key Vault Administrator",
+   "resource": "Resource kv-shared-secrets-02",
+   "type": "Role assignment",
+   "resource_group": "rg-shared-secrets",
+   "when_utc": "2026-11-05T15:56:28Z",
+   "who": "alex.ops@contoso.com",
+   "client": "",
+   "why": "Key Vault Administrator for User bcc1a6f4-bc8d-535f-ab33-aa86f19f4c6e",
+   "flags": [],
+   "ref": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02/providers/Microsoft.Authorization/RoleAssignments/9c7c13a7-1efe-5b02-beca-571e0a4512eb"
+  },
+  {
+   "kind": "change",
+   "level": "medium",
+   "title": "Create kv-shared-secrets-01",
+   "resource": "kv-shared-secrets-01",
+   "type": "Key Vault",
+   "resource_group": "rg-platform-shared",
+   "when_utc": "2026-11-05T15:51:39Z",
+   "who": "alex.ops@contoso.com",
+   "client": "CLI",
+   "why": "new security or data resource",
+   "flags": [],
+   "ref": "09223372036854775807_a3569028-46a2-4929-8de3-c2ad9a9dc14f"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update arc-server-01",
+   "resource": "arc-server-01",
+   "type": "Virtual machine",
+   "resource_group": "rg-arc-servers-prod",
+   "when_utc": "2026-11-06T07:02:32Z",
+   "who": "la-start-arc-servers",
+   "client": "Azure Logic Apps",
+   "why": "power operation",
+   "flags": [],
+   "ref": "08584076583833865807_6a40803a-b695-476f-b223-50e165865839"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update ARC-SERVER-01",
+   "resource": "ARC-SERVER-01",
+   "type": "Virtual machine",
+   "resource_group": "rg-arc-servers-prod",
+   "when_utc": "2026-11-06T07:01:12Z",
+   "who": "Azure platform (System)",
+   "client": "Unspecified",
+   "why": "power state change",
+   "flags": [],
+   "ref": "08584076584157225807_88ef8c19-c679-96c2-2003-812a72d015be"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update ARC-SERVER-01",
+   "resource": "ARC-SERVER-01",
+   "type": "Virtual machine",
+   "resource_group": "rg-arc-servers-prod",
+   "when_utc": "2026-11-06T07:00:58Z",
+   "who": "la-start-arc-servers",
+   "client": "Azure Logic Apps",
+   "why": "power operation",
+   "flags": [],
+   "ref": "08584076584518835807_e19f5ef8-4eb4-4626-6bab-6bffdb2101cf"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update arc-server-01",
+   "resource": "arc-server-01",
+   "type": "Virtual machine",
+   "resource_group": "rg-arc-servers-prod",
+   "when_utc": "2026-11-06T07:00:33Z",
+   "who": "la-start-arc-servers",
+   "client": "Azure Logic Apps",
+   "why": "power operation",
+   "flags": [],
+   "ref": "08584077045312225807_6a40803a-b695-476f-b223-50e165865839"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update arc-server-01",
+   "resource": "arc-server-01",
+   "type": "Virtual machine",
+   "resource_group": "rg-arc-servers-prod",
+   "when_utc": "2026-11-05T18:12:34Z",
+   "who": "VS DevTest Lab",
+   "client": "VS DevTest Lab",
+   "why": "power state change",
+   "flags": [],
+   "ref": "08584077059927995807_7414c7e5-2b37-4cd4-aac9-5457e03a1913"
+  },
+  {
+   "kind": "delete",
+   "level": "low",
+   "title": "Deleted 4 resources: AKS-DEFAULT-NODE1, computeAksLinuxBilling, cse-agent-karpenter +1",
+   "resource": "AKS-DEFAULT-NODE1, computeAksLinuxBilling, cse-agent-karpenter +1",
+   "type": "Virtual machine, VM extension",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:53:13Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "platform-managed delete",
+   "flags": [],
+   "ref": "e8836f04-ef15-5789-b465-4bbf74bf35a2"
+  },
+  {
+   "kind": "delete",
+   "level": "low",
+   "title": "Deleted 2 resources: aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Network interface",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:53:11Z",
+   "who": "Azure service (app 1f77b635)",
+   "client": "1F77B635-0804-5DB0-9CDF-0F07EBE8D1A6",
+   "why": "platform-managed delete",
+   "flags": [],
+   "ref": "7136341a-34e4-5260-95ac-a8f67740ee64"
+  },
+  {
+   "kind": "delete",
+   "level": "low",
+   "title": "Deleted aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Managed disk",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:53:09Z",
+   "who": "Azure service (app 11943159)",
+   "client": "11943159-3197-5609-8E86-0281CF4233EE",
+   "why": "platform-managed delete",
+   "flags": [],
+   "ref": "e8836f04-ef15-5789-b465-4bbf74bf35a2"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update aks-nodepool1-vmss",
+   "resource": "aks-nodepool1-vmss",
+   "type": "VM scale set",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:52:29Z",
+   "who": "Azure Container Service",
+   "client": "Azure Container Service",
+   "why": "platform autoscale (capacity)",
+   "flags": [],
+   "ref": "08584077255792615807_0d72b9c0-ac0a-44e3-85d0-574434bdab34"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create AKSLinuxExtension",
+   "resource": "AKSLinuxExtension",
+   "type": "VM extension",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:38:01Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_f7053d2b-2ad9-45f2-86c9-fdbfa9325264"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Managed disk",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:32:39Z",
+   "who": "Azure service (app 11943159)",
+   "client": "11943159-3197-5609-8E86-0281CF4233EE",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_48cbb502-bb3e-4e62-be73-9604d2965a3b"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Managed disk",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:32:39Z",
+   "who": "Azure service (app 11943159)",
+   "client": "11943159-3197-5609-8E86-0281CF4233EE",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_7831502d-973d-9ac5-e268-5dbba5964eac"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create computeAksLinuxBilling",
+   "resource": "computeAksLinuxBilling",
+   "type": "VM extension",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:24:18Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_e3e1915e-d512-4a98-9d47-5d88068f49ce"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create cse-agent-karpenter",
+   "resource": "cse-agent-karpenter",
+   "type": "VM extension",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:23:50Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_aa0c67a7-7f86-4491-ab4e-ca35b237dd7e"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update AKS-DEFAULT-NODE1",
+   "resource": "AKS-DEFAULT-NODE1",
+   "type": "Virtual machine",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:50Z",
+   "who": "Azure platform (System)",
+   "client": "Unspecified",
+   "why": "power state change",
+   "flags": [],
+   "ref": "08584077255154815807_16cdc662-4260-1e5b-0d80-a100ac1e7d2a"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update AKS-DEFAULT-NODE1",
+   "resource": "AKS-DEFAULT-NODE1",
+   "type": "Virtual machine",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:49Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "power state change",
+   "flags": [],
+   "ref": "08584077255158825807_2ef4105c-4000-c4b9-d393-629b35d9f297"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Network interface",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:40Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "NIC attach/detach churn",
+   "flags": [],
+   "ref": "08584077255301495807_a2970d22-8f38-4cdd-bbf3-430538784213"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Virtual machine",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:40Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_48cbb502-bb3e-4e62-be73-9604d2965a3b"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Managed disk",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:39Z",
+   "who": "Azure service (app 11943159)",
+   "client": "11943159-3197-5609-8E86-0281CF4233EE",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_31cf39d1-4f08-18c9-4d2b-5f7a4fe7ed4d"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Managed disk",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:39Z",
+   "who": "Azure platform (System)",
+   "client": "Unspecified",
+   "why": "configuration change",
+   "flags": [],
+   "ref": "08584077255265715807_b6c924d4-ae2b-4315-c972-222d3aa8d54d"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Managed disk",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:38Z",
+   "who": "Azure service (app 11943159)",
+   "client": "11943159-3197-5609-8E86-0281CF4233EE",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_62802d8d-6ee4-aec8-85b1-559120f72d98"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Create aks-default-node1",
+   "resource": "aks-default-node1",
+   "type": "Network interface",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:22:34Z",
+   "who": "aks-prod-weu",
+   "client": "Go SDK",
+   "why": "platform-managed create",
+   "flags": [],
+   "ref": "09223372036854775807_37d6555e-b135-4305-9495-60bde28b8471"
+  },
+  {
+   "kind": "change",
+   "level": "low",
+   "title": "Update aks-nodepool1-vmss",
+   "resource": "aks-nodepool1-vmss",
+   "type": "VM scale set",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "when_utc": "2026-11-05T12:21:46Z",
+   "who": "Azure Container Service",
+   "client": "Azure Container Service",
+   "why": "platform autoscale (capacity)",
+   "flags": [],
+   "ref": "08584077256627335807_326ba1d3-aa0d-41aa-ab7e-9e2f87005b1d"
+  }
+ ],
+ "changes": [
+  {
+   "change_id": "08584076448796965807_0c9162b4-8227-4636-91f4-db88b94b9b5c",
+   "timestamp_utc": "2026-11-06T11:30:20Z",
+   "timestamp_local": "2026-11-06 12:30 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend",
+   "resource_name": "nsg-app-frontend",
+   "resource_type": "microsoft.network/networksecuritygroups",
+   "resource_type_label": "Network security group",
+   "change_type": "Update",
+   "level": "high",
+   "reasons": [
+    "Security rule allow-rdp-from-internet removed (was Inbound Allow from Internet to 3389 (RDP))"
+   ],
+   "flags": [
+    "first-time actor on RG"
+   ],
+   "actor": {
+    "changed_by": "e888bb96-b481-51fc-bf75-73a0d859562b",
+    "changed_by_type": "Application",
+    "actor_class": "automation",
+    "display_name": "e888bb96-b481-51fc-bf75-73a0d859562b",
+    "resolution": "raw"
+   },
+   "client": {
+    "client_type": "PowerShell",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Network/networkSecurityGroups/write",
+   "correlation_id": "51b0d870-3808-5108-8ad0-51c10f8fac09",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 1,
+   "paths": [
+    {
+     "path": "properties.securityRules[0].id",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend/securityRules/allow-rdp-from-internet",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].name",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "allow-rdp-from-internet",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.access",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "Allow",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.destinationAddressPrefix",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "*",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.destinationPortRange",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "3389",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.direction",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "Inbound",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.priority",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "300",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.protocol",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "Tcp",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.sourceAddressPrefix",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "Internet",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].properties.sourcePortRange",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "*",
+     "new": ""
+    },
+    {
+     "path": "properties.securityRules[0].type",
+     "shape": "removed",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "Microsoft.Network/networkSecurityGroups/securityRules",
+     "new": ""
+    }
+   ]
+  },
+  {
+   "change_id": "09223372036854775807_74d26964-8f43-44cc-b38b-2a2df8bd84b7",
+   "timestamp_utc": "2026-11-06T10:46:40Z",
+   "timestamp_local": "2026-11-06 11:46 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu",
+   "resource_name": "rg-app-prod-weu",
+   "resource_type": "microsoft.resources/subscriptions/resourcegroups",
+   "resource_type_label": "Resource group",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "created by a human"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Resources/subscriptions/resourcegroups/write",
+   "correlation_id": "9db9817f-dc99-51a8-a05b-6d8c8ff79599",
+   "managed_rg": false,
+   "prod": true,
+   "security": false,
+   "source": "resourcecontainerchanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584076451018525807_5beee499-ae80-4fe7-abe8-70f441fc9aa6",
+   "timestamp_utc": "2026-11-06T10:44:49Z",
+   "timestamp_local": "2026-11-06 11:44 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/publicIPAddresses/pip-temp-test",
+   "resource_name": "pip-temp-test",
+   "resource_type": "microsoft.network/publicipaddresses",
+   "resource_type_label": "Public IP address",
+   "change_type": "Delete",
+   "level": "high",
+   "reasons": [
+    "deleted by a human",
+    "actor recovered from the Activity Log (Change Analysis recorded no actor)"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Unspecified",
+    "client_class": "unspecified"
+   },
+   "operation": "Microsoft.Network/publicIpAddresses/delete",
+   "correlation_id": "1a2dfc47-50b7-515e-98b9-91beac1057fd",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584076453060275807_c978c3be-4af9-fab2-5098-9b959b314da8",
+   "timestamp_utc": "2026-11-06T10:43:23Z",
+   "timestamp_local": "2026-11-06 11:43 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Compute/disks/disk-app-data",
+   "resource_name": "disk-app-data",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Update",
+   "level": "medium",
+   "reasons": [
+    "SKU Standard_LRS -> Premium_LRS",
+    "configuration change"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": false,
+   "prod": true,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.diskIOPSReadWrite",
+     "shape": "modified",
+     "level": "medium",
+     "reason": "configuration change",
+     "previous": "500",
+     "new": "120"
+    },
+    {
+     "path": "properties.diskMBpsReadWrite",
+     "shape": "modified",
+     "level": "medium",
+     "reason": "configuration change",
+     "previous": "60",
+     "new": "25"
+    },
+    {
+     "path": "properties.tier",
+     "shape": "inserted",
+     "level": "medium",
+     "reason": "configuration change",
+     "previous": "",
+     "new": "P2"
+    },
+    {
+     "path": "sku.name",
+     "shape": "modified",
+     "level": "medium",
+     "reason": "SKU / size / tier changed",
+     "previous": "Standard_LRS",
+     "new": "Premium_LRS"
+    },
+    {
+     "path": "sku.tier",
+     "shape": "modified",
+     "level": "medium",
+     "reason": "SKU / size / tier changed",
+     "previous": "Standard",
+     "new": "Premium"
+    }
+   ]
+  },
+  {
+   "change_id": "08584076453162955807_5f1479b2-1421-4853-bfdb-df4a47577ed4",
+   "timestamp_utc": "2026-11-06T10:43:19Z",
+   "timestamp_local": "2026-11-06 11:43 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend",
+   "resource_name": "nsg-app-frontend",
+   "resource_type": "microsoft.network/networksecuritygroups",
+   "resource_type_label": "Network security group",
+   "change_type": "Update",
+   "level": "high",
+   "reasons": [
+    "Inbound Allow from any source (*) to 22 (SSH) on rule allow-ssh-office"
+   ],
+   "flags": [
+    "internet-exposed",
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Network/networkSecurityGroups/securityRules/write",
+   "correlation_id": "d4ecc148-a78c-5697-8602-2c641dbc4413",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.securityRules[1].properties.sourceAddressPrefix",
+     "shape": "modified",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "198.51.100.0/24",
+     "new": "*"
+    }
+   ]
+  },
+  {
+   "change_id": "08584076454327835807_d6500012-d41e-45f4-8767-926360776ca4",
+   "timestamp_utc": "2026-11-06T10:39:39Z",
+   "timestamp_local": "2026-11-06 11:39 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Compute/disks/disk-app-data",
+   "resource_name": "disk-app-data",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Update",
+   "level": "medium",
+   "reasons": [
+    "Disk size 4 GB -> 8 GB"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "9e056fa4-7b59-5423-bcf0-ecc9c4663a92",
+   "managed_rg": false,
+   "prod": true,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.diskSizeBytes",
+     "shape": "modified",
+     "level": "medium",
+     "reason": "SKU / size / tier changed",
+     "previous": "4294967296",
+     "new": "8589934592"
+    },
+    {
+     "path": "properties.diskSizeGB",
+     "shape": "modified",
+     "level": "medium",
+     "reason": "SKU / size / tier changed",
+     "previous": "4",
+     "new": "8"
+    }
+   ]
+  },
+  {
+   "change_id": "08584076454679975807_77c0ec05-472f-495e-8f64-8fe7a941041f",
+   "timestamp_utc": "2026-11-06T10:39:31Z",
+   "timestamp_local": "2026-11-06 11:39 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.KeyVault/vaults/kv-app-prod-weu",
+   "resource_name": "kv-app-prod-weu",
+   "resource_type": "microsoft.keyvault/vaults",
+   "resource_type_label": "Key Vault",
+   "change_type": "Update",
+   "level": "high",
+   "reasons": [
+    "Network ACL default action (not set) -> Allow",
+    "Firewall allow rule added: 203.0.113.10/32"
+   ],
+   "flags": [
+    "exposure increased",
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.KeyVault/vaults/write",
+   "correlation_id": "32dfb89d-e306-5ae7-afb0-ed52a9bd5ecb",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 1,
+   "paths": [
+    {
+     "path": "properties.networkAcls.bypass",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "AzureServices"
+    },
+    {
+     "path": "properties.networkAcls.defaultAction",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Allow"
+    },
+    {
+     "path": "properties.networkAcls.ipRules[0].value",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "203.0.113.10/32"
+    }
+   ]
+  },
+  {
+   "change_id": "08584076453212875807_b5b0e149-74ec-44b5-85a8-87b08efec8c9",
+   "timestamp_utc": "2026-11-06T10:39:29Z",
+   "timestamp_local": "2026-11-06 11:39 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend",
+   "resource_name": "nsg-app-frontend",
+   "resource_type": "microsoft.network/networksecuritygroups",
+   "resource_type_label": "Network security group",
+   "change_type": "Update",
+   "level": "high",
+   "reasons": [
+    "Security rule allow-ssh-office added: Inbound Allow 198.51.100.0/24 -> 22"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Network/networkSecurityGroups/securityRules/write",
+   "correlation_id": "8bcb2b4e-0118-5ebc-a64f-bbec9cfec2ee",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.securityRules[1].id",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend/securityRules/allow-ssh-office"
+    },
+    {
+     "path": "properties.securityRules[1].name",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "allow-ssh-office"
+    },
+    {
+     "path": "properties.securityRules[1].properties.access",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Allow"
+    },
+    {
+     "path": "properties.securityRules[1].properties.destinationAddressPrefix",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "*"
+    },
+    {
+     "path": "properties.securityRules[1].properties.destinationPortRange",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "22"
+    },
+    {
+     "path": "properties.securityRules[1].properties.direction",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Inbound"
+    },
+    {
+     "path": "properties.securityRules[1].properties.priority",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "310"
+    },
+    {
+     "path": "properties.securityRules[1].properties.protocol",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Tcp"
+    },
+    {
+     "path": "properties.securityRules[1].properties.sourceAddressPrefix",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "198.51.100.0/24"
+    },
+    {
+     "path": "properties.securityRules[1].properties.sourcePortRange",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "*"
+    },
+    {
+     "path": "properties.securityRules[1].type",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Microsoft.Network/networkSecurityGroups/securityRules"
+    }
+   ]
+  },
+  {
+   "change_id": "08584076454156735807_039ce36c-8377-4a22-9184-01046dc9b371",
+   "timestamp_utc": "2026-11-06T10:39:24Z",
+   "timestamp_local": "2026-11-06 11:39 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend",
+   "resource_name": "nsg-app-frontend",
+   "resource_type": "microsoft.network/networksecuritygroups",
+   "resource_type_label": "Network security group",
+   "change_type": "Update",
+   "level": "high",
+   "reasons": [
+    "Inbound Allow from Internet to 3389 (RDP) on rule allow-rdp-from-internet"
+   ],
+   "flags": [
+    "internet-exposed",
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Network/networkSecurityGroups/securityRules/write",
+   "correlation_id": "9593f994-7f62-5485-b36b-09710f79962d",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.securityRules[0].id",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend/securityRules/allow-rdp-from-internet"
+    },
+    {
+     "path": "properties.securityRules[0].name",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "allow-rdp-from-internet"
+    },
+    {
+     "path": "properties.securityRules[0].properties.access",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Allow"
+    },
+    {
+     "path": "properties.securityRules[0].properties.destinationAddressPrefix",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "*"
+    },
+    {
+     "path": "properties.securityRules[0].properties.destinationPortRange",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "3389"
+    },
+    {
+     "path": "properties.securityRules[0].properties.direction",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Inbound"
+    },
+    {
+     "path": "properties.securityRules[0].properties.priority",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "300"
+    },
+    {
+     "path": "properties.securityRules[0].properties.protocol",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Tcp"
+    },
+    {
+     "path": "properties.securityRules[0].properties.sourceAddressPrefix",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Internet"
+    },
+    {
+     "path": "properties.securityRules[0].properties.sourcePortRange",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "*"
+    },
+    {
+     "path": "properties.securityRules[0].type",
+     "shape": "inserted",
+     "level": "high",
+     "reason": "security / exposure setting",
+     "previous": "",
+     "new": "Microsoft.Network/networkSecurityGroups/securityRules"
+    }
+   ]
+  },
+  {
+   "change_id": "09223372036854775807_ee232ff2-a326-4562-8894-ca70614ccfc6",
+   "timestamp_utc": "2026-11-06T10:38:03Z",
+   "timestamp_local": "2026-11-06 11:38 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/publicIPAddresses/pip-temp-test",
+   "resource_name": "pip-temp-test",
+   "resource_type": "microsoft.network/publicipaddresses",
+   "resource_type_label": "Public IP address",
+   "change_type": "Create",
+   "level": "high",
+   "reasons": [
+    "new public IP address (Internet exposure)"
+   ],
+   "flags": [
+    "exposure increased",
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Network/publicIPAddresses/write",
+   "correlation_id": "d912a20f-0b5b-55e1-85c4-b3ec105c6a11",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_8798dac6-ad32-4ea8-9ae3-30b2a8160948",
+   "timestamp_utc": "2026-11-06T10:37:58Z",
+   "timestamp_local": "2026-11-06 11:37 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Storage/storageAccounts/stappprodweu",
+   "resource_name": "stappprodweu",
+   "resource_type": "microsoft.storage/storageaccounts",
+   "resource_type_label": "Storage account",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "new security or data resource"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Storage/storageAccounts/write",
+   "correlation_id": "f4e12d92-900d-5dde-ac23-fd56d2b7fc75",
+   "managed_rg": false,
+   "prod": true,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_870cc495-9b76-4b18-8c78-91e7f90e62d2",
+   "timestamp_utc": "2026-11-06T10:37:49Z",
+   "timestamp_local": "2026-11-06 11:37 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Network/networkSecurityGroups/nsg-app-frontend",
+   "resource_name": "nsg-app-frontend",
+   "resource_type": "microsoft.network/networksecuritygroups",
+   "resource_type_label": "Network security group",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "new security or data resource"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Network/networkSecurityGroups/write",
+   "correlation_id": "1c129e3b-2397-578b-9528-f25b077c49b8",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_8822afea-b212-4740-8a74-e9ceff66f087",
+   "timestamp_utc": "2026-11-06T10:37:32Z",
+   "timestamp_local": "2026-11-06 11:37 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Compute/disks/disk-app-data",
+   "resource_name": "disk-app-data",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "new security or data resource"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "3226776a-95fa-5b2e-ba9b-f7aec17a1532",
+   "managed_rg": false,
+   "prod": true,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_bf2b4b09-d45b-4515-b1a7-0fce0ed3971e",
+   "timestamp_utc": "2026-11-06T10:36:57Z",
+   "timestamp_local": "2026-11-06 11:36 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-app-prod-weu",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.KeyVault/vaults/kv-app-prod-weu",
+   "resource_name": "kv-app-prod-weu",
+   "resource_type": "microsoft.keyvault/vaults",
+   "resource_type_label": "Key Vault",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "new security or data resource"
+   ],
+   "flags": [
+    "first-time actor on RG",
+    "burst"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.KeyVault/vaults/write",
+   "correlation_id": "e5cfa304-be6a-58af-a065-fe4010fc6c2a",
+   "managed_rg": false,
+   "prod": true,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584076583833865807_6a40803a-b695-476f-b223-50e165865839",
+   "timestamp_utc": "2026-11-06T07:02:32Z",
+   "timestamp_local": "2026-11-06 08:02 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-arc-servers-prod",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-arc-servers-prod/providers/Microsoft.Compute/virtualMachines/arc-server-01",
+   "resource_name": "arc-server-01",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power operation"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "0780a89e-50c3-5c4b-a9df-bea16244ff09",
+    "changed_by_type": "Application",
+    "actor_class": "automation",
+    "display_name": "la-start-arc-servers",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Azure Logic Apps",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/start/action",
+   "correlation_id": "fcd818e6-f1af-5e45-89d6-fe932b38ad02",
+   "managed_rg": false,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 8,
+   "paths": []
+  },
+  {
+   "change_id": "08584076584157225807_88ef8c19-c679-96c2-2003-812a72d015be",
+   "timestamp_utc": "2026-11-06T07:01:12Z",
+   "timestamp_local": "2026-11-06 08:01 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-arc-servers-prod",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/RG-ARC-SERVERS-PROD/providers/Microsoft.Compute/virtualMachines/ARC-SERVER-01",
+   "resource_name": "ARC-SERVER-01",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power state change"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "System",
+    "changed_by_type": "System",
+    "actor_class": "platform",
+    "display_name": "Azure platform (System)",
+    "resolution": "raw"
+   },
+   "client": {
+    "client_type": "Unspecified",
+    "client_class": "unspecified"
+   },
+   "operation": "Unspecified",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": false,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.extended.instanceView.powerState.code",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "PowerState/starting",
+     "new": "PowerState/running"
+    },
+    {
+     "path": "properties.extended.instanceView.powerState.displayStatus",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "VM starting",
+     "new": "VM running"
+    }
+   ]
+  },
+  {
+   "change_id": "08584076584518835807_e19f5ef8-4eb4-4626-6bab-6bffdb2101cf",
+   "timestamp_utc": "2026-11-06T07:00:58Z",
+   "timestamp_local": "2026-11-06 08:00 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-arc-servers-prod",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/RG-ARC-SERVERS-PROD/providers/Microsoft.Compute/virtualMachines/ARC-SERVER-01",
+   "resource_name": "ARC-SERVER-01",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power operation"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "0780a89e-50c3-5c4b-a9df-bea16244ff09",
+    "changed_by_type": "Application",
+    "actor_class": "automation",
+    "display_name": "la-start-arc-servers",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Azure Logic Apps",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/start/action",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": false,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 5,
+   "paths": []
+  },
+  {
+   "change_id": "08584077045312225807_6a40803a-b695-476f-b223-50e165865839",
+   "timestamp_utc": "2026-11-06T07:00:33Z",
+   "timestamp_local": "2026-11-06 08:00 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-arc-servers-prod",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-arc-servers-prod/providers/Microsoft.Compute/virtualMachines/arc-server-01",
+   "resource_name": "arc-server-01",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power operation"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "0780a89e-50c3-5c4b-a9df-bea16244ff09",
+    "changed_by_type": "Application",
+    "actor_class": "automation",
+    "display_name": "la-start-arc-servers",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Azure Logic Apps",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/start/action",
+   "correlation_id": "fcd818e6-f1af-5e45-89d6-fe932b38ad02",
+   "managed_rg": false,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 4,
+   "paths": []
+  },
+  {
+   "change_id": "08584077059927995807_7414c7e5-2b37-4cd4-aac9-5457e03a1913",
+   "timestamp_utc": "2026-11-05T18:12:34Z",
+   "timestamp_local": "2026-11-05 19:12 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-arc-servers-prod",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-arc-servers-prod/providers/Microsoft.Compute/virtualMachines/arc-server-01",
+   "resource_name": "arc-server-01",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power state change"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "58a5a4d1-b7ca-5aed-9e3e-c4ec25e1b1ca",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "VS DevTest Lab",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "VS DevTest Lab",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/deallocate/action",
+   "correlation_id": "a4a844dd-622b-5851-9312-643eb7b1e1ad",
+   "managed_rg": false,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 9,
+   "paths": [
+    {
+     "path": "properties.extended.instanceView.powerState.code",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "PowerState/running",
+     "new": "PowerState/deallocated"
+    },
+    {
+     "path": "properties.extended.instanceView.powerState.displayStatus",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "VM running",
+     "new": "VM deallocated"
+    }
+   ]
+  },
+  {
+   "change_id": "09223372036854775807_6f7e937a-df0d-4293-9ccf-d113663d24b0",
+   "timestamp_utc": "2026-11-05T16:04:39Z",
+   "timestamp_local": "2026-11-05 17:04 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-shared-secrets",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02",
+   "resource_name": "kv-shared-secrets-02",
+   "resource_type": "microsoft.keyvault/vaults",
+   "resource_type_label": "Key Vault",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "new security or data resource"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.KeyVault/vaults/write",
+   "correlation_id": "527a1813-1ed8-519e-a220-067d24f11d5b",
+   "managed_rg": false,
+   "prod": false,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_ce05e8af-cad2-4069-88dd-920bcb76a5d3",
+   "timestamp_utc": "2026-11-05T16:04:17Z",
+   "timestamp_local": "2026-11-05 17:04 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-shared-secrets",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets",
+   "resource_name": "rg-shared-secrets",
+   "resource_type": "microsoft.resources/subscriptions/resourcegroups",
+   "resource_type_label": "Resource group",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "created by a human"
+   ],
+   "flags": [
+    "first-time actor on RG"
+   ],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.Resources/subscriptions/resourcegroups/write",
+   "correlation_id": "dea3945f-2814-5fc8-9ce5-14bbf7b66442",
+   "managed_rg": false,
+   "prod": false,
+   "security": false,
+   "source": "resourcecontainerchanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077129410525807_7a9f2664-28a7-4c61-9a33-874682fec6f4",
+   "timestamp_utc": "2026-11-05T15:54:49Z",
+   "timestamp_local": "2026-11-05 16:54 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-platform-shared",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-platform-shared/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-01",
+   "resource_name": "kv-shared-secrets-01",
+   "resource_type": "microsoft.keyvault/vaults",
+   "resource_type_label": "Key Vault",
+   "change_type": "Delete",
+   "level": "high",
+   "reasons": [
+    "deleted by a human"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.KeyVault/vaults/delete",
+   "correlation_id": "d9765bbd-861b-5986-8344-d7324ec1a64c",
+   "managed_rg": false,
+   "prod": false,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_a3569028-46a2-4929-8de3-c2ad9a9dc14f",
+   "timestamp_utc": "2026-11-05T15:51:39Z",
+   "timestamp_local": "2026-11-05 16:51 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "rg-platform-shared",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-platform-shared/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-01",
+   "resource_name": "kv-shared-secrets-01",
+   "resource_type": "microsoft.keyvault/vaults",
+   "resource_type_label": "Key Vault",
+   "change_type": "Create",
+   "level": "medium",
+   "reasons": [
+    "new security or data resource"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "alex.ops@contoso.com",
+    "changed_by_type": "User",
+    "actor_class": "human",
+    "display_name": "alex.ops@contoso.com",
+    "resolution": "upn"
+   },
+   "client": {
+    "client_type": "CLI",
+    "client_class": "script"
+   },
+   "operation": "Microsoft.KeyVault/vaults/write",
+   "correlation_id": "bd3554f5-ed17-5c17-9166-35cf392b29a5",
+   "managed_rg": false,
+   "prod": false,
+   "security": true,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077252245135807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+   "timestamp_utc": "2026-11-05T12:53:13Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/virtualMachines/AKS-DEFAULT-NODE1",
+   "resource_name": "AKS-DEFAULT-NODE1",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/delete",
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077254274495807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+   "timestamp_utc": "2026-11-05T12:53:13Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1/extensions/computeAksLinuxBilling",
+   "resource_name": "computeAksLinuxBilling",
+   "resource_type": "microsoft.compute/virtualmachines/extensions",
+   "resource_type_label": "VM extension",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/extensions/delete",
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077254548935807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+   "timestamp_utc": "2026-11-05T12:53:13Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1/extensions/cse-agent-karpenter",
+   "resource_name": "cse-agent-karpenter",
+   "resource_type": "microsoft.compute/virtualmachines/extensions",
+   "resource_type_label": "VM extension",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/extensions/delete",
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077246041605807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+   "timestamp_utc": "2026-11-05T12:53:13Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1/extensions/AKSLinuxExtension",
+   "resource_name": "AKSLinuxExtension",
+   "resource_type": "microsoft.compute/virtualmachines/extensions",
+   "resource_type_label": "VM extension",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/extensions/delete",
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077254711115807_85c8be06-e0c8-447a-90a2-2af3dc89136d",
+   "timestamp_utc": "2026-11-05T12:53:11Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Network/networkInterfaces/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.network/networkinterfaces",
+   "resource_type_label": "Network interface",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "1f77b635-0804-5db0-9cdf-0f07ebe8d1a6",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 1f77b635)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "1F77B635-0804-5DB0-9CDF-0F07EBE8D1A6",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Network/networkInterfaces/delete",
+   "correlation_id": "7136341a-34e4-5260-95ac-a8f67740ee64",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077236951105807_85c8be06-e0c8-447a-90a2-2af3dc89136d",
+   "timestamp_utc": "2026-11-05T12:53:11Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Network/networkInterfaces/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.network/networkinterfaces",
+   "resource_type_label": "Network interface",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "1f77b635-0804-5db0-9cdf-0f07ebe8d1a6",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 1f77b635)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "1F77B635-0804-5DB0-9CDF-0F07EBE8D1A6",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Network/networkInterfaces/delete",
+   "correlation_id": "7136341a-34e4-5260-95ac-a8f67740ee64",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077249255935807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+   "timestamp_utc": "2026-11-05T12:53:09Z",
+   "timestamp_local": "2026-11-05 13:53 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/disks/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Delete",
+   "level": "low",
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "11943159-3197-5609-8e86-0281cf4233ee",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 11943159)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "11943159-3197-5609-8E86-0281CF4233EE",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/disks/delete",
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077255792615807_0d72b9c0-ac0a-44e3-85d0-574434bdab34",
+   "timestamp_utc": "2026-11-05T12:52:29Z",
+   "timestamp_local": "2026-11-05 13:52 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachineScaleSets/aks-nodepool1-vmss",
+   "resource_name": "aks-nodepool1-vmss",
+   "resource_type": "microsoft.compute/virtualmachinescalesets",
+   "resource_type_label": "VM scale set",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "platform autoscale (capacity)"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "27bf6cca-6652-52ce-a5ff-205a6dd489ed",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure Container Service",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "Azure Container Service",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/virtualMachineScaleSets/delete/action",
+   "correlation_id": "fe341b99-3c3b-5158-9a9b-5755dfbb69e5",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "sku.capacity",
+     "shape": "modified",
+     "level": "low",
+     "reason": "platform autoscale (capacity)",
+     "previous": "4",
+     "new": "3"
+    }
+   ]
+  },
+  {
+   "change_id": "09223372036854775807_f7053d2b-2ad9-45f2-86c9-fdbfa9325264",
+   "timestamp_utc": "2026-11-05T12:38:01Z",
+   "timestamp_local": "2026-11-05 13:38 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1/extensions/AKSLinuxExtension",
+   "resource_name": "AKSLinuxExtension",
+   "resource_type": "microsoft.compute/virtualmachines/extensions",
+   "resource_type_label": "VM extension",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/extensions/write",
+   "correlation_id": "2911b010-05e0-5a89-989a-5a3795e205b9",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_48cbb502-bb3e-4e62-be73-9604d2965a3b",
+   "timestamp_utc": "2026-11-05T12:32:39Z",
+   "timestamp_local": "2026-11-05 13:32 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/disks/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "11943159-3197-5609-8e86-0281cf4233ee",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 11943159)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "11943159-3197-5609-8E86-0281CF4233EE",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "15590b05-8671-5e7b-bd62-30be9ab0a379",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_7831502d-973d-9ac5-e268-5dbba5964eac",
+   "timestamp_utc": "2026-11-05T12:32:39Z",
+   "timestamp_local": "2026-11-05 13:32 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/disks/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "11943159-3197-5609-8e86-0281cf4233ee",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 11943159)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "11943159-3197-5609-8E86-0281CF4233EE",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_e3e1915e-d512-4a98-9d47-5d88068f49ce",
+   "timestamp_utc": "2026-11-05T12:24:18Z",
+   "timestamp_local": "2026-11-05 13:24 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1/extensions/computeAksLinuxBilling",
+   "resource_name": "computeAksLinuxBilling",
+   "resource_type": "microsoft.compute/virtualmachines/extensions",
+   "resource_type_label": "VM extension",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/extensions/write",
+   "correlation_id": "e6e7af9b-ce87-5908-8256-b802093f34ef",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_aa0c67a7-7f86-4491-ab4e-ca35b237dd7e",
+   "timestamp_utc": "2026-11-05T12:23:50Z",
+   "timestamp_local": "2026-11-05 13:23 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1/extensions/cse-agent-karpenter",
+   "resource_name": "cse-agent-karpenter",
+   "resource_type": "microsoft.compute/virtualmachines/extensions",
+   "resource_type_label": "VM extension",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/extensions/write",
+   "correlation_id": "25dbecfd-ed1b-5f04-8419-c1527905435c",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077255154815807_16cdc662-4260-1e5b-0d80-a100ac1e7d2a",
+   "timestamp_utc": "2026-11-05T12:22:50Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/virtualMachines/AKS-DEFAULT-NODE1",
+   "resource_name": "AKS-DEFAULT-NODE1",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power state change"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "System",
+    "changed_by_type": "System",
+    "actor_class": "platform",
+    "display_name": "Azure platform (System)",
+    "resolution": "raw"
+   },
+   "client": {
+    "client_type": "Unspecified",
+    "client_class": "unspecified"
+   },
+   "operation": "Unspecified",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.extended.instanceView.powerState.code",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "PowerState/starting",
+     "new": "PowerState/running"
+    },
+    {
+     "path": "properties.extended.instanceView.powerState.displayStatus",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "VM starting",
+     "new": "VM running"
+    }
+   ]
+  },
+  {
+   "change_id": "08584077255158825807_2ef4105c-4000-c4b9-d393-629b35d9f297",
+   "timestamp_utc": "2026-11-05T12:22:49Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/virtualMachines/AKS-DEFAULT-NODE1",
+   "resource_name": "AKS-DEFAULT-NODE1",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "power state change"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/write",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "properties.extended.instanceView.powerState.code",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "PowerState/running",
+     "new": "PowerState/starting"
+    },
+    {
+     "path": "properties.extended.instanceView.powerState.displayStatus",
+     "shape": "modified",
+     "level": "low",
+     "reason": "power state change",
+     "previous": "VM running",
+     "new": "VM starting"
+    }
+   ]
+  },
+  {
+   "change_id": "08584077255301495807_a2970d22-8f38-4cdd-bbf3-430538784213",
+   "timestamp_utc": "2026-11-05T12:22:40Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Network/networkInterfaces/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.network/networkinterfaces",
+   "resource_type_label": "Network interface",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "NIC attach/detach churn"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Network/networkInterfaces/write",
+   "correlation_id": "ce29df8f-3a2e-59e6-8ca1-7ca0b7eeee7b",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 1,
+   "paths": [
+    {
+     "path": "properties.primary",
+     "shape": "inserted",
+     "level": "low",
+     "reason": "NIC attach/detach churn",
+     "previous": "",
+     "new": "True"
+    },
+    {
+     "path": "properties.virtualMachine.id",
+     "shape": "inserted",
+     "level": "low",
+     "reason": "NIC attach/detach churn",
+     "previous": "",
+     "new": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1"
+    }
+   ]
+  },
+  {
+   "change_id": "09223372036854775807_48cbb502-bb3e-4e62-be73-9604d2965a3b",
+   "timestamp_utc": "2026-11-05T12:22:40Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachines/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/virtualmachines",
+   "resource_type_label": "Virtual machine",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Compute/virtualMachines/write",
+   "correlation_id": "15590b05-8671-5e7b-bd62-30be9ab0a379",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_31cf39d1-4f08-18c9-4d2b-5f7a4fe7ed4d",
+   "timestamp_utc": "2026-11-05T12:22:39Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/disks/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "11943159-3197-5609-8e86-0281cf4233ee",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 11943159)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "11943159-3197-5609-8E86-0281CF4233EE",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077255265715807_b6c924d4-ae2b-4315-c972-222d3aa8d54d",
+   "timestamp_utc": "2026-11-05T12:22:39Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/disks/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "configuration change"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "System",
+    "changed_by_type": "System",
+    "actor_class": "platform",
+    "display_name": "Azure platform (System)",
+    "resolution": "raw"
+   },
+   "client": {
+    "client_type": "Unspecified",
+    "client_class": "unspecified"
+   },
+   "operation": "Unspecified",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 1,
+   "paths": [
+    {
+     "path": "properties.tier",
+     "shape": "inserted",
+     "level": "low",
+     "reason": "configuration change",
+     "previous": "",
+     "new": "P10"
+    }
+   ]
+  },
+  {
+   "change_id": "09223372036854775807_62802d8d-6ee4-aec8-85b1-559120f72d98",
+   "timestamp_utc": "2026-11-05T12:22:38Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_RG-AKS-PROD_AKS-PROD-WEU_WESTEUROPE/providers/Microsoft.Compute/disks/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.compute/disks",
+   "resource_type_label": "Managed disk",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "11943159-3197-5609-8e86-0281cf4233ee",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure service (app 11943159)",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "11943159-3197-5609-8E86-0281CF4233EE",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/disks/write",
+   "correlation_id": "00000000-0000-0000-0000-000000000000",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "09223372036854775807_37d6555e-b135-4305-9495-60bde28b8471",
+   "timestamp_utc": "2026-11-05T12:22:34Z",
+   "timestamp_local": "2026-11-05 13:22 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Network/networkInterfaces/aks-default-node1",
+   "resource_name": "aks-default-node1",
+   "resource_type": "microsoft.network/networkinterfaces",
+   "resource_type_label": "Network interface",
+   "change_type": "Create",
+   "level": "low",
+   "reasons": [
+    "platform-managed create"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "aks-prod-weu",
+    "resolution": "activity_log"
+   },
+   "client": {
+    "client_type": "Go SDK",
+    "client_class": "sdk"
+   },
+   "operation": "Microsoft.Network/networkInterfaces/write",
+   "correlation_id": "634c658c-9ac6-57ac-9ef9-bda452cee651",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": []
+  },
+  {
+   "change_id": "08584077256627335807_326ba1d3-aa0d-41aa-ab7e-9e2f87005b1d",
+   "timestamp_utc": "2026-11-05T12:21:46Z",
+   "timestamp_local": "2026-11-05 13:21 CET",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "resource_group": "MC_rg-aks-prod_aks-prod-weu_westeurope",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/MC_rg-aks-prod_aks-prod-weu_westeurope/providers/Microsoft.Compute/virtualMachineScaleSets/aks-nodepool1-vmss",
+   "resource_name": "aks-nodepool1-vmss",
+   "resource_type": "microsoft.compute/virtualmachinescalesets",
+   "resource_type_label": "VM scale set",
+   "change_type": "Update",
+   "level": "low",
+   "reasons": [
+    "platform autoscale (capacity)"
+   ],
+   "flags": [],
+   "actor": {
+    "changed_by": "27bf6cca-6652-52ce-a5ff-205a6dd489ed",
+    "changed_by_type": "Application",
+    "actor_class": "platform",
+    "display_name": "Azure Container Service",
+    "resolution": "heuristic"
+   },
+   "client": {
+    "client_type": "Azure Container Service",
+    "client_class": "service"
+   },
+   "operation": "Microsoft.Compute/virtualMachineScaleSets/write",
+   "correlation_id": "ff6a242d-42ef-556c-96e4-7f7998595a2b",
+   "managed_rg": true,
+   "prod": false,
+   "security": false,
+   "source": "resourcechanges",
+   "noise_paths": 0,
+   "paths": [
+    {
+     "path": "sku.capacity",
+     "shape": "modified",
+     "level": "low",
+     "reason": "platform autoscale (capacity)",
+     "previous": "3",
+     "new": "4"
+    }
+   ]
+  }
+ ],
+ "delete_chains": [
+  {
+   "correlation_id": "1a2dfc47-50b7-515e-98b9-91beac1057fd",
+   "actor": "alex.ops@contoso.com",
+   "actor_display": "alex.ops@contoso.com",
+   "actor_class": "human",
+   "client_type": "Unspecified",
+   "client_class": "unspecified",
+   "deleted": 1,
+   "resource_types": [
+    "microsoft.network/publicipaddresses"
+   ],
+   "resources": [
+    "pip-temp-test"
+   ],
+   "resource_groups": [
+    "rg-app-prod-weu"
+   ],
+   "level": "high",
+   "managed": false,
+   "reasons": [
+    "deleted by a human",
+    "actor recovered from the Activity Log (Change Analysis recorded no actor)"
+   ],
+   "flags": [
+    "burst"
+   ],
+   "change_ids": [
+    "08584076451018525807_5beee499-ae80-4fe7-abe8-70f441fc9aa6"
+   ],
+   "first_utc": "2026-11-06T10:44:49Z",
+   "last_utc": "2026-11-06T10:44:49Z",
+   "last_local": "2026-11-06 11:44 CET"
+  },
+  {
+   "correlation_id": "d9765bbd-861b-5986-8344-d7324ec1a64c",
+   "actor": "alex.ops@contoso.com",
+   "actor_display": "alex.ops@contoso.com",
+   "actor_class": "human",
+   "client_type": "CLI",
+   "client_class": "script",
+   "deleted": 1,
+   "resource_types": [
+    "microsoft.keyvault/vaults"
+   ],
+   "resources": [
+    "kv-shared-secrets-01"
+   ],
+   "resource_groups": [
+    "rg-platform-shared"
+   ],
+   "level": "high",
+   "managed": false,
+   "reasons": [
+    "deleted by a human"
+   ],
+   "flags": [],
+   "change_ids": [
+    "08584077129410525807_7a9f2664-28a7-4c61-9a33-874682fec6f4"
+   ],
+   "first_utc": "2026-11-05T15:54:49Z",
+   "last_utc": "2026-11-05T15:54:49Z",
+   "last_local": "2026-11-05 16:54 CET"
+  },
+  {
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "actor": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+   "actor_display": "aks-prod-weu",
+   "actor_class": "platform",
+   "client_type": "Go SDK",
+   "client_class": "sdk",
+   "deleted": 4,
+   "resource_types": [
+    "microsoft.compute/virtualmachines",
+    "microsoft.compute/virtualmachines/extensions"
+   ],
+   "resources": [
+    "AKS-DEFAULT-NODE1",
+    "computeAksLinuxBilling",
+    "cse-agent-karpenter",
+    "AKSLinuxExtension"
+   ],
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "level": "low",
+   "managed": true,
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "change_ids": [
+    "08584077252245135807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+    "08584077254274495807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+    "08584077254548935807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05",
+    "08584077246041605807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05"
+   ],
+   "first_utc": "2026-11-05T12:53:13Z",
+   "last_utc": "2026-11-05T12:53:13Z",
+   "last_local": "2026-11-05 13:53 CET"
+  },
+  {
+   "correlation_id": "7136341a-34e4-5260-95ac-a8f67740ee64",
+   "actor": "1f77b635-0804-5db0-9cdf-0f07ebe8d1a6",
+   "actor_display": "Azure service (app 1f77b635)",
+   "actor_class": "platform",
+   "client_type": "1F77B635-0804-5DB0-9CDF-0F07EBE8D1A6",
+   "client_class": "service",
+   "deleted": 2,
+   "resource_types": [
+    "microsoft.network/networkinterfaces"
+   ],
+   "resources": [
+    "aks-default-node1"
+   ],
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "level": "low",
+   "managed": true,
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "change_ids": [
+    "08584077254711115807_85c8be06-e0c8-447a-90a2-2af3dc89136d",
+    "08584077236951105807_85c8be06-e0c8-447a-90a2-2af3dc89136d"
+   ],
+   "first_utc": "2026-11-05T12:53:11Z",
+   "last_utc": "2026-11-05T12:53:11Z",
+   "last_local": "2026-11-05 13:53 CET"
+  },
+  {
+   "correlation_id": "e8836f04-ef15-5789-b465-4bbf74bf35a2",
+   "actor": "11943159-3197-5609-8e86-0281cf4233ee",
+   "actor_display": "Azure service (app 11943159)",
+   "actor_class": "platform",
+   "client_type": "11943159-3197-5609-8E86-0281CF4233EE",
+   "client_class": "service",
+   "deleted": 1,
+   "resource_types": [
+    "microsoft.compute/disks"
+   ],
+   "resources": [
+    "aks-default-node1"
+   ],
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "level": "low",
+   "managed": true,
+   "reasons": [
+    "platform-managed delete"
+   ],
+   "flags": [],
+   "change_ids": [
+    "08584077249255935807_d2dae53c-b299-4e01-8e4b-5f3aad22ba05"
+   ],
+   "first_utc": "2026-11-05T12:53:09Z",
+   "last_utc": "2026-11-05T12:53:09Z",
+   "last_local": "2026-11-05 13:53 CET"
+  }
+ ],
+ "role_assignments": [
+  {
+   "kind": "created",
+   "created_utc": "2026-11-06T10:39:52Z",
+   "time_local": "2026-11-06 11:39 CET",
+   "scope": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu",
+   "scope_label": "Resource group rg-app-prod-weu",
+   "resource_group": "rg-app-prod-weu",
+   "role_name": "Reader",
+   "role_id": "1e4e2a4d-88e0-5a57-993d-8f3f1862fb10",
+   "principal_type": "ServicePrincipal",
+   "principal_id": "a5ba59eb-d8cc-52f9-8de1-425ea456bddd",
+   "principal_display": "id-sre-agent (managed identity)",
+   "created_by": "alex.ops@contoso.com",
+   "created_by_resolution": "activity_log",
+   "privileged": false,
+   "level": "medium",
+   "id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Authorization/RoleAssignments/bc156ee3-60ce-5df9-bece-818c64541369"
+  },
+  {
+   "kind": "created",
+   "created_utc": "2026-11-05T15:56:32Z",
+   "time_local": "2026-11-05 16:56 CET",
+   "scope": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02",
+   "scope_label": "Resource kv-shared-secrets-02",
+   "resource_group": "rg-shared-secrets",
+   "role_name": "Key Vault Secrets User",
+   "role_id": "33707492-3d73-56e3-9dec-cd80a5e386bf",
+   "principal_type": "ServicePrincipal",
+   "principal_id": "a5ba59eb-d8cc-52f9-8de1-425ea456bddd",
+   "principal_display": "id-sre-agent (managed identity)",
+   "created_by": "alex.ops@contoso.com",
+   "created_by_resolution": "activity_log",
+   "privileged": false,
+   "level": "medium",
+   "id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02/providers/Microsoft.Authorization/RoleAssignments/4ea043d3-c1ec-5a76-97e1-bb759a3dcbad"
+  },
+  {
+   "kind": "created",
+   "created_utc": "2026-11-05T15:56:28Z",
+   "time_local": "2026-11-05 16:56 CET",
+   "scope": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02",
+   "scope_label": "Resource kv-shared-secrets-02",
+   "resource_group": "rg-shared-secrets",
+   "role_name": "Key Vault Administrator",
+   "role_id": "4c9023b5-0f5a-517b-972b-3837ef35fb10",
+   "principal_type": "User",
+   "principal_id": "bcc1a6f4-bc8d-535f-ab33-aa86f19f4c6e",
+   "principal_display": "",
+   "created_by": "alex.ops@contoso.com",
+   "created_by_resolution": "activity_log",
+   "privileged": false,
+   "level": "medium",
+   "id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-shared-secrets/providers/Microsoft.KeyVault/vaults/kv-shared-secrets-02/providers/Microsoft.Authorization/RoleAssignments/9c7c13a7-1efe-5b02-beca-571e0a4512eb"
+  }
+ ],
+ "activity_log_gaps": [
+  {
+   "time_utc": "2026-11-06T10:45:02Z",
+   "operation": "Microsoft.Insights/diagnosticSettings/delete",
+   "label": "Diagnostic setting removed (monitoring gap)",
+   "level": "high",
+   "status": "Succeeded",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.KeyVault/vaults/kv-app-prod-weu/providers/Microsoft.Insights/diagnosticSettings/diag-kv-audit",
+   "resource_name": "diag-kv-audit",
+   "target": "kv-app-prod-weu",
+   "resource_group": "rg-app-prod-weu",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "alex.ops@contoso.com",
+   "correlation_id": "a4a5382f-1a49-5a88-bde6-7339f2f59a9f",
+   "time_local": "2026-11-06 11:45 CET"
+  },
+  {
+   "time_utc": "2026-11-06T10:44:44Z",
+   "operation": "Microsoft.Authorization/locks/delete",
+   "label": "Resource lock removed",
+   "level": "high",
+   "status": "Succeeded",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Authorization/locks/lock-do-not-delete",
+   "resource_name": "lock-do-not-delete",
+   "target": "rg-app-prod-weu",
+   "resource_group": "rg-app-prod-weu",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "alex.ops@contoso.com",
+   "correlation_id": "fc729483-67f4-50d4-9555-27b2d5d469c5",
+   "time_local": "2026-11-06 11:44 CET"
+  },
+  {
+   "time_utc": "2026-11-06T10:43:36Z",
+   "operation": "Microsoft.Insights/diagnosticSettings/write",
+   "label": "Diagnostic setting created or changed",
+   "level": "medium",
+   "status": "Succeeded",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.KeyVault/vaults/kv-app-prod-weu/providers/Microsoft.Insights/diagnosticSettings/diag-kv-audit",
+   "resource_name": "diag-kv-audit",
+   "target": "kv-app-prod-weu",
+   "resource_group": "rg-app-prod-weu",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "alex.ops@contoso.com",
+   "correlation_id": "1779939a-3e03-55fb-86a7-6f274aec114a",
+   "time_local": "2026-11-06 11:43 CET"
+  },
+  {
+   "time_utc": "2026-11-06T10:39:58Z",
+   "operation": "Microsoft.Authorization/locks/write",
+   "label": "Resource lock created or changed",
+   "level": "medium",
+   "status": "Succeeded",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.Authorization/locks/lock-do-not-delete",
+   "resource_name": "lock-do-not-delete",
+   "target": "rg-app-prod-weu",
+   "resource_group": "rg-app-prod-weu",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "alex.ops@contoso.com",
+   "correlation_id": "af3c465c-db8d-55e2-b62a-0c7ef77faf50",
+   "time_local": "2026-11-06 11:39 CET"
+  },
+  {
+   "time_utc": "2026-11-05T19:45:37Z",
+   "operation": "Microsoft.Authorization/locks/write",
+   "label": "Resource lock created or changed",
+   "level": "medium",
+   "status": "Succeeded",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourcegroups/rg-backup-prod/providers/Microsoft.Storage/storageAccounts/stbackupprod001/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock",
+   "resource_name": "AzureBackupProtectionLock",
+   "target": "stbackupprod001",
+   "resource_group": "rg-backup-prod",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "19a38b2f-a3c4-56c4-8f9e-0308427e6dab",
+   "correlation_id": "f0bc6da2-35fa-5f80-8e7b-16ba6d5cc65f",
+   "time_local": "2026-11-05 20:45 CET"
+  },
+  {
+   "time_utc": "2026-11-05T19:45:36Z",
+   "operation": "Microsoft.Authorization/locks/write",
+   "label": "Resource lock created or changed",
+   "level": "medium",
+   "status": "Succeeded",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourcegroups/rg-backup-prod/providers/Microsoft.Storage/storageAccounts/stbackupprod001/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock",
+   "resource_name": "AzureBackupProtectionLock",
+   "target": "stbackupprod001",
+   "resource_group": "rg-backup-prod",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "19a38b2f-a3c4-56c4-8f9e-0308427e6dab",
+   "correlation_id": "e28222e1-d6c9-5aca-afaa-454dd8b72308",
+   "time_local": "2026-11-05 20:45 CET"
+  }
+ ],
+ "failed_attempts": [
+  {
+   "time_utc": "2026-11-06T10:44:40Z",
+   "operation": "Microsoft.Insights/diagnosticSettings/delete",
+   "label": "Diagnostic setting removed attempt failed",
+   "level": "low",
+   "status": "Failed",
+   "resource_id": "/subscriptions/bb43e7f4-cf9c-5cf5-b951-1a850caa1693/resourceGroups/rg-app-prod-weu/providers/Microsoft.KeyVault/vaults/kv-app-prod-weu/providers/Microsoft.Insights/diagnosticSettings/diag-kv-audit",
+   "resource_name": "diag-kv-audit",
+   "target": "kv-app-prod-weu",
+   "resource_group": "rg-app-prod-weu",
+   "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+   "caller": "alex.ops@contoso.com",
+   "correlation_id": "28db806f-7805-512b-95e6-6c7ae20f8b06",
+   "error_code": "ScopeLocked",
+   "time_local": "2026-11-06 11:44 CET"
+  }
+ ],
+ "actors": [
+  {
+   "changed_by": "alex.ops@contoso.com",
+   "display_name": "alex.ops@contoso.com",
+   "resolution": "upn",
+   "changed_by_type": "User",
+   "changes": 17,
+   "creates": 9,
+   "updates": 6,
+   "deletes": 2,
+   "high": 7,
+   "medium": 10,
+   "low": 0,
+   "resource_groups": [
+    "rg-app-prod-weu",
+    "rg-shared-secrets",
+    "rg-platform-shared"
+   ],
+   "clients": [
+    "CLI",
+    "Unspecified"
+   ],
+   "actor_class": "human",
+   "resource_group_count": 3
+  },
+  {
+   "changed_by": "e888bb96-b481-51fc-bf75-73a0d859562b",
+   "display_name": "e888bb96-b481-51fc-bf75-73a0d859562b",
+   "resolution": "raw",
+   "changed_by_type": "Application",
+   "changes": 1,
+   "creates": 0,
+   "updates": 1,
+   "deletes": 0,
+   "high": 1,
+   "medium": 0,
+   "low": 0,
+   "resource_groups": [
+    "rg-app-prod-weu"
+   ],
+   "clients": [
+    "PowerShell"
+   ],
+   "actor_class": "automation",
+   "resource_group_count": 1
+  },
+  {
+   "changed_by": "5d87ecc8-86fc-5e1d-9c03-9c2ab18696fb",
+   "display_name": "aks-prod-weu",
+   "resolution": "activity_log",
+   "changed_by_type": "Application",
+   "changes": 11,
+   "creates": 5,
+   "updates": 2,
+   "deletes": 4,
+   "high": 0,
+   "medium": 0,
+   "low": 11,
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "clients": [
+    "Go SDK"
+   ],
+   "actor_class": "platform",
+   "resource_group_count": 1
+  },
+  {
+   "changed_by": "11943159-3197-5609-8e86-0281cf4233ee",
+   "display_name": "Azure service (app 11943159)",
+   "resolution": "heuristic",
+   "changed_by_type": "Application",
+   "changes": 5,
+   "creates": 4,
+   "updates": 0,
+   "deletes": 1,
+   "high": 0,
+   "medium": 0,
+   "low": 5,
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "clients": [
+    "11943159-3197-5609-8E86-0281CF4233EE"
+   ],
+   "actor_class": "platform",
+   "resource_group_count": 1
+  },
+  {
+   "changed_by": "0780a89e-50c3-5c4b-a9df-bea16244ff09",
+   "display_name": "la-start-arc-servers",
+   "resolution": "activity_log",
+   "changed_by_type": "Application",
+   "changes": 3,
+   "creates": 0,
+   "updates": 3,
+   "deletes": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 3,
+   "resource_groups": [
+    "rg-arc-servers-prod"
+   ],
+   "clients": [
+    "Azure Logic Apps"
+   ],
+   "actor_class": "automation",
+   "resource_group_count": 1
+  },
+  {
+   "changed_by": "System",
+   "display_name": "Azure platform (System)",
+   "resolution": "raw",
+   "changed_by_type": "System",
+   "changes": 3,
+   "creates": 0,
+   "updates": 3,
+   "deletes": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 3,
+   "resource_groups": [
+    "rg-arc-servers-prod",
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "clients": [
+    "Unspecified"
+   ],
+   "actor_class": "platform",
+   "resource_group_count": 2
+  },
+  {
+   "changed_by": "1f77b635-0804-5db0-9cdf-0f07ebe8d1a6",
+   "display_name": "Azure service (app 1f77b635)",
+   "resolution": "heuristic",
+   "changed_by_type": "Application",
+   "changes": 2,
+   "creates": 0,
+   "updates": 0,
+   "deletes": 2,
+   "high": 0,
+   "medium": 0,
+   "low": 2,
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "clients": [
+    "1F77B635-0804-5DB0-9CDF-0F07EBE8D1A6"
+   ],
+   "actor_class": "platform",
+   "resource_group_count": 1
+  },
+  {
+   "changed_by": "27bf6cca-6652-52ce-a5ff-205a6dd489ed",
+   "display_name": "Azure Container Service",
+   "resolution": "heuristic",
+   "changed_by_type": "Application",
+   "changes": 2,
+   "creates": 0,
+   "updates": 2,
+   "deletes": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 2,
+   "resource_groups": [
+    "MC_rg-aks-prod_aks-prod-weu_westeurope"
+   ],
+   "clients": [
+    "Azure Container Service"
+   ],
+   "actor_class": "platform",
+   "resource_group_count": 1
+  },
+  {
+   "changed_by": "58a5a4d1-b7ca-5aed-9e3e-c4ec25e1b1ca",
+   "display_name": "VS DevTest Lab",
+   "resolution": "heuristic",
+   "changed_by_type": "Application",
+   "changes": 1,
+   "creates": 0,
+   "updates": 1,
+   "deletes": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 1,
+   "resource_groups": [
+    "rg-arc-servers-prod"
+   ],
+   "clients": [
+    "VS DevTest Lab"
+   ],
+   "actor_class": "platform",
+   "resource_group_count": 1
+  }
+ ],
+ "client_matrix": [
+  {
+   "client_class": "script",
+   "actor_class": "human",
+   "changes": 16
+  },
+  {
+   "client_class": "sdk",
+   "actor_class": "platform",
+   "changes": 11
+  },
+  {
+   "client_class": "service",
+   "actor_class": "platform",
+   "changes": 10
+  },
+  {
+   "client_class": "sdk",
+   "actor_class": "automation",
+   "changes": 3
+  },
+  {
+   "client_class": "unspecified",
+   "actor_class": "platform",
+   "changes": 3
+  },
+  {
+   "client_class": "script",
+   "actor_class": "automation",
+   "changes": 1
+  },
+  {
+   "client_class": "unspecified",
+   "actor_class": "human",
+   "changes": 1
+  }
+ ],
+ "unusual": {
+  "after_hours": [],
+  "first_time_actor_rg": [
+   {
+    "actor": "alex.ops@contoso.com",
+    "actor_class": "human",
+    "resource_group": "rg-shared-secrets",
+    "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+    "first_utc": "2026-11-05T16:04:39Z",
+    "changes": 2
+   },
+   {
+    "actor": "alex.ops@contoso.com",
+    "actor_class": "human",
+    "resource_group": "rg-app-prod-weu",
+    "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+    "first_utc": "2026-11-06T10:36:57Z",
+    "changes": 13
+   },
+   {
+    "actor": "e888bb96-b481-51fc-bf75-73a0d859562b",
+    "actor_class": "automation",
+    "resource_group": "rg-app-prod-weu",
+    "subscription_id": "bb43e7f4-cf9c-5cf5-b951-1a850caa1693",
+    "first_utc": "2026-11-06T11:30:20Z",
+    "changes": 1
+   }
+  ],
+  "bursts": [
+   {
+    "actor": "alex.ops@contoso.com",
+    "start_utc": "2026-11-06T10:36:57Z",
+    "end_utc": "2026-11-06T10:46:40Z",
+    "changes": 13,
+    "deletes": 1,
+    "resource_types": [
+     "microsoft.compute/disks",
+     "microsoft.keyvault/vaults",
+     "microsoft.network/networksecuritygroups",
+     "microsoft.network/publicipaddresses",
+     "microsoft.resources/subscriptions/resourcegroups",
+     "microsoft.storage/storageaccounts"
+    ]
+   }
+  ]
+ },
+ "noise": {
+  "total": 60,
+  "server_side": 56,
+  "by_reason": {
+   "platform metadata/timestamp": 51,
+   "agent-reported inventory": 5,
+   "duplicate change record": 3,
+   "VM enrichment on start/deallocate": 1
+  },
+  "by_changed_by_type": {
+   "Application": 43,
+   "User": 7,
+   "System": 6,
+   "Unspecified": 4
+  },
+  "top_paths": [
+   {
+    "path_pattern": "properties.lastInventoryUploadTime",
+    "occurrences": 24
+   },
+   {
+    "path_pattern": "properties.azureDefenderStatusLastUpdated",
+    "occurrences": 12
+   },
+   {
+    "path_pattern": "properties.provisioningState",
+    "occurrences": 10
+   },
+   {
+    "path_pattern": "properties.lastUsageUploadTime",
+    "occurrences": 6
+   },
+   {
+    "path_pattern": "properties.lastDatabaseUploadTime",
+    "occurrences": 6
+   },
+   {
+    "path_pattern": "properties.hardwareProfile.processors[*].name",
+    "occurrences": 5
+   },
+   {
+    "path_pattern": "properties.detectedProperties.processorNames",
+    "occurrences": 5
+   },
+   {
+    "path_pattern": "properties.LastOwnershipUpdateTime",
+    "occurrences": 4
+   },
+   {
+    "path_pattern": "properties.diskState",
+    "occurrences": 4
+   },
+   {
+    "path_pattern": "properties.extended.instanceView.powerState.code",
+    "occurrences": 3
+   },
+   {
+    "path_pattern": "properties.extended.instanceView.powerState.displayStatus",
+    "occurrences": 3
+   },
+   {
+    "path_pattern": "properties.storageProfile.disks[*].maxSizeInBytes",
+    "occurrences": 2
+   },
+   {
+    "path_pattern": "properties.detectedProperties.totalPhysicalMemoryInBytes",
+    "occurrences": 2
+   },
+   {
+    "path_pattern": "properties.settings.activityId",
+    "occurrences": 2
+   },
+   {
+    "path_pattern": "properties.storageProfile.disks[*].usedSpaceInBytes",
+    "occurrences": 2
+   }
+  ],
+  "top_types": [
+   {
+    "resource_type": "microsoft.azurearcdata/sqlserverinstances",
+    "label": "Arc SQL Server instance",
+    "changes": 30
+   },
+   {
+    "resource_type": "microsoft.compute/virtualmachines",
+    "label": "Virtual machine",
+    "changes": 7
+   },
+   {
+    "resource_type": "microsoft.azurearcdata/sqlserverinstances/databases",
+    "label": "Arc SQL database",
+    "changes": 6
+   },
+   {
+    "resource_type": "microsoft.compute/disks",
+    "label": "Managed disk",
+    "changes": 5
+   },
+   {
+    "resource_type": "microsoft.hybridcompute/machines",
+    "label": "Arc-enabled server",
+    "changes": 5
+   },
+   {
+    "resource_type": "microsoft.hybridcompute/machines/extensions",
+    "label": "Arc server extension",
+    "changes": 4
+   },
+   {
+    "resource_type": "microsoft.keyvault/vaults",
+    "label": "Key Vault",
+    "changes": 1
+   },
+   {
+    "resource_type": "microsoft.network/networksecuritygroups",
+    "label": "Network security group",
+    "changes": 1
+   },
+   {
+    "resource_type": "microsoft.containerservice/managedclusters",
+    "label": "AKS cluster",
+    "changes": 1
+   }
+  ],
+  "managed_rg_changes": 24,
+  "low_summaries": [
+   {
+    "count": 4,
+    "resources": 1,
+    "actor": "Azure service (app 11943159)",
+    "resource_type": "microsoft.compute/disks",
+    "type_label": "Managed disk",
+    "change_type": "Create",
+    "reason": "platform-managed create",
+    "paths": []
+   },
+   {
+    "count": 3,
+    "resources": 1,
+    "actor": "la-start-arc-servers",
+    "resource_type": "microsoft.compute/virtualmachines",
+    "type_label": "Virtual machine",
+    "change_type": "Update",
+    "reason": "power operation",
+    "paths": []
+   },
+   {
+    "count": 3,
+    "resources": 3,
+    "actor": "aks-prod-weu",
+    "resource_type": "microsoft.compute/virtualmachines/extensions",
+    "type_label": "VM extension",
+    "change_type": "Delete",
+    "reason": "platform-managed delete",
+    "paths": []
+   },
+   {
+    "count": 3,
+    "resources": 3,
+    "actor": "aks-prod-weu",
+    "resource_type": "microsoft.compute/virtualmachines/extensions",
+    "type_label": "VM extension",
+    "change_type": "Create",
+    "reason": "platform-managed create",
+    "paths": []
+   },
+   {
+    "count": 2,
+    "resources": 2,
+    "actor": "Azure platform (System)",
+    "resource_type": "microsoft.compute/virtualmachines",
+    "type_label": "Virtual machine",
+    "change_type": "Update",
+    "reason": "power state change",
+    "paths": [
+     "properties.extended.instanceView.powerState.code",
+     "properties.extended.instanceView.powerState.displayStatus"
+    ]
+   },
+   {
+    "count": 2,
+    "resources": 1,
+    "actor": "Azure service (app 1f77b635)",
+    "resource_type": "microsoft.network/networkinterfaces",
+    "type_label": "Network interface",
+    "change_type": "Delete",
+    "reason": "platform-managed delete",
+    "paths": []
+   },
+   {
+    "count": 2,
+    "resources": 1,
+    "actor": "Azure Container Service",
+    "resource_type": "microsoft.compute/virtualmachinescalesets",
+    "type_label": "VM scale set",
+    "change_type": "Update",
+    "reason": "platform autoscale (capacity)",
+    "paths": [
+     "sku.capacity"
+    ]
+   },
+   {
+    "count": 1,
+    "resources": 1,
+    "actor": "VS DevTest Lab",
+    "resource_type": "microsoft.compute/virtualmachines",
+    "type_label": "Virtual machine",
+    "change_type": "Update",
+    "reason": "power state change",
+    "paths": [
+     "properties.extended.instanceView.powerState.code",
+     "properties.extended.instanceView.powerState.displayStatus"
+    ]
+   },
+   {
+    "count": 1,
+    "resources": 1,
+    "actor": "aks-prod-weu",
+    "resource_type": "microsoft.compute/virtualmachines",
+    "type_label": "Virtual machine",
+    "change_type": "Delete",
+    "reason": "platform-managed delete",
+    "paths": []
+   },
+   {
+    "count": 1,
+    "resources": 1,
+    "actor": "Azure service (app 11943159)",
+    "resource_type": "microsoft.compute/disks",
+    "type_label": "Managed disk",
+    "change_type": "Delete",
+    "reason": "platform-managed delete",
+    "paths": []
+   },
+   {
+    "count": 1,
+    "resources": 1,
+    "actor": "aks-prod-weu",
+    "resource_type": "microsoft.compute/virtualmachines",
+    "type_label": "Virtual machine",
+    "change_type": "Update",
+    "reason": "power state change",
+    "paths": [
+     "properties.extended.instanceView.powerState.code",
+     "properties.extended.instanceView.powerState.displayStatus"
+    ]
+   },
+   {
+    "count": 1,
+    "resources": 1,
+    "actor": "aks-prod-weu",
+    "resource_type": "microsoft.network/networkinterfaces",
+    "type_label": "Network interface",
+    "change_type": "Update",
+    "reason": "NIC attach/detach churn",
+    "paths": [
+     "properties.primary",
+     "properties.virtualMachine.id"
+    ]
+   }
+  ]
+ },
+ "timeline": {
+  "step_hours": 1,
+  "buckets": [
+   {
+    "start_utc": "2026-11-05T11:53:59Z",
+    "label": "12:53",
+    "high": 0,
+    "medium": 0,
+    "low": 22
+   },
+   {
+    "start_utc": "2026-11-05T12:53:59Z",
+    "label": "13:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T13:53:59Z",
+    "label": "14:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T14:53:59Z",
+    "label": "15:53",
+    "high": 0,
+    "medium": 1,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T15:53:59Z",
+    "label": "16:53",
+    "high": 1,
+    "medium": 2,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T16:53:59Z",
+    "label": "17:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T17:53:59Z",
+    "label": "18:53",
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   {
+    "start_utc": "2026-11-05T18:53:59Z",
+    "label": "19:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T19:53:59Z",
+    "label": "20:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T20:53:59Z",
+    "label": "21:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T21:53:59Z",
+    "label": "22:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T22:53:59Z",
+    "label": "23:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-05T23:53:59Z",
+    "label": "00:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T00:53:59Z",
+    "label": "01:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T01:53:59Z",
+    "label": "02:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T02:53:59Z",
+    "label": "03:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T03:53:59Z",
+    "label": "04:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T04:53:59Z",
+    "label": "05:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T05:53:59Z",
+    "label": "06:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T06:53:59Z",
+    "label": "07:53",
+    "high": 0,
+    "medium": 0,
+    "low": 4
+   },
+   {
+    "start_utc": "2026-11-06T07:53:59Z",
+    "label": "08:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T08:53:59Z",
+    "label": "09:53",
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T09:53:59Z",
+    "label": "10:53",
+    "high": 6,
+    "medium": 7,
+    "low": 0
+   },
+   {
+    "start_utc": "2026-11-06T10:53:59Z",
+    "label": "11:53",
+    "high": 1,
+    "medium": 0,
+    "low": 0
+   }
+  ]
+ },
+ "coverage": {
+  "status": "ok",
+  "sources": [
+   {
+    "id": "arg_resourcecontainers",
+    "label": "Subscriptions and resource groups (resourcecontainers)",
+    "status": "complete",
+    "pages": 1,
+    "records": 40,
+    "seconds": 1.06,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_resourcechanges",
+    "label": "Resource changes, noise pre-filtered server-side (resourcechanges)",
+    "status": "complete",
+    "pages": 1,
+    "records": 47,
+    "seconds": 1.14,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "activity_log_delete_attribution",
+    "label": "Activity Log callers for deletes recorded as System or Unspecified",
+    "status": "complete",
+    "pages": 1,
+    "records": 1,
+    "seconds": 1.48,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_resourcecontainerchanges",
+    "label": "Resource group and subscription changes (resourcecontainerchanges)",
+    "status": "complete",
+    "pages": 1,
+    "records": 2,
+    "seconds": 0.97,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_noise_aggregate",
+    "label": "Noise-only updates by resource type and resource group (aggregate)",
+    "status": "complete",
+    "pages": 1,
+    "records": 10,
+    "seconds": 1.06,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_noise_paths",
+    "label": "Noise-only updates by property path (aggregate)",
+    "status": "complete",
+    "pages": 1,
+    "records": 21,
+    "seconds": 1.3,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_first_seen_baseline",
+    "label": "First-seen actor per resource group (14-day baseline)",
+    "status": "complete",
+    "pages": 1,
+    "records": 3,
+    "seconds": 1.28,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_role_assignments",
+    "label": "New or updated role assignments (authorizationresources)",
+    "status": "complete",
+    "pages": 1,
+    "records": 3,
+    "seconds": 1.05,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arm_role_definitions",
+    "label": "Role definition names (ARM roleDefinitions)",
+    "status": "complete",
+    "pages": 2,
+    "records": 2,
+    "seconds": 2.0,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_nsg_rules",
+    "label": "Current NSG rules for changed rules (resources)",
+    "status": "complete",
+    "pages": 1,
+    "records": 1,
+    "seconds": 1.06,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "arg_resource_tags",
+    "label": "Resource tags for manual portal changes (resources)",
+    "status": "not_needed",
+    "pages": 0,
+    "records": 0,
+    "seconds": 0.0,
+    "notes": "No manual portal changes to check against PROD_TAGS (resource group tags are always used).",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "subscription_access",
+    "label": "Configured subscriptions visible to the identity",
+    "status": "complete",
+    "pages": 0,
+    "records": 1,
+    "seconds": 0.0,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "activity_log_gaps",
+    "label": "Activity Log gap events: role assignment deletes, locks, diagnostic settings, policy",
+    "status": "complete",
+    "pages": 2,
+    "records": 7,
+    "seconds": 4.14,
+    "notes": "",
+    "errors": [],
+    "optional": false
+   },
+   {
+    "id": "activity_log_actor_lookup",
+    "label": "Activity Log lookups by correlationId for unresolved application actors",
+    "status": "complete",
+    "pages": 3,
+    "records": 3,
+    "seconds": 4.66,
+    "notes": "",
+    "errors": [],
+    "optional": true
+   },
+   {
+    "id": "arg_identity_maps",
+    "label": "Managed identity name maps (resources: clientId / principalId)",
+    "status": "complete",
+    "pages": 1,
+    "records": 3,
+    "seconds": 1.19,
+    "notes": "",
+    "errors": [],
+    "optional": true
+   },
+   {
+    "id": "graph_names",
+    "label": "Microsoft Graph display names (optional)",
+    "status": "not_configured",
+    "pages": 0,
+    "records": 0,
+    "seconds": 0.0,
+    "notes": "ENABLE_GRAPH_NAMES is False: application IDs are shown raw when no other source resolves them.",
+    "errors": [],
+    "optional": true
+   }
+  ],
+  "not_covered": [
+   "data-plane",
+   "app-service-files",
+   "rbac-deletes-without-activity-log",
+   "locks",
+   "diagnostic-settings",
+   "policy"
+  ],
+  "retention_days": 14,
+  "latency_note": "Change records are usually available in Azure Resource Graph within 5 minutes.",
+  "graph": "not_configured",
+  "activity_log": "complete",
+  "identity_check": {
+   "arm": "verified sidecar placeholder token"
+  },
+  "http_requests": 17,
+  "throttled_waits": 0,
+  "collection_seconds": 22.5,
+  "managed_resource_groups": 8,
+  "prod_resource_groups": 2
+ },
+ "sources": [
+  "https://learn.microsoft.com/azure/governance/resource-graph/changes/get-resource-changes",
+  "https://learn.microsoft.com/azure/governance/resource-graph/changes/resource-graph-changes",
+  "https://learn.microsoft.com/azure/governance/resource-graph/changes/view-resource-changes",
+  "https://learn.microsoft.com/azure/governance/resource-graph/concepts/work-with-data",
+  "https://learn.microsoft.com/azure/governance/resource-graph/concepts/guidance-for-throttled-requests",
+  "https://learn.microsoft.com/azure/azure-monitor/platform/activity-log",
+  "https://learn.microsoft.com/azure/sre-agent/overview"
+ ]
+}
