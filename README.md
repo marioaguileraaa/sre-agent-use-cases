@@ -8,7 +8,7 @@ The workload guides preserve **real annotated screenshots** where collected: red
 
 **Browse the use cases visually:** [A field guide to Azure SRE Agent use cases](https://marioaguileraaa.github.io/sre-agent-use-cases/), a plain-language page for less technical readers that links to every guide below and updates itself when a new case is added to this table.
 
-**Quick navigation:** [Use cases](#use-cases) · [Before the workshop](#before-the-workshop) · [Inputs and outputs](#inputs-and-outputs-at-a-glance) · [Permissions](#common-prerequisites) · [Acceptance](#implementation-and-acceptance-checkpoints).
+**Quick navigation:** [Use cases](#use-cases) · [Platform note](#platform-note-november-2026-update-tools-deployed-before-this-date) · [Before the workshop](#before-the-workshop) · [Inputs and outputs](#inputs-and-outputs-at-a-glance) · [Permissions](#common-prerequisites) · [Acceptance](#implementation-and-acceptance-checkpoints).
 
 ## Use cases
 
@@ -74,6 +74,13 @@ NN-use-case-name/
 ```
 
 The workload guides follow the same pattern: **permissions → tool → skill → subagent → test in chat → automate**. You validate every step before you move to the next one. The [Case 00 builder](case_0_v3/) generates exactly this set for any new idea.
+
+## Platform note (November 2026): update tools deployed before this date
+
+Python tools in the Azure SRE Agent sandbox now receive **placeholder managed identity tokens** issued by the platform identity sidecar (`iss` = `adc-msi-sidecar`, with `tid`, `clientId` and `scp` instead of `aud` and `appid`). The platform proxy swaps them for the real token when they leave in an `Authorization` header. Two consequences:
+
+- **Cases 04, 05, 06, 08, 09 and 10** verify token claims before reading. Copies deployed before this change return `identity_mismatch` on every source, with no HTTP status. **Re-paste the current tool file** from the case folder: `normalize_sidecar_claims` maps the sandbox token onto the same tenant, client and audience checks.
+- **Cross-tenant access with a federated credential (cases 08 and 11)** no longer works from a Python tool: Entra rejects the placeholder token as a client assertion with `AADSTS5002723`. Give the multi-tenant app a **certificate in a Key Vault** that only the agent identity can read; [`11-fabric-finops-chargeback/setup-cross-tenant-app.ps1`](11-fabric-finops-chargeback/setup-cross-tenant-app.ps1) `-KeyVaultName` does it in one run. Same-tenant deployments are not affected by this second point.
 
 ## Common prerequisites
 

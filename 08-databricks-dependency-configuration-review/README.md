@@ -159,7 +159,14 @@ place.
 
 ### Phase B — Choose and complete ONE cross-tenant permission path
 
-#### Option 1 (Recommended, 100% secretless): `cross_tenant_multitenant_fic`
+#### Option 1 (Recommended): `cross_tenant_multitenant_fic`
+
+> ℹ️ **Platform change (November 2026): add a certificate in Key Vault.** Python tools in the Azure SRE Agent sandbox now receive a placeholder managed identity token issued by the platform identity sidecar (`iss` = `adc-msi-sidecar`); the platform proxy swaps it for the real token only when it leaves in an `Authorization` header. The federated (FIC) exchange sends that token inside the request body, so Entra rejects it with **`AADSTS5002723`**. Keep the app and the FIC below, and also give the app a **certificate stored in a Key Vault of Tenant A** that only the SRE Agent managed identity can read; set `CROSS_TENANT_CERT_KEYVAULT_URL` and `CROSS_TENANT_CERT_NAME` (Phase C). With both empty the tool still tries the FIC. The setup script of case 11 does all of it in one idempotent run (public network access must be enabled on the vault):
+>
+> ```powershell
+> ../11-fabric-finops-chargeback/setup-cross-tenant-app.ps1 -SreTenantId <SRE_TENANT_ID> -UamiPrincipalId <SRE_UAMI_OBJECT_PRINCIPAL_ID> `
+>     -AppName <YOUR_MULTITENANT_APP_NAME> -KeyVaultName <VAULT> -ResourceGroup <RESOURCE_GROUP> -SubscriptionId <SRE_SUBSCRIPTION_ID>
+> ```
 
 1. **In Tenant A (your SRE tenant — Application Administrator / Developer):**
    - Create an App Registration in **Microsoft Entra ID > App registrations > New registration** with **Accounts in any organizational directory (Any Microsoft Entra ID tenant - Multitenant)**. Copy its **Application (client) ID** for `FEDERATED_APP_CLIENT_ID`.
@@ -205,6 +212,8 @@ TARGET_TENANT_ID = "<COLLEAGUE_DATABRICKS_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_SRE_UAMI_CLIENT_ID>"
 FEDERATED_APP_CLIENT_ID = "<MULTITENANT_APP_CLIENT_ID>"
 KEYVAULT_OAUTH_SECRET_URI = ""
+CROSS_TENANT_CERT_KEYVAULT_URL = "https://<VAULT>.vault.azure.net"   # certificate of the multi-tenant app (see Option 1)
+CROSS_TENANT_CERT_NAME = "<CERTIFICATE_NAME>"
 CLIENT_NAME = "CLIENTE"
 CLIENT_LOGO_DATA_URI = ""
 CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
@@ -327,7 +336,7 @@ Keep the repository copy untouched with `<PLACEHOLDER>` values. In a **private
 staging copy outside Git**, edit only the administrator constants at the top of
 `generate-databricks-dependency-report.py` (`SUBSCRIPTION_ID`, `SRE_TENANT_ID`,
 `TARGET_TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `FEDERATED_APP_CLIENT_ID`,
-`KEYVAULT_OAUTH_SECRET_URI`, `CLIENT_NAME`, `CLIENT_LOGO_DATA_URI`,
+`KEYVAULT_OAUTH_SECRET_URI`, `CROSS_TENANT_CERT_KEYVAULT_URL`, `CROSS_TENANT_CERT_NAME`, `CLIENT_NAME`, `CLIENT_LOGO_DATA_URI`,
 `CLIENT_LOGO_ALT`, `APPROVED_WORKSPACES`).
 
 - **Visual styling and private logo boundary:** The HTML report uses the
@@ -525,6 +534,9 @@ first report.
 |---|---|---|
 | `configuration_required` | Committed `<PLACEHOLDER>` GUIDs or workspace host are still present | Expected before the colleague session. Fill the fixed constants in your private deployment copy during the session. |
 | `cross_tenant_configuration_required` | `SRE_TENANT_ID != TARGET_TENANT_ID` while `auth_mode == "same_tenant_uami"` | Switch `auth_mode` to `cross_tenant_multitenant_fic`, `cross_tenant_lighthouse_plus_databricks_oidc` or `cross_tenant_lighthouse_plus_keyvault_oauth_m2m` after completing cross-tenant setup. |
+| `identity_mismatch` on every source, with no HTTP status | Tool code older than November 2026: it does not recognize the SRE Agent sandbox placeholder tokens (`iss` = `adc-msi-sidecar`) | Update `generate-databricks-dependency-report.py` from this folder; `normalize_sidecar_claims` maps their tenant, client and scope before the same checks. |
+| `cross_tenant_auth_failed` with `AADSTS5002723` | The federated exchange sent a sandbox placeholder token as client assertion | Configure the Key Vault certificate (`CROSS_TENANT_CERT_KEYVAULT_URL`, `CROSS_TENANT_CERT_NAME`) as described in Option 1. |
+| `keyvault_secret_read_failed` | The SRE Agent identity cannot read the certificate (missing *Key Vault Secrets User*, or vault public network access disabled) | Re-run the setup script; enable public access or use a resource group exempted from the policy that disables it. |
 | `cross_tenant_auth_failed` | Entra FIC token exchange at `login.microsoftonline.com/<TARGET_TENANT_ID>/oauth2/v2.0/token` failed | Verify the multi-tenant App Registration in Tenant A has the UAMI's **Object (principal) ID** as `subject`, `issuer = https://login.microsoftonline.com/<SRE_TENANT_ID>/v2.0`, `audience = api://AzureADTokenExchange`, and is provisioned in Tenant B. |
 | `access_denied` on `dbx_*` or `uc_*` while `arm_workspace` is `complete` | Plane 1 (ARM) succeeded (e.g., via Lighthouse), but the service principal is not authorized inside the Databricks Workspace or Unity Catalog | Have the colleague's Databricks Workspace/Account Admin add the service principal in **Settings > Identity and access > Service principals** and grant read/browse privileges. |
 | `G06` / `R06` shown as `not_evaluated` (`No evaluado`) | Runtime table lineage (`system.access.table_lineage`) and DBU billing (`system.billing.usage`) require SQL Warehouse execution | Expected by design: this control-plane collector never starts compute or executes SQL statements. |
