@@ -29,6 +29,13 @@ TARGET_TENANT_ID = "<YOUR_TARGET_DATABRICKS_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_SRE_UAMI_CLIENT_ID>"
 FEDERATED_APP_CLIENT_ID = ""
 KEYVAULT_OAUTH_SECRET_URI = ""
+# Optional cross-tenant certificate for auth_mode "cross_tenant_multitenant_fic". The Azure SRE Agent sandbox hands
+# Python tools sidecar-issued managed identity tokens that the platform proxy swaps at egress, so they cannot be sent
+# as a federated client assertion (Entra rejects them with AADSTS5002723). Store a certificate of the multi-tenant
+# app in a Key Vault the agent identity can read (Key Vault Secrets User) and set both values; leave them empty to
+# use the federated identity credential.
+CROSS_TENANT_CERT_KEYVAULT_URL = ""
+CROSS_TENANT_CERT_NAME = ""
 CLIENT_NAME = "CLIENTE"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
@@ -132,6 +139,25 @@ WORKSPACE_CONF_KEYS = (
 CATALOG = {}
 HTML_TEMPLATE = ""
 # END BUILD-TIME ASSETS
+
+
+SIDECAR_TOKEN_ISSUER = "adc-msi-sidecar"
+
+
+def normalize_sidecar_claims(claims):
+    """Map Azure SRE Agent sandbox token claims onto the standard Entra names.
+
+    Python tools in the SRE Agent sandbox receive placeholder tokens issued by the identity sidecar
+    (iss "adc-msi-sidecar") that the platform proxy replaces with the real managed identity token at egress.
+    They carry tid, clientId and scp instead of aud/appid, so tenant, client and audience stay verifiable.
+    """
+    if not isinstance(claims, dict) or claims.get("iss") != SIDECAR_TOKEN_ISSUER:
+        return claims
+    scope = claims.get("scp") if isinstance(claims.get("scp"), str) else ""
+    audience = scope[:-len("/.default")] if scope.endswith("/.default") else scope
+    if audience.rstrip("/").lower() == "https://management.core.windows.net":
+        audience = "https://management.azure.com"
+    return dict(claims, appid=claims.get("clientId") or claims.get("cid") or None, aud=audience or None)
 
 
 class EvidenceError(RuntimeError):
@@ -339,6 +365,18 @@ def validate_config(workspace_name):
         dbx_plane_enabled and auth_mode in ("cross_tenant_lighthouse_plus_databricks_oidc", "cross_tenant_lighthouse_plus_keyvault_oauth_m2m")
     ):
         validate_guid(FEDERATED_APP_CLIENT_ID, "FEDERATED_APP_CLIENT_ID")
+    if auth_mode == "cross_tenant_multitenant_fic" and (CROSS_TENANT_CERT_KEYVAULT_URL or CROSS_TENANT_CERT_NAME):
+        if not (
+            isinstance(CROSS_TENANT_CERT_KEYVAULT_URL, str)
+            and re.fullmatch(r"https://[a-z0-9-]{3,24}\.vault\.azure\.net/?", CROSS_TENANT_CERT_KEYVAULT_URL)
+            and isinstance(CROSS_TENANT_CERT_NAME, str)
+            and re.fullmatch(r"[A-Za-z0-9-]{1,127}", CROSS_TENANT_CERT_NAME)
+        ):
+            raise EvidenceError(
+                "configuration_required",
+                "Configure CROSS_TENANT_CERT_KEYVAULT_URL as https://<vault>.vault.azure.net and CROSS_TENANT_CERT_NAME as the certificate name, or leave both empty.",
+                "configuration",
+            )
     if dbx_plane_enabled and auth_mode == "cross_tenant_lighthouse_plus_keyvault_oauth_m2m":
         if not isinstance(KEYVAULT_OAUTH_SECRET_URI, str) or not re.fullmatch(
             r"https://[a-z0-9-]{3,24}\.vault\.azure\.net/secrets/[A-Za-z0-9-]{1,127}(?:/[0-9a-f]{32})?",
@@ -489,6 +527,7 @@ def verify_jwt_claims(token_str, expected_tid, expected_client, expected_aud):
     try:
         encoded = token_str.split(".")[1]
         claims = json.loads(base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)))
+        claims = normalize_sidecar_claims(claims)
     except (AttributeError, IndexError, ValueError, binascii.Error) as exc:
         raise EvidenceError("authentication_failed", "Identity provider returned an unreadable JWT; token contents are excluded.", "identity") from exc
     tenant = pick(claims, "tid")
@@ -545,7 +584,34 @@ class Identity:
         verify_jwt_claims(token, SRE_TENANT_ID, MANAGED_IDENTITY_CLIENT_ID, audience)
         return token
 
+    def exchange_entra_certificate(self, target_resource):
+        kv_token = self.uami_token(KEYVAULT_AUDIENCE)
+        self._guard_budget()
+        kv_req = Request(CROSS_TENANT_CERT_KEYVAULT_URL.rstrip("/") + "/secrets/" + CROSS_TENANT_CERT_NAME + "?api-version=7.4",
+                         method="GET", headers={"Authorization": "Bearer " + kv_token, "Accept": "application/json"})
+        try:
+            with self.opener.open(kv_req, timeout=15) as response:
+                kv_payload = obj(json.loads(response.read(65536)), "identity")
+        except HTTPError as exc:
+            raise EvidenceError("keyvault_secret_read_failed", "Key Vault cross-tenant certificate read failed with HTTP " + str(exc.code) + ".", "identity", exc.code) from exc
+        except (URLError, TimeoutError, ssl.SSLError, OSError, ValueError) as exc:
+            raise EvidenceError("keyvault_secret_read_failed", "Key Vault cross-tenant certificate transport failed.", "identity") from exc
+        pem = kv_payload.get("value")
+        if not isinstance(pem, str) or len(pem) > 32768 or "-----BEGIN" not in pem:
+            raise EvidenceError("keyvault_secret_read_failed", "Key Vault returned no PEM certificate for the cross-tenant app.", "identity")
+        self._guard_budget()
+        try:
+            from azure.identity import CertificateCredential
+            access_token = CertificateCredential(TARGET_TENANT_ID.lower(), FEDERATED_APP_CLIENT_ID.lower(),
+                                                 certificate_data=pem.encode("utf-8")).get_token(target_resource.rstrip("/") + "/.default").token
+        except Exception as exc:
+            raise EvidenceError("cross_tenant_auth_failed", "Cross-tenant certificate sign-in failed: " + " ".join(str(exc).split())[:220], "identity") from exc
+        verify_jwt_claims(access_token, TARGET_TENANT_ID, FEDERATED_APP_CLIENT_ID, target_resource)
+        return access_token
+
     def exchange_entra_fic(self, target_resource):
+        if CROSS_TENANT_CERT_KEYVAULT_URL and CROSS_TENANT_CERT_NAME:
+            return self.exchange_entra_certificate(target_resource)
         assertion = self.uami_token(ENTRA_TOKEN_EXCHANGE_AUDIENCE)
         self._guard_budget()
         token_url = "https://login.microsoftonline.com/" + TARGET_TENANT_ID.lower() + "/oauth2/v2.0/token"

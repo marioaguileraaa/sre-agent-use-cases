@@ -33,6 +33,12 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
     # Option B - cross-tenant: client ID of the multi-tenant app and tenant ID where Fabric lives.
     FEDERATED_APP_CLIENT_ID = "<FEDERATED_APP_CLIENT_ID>"
     TARGET_FABRIC_TENANT_ID = "<TARGET_FABRIC_TENANT_ID>"
+    # Option B, recommended: certificate of the multi-tenant app stored in a Key Vault of the SRE Agent tenant
+    # (the agent identity needs "Key Vault Secrets User" on it). The SRE Agent sandbox hands Python tools
+    # sidecar-issued managed identity tokens that its proxy swaps at egress, so they cannot be sent as a
+    # federated client assertion (Entra rejects them with AADSTS5002723). Leave empty to try the federated credential.
+    CROSS_TENANT_CERT_KEYVAULT_URL = ""   # e.g. "https://<vault>.vault.azure.net"
+    CROSS_TENANT_CERT_NAME = ""           # e.g. "sre-agent-fabric-cross-tenant"
     # ------------------------------------------------------------------------------------------------
 
     def _configured(v):
@@ -116,10 +122,26 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
 
         uami = (ManagedIdentityCredential(client_id=MANAGED_IDENTITY_CLIENT_ID) if _configured(MANAGED_IDENTITY_CLIENT_ID)
                 else ManagedIdentityCredential())
-        if CROSS_TENANT:
+        cred = None
+        if CROSS_TENANT and _configured(CROSS_TENANT_CERT_KEYVAULT_URL) and _configured(CROSS_TENANT_CERT_NAME):
+            try:
+                from azure.identity import CertificateCredential
+                kv_tok = uami.get_token("https://vault.azure.net/.default").token
+                kv_r = requests.get(f"{CROSS_TENANT_CERT_KEYVAULT_URL.strip().rstrip('/')}/secrets/{CROSS_TENANT_CERT_NAME.strip()}?api-version=7.4",
+                                    headers={"Authorization": "Bearer " + kv_tok, "Accept": "application/json"}, timeout=30)
+                if kv_r.status_code == 200:
+                    cred = CertificateCredential(tenant_id=TARGET_FABRIC_TENANT_ID, client_id=FEDERATED_APP_CLIENT_ID,
+                                                 certificate_data=kv_r.json()["value"].encode("utf-8"))
+                    src("cross_tenant_auth", "ok", 200, note="Certificado de la app multi-tenant leído de Key Vault")
+                else:
+                    src("cross_tenant_auth", "error", kv_r.status_code,
+                        note="Key Vault no devolvió el certificado: " + " ".join(kv_r.text.split())[:240])
+            except Exception as exc:
+                src("cross_tenant_auth", "error", note=type(exc).__name__ + ": " + " ".join(str(exc).split())[:240])
+        if cred is None and CROSS_TENANT:
             cred = ClientAssertionCredential(tenant_id=TARGET_FABRIC_TENANT_ID, client_id=FEDERATED_APP_CLIENT_ID,
                                              func=lambda: uami.get_token("api://AzureADTokenExchange/.default").token)
-        else:
+        elif cred is None:
             cred = uami
         tokens = {}
         for key, scope in (("fab", "https://api.fabric.microsoft.com/.default"),
@@ -130,7 +152,7 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
                 tokens[key] = cred.get_token(scope).token
             except Exception as exc:
                 tokens[key] = None
-                src("token_" + key, "error", note=type(exc).__name__)
+                src("token_" + key, "error", note=(type(exc).__name__ + ": " + " ".join(str(exc).split())[:320]))
 
         def _token_tid(tok):
             try:
@@ -2128,7 +2150,7 @@ No incluye ráfagas de minutos: confirmar en Capacity Metrics antes de cambiar d
         "idle_workspaces_on_paid_capacity": [r["name"] for r in idle_ws],
         "tenant_settings": [{"setting": r["title"], "enabled": r["enabled"], "scope": r["scope"]} for r in ts_rows],
         "capacity_metrics_app": "installed; not queryable by service principal (RLS/SSO model)" if cm_installed else "not detected",
-        "sources": {k: {"status": v.get("status"), "http": v.get("http"), "count": v.get("count")} for k, v in sources.items()},
+        "sources": {k: {"status": v.get("status"), "http": v.get("http"), "count": v.get("count"), "note": v.get("note")} for k, v in sources.items()},
         "analysis_seconds": round(time.monotonic() - t_an, 1),
     }
     if operation == "summary":

@@ -77,10 +77,16 @@ class MediaAndDocumentationTests(unittest.TestCase):
         self.assertEqual(receipt["media"]["actual_annotated_photographs"], 11)
 
         # Verify committed LF blob SHA-256 parity on the 4 frozen runtime files
-        expected_blobs = receipt["canonical_runtime_files_sha256"]
+        expected_blobs = dict(receipt["canonical_runtime_files_sha256"])
+        # Later, documented runtime changes (runtime-changes.json) supersede the receipt hash for the files they list.
+        changes_path = ROOT / "runtime-changes.json"
+        if changes_path.is_file():
+            for change in json.loads(changes_path.read_text(encoding="utf-8"))["changes"]:
+                self.assertTrue(change.get("reason") and change.get("date_utc"))
+                expected_blobs.update(change["files_sha256"])
         for rel_path, expected_sha in expected_blobs.items():
             lf_bytes = (ROOT / rel_path).read_bytes().replace(b"\r\n", b"\n")
-            self.assertEqual(hashlib.sha256(lf_bytes).hexdigest(), expected_sha, f"Frozen file modified: {rel_path}")
+            self.assertEqual(hashlib.sha256(lf_bytes).hexdigest(), expected_sha, f"Frozen file modified without a runtime-changes.json entry: {rel_path}")
 
     def test_readme_plane2_acl_matrix_and_readiness_disclosures(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

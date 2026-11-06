@@ -117,6 +117,25 @@ HTML_TEMPLATE = ""
 # END BUILD-TIME ASSETS
 
 
+SIDECAR_TOKEN_ISSUER = "adc-msi-sidecar"
+
+
+def normalize_sidecar_claims(claims):
+    """Map Azure SRE Agent sandbox token claims onto the standard Entra names.
+
+    Python tools in the SRE Agent sandbox receive placeholder tokens issued by the identity sidecar
+    (iss "adc-msi-sidecar") that the platform proxy replaces with the real managed identity token at egress.
+    They carry tid, clientId and scp instead of aud/appid, so tenant, client and audience stay verifiable.
+    """
+    if not isinstance(claims, dict) or claims.get("iss") != SIDECAR_TOKEN_ISSUER:
+        return claims
+    scope = claims.get("scp") if isinstance(claims.get("scp"), str) else ""
+    audience = scope[:-len("/.default")] if scope.endswith("/.default") else scope
+    if audience.rstrip("/").lower() == "https://management.core.windows.net":
+        audience = "https://management.azure.com"
+    return dict(claims, appid=claims.get("clientId") or claims.get("cid") or None, aud=audience or None)
+
+
 class EvidenceError(RuntimeError):
     def __init__(self, code, message, source="investigation", http_status=None):
         super().__init__(message)
@@ -440,6 +459,7 @@ class Identity:
             try:
                 padded = parts[1] + "=" * (-len(parts[1]) % 4)
                 claims = json.loads(base64.urlsafe_b64decode(padded).decode("utf-8"))
+                claims = normalize_sidecar_claims(claims)
             except Exception as exc:
                 raise EvidenceError("authentication_failed", "ARM JWT payload could not be decoded for claim verification.", "identity") from exc
             app_claim = (claims.get("appid") or claims.get("azp") or "").lower()

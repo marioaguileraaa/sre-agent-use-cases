@@ -41,7 +41,7 @@ flowchart LR
     C --> T["Only selected tool<br/>generate-fabric-chargeback-report"]
     T --> U["SRE Agent UAMI<br/>ManagedIdentityCredential"]
     U -->|"Option A - same tenant"| B["Fabric tenant<br/>(read-only grants)"]
-    U -->|"Option B - cross-tenant<br/>FIC token exchange"| F["Multi-tenant app SP<br/>in Fabric tenant"]
+    U -->|"Option B - cross-tenant<br/>app certificate from Key Vault"| F["Multi-tenant app SP<br/>in Fabric tenant"]
     F --> B
     B --> P1["Fabric / Power BI admin APIs<br/>capacities, workspaces, items,<br/>activity, refreshes, settings"]
     B --> P2["Fabric Spark (Livy) + OneLake"]
@@ -55,7 +55,7 @@ flowchart LR
 ```
 
 - **One tool, no secrets.** The tool reads the 14 sources in parallel (about 60-90 s), builds the model and writes the 4 files. Collection budget 105 s inside a 150 s timeout: a source that does not answer in time is marked, and the rest of the report still renders.
-- **Two auth modes in the same file.** If the two cross-tenant constants are left as placeholders, the tool uses the SRE Agent managed identity directly (Option A). If both are set, it exchanges the managed identity token for a token of the multi-tenant app in the Fabric tenant (Option B). The report header shows which mode ran.
+- **Two auth modes in the same file.** If the two cross-tenant constants are left as placeholders, the tool uses the SRE Agent managed identity directly (Option A). If both are set, it signs in as the multi-tenant app in the Fabric tenant (Option B) with the app certificate it reads from Key Vault with the managed identity. The report header shows which mode ran.
 
 ## 14 read-only sources and the permission each needs
 
@@ -85,9 +85,9 @@ The **identity** is the SRE Agent UAMI (Option A) or the multi-tenant app servic
 | | **Option A - same tenant** (recommended for customers) | **Option B - cross-tenant** |
 |---|---|---|
 | When | The SRE Agent and Fabric live in the **same Entra ID tenant**. This is the normal customer deployment | The SRE Agent is in **tenant A** (e.g. a partner / Microsoft lab) and Fabric is in **tenant B** (e.g. a colleague's or a customer's tenant for a PoC) |
-| Identity that reads Fabric | The SRE Agent **UAMI** itself | A **multi-tenant app** (no secret, no certificate) trusted by the UAMI through a **Federated Identity Credential** |
+| Identity that reads Fabric | The SRE Agent **UAMI** itself | A **multi-tenant app** whose **certificate lives in a Key Vault of tenant A** that only the UAMI can read |
 | Scripts | 1: `grant-fabric-finops-access.ps1 -PrincipalObjectId` | 2: `setup-cross-tenant-app.ps1` in tenant A, then `grant-fabric-finops-access.ps1 -AppClientId` in tenant B |
-| Tool constants | Only `MANAGED_IDENTITY_CLIENT_ID` | All 3 constants |
+| Tool constants | Only `MANAGED_IDENTITY_CLIENT_ID` | All 5 constants |
 | People involved | 1 Fabric / Azure admin | Tenant A app registrant **and** tenant B Fabric / Azure admin |
 | Time | 15-20 min + 15 min propagation | 30-45 min + 15 min propagation |
 
@@ -175,41 +175,47 @@ Continue with [step 3](#step-3---configure-the-tool-the-3-constants).
 
 ## Option B - cross-tenant (SRE Agent in tenant A, Fabric in tenant B)
 
-Use this when your SRE Agent lives in a different tenant from Fabric (for example, a demo against a colleague's tenant). A managed identity cannot be granted roles in another tenant, so the tool uses a **workload identity federation** chain with **no secrets and no certificates**:
+Use this when your SRE Agent lives in a different tenant from Fabric (for example, a demo against a colleague's tenant). A managed identity cannot be granted roles in another tenant, so the tool signs in as a **multi-tenant app** whose service principal holds the read-only grants in tenant B. The app's **certificate stays in a Key Vault of tenant A**, and only the SRE Agent managed identity can read it:
 
 ```text
  Tenant A (SRE Agent)                                     Tenant B (Fabric)
 ┌────────────────────────────────────┐                  ┌───────────────────────────────────────────────┐
-│ SRE Agent UAMI                     │ 1. UAMI token    │ Service principal of the multi-tenant app     │
-│   │ (audience api://AzureADToken   │   as client      │  ├ member of sg-sre-agent-fabric              │
-│   │  Exchange)                     │   assertion      │  │   └ tenant settings: read-only admin APIs, │
-│   ▼                                │ ───────────────▶ │  │     call Fabric public APIs                │
-│ Multi-tenant app (no secret)       │                  │  ├ Viewer on the workspaces                   │
-│   └ Federated Identity Credential  │ 2. token for     │  └ Reader + Cost Management Reader            │
-│     issuer = tenant A, subject =   │   tenant B       │      on the capacity subscription             │
-│     UAMI principal ID              │ ◀─────────────── │                                               │
+│ SRE Agent UAMI                     │                  │ Service principal of the multi-tenant app     │
+│   │ 1. reads the app certificate   │                  │  ├ member of sg-sre-agent-fabric              │
+│   ▼    (Key Vault Secrets User)    │ 2. sign in as    │  │   └ tenant settings: read-only admin APIs, │
+│ Key Vault ─ certificate (PEM)      │   the app with   │  │     call Fabric public APIs                │
+│   │                                │   the cert       │  ├ Viewer on the workspaces                   │
+│ Multi-tenant app                   │ ───────────────▶ │  └ Reader + Cost Management Reader            │
+│   └ public key of the certificate  │ 3. token for     │      on the capacity subscription             │
+│                                    │   tenant B       │                                               │
+│                                    │ ◀─────────────── │                                               │
 └────────────────────────────────────┘                  └───────────────────────────────────────────────┘
 ```
+
+> ℹ️ **Why a certificate and not a federated credential (FIC).** Python tools in the Azure SRE Agent sandbox receive a placeholder managed identity token issued by the platform identity sidecar (`iss` = `adc-msi-sidecar`); the platform proxy swaps it for the real token only when it leaves in an `Authorization` header. A federated sign-in sends the managed identity token inside the request body, so Entra rejects it with **`AADSTS5002723`** (*No certificate thumbprint nor keyId specified in token header*). Reading the certificate from Key Vault is a normal `Authorization` call and works. The tool still falls back to the FIC when the two certificate constants are empty, and the setup script still creates the FIC, so nothing else changes if the platform allows it again.
 
 **Who does what, and where**
 
 | Step | Who | Tenant | Script / action | Output |
 |---|---|---|---|---|
-| B1 | SRE Agent admin | **A** | `setup-cross-tenant-app.ps1` | `FEDERATED_APP_CLIENT_ID` |
+| B1 | SRE Agent admin | **A** | `setup-cross-tenant-app.ps1 -KeyVaultName ...` | `FEDERATED_APP_CLIENT_ID`, `CROSS_TENANT_CERT_KEYVAULT_URL`, `CROSS_TENANT_CERT_NAME` |
 | B2 | Fabric / Azure admin | **B** | `grant-fabric-finops-access.ps1 -AppClientId` | Service principal in B + all read-only grants |
 | B3 | Either | - | Verify the chain | Token for tenant B works |
 
-### Step B1 - Tenant A: create the multi-tenant app and its FIC
+### Step B1 - Tenant A: create the multi-tenant app and its certificate in Key Vault
 
-You need the **SRE tenant ID** and the **UAMI Object (principal) ID** ([step A1](#step-a1---get-the-uami-object-principal-id)).
+You need the **SRE tenant ID**, the **UAMI Object (principal) ID** ([step A1](#step-a1---get-the-uami-object-principal-id)), and a resource group and subscription of tenant A for the Key Vault.
 
 ```powershell
-./setup-cross-tenant-app.ps1 -SreTenantId <SRE_TENANT_ID> -UamiPrincipalId <UAMI_OBJECT_PRINCIPAL_ID>
+./setup-cross-tenant-app.ps1 -SreTenantId <SRE_TENANT_ID> -UamiPrincipalId <UAMI_OBJECT_PRINCIPAL_ID> `
+    -KeyVaultName <NEW_OR_EXISTING_VAULT> -ResourceGroup <RESOURCE_GROUP> -SubscriptionId <SRE_SUBSCRIPTION_ID>
 ```
+
+> ⚠️ The SRE Agent reaches the vault over the internet, so the Key Vault needs **public network access enabled** (access stays restricted by Entra ID and RBAC). If an Azure Policy of your organization forces it off, create the vault in a resource group your organization exempts from that policy; the script warns you if access is disabled.
 
 It is idempotent and does exactly this:
 
-1. Creates the app **`sre-agent-fabric-cross-tenant-bridge`** (`-AppName` to change) with *Accounts in any organizational directory* (`AzureADMultipleOrgs`), **no secret, no certificate, no API permissions**.
+1. Creates the app **`sre-agent-fabric-cross-tenant-bridge`** (`-AppName` to change) with *Accounts in any organizational directory* (`AzureADMultipleOrgs`), **no secret and no API permissions**.
 2. Adds a **Federated Identity Credential** `sre-agent-uami-fic` to the app:
 
    | Field | Value |
@@ -218,11 +224,15 @@ It is idempotent and does exactly this:
    | Subject | `<UAMI_OBJECT_PRINCIPAL_ID>` |
    | Audience | `api://AzureADTokenExchange` |
 
-3. Prints `FEDERATED_APP_CLIENT_ID = <appId>`. Keep it for B2 and step 3.
+3. Creates (or reuses) the Key Vault with RBAC authorization, gives **you** *Key Vault Certificates Officer* and the **UAMI** *Key Vault Secrets User* on that vault only.
+4. Creates a self-signed certificate `sre-agent-fabric-cross-tenant` in the vault (12 months by default, `-CertificateValidityMonths`; the private key never leaves Key Vault) and adds **only its public key** to the app.
+5. Prints the three values for step 3: `FEDERATED_APP_CLIENT_ID`, `CROSS_TENANT_CERT_KEYVAULT_URL` and `CROSS_TENANT_CERT_NAME`.
+
+Every `az` call is checked: if your sign-in has expired or a role is missing, the script stops with the failing command instead of continuing. It is idempotent, so re-run it after fixing the cause. **Renew the certificate before it expires** (Key Vault can e-mail its contacts 30 days before): create a new version in the vault and re-run the script to add its public key to the app.
 
 > ⚠️ **Never add Power BI or Fabric API permissions with admin consent to this app.** The Fabric admin APIs then reject the service principal with 401. The default (no permissions) is correct. One app serves any number of Fabric tenants.
 
-Portal equivalent: **Entra ID** > **App registrations** > **New registration** > *Accounts in any organizational directory* > **Register**; then **Certificates & secrets** > **Federated credentials** > **Add credential** > *Other issuer* with the three values above.
+Portal equivalent: **Entra ID** > **App registrations** > **New registration** > *Accounts in any organizational directory* > **Register**; **Key Vault** > **Certificates** > **Generate/Import** (self-signed, content type PEM) > **Download in CER format**; back in the app, **Certificates & secrets** > **Certificates** > **Upload certificate**; finally **Key Vault** > **Access control (IAM)** > *Key Vault Secrets User* for the SRE Agent managed identity.
 
 ### Step B2 - Tenant B: create the service principal and grant read-only access
 
@@ -245,11 +255,11 @@ Alternative to create the service principal: a Global Administrator of tenant B 
 
 - **Tenant B > Entra ID > Enterprise applications** > `sre-agent-fabric-cross-tenant-bridge` exists; **Groups** > `sg-sre-agent-fabric` > Members contains it.
 - **Tenant B > subscription > Access control (IAM) > Role assignments**: the app has *Reader* and *Cost Management Reader*.
-- After step 3 and 4, the **Test playground** of the tool (step 4, screenshot `b05`) with `operation=summary` returns `"auth_mode": "cross_tenant"` and sources with status OK. An `AADSTS700213`/`AADSTS70021` error means the FIC subject/issuer does not match the UAMI.
+- After step 3 and 4, the **Test playground** of the tool (step 4, screenshot `b05`) with `operation=summary` returns `"auth_mode": "cross_tenant"`, a `cross_tenant_auth` source with status OK (*certificate read from Key Vault*) and the other sources with status OK.
 
 ---
 
-## Step 3 - Configure the tool (the 3 constants)
+## Step 3 - Configure the tool (the constants)
 
 Open [`generate-fabric-chargeback-report.py`](generate-fabric-chargeback-report.py) and edit **only** the `CONFIGURE` block at the top of `main()`:
 
@@ -257,6 +267,8 @@ Open [`generate-fabric-chargeback-report.py`](generate-fabric-chargeback-report.
 MANAGED_IDENTITY_CLIENT_ID = "<SRE_AGENT_UAMI_CLIENT_ID>"   # both options: UAMI Client ID
 FEDERATED_APP_CLIENT_ID    = "<FEDERATED_APP_CLIENT_ID>"    # Option B only: printed by setup-cross-tenant-app.ps1
 TARGET_FABRIC_TENANT_ID    = "<TARGET_FABRIC_TENANT_ID>"    # Option B only: tenant where Fabric lives
+CROSS_TENANT_CERT_KEYVAULT_URL = ""   # Option B only: printed by setup-cross-tenant-app.ps1
+CROSS_TENANT_CERT_NAME = ""           # Option B only: printed by setup-cross-tenant-app.ps1
 ```
 
 | Constant | Option A - same tenant | Option B - cross-tenant |
@@ -264,10 +276,12 @@ TARGET_FABRIC_TENANT_ID    = "<TARGET_FABRIC_TENANT_ID>"    # Option B only: ten
 | `MANAGED_IDENTITY_CLIENT_ID` | UAMI **Client ID** | UAMI **Client ID** |
 | `FEDERATED_APP_CLIENT_ID` | Leave the placeholder (or `""`) | App client ID from step B1 |
 | `TARGET_FABRIC_TENANT_ID` | Leave the placeholder (or `""`) | Tenant B ID |
+| `CROSS_TENANT_CERT_KEYVAULT_URL` | Leave `""` | Vault URL from step B1, e.g. `https://<vault>.vault.azure.net` |
+| `CROSS_TENANT_CERT_NAME` | Leave `""` | Certificate name from step B1 (`sre-agent-fabric-cross-tenant`) |
 
 ![Configure block: the 3 constants and which ones each option fills in](images/b03-python-tool-configure-block.png)
 
-*Inside the Builder code editor: **(1)** UAMI Client ID, required in both options; **(2)** the app client ID and Fabric tenant ID, only for cross-tenant - leave the placeholders for same tenant. Keep these values in your private deployment copy, never in a public repository.*
+*Inside the Builder code editor: **(1)** UAMI Client ID, required in both options; **(2)** the app client ID and Fabric tenant ID, only for cross-tenant - leave the placeholders for same tenant. The two certificate constants (Option B) sit right below them; the screenshot predates them. Keep these values in your private deployment copy, never in a public repository.*
 
 ## Step 4 - Create the Python tool
 
@@ -493,14 +507,16 @@ Ready-made questions for the agent, and the [sources](#step-7---first-run-in-cha
 | Spark or OneLake **partial** | Identity missing on some workspaces; OneLake needs Contributor (or Viewer + OneLake *ReadAll*) | `-WorkspaceRole Contributor` only if you need OneLake size; the report lists which workspaces are missing |
 | Activity **partial** | The activity API keeps about 30 days; the tool reads 27 | Expected with 30-day windows |
 | Capacity Metrics *"no consultable"* | The app's RLS/SSO model does not allow service principals | Expected. Usage is computed from Cost Management CU-h, the same billing data at hourly grain |
-| Option B: `AADSTS700213` / `AADSTS70021` | FIC issuer/subject does not match the UAMI | Re-run `setup-cross-tenant-app.ps1` with the UAMI **Object (principal) ID** and the correct SRE tenant ID |
+| Option B: all four `token_*` sources in error with `AADSTS5002723` | The certificate constants are empty, so the tool tried the federated credential, which the SRE Agent sandbox cannot use | Run `setup-cross-tenant-app.ps1 -KeyVaultName ...` and fill `CROSS_TENANT_CERT_KEYVAULT_URL` / `CROSS_TENANT_CERT_NAME` |
+| Option B: `cross_tenant_auth` error *Key Vault no devolvió el certificado* (403 / `ForbiddenByConnection`) | The UAMI lacks *Key Vault Secrets User*, or the vault's public network access is disabled (often by Azure Policy) | Re-run the setup script; enable public access or use an exempted resource group |
+| Option B: `AADSTS700027` / `AADSTS7000222` | Certificate public key missing on the app, or certificate expired | Re-run `setup-cross-tenant-app.ps1 -KeyVaultName ...` (it adds the current certificate to the app) |
 | Option B: `AADSTS7000229` / app not found in tenant B | Service principal not created in tenant B | Re-run the grant script with `-AppClientId`, or use the admin consent URL |
 | 1-year and 3-year reservation cost the same | Some regions list the same per-CU/year price | Real data; the report says so |
 
 ## Security and limits
 
 - **Read-only.** Never pauses, resumes or resizes capacities, never changes access, settings or billing. People apply the actions.
-- **No secrets** in either option: managed identity (A) or managed identity → FIC → multi-tenant app (B). Tokens and headers are never printed.
+- **No secrets in the code** in either option: managed identity (A), or managed identity → certificate in Key Vault → multi-tenant app (B). The private key never leaves Key Vault except into the tool process for the sign-in; only the managed identity can read it. Tokens, keys and headers are never printed.
 - **Least privilege:** tenant settings scoped to one security group; workspace **Viewer** by default; Reader + Cost Management Reader only on the capacity subscriptions. No Fabric Administrator, capacity admin or write role for the identity.
 - **Identities masked by default** in HTML, JSON and CSV (including personal workspace names). `identities=visible` only on explicit request for an authorized recipient.
 - **Stateless.** Nothing is stored between runs; each report is built from the data of the moment. Keep the JSON snapshots if you want month-to-month comparison.

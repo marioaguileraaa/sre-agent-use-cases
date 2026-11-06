@@ -54,6 +54,25 @@ MAX_COLLECTION_SECONDS = 240
 UTC = timezone.utc
 
 
+SIDECAR_TOKEN_ISSUER = "adc-msi-sidecar"
+
+
+def normalize_sidecar_claims(claims):
+    """Map Azure SRE Agent sandbox token claims onto the standard Entra names.
+
+    Python tools in the SRE Agent sandbox receive placeholder tokens issued by the identity sidecar
+    (iss "adc-msi-sidecar") that the platform proxy replaces with the real managed identity token at egress.
+    They carry tid, clientId and scp instead of aud/appid, so tenant, client and audience stay verifiable.
+    """
+    if not isinstance(claims, dict) or claims.get("iss") != SIDECAR_TOKEN_ISSUER:
+        return claims
+    scope = claims.get("scp") if isinstance(claims.get("scp"), str) else ""
+    audience = scope[:-len("/.default")] if scope.endswith("/.default") else scope
+    if audience.rstrip("/").lower() == "https://management.core.windows.net":
+        audience = "https://management.azure.com"
+    return dict(claims, appid=claims.get("clientId") or claims.get("cid") or None, aud=audience or None)
+
+
 class EvidenceError(RuntimeError):
     def __init__(self, code, message, source, http_status=None, artifacts_may_remain=False):
         super().__init__(message)
@@ -236,6 +255,7 @@ class Identity:
         try:
             encoded = token.split(".")[1]
             claims = json.loads(base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)))
+            claims = normalize_sidecar_claims(claims)
         except (AttributeError, IndexError, ValueError, binascii.Error, UnicodeDecodeError) as exc:
             raise EvidenceError("authentication_failed", "Token identity claims could not be checked; no token content is retained.", "identity") from exc
         if not isinstance(claims, dict) or not (

@@ -1,0 +1,13 @@
+{
+  "_description": "Runtime changes made after native-readiness-validation.json. That receipt stays as observed; each entry records why a frozen runtime file changed and its new LF SHA-256.",
+  "changes": [
+    {
+      "date_utc": "2026-11-06",
+      "files_sha256": {
+        "generate-databricks-dependency-report.py": "2d7263f01ce738e66f82fda57d7d983536a18e0b6a31e588a7d47eb5c05da778"
+      },
+      "reason": "Azure SRE Agent sandbox now issues sidecar placeholder managed identity tokens (iss adc-msi-sidecar, claims tid/clientId/scp, no aud/appid) that the platform proxy swaps at egress. Token claim checks map them with normalize_sidecar_claims; cross_tenant_multitenant_fic can read the bridge app certificate from Key Vault (CROSS_TENANT_CERT_KEYVAULT_URL / CROSS_TENANT_CERT_NAME) because a sidecar token cannot be sent as a federated client assertion (AADSTS5002723).",
+      "validated": "Unit tests (tests/test_sidecar_tokens.py) and a live cross-tenant run in a lab agent on 2026-11-06 (4 files written; ARM 403 handled by Plane 2 as before)."
+    }
+  ]
+}
