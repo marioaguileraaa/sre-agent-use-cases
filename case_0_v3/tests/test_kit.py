@@ -103,6 +103,16 @@ print(f"{'PASS' if good['status'] == 'PASS' else 'FAIL'} lint-positive read-only
 inv = kit.main("scaffold", json.dumps({"name": "X", "sources": [{"id": "a", "type": "nope"}], "rules": [{"id": "r", "dataset": "b", "when": {"field": "f", "op": "zz"}}]}))
 failures += inv["status"] != "INVALID"
 print(f"{'PASS' if inv['status'] == 'INVALID' else 'FAIL'} invalid spec -> {len(inv.get('errors', []))} errors with fixes")
+# KPI aggregation alias written by the model ("aggregation" instead of "agg") must be normalized, not silently ignored
+alias_spec = {"name": "kpi-alias-check", "description": "alias", "sources": [{"id": "rows", "type": "resource_graph", "query": "resources | project id, resourceGroup",
+              "sample_rows": [{"id": "a", "resourceGroup": "rg1"}, {"id": "b", "resourceGroup": "rg1"}, {"id": "c", "resourceGroup": "rg2"}]}],
+              "kpis": [{"id": "groups", "label": "Groups", "dataset": "rows", "aggregation": "distinct", "field": "resourceGroup"}],
+              "rules": [{"id": "any", "dataset": "rows", "severity": "low", "when": {"field": "id", "op": "not_empty"}}], "keys": {"rows": ["id"]}}
+alias_res = kit.main("scaffold", json.dumps(alias_spec))
+alias_code = (work / "sre-usecase-builder" / "kpi-alias-check" / "run-kpi-alias-check.py").read_text(encoding="utf-8")
+ok = alias_res["status"] in ("READY", "READY_WITH_INPUTS") and "'agg': 'distinct'" in alias_code and "'aggregation'" not in alias_code
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} kpi alias 'aggregation' normalized to 'agg'")
 print("work dir:", work)
 print("FAILURES:", failures)
 sys.exit(1 if failures else 0)
