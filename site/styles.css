@@ -705,6 +705,38 @@ html:has(.player[open]) { overflow: hidden; }
   .tutorial-thumb { width: 100%; }
 }
 
+/* Sample report: same card as the tutorial, a link instead of a player */
+.sample { max-width: 560px; }
+a.sample-main { text-decoration: none; }
+.sample-thumb { background: #e9edf2; }
+.sample-thumb img { object-position: top left; }
+.sample-main:hover .tutorial-text b { text-decoration: underline; text-decoration-color: var(--brass); }
+.sample-alt {
+  margin: 8px 0 0 2px;
+  font-family: var(--display);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.sample-alt a { color: var(--ink); }
+
+/* Plate 00: the report the builder hands back, presented by the mascot */
+.plate-fig.showcase .plate-frame { border: 0; padding: 0; background: transparent; }
+.plate-fig.showcase img {
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 4 / 3;
+  margin-inline: auto;
+  object-fit: contain;
+  background: transparent;
+  transition: transform 0.6s var(--ease), filter 0.6s var(--ease);
+}
+.plate-fig.showcase .plate-frame:hover img { transform: translateY(-4px); filter: drop-shadow(0 18px 22px rgba(17, 45, 37, 0.16)); }
+.plate-fig.showcase figcaption { max-width: 760px; margin-inline: auto; width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .plate-fig.showcase img { transition: none; }
+  .plate-fig.showcase .plate-frame:hover img { transform: none; }
+}
+
 .plate-fig {
   margin: 0;
   padding: clamp(36px, 5vw, 72px) calc(var(--edge) + var(--tabs)) clamp(36px, 5vw, 64px) clamp(24px, 4vw, 56px);

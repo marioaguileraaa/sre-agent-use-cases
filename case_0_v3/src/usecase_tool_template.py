@@ -934,7 +934,7 @@ tr.f-hide,tr.pg{display:none}td.n,th.n{text-align:right;white-space:nowrap}.more
 .mono{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere}.nil{color:var(--muted)}
 .res b{display:block;font-weight:600;overflow-wrap:anywhere}.res small,.sm{display:block;color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.chips span{font-size:12px;background:var(--soft);border-radius:8px;padding:2px 8px;color:var(--muted);overflow-wrap:anywhere}.chips b{color:var(--ink);font-weight:600}
-.ext{font-size:13px;font-weight:600;white-space:nowrap}.wide{min-width:260px}td.nw{white-space:nowrap}
+.ext{font-size:13px;font-weight:600;white-space:nowrap}.wide{min-width:260px}td.nw{white-space:nowrap}td.brk{overflow-wrap:break-word}.guid{overflow-wrap:normal}
 .empty{display:flex;gap:16px;align-items:center}.empty svg{width:40px;height:40px;color:#079455;flex:none}.empty b{display:block;font-size:18px;color:var(--title)}
 details{border-top:1px solid var(--line);padding:12px 0}details:first-of-type{border-top:0}summary{cursor:pointer;font-weight:600}
 footer{max-width:1320px;margin:0 auto;padding:22px clamp(16px,4vw,40px) 40px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;color:var(--muted);font-size:13px}
@@ -948,9 +948,9 @@ footer .fl{display:flex;gap:14px;align-items:center}footer img{height:26px;width
 .hero{padding:24px 22px 76px;border-radius:14px}.hero::after{display:none}main{padding:0}footer{padding:14px 0}
 .hero h1{font-size:30px}.lead{font-size:14px}.kpi .v{font-size:28px}tr.pg{display:table-row!important}.wrap{overflow:visible;background:none}
 section{margin-top:22px;break-inside:auto}.card,.kpi,.brow,tr,.signal{break-inside:avoid}thead{display:table-header-group}
-.card,.kpi{box-shadow:none}table,table.dense{font-size:11px}td,th,.dense td,.dense th{padding:6px 8px}td.nw{white-space:normal}.sh{display:block;break-after:avoid}.sh h2{break-after:avoid}
+.card,.kpi{box-shadow:none}table,table.dense{font-size:11px}td,th,.dense td,.dense th{padding:6px 8px}td.nw{white-space:normal}td{overflow-wrap:anywhere}.wide{min-width:0}.sh{display:block;break-after:avoid}.sh h2{break-after:avoid}
 .hero-in{grid-template-columns:minmax(0,1fr) 230px;gap:16px 28px}.grid2{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.signal b{font-size:20px}.brow{grid-template-columns:minmax(0,46%) 1fr auto}.brow .bl{white-space:normal;overflow:visible}}
+.signal b{font-size:20px}.brow{grid-template-columns:minmax(0,46%) 1fr auto}.brow .bl{white-space:normal;overflow:visible;overflow-wrap:anywhere}}
 """
 
 DESIGN_JS = """
@@ -1050,13 +1050,39 @@ def _cell(field, value, days_fields):
         host = re.sub(r"^https?://", "", text).split("/")[0]
         return f"<a class='ext' href='{html.escape(text)}' target='_blank' rel='noopener noreferrer'>{html.escape(host)} \u2197</a>", None, text, ""
     if GUID_RE.match(text):
-        return f"<span class='mono'>{html.escape(text)}</span>", None, text, "nw"
+        return f"<span class='mono guid'>{html.escape(text)}</span>", None, text, "nw"
     for tone, words in TONE_WORDS.items():
         if low in words:
             return f"<span class='pill {tone}'>{html.escape(text)}</span>", None, text, ""
     if len(text) > 160:
         return f"<span title='{html.escape(text[:2000])}'>{html.escape(text[:160])}…</span>", None, text, "wide"
+    if len(text) > 24 and " " not in text:
+        return _breakable(text), None, text, "brk"
     return html.escape(text), None, text, "wide" if len(text) > 60 else "nw" if len(text) <= 24 and " " not in text else ""
+
+
+def _breakable(text):
+    """Escape a long token (resource type, host, group name) and let it wrap after / . _ instead of overflowing the table."""
+    return re.sub(r"([/._])", r"\1<wbr>", html.escape(text))
+
+
+def _arm_parts(text):
+    """(name, resource group, portal URL) for an Azure resource ID, else None."""
+    match = ARM_ID_RE.match(str(text or "").strip())
+    if not match or not str(text).lower().startswith("/subscriptions/") or str(text).count("/") < 4:
+        return None
+    return match.group(2), match.group(1) or "", "https://portal.azure.com/#@/resource" + str(text).strip()
+
+
+RESOURCE_TYPE_RE = re.compile(r"^[a-z][a-z0-9]*\.[a-z0-9.]+/[a-z0-9/._-]+$", re.I)
+
+
+def _short_label(text):
+    """Chart label: 'microsoft.compute/virtualmachines/extensions' -> 'virtualmachines/extensions' (full value in the tooltip)."""
+    text = str(text)
+    if RESOURCE_TYPE_RE.match(text):
+        return text.split("/", 1)[1]
+    return text
 
 
 def _td(field, value, days_fields):
@@ -1067,6 +1093,19 @@ def _td(field, value, days_fields):
     if klass:
         attrs += f" class='{klass}'"
     return f"<td{attrs}>{body}</td>"
+
+
+def _item_td(f):
+    """Findings register item: Azure resource IDs as name + resource group + portal link; other keys as name + key."""
+    arm = _arm_parts(f["item"])
+    if arm:
+        name, group, url = arm
+        return (f"<td data-raw='{html.escape(f['item'])}' class='wide'><div class='res'><b>{_breakable(f.get('name') or name)}</b>"
+                f"<small>{html.escape(group)}</small><a class='ext' href='{html.escape(url)}' target='_blank' rel='noopener noreferrer'>{_dt('portal')} \u2197</a></div></td>")
+    if f.get("name") and f["name"] != f["item"]:
+        return (f"<td data-raw='{html.escape(f['name'])}' class='wide'><div class='res'><b>{_breakable(f['name'])}</b>"
+                f"<small class='mono'>{html.escape(f['item'])}</small></div></td>")
+    return f"<td data-raw='{html.escape(f['item'])}' class='wide'>{_breakable(f['item'])}</td>"
 
 
 def _badge(severity):
@@ -1255,7 +1294,7 @@ def _html(ctx):
             label = chart.get("title") or _label(chart["by"])
             sub = chart.get("subtitle", "")
             charts.append(f"<div class='card'><h3>{esc(label)}</h3>{f'<p class=sub>{esc(sub)}</p>' if sub else ''}"
-                          f"{_bars([(esc(k), v, None) for k, v in items], chart.get('unit', ''))}</div>")
+                          f"{_bars([(f'<span title={chr(39)}{esc(k)}{chr(39)}>{_breakable(_short_label(k))}</span>', v, None) for k, v in items], chart.get('unit', ''))}</div>")
     if charts:
         out.append(f"<div class='grid2' style='margin-top:16px'>{''.join(charts)}</div>")
     # Findings register
@@ -1271,8 +1310,7 @@ def _html(ctx):
             body.append(f"<tr data-sev='{esc(f['severity'])}' data-rule='{esc(f['rule'])}'>"
                         f"<td data-raw='{esc(f['severity'])}' data-n='{SEVERITIES.index(f['severity']) if f['severity'] in SEVERITIES else 9}'>{_badge(f['severity'])}</td>"
                         f"<td data-raw='{esc(f['title'])}'>{esc(f['title'])}</td>"
-                        + (f"<td data-raw='{esc(f['name'])}' class='wide'><div class='res'><b>{esc(f['name'])}</b><small class='mono'>{esc(f['item'])}</small></div></td>"
-                           if f.get("name") and f["name"] != f["item"] else f"<td data-raw='{esc(f['item'])}' class='wide'>{esc(f['item'])}</td>")
+                        + _item_td(f)
                         + 
 f"<td data-raw='{esc(f['message'])}' class='wide'>{esc(f['message'])}{f'<div class=chips>{chips}</div>' if chips else ''}</td></tr>")
         head = [(_t("severity"), "severity", ""), (_t("rule"), "rule", ""), (_t("item"), "item", ""), (_t("detail"), "message", "")]

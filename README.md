@@ -2,7 +2,7 @@
 
 English, **step-by-step implementation guides for [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/overview)**, with source code, restricted runtime instructions and dated evidence. Cases **01–03** include field-tested reference workflows; **04** retains explicit partial-live Kubernetes coverage. Read each guide's prerequisites and evidence limits before reproducing it in your own or a customer's environment. A published guide is not proof that the customer's sources or permissions are ready.
 
-**Case 00** is the **SRE use-case builder**: describe a new operations idea in one sentence and the SRE Agent itself returns a tested use case (Python tool, skill, subagent and scheduled task) plus the exact permissions it needs. Start there to build scenarios beyond cases 01–13. Watch the [3-minute video tutorial](case_0_v3/README.md#watch-it-from-one-sentence-to-a-scheduled-use-case-3-minutes): from one sentence to a scheduled use case, in a real run.
+**Case 00** is the **SRE use-case builder**: describe a new operations idea in one sentence and the SRE Agent itself returns a tested use case (Python tool, skill, subagent and scheduled task) plus the exact permissions it needs. Start there to build scenarios beyond cases 01–13. Watch the [2½-minute video tutorial](case_0_v3/README.md#watch-it-from-one-sentence-to-a-scheduled-use-case): from one sentence to a scheduled use case, in a real run.
 
 The workload guides preserve **real annotated screenshots** where collected: red boxes and numbers identify the controls, and captions distinguish dated live evidence, historical replay and synthetic samples. Use the linked code, schemas, skills and prompts, not code transcribed from an image.
 

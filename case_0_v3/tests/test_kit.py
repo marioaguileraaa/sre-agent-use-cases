@@ -184,6 +184,18 @@ page = sorted((work / "run-hb-check").glob("selftest-*.html"))[-1].read_text(enc
 ok = "3/3 rules fired" in res.get("verification", {}).get("self_test", "") and "LastHeartbeat-0" not in page and "OSType-" not in page
 failures += not ok
 print(f"{'PASS' if ok else 'FAIL'} self_test spreads stacked thresholds and types columns by name -> {res.get('verification', {}).get('self_test', '')[:90]}")
+cfg, meta, errs, _ = kit._validate(hb)
+tool = {"__name__": "tool"}
+exec(compile(kit._build_code(cfg, meta, ""), "tool.py", "exec"), tool)
+arm = "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-web/providers/Microsoft.Compute/disks/web-01_OsDisk"
+cell = tool["_item_td"]({"item": arm, "name": "web-01_OsDisk"})
+checks = {"register shows ARM item as name + group + portal link": "rg-web" in cell and "portal.azure.com" in cell and "class='mono'" not in cell,
+          "chart label shortens resource types": tool["_short_label"]("microsoft.compute/virtualmachines/extensions") == "virtualmachines/extensions"
+          and tool["_short_label"]("rg-web") == "rg-web",
+          "long tokens get break points": tool["_breakable"]("microsoft.network/networksecuritygroups") == "microsoft.<wbr>network/<wbr>networksecuritygroups"}
+for label, cond in checks.items():
+    failures += not cond
+    print(f"{'PASS' if cond else 'FAIL'} {label}")
 print("work dir:", work)
 print("FAILURES:", failures)
 sys.exit(1 if failures else 0)

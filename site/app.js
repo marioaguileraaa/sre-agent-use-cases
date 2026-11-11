@@ -162,16 +162,19 @@
 
     const fullHref = c.full || c.image;
     const fullLabel = c.full && c.full.endsWith(".html") ? "Open the sample report" : "View full size";
+    const showcase = Boolean(c.showcase);
+    const flat = c.illustration && !showcase;
 
-    const figure = el("figure", { class: `plate-fig${c.illustration ? " illustration" : ""}` },
-      el("a", { class: "plate-frame", href: fullHref || guideUrl, rel: "noopener", "aria-label": `${fullLabel}: ${c.name}` },
+    const figure = el("figure", { class: `plate-fig${c.illustration ? " illustration" : ""}${showcase ? " showcase" : ""}` },
+      el("a", { class: "plate-frame", href: fullHref || guideUrl, rel: "noopener", target: showcase ? "_blank" : null, "aria-label": `${fullLabel}: ${c.name}` },
         c.image
-          ? el("img", { src: c.image, alt: c.illustration ? "Cartoon of a smiling engineer in a blue hard hat and overalls, holding a glowing wrench and a floating cloud dashboard with a green check mark." : `Report produced by the ${c.name} use case.`, width: c.illustration ? 1000 : 1200, height: c.illustration ? 1001 : 750, loading: "lazy", decoding: "async" })
+          ? el("img", { src: c.image, alt: c.alt || (c.illustration ? "Cartoon of a smiling engineer in a blue hard hat and overalls, holding a glowing wrench and a floating cloud dashboard with a green check mark." : `Report produced by the ${c.name} use case.`), width: showcase ? 1400 : (c.illustration ? 1000 : 1200), height: showcase ? 1050 : (c.illustration ? 1001 : 750), loading: "lazy", decoding: "async" })
           : el("span", { class: "plate-pending" }, "Screenshots are in the guide on GitHub")),
       el("figcaption", {},
         el("b", {}, `Plate ${c.no}. `),
         c.caption || "From the guide on GitHub.",
-        c.full ? el("a", { href: fullHref, rel: "noopener" }, fullLabel) : null));
+        (c.full && !flat) ? el("a", { href: fullHref, rel: "noopener", target: showcase ? "_blank" : null }, fullLabel) : null,
+        c.fullPdf ? [" · ", el("a", { href: c.fullPdf, rel: "noopener", target: "_blank", class: "pdf" }, "PDF")] : null));
 
     const text = el("div", { class: "plate-text" },
       el("div", { class: "plate-head" },
@@ -185,7 +188,8 @@
         compareWith.length ? el("div", { class: "compare" }, el("dt", {}, "Compare with"),
           el("dd", {}, compareWith.map((o, i) => [i ? ", " : "", el("a", { href: `#plate-${o.no}` }, `No. ${o.no} ${o.name}`)]))) : null),
       el("a", { class: "guide", href: guideUrl, rel: "noopener" }, "Open the step-by-step guide", icon()),
-      c.tutorial ? tutorialCard(c) : null);
+      c.tutorial ? tutorialCard(c) : null,
+      c.sample ? sampleCard(c) : null);
 
     return el("article", { class: "plate", id: `plate-${c.no}`, "aria-labelledby": `plate-${c.no}-title`, "data-folder": c.folder, style: famStyle(f) }, text, figure);
   }
@@ -202,6 +206,20 @@
         el("span", {}, t.teaser)));
     card.addEventListener("click", () => openPlayer(c, card));
     return card;
+  }
+
+  // Sample report: same card shape as the tutorial, opens the report in a new tab.
+  function sampleCard(c) {
+    const s = c.sample;
+    return el("div", { class: "sample" },
+      el("a", { class: "tutorial sample-main", href: s.html, target: "_blank", rel: "noopener" },
+        el("span", { class: "tutorial-thumb sample-thumb" },
+          el("img", { src: s.thumb, alt: "", width: 352, height: 198, loading: "lazy", decoding: "async" }),
+          el("span", { class: "tutorial-time" }, "HTML + PDF")),
+        el("span", { class: "tutorial-text" },
+          el("b", {}, s.title || "Open a sample report"),
+          el("span", {}, s.teaser))),
+      s.pdf ? el("p", { class: "sample-alt" }, "Same report as ", el("a", { href: s.pdf, target: "_blank", rel: "noopener" }, "PDF"), s.note ? ` · ${s.note}` : "") : null);
   }
 
   function buildPlayer(c) {

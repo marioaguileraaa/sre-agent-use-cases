@@ -15,13 +15,14 @@ It asks no questions unless it cannot know where the data lives.
 | **Permissions it needs** | None of its own. It reads only what the agent managed identity can already read, so it can live-check the generated tool |
 | **Status** | Deployed and run live end to end: builder → generated tool → generated subagent → report → scheduled task (evidence below) |
 
-### Watch it: from one sentence to a scheduled use case (3 minutes)
+### Watch it: from one sentence to a scheduled use case
 
 [![Tutorial video: the SRE use-case builder from one sentence to a scheduled use case](docs/video/sre-usecase-builder-tutorial-poster.jpg)](docs/video/sre-usecase-builder-tutorial.mp4)
 
-*Click the image to play the video (MP4, 3:09, no voice-over: every step is captioned on screen). It is also on the [use-case field guide](https://marioaguileraaa.github.io/sre-agent-use-cases/#tutorial).*
+*Click the image to play the video (MP4, 2:22, no voice-over: every step is captioned on screen, and the camera zooms into each highlighted area so it reads well on a projector). It is also on the [use-case field guide](https://marioaguileraaa.github.io/sre-agent-use-cases/#tutorial).*
 
-A real, uncut run on a lab Azure SRE Agent (names and identifiers replaced), sped up only while the agent works:
+A real run on a lab Azure SRE Agent (names and identifiers replaced), sped up while the agent works. Steps 5 and 6 were
+recorded again with kit 3.1, after updating the generated tool, to show the new report design and its PDF:
 
 | Step | What you see |
 |---|---|
@@ -29,8 +30,8 @@ A real, uncut run on a lab Azure SRE Agent (names and identifiers replaced), spe
 | 2 | **The builder works on its own.** No questions: recipe, environment, JSON spec, code generation, lint, self-test and a live read. About 2 minutes |
 | 3 | **Review the answer.** Status `READY_LIVE_VERIFIED`, the permissions with exact `az` commands, and the 4 Builder blocks |
 | 4 | **Create it in Builder.** Python tool (paste the code, Identity off, `mode=self_test` test, Create), then the skill and the subagent with their blocks |
-| 5 | **Run it.** `/agent missing-mandatory-tags`: 463 resources in 34 resource groups missing tags, with the verdict, indicators and top findings |
-| 6 | **Open the report.** The HTML report with CSVs and JSON, written by the generated tool |
+| 5 | **Run it.** `/agent missing-mandatory-tags`: 464 resources in 34 resource groups missing tags, with the verdict, indicators, top findings and the report files (HTML, PDF, CSV, JSON) |
+| 6 | **Open the report.** The interactive HTML report on live data: verdict, indicators, charts, a findings register you can search and filter, the data tables, and the same report as PDF |
 | 7 | **Schedule it.** Automation > Scheduled task, with the cron from block 4 (`0 7 * * 1`, Mondays 07:00 UTC) |
 
 ---
