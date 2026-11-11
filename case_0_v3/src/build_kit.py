@@ -9,7 +9,7 @@ assert "'''" not in template, "template must not contain triple single quotes"
 assert not template.rstrip("\n").endswith("\\"), "template must not end with a backslash"
 assert template.count("\ndef main(") == 1 and "__TEMPLATE_MAIN__" not in template
 template = template.replace("\ndef main(", "\ndef __TEMPLATE_MAIN__(")
-parts = [(ROOT / f).read_text(encoding="utf-8") for f in ("kit_1_catalog.py", "kit_2_build.py", "kit_3_blocks.py", "kit_4_ops.py")]
+parts = [(ROOT / f).read_text(encoding="utf-8") for f in ("kit_1_catalog.py", "kit_2_build.py", "kit_3_blocks.py", "kit_4_ops.py", "kit_5_brand.py", "kit_6_assets.py")]
 kit = "".join(parts)
 assert kit.count("r'''__TEMPLATE__'''") == 1
 kit = kit.replace("r'''__TEMPLATE__'''", "r'''" + template + "'''")

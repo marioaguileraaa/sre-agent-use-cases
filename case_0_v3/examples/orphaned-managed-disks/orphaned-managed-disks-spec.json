@@ -132,5 +132,28 @@
     ]
   },
   "lookback_days": 7,
-  "schedule": "weekly"
+  "schedule": "weekly",
+  "charts": [
+    {
+      "title": "Orphaned capacity by resource group (GB)",
+      "dataset": "disks",
+      "by": "resourceGroup",
+      "agg": "sum",
+      "field": "SizeGB"
+    },
+    {
+      "title": "Orphaned disks by SKU",
+      "dataset": "disks",
+      "by": "Sku"
+    }
+  ],
+  "labels": {
+    "DiskName": "Disk",
+    "subscriptionId": "Subscription",
+    "resourceGroup": "Resource group",
+    "SizeGB": "Size (GB)",
+    "DaysUnattached": "Days unattached",
+    "OsType": "OS",
+    "Sku": "SKU"
+  }
 }

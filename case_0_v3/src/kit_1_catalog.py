@@ -8,6 +8,8 @@ Operations (parameter `operation`):
   probe        build the tool from `spec_json` and run it LIVE in discover mode: real columns, field check, permission fixes
   scaffold     validate `spec_json`, generate the tool, lint it, run its self_test (network blocked), run a live check
                when the agent identity is available, then write the 4 Builder blocks + setup guide to the thread
+  brand        spec_json={"website": "https://www.customer.com"} (or logo_url): reads the customer's site, proposes logo,
+               colours and font, caches the logo for scaffold and returns a branded sample report (HTML + PDF) to show
   get          spec_json='<name>/<part>[/<page>]' returns a generated part page by page (answer, tool, config, skill,
                subagent, task, permissions, tests, setup, code, spec)
   lint         static safety and contract checks for any Python tool passed in `code`
@@ -30,7 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-KIT_VERSION = "3.0.0"
+KIT_VERSION = "3.1.1"
 ARM = "https://management.azure.com"
 
 
@@ -133,6 +135,9 @@ RECIPES = [
                    "where": {"field": "HoursSilent", "op": "gt", "value": 1}}],
          "tables": [{"title": "Silent machines", "dataset": "heartbeat", "columns": ["Computer", "OSType", "ComputerEnvironment", "ResourceGroup", "LastHeartbeat", "HoursSilent"],
                      "sort": "HoursSilent", "desc": True, "where": {"field": "HoursSilent", "op": "gt", "value": 1}}],
+         "charts": [{"title": "Silent machines by resource group", "dataset": "heartbeat", "by": "ResourceGroup", "where": {"field": "HoursSilent", "op": "gt", "value": 1}},
+                    {"title": "Machines by operating system", "dataset": "heartbeat", "by": "OSType"}],
+         "labels": {"HoursSilent": "Hours silent", "ComputerEnvironment": "Environment", "LastHeartbeat": "Last heartbeat"},
          "keys": {"heartbeat": ["Computer"]}, "schedule": "weekdays"}},
     {"name": "entra-app-secrets-expiry", "use": "Entra ID app registrations with client secrets expired or expiring soon.",
      "spec": {
@@ -154,6 +159,9 @@ RECIPES = [
                    "where": {"all": [{"field": "days_left", "op": "gte", "value": 0}, {"field": "days_left", "op": "lte", "value": 30}]}}],
          "tables": [{"title": "Secrets by expiry", "dataset": "secrets", "columns": ["displayName", "appId", "passwordCredentials.displayName", "passwordCredentials.endDateTime", "days_left"],
                      "sort": "days_left", "where": {"field": "days_left", "op": "lte", "value": 90}}],
+         "charts": [{"title": "Secrets by days to expiry", "dataset": "secrets", "by": "days_left", "buckets": [0, 30, 90]},
+                    {"title": "Apps with most secrets", "dataset": "secrets", "by": "displayName", "limit": 8}],
+         "labels": {"displayName": "Application", "passwordCredentials.displayName": "Secret", "passwordCredentials.endDateTime": "Expires", "days_left": "Days left"},
          "keys": {"secrets": ["appId", "passwordCredentials.keyId"]}, "schedule": "weekly"}},
     {"name": "advisor-high-impact", "use": "Azure Advisor high-impact recommendations across all visible subscriptions.",
      "spec": {
@@ -174,6 +182,8 @@ RECIPES = [
                   {"id": "high", "label": "High impact", "dataset": "advisor", "good": "down", "where": {"field": "Impact", "op": "eq", "value": "High"}}],
          "tables": [{"title": "High impact", "dataset": "advisor", "columns": ["Category", "Problem", "resourceGroup", "Resource", "Updated"],
                      "sort": "Category", "where": {"field": "Impact", "op": "eq", "value": "High"}}],
+         "charts": [{"title": "Recommendations by category", "dataset": "advisor", "by": "Category"},
+                    {"title": "Resource groups with most recommendations", "dataset": "advisor", "by": "resourceGroup", "limit": 8}],
          "keys": {"advisor": ["id"]}, "schedule": "weekly"}},
     {"name": "sharepoint-excel-register", "use": "Excel register kept in SharePoint (certificates, contracts, licences) with expiry dates.",
      "spec": {
@@ -192,6 +202,9 @@ RECIPES = [
          "kpis": [{"id": "items", "label": "Items in register", "dataset": "register"},
                   {"id": "expiring", "label": "Expired or < 30 days", "dataset": "register", "good": "down", "where": {"field": "days_left", "op": "lte", "value": 30}}],
          "tables": [{"title": "Next expiries", "dataset": "register", "columns": ["Certificate", "Owner", "ExpiryDate", "days_left"], "sort": "days_left", "limit": 30}],
+         "charts": [{"title": "Items by days to expiry", "dataset": "register", "by": "days_left", "buckets": [0, 30, 90]},
+                    {"title": "Items by owner", "dataset": "register", "by": "Owner"}],
+         "labels": {"days_left": "Days left", "ExpiryDate": "Expiry date"},
          "keys": {"register": ["Certificate"]},
          "publish": {"sharepoint": {"site_url": "https://<tenant>.sharepoint.com/sites/<site>", "folder": "<folder for reports>"}},
          "history": "sharepoint", "schedule": "weekly"}},
@@ -205,6 +218,7 @@ RECIPES = [
          "kpis": [{"id": "total", "label": "Total cost", "dataset": "cost", "agg": "sum", "field": "Cost", "good": "down"},
                   {"id": "groups", "label": "Resource groups with cost", "dataset": "cost"}],
          "tables": [{"title": "Top resource groups", "dataset": "cost", "columns": ["ResourceGroupName", "Cost", "Currency"], "sort": "Cost", "desc": True, "limit": 25}],
+         "charts": [{"title": "Cost by resource group", "dataset": "cost", "by": "ResourceGroupName", "agg": "sum", "field": "Cost", "limit": 10}],
          "keys": {"cost": ["ResourceGroupName"]}, "lookback_days": 30, "schedule": "weekly"}},
     {"name": "activity-deletes", "use": "Who deleted Azure resources in the window (audit).",
      "spec": {
@@ -221,6 +235,8 @@ RECIPES = [
          "kpis": [{"id": "deletes", "label": "Delete operations", "dataset": "deletes"},
                   {"id": "callers", "label": "Distinct callers", "dataset": "deletes", "agg": "distinct", "field": "Caller"}],
          "tables": [{"title": "Deletes", "dataset": "deletes", "columns": ["TimeGenerated", "Caller", "Operation", "ResourceGroup", "Resource"], "sort": "TimeGenerated", "desc": True}],
+         "charts": [{"title": "Deletes by caller", "dataset": "deletes", "by": "Caller"},
+                    {"title": "Deletes by resource group", "dataset": "deletes", "by": "ResourceGroup"}],
          "keys": {"deletes": ["CorrelationId", "Resource"]}, "lookback_days": 7, "schedule": "daily"}},
 ]
 
@@ -228,7 +244,13 @@ SPEC_FIELDS = {
     "name": "kebab-case use-case name, 3-40 chars (tool = run-<name>, skill and subagent = <name>)",
     "title": "report title shown in HTML and chat", "description": "one sentence: what it detects and why it matters (business value)",
     "language": "es | en (report language; the subagent answers in the user's language)", "client": "optional customer/team label",
-    "audience": "optional: who reads the report", "accent": "optional hex colour for the report, default #0f6cbd",
+    "audience": "optional: who reads the report", "accent": "legacy single colour; prefer brand.primary",
+    "brand": "optional report identity {name, website, logo_url, primary, accent, dark, font: plex|nunito|fira, hero: auto|brand|dark|light}. "
+             "Call operation=brand with the customer website first; scaffold embeds the official logo and colours. Without brand: Azure SRE Agent design",
+    "charts": "optional list of {title, dataset, by, agg=count|sum|avg|max|min|distinct, field?, where?, limit=8, buckets?: [0,30,90], unit?} "
+              "- bar charts grouped by a column (1-3 per report: by resource group, owner, OS, category, expiry window...)",
+    "labels": "optional {column: display name} for table headers and finding chips (default: humanised column names)",
+    "pdf": "auto (default; landscape when a table has more than 6 columns) | portrait | landscape | none - PDF printed from the HTML",
     "lookback_days": "default 7 (1-366)", "max_rows_per_source": "default 50000",
     "sources": "list of {id, type, ...type fields}; id = snake_case dataset name used by rules/kpis/tables",
     "derive": "optional list of {name, dataset, field, type: days_until|days_since} computed columns",
@@ -267,7 +289,7 @@ def _catalog_index():
         "spec_fields": list(SPEC_FIELDS),
         "rule_operators": list(OPERATORS), "kpi_aggregations": list(AGGREGATIONS), "derive_types": ["days_until", "days_since"],
         "severities": SEVERITIES, "schedule_presets": list(CRON_PRESETS),
-        "workflow": ["catalog", "catalog <recipe>", "environment", "write spec", "probe (optional)", "scaffold", "get <name>/<part>"],
+        "workflow": ["catalog", "catalog <recipe>", "environment", "brand <website> (when a customer is named)", "write spec", "probe (optional)", "scaffold", "get <name>/<part>"],
     }
 
 

@@ -28,16 +28,17 @@ TOOL = "sre-usecase-builder-kit"
 TOOL_DESCRIPTION = (
     "Builds working Azure SRE Agent use cases. operation=catalog returns a compact index of recipes, source types and "
     "spec fields (spec_json=<recipe or topic> returns its details); environment discovers what the agent identity can read "
-    "(subscriptions, Log Analytics workspaces, storage, roles); probe reads a few live rows for a spec; scaffold generates, "
-    "lints, self-tests and live-checks the Python tool; get returns the generated Builder blocks, code and guides page by "
+    "(subscriptions, Log Analytics workspaces, storage, roles); brand reads a customer website and proposes the report identity "
+    "(official logo, colours, font) with a sample branded report; probe reads a few live rows for a spec; scaffold generates, "
+    "lints, self-tests and live-checks the Python tool, whose report is a branded interactive HTML plus a PDF of the same design; get returns the generated Builder blocks, code and guides page by "
     "page; lint checks tool code. Every result fits the tool-result size limit."
 )
 TOOL_PARAMETERS = [
     {"name": "operation", "type": "string", "required": False, "value": None,
-     "description": "catalog | environment | probe | scaffold | get | lint. Default: catalog"},
+     "description": "catalog | environment | brand | probe | scaffold | get | lint. Default: catalog"},
     {"name": "spec_json", "type": "string", "required": False, "value": None,
      "description": "probe/scaffold: use-case spec as JSON (start from a catalog recipe). catalog: recipe name or topic "
-                    "(spec, operators, a source type). get: '<name>/<part>[/<page>]', e.g. 'vm-heartbeat-gaps/answer'."},
+                    "(spec, operators, a source type). brand: {\"website\": \"https://www.customer.com\"}. get: '<name>/<part>[/<page>]', e.g. 'vm-heartbeat-gaps/answer'."},
     {"name": "code", "type": "string", "required": False, "value": None,
      "description": "Python tool code to lint (operation=lint only)."},
 ]

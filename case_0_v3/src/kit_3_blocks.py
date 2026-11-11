@@ -134,7 +134,7 @@ def _sources_line(config):
 # ----------------------------------------------------------------------------- generated blocks
 TOOL_PARAMS = [
     {"name": "mode", "type": "string", "required": False, "value": "report",
-     "description": "report = full HTML/CSV/JSON report; discover = read a few live rows per source and list columns (no report); "
+     "description": "report = full branded HTML + PDF + CSV/JSON report; discover = read a few live rows per source and list columns (no report); "
                     "self_test = simulated data, no Azure calls, proves the logic and HTML"},
     {"name": "publish", "type": "string", "required": False, "value": "no",
      "description": "yes = also upload the report and its snapshot to the configured SharePoint/Blob target (history for next comparison); no = thread only"},
@@ -146,7 +146,7 @@ TOOL_PARAMS = [
 def _tool_description(config, meta):
     desc = meta["description"] or config["title"]
     return (f"{desc} Reads {_sources_line(config)} with the agent managed identity (read-only), evaluates {len(config['rules'])} rules, "
-            "compares with the previous run and writes an HTML + CSV + JSON report to the thread.")[:1000]
+            "compares with the previous run and writes a branded HTML report, its PDF and CSV + JSON to the thread.")[:1000]
 
 
 def _skill_md(config, meta):
@@ -193,7 +193,7 @@ Always use `{meta['tool']}`. Never answer from memory or invent numbers.
 2. **Key indicators** - table of `kpis` with the change versus `previous_report_utc` from `comparison.kpis` (arrow and delta; say "first run" if there is no history).
 3. **What changed** - `new_findings` and `resolved_findings` since the previous report.
 4. **Top findings** - up to 10 from `top_findings`, most severe first, with the affected item.
-5. **Report** - links from `files` (HTML first) and `published` when present.
+5. **Report** - links from `files`: the HTML report first, then the PDF (same design, for e-mail and printing), then CSV/JSON; and `published` when present. Never rebuild, restyle or summarise the report into another document: deliver these files.
 6. **Next step** - one concrete action for the owner of the most severe finding.
 
 ## Rules evaluated

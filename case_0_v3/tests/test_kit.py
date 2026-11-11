@@ -113,6 +113,77 @@ alias_code = (work / "sre-usecase-builder" / "kpi-alias-check" / "run-kpi-alias-
 ok = alias_res["status"] in ("READY", "READY_WITH_INPUTS") and "'agg': 'distinct'" in alias_code and "'aggregation'" not in alias_code
 failures += not ok
 print(f"{'PASS' if ok else 'FAIL'} kpi alias 'aggregation' normalized to 'agg'")
+# ---------- report design: brand palette, logo sanitising, charts, font, PDF
+from collections import Counter
+il = kit._brand_palette(Counter({"#0077c8": 13, "#0b4272": 8, "#0094f6": 5, "#1b2a37": 12, "#ffd100": 2}), Counter({"#0077c8": 2, "#ffd100": 1}))
+ok = il and il["primary"] == "#0b4272" and il["accent"] == "#ffd100"
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} brand palette (navy hero + yellow accent) -> {il and (il['primary'], il['accent'])}")
+vs = kit._brand_palette(Counter({"#ff0033": 226, "#ed002f": 35, "#ab192d": 34, "#262626": 44}), Counter({"#ed002f": 5}))
+ok = vs and vs["primary"] == "#ff0033" and vs["dark"] is None
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} brand palette (bright red -> light hero) -> {vs and (vs['primary'], vs['accent'], vs['dark'])}")
+dirty = b'<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20" onload="alert(1)"><script>alert(2)</script><a href="javascript:x"><rect width="40" height="20" fill="#ff0000"/></a><image href="https://evil/x.png"/></svg>'
+clean = kit._svg_clean(dirty) or ""
+ok = clean and "script" not in clean and "onload" not in clean and "javascript" not in clean and "evil" not in clean and 'viewBox="0 0 40 20"' in clean
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} svg sanitiser strips scripts, handlers and external refs")
+failures += kit._svg_clean(b'<!DOCTYPE x [<!ENTITY a "b">]><svg xmlns="http://www.w3.org/2000/svg"/>') is not None
+import socket
+import requests
+from unittest import mock
+
+
+class _Redirect:
+    status_code, headers = 302, {"Location": "https://10.0.0.5/admin"}
+
+    def close(self):
+        pass
+
+
+fake_dns = lambda host, *a, **k: [(0, 0, 0, "", ("10.0.0.5" if host.startswith("10.") else "93.184.216.34", 443))]
+with mock.patch.object(socket, "getaddrinfo", fake_dns), mock.patch.object(requests, "get", return_value=_Redirect()) as got:
+    try:
+        kit._brand_get("https://www.contoso-example.com/")
+        ok = False
+    except ValueError as exc:
+        ok = "public https" in str(exc) and got.call_count == 1
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} brand fetch refuses a redirect to a private address before requesting it")
+design_spec = fill(copy.deepcopy(next(r["spec"] for r in recipes if r["name"] == "entra-app-secrets-expiry")))
+design_spec.update(name="design-check", language="es", brand={"name": "Contoso Salud", "primary": "#0b4272", "accent": "#ffd100", "font": "nunito"})
+res = kit.main("scaffold", json.dumps(design_spec))
+html_files = sorted((work / "run-design-check").glob("selftest-*.html"))
+page = html_files[-1].read_text(encoding="utf-8") if html_files else ""
+checks = {"status READY": res.get("status") == "READY", "font embedded": "@font-face{font-family:'Nunito Sans'" in page,
+          "brand colours": "--hero-stripe:#ffd100" in page and "#0b4272" in page, "charts rendered": "Secrets by days to expiry" in page and "\u2264 30" in page,
+          "csp": "Content-Security-Policy" in page, "interactive register": "class='card dt" in page and "data-sev='critical'" in page,
+          "spanish ui": "Hallazgos por regla" in page, "labels": ">Days left<" in page, "design summary": res.get("design", {}).get("font") == "nunito"}
+for label, cond in checks.items():
+    failures += not cond
+    print(f"{'PASS' if cond else 'FAIL'} design {label}")
+pdfs = sorted((work / "run-design-check").glob("selftest-*.pdf"))
+print(f"INFO pdf rendered locally: {bool(pdfs)} ({res.get('verification', {}).get('self_test', '')[-60:]})")
+logo = "data:image/svg+xml;base64," + __import__("base64").b64encode(clean.encode()).decode()
+cfg, meta, errs, _ = kit._validate(design_spec)
+code = kit._build_code(cfg, meta, logo)
+ok = "BRAND_LOGO = (" in code and kit._lint(code)["status"] == "PASS"
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} logo embedded as BRAND_LOGO and lint PASS")
+bad_chart = dict(design_spec, charts=[{"dataset": "secrets"}, {"dataset": "nope", "by": "x"}, {"dataset": "secrets", "by": "x", "agg": "sum"}])
+inv = kit.main("scaffold", json.dumps(bad_chart))
+ok = inv["status"] == "INVALID" and len([e for e in inv["errors"] if e["path"].startswith("charts")]) >= 3
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} invalid charts rejected with fixes")
+hb = fill(copy.deepcopy(next(r["spec"] for r in recipes if r["name"] == "vm-heartbeat-gaps")))
+hb.update(name="hb-check", language="es")
+hb["rules"].insert(0, {"id": "silent_7d", "dataset": "heartbeat", "severity": "critical", "title": "Silent > 7 days",
+                       "when": {"field": "HoursSilent", "op": "gt", "value": 168}, "message": "{Computer} silent for {HoursSilent} h"})
+res = kit.main("scaffold", json.dumps(hb))
+page = sorted((work / "run-hb-check").glob("selftest-*.html"))[-1].read_text(encoding="utf-8")
+ok = "3/3 rules fired" in res.get("verification", {}).get("self_test", "") and "LastHeartbeat-0" not in page and "OSType-" not in page
+failures += not ok
+print(f"{'PASS' if ok else 'FAIL'} self_test spreads stacked thresholds and types columns by name -> {res.get('verification', {}).get('self_test', '')[:90]}")
 print("work dir:", work)
 print("FAILURES:", failures)
 sys.exit(1 if failures else 0)

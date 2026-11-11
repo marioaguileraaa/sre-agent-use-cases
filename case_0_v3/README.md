@@ -15,7 +15,6 @@ It asks no questions unless it cannot know where the data lives.
 | **Permissions it needs** | None of its own. It reads only what the agent managed identity can already read, so it can live-check the generated tool |
 | **Status** | Deployed and run live end to end: builder → generated tool → generated subagent → report → scheduled task (evidence below) |
 
-
 ### Watch it: from one sentence to a scheduled use case (3 minutes)
 
 [![Tutorial video: the SRE use-case builder from one sentence to a scheduled use case](docs/video/sre-usecase-builder-tutorial-poster.jpg)](docs/video/sre-usecase-builder-tutorial.mp4)
@@ -46,12 +45,13 @@ A real, uncut run on a lab Azure SRE Agent (names and identifiers replaced), spe
 6. [Install — option B: by hand in Builder, step by step](#install--option-b-by-hand-in-builder-step-by-step)
 7. [Use it: create a new use case from chat](#use-it-create-a-new-use-case-from-chat)
 8. [Deploy, run and schedule the generated use case](#deploy-run-and-schedule-the-generated-use-case)
-9. [Permissions for the generated use cases](#permissions-for-the-generated-use-cases)
-10. [What it can build](#what-it-can-build)
-11. [Live evidence](#live-evidence)
-12. [Troubleshooting and Builder gotchas](#troubleshooting-and-builder-gotchas)
-13. [For maintainers: build and test the kit](#for-maintainers-build-and-test-the-kit)
-14. [Files in this folder](#files-in-this-folder)
+9. [Report design: branded HTML and PDF](#report-design-branded-html-and-pdf)
+10. [Permissions for the generated use cases](#permissions-for-the-generated-use-cases)
+11. [What it can build](#what-it-can-build)
+12. [Live evidence](#live-evidence)
+13. [Troubleshooting and Builder gotchas](#troubleshooting-and-builder-gotchas)
+14. [For maintainers: build and test the kit](#for-maintainers-build-and-test-the-kit)
+15. [Files in this folder](#files-in-this-folder)
 
 ---
 
@@ -61,7 +61,7 @@ A real, uncut run on a lab Azure SRE Agent (names and identifiers replaced), spe
 |---|---|
 | Each new scenario is a small software project: discovering the API, writing Python, guessing column names, debugging in the Builder playground, and writing a skill and subagent prompts | One sentence in chat. The kit writes the code from a declarative spec, so each use case starts from the same tested engine |
 | Code is often handed over untested, with placeholders that fail on the first run | The code is linted, self-tested and, when the identity allows it, run against live data **before** it reaches the user |
-| Every report looks different, and there is no "what changed since last time" | Every generated report has the same structure: verdict, KPIs with trend, findings by severity, changes since the previous run, data tables, and downloadable HTML, CSV and JSON files |
+| Every report looks different, and there is no "what changed since last time" | Every generated report has the same polished, interactive design: verdict, KPIs with trend, findings by severity, charts, changes since the previous run, a searchable findings register, and downloadable HTML, **PDF**, CSV and JSON files. Name a company and the report carries its logo, colours and font, read from its website |
 | Permissions are found by trial and error (`403` in production) | The exact `az` commands per data source come with the blocks, and the agent's existing roles are detected |
 | Customers wait for an expert to build each scenario | Customer teams build their own scenarios safely: generated tools are **read-only by design** |
 
@@ -92,7 +92,7 @@ more parameters and we don't know how to continue."* Reviewing it against the li
 ```mermaid
 flowchart LR
     U["User idea<br/>(one sentence, any language)"] --> A["Subagent<br/>sre-usecase-builder"]
-    A -- "catalog / environment" --> K["Python tool<br/>sre-usecase-builder-kit"]
+    A -- "catalog / environment / brand" --> K["Python tool<br/>sre-usecase-builder-kit"]
     A -- "writes JSON spec" --> K
     K --> G["Generated tool<br/>run-&lt;name&gt;.py"]
     G --> L["lint"] --> S["self_test<br/>(network blocked)"] --> D["live discover<br/>(agent identity)"]
@@ -102,9 +102,10 @@ flowchart LR
 
 1. **catalog**: the subagent reads the compact list of recipes, source types and spec fields, and picks the closest recipe.
 2. **environment**: the kit discovers what the agent managed identity can see: subscriptions, Log Analytics workspaces (real `customerId`), storage accounts, and the Azure roles and Graph app roles already granted.
-3. **spec**: the subagent writes a declarative JSON spec with sources, rules, KPIs, tables and schedule.
-4. **scaffold**: the kit validates the spec, generates `run-<name>.py`, lints it, runs it in `self_test` mode with the network blocked, and then runs `discover` against live data when the identity can.
-5. **get answer**: the kit returns the ready-to-paste answer: verification, permissions, values to fill, the 4 Builder blocks and file links.
+3. **brand** (only when the idea names a company or a website): the kit reads the public website once and returns the official logo (SVG when the site has one), the primary and accent colours and the closest font preset. The logo is cached and embedded by the kit; it never passes through the chat.
+4. **spec**: the subagent writes a declarative JSON spec with sources, rules, KPIs, tables, charts, labels and schedule.
+5. **scaffold**: the kit validates the spec, generates `run-<name>.py`, lints it, runs it in `self_test` mode with the network blocked, and then runs `discover` against live data when the identity can.
+6. **get answer**: the kit returns the ready-to-paste answer: verification, permissions, values to fill, the 4 Builder blocks and file links, including the self-test report in HTML and PDF.
 
 **The generated tool** is one Python file driven entirely by a `CONFIG = {...}` block:
 
@@ -112,11 +113,11 @@ flowchart LR
 
 | Mode | What it does |
 |---|---|
-| `self_test` | Synthetic data, no network. Proves the rules, KPIs, comparison and HTML |
+| `self_test` | Synthetic data, no network. Proves the rules, KPIs, comparison, HTML and PDF |
 | `discover` | Reads a few live rows per source and lists the real columns. Writes nothing |
-| `report` | Live run that produces HTML, CSV and JSON. `publish=yes` also uploads the report and its history snapshot to SharePoint or Blob for the next comparison |
+| `report` | Live run that produces the HTML report, its PDF, CSV and JSON. `publish=yes` also uploads the report and its history snapshot to SharePoint or Blob for the next comparison |
 
-To change a use case later, edit only `CONFIG` (queries, thresholds, rules, KPIs, tables, publishing). No other code changes are needed.
+To change a use case later, edit only `CONFIG` (queries, thresholds, rules, KPIs, tables, charts, brand, publishing). No other code changes are needed.
 
 ---
 
@@ -149,13 +150,13 @@ The agent URL is the address in your browser when the SRE Agent portal is open, 
 The script:
 
 1. Creates or updates the Python tool `sre-usecase-builder-kit` (timeout 300 s), the skill `sre-usecase-builder`, and the subagent `sre-usecase-builder` with the skill and tool linked.
-2. Runs the kit once in the agent sandbox (`operation=catalog`) and prints `status: OK`, `kit_version: 3.0.0` and the 6 recipes.
+2. Runs the kit once in the agent sandbox (`operation=catalog`) and prints `status: OK`, `kit_version: 3.1.1` and the 6 recipes.
 
 ```text
 OK  tools/sre-usecase-builder-kit  (202)
 OK  skills/sre-usecase-builder  (202)
 OK  agents/sre-usecase-builder  (202)
-Sandbox smoke test: {'status': 'OK', 'kit_version': '3.0.0', 'recipes': ['vm-heartbeat-gaps', ...]}
+Sandbox smoke test: {'status': 'OK', 'kit_version': '3.1.1', 'recipes': ['vm-heartbeat-gaps', ...]}
 Done. In the agent chat run:  /agent sre-usecase-builder  and describe your use case.
 ```
 
@@ -180,7 +181,7 @@ On the **Code** tab:
 | Field | Value |
 |---|---|
 | Tool name | `sre-usecase-builder-kit` |
-| Description | Copy `TOOL_DESCRIPTION` from [`deploy-to-sre-agent.py`](deploy-to-sre-agent.py) (lines 28–34) |
+| Description | Copy `TOOL_DESCRIPTION` from [`deploy-to-sre-agent.py`](deploy-to-sre-agent.py) (lines 28–35) |
 | Timeout | `300` seconds |
 | Code | Paste the whole [`sre-usecase-builder-kit.py`](sre-usecase-builder-kit.py). No edits needed |
 
@@ -194,7 +195,7 @@ On the **Identity** tab, leave **Enable Azure Identity OFF**. The kit uses the a
 
 ![Test playground: operation=catalog, Test](docs/images/04-python-tool-test-playground.png)
 
-Expected result: **Function test succeeded**, with `status: OK`, `kit_version: 3.0.0` and the recipe list:
+Expected result: **Function test succeeded**, with `status: OK`, `kit_version: 3.1.1` (the capture below is from an earlier 3.0.0 run) and the recipe list:
 
 ![Function test succeeded](docs/images/04b-python-tool-test-result.png)
 
@@ -268,6 +269,9 @@ SharePoint site, storage account); if you don't, the builder discovers it or lea
 
 ![Describe the idea](docs/images/17-chat-describe-idea.png)
 
+To get a report in a customer's look, name the company or its website, for example *"… for Contoso (https://www.contoso.com), with its logo and colours"*.
+The builder reads the logo, colours and font from the website (see [Report design](#report-design-branded-html-and-pdf)).
+
 More ready-to-use prompts are in **[prompts.md](prompts.md)**.
 
 The builder works on its own: catalog → recipe → environment → spec → scaffold → answer. It needed **no questions** in any of our test runs:
@@ -278,12 +282,12 @@ The answer always has the same sections:
 
 | Section | What you get |
 |---|---|
-| 1. Use case | What it reports, the defaults it chose (thresholds, schedule, names) |
+| 1. Use case | What it reports, the defaults it chose (thresholds, schedule, names) and the design applied (brand, charts) |
 | 2. Verification | `lint`, `self_test`, `live_discover`, `field_check` and the final **status** |
 | 3. Permissions | Roles already granted and the exact `az` commands for the missing ones |
 | 4. Values to fill | Only when something could not be discovered (for example a SharePoint folder) |
 | 5. Builder blocks | Python tool, Skill, Subagent and Scheduled task, ready to paste |
-| 6. Files | Links to download the tool `.py`, `BUILDER-BLOCKS.md`, `SETUP.md`, the spec and the self-test report |
+| 6. Files | Links to download the tool `.py`, `BUILDER-BLOCKS.md`, `SETUP.md`, the spec and the self-test report (HTML and PDF) |
 
 ![Verification and permissions](docs/images/19-builder-verification.png)
 
@@ -332,14 +336,12 @@ It runs the tool and answers with the verdict, KPIs, top findings and what chang
 
 ![Generated subagent: live report](docs/images/24-generated-agent-run.png)
 
-All 4 downloads are attached in the thread: HTML report, one CSV per table, findings CSV and full JSON:
+The downloads are attached in the thread: HTML report, PDF, one CSV per table, findings CSV and full JSON
+(this capture is from a kit 3.0 run, before the PDF was added):
 
 ![Downloads](docs/images/25-generated-agent-downloads.png)
 
-This is the HTML report structure, shown here on synthetic `self_test` data
-([open the example HTML](examples/orphaned-managed-disks/selftest-report.html)):
-
-![Generated HTML report (self-test data)](docs/images/27-generated-report-selftest.png)
+The report itself is described in [Report design](#report-design-branded-html-and-pdf).
 
 **Schedule it.** Go to **Automation > Create > Scheduled task**. Use the task name, **Response subagent** and prompt from block 4.
 Set **Frequency** to the generated cron (`0 7 * * 1` = Mondays 07:00 UTC) via **Custom cron**, or pick the equivalent Weekly option.
@@ -349,6 +351,68 @@ The time list is in **your local time zone**, so 08:00 CET is 07:00 UTC.
 
 When publishing is enabled (`publish=yes` in the prompt), each run stores a history snapshot. The next run compares
 against it: new findings, resolved findings, and added, removed and changed rows, with KPI trend arrows.
+
+---
+
+## Report design: branded HTML and PDF
+
+Field teams show these reports to customers, so they must look as good as a hand-made demo. That is why **the agent never
+writes report code**. Every generated tool embeds the same tested design engine, so a scheduled run on a Monday morning
+looks exactly like the demo did. The LLM only chooses *what* to show (charts, column titles, brand), in the spec.
+
+**Default design** (no company named), on synthetic `self_test` data:
+[open the HTML](examples/orphaned-managed-disks/selftest-report.html) · [open the PDF](examples/orphaned-managed-disks/selftest-report.pdf)
+
+![Generated HTML report, default design (self-test data)](docs/images/27-generated-report-selftest.png)
+
+**Branded design**, the same use case for a fictional company, Contoso (logo, colours and font preset):
+[open the HTML](examples/orphaned-managed-disks/selftest-report-branded.html) · [open the PDF](examples/orphaned-managed-disks/selftest-report-branded.pdf)
+
+![Generated HTML report with a customer brand](docs/images/28-generated-report-branded.png)
+
+**The PDF** is the same HTML, printed by headless Chromium inside the agent sandbox, so both always match:
+
+![PDF pages of the same report](docs/images/29-generated-report-pdf.png)
+
+<img src="docs/images/30-generated-report-mobile.png" alt="The same report on a phone" width="260" align="right">
+
+**What every report contains**
+
+| Part | Detail |
+|---|---|
+| Top bar | Customer logo (or a wordmark), section links and a **Print / PDF** button |
+| Hero | Title, purpose, the verdict (*Urgent action*, *Needs attention* or *No relevant issues*) and a severity bar |
+| KPI cards | Each indicator with its change versus the previous run, coloured by whether up is good or bad |
+| Findings by rule and changes | Bars per rule; new and resolved findings since the previous report |
+| Charts | Bar charts declared in the spec: count, sum, average, distinct, or buckets such as *days to expiry* |
+| Findings register | Search, filter by severity and rule, sort by any column, paging and CSV export |
+| Data tables | Smart cells: dates, Azure resource IDs as portal links, GUIDs, status pills, *days left* in colour, numbers in the report language |
+| Data changes and coverage | Added, removed and changed rows; every source with its status and row count, so a failed source is never shown as zero |
+
+The report is fully responsive (phone, tablet, desktop) and is a single, self-contained file. It makes no external
+requests, has a strict Content-Security-Policy (`default-src 'none'`), and embeds its fonts and logo, so it opens offline
+from a Teams chat, an email or SharePoint. The PDF is A4, switches to landscape when a table has more than 6 columns,
+and has page numbers. If Chromium is not available in a sandbox, the run still succeeds (`pdf: skipped`) and the
+HTML **Print / PDF** button does the same.
+
+**Spec fields that control the design** (all optional):
+
+| Field | What it does |
+|---|---|
+| `brand` | `{name, website, logo_url, primary, accent, dark, font, hero, logo_on_dark}`. `font` is `plex` (default, technical), `nunito` (rounded) or `fira` (humanist). `hero` is `auto`, `brand`, `dark` or `light` |
+| `charts` | `[{title, dataset, by, agg, field, where, buckets, limit}]`, for example `{"title": "Capacity by resource group", "dataset": "disks", "by": "resourceGroup", "agg": "sum", "field": "SizeGB"}` |
+| `labels` | Column titles: `{"SizeGB": "Size (GB)", "displayName": "Application"}` |
+| `pdf` | `auto` (default) or `off` |
+
+**Brand from a website.** With `operation=brand` (the builder calls it when the idea names a company or a URL), the kit
+reads the public home page and its stylesheets once. It keeps the official logo (SVG when available, otherwise PNG), the
+colours of the logo and the site, and the closest font preset. Text on brand colours is kept at WCAG AA contrast (4.5:1),
+darkening a colour when needed. SVG logos are sanitised (no scripts, event handlers or external references). Discovery
+only calls public HTTPS addresses, with a timeout and a size limit. If a site cannot be read, the builder says so and uses
+the default design; you can always give the colours or a `logo_url` yourself.
+
+Fonts: three subsets of SIL Open Font License fonts are embedded: *Report Sans* (IBM Plex Sans, renamed because "Plex"
+is a Reserved Font Name), Nunito Sans and Fira Sans. The license texts are in [`src/fonts-OFL.txt`](src/fonts-OFL.txt).
 
 ---
 
@@ -416,12 +480,16 @@ Verified on a lab Azure SRE Agent (identifiers removed):
 
 | Step | Result |
 |---|---|
-| Install with `deploy-to-sre-agent.py` | Tool, skill and subagent created (`202`); sandbox smoke test `OK`, kit 3.0.0 |
+| Install with `deploy-to-sre-agent.py` | Tool, skill and subagent created (`202`); sandbox smoke test `OK`, kit 3.1.1 |
 | Builder test, idea: orphaned managed disks | **0 questions**. `READY_LIVE_VERIFIED`: lint PASS · self_test SIMULATED OK, 4/4 rules fired · live_discover OK (4 rows, 14 columns) · field_check OK |
 | 4 different ideas, in Spanish and English | All 4 Builder blocks delivered in every thread, **0 questions**: Entra app secrets expiry (`READY_LIVE_VERIFIED`) · orphaned disks (`READY_LIVE_VERIFIED`) · VMs stopped but not deallocated (`READY_LIVE_VERIFIED`) · certificate inventory Excel in SharePoint, site not given (`READY_WITH_INPUTS`, placeholders listed instead of questions) |
 | Generated use case deployed | Tool, skill and subagent created from the generated blocks |
 | Generated subagent run | **4 orphaned disks, 196 GB, 0 Premium, 4 unattached 30+ days**, with verdict, KPIs, top findings and 4 downloads |
 | Scheduled task | Weekly, Monday, cron `0 7 * * 1` UTC |
+| Report design (kit 3.1), idea naming a company and its website, in Spanish | `brand` found the official SVG logo and the primary and accent colours on the public site. Spec with the brand, 3 charts and Spanish column titles. `READY_LIVE_VERIFIED`; self-test HTML and PDF written in the agent sandbox |
+| Report design, idea with no company (weekly Advisor review, in Spanish) | Default design, 3 charts. `READY_LIVE_VERIFIED`, 3/3 rules fired, HTML and PDF |
+| Generated branded tool (235 KB with logo and fonts), `mode=report` on live data in the agent sandbox | `status: OK`, `pdf: OK`, 5 servers read, 1 second |
+| `operation=brand` on two public company websites from the agent sandbox | Both `OK`: SVG logo on one, PNG on the other, primary and accent colours, redirects validated hop by hop |
 | Kit test suites | `tests/test_kit.py` and `tests/test_report_mocked.py`: **0 failures** |
 
 ---
@@ -439,6 +507,10 @@ Verified on a lab Azure SRE Agent (identifiers removed):
 | The time in the scheduled task is wrong | The Daily/Weekly time list uses your local time zone; the generated cron is UTC. Use **Custom cron** to be exact |
 | Enable Azure Identity | Leave it **OFF** for the kit and generated tools. They use the sandbox agent identity |
 | A generated subagent uses other tools | Selecting tools and skills on a custom agent overrides the global defaults; select only the generated ones |
+| The report has no PDF (`pdf: skipped: ...`) | Headless Chromium was not available in that sandbox. The run still succeeds; open the HTML and use **Print / PDF** |
+| Wrong logo or colours | Say it in the same thread: *"use primary #0E5A5A and accent #FF7A59"* or *"use the logo at https://.../logo.svg"*. The builder regenerates and re-tests |
+| You want no brand | Say *"use the default design"* |
+| The tool code is large (150–250 KB) | Normal: the fonts and the logo are embedded so the report works offline. Paste the whole file; do not remove the constants at the end |
 
 ---
 
@@ -448,19 +520,22 @@ The kit is a single file built from modules:
 
 ```powershell
 python src\build_kit.py            # writes sre-usecase-builder-kit.py and prints size + sha256
-python tests\test_kit.py           # catalog, spec validation, scaffold, lint, self_test, paging, budget
-python tests\test_report_mocked.py # every source type with mocked HTTP, report, publish, comparison
+python tests\test_kit.py           # catalog, spec validation, scaffold, lint, self_test, paging, budget, report design
+python tests\test_report_mocked.py # every source type with mocked HTTP, report, PDF, publish, comparison
 ```
 
 | Module | Content |
 |---|---|
 | `src/kit_1_catalog.py` | Source types, operators, Graph roles and recipes |
-| `src/kit_2_build.py` | Spec validation with fix hints, and code generation |
+| `src/kit_2_build.py` | Spec validation with fix hints (including brand, charts, labels and pdf), and code generation |
 | `src/kit_3_blocks.py` | The 4 Builder blocks and the permission plan by source type |
-| `src/kit_4_ops.py` | Operations (catalog, environment, probe, scaffold, get, lint), budget and paging, SETUP and BUILDER-BLOCKS templates |
-| `src/usecase_tool_template.py` | The engine every generated tool is built from: sources, rules, KPIs, comparison, HTML, CSV and JSON, publishing, self-test |
+| `src/kit_4_ops.py` | Operations (catalog, environment, probe, scaffold, get, lint, brand), budget and paging, SETUP and BUILDER-BLOCKS templates |
+| `src/kit_5_brand.py` | Brand discovery from a public website: logo (SVG sanitiser, trimming, PNG fallback), palette, font preset, cache |
+| `src/kit_6_assets.py` | Embedded font presets, generated by `src/make_assets.py` (license texts in `src/fonts-OFL.txt`) |
+| `src/usecase_tool_template.py` | The engine every generated tool is built from: sources, rules, KPIs, comparison, the HTML design engine and PDF, CSV and JSON, publishing, self-test |
 
-Rules for contributions: keep every tool result under 3,800 characters (use `get` paging), keep `main()` at the top, and keep generated tools read-only.
+Rules for contributions: keep every tool result under 3,800 characters (use `get` paging), keep `main()` at the top, keep generated tools read-only,
+and change the report look only in `usecase_tool_template.py` (the agent must never write report code).
 
 ---
 
@@ -473,6 +548,6 @@ Rules for contributions: keep every tool result under 3,800 characters (use `get
 | [`skills/subagent-instructions.md`](skills/subagent-instructions.md) | **The subagent instructions** |
 | [`deploy-to-sre-agent.py`](deploy-to-sre-agent.py) | Installs the three objects with one command and smoke-tests them |
 | [`prompts.md`](prompts.md) | Ready-to-use prompts in English and Spanish |
-| [`examples/orphaned-managed-disks/`](examples/orphaned-managed-disks/) | Full output for one idea: spec, generated tool, Builder blocks, setup guide, self-test HTML |
+| [`examples/orphaned-managed-disks/`](examples/orphaned-managed-disks/) | Full output for one idea: spec, generated tool, Builder blocks, setup guide, self-test report in HTML and PDF (default and branded design) |
 | `src/`, `tests/` | Kit source and tests |
 | `docs/images/` | Screenshots used in this guide |

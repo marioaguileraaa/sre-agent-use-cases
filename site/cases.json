@@ -302,11 +302,12 @@
       "does": "Describe the idea in one sentence. The agent writes the tool, tests it against your real data and hands back everything needed to run it as a new use case: the four building blocks, the exact permissions and a setup guide.",
       "runs": "On demand",
       "reads": "Whatever your idea needs, read-only",
-      "delivers": "A tested tool, skill, subagent and scheduled task",
+      "delivers": "A tested tool, skill, subagent and scheduled task, with a branded HTML and PDF report",
       "changes": "Nothing. The use cases it builds are read-only too",
       "image": "site/img/builder-engineer.webp",
       "thumb": "site/img/builder-engineer-320.webp",
       "illustration": true,
+      "full": "case_0_v3/examples/orphaned-managed-disks/selftest-report-branded.html",
       "caption": "The builder at work.",
       "tutorial": {
         "video": "case_0_v3/docs/video/sre-usecase-builder-tutorial.mp4",

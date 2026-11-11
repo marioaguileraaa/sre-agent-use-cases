@@ -49,6 +49,13 @@ Prompts marked ✅ were run live on a lab agent; each one produced all 4 Builder
 
 - Weekly operations summary: VMs without heartbeat (Log Analytics) plus high-impact Advisor recommendations plus cost by resource group, in one report.
 
+### Report in a customer's look
+
+Name the company or its website and the builder reads the logo, colours and font from the public site:
+
+- Weekly report of VMs and Arc servers without heartbeat for Contoso (https://www.contoso.com), with its logo and colours.
+- Quiero un informe semanal de los secretos de Entra ID que caducan en 30 días para Contoso (https://www.contoso.com), con su logo y sus colores, y gráficos por aplicación.
+
 ## 3. Follow-up prompts in the same thread
 
 The builder regenerates and re-tests after each change.
@@ -60,6 +67,10 @@ The builder regenerates and re-tests after each change.
 | Keep history and compare | Publish the report to my SharePoint site `<site URL>` folder `Reports/Disks` so each run compares with the previous one. |
 | Publish to Blob | Publish the report to storage account `<account>`, container `sre-reports`. |
 | Add a column or KPI | Add the disk tier as a column and a KPI with the total GB of Premium disks. |
+| Add a chart | Add a chart of orphaned capacity (GB) by resource group. |
+| Use a customer's look | Use the logo and colours of https://www.contoso.com. |
+| Fix the brand | Use primary #0E5A5A, accent #FF7A59 and the logo at `<https URL of the logo>`. |
+| Rename columns | Call the columns "Disk", "Size (GB)" and "Days unattached". |
 | Understand permissions | Explain the permissions the agent needs for this and give me the exact commands. |
 | Check real columns first | Probe the source and show me the real columns before generating. |
 | Get one block again | Give me block 1 again (the Python tool) complete. |

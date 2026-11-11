@@ -109,7 +109,10 @@ r1 = ns["main"](mode="report", publish="yes")
 check("sharepoint run1 status OK", r1["status"] == "OK", r1)
 check("sharepoint run1 history empty (first run)", r1["history"] == "empty", r1["history"])
 check("sharepoint run1 findings critical+high+low", (r1["findings_by_severity"]["critical"], r1["findings_by_severity"]["high"], r1["findings_by_severity"]["low"]) == (1, 1, 1), r1["findings_by_severity"])
-check("sharepoint run1 published 4 files incl. history", sum(p["status"] == "OK" for p in r1["published"]) == 4 and any("history/" in p["file"] for p in r1["published"]), r1["published"])
+expected = 5 if r1.get("pdf") == "OK" else 4
+check(f"sharepoint run1 published {expected} files incl. PDF (when rendered) and history",
+      sum(p["status"] == "OK" for p in r1["published"]) == expected and any("history/" in p["file"] for p in r1["published"])
+      and (r1.get("pdf") != "OK" or any(p["file"].endswith(".pdf") for p in r1["published"])), r1["published"])
 check("no DELETE/PATCH calls", not any(m in ("DELETE", "PATCH") for m, _ in fake.calls))
 drive["Certificates/certs-2026-b.xlsx"] = {"data": xlsx([["web-prod", "ana", soon], ["api", "luis", far], ["new-cert", "eva", past]]), "t": "2026-10-08T00:00:00Z"}
 ns, fake = load(code, sp_handler)

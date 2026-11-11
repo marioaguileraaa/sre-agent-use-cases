@@ -171,7 +171,7 @@
       el("figcaption", {},
         el("b", {}, `Plate ${c.no}. `),
         c.caption || "From the guide on GitHub.",
-        (c.full && !c.illustration) ? el("a", { href: fullHref, rel: "noopener" }, fullLabel) : null));
+        c.full ? el("a", { href: fullHref, rel: "noopener" }, fullLabel) : null));
 
     const text = el("div", { class: "plate-text" },
       el("div", { class: "plate-head" },

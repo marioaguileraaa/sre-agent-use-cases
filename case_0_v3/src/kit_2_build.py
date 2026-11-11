@@ -63,6 +63,8 @@ def _check_condition(cond, where, errors):
 
 KPI_FIELDS = {"id", "label", "dataset", "agg", "field", "where", "good", "unit"}
 KPI_AGG_ALIASES = ("aggregation", "aggregate", "agg_type", "function")
+CHART_FIELDS = {"title", "subtitle", "dataset", "by", "agg", "field", "where", "limit", "buckets", "unit"}
+BRAND_FIELDS = ("name", "website", "logo_url", "primary", "accent", "dark", "font", "hero", "logo_on_dark")
 
 
 def _validate(spec):
@@ -81,6 +83,45 @@ def _validate(spec):
         warnings.append("Add 'description' (what it detects and why it matters): it becomes the business value in skill and task.")
     language = spec.get("language", "en") if spec.get("language") in ("es", "en") else "en"
     accent = spec.get("accent") if HEX_RE.match(str(spec.get("accent", ""))) else "#0f6cbd"
+    brand_in = spec.get("brand") or {}
+    if not isinstance(brand_in, dict):
+        errors.append({"path": "brand", "error": "brand must be an object", "fix": '{"name": "Contoso", "website": "https://www.contoso.com"}'})
+        brand_in = {}
+    brand = {}
+    for key in brand_in:
+        if key not in BRAND_FIELDS:
+            warnings.append(f"brand.{key} is not used (allowed: {', '.join(BRAND_FIELDS)}).")
+    for key in ("primary", "accent", "dark"):
+        if brand_in.get(key) not in (None, ""):
+            if HEX_RE.match(str(brand_in[key])):
+                brand[key] = str(brand_in[key]).lower()
+            else:
+                errors.append({"path": f"brand.{key}", "error": f"invalid colour '{brand_in[key]}'", "fix": "hex #RRGGBB"})
+    if not brand.get("primary") and accent.lower() != "#0f6cbd":
+        brand["primary"] = accent.lower()
+    if brand_in.get("font"):
+        if brand_in["font"] in FONT_PRESETS:
+            brand["font"] = brand_in["font"]
+        else:
+            warnings.append(f"brand.font '{brand_in['font']}' unknown: using plex (options: {', '.join(FONT_PRESETS)}).")
+    hero = brand_in.get("hero") or "auto"
+    if hero not in ("auto", "brand", "dark", "light"):
+        errors.append({"path": "brand.hero", "error": f"invalid hero '{hero}'", "fix": "auto | brand | dark | light"})
+    brand["hero"] = hero
+    if brand_in.get("name"):
+        brand["name"] = str(brand_in["name"])[:60]
+    if "logo_on_dark" in brand_in:
+        brand["logo_on_dark"] = bool(brand_in["logo_on_dark"])
+    for key in ("website", "logo_url"):
+        if brand_in.get(key) and not str(brand_in[key]).startswith("https://"):
+            errors.append({"path": f"brand.{key}", "error": "must be an https:// URL", "fix": "e.g. https://www.contoso.com"})
+    pdf = str(spec.get("pdf", "auto")).lower()
+    if pdf not in ("auto", "portrait", "landscape", "none"):
+        errors.append({"path": "pdf", "error": f"invalid pdf '{pdf}'", "fix": "auto | portrait | landscape | none"})
+    labels = spec.get("labels") or {}
+    if not isinstance(labels, dict) or not all(isinstance(v, str) for v in labels.values()):
+        errors.append({"path": "labels", "error": "labels must map column names to display names", "fix": '{"HoursSilent": "Hours without heartbeat"}'})
+        labels = {}
     days = spec.get("lookback_days", 7)
     if not isinstance(days, int) or not 1 <= days <= 366:
         errors.append({"path": "lookback_days", "error": "must be an integer 1-366", "fix": "e.g. 7"})
@@ -167,6 +208,29 @@ def _validate(spec):
         if k.get("good") not in (None, "up", "down"):
             errors.append({"path": f"kpis[{i}].good", "error": "good must be up or down", "fix": "down = lower is better"})
         _check_condition(k.get("where"), f"kpis[{i}].where", errors)
+    charts = spec.get("charts") or []
+    for i, c in enumerate(charts):
+        if not isinstance(c, dict):
+            errors.append({"path": f"charts[{i}]", "error": "chart must be an object", "fix": "{title, dataset, by, agg=count, field?, where?, limit?, buckets?}"})
+            continue
+        for alias in KPI_AGG_ALIASES:
+            if alias in c:
+                value = c.pop(alias)
+                c.setdefault("agg", value)
+        for field in list(c):
+            if field not in CHART_FIELDS:
+                warnings.append(f"charts[{i}]: field '{field}' is not used (allowed: {', '.join(sorted(CHART_FIELDS))}).")
+        ds(c, f"charts[{i}]")
+        if not c.get("by"):
+            errors.append({"path": f"charts[{i}].by", "error": "chart needs by (the column to group bars by)", "fix": "e.g. resourceGroup, OSType, Category"})
+        if c.get("agg", "count") not in AGGREGATIONS:
+            errors.append({"path": f"charts[{i}].agg", "error": f"unknown agg '{c.get('agg')}'", "fix": "use " + ", ".join(AGGREGATIONS)})
+        if c.get("agg", "count") not in ("count",) and not c.get("field"):
+            errors.append({"path": f"charts[{i}].field", "error": f"agg {c.get('agg')} needs field", "fix": "numeric column, e.g. Cost"})
+        b = c.get("buckets")
+        if b is not None and not (isinstance(b, list) and b and all(isinstance(x, (int, float)) for x in b) and b == sorted(b)):
+            errors.append({"path": f"charts[{i}].buckets", "error": "buckets must be ascending numbers", "fix": "e.g. [0, 30, 90] for days left"})
+        _check_condition(c.get("where"), f"charts[{i}].where", errors)
     tables = spec.get("tables") or []
     for i, t in enumerate(tables):
         ds(t, f"tables[{i}]")
@@ -201,12 +265,14 @@ def _validate(spec):
     if not tables:
         tables = [{"title": s, "dataset": s, "columns": list(dict.fromkeys(list(keys.get(s, [])) + [f for r in rules if r.get("dataset") == s for f in r.get("show", [])])), "limit": 50}
                   for s in ids if s]
-    config = {"tool_name": f"run-{name}", "title": title, "client": str(spec.get("client", "")), "language": language, "accent": accent,
+    config = {"tool_name": f"run-{name}", "title": title, "description": description, "client": str(spec.get("client", "") or brand.get("name", "")),
+              "language": language, "accent": accent, "brand": brand, "pdf": pdf, "labels": labels, "charts": charts,
               "identity_client_id": "", "lookback_days": days, "max_rows_per_source": int(spec.get("max_rows_per_source", 50000)),
               "file_prefix": name, "sources": sources, "derive": derive, "kpis": kpis, "rules": rules, "tables": tables, "keys": keys,
               "publish": publish, "history": history}
     cadence = {v: k for k, v in CRON_PRESETS.items()}.get(cron, "scheduled")
     meta = {"name": name, "title": title, "description": description, "audience": str(spec.get("audience", "")), "cron": cron,
+            "brand_source": {k: brand_in.get(k) for k in ("website", "logo_url") if brand_in.get(k)},
             "cadence": cadence, "tool": f"run-{name}", "skill": name, "agent": name, "task": f"{name}-{cadence}"}
     return config, meta, errors, warnings
 
@@ -233,6 +299,11 @@ def _referenced_fields(config):
         add(k["dataset"], k.get("field"), f"kpi {k['id']}")
         for c in _conditions(k.get("where")):
             add(k["dataset"], c.get("field"), f"kpi {k['id']}")
+    for c in config.get("charts", []):
+        for f in (c.get("by"), c.get("field")):
+            add(c["dataset"], f, f"chart {c.get('title', c.get('by'))}")
+        for cond in _conditions(c.get("where")):
+            add(c["dataset"], cond.get("field"), f"chart {c.get('title', c.get('by'))}")
     for t in config.get("tables", []):
         for f in t.get("columns", []) + ([t["sort"]] if t.get("sort") else []):
             add(t["dataset"], f, f"table {t.get('title', '')}")
@@ -244,7 +315,14 @@ def _referenced_fields(config):
     return {ds_: {f: sorted(u) for f, u in fields.items() if (ds_, f) not in derived} for ds_, fields in refs.items()}
 
 
-def _build_code(config, meta):
+def _literal_lines(name, text, width=110):
+    if not text:
+        return f'{name} = ""'
+    chunks = [text[i:i + width] for i in range(0, len(text), width)]
+    return f"{name} = (\n" + "\n".join(f"    {c!r}" for c in chunks) + "\n)"
+
+
+def _build_code(config, meta, logo=""):
     sources = config["sources"]
     publish = config.get("publish") or {}
     keep = {"source:" + s["type"] for s in sources}
@@ -269,6 +347,8 @@ def _build_code(config, meta):
     code = re.sub(r"\n{4,}", "\n\n\n", "\n".join(lines)) + "\n"
     literal = pprint.pformat(config, width=118, sort_dicts=False)
     code = code.replace("CONFIG = {}  # @config", "# Everything this tool does is driven by CONFIG: edit queries, thresholds and rules here.\nCONFIG = " + literal, 1)
+    code = code.replace('BRAND_LOGO = ""  # @logo', _literal_lines("BRAND_LOGO", logo or ""), 1)
+    code = code.replace('FONT_CSS = ""  # @fonts', _literal_lines("FONT_CSS", _font_css((config.get("brand") or {}).get("font", "plex"))), 1)
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     return (code.replace("__TOOL_NAME__", config["tool_name"]).replace("__TITLE__", meta["title"])
             .replace("__KIT_VERSION__", KIT_VERSION).replace("__GENERATED_UTC__", stamp))

@@ -334,7 +334,8 @@ def _probe(spec):
         return {"status": "NEEDS_INPUT", "pending_inputs": pending, "message": "Fill the placeholders in sources (operation environment lists workspaces, storage, subscriptions)."}
     if not _live_possible():
         return {"status": "NO_IDENTITY", "message": "probe must run inside Azure SRE Agent (managed identity not available)."}
-    code = _build_code(config, meta)
+    logo = _brand_resolve(spec.get("brand"), config, warnings)
+    code = _build_code(config, meta, logo)
     _, discover, elapsed = _run(code, "discover")
     env = _env_cached()
     perms = _permissions(config, env if env.get("status") in ("OK", "PARTIAL") else None)
@@ -351,11 +352,12 @@ def _scaffold(spec):
         return {"status": "INVALID", "errors": errors, "warnings": warnings,
                 "next": "Fix every error (path + fix) and call scaffold again with the corrected spec."}
     pending = _walk_placeholders({"sources": config["sources"], "publish": config.get("publish")})
+    logo = _brand_resolve(spec.get("brand"), config, warnings)
     env = _env_cached() if _live_possible() else None
     env_ok = bool(env and env.get("status") in ("OK", "PARTIAL"))
     verification, live = {}, None
     if not pending and _live_possible():
-        code0 = _build_code(config, meta)
+        code0 = _build_code(config, meta, logo)
         _, live, live_s = _run(code0, "discover")
         if not config["keys"]:
             config["keys"] = _auto_keys(config, live)
@@ -368,7 +370,7 @@ def _scaffold(spec):
         verification["live_discover"] = "NOT RUN - placeholders to fill: " + ", ".join(p["path"] for p in pending)
     else:
         verification["live_discover"] = "NOT RUN - no managed identity here (run self_test + discover in Builder)"
-    code = _build_code(config, meta)
+    code = _build_code(config, meta, logo)
     lint = _lint(code)
     verification["lint"] = lint["status"] + (": " + "; ".join(lint["errors"]) if lint["errors"] else "")
     if lint["status"] != "PASS":
@@ -379,7 +381,8 @@ def _scaffold(spec):
                 "next": "Usually a condition/field mismatch: check the error, fix the spec and scaffold again."}
     fired, silent = _rule_coverage(ns, config)
     verification["self_test"] = (f"SIMULATED OK in {st_s}s - network blocked, {len(fired)}/{len(config['rules'])} rules fired on synthetic data, "
-                                 f"{len(selftest.get('kpis', []))} KPIs, comparison with a simulated previous run, HTML/CSV/JSON written")
+                                 f"{len(selftest.get('kpis', []))} KPIs, comparison with a simulated previous run, branded HTML + "
+                                 f"{'PDF' if selftest.get('pdf') == 'OK' else 'no PDF (' + str(selftest.get('pdf')) + ')'} + CSV/JSON written")
     if silent:
         warnings.append("Rules that never fired on synthetic data (check the condition, or add sample_rows to the source): " + ", ".join(silent))
     field_check = _field_check(config, live) if live else []
@@ -426,12 +429,18 @@ def _scaffold(spec):
     }
     (folder / f"{meta['name']}-scaffold.json").write_text(json.dumps(full, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     html_report = next((v for k, v in (selftest.get("files") or {}).items() if k.endswith(".html")), None)
+    pdf_report = next((v for k, v in (selftest.get("files") or {}).items() if k.endswith(".pdf")), None)
+    brand = config.get("brand") or {}
     compact = {
         "status": status, "meaning": full["meaning"], "names": full["names"], "verification": verification,
         "pending_inputs": [p["path"] for p in pending],
         "permissions": [{"status": p["status"], "need": p["need"], "scope": p["scope"]} for p in perms],
         "warnings": warnings,
-        "self_test_report": html_report, "files": full["files"],
+        "self_test_report": html_report, "self_test_pdf": pdf_report,
+        "design": {"brand": brand.get("name") or "default (Azure SRE Agent)", "logo": "embedded" if logo else "wordmark",
+                   "primary": brand.get("primary"), "accent": brand.get("accent"), "font": brand.get("font", "plex"),
+                   "charts": len(config.get("charts", []))},
+        "files": full["files"],
         "get_parts": [f"{meta['name']}/{p}" for p in GET_PARTS],
         "next": (f"Now call operation=get with spec_json='{meta['name']}/answer' (pages 1..n via '/answer/2'...) - it returns the complete "
                  "Builder blocks, permission commands and test steps ready to present. Single parts: " + ", ".join(GET_PARTS) + "."),
@@ -606,12 +615,14 @@ def _kit_main(operation="catalog", spec_json="", code=""):
             return _fit(_lint(code or ""), "lint")
         if op == "get":
             return _get(spec_json)
+        if op == "brand":
+            return _fit(_brand_op(spec_json), "brand")
         if op in ("probe", "scaffold"):
             spec, error = _parse_spec(spec_json)
             if error:
                 return error
             return _fit(_probe(spec) if op == "probe" else _scaffold(spec), op)
-        return {"status": "INVALID", "message": "operation must be catalog, environment, probe, scaffold, get or lint"}
+        return {"status": "INVALID", "message": "operation must be catalog, environment, brand, probe, scaffold, get or lint"}
     except Exception as exc:
         return {"status": "KIT_ERROR", "error": f"{type(exc).__name__}: {exc}", "trace": traceback.format_exc()[-1500:],
                 "next": "Report this error; retry scaffold once with a simpler spec."}
