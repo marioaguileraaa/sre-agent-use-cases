@@ -298,7 +298,7 @@ report and investigation do not substitute one for the other.
 
 Existing tools, skills and agents were hash-compared unchanged, and the nine
 pre-existing tasks retained their stable configured fields. The one existing
-incident-plan exception is the narrowly documented Grubify title exclusion
+incident-plan exception is the narrowly documented storefront-plan title exclusion
 below; it must not be presented as an unchanged plan definition.
 
 ## Setup steps (guide order)
@@ -395,7 +395,7 @@ a local copy for configuration/pasting. Private repository access is required.
 | [`tests/test_package_contract.py`](tests/test_package_contract.py) | Offline package contract checks: zero-side-effect `__main__` tool hydration, 16-parameter schema parity, relative link/anchor/image resolution and bilingual EN/ES prompt coverage. |
 | [`PRODUCT.md`](PRODUCT.md) | Scenario-local, confirmed product boundaries; no changes to earlier cases. |
 | [`DESIGN.md`](DESIGN.md) | Report visual contract (Azure SRE Agent report family in this scenario's petrol palette), tokens, responsive and print behavior. |
-| [`images/`](images/) | Captures with red callouts. Report screenshots re-render dated lab snapshots with pseudonymized names and identifiers; portal captures are actual, reviewed and masked. Historical UI examples are dated in their captions. |
+| [`images/`](images/) | Captures with red callouts. Report screenshots re-render dated lab snapshots with pseudonymized names and identifiers; portal captures are actual and reviewed; identifiers are masked and visible lab names use the same pseudonyms. Historical UI examples are dated in their captions. |
 
 Raw API handoffs are ignored, private validation inputs. They are not a
 committed dataset, deployed fixture or sample report.
@@ -1318,7 +1318,7 @@ entries; unrelated tasks are excluded from the image. The final verified
 11:54:38 execution is the **fourth** retained entry, not a replacement of the
 earlier failures/retries.
 
-![Actual monthly native downloads: HTML (1), resources CSV (2), signals CSV (3) and complete JSON (4)](images/infra03-monthly-four-downloads.png)
+![Actual monthly native downloads, lab names pseudonymized: HTML (1), resources CSV (2), signals CSV (3) and complete JSON (4)](images/infra03-monthly-four-downloads.png)
 
 This real native-widget example is from the **11:39:54 UTC** run after the
 sharing-contract fix, before the final package-image/mobile corrections.
@@ -1429,7 +1429,7 @@ The two lab plans are `infra03-cpu-demo-native-response` and
 corresponding `infra03-cpu-demo-native` / `infra03-cpu-demo-arc` title filter.
 Their three-hour cooldown is an explicit lab setting.
 
-The existing broad Grubify plan would also match these alerts. The parent
+The existing broad storefront plan would also match these alerts. The parent
 operator added only `titleNotContains=["infra03-cpu-demo"]`, preserving its
 other configured fields. This was a narrowly scoped implementation decision
 under autonomous execution, **not explicit human approval of that plan edit**.
@@ -1517,7 +1517,7 @@ to make a demo more dramatic.
 7. Generate a fresh report/query for the demonstration window and show the
    actual chronology. A manual report or replayed JSON is not automatic proof.
 
-![Actual native automatic incident: the generated Sev3 thread (1) and completed read-only investigation (2)](images/infra03-native-automatic-investigation.png)
+![Actual native automatic incident, lab names pseudonymized: the generated Sev3 thread (1) and completed read-only investigation (2)](images/infra03-native-automatic-investigation.png)
 
 The native rule's real fire created this incident thread (1); its response plan
 selected the infrastructure specialist. The completed response (2) cites actual
@@ -1525,7 +1525,7 @@ CPU above the 65% teaching threshold and states that **no remediation was
 performed**. It also distinguishes a completed investigation from an external
 incident update. Native alert resolution and restoration were verified later.
 
-![Actual Arc automatic incident: generated Sev3 thread (1), source-qualified read-only completion (2)](images/infra03-arc-automatic-investigation.png)
+![Actual Arc automatic incident, lab names pseudonymized: generated Sev3 thread (1), source-qualified read-only completion (2)](images/infra03-arc-automatic-investigation.png)
 
 The Arc rule separately created this genuine automatic incident (1), and the
 same specialist completed its source-qualified investigation (2). It does not

@@ -590,12 +590,12 @@
     },
     {
       "filename": "12-live-chat-four-files.png",
-      "bytes": 111957,
-      "sha256": "24d5d53beb65365cd6d0e6db61e36f9259618990575cf6a518f43c0d5d2b7d7f",
+      "bytes": 114935,
+      "sha256": "b5c04288b62ed5f15ead71aaaa0b03d7d7cce3d75338a6b217ab715235f17568",
       "width": 1400,
       "height": 760,
       "evidence_kind": "actual_connected_cross_tenant_live_run",
-      "caption": "Connected cross-tenant report turn (cross_tenant_multitenant_fic): delivers all four native files, discloses partial source coverage (14 complete, 6 denied, 4 not_configured) alongside the local score, and summarizes OBSERVED, INFERRED and UNKNOWN dependency counts without starting compute.",
+      "caption": "Connected cross-tenant report turn (cross_tenant_multitenant_fic): delivers all four native files, discloses partial source coverage (14 complete, 6 denied, 4 not_configured) alongside the local score, and summarizes OBSERVED, INFERRED and UNKNOWN dependency counts without starting compute. The workspace name and thread ID are masked and the ADLS account name is pseudonymized.",
       "callouts": [
         {
           "number": 1,

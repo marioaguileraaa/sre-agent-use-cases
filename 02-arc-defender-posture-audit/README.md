@@ -7,17 +7,17 @@ posture controls and vulnerability evidence into a navigable report and
 source-grounded answers. The **LIVE report is customer-neutral** and covers the
 configured subscription's relevant Azure services, not just Arc.
 
-The separate **Retail-inspired SIMULATED demo** remains focused on 200 Arc
+The separate **retail-inspired SIMULATED demo** remains focused on 200 Arc
 on-premises/GCP servers, with its historical green branding and clearly fictional
 teaching chains. It never reads customer infrastructure, calls Azure or acquires
 a token. Its brand, names and allocations are example labels, not evidence about
 the customer implementing this guide.
 
-| | LIVE general Defender | SIMULATED Retail Arc |
+| | LIVE general Defender | SIMULATED retail Arc |
 |---|---|---|
 | Audience | Reusable Defender for Cloud / SRE demo for any customer | Hybrid Arc demonstration |
 | Resource scope | One configured Enabled subscription; source-visible ARM resources plus explicitly labeled Defender-indexed child assets | 200 fictional Arc hosts, 142 on-premises / 58 GCP |
-| Visual identity | Neutral navy hero, system typography, neutral shield mark in the top bar | Forest/emerald hero, serif headline, approved logo in the white top bar |
+| Visual identity | Neutral navy hero, system typography, neutral shield mark in the top bar | Forest/emerald hero, serif headline, neutral placeholder logo in the white top bar |
 | Tool | `generate-defender-cloud-report` | `simulate-arc-defender-retail` |
 | Skill / subagent | `defender-cloud-live` | `arc-defender-retail` |
 | Output | HTML, inventory CSV, finding CSV, full JSON; additional section exports in HTML | Same formats, all explicitly SIMULATED |
@@ -248,7 +248,7 @@ and [Defender for Cloud permissions](https://learn.microsoft.com/azure/defender-
 
 1. Decide **LIVE**, **SIMULATED**, or two explicitly separate demonstrations.
    For a real Defender for Cloud review, LIVE is the normal path. Installation
-   of the Retail example is not a prerequisite.
+   of the retail example is not a prerequisite.
 2. Have the scope owner identify the **monitored subscription and its tenant**,
    the **SRE Agent host resource**, and the assigned **runtime UAMI**. They may
    have different resource groups or subscriptions. Keep these values in the
@@ -289,7 +289,7 @@ controlled installation instead of mixing files downloaded on different dates.
 | [`monthly-task-prompt.md`](monthly-task-prompt.md) | Canonical task name, responder, cron and prompt. |
 | [`requirements.txt`](requirements.txt) | LIVE dependencies: requests and azure-identity. |
 | [`tests/`](tests/) | Offline source, schema, scope, risk, graph, encoding and exact transport-budget tests. |
-| [`images/`](images/) | 25 unchanged historical portal/report captures. The [catalogue](#screenshot-catalogue) identifies general LIVE, older Arc-only LIVE and SIMULATED images separately. |
+| [`images/`](images/) | 25 portal/report captures: historical portal/chat captures with neutralized names and sanitized report renders. The [catalogue](#screenshot-catalogue) identifies general LIVE, older Arc-only LIVE and SIMULATED images separately. |
 | [`evidence/linux-mde-verification.json`](evidence/linux-mde-verification.json) | Historical supplementary checks of two lab Linux hosts, not a live fleet-health API. |
 
 The stable scenario folder/README URL is retained. The old Python filename
@@ -899,7 +899,7 @@ The generic LIVE report has no built-in company-logo parameter. If desired,
 edit only your local deployment copy of
 [`generate-defender-cloud-report.py`](generate-defender-cloud-report.py), in
 `_render_html(snapshot)`. Do not change the separate SIMULATED file or its
-approved branding. Keep the neutral LIVE colors, title and evidence labels.
+demo branding. Keep the neutral LIVE colors, title and evidence labels.
 
 This is an **optional local source customization**, not a built-in setting,
 parameter, uploaded report asset or a change made by this documentation review.
@@ -1339,14 +1339,14 @@ Keep LIVE and SIMULATED threads and claims separate.
   Explica una cadena ilustrativa GCP/on-premises de la simulación y sus cortes propuestos, dejando claro que es un escenario sintético SIMULATED y no una detección real de Defender ni topología del cliente.
   ```
 
-The current Arc demo keeps its approved green identity and adds two
+The current Arc demo keeps its green identity and adds two
 **illustrative simulated chains**, not customer topology or native detections:
 
-![SIMULATED Arc overview: green identity, verdict-first header and SIMULATED banner (logo replaced by a placeholder)](images/v2-simulated-overview.png)
+![SIMULATED Arc overview: green identity, verdict-first header and SIMULATED banner (neutral placeholder logo)](images/v2-simulated-overview.png)
 
 *SIMULATED report in the current design: (1) fictional 200-host provenance,
-(2) navigation. In this public capture the approved logo is replaced by a
-neutral placeholder. Its two illustrative chains and baseline ratio are not
+(2) navigation. The top bar shows the report's neutral placeholder logo,
+not a customer brand. Its two illustrative chains and baseline ratio are not
 native customer detections or Defender Secure Score.
 [Open full resolution](images/v2-simulated-overview.png).*
 
@@ -1658,7 +1658,7 @@ or unmasked screenshots to demonstrate the report.
 
 ## Simulation assumptions
 
-All allocations are **fictional**, not verified Retail data:
+All allocations are **fictional**, not verified data from any retail customer:
 
 | Environment | On-premises | GCP | Total |
 |---|---:|---:|---:|
@@ -1860,7 +1860,7 @@ Arc-only metric captions, with complete decoded evidence:
 The LIVE decode retained 554 combined inventory/indexed resources, all 1693
 recommendation records, 7495 embedded CVE occurrences, 77 software rows and
 3 observed graphs. Both actual HTML files had no JavaScript errors. LIVE was
-neutral, without a Retail logo; the offline Arc demo retained its green
+neutral, without a customer logo; the offline Arc demo retained its green
 branding. Both sources for that historical revision were persisted and verified; the synchronized
 SIMULATED caption-only copy also passed its actual sandbox test.
 
@@ -1886,7 +1886,7 @@ horizontal page overflow:
 
 Lazy tables did not limit the CSV to the rendered 50 rows. The final graph
 conversation named the actual
-IP-to-`vm-arc-host-weu-NIC`-to-`vm-arc-host-weu` Azure VM path, both edges labeled
+IP-to-`vm-arc-host-weu-nic`-to-`vm-arc-host-weu` Azure VM path, both edges labeled
 “routes traffic to”, High native path risk and **no Arc association**.
 
 The immediate V2 task and its four downloads are independently recorded above;
@@ -2011,15 +2011,16 @@ performed by this documentation-only revision.
 
 ## Screenshot catalogue
 
-The **17 portal and chat PNGs are retained unchanged**; they are actual
-historical captures. The **8 report images** (`report-*-overview.png`,
-`v2-live-overview.png`, `v2-live-resource-sql*.png` and
-`v2-simulated-overview.png`) were regenerated on 12 November 2026 with the
+The **17 portal and chat PNGs are actual historical captures**; in six of
+them, visible customer and lab names were re-lettered on 12 November 2026 to
+the neutral names used in this guide. The **8 report images**
+(`report-*-overview.png`, `v2-live-overview.png`, `v2-live-resource-sql*.png`
+and `v2-simulated-overview.png`) were regenerated on 12 November 2026 with the
 current report design from **sanitized sample data**: a fictional subscription
-rendered offline through the LIVE pipeline, and the SIMULATED fixture with its
-logo replaced by a neutral placeholder. A screenshot of a sample or offline
-report is real media of **fictional data**, not LIVE evidence. Click each link
-for full resolution. The `v2-` filenames are kept for link stability.
+rendered offline through the LIVE pipeline, and the SIMULATED fixture with the
+neutral placeholder logo that the tool now ships. A screenshot of a sample or
+offline report is real media of **fictional data**, not LIVE evidence. Click
+each link for full resolution. The `v2-` filenames are kept for link stability.
 
 The current LIVE/SIMULATED paths are defined by source, tool and provenance,
 not color alone.

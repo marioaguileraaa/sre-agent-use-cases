@@ -320,13 +320,13 @@ class PostureAndTransportTests(unittest.TestCase):
     def test_live_is_customer_neutral_and_simulation_keeps_approved_brand(self):
         snapshot = sim._fixture(REFERENCE)
         simulated_html = sim._render_html(snapshot)
-        self.assertIn('alt="Retail"', simulated_html)
+        self.assertIn('alt="Company logo (placeholder)"', simulated_html)
         self.assertIn("Illustrative simulated attack chains", simulated_html)
         snapshot["provenance"] = "LIVE"
         snapshot["scope"] = {"description": "General subscription"}
         actual_html = live._render_html(snapshot)
         body = actual_html.split("<body", 1)[1].split('<script type="application/json"', 1)[0]
-        self.assertNotIn('alt="Retail"', body)
+        self.assertNotIn('alt="Company logo (placeholder)"', body)
         self.assertIn('class="live"', body)
         self.assertIn("Defender for Cloud posture", body)
         self.assertIn("Native risk", body)

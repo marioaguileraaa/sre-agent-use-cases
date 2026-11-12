@@ -707,7 +707,7 @@ class EncodingAndArtifactTests(unittest.TestCase):
         document = sim._render_html(sim._fixture(REFERENCE))
         self.assertIn("linear-gradient(120deg,#0a3022", document)
         self.assertIn('"Palatino Linotype",Georgia,serif', document)
-        self.assertIn('alt="Retail"', document)
+        self.assertIn('alt="Company logo (placeholder)"', document)
         self.assertIn("SIMULATED DEMO", document)
         self.assertIn('label for="search"', document)
         self.assertIn("aria-sort", document)

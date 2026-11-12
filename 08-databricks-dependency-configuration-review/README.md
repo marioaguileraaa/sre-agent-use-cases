@@ -488,7 +488,7 @@ skill, single tool and instruction block are persisted.
 
    ![Connected cross-tenant report turn delivering all four native files and source/dependency disclosures](images/12-live-chat-four-files.png)
 
-   *Connected cross-tenant report turn (`12-live-chat-four-files.png`, `auth_mode="cross_tenant_multitenant_fic"`): **(1)** all four native files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) are delivered in one turn and verified with HTTP 200; **(2)** source coverage (`14 complete`, `6 denied`, `4 not_configured`) and the local score (`100.0%` over `4` evaluated vs `31` `No evaluado`) are disclosed together; **(3)** `9 OBSERVED` joins, `2 INFERRED` ADLS Gen2 URI edges and `12 UNKNOWN` blind spots are reported with zero compute started.*
+   *Connected cross-tenant report turn (`12-live-chat-four-files.png`, `auth_mode="cross_tenant_multitenant_fic"`): **(1)** all four native files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) are delivered in one turn and verified with HTTP 200; **(2)** source coverage (`14 complete`, `6 denied`, `4 not_configured`) and the local score (`100.0%` over `4` evaluated vs `31` `No evaluado`) are disclosed together; **(3)** `9 OBSERVED` joins, `2 INFERRED` ADLS Gen2 URI edges and `12 UNKNOWN` blind spots are reported with zero compute started. The workspace name and thread ID are masked and the ADLS account name is pseudonymized.*
 
 ## Step 6 - Read and explore the HTML dependency and configuration dossier
 

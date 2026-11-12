@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = "2026-10-20T16:00:00Z"
 SUBSCRIPTION = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
 CLIENT_ID = "12345678-1234-4abc-8def-123456789abc"
-RG_ARC_DEMO = "rg-arc-servers-weu"
+RG_ARC_SERVERS = "rg-arc-servers-weu"
 RG_ONPREM = "rg-arc-onprem"
 RG_AUTO = "rg-automation"
 
@@ -36,38 +36,38 @@ def load_engine(standalone=False):
 
 
 def raw_arg_fixture():
-    vm_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ARC_DEMO + "/providers/Microsoft.Compute/virtualMachines/"
-    arc_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ARC_DEMO + "/providers/Microsoft.HybridCompute/machines/"
+    vm_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ARC_SERVERS + "/providers/Microsoft.Compute/virtualMachines/"
+    arc_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ARC_SERVERS + "/providers/Microsoft.HybridCompute/machines/"
     onprem_arc_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ONPREM + "/providers/Microsoft.HybridCompute/machines/"
     onprem_vm_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ONPREM + "/providers/Microsoft.Compute/virtualMachines/"
     auto_vm_prefix = "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_AUTO + "/providers/Microsoft.Compute/virtualMachines/"
 
-    arc_demo_client_id = vm_prefix + "vm-arc-host-weu"
-    arc_demo_sql_id = arc_prefix + "arc-sql-01"
-    arc_demo_win22_id = arc_prefix + "arc-win2k22-01"
-    arc_demo_ubuntu01_id = arc_prefix + "arc-ubuntu-01"
-    arc_demo_ubuntu02_id = arc_prefix + "arc-ubuntu-02"
+    host_vm_id = vm_prefix + "vm-arc-host-weu"
+    arc_sql_id = arc_prefix + "arc-sql-01"
+    arc_win2k22_id = arc_prefix + "arc-win2k22-01"
+    arc_ubuntu01_id = arc_prefix + "arc-ubuntu-01"
+    arc_ubuntu02_id = arc_prefix + "arc-ubuntu-02"
     arc_expired_id = onprem_arc_prefix + "vm-arc-win-01"
     vm_failed_ext_id = onprem_vm_prefix + "vm-arc-win-04"
     vm_unassessed_id = auto_vm_prefix + "vm-linux-01"
     vm_healthy_id = vm_prefix + "vm-healthy-01"
 
     maint_conf_win = (
-        "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ARC_DEMO
+        "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/" + RG_ARC_SERVERS
         + "/providers/Microsoft.Maintenance/maintenanceConfigurations/mc-windows-monthly"
     )
-    maint_conf_263 = (
-        "/subscriptions/00000000-0000-0000-0000-0000000000f1/resourcegroups/rg-update-management"
+    maint_conf_weekly = (
+        "/subscriptions/00000000-0000-0000-0000-0000000000b1/resourcegroups/rg-update-management"
         "/providers/microsoft.maintenance/maintenanceconfigurations/mc-platform-weekly"
     )
 
     return {
         "arg_compute_machines": [
             {
-                "id": arc_demo_client_id,
+                "id": host_vm_id,
                 "name": "vm-arc-host-weu",
                 "type": "microsoft.compute/virtualmachines",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "tags": {"env": "poc", "secret_token": "DO-NOT-EXPORT"},
                 "properties": {
@@ -92,10 +92,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_sql_id,
+                "id": arc_sql_id,
                 "name": "arc-sql-01",
                 "type": "microsoft.hybridcompute/machines",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "tags": {"role": "sql"},
                 "properties": {
@@ -110,10 +110,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_win22_id,
+                "id": arc_win2k22_id,
                 "name": "arc-win2k22-01",
                 "type": "microsoft.hybridcompute/machines",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "tags": {},
                 "properties": {
@@ -126,10 +126,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_ubuntu01_id,
+                "id": arc_ubuntu01_id,
                 "name": "arc-ubuntu-01",
                 "type": "microsoft.hybridcompute/machines",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "tags": {},
                 "properties": {
@@ -143,10 +143,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_ubuntu02_id,
+                "id": arc_ubuntu02_id,
                 "name": "arc-ubuntu-02",
                 "type": "microsoft.hybridcompute/machines",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "tags": {},
                 "properties": {
@@ -204,7 +204,7 @@ def raw_arg_fixture():
                 "id": vm_healthy_id,
                 "name": "vm-healthy-01",
                 "type": "microsoft.compute/virtualmachines",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "tags": {},
                 "properties": {
@@ -216,13 +216,13 @@ def raw_arg_fixture():
         ],
         "arg_patch_assessments": [
             {
-                "id": arc_demo_client_id + "/patchAssessmentResults/latest",
-                "name": "c726bada-932f-454c-a983-ea453ed4a876",
+                "id": host_vm_id + "/patchAssessmentResults/latest",
+                "name": "00000000-0000-0000-0000-0000000000c1",
                 "type": "microsoft.compute/virtualmachines/patchassessmentresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
-                    "assessmentActivityId": "c726bada-932f-454c-a983-ea453ed4a876",
+                    "assessmentActivityId": "00000000-0000-0000-0000-0000000000c1",
                     "status": "Succeeded",
                     "rebootPending": False,
                     "startDateTime": "2026-10-20T14:53:04.956Z",
@@ -262,10 +262,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_sql_id + "/patchAssessmentResults/latest",
+                "id": arc_sql_id + "/patchAssessmentResults/latest",
                 "name": "ass-sql-latest",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "Succeeded",
@@ -289,10 +289,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_win22_id + "/patchAssessmentResults/latest",
+                "id": arc_win2k22_id + "/patchAssessmentResults/latest",
                 "name": "ass-win22-latest",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "Succeeded",
@@ -314,10 +314,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_ubuntu01_id + "/patchAssessmentResults/latest",
+                "id": arc_ubuntu01_id + "/patchAssessmentResults/latest",
                 "name": "ass-ubuntu01-latest",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "InProgress",
@@ -334,10 +334,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_ubuntu02_id + "/patchAssessmentResults/latest",
+                "id": arc_ubuntu02_id + "/patchAssessmentResults/latest",
                 "name": "ass-ubuntu02-latest",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "InProgress",
@@ -357,7 +357,7 @@ def raw_arg_fixture():
                 "id": vm_healthy_id + "/patchAssessmentResults/latest",
                 "name": "ass-healthy-latest",
                 "type": "microsoft.compute/virtualmachines/patchassessmentresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "Succeeded",
@@ -375,14 +375,14 @@ def raw_arg_fixture():
         ],
         "arg_software_patches_pending": [
             {
-                "id": arc_demo_client_id + "/patchAssessmentResults/latest/softwarePatches/2",
+                "id": host_vm_id + "/patchAssessmentResults/latest/softwarePatches/2",
                 "name": "2",
                 "type": "microsoft.compute/virtualmachines/patchassessmentresults/softwarepatches",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "properties": {
                     "classifications": ["UpdateRollUp"],
                     "kbId": "890830",
-                    "patchId": "3d6484a2-3e2f-4d89-8290-33b9e39f0aaf",
+                    "patchId": "00000000-0000-0000-0000-0000000000d2",
                     "patchName": "Windows Malicious Software Removal Tool x64 - v5.146 (KB890830)",
                     "publishedDateTime": "2026-10-13T00:00:00Z",
                     "lastModifiedDateTime": "2026-10-20T14:53:58.746Z",
@@ -390,15 +390,15 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_sql_id + "/patchAssessmentResults/latest/softwarePatches/2",
+                "id": arc_sql_id + "/patchAssessmentResults/latest/softwarePatches/2",
                 "name": "2",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "properties": {
                     "classifications": ["Security"],
                     "kbId": "5128493",
                     "msrcSeverity": "Important",
-                    "patchId": "18924619-7b56-4d6a-877d-8a1aaa3033fd",
+                    "patchId": "00000000-0000-0000-0000-0000000000d3",
                     "patchName": "Security Update for SQL Server 2022 RTM GDR (KB5128493)",
                     "publishedDateTime": "2026-10-13T07:00:00Z",
                     "lastModifiedDateTime": "2026-10-19T15:59:01.2909821Z",
@@ -406,15 +406,15 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_sql_id + "/patchAssessmentResults/latest/softwarePatches/4",
+                "id": arc_sql_id + "/patchAssessmentResults/latest/softwarePatches/4",
                 "name": "4",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "properties": {
                     "classifications": ["Security"],
                     "kbId": "5128928",
                     "msrcSeverity": "Important",
-                    "patchId": "f9a18221-4697-4195-8588-387c4b81827f",
+                    "patchId": "00000000-0000-0000-0000-0000000000d4",
                     "patchName": "2026-10 Cumulative Update for .NET Framework 3.5, 4.8 and 4.8.1 (KB5128928)",
                     "publishedDateTime": "2026-10-13T07:00:00Z",
                     "lastModifiedDateTime": "2026-10-19T15:59:01.2909821Z",
@@ -422,10 +422,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_ubuntu01_id + "/patchAssessmentResults/latest/softwarePatches/1",
+                "id": arc_ubuntu01_id + "/patchAssessmentResults/latest/softwarePatches/1",
                 "name": "1",
                 "type": "microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "properties": {
                     "classifications": ["Security"],
                     "patchId": "git_1_2.43.0-1ubuntu7.4_Ubuntu_24.04",
@@ -437,10 +437,10 @@ def raw_arg_fixture():
         ],
         "arg_patch_installations": [
             {
-                "id": arc_demo_client_id + "/patchInstallationResults/c726bada-932f-454c-a983-ea453ed4a876",
-                "name": "c726bada-932f-454c-a983-ea453ed4a876",
+                "id": host_vm_id + "/patchInstallationResults/00000000-0000-0000-0000-0000000000c1",
+                "name": "00000000-0000-0000-0000-0000000000c1",
                 "type": "microsoft.compute/virtualmachines/patchinstallationresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "Succeeded",
@@ -452,15 +452,15 @@ def raw_arg_fixture():
                     "notSelectedPatchCount": 1,
                     "maintenanceWindowExceeded": False,
                     "rebootStatus": "NotNeeded",
-                    "maintenanceRunId": maint_conf_263 + "/providers/microsoft.maintenance/applyupdates/20261020145000",
+                    "maintenanceRunId": maint_conf_weekly + "/providers/microsoft.maintenance/applyupdates/20261020145000",
                     "errorDetails": {"code": "Success", "details": [], "message": "0 error/s reported"},
                 },
             },
             {
-                "id": arc_demo_client_id + "/patchInstallationResults/e2214aba-a692-4b33-a89f-3541fe2a1ca4",
-                "name": "e2214aba-a692-4b33-a89f-3541fe2a1ca4",
+                "id": host_vm_id + "/patchInstallationResults/00000000-0000-0000-0000-0000000000c2",
+                "name": "00000000-0000-0000-0000-0000000000c2",
                 "type": "microsoft.compute/virtualmachines/patchinstallationresults",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "status": "Succeeded",
@@ -472,17 +472,17 @@ def raw_arg_fixture():
                     "notSelectedPatchCount": 1,
                     "maintenanceWindowExceeded": False,
                     "rebootStatus": "Completed",
-                    "maintenanceRunId": maint_conf_263 + "/providers/microsoft.maintenance/applyupdates/20261014085000",
+                    "maintenanceRunId": maint_conf_weekly + "/providers/microsoft.maintenance/applyupdates/20261014085000",
                     "errorDetails": {"code": "Success", "details": [], "message": "0 error/s reported"},
                 },
             },
         ],
         "arg_software_patches_installed": [
             {
-                "id": arc_demo_client_id + "/patchInstallationResults/c726bada-932f-454c-a983-ea453ed4a876/softwarePatches/aebdf561-8e37-4e47-bfc0-d8221c8908e0",
-                "name": "aebdf561-8e37-4e47-bfc0-d8221c8908e0",
+                "id": host_vm_id + "/patchInstallationResults/00000000-0000-0000-0000-0000000000c1/softwarePatches/00000000-0000-0000-0000-0000000000d1",
+                "name": "00000000-0000-0000-0000-0000000000d1",
                 "type": "microsoft.compute/virtualmachines/patchinstallationresults/softwarepatches",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "properties": {
                     "classifications": ["Definition"],
                     "installationState": "Installed",
@@ -495,10 +495,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_client_id + "/patchInstallationResults/c726bada-932f-454c-a983-ea453ed4a876/softwarePatches/3d6484a2-3e2f-4d89-8290-33b9e39f0aaf",
-                "name": "3d6484a2-3e2f-4d89-8290-33b9e39f0aaf",
+                "id": host_vm_id + "/patchInstallationResults/00000000-0000-0000-0000-0000000000c1/softwarePatches/00000000-0000-0000-0000-0000000000d2",
+                "name": "00000000-0000-0000-0000-0000000000d2",
                 "type": "microsoft.compute/virtualmachines/patchinstallationresults/softwarepatches",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "properties": {
                     "classifications": ["UpdateRollUp"],
                     "installationState": "NotSelected",
@@ -513,53 +513,53 @@ def raw_arg_fixture():
         ],
         "arg_maintenance_cycles": [
             {
-                "id": arc_demo_client_id + "/providers/Microsoft.Maintenance/applyUpdates/20261019205000_1012413953",
+                "id": host_vm_id + "/providers/Microsoft.Maintenance/applyUpdates/20261019205000_1012413953",
                 "name": "20261019205000_1012413953",
                 "type": "microsoft.maintenance/applyupdates",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
-                    "correlationId": maint_conf_263 + "/providers/microsoft.maintenance/applyupdates/20261019205000",
-                    "maintenanceConfigurationId": maint_conf_263,
+                    "correlationId": maint_conf_weekly + "/providers/microsoft.maintenance/applyupdates/20261019205000",
+                    "maintenanceConfigurationId": maint_conf_weekly,
                     "maintenanceScope": "InGuestPatch",
-                    "resourceId": arc_demo_client_id,
+                    "resourceId": host_vm_id,
                     "startDateTime": "2026-10-19T20:50:00Z",
                     "endDateTime": "2026-10-19T23:20:00Z",
                     "status": "ShutdownOrUnresponsive",
                 },
             },
             {
-                "id": arc_demo_client_id + "/providers/Microsoft.Maintenance/applyUpdates/20261020145000_2619246425",
+                "id": host_vm_id + "/providers/Microsoft.Maintenance/applyUpdates/20261020145000_2619246425",
                 "name": "20261020145000_2619246425",
                 "type": "microsoft.maintenance/applyupdates",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
-                    "correlationId": maint_conf_263 + "/providers/microsoft.maintenance/applyupdates/20261020145000",
-                    "maintenanceConfigurationId": maint_conf_263,
+                    "correlationId": maint_conf_weekly + "/providers/microsoft.maintenance/applyupdates/20261020145000",
+                    "maintenanceConfigurationId": maint_conf_weekly,
                     "maintenanceScope": "InGuestPatch",
-                    "resourceId": arc_demo_client_id,
+                    "resourceId": host_vm_id,
                     "startDateTime": "2026-10-20T14:50:00Z",
                     "endDateTime": "2026-10-20T14:58:49.4497796Z",
                     "status": "UpdateSuccessfullyApplied",
                 },
             },
             {
-                "id": arc_demo_client_id + "/providers/Microsoft.Maintenance/configurationAssignments/vm-arc-host-weu",
+                "id": host_vm_id + "/providers/Microsoft.Maintenance/configurationAssignments/vm-arc-host-weu",
                 "name": "vm-arc-host-weu",
                 "type": "microsoft.maintenance/configurationassignments",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
-                    "maintenanceConfigurationId": maint_conf_263,
-                    "resourceId": arc_demo_client_id,
+                    "maintenanceConfigurationId": maint_conf_weekly,
+                    "resourceId": host_vm_id,
                 },
             },
             {
                 "id": maint_conf_win + "/providers/microsoft.maintenance/applyupdates/20261018000000",
                 "name": "20261018000000",
                 "type": "microsoft.maintenance/maintenanceconfigurations/applyupdates",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "correlationId": maint_conf_win + "/providers/microsoft.maintenance/applyupdates/20261018000000",
@@ -584,10 +584,10 @@ def raw_arg_fixture():
         ],
         "arg_patch_extensions": [
             {
-                "id": arc_demo_client_id + "/extensions/AzurePolicyforWindows",
+                "id": host_vm_id + "/extensions/AzurePolicyforWindows",
                 "name": "AzurePolicyforWindows",
                 "type": "microsoft.compute/virtualmachines/extensions",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "publisher": "Microsoft.GuestConfiguration",
@@ -614,10 +614,10 @@ def raw_arg_fixture():
                 },
             },
             {
-                "id": arc_demo_sql_id + "/extensions/ChangeTracking-Windows",
+                "id": arc_sql_id + "/extensions/ChangeTracking-Windows",
                 "name": "ChangeTracking-Windows",
                 "type": "microsoft.hybridcompute/machines/extensions",
-                "resourceGroup": RG_ARC_DEMO,
+                "resourceGroup": RG_ARC_SERVERS,
                 "location": "westeurope",
                 "properties": {
                     "publisher": "Microsoft.Azure.ChangeTrackingAndInventory",

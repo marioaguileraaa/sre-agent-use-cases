@@ -3,7 +3,7 @@
 ## Objective and provenance
 Demonstrate the same evidence-led experience using a **SIMULATED**, deterministic
 200-server fixture: 142 on-premises / 58 GCP. These allocations, environments,
-operating systems and findings are synthetic assumptions, not verified Retail
+operating systems and findings are synthetic assumptions, not verified retail
 customer facts. Say **SIMULATED** prominently in every answer and artifact.
 
 ## Mandatory tool

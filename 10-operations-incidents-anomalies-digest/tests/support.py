@@ -20,18 +20,18 @@ WORKSPACES = [
     },
     {
         "name": "law-demo0000000000",
-        "customer_id": "68a21298-73aa-488e-801b-9044fca6e440",
+        "customer_id": "00000000-0000-0000-0000-0000000000a2",
         "resource_group": "rg-sre-agent-poc",
     },
     {
         "name": "law-hybrid-weu",
-        "customer_id": "4dac60d7-291c-4243-9b0f-ac1163932259",
+        "customer_id": "00000000-0000-0000-0000-0000000000a3",
         "resource_group": "rg-hybrid-weu",
     },
     {
-        "name": "law-obs-demo-weu",
-        "customer_id": "11513581-b28e-40ee-a4a7-3d9413e7259c",
-        "resource_group": "rg-obs-demo-weu",
+        "name": "law-monitoring-weu",
+        "customer_id": "00000000-0000-0000-0000-0000000000a4",
+        "resource_group": "rg-monitoring-weu",
     },
 ]
 
@@ -66,11 +66,11 @@ def fixture(module, period="previous_month"):
         + "/providers/Microsoft.ContainerService/managedClusters/aks-demo-weu"
     )
     vm_id = (
-        "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/rg-obs-demo-weu"
+        "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/rg-monitoring-weu"
         + "/providers/Microsoft.Compute/virtualMachines/vm-obs-app-01"
     )
     kv_id = (
-        "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/rg-obs-demo-weu"
+        "/subscriptions/" + SUBSCRIPTION + "/resourceGroups/rg-monitoring-weu"
         + "/providers/Microsoft.KeyVault/vaults/kv-obs-weu-01"
     )
 
@@ -86,7 +86,7 @@ def fixture(module, period="previous_month"):
                 "monitorService": "Platform",
                 "targetResource": vm_id,
                 "targetResourceName": "vm-obs-app-01",
-                "targetResourceGroup": "rg-obs-demo-weu",
+                "targetResourceGroup": "rg-monitoring-weu",
                 "targetResourceType": "microsoft.compute/virtualmachines",
                 "startDateTime": "2026-09-18T14:20:00Z",
                 "lastModifiedDateTime": "2026-09-18T14:35:00Z",
@@ -189,7 +189,7 @@ def fixture(module, period="previous_month"):
                 "id": vm_id,
                 "name": "vm-obs-app-01",
                 "type": "microsoft.compute/virtualmachines",
-                "resourceGroup": "rg-obs-demo-weu",
+                "resourceGroup": "rg-monitoring-weu",
                 "location": "westeurope",
                 "tags": {"owner": "ops-team"},
                 "provisioningState": "Succeeded",
@@ -205,7 +205,7 @@ def fixture(module, period="previous_month"):
                 "id": kv_id,
                 "name": "kv-obs-weu-01",
                 "type": "microsoft.keyvault/vaults",
-                "resourceGroup": "rg-obs-demo-weu",
+                "resourceGroup": "rg-monitoring-weu",
                 "location": "westeurope",
                 "skuName": "standard",
                 "tags": {},
@@ -256,7 +256,7 @@ def fixture(module, period="previous_month"):
                 "id": vm_id + "/extensions/AzureMonitorLinuxAgent",
                 "name": "AzureMonitorLinuxAgent",
                 "type": "microsoft.compute/virtualmachines/extensions",
-                "resourceGroup": "rg-obs-demo-weu",
+                "resourceGroup": "rg-monitoring-weu",
                 "location": "westeurope",
                 "publisher": "Microsoft.Azure.Monitor",
                 "extType": "AzureMonitorLinuxAgent",
@@ -324,7 +324,7 @@ def fixture(module, period="previous_month"):
     telemetry_anomalies = []
     telemetry_summaries = []
     for r in raw_tel_rows:
-        ws_name = "law-obs-demo-weu" if "vm-obs" in r["_ResourceId"] else "law-arc-servers-weu"
+        ws_name = "law-monitoring-weu" if "vm-obs" in r["_ResourceId"] else "law-arc-servers-weu"
         telemetry_summaries.append({
             "workspace_name": ws_name,
             "resource_id": r["_ResourceId"],
