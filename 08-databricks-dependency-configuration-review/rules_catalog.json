@@ -11,7 +11,7 @@
   "interpretation": [
     "Local rule-resource indicators, not an official Microsoft Well-Architected assessment, certification or Databricks audit grade.",
     "Dependency edges distinguish OBSERVED native ID/key joins from explicit INFERRED URI/host references and UNKNOWN runtime lineage.",
-    "Control-plane REST API reads never start clusters or SQL warehouses and never execute billable SQL queries against system.access.table_lineage or system.billing.usage.",
+    "Control-plane REST API reads never start clusters or SQL warehouses and never execute billable SQL queries against system.access.table_lineage; system.billing.usage is queried only when the operator sets system_tables_warehouse_id (off by default; that one fixed statement consumes DBUs and can start the chosen warehouse).",
     "Cross-tenant collection requires explicit administrator-configured federation or Azure Lighthouse delegation; a single-tenant SRE UAMI never acquires foreign-tenant tokens implicitly.",
     "Configuration presence does not prove effective firewall enforcement, data-plane network reachability, least-privilege Unity Catalog grants or workload SLA compliance."
   ],

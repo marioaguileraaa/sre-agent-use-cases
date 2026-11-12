@@ -652,8 +652,8 @@
     },
     {
       "filename": "13-report-overview-and-pillars.png",
-      "bytes": 264301,
-      "sha256": "abeb60bd9ba793c84ace41bceba0a99ff88df256d9308e006c94c175413253de",
+      "bytes": 264358,
+      "sha256": "53c65a1a62d6af3452cd4e17f389af7f20fcaaef4a40d002ce7ec0a0cde2b850",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
@@ -715,8 +715,8 @@
     },
     {
       "filename": "14-report-dependency-graph.png",
-      "bytes": 155649,
-      "sha256": "fef96c4a3444bfc042c5f435035f0c6ad1786353e696bea7449ee8e548a0904e",
+      "bytes": 155868,
+      "sha256": "c3907d69efb8a5d45843dbf78669c645fee026fc53ec5861a17309e470b20e21",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
@@ -778,8 +778,8 @@
     },
     {
       "filename": "15-report-controls-and-reference.png",
-      "bytes": 141762,
-      "sha256": "d3c76c298ee9b0a8287783eaf91cf2f0d88defea85374e58d519b2fc01ae6168",
+      "bytes": 142006,
+      "sha256": "1a5158887d71026281e22f1313380e955747bfec6b66724440b413d4ae4ac288",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
@@ -825,8 +825,8 @@
     },
     {
       "filename": "16-report-source-coverage-ledger.png",
-      "bytes": 124224,
-      "sha256": "95a622686202316ce7fb3999131ec728d8d536027f1b5dc6186d5366990bb4dd",
+      "bytes": 124473,
+      "sha256": "01d010763219d314cf67bf821c9da608de8708b60a92021f77354c4429661edc",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
@@ -862,6 +862,116 @@
             622,
             54,
             646
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "regenerated_at_utc": "2026-11-12"
+    },
+    {
+      "filename": "17-report-databricks-costs.png",
+      "caption": "Report section 6 'Costes de Databricks: de dónde vienen y cómo optimizarlos' rendered from operation=self_test (built-in SIMULATED workspace, no customer data): month cost and change, DBU vs infrastructure, cost without a compute tag, estimated savings and the three-month trend, DBU by compute type, infrastructure by service and who consumes it.",
+      "evidence_kind": "simulated_self_test_render",
+      "bytes": 198925,
+      "sha256": "3a12ea198bc5054e4da35379a5d43a232c48a13217966a5b024da2a7185456cc",
+      "width": 1440,
+      "height": 1400,
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Month cost vs the previous month, DBU · infrastructure split, share without a compute tag and estimated monthly savings (one per object), with the three-month trend (current month partial)",
+          "box": [
+            54,
+            167,
+            1386,
+            414
+          ],
+          "badge": [
+            21,
+            169,
+            49,
+            193
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "DBU by compute type with its meters and infrastructure by service with the costliest VM sizes",
+          "box": [
+            54,
+            418,
+            1386,
+            888
+          ],
+          "badge": [
+            21,
+            420,
+            49,
+            444
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Who consumes it: tabs by cluster, job, SQL warehouse, pool, creator and allocation tag, with search, CSV and DBU, infrastructure, total, share, change and allocation tags per row",
+          "box": [
+            56,
+            894,
+            1384,
+            1393
+          ],
+          "badge": [
+            23,
+            896,
+            51,
+            920
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "regenerated_at_utc": "2026-11-12"
+    },
+    {
+      "filename": "18-report-databricks-cost-signals.png",
+      "caption": "Report section 6 optimisation signals rendered from operation=self_test (SIMULATED): count and counted savings, filters and CSV, then each signal with evidence, object, month cost, estimated saving with its basis, the action and a Microsoft Learn link.",
+      "evidence_kind": "simulated_self_test_render",
+      "bytes": 188091,
+      "sha256": "c28d468ff78bd471342a7c6ee4c340b99ff02062bcdbeba0ca164e25813bbd89",
+      "width": 1440,
+      "height": 1020,
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Signal count with the counted estimated savings (only the largest per object) and severity, savings and search filters with a filtered CSV",
+          "box": [
+            57,
+            93,
+            1383,
+            233
+          ],
+          "badge": [
+            24,
+            95,
+            52,
+            119
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Each signal: evidence chips, object and kind, cost of the month, estimated saving with its basis (lower bound or estimate) and what to do with a Microsoft Learn link",
+          "box": [
+            61,
+            269,
+            1379,
+            552
+          ],
+          "badge": [
+            28,
+            271,
+            56,
+            295
           ]
         }
       ],

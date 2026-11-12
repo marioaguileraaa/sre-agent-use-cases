@@ -8,7 +8,7 @@ STORY: Read the verdict and coverage first, confirm workspace identity and prove
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="color-scheme" content="light dark">
 <title>Revisión Azure Databricks | Mapa de dependencias y configuración</title>
 <style>
@@ -17,9 +17,10 @@ color-scheme:light;
 --brand-navy: #003865; --brand-lava: #ff3621; --brand-steel: #0066a1; --brand-teal: #00875a;
 --paper:#f2f5f8;--surface:#ffffff;--soft:#eef2f6;--hover:#f6f9fc;
 --ink:#16212c;--title:#002b4e;--muted:#4f5d6b;--line:#dde3ea;--line2:#c2ccd6;
---link:#0058a3;--focus:#0b6bcb;--sel:#cfe3f7;--chart:#0066a1;--edge:#4d7aa3;
+--link:#0058a3;--focus:#0b6bcb;--sel:#cfe3f7;--chart:#0066a1;--chart-2:#8fb3d3;--edge:#4d7aa3;
 --bar-bg:#ffffff;--bar-hover:#eef2f6;--btn:#003865;--btn-hover:#002848;--btn-ink:#ffffff;
 --hero-a:#003865;--hero-b:#00223c;--hero-muted:#c3d5e8;--hero-line:rgba(255,255,255,.24);
+--up-ink:#b42318;--down-ink:#067647;
 --shadow:0 1px 2px rgba(16,24,40,.05),0 10px 28px rgba(16,24,40,.07);
 --crit-ink:#b42318;--crit-bg:#fee4e2;--crit-bar:#d92d20;
 --high-ink:#b93815;--high-bg:#ffead5;--high-bar:#ef6820;
@@ -35,7 +36,8 @@ color-scheme:light;
 color-scheme:dark;
 --paper:#0d141b;--surface:#15202a;--soft:#1c2834;--hover:#19242f;
 --ink:#e6edf3;--title:#f1f6fb;--muted:#a9b7c5;--line:#26333f;--line2:#3a4a5a;
---link:#8cc8ff;--focus:#8cc8ff;--sel:#24476b;--chart:#6fb6f0;--edge:#7aa7cf;
+--link:#8cc8ff;--focus:#8cc8ff;--sel:#24476b;--chart:#6fb6f0;--chart-2:#3f6d94;--edge:#7aa7cf;
+--up-ink:#ffb4ab;--down-ink:#a6f4c5;
 --bar-bg:#101920;--bar-hover:#1c2834;--btn:#8cc8ff;--btn-hover:#a9d6ff;--btn-ink:#0b1620;
 --hero-a:#0a2742;--hero-b:#061626;--hero-muted:#bdd0e3;
 --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
@@ -116,6 +118,7 @@ select:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-
 .signal p{margin:8px 0 0;font-size:14px;color:var(--hero-muted)}
 .signal.crit{--sig-ink:#ffb4ab;--sig-line:rgba(255,180,171,.55)}
 .signal.warn{--sig-ink:#fedf89;--sig-line:rgba(254,223,137,.5)}
+.signal.act{--sig-ink:#fdb022;--sig-line:rgba(253,176,34,.5)}
 .signal.ok{--sig-ink:#a6f4c5;--sig-line:rgba(166,244,197,.45)}
 .signal.info{--sig-ink:#e4e7ec;--sig-line:rgba(255,255,255,.35)}
 .dist{grid-column:1 / -1}
@@ -286,11 +289,70 @@ details.json pre{max-width:620px;max-height:260px;overflow:auto;margin:6px 0 0;p
 .state-card h2{margin:0 0 6px;font-size:20px}
 .state-card p{margin:0;color:var(--ink)}
 .state-card dl{margin:12px 0 0;color:var(--ink)}
+.hero h1,.sh h2,.signal b{font-family:var(--display,inherit)}
+html.brand-font .hero h1{font-weight:600;letter-spacing:0;font-size:clamp(32px,3.6vw,48px);line-height:1.08}
+html.brand-font .sh h2{font-weight:600;letter-spacing:0;font-size:27px}
+html.brand-font .signal b{font-weight:600;letter-spacing:0;font-size:28px}
+.client-logo{display:none}
+html.brand-bar .brand .mark,html.brand-bar .wordmark{display:none}
+html.brand-bar .client-logo{display:block;height:30px;width:auto;max-width:200px}
+html.brand-bar .product{padding-left:16px;border-left-color:var(--line)}
+html.brand-bar .brand-ribbon,html.brand-bar #plaque-block{display:none}
+html.brand-bar .bar{box-shadow:none;border-bottom:3px solid var(--brand-rule,var(--btn))}
+html.branded .foot{max-width:none;margin:0;padding:18px clamp(14px,3vw,40px) 28px;border-top:0;background:var(--foot-bg,transparent);color:var(--foot-ink,var(--muted))}
+.cost-head{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px 40px;align-items:start}
+.cstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}
+.cstat .k{font-size:13px;font-weight:600;color:var(--muted)}
+.cstat .n{margin-top:4px;font-size:30px;line-height:1.08;font-weight:700;letter-spacing:-.02em;color:var(--title);white-space:nowrap}
+.cstat .n small{margin-left:5px;font-size:14px;font-weight:600;letter-spacing:0;color:var(--muted)}
+.cstat .d{margin-top:5px;font-size:13px;color:var(--muted)}
+.up{color:var(--up-ink);font-weight:600}
+.down{color:var(--down-ink);font-weight:600}
+.cost-trend h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--muted)}
+.mrow{display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr) auto;gap:12px;align-items:center;padding:6px 0;font-size:13.5px}
+.mrow .ml{font-weight:600;white-space:nowrap}
+.mrow .ml small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.mrow .mv{text-align:right;font-weight:700;white-space:nowrap}
+.strack{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--soft)}
+.strack i{display:block;height:100%}
+.seg-dbu{background:var(--chart)}
+.seg-infra{background:var(--chart-2)}
+.mrow.partial .strack i{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.5) 0 4px,rgba(255,255,255,0) 4px 8px)}
+.keys{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{display:inline-block;width:10px;height:10px;border-radius:3px}
+.vm-sizes{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.vm-sizes .chips{margin-top:6px}
+.cost-tabs{margin:0 22px 14px}
+.movers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 36px}
+.movers h4{margin:4px 0 2px;font-size:13px;font-weight:600;color:var(--muted)}
+.mover{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.mover b{font-weight:600;overflow-wrap:anywhere}
+.mover .dv{text-align:right;font-weight:700;white-space:nowrap}
+.mover small{font-size:12.5px;color:var(--muted)}
+.gapn{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:2px 0 14px}
+.gapn b{font-size:30px;line-height:1.1;font-weight:700;letter-spacing:-.02em;color:var(--title)}
+.gapn span{font-size:14px;color:var(--muted)}
+.sav{font-weight:700;white-space:nowrap}
+.sav small{display:block;font-size:12px;font-weight:400;color:var(--muted);white-space:normal}
+.sav.nc{font-weight:600;color:var(--muted)}
+.legacy-sum{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:baseline;padding:0 22px 14px}
+.legacy-sum .stat{margin:0}
+.legacy-sum .notes{margin:0;max-width:80ch}
+.sys-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 40px;margin-top:20px}
+.sys-grid h4,.sys-h{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--muted)}
+.sys-h{margin-top:14px}
+.sys-wrap{margin:0 -22px;border-bottom:1px solid var(--line)}
+#sec-finops .bars{grid-template-columns:minmax(120px,36%) minmax(0,1fr) auto;column-gap:12px}
+#sec-finops .bars>*{grid-column:1 / -1}
+#sec-finops .bars>.brow{grid-template-columns:subgrid}
+.h3row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:4px}
+.h3row h3{margin:0}
 @media (max-width:1400px){#workspace-error-view,#opening-state{margin:28px clamp(14px,3vw,40px)}}
 .foot{max-width:1320px;margin:0 auto;padding:20px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 @media (max-width:1400px){.foot{margin:0 clamp(14px,3vw,40px)}}
 @media (max-width:1360px){.bar-nav,.tag{display:none} .toc{display:block}}
-@media (max-width:1040px){.hero-in{grid-template-columns:1fr} .hero-side{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))} .product{display:none}}
+@media (max-width:1040px){.hero-in{grid-template-columns:1fr} .hero-side{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))} .product{display:none} .cost-head,.sys-grid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:720px){
 .btn .lbl{display:none}
 .btn{padding:0 11px}
@@ -309,6 +371,14 @@ details.json pre{max-width:620px;max-height:260px;overflow:auto;margin:6px 0 0;p
 .card.flat{padding:0}
 .dl2{grid-template-columns:1fr;gap:2px 0}
 .dl2 dd + dt{margin-top:10px}
+.cost-tabs{margin-left:16px;margin-right:16px}
+.sys-wrap{margin:0 -16px}
+#sec-finops .bars{grid-template-columns:minmax(0,1fr) auto}
+.legacy-sum{padding-left:16px;padding-right:16px}
+.cstats{gap:16px 18px}
+.cstat .n{font-size:25px}
+html.brand-font .hero h1{font-size:30px}
+html.brand-font .sh h2{font-size:24px}
 }
 @media (max-width:420px){.wordmark{font-size:15px} .brand .mark{width:26px;height:26px} .btn.icon,.acts .btn{width:38px;min-height:38px;padding:0}}
 @media (max-width:360px){.bar{gap:8px} .acts{gap:4px} .brand{flex:0 1 auto;min-width:0} .wordmark{overflow:hidden;text-overflow:ellipsis}}
@@ -368,6 +438,16 @@ td.w{min-width:0}
 [hidden].print-show{display:block !important}
 a{color:inherit;text-decoration:none}
 .foot{padding:14px 0 0}
+.cost-head{grid-template-columns:1.25fr 1fr;gap:12px 24px}
+.cstat .n{font-size:20px}
+.cstat .d,.mrow,.mover,.keys,.vm-sizes{font-size:10.5px}
+.gapn b{font-size:20px}
+.sys-grid{grid-template-columns:1fr 1fr}
+.brow .bl small,.brow .bv small{font-size:10.5px}
+.mrow,.mover,.cstat{break-inside:avoid}
+html.brand-font .hero h1{font-size:28px}
+html.brand-font .sh h2{font-size:20px}
+html.branded .foot{background:none;color:#475467}
 }
 </style>
 </head>
@@ -377,26 +457,26 @@ a{color:inherit;text-decoration:none}
   <a class="brand" href="#sec-cover">
     <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#003865"/><path d="M16 7.5l9 4.6-9 4.6-9-4.6z" fill="#ff3621"/><path d="M7 16.4l9 4.6 9-4.6M7 20.8l9 4.6 9-4.6" fill="none" stroke="#ffffff" stroke-width="1.9" stroke-linejoin="round"/></svg>
     <span class="wordmark">Azure SRE Agent</span>
-    <span class="product">Dependencias Azure Databricks</span>
+    <span class="product" id="bar-product">Dependencias Azure Databricks</span>
   </a>
-  <nav class="bar-nav" aria-label="Contenido del informe">
+  <nav class="bar-nav" aria-label="Contenido del informe" id="bar-nav">
     <a href="#sec-dependencies">Dependencias</a>
     <a href="#sec-inventory">Inventario</a>
     <a href="#sec-findings">Hallazgos</a>
-    <a href="#sec-finops">FinOps</a>
+    <a href="#sec-finops">Costes</a>
     <a href="#sec-actions">Plan</a>
     <a href="#sec-sources">Fuentes</a>
   </nav>
   <div class="acts">
     <details class="menu toc">
       <summary class="btn ghost" aria-label="Contenido"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="lbl">Contenido</span></summary>
-      <nav class="menu-pop" aria-label="Contenido">
+      <nav class="menu-pop" aria-label="Contenido" id="toc-menu">
         <a href="#sec-cover">1. Portada y procedencia</a>
         <a href="#sec-executive">2. Resumen ejecutivo y WAF</a>
         <a href="#sec-dependencies">3. Mapa de dependencias</a>
         <a href="#sec-inventory">4. Inventario Lakehouse y ARM</a>
         <a href="#sec-findings">5. Hallazgos y reglas</a>
-        <a href="#sec-finops">6. FinOps y capacidad</a>
+        <a href="#sec-finops">6. Costes de Databricks</a>
         <a href="#sec-actions">7. Plan de acción</a>
         <a href="#sec-sources">8. Fuentes y metodología</a>
       </nav>
@@ -409,6 +489,8 @@ a{color:inherit;text-decoration:none}
         <button type="button" id="export-json-btn">Instantánea completa (JSON)<small>Modelo normalizado embebido en este informe</small></button>
         <button type="button" id="export-deps-csv-btn">Dependencias (CSV)<small>Nodos, relaciones y puntos ciegos del workspace</small></button>
         <button type="button" id="export-findings-csv-btn">Comprobaciones (CSV)<small>Todas las reglas evaluadas con su evidencia</small></button>
+        <button type="button" id="export-costs-csv-btn">Coste por carga (CSV)<small>Clústeres, jobs, warehouses, pools y etiquetas del mes</small></button>
+        <button type="button" id="export-signals-csv-btn">Señales de optimización (CSV)<small>Cada señal con su coste y su ahorro estimado</small></button>
       </div>
     </details>
     <button type="button" class="btn" id="print-btn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 9V3h10v6M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg><span class="lbl">Imprimir / PDF</span></button>
@@ -435,7 +517,7 @@ a{color:inherit;text-decoration:none}
           <div class="meta" id="cover-badges"></div>
         </div>
         <aside class="hero-side" aria-label="Cliente y veredicto">
-          <div>
+          <div id="plaque-block">
             <p class="plaque-k">Preparado para</p>
             <div class="brand-plaque" id="brand-plaque"></div>
             <p class="client-name" id="client-name-label"></p>
@@ -457,7 +539,7 @@ a{color:inherit;text-decoration:none}
       <section class="chapter" id="sec-executive" aria-labelledby="h-exec">
         <div class="sh"><h2 id="h-exec">2. Lectura ejecutiva, cobertura e indicadores locales</h2><p>El índice local mide únicamente las reglas evaluadas sobre evidencia observada. Nunca sustituye una evaluación oficial de Microsoft Well-Architected ni oculta fuentes no evaluadas.</p></div>
         <div class="grid2">
-          <div class="card"><h3>Lectura ejecutiva</h3><p class="sub">Lo esencial de esta revisión en cinco líneas.</p><ul class="msgs" id="executive-messages"></ul></div>
+          <div class="card"><h3>Lectura ejecutiva</h3><p class="sub">Lo esencial de esta revisión, empezando por el coste.</p><ul class="msgs" id="executive-messages"></ul></div>
           <div class="card"><h3>Distribución de comprobaciones</h3><p class="sub">Estado de cada regla local frente a la evidencia observada.</p><div class="bars" id="check-status"></div></div>
           <div class="card"><h3>Desglose por área</h3><p class="sub">Índice local por área de revisión, junto a su cobertura evaluada.</p><div class="bars" id="area-scores"></div></div>
           <div class="card"><h3>Desglose por pilar Well-Architected</h3><p class="sub">Mismo cálculo agrupado por pilar; no es una puntuación oficial WAF.</p><div class="bars" id="pillar-scores"></div></div>
@@ -583,14 +665,70 @@ a{color:inherit;text-decoration:none}
       </section>
 
       <section class="chapter" id="sec-finops" aria-labelledby="h-finops">
-        <div class="sh"><h2 id="h-finops">6. FinOps, costes observados y candidatos de optimización</h2><p>Coste real observado en ARM y configuraciones que suelen generar gasto en inactividad. No se inventan ahorros: lo que no se ha medido figura como no calculado.</p></div>
-        <div class="grid2">
-          <div class="card"><h3>Coste real observado (ARM ActualCost)</h3><div class="stat" id="finops-actual-cost"></div><p class="sub" id="finops-cost-window"></p><ul class="notes" id="finops-cost-note"></ul></div>
-          <div class="card"><h3>Ahorro estimado</h3><div class="stat na">Por estimar / No calculado</div><p class="sub">No se inventan ahorros DBU ni descuentos sin medir el consumo histórico en system.billing.usage y validar compromisos comerciales.</p></div>
+        <div class="sh"><h2 id="h-finops">6. Costes de Databricks: de dónde vienen y cómo optimizarlos</h2><p id="cost-intro">El coste del mes en Cost Management, repartido por las etiquetas que Databricks pone a cada clúster, job, SQL warehouse y pool, y los cambios de configuración que lo reducirían.</p></div>
+        <div id="cost-empty" hidden></div>
+        <div id="cost-body">
+          <div id="cost-data">
+          <div class="card cost-head">
+            <div class="cstats" id="cost-stats"></div>
+            <div class="cost-trend" id="cost-trend"></div>
+          </div>
+          <div class="grid2" style="margin-top:16px">
+            <div class="card"><h3>DBU por tipo de cómputo</h3><p class="sub" id="cost-dbu-sub">Lo que Databricks factura por unidad de procesamiento, según el tipo de carga.</p><div class="bars" id="cost-dbu-bars"></div></div>
+            <div class="card"><h3>Infraestructura por servicio</h3><p class="sub" id="cost-infra-sub">Máquinas virtuales, discos y red que el área de trabajo usa en vuestra suscripción.</p><div class="bars" id="cost-infra-bars"></div><div class="vm-sizes" id="cost-vm-sizes"></div></div>
+          </div>
+          <div class="card flat" style="margin-top:16px">
+            <div class="card-head"><h3>Quién lo consume</h3><p id="cost-attr-note"></p></div>
+            <div class="tabs cost-tabs" role="tablist" aria-label="Reparto del coste" id="cost-tabs"></div>
+            <div class="tools">
+              <label class="field grow">Buscar
+                <input type="search" id="cost-attr-search" placeholder="Clúster, job, warehouse, pool o valor de etiqueta…">
+              </label>
+              <button type="button" class="btn ghost" id="cost-attr-export"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>CSV del reparto</button>
+            </div>
+            <div class="wrap" role="tabpanel" id="cost-attr-panel" aria-labelledby="cost-tab-cluster"><table class="dense" id="cost-attr-table"></table></div>
+          </div>
+          <div class="grid2" style="margin-top:16px">
+            <div class="card"><h3>Lo que no explica ninguna etiqueta</h3><p class="sub">Coste sin la etiqueta <span class="mono">Vendor</span> que Databricks pone a todo el cómputo clásico: servicios compartidos del área de trabajo y cómputo serverless.</p><div id="cost-gap"></div></div>
+            <div class="card"><h3>Cobertura de vuestras etiquetas</h3><p class="sub" id="cost-tags-sub">Parte del coste del mes que lleva cada etiqueta de imputación configurada.</p><div class="bars" id="cost-tag-bars"></div><ul class="notes" id="cost-tag-notes"></ul></div>
+          </div>
+          <div class="card" style="margin-top:16px"><h3>Qué ha cambiado frente al mes anterior</h3><p class="sub" id="cost-movers-sub">Clústeres, jobs, SQL warehouses y pools con mayor variación.</p><div class="movers" id="cost-movers"></div></div>
+          </div>
+          <div class="card flat" style="margin-top:16px">
+            <div class="card-head"><h3>Cómo optimizarlo</h3><p id="cost-signals-count"></p></div>
+            <div class="tools">
+              <label class="field">Severidad
+                <select id="cost-sig-sev">
+                  <option value="all">Todas</option>
+                  <option value="high">Alta</option>
+                  <option value="medium">Media</option>
+                  <option value="low">Baja</option>
+                </select>
+              </label>
+              <label class="field">Ahorro
+                <select id="cost-sig-saving">
+                  <option value="all">Todas las señales</option>
+                  <option value="with">Con ahorro estimado</option>
+                </select>
+              </label>
+              <label class="field grow">Buscar
+                <input type="search" id="cost-sig-search" placeholder="Señal, clúster, job, warehouse…">
+              </label>
+              <button type="button" class="btn ghost" id="cost-sig-export"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>CSV filtrado</button>
+            </div>
+            <div class="wrap"><table class="dense" id="cost-signals-table"></table></div>
+          </div>
+          <div class="card" style="margin-top:16px" id="cost-system"></div>
+          <div class="card" style="margin-top:16px">
+            <h3>Método, supuestos y fuentes de coste</h3>
+            <p class="sub">Cómo se calcula cada cifra de esta sección. Ninguna consulta arranca cómputo ni cambia nada.</p>
+            <dl class="dl2" id="cost-method"></dl>
+          </div>
         </div>
-        <div class="stack-gap" style="margin-top:16px">
-          <div class="card flat"><div class="card-head"><h3>Candidatos de eficiencia operativa y FinOps</h3><p>Configuraciones observadas que merecen revisión; sin proyección de ahorro.</p></div><div class="wrap"><table class="dense" id="finops-candidates-table"></table></div></div>
-          <div class="card flat"><div class="card-head"><h3>Filas de facturación ARM observadas</h3><p>Importes por ResourceId aprobado, en la moneda real de facturación.</p></div><div class="wrap"><table class="dense" id="finops-cost-table"></table></div></div>
+        <div class="card flat legacy-cost" style="margin-top:16px" id="finops-legacy">
+          <div class="card-head"><h3>Coste ARM del alcance aprobado (<span class="mono">cost_scope</span>)</h3><p id="finops-cost-window"></p></div>
+          <div class="legacy-sum"><div class="stat" id="finops-actual-cost"></div><ul class="notes" id="finops-cost-note"></ul></div>
+          <div class="wrap"><table class="dense" id="finops-cost-table"></table></div>
         </div>
       </section>
 
@@ -1286,6 +1424,12 @@ a{color:inherit;text-decoration:none}
     var fails = (snap.findings || []).length, ev = g.evaluated || 0;
     var sevText = SEVS.filter(function (s) { return counts[s]; }).map(function (s) { return counts[s] + " " + plural(counts[s], SEV_WORD[s][0], SEV_WORD[s][1]); }).join(" · ");
     var depParts = [" El mapa de dependencias reúne ", [num(sc.nodes_total || 0)], " nodos y ", [num(sc.edges_total || 0)], " relaciones, con ", [num(sc.edges_inferred || 0)], " referencias INFERRED y ", [num(sc.unknowns_total || 0)], " puntos ciegos UNKNOWN."];
+    var ch = (snap.databricks_costs && snap.databricks_costs.headline) || {};
+    if (isNum(ch.review_total)) {
+      costCurrency = snap.databricks_costs.currency || "";
+      depParts = depParts.concat([" Databricks costó ", [money(ch.review_total)], " en " + monthName(ch.review_month)].concat(
+        isNum(ch.estimated_monthly_savings) ? ["; ahorro estimado ", ["≈ " + money(ch.estimated_monthly_savings)], " al mes (sección de costes)."] : ["."]));
+    }
     rich(document.getElementById("cover-lead"), ev ? [[num(fails)], plural(fails, " comprobación no cumple", " comprobaciones no cumplen"), sevText ? " (" + sevText + ")" : "", " de ", [num(ev)], " evaluadas; índice local ", [pct(g.score)], " con una cobertura del ", [pct(g.coverage_percent)], "."].concat(depParts)
       : ["Ninguna comprobación pudo evaluarse con las fuentes disponibles; revise la cobertura en la sección 8."].concat(depParts));
     var meta = document.getElementById("cover-badges");
@@ -1352,14 +1496,27 @@ a{color:inherit;text-decoration:none}
     var sp = pctParts(g.score), cp = pctParts(g.coverage_percent);
     var hasCost = isNum(fin.actual_cost);
     var win = fin.window ? day(fin.window.start).slice(5) + " → " + day(fin.window.end).slice(5) : null;
-    [
+    var cm = snap.databricks_costs || {}, ch = cm.headline || {};
+    costCurrency = cm.currency || "";
+    var costKpi = isNum(ch.review_total)
+      ? kpi(NF0.format(ch.review_total), cm.currency || "", "Coste Databricks", monthName(ch.review_month).split(" de ")[0] + (isNum(ch.dbu_share) ? " · " + NF0.format(ch.dbu_share) + " % DBU" : "") + (isNum(ch.estimated_monthly_savings) ? " · ahorro ≈ " + money(ch.estimated_monthly_savings) + "/mes" : " · " + signedPct(ch.change_pct) + " vs mes anterior"))
+      : kpi(hasCost ? NF2.format(fin.actual_cost) : "—", hasCost ? (fin.currency || "") : "", "Coste observado", hasCost ? "ActualCost · " + (win || "periodo acumulado") : "No evaluado");
+    var list = FOCUS === "costs" && isNum(ch.review_total) ? [
+      kpi(NF0.format(ch.review_total), cm.currency || "", "Coste de " + monthName(ch.review_month).split(" de ")[0], signedPct(ch.change_pct) + " frente a " + monthName(ch.previous_month).split(" de ")[0]),
+      kpi(NF0.format(ch.mtd_total), cm.currency || "", "Mes en curso", "hasta el día " + ch.mtd_days + " de " + monthName(ch.current_month).split(" de ")[0]),
+      kpi(NF0.format(ch.dbu_share || 0), "%", "DBU", NF0.format(100 - (ch.dbu_share || 0)) + " % infraestructura (" + money(ch.infra_total) + ")"),
+      kpi(isNum(ch.unattributed_share) ? NF1.format(ch.unattributed_share) : "—", isNum(ch.unattributed_share) ? "%" : "", "Sin etiqueta de cómputo", isNum(ch.unattributed_total) ? money(ch.unattributed_total) + " sin atribuir" : "No evaluado"),
+      kpi(isNum(ch.estimated_monthly_savings) ? NF0.format(ch.estimated_monthly_savings) : "—", isNum(ch.estimated_monthly_savings) ? cm.currency || "" : "", "Ahorro estimado al mes", ch.savings_signals + " de " + ch.signals + " señales, sin contar dos veces"),
+      kpi(num(fails), "", "Hallazgos de configuración", sevText || "Sin desviaciones observadas")
+    ] : [
       kpi(num(fails), "", "Hallazgos", sevText || "Sin desviaciones observadas"),
       kpi(sp[0], sp[1], "Índice local", ev ? "Sobre " + ev + " evaluadas" : "Sin comprobaciones evaluadas"),
       kpi(cp[0], cp[1], "Cobertura evaluada", ev + " de " + (ev + (g.not_evaluated || 0)) + " aplicables"),
       kpi(num(sc.edges_total || 0), "", "Relaciones", num(sc.edges_observed || 0) + " OBSERVED · " + num(sc.edges_inferred || 0) + " INFERRED"),
       kpi(num(sc.unknowns_total || 0), "", "Puntos ciegos UNKNOWN", num(sc.broken_references_total || 0) + plural(sc.broken_references_total || 0, " referencia rota", " referencias rotas")),
-      kpi(hasCost ? NF2.format(fin.actual_cost) : "—", hasCost ? (fin.currency || "") : "", "Coste observado", hasCost ? "ActualCost · " + (win || "periodo acumulado") : "No evaluado")
-    ].forEach(function (k) { holder.appendChild(k); });
+      costKpi
+    ];
+    list.forEach(function (k) { holder.appendChild(k); });
 
     var notices = document.getElementById("notices");
     clear(notices);
@@ -1496,36 +1653,549 @@ a{color:inherit;text-decoration:none}
 
   function renderFinops(snap) {
     var fin = snap.finops || {};
+    var legacy = document.getElementById("finops-legacy");
+    var configured = (fin.cost_rows || []).length > 0 || fin.cost_source_complete;
     var amount = document.getElementById("finops-actual-cost");
     clear(amount);
+    amount.hidden = !configured;
     if (isNum(fin.actual_cost)) { amount.className = "stat"; amount.appendChild(document.createTextNode(NF2.format(fin.actual_cost) + " ")); amount.appendChild(el("small", { text: fin.currency || "" })); }
-    else { amount.className = "stat na"; amount.textContent = "No evaluado / Sin alcance de facturación"; }
-    document.getElementById("finops-cost-window").textContent = fin.window ? "Ventana " + day(fin.window.start) + " → " + day(fin.window.end) + " · fuente azure_cost " + (fin.cost_source_complete ? "completa" : "incompleta") : "Sin ventana de coste observada.";
+    else { amount.className = "stat na"; amount.textContent = "No evaluado"; }
+    document.getElementById("finops-cost-window").textContent = fin.window && configured ? "Ventana " + day(fin.window.start) + " → " + day(fin.window.end) + " · fuente azure_cost " + (fin.cost_source_complete ? "completa" : "incompleta") : "Desactivado (cost_scope = disabled). Opcional: importes por ResourceId aprobado, sin reparto por carga.";
     var notes = document.getElementById("finops-cost-note");
     clear(notes);
-    (fin.notes || []).forEach(function (n) { notes.appendChild(el("li", { text: n })); });
-    function unitText(c) {
-      if (c.unit === "minutes") { return "min"; }
-      if (c.unit === "tasks_on_all_purpose") { return c.value === 1 ? "tarea en All-Purpose" : "tareas en All-Purpose"; }
-      return c.unit || "";
-    }
-    renderTable(document.getElementById("finops-candidates-table"),
-      ["Carga / objeto", "Candidato", { t: "Valor observado", c: "n" }, "Base", { t: "Recomendación", c: "w" }],
-      (fin.candidates || []).map(function (c) {
-        return [
-          { v: stack(c.workload_name || "—", mono(c.id)), s: c.workload_name },
-          c.title,
-          { v: (c.value === "disabled" ? "desactivado" : num(c.value)) + " " + unitText(c), s: isNum(c.value) ? c.value : -1 },
-          c.basis, c.recommendation
-        ];
-      }), { sortable: true, empty: "Sin candidatos de eficiencia en la configuración observada." }
-    );
-    renderTable(document.getElementById("finops-cost-table"),
+    (configured ? fin.notes || [] : []).forEach(function (n) { notes.appendChild(el("li", { text: n })); });
+    var table = document.getElementById("finops-cost-table");
+    table.parentNode.hidden = !configured;
+    renderTable(table,
       ["Recurso", "Fecha", { t: "Importe", c: "n" }, "Moneda", "Base"],
       (fin.cost_rows || []).map(function (r) {
         return [{ v: armCell(r.resource_id) }, r.usage_date ? day(r.usage_date) : "Periodo acumulado", { v: isNum(r.amount) ? NF2.format(r.amount) : num(r.amount), s: r.amount }, r.currency, r.basis];
       }), { empty: "Sin filas de facturación observadas en el alcance aprobado." }
     );
+    legacy.hidden = false;
+  }
+
+  var NF0 = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0, useGrouping: "always" });
+  var NF1 = new Intl.NumberFormat("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  var C = {
+    family: { all_purpose: "All-purpose (interactivo)", jobs: "Jobs", jobs_light: "Jobs Light", sql: "SQL warehouses pro y clásicos", sql_serverless: "SQL warehouses serverless",
+      pipelines: "Pipelines (DLT)", serverless: "Serverless (notebooks y jobs)", ai: "IA y model serving", other: "Otros DBU" },
+    category: { "virtual machines": "Máquinas virtuales", storage: "Almacenamiento y discos", bandwidth: "Transferencia de datos", "virtual network": "Red virtual (NAT, IP públicas)",
+      "load balancer": "Load Balancer", "azure databricks": "DBU", "nat gateway": "NAT Gateway" },
+    gapWhy: { storage: "Almacenamiento raíz del área de trabajo (DBFS) y discos sin clúster", "azure databricks": "No llevan etiquetas de Azure: se reparten con políticas de uso serverless o con las tablas de sistema",
+      bandwidth: "Transferencia de datos de salida", "virtual network": "NAT Gateway e IP públicas del área de trabajo", "load balancer": "Load Balancer del área de trabajo",
+      "virtual machines": "Máquinas virtuales sin etiquetas de Databricks" },
+    dim: { cluster: "Clústeres", job: "Jobs", warehouse: "SQL warehouses", pool: "Pools", creators: "Creadores" },
+    kind: { all_purpose: "Clúster interactivo", job_run: "Clúster de job", job_runs: "Clústeres efímeros de jobs", pipeline: "Clúster de pipeline", pipeline_runs: "Clústeres de pipelines (DLT)",
+      not_in_inventory: "No está en el inventario (eliminado o de otro tipo)", job: "Job", warehouse: "SQL warehouse", pool: "Pool" },
+    objKind: { AllPurposeCluster: "Clúster interactivo", Job: "Job", InstancePool: "Pool", SqlWarehouse: "SQL warehouse", ClusterPolicy: "Política de cómputo", Runtime: "Runtime", NodeType: "Tipo de VM" },
+    saving: { lower_bound: "al menos", upper_bound: "hasta", estimate: "≈" },
+    basis: { weekend_cost: "coste de sábados y domingos del mes", jobs_dbu_ratio: "DBU del clúster × (1 − ratio jobs/all-purpose)", spot_discount: "VM de workers × descuento spot",
+      daily_floor: "coste mínimo diario × días del mes", always_on_weekends: "coste × fines de semana / días del mes" },
+    ev: { autotermination_minutes: "autoterminación (min)", state: "estado", uptime_hours: "encendido (h)", active_days: "días con coste", weekend_cost: "coste en fin de semana",
+      jobs: "jobs", jobs_count: "nº de jobs", dbu_cost: "coste DBU", availability: "disponibilidad", workers: "workers", vm_cost: "coste VM", continuous: "continuo",
+      max_workers: "máx. workers", min_idle_instances: "inactivas mínimas", idle_now: "inactivas ahora", idle_autotermination_minutes: "liberación de inactivas (min)",
+      daily_floor: "suelo diario", auto_stop_mins: "auto-stop (min)", serverless: "serverless", warehouse_type: "tipo", cluster_size: "tamaño", objects: "objetos",
+      allocation_tags: "etiquetas", supported_list_checked: "lista oficial consultada", deprecated: "retirada" },
+    status: { complete: "Completa", partial: "Parcial", denied: "Denegada", error: "Error", skipped: "Omitida por tiempo", not_configured: "No configurada", not_collected: "No recogida" }
+  };
+  var costCurrency = "";
+  function monthName(label, short) {
+    var m = /^(\d{4})-(\d{2})$/.exec(String(label || ""));
+    if (!m) { return String(label || "—"); }
+    var name = MONTHS[Number(m[2]) - 1] || m[2];
+    return short ? name.slice(0, 3) + " " + m[1] : name + " de " + m[1];
+  }
+  function money(v, cur) {
+    if (!isNum(v)) { return "—"; }
+    return (v === 0 ? "0" : Math.abs(v) < 10 ? NF2.format(v) : NF0.format(v)) + (cur === "" ? "" : "\u00a0" + (cur || costCurrency));
+  }
+  function signedPct(v) { return isNum(v) ? (v > 0 ? "+" : v < 0 ? "−" : "") + NF1.format(Math.abs(v)) + "\u00a0%" : "—"; }
+  function deltaNode(pct, abs, cur) {
+    if (!isNum(pct) && !isNum(abs)) { return el("span", { className: "muted", text: "sin mes anterior" }); }
+    var up = (isNum(abs) ? abs : pct) > 0;
+    var text = isNum(pct) ? signedPct(pct) : (abs > 0 ? "+" : "−") + money(Math.abs(abs), cur);
+    return el("span", { className: up ? "up" : "down", text: text });
+  }
+  function sh(v) { return isNum(v) ? NF1.format(v) + "\u00a0%" : "—"; }
+  function lowerKey(s) { return String(s || "").toLowerCase(); }
+  function costRows(m) { return (m && m.attribution && m.attribution.rows) || []; }
+  function rowName(r) {
+    if (r.kind === "job_runs") { return "Clústeres efímeros de jobs (" + r.count + plural(r.count, " ejecución", " ejecuciones") + ")"; }
+    if (r.kind === "pipeline_runs") { return "Clústeres de pipelines (DLT)"; }
+    return r.name;
+  }
+  function tagChips(tags) {
+    var keys = Object.keys(tags || {});
+    if (!keys.length) { return el("span", { className: "muted", text: "Sin etiquetas" }); }
+    var wrap = el("div", { className: "chips" });
+    keys.forEach(function (k) { wrap.appendChild(el("span", null, [k + ": ", el("b", { text: String(tags[k]) })])); });
+    return wrap;
+  }
+  function evText(v) {
+    if (Array.isArray(v)) { return v.join(", "); }
+    if (v === true) { return "Sí"; }
+    if (v === false) { return "No"; }
+    return isNum(v) ? NF.format(v) : String(v);
+  }
+  function sigChips(ev) {
+    var wrap = el("div", { className: "chips" }), n = 0;
+    Object.keys(ev || {}).forEach(function (k) {
+      var v = ev[k];
+      if (v === null || v === undefined || v === "" || (Array.isArray(v) && !v.length) || n >= 4) { return; }
+      var shown = /cost|floor/.test(k) && isNum(v) ? money(v) : evText(v);
+      wrap.appendChild(el("span", null, [(C.ev[k] || k) + ": ", el("b", { text: shown })]));
+      n++;
+    });
+    return n ? wrap : null;
+  }
+  function savingCell(s) {
+    if (!isNum(s.estimated_monthly_saving)) { return { v: el("span", { className: "muted", text: s.monthly_cost === null ? "—" : "No estimable" }), s: -1 }; }
+    var box = el("div", { className: "sav" + (s.counted ? "" : " nc") }, [(C.saving[s.saving_kind] || "≈") + " " + money(s.estimated_monthly_saving)]);
+    box.appendChild(el("small", { text: s.counted ? C.basis[s.saving_basis] || "" : "No suma: mismo objeto que un ahorro mayor" }));
+    return { v: box, s: s.counted ? s.estimated_monthly_saving : s.estimated_monthly_saving / 1000 };
+  }
+  var COST_TAB = "cluster";
+  function costTabs(m) {
+    var tabs = [];
+    ((m.attribution && m.attribution.dimensions) || []).forEach(function (d) { tabs.push({ id: d.key, label: C.dim[d.key] || d.key }); });
+    if (m.attribution && (m.attribution.creators || []).length) { tabs.push({ id: "creators", label: C.dim.creators }); }
+    ((m.attribution && m.attribution.custom_tags) || []).forEach(function (t) { tabs.push({ id: "tag:" + t.tag, label: "Etiqueta " + t.tag }); });
+    return tabs;
+  }
+  function drawCostTabs(m) {
+    var holder = document.getElementById("cost-tabs");
+    clear(holder);
+    var tabs = costTabs(m);
+    if (!tabs.some(function (t) { return t.id === COST_TAB; })) { COST_TAB = tabs.length ? tabs[0].id : "cluster"; }
+    tabs.forEach(function (t, i) {
+      var b = el("button", { type: "button", role: "tab", id: "cost-tab-" + i, "aria-selected": t.id === COST_TAB ? "true" : "false", "aria-controls": "cost-attr-panel", tabindex: t.id === COST_TAB ? "0" : "-1", text: t.label });
+      b.addEventListener("click", function () { COST_TAB = t.id; drawCostTabs(m); renderAttribution(m); });
+      b.addEventListener("keydown", function (ev) {
+        if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") { return; }
+        var next = tabs[(i + (ev.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+        COST_TAB = next.id;
+        drawCostTabs(m);
+        renderAttribution(m);
+        var focusBtn = document.querySelector('#cost-tabs [aria-selected="true"]');
+        if (focusBtn) { focusBtn.focus(); }
+        ev.preventDefault();
+      });
+      if (t.id === COST_TAB) { document.getElementById("cost-attr-panel").setAttribute("aria-labelledby", "cost-tab-" + i); }
+      holder.appendChild(b);
+    });
+  }
+  function attributionView(m) {
+    var head = m.headline || {}, q = (document.getElementById("cost-attr-search").value || "").toLowerCase().trim();
+    var prev = monthName(head.previous_month, true), view = { headers: [], rows: [], note: "" };
+    function keep(text) { return !q || String(text).toLowerCase().indexOf(q) >= 0; }
+    var deltaHead = { t: "Frente a " + prev, c: "n" };
+    if (COST_TAB === "creators") {
+      view.headers = ["Creador", { t: "Coste del mes", c: "n" }, { t: "% del mes", c: "n" }];
+      view.rows = (m.attribution.creators || []).filter(function (r) { return keep(r.creator); }).map(function (r) {
+        return [{ v: brk(r.creator === "—" ? "Sin creador conocido" : r.creator, ""), s: r.creator }, { v: money(r.total), s: r.total, c: "n" }, { v: sh(r.share), s: r.share, c: "n" }];
+      });
+      view.note = "Según quién creó cada clúster, job y SQL warehouse del inventario actual; lo eliminado no tiene creador.";
+      return view;
+    }
+    if (COST_TAB.indexOf("tag:") === 0) {
+      var t = (m.attribution.custom_tags || []).filter(function (x) { return "tag:" + x.tag === COST_TAB; })[0] || { values: [] };
+      view.headers = ["Valor de " + t.tag, { t: "DBU", c: "n" }, { t: "Infraestructura", c: "n" }, { t: "Total", c: "n" }, { t: "% del mes", c: "n" }, deltaHead];
+      view.rows = (t.values || []).filter(function (r) { return keep(r.value); }).map(function (r) {
+        return [{ v: el("b", { text: r.value }), s: r.value }, { v: money(r.dbu), s: r.dbu, c: "n" }, { v: money(r.infra), s: r.infra, c: "n" }, { v: money(r.total), s: r.total, c: "n" },
+          { v: sh(r.share), s: r.share, c: "n" }, { v: deltaNode(r.previous_total ? 100 * (r.total - r.previous_total) / r.previous_total : null, r.total - r.previous_total), s: r.total - r.previous_total, c: "n" }];
+      });
+      if (isNum(t.untagged_total) && keep("sin etiqueta")) {
+        var why = (t.untagged_categories || []).slice(0, 3).map(function (c) { return lab(C.category, lowerKey(c.category)) + " " + money(c.review); }).join(" · ");
+        view.rows.push([{ v: stack("Sin etiqueta " + t.tag, why || null), s: "~" }, { v: "—", c: "n", s: -1 }, { v: "—", c: "n", s: -1 }, { v: money(t.untagged_total), s: t.untagged_total, c: "n" },
+          { v: sh(isNum(head.review_total) && head.review_total ? 100 * t.untagged_total / head.review_total : null), s: t.untagged_total, c: "n" }, { v: "—", c: "n", s: 0 }]);
+      }
+      view.note = isNum(t.tagged_share) ? "La etiqueta " + t.tag + " está en el " + sh(t.tagged_share) + " del coste del mes; sin ella quedan " + money(t.untagged_total) + "." : "Consulta de la etiqueta " + t.tag + ": " + lab(C.status, t.status) + ".";
+      return view;
+    }
+    var d = ((m.attribution && m.attribution.dimensions) || []).filter(function (x) { return x.key === COST_TAB; })[0] || {};
+    view.headers = ["Nombre", { t: "DBU", c: "n" }, { t: "Infraestructura", c: "n" }, { t: "Total", c: "n" }, { t: "% del mes", c: "n" }, deltaHead, "Etiquetas de imputación"];
+    view.rows = costRows(m).filter(function (r) { return r.dimension === COST_TAB && keep(rowName(r) + " " + JSON.stringify(r.tags) + " " + (r.creator || "")); }).map(function (r) {
+      var grouped = r.kind === "job_runs" || r.kind === "pipeline_runs";
+      var sub = grouped ? (r.kind === "job_runs" ? "Detalle por job en la pestaña Jobs" : "Etiquetas en la definición de cada pipeline") : lab(C.kind, r.kind) + (r.creator ? " · " + r.creator : "");
+      return [{ v: stack(brk(rowName(r), ""), sub), s: rowName(r) }, { v: money(r.dbu), s: r.dbu, c: "n" }, { v: money(r.infra), s: r.infra, c: "n" }, { v: el("b", { text: money(r.total) }), s: r.total, c: "n" },
+        { v: sh(r.share), s: r.share, c: "n" }, { v: deltaNode(r.change_pct, r.change), s: r.change, c: "n" }, { v: grouped ? el("span", { className: "muted", text: "—" }) : tagChips(r.tags) }];
+    });
+    if (isNum(d.untagged_total) && keep("sin etiqueta")) {
+      view.rows.push([{ v: stack("Sin etiqueta " + d.tag, "Coste que esta etiqueta no explica"), s: "~" }, { v: "—", c: "n", s: -1 }, { v: "—", c: "n", s: -1 }, { v: money(d.untagged_total), s: d.untagged_total, c: "n" },
+        { v: sh(isNum(d.tagged_share) ? 100 - d.tagged_share : null), s: d.untagged_total, c: "n" }, { v: "—", c: "n", s: 0 }, { v: "—" }]);
+    }
+    var why = { cluster: "Los jobs aparecen agrupados; su detalle está en la pestaña Jobs.", job: "Solo el cómputo de jobs lleva JobId: un job que corre en un clúster interactivo cuenta en ese clúster.",
+      warehouse: "Cada SQL warehouse con su DBU y, si no es serverless, sus VM.", pool: "Las VM de un pool solo llevan las etiquetas del pool, nunca las del clúster que las usa." }[COST_TAB] || "";
+    view.note = isNum(d.tagged_share) ? "La etiqueta " + d.tag + " explica el " + sh(d.tagged_share) + " del coste del mes. " + why : "Consulta " + (d.tag || "") + ": " + lab(C.status, d.status) + ".";
+    return view;
+  }
+  function renderAttribution(m) {
+    var view = attributionView(m);
+    document.getElementById("cost-attr-note").textContent = view.note;
+    renderTable(document.getElementById("cost-attr-table"), view.headers, view.rows, { sortable: true, page: 12, empty: "Sin coste en esta vista." });
+  }
+  function filteredSignals(m) {
+    var sev = document.getElementById("cost-sig-sev").value, sav = document.getElementById("cost-sig-saving").value;
+    var q = (document.getElementById("cost-sig-search").value || "").toLowerCase().trim();
+    return (m.signals || []).filter(function (s) {
+      if (sev !== "all" && s.severity !== sev) { return false; }
+      if (sav === "with" && !isNum(s.estimated_monthly_saving)) { return false; }
+      return !q || JSON.stringify(s).toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  function renderSignals(m) {
+    var all = m.signals || [], list = filteredSignals(m), head = m.headline || {};
+    var counted = all.filter(function (s) { return s.counted; });
+    document.getElementById("cost-signals-count").textContent = "Mostrando " + list.length + " de " + all.length + plural(all.length, " señal", " señales") +
+      (counted.length ? " · " + counted.length + " con ahorro estimado que suman " + money(head.estimated_monthly_savings) + " al mes (por objeto solo cuenta el mayor)." : ".");
+    renderTable(document.getElementById("cost-signals-table"),
+      [{ t: "Severidad" }, { t: "Señal y evidencia", c: "w" }, { t: "Objeto" }, { t: "Coste del mes", c: "n" }, { t: "Ahorro estimado / mes", c: "n" }, { t: "Qué hacer", c: "w" }],
+      list.map(function (s) {
+        var d = el("div", { className: "fd" }, [el("b", { text: s.title })]);
+        var chips = sigChips(s.evidence);
+        if (chips) { d.appendChild(chips); }
+        var rec = el("div", { className: "fr" }, [el("p", { text: s.recommendation })]);
+        var link = safeLearnUrl(s.learn_url);
+        if (link) { rec.appendChild(extLink(link, "Microsoft Learn")); }
+        return [
+          { v: sevPill(s.severity), s: ["high", "medium", "low"].indexOf(s.severity) },
+          { v: d, s: s.title },
+          { v: stack(brk(s.object_name, ""), lab(C.objKind, s.object_kind)), s: s.object_name },
+          { v: money(s.monthly_cost), s: isNum(s.monthly_cost) ? s.monthly_cost : -1, c: "n" },
+          savingCell(s),
+          { v: rec, s: s.recommendation }
+        ];
+      }), { sortable: true, page: 12, empty: "Ninguna señal coincide con el filtro." }
+    );
+  }
+  function costBars(holder, items, total, color, cur) {
+    clear(holder);
+    var max = Math.max.apply(null, [1].concat(items.map(function (i) { return i.value; })));
+    items.forEach(function (i) { holder.appendChild(barRow(i.label, i.sub, 100 * i.value / max, money(i.value, cur), i.valueSub, color, false)); });
+    if (!items.length) { holder.appendChild(emptyState("Sin coste en el mes revisado.")); }
+  }
+  function renderCostStats(m) {
+    var head = m.headline || {}, stats = document.getElementById("cost-stats");
+    clear(stats);
+    function stat(k, n, unit, d) {
+      var nv = el("div", { className: "n" }, [String(n)]);
+      if (unit) { nv.appendChild(el("small", { text: unit })); }
+      stats.appendChild(el("div", { className: "cstat" }, [el("div", { className: "k", text: k }), nv, d ? (d instanceof Node ? el("div", { className: "d" }, [d]) : el("div", { className: "d", text: d })) : null]));
+    }
+    var delta = el("span", null, [deltaNode(head.change_pct, head.change), " frente a " + monthName(head.previous_month) + " (" + money(head.previous_total) + ")"]);
+    stat("Coste de " + monthName(head.review_month), money(head.review_total, ""), costCurrency, delta);
+    stat("DBU · infraestructura", isNum(head.dbu_share) ? NF0.format(head.dbu_share) + " · " + NF0.format(100 - head.dbu_share) : "—", "%", money(head.dbu_total) + " DBU · " + money(head.infra_total) + " infraestructura");
+    stat("Sin etiqueta de cómputo", isNum(head.unattributed_share) ? NF1.format(head.unattributed_share) : "—", isNum(head.unattributed_share) ? "%" : "",
+      isNum(head.unattributed_total) ? money(head.unattributed_total) + " en servicios compartidos y serverless" : "No evaluado");
+    stat("Ahorro estimado al mes", isNum(head.estimated_monthly_savings) ? "≈ " + money(head.estimated_monthly_savings, "") : "—", isNum(head.estimated_monthly_savings) ? costCurrency : "",
+      isNum(head.estimated_monthly_savings) ? head.savings_signals + " de " + head.signals + " señales, sin contar dos veces" : "Sin datos de coste para estimarlo");
+    var trend = document.getElementById("cost-trend");
+    clear(trend);
+    trend.appendChild(el("h4", { text: "Evolución mensual" }));
+    var maxTotal = Math.max.apply(null, [1].concat((m.monthly || []).map(function (r) { return r.total; })));
+    (m.monthly || []).forEach(function (r) {
+      var row = el("div", { className: "mrow" + (r.partial ? " partial" : "") });
+      row.appendChild(el("div", { className: "ml" }, [monthName(r.month, true), r.partial ? el("small", { text: "hasta el día " + (head.mtd_days || "—") }) : r.month === head.review_month ? el("small", { text: "mes revisado" }) : null]));
+      var track = el("div", { className: "strack", role: "img", "aria-label": monthName(r.month) + ": " + money(r.dbu) + " DBU y " + money(r.infra) + " de infraestructura" });
+      [["seg-dbu", r.dbu], ["seg-infra", r.infra]].forEach(function (p) { var seg = el("i", { className: p[0] }); seg.style.width = (100 * p[1] / maxTotal) + "%"; track.appendChild(seg); });
+      row.appendChild(track);
+      row.appendChild(el("div", { className: "mv", text: money(r.total) }));
+      trend.appendChild(row);
+    });
+    trend.appendChild(el("div", { className: "keys" }, [el("span", null, [el("i", { className: "seg-dbu" }), "DBU"]), el("span", null, [el("i", { className: "seg-infra" }), "Infraestructura"])]));
+  }
+  function renderCostSplit(m) {
+    var split = m.split || {}, head = m.headline || {};
+    costBars(document.getElementById("cost-dbu-bars"), (split.dbu_families || []).map(function (f) {
+      return { label: lab(C.family, f.key), sub: (f.meters || []).slice(0, 2).map(function (x) { return x.meter; }).join(" · "), value: f.review,
+        valueSub: sh(f.share) + (isNum(f.previous) && f.previous ? " · " + signedPct(100 * (f.review - f.previous) / f.previous) : "") };
+    }), head.dbu_total, "var(--chart)");
+    var ap = (split.dbu_families || []).filter(function (f) { return f.key === "all_purpose"; })[0];
+    document.getElementById("cost-dbu-sub").textContent = ap && isNum(ap.share) && ap.share >= 25
+      ? "El cómputo interactivo es el " + sh(ap.share) + " de la DBU, y su DBU cuesta casi el doble que la de jobs."
+      : "Lo que Databricks factura por unidad de procesamiento, según el tipo de carga.";
+    costBars(document.getElementById("cost-infra-bars"), (split.infra_categories || []).map(function (c) {
+      return { label: lab(C.category, lowerKey(c.category)), sub: null, value: c.review, valueSub: sh(c.share) };
+    }), head.infra_total, "var(--chart-2)");
+    var sizes = document.getElementById("cost-vm-sizes");
+    clear(sizes);
+    if ((split.vm_sizes || []).length) {
+      sizes.appendChild(document.createTextNode("Tamaños de VM con más coste"));
+      var chips = el("div", { className: "chips" });
+      split.vm_sizes.slice(0, 6).forEach(function (v) { chips.appendChild(el("span", null, [v.meter + " · ", el("b", { text: money(v.review) })])); });
+      sizes.appendChild(chips);
+    }
+  }
+  function renderGapAndTags(m) {
+    var gapBox = document.getElementById("cost-gap"), gap = m.attribution && m.attribution.gap;
+    clear(gapBox);
+    if (!gap) { gapBox.appendChild(el("p", { className: "muted", text: "No evaluado: la consulta por la etiqueta Vendor no está disponible." })); }
+    else {
+      gapBox.appendChild(el("div", { className: "gapn" }, [el("b", { text: NF1.format(gap.share || 0) + "\u00a0%" }), el("span", { text: money(gap.total) + " del mes" })]));
+      var bars = el("div", { className: "bars" });
+      gapBox.appendChild(bars);
+      costBars(bars, (gap.categories || []).map(function (c) {
+        var key = lowerKey(c.category);
+        return { label: key === "azure databricks" ? "DBU serverless" : lab(C.category, key), sub: C.gapWhy[key] || null, value: c.review, valueSub: sh(c.share) };
+      }), gap.total, "var(--info-bar)");
+    }
+    var tags = (m.attribution && m.attribution.custom_tags) || [], holder = document.getElementById("cost-tag-bars");
+    clear(holder);
+    tags.forEach(function (t) {
+      holder.appendChild(barRow(el("span", { className: "mono", text: t.tag }), isNum(t.untagged_total) ? "Sin ella: " + money(t.untagged_total) : lab(C.status, t.status),
+        isNum(t.tagged_share) ? t.tagged_share : 0, isNum(t.tagged_share) ? sh(t.tagged_share) : "—", null, "var(--chart)", !isNum(t.tagged_share)));
+    });
+    if (!tags.length) { holder.appendChild(el("p", { className: "muted", text: "Sin etiquetas de imputación configuradas (COST_ALLOCATION_TAGS)." })); }
+    var notes = document.getElementById("cost-tag-notes");
+    clear(notes);
+    (m.signals || []).filter(function (s) { return s.code === "MISSING_ALLOCATION_TAGS" || s.code === "POLICY_TAGS"; }).slice(0, 5).forEach(function (s) {
+      notes.appendChild(el("li", { text: s.title + ": " + ((s.evidence && s.evidence.objects) || []).slice(0, 4).join("; ") }));
+    });
+  }
+  function renderMovers(m) {
+    var holder = document.getElementById("cost-movers"), mv = m.movers || {}, head = m.headline || {};
+    clear(holder);
+    document.getElementById("cost-movers-sub").textContent = "Clústeres, jobs, SQL warehouses y pools con mayor variación de " + monthName(head.previous_month) + " a " + monthName(head.review_month) + ".";
+    [["Suben", mv.up || []], ["Bajan", mv.down || []]].forEach(function (g) {
+      var col = el("div", null, [el("h4", { text: g[0] })]);
+      if (!g[1].length) { col.appendChild(el("p", { className: "muted", text: "Sin variaciones relevantes." })); }
+      g[1].forEach(function (r) {
+        col.appendChild(el("div", { className: "mover" }, [
+          el("b", { text: rowName(r) }),
+          el("span", { className: "dv " + (r.change > 0 ? "up" : "down"), text: (r.change > 0 ? "+" : "−") + money(Math.abs(r.change)) }),
+          el("small", { text: lab(C.kind, r.kind) + " · " + money(r.total) + " en " + monthName(head.review_month, true) }),
+          el("small", { className: "dv", text: r.previous_total ? signedPct(r.change_pct) : "nuevo" })
+        ]));
+      });
+      holder.appendChild(col);
+    });
+  }
+  function renderSystemTables(m) {
+    var box = document.getElementById("cost-system"), st = m.system_tables || { status: "not_configured" };
+    clear(box);
+    var on = st.status === "complete";
+    box.appendChild(el("div", { className: "h3row" }, [el("h3", { text: "Detalle por ejecución y usuario (tablas de sistema)" }),
+      pill(on ? "tone-warn" : st.status === "not_configured" ? "tone-info" : "tone-crit", on ? "Activado · consume DBU" : st.status === "not_configured" ? "Desactivado" : lab(C.status, st.status))]));
+    if (!on) {
+      box.appendChild(el("p", { className: "sub", text: st.status === "not_configured"
+        ? "Opcional y desactivado por defecto porque consume DBU (y arranca el SQL warehouse si está parado). Con system_tables_warehouse_id (un SQL warehouse existente) la tool lanza una única consulta de solo lectura a system.billing.usage y system.billing.list_prices y muestra aquí el coste por ejecución de job y por usuario."
+        : "La consulta a las tablas de sistema no terminó: revise en la sección 8 la fuente dbx_system_billing." }));
+      return;
+    }
+    var cur = st.currency || "USD";
+    var ws = String(st.window && st.window.start || ""), we = String(st.window && st.window.end || "");
+    var wy = +ws.slice(0, 4), wm = +ws.slice(5, 7), nextMonth = wm === 12 ? (wy + 1) + "-01" : wy + "-" + String(wm + 1).padStart(2, "0");
+    var wholeMonth = /^\d{4}-\d{2}-01/.test(ws) && we.slice(0, 10) === nextMonth + "-01";
+    box.appendChild(el("p", { className: "sub", text: "Coste a precio de lista (" + cur + ", sin descuentos) " + (wholeMonth ? "de " + monthName(ws.slice(0, 7)) : "de " + day(ws) + " a " + day(we)) + ", según system.billing.usage." }));
+    box.appendChild(el("h4", { className: "sys-h", text: "Ejecuciones y cargas con más coste" }));
+    var wrap = el("div", { className: "wrap sys-wrap" }), table = el("table", { className: "dense", id: "cost-system-table" });
+    wrap.appendChild(table);
+    box.appendChild(wrap);
+    var grid = el("div", { className: "sys-grid" }), left = el("div"), right = el("div");
+    left.appendChild(el("h4", { text: "Por usuario o service principal" }));
+    var ub = el("div", { className: "bars" });
+    left.appendChild(ub);
+    right.appendChild(el("h4", { text: "Por producto" }));
+    var pb = el("div", { className: "bars" });
+    right.appendChild(pb);
+    grid.appendChild(left);
+    grid.appendChild(right);
+    box.appendChild(grid);
+    function sku(s) { return s ? String(s).replace(/_/g, " ").toLowerCase() : null; }
+    function product(p) {
+      var known = { ALL_PURPOSE: "All-purpose (interactivo)", JOBS: "Jobs", SQL: "SQL warehouses", DLT: "Pipelines (DLT)", INTERACTIVE: "Notebooks serverless",
+        MODEL_SERVING: "Model serving", VECTOR_SEARCH: "Vector Search", LAKEHOUSE_MONITORING: "Lakehouse Monitoring", PREDICTIVE_OPTIMIZATION: "Predictive optimization" };
+      return p ? known[String(p).toUpperCase()] || String(p).charAt(0) + String(p).slice(1).replace(/_/g, " ").toLowerCase() : "—";
+    }
+    renderTable(table, ["Producto", "Job · ejecución / recurso", "Ejecutado por", { t: "DBU", c: "n" }, { t: "Coste de lista", c: "n" }],
+      (st.runs || []).map(function (r) {
+        var what = r.job_id ? "Job " + r.job_id + (r.job_run_id ? " · ejecución " + r.job_run_id : "") : r.warehouse_id ? "Warehouse " + r.warehouse_id : r.cluster_id ? "Clúster " + r.cluster_id : r.pipeline_id ? "Pipeline " + r.pipeline_id : "—";
+        return [{ v: stack(product(r.product), sku(r.sku)), s: r.product }, { v: brk(what, "") }, { v: brk(r.run_as || "—", "") }, { v: NF0.format(r.dbus || 0), s: r.dbus, c: "n" }, { v: money(r.list_cost, cur), s: r.list_cost, c: "n" }];
+      }), { sortable: true, page: 8 });
+    costBars(ub, (st.users || []).slice(0, 8).map(function (u) { return { label: brk(u.run_as || "—", ""), value: u.list_cost || 0 }; }), null, "var(--chart)", cur);
+    costBars(pb, (st.products || []).slice(0, 8).map(function (p) { return { label: product(p.product), sub: sku(p.sku), value: p.list_cost || 0 }; }), null, "var(--chart-2)", cur);
+  }
+  function renderCostMethod(m) {
+    var dl = document.getElementById("cost-method"), a = m.assumptions || {}, scope = m.scope || {}, p = m.periods || {};
+    clear(dl);
+    function row(term, node) { dl.appendChild(el("dt", { text: term })); var dd = el("dd"); dd.appendChild(node instanceof Node ? node : document.createTextNode(node)); dl.appendChild(dd); }
+    row("Alcance", "Recurso del área de trabajo (DBU)" + (scope.managed_resource_group ? " y su grupo de recursos administrado " + scope.managed_resource_group + " (VM, discos y red)" : "") +
+      ((scope.resource_ids || []).length > 1 ? ", más " + (scope.resource_ids.length - 1) + " recursos aprobados" : "") + "; coste " + (m.metric === "ActualCost" ? "real (vista de factura)" : "amortizado") + " en " + (m.currency || "la moneda de facturación") + ".");
+    row("Meses", "Mes revisado " + monthName(p.review) + " (cerrado), comparado con " + monthName(p.previous) + "; " + monthName(p.current) + " hasta el día " + (p.mtd_days || "—") + ". El coste de los dos últimos días puede cambiar.");
+    row("Reparto", "Cost Management agrupado por las etiquetas que Databricks pone al cómputo (ClusterName, JobId, SqlEndpointId, DatabricksInstancePoolId, Vendor) y por " +
+      ((a.allocation_tags || []).length ? (a.allocation_tags || []).join(", ") : "ninguna etiqueta propia") + ", cada una con su servicio (DBU frente a infraestructura).");
+    var rules = el("ul");
+    [
+      "Autoterminación desactivada: lo que costó el clúster en sábados y domingos (al menos, si nadie lo usa el fin de semana).",
+      "Jobs en un clúster interactivo: DBU del clúster × (1 − " + NF.format(a.jobs_to_all_purpose_dbu_ratio) + ") (hasta, si todo su uso son esos jobs).",
+      "Workers sin spot: coste de VM × workers / (workers + 1) × " + NF0.format(100 * (a.spot_discount || 0)) + " % de descuento prudente.",
+      "Pool con instancias inactivas mínimas: coste mínimo diario del pool × días del mes.",
+      "SQL warehouse sin auto-stop: coste × " + NF1.format(100 * (a.weekend_share || 0)) + " % (fines de semana del mes).",
+      "Por objeto solo suma el mayor ahorro; los demás figuran como «no suma». Las demás señales no tienen un dato de coste que permita estimar sin inventar."
+    ].forEach(function (t) { rules.appendChild(el("li", { text: t })); });
+    row("Ahorro estimado", rules);
+    var chips = el("div", { className: "chips" });
+    Object.keys(m.query_status || {}).forEach(function (k) { chips.appendChild(el("span", null, [k + ": ", el("b", { text: lab(C.status, m.query_status[k]) })])); });
+    row("Consultas", chips.firstChild ? chips : "Sin consultas de coste (" + lab(C.status, m.status) + ").");
+    var sys = m.system_tables || {};
+    var gaps = (sys.status === "complete" ? "" : "Uso por ejecución y por usuario (tablas de sistema, desactivadas por defecto); ") +
+      "almacenamiento y red fuera del grupo administrado salvo los recursos de approved_cost_resource_ids" +
+      (sys.status === "complete" ? "; el detalle de las tablas de sistema va a precio de lista, sin vuestros descuentos." : ".");
+    row("No cubre", gaps.charAt(0).toUpperCase() + gaps.slice(1));
+  }
+  function renderCosts(snap) {
+    var m = snap.databricks_costs, emptyBox = document.getElementById("cost-empty");
+    var body = document.getElementById("cost-body"), data = document.getElementById("cost-data");
+    clear(emptyBox);
+    if (!m) {
+      body.hidden = true;
+      emptyBox.hidden = false;
+      emptyBox.appendChild(el("div", { className: "note", role: "note" }, [icon("info"), el("span", { text: "Esta instantánea no incluye el análisis de costes de Databricks." })]));
+      return;
+    }
+    body.hidden = false;
+    costCurrency = m.currency || "";
+    var head = m.headline || {}, hasData = isNum(head.review_total);
+    data.hidden = !hasData;
+    if (!hasData) {
+      emptyBox.hidden = false;
+      var why = { not_configured: "El análisis de costes está desactivado en la configuración (cost_analysis_enabled = False).",
+        denied: "La identidad no puede leer costes: conceda Cost Management Reader (o Reader) en la suscripción y repita la revisión.",
+        not_collected: "Esta ejecución no recogió costes de Cost Management." }[m.status] || "Cost Management no devolvió datos utilizables (" + lab(C.status, m.status) + "); vea la fuente azure_cost_databricks en la sección 8.";
+      emptyBox.appendChild(el("div", { className: "note", role: "note" }, [icon("info"), el("span", { text: why + " Las señales de configuración siguen abajo, sin ahorro estimado." })]));
+    } else {
+      emptyBox.hidden = true;
+      renderCostStats(m);
+      renderCostSplit(m);
+      drawCostTabs(m);
+      renderAttribution(m);
+      renderGapAndTags(m);
+      renderMovers(m);
+    }
+    renderSignals(m);
+    renderSystemTables(m);
+    renderCostMethod(m);
+  }
+  ["cost-sig-sev", "cost-sig-saving", "cost-sig-search"].forEach(function (id) {
+    var node = document.getElementById(id);
+    ["input", "change"].forEach(function (evName) { node.addEventListener(evName, function () { if (currentSnap && currentSnap.databricks_costs) { renderSignals(currentSnap.databricks_costs); } }); });
+  });
+  document.getElementById("cost-attr-search").addEventListener("input", function () { if (currentSnap && currentSnap.databricks_costs) { renderAttribution(currentSnap.databricks_costs); } });
+  function csvLines(cols, rows) { return "\uFEFF" + [cols.join(",")].concat(rows.map(function (r) { return cols.map(function (c) { return csvEscape(r[c]); }).join(","); })).join("\r\n"); }
+  function costCsv() {
+    var m = currentSnap && currentSnap.databricks_costs;
+    if (!m) { return csvLines(["dimension"], []); }
+    var rows = costRows(m).map(function (r) { return { dimension: r.dimension, name: rowName(r), kind: r.kind, creator: r.creator, dbu: r.dbu, infra: r.infra, total: r.total, previous_total: r.previous_total, share: r.share, tags: r.tags, currency: m.currency, month: m.periods && m.periods.review }; });
+    ((m.attribution && m.attribution.custom_tags) || []).forEach(function (t) {
+      (t.values || []).forEach(function (v) { rows.push({ dimension: "tag:" + t.tag, name: v.value, kind: "tag_value", dbu: v.dbu, infra: v.infra, total: v.total, previous_total: v.previous_total, share: v.share, currency: m.currency, month: m.periods && m.periods.review }); });
+      if (isNum(t.untagged_total)) { rows.push({ dimension: "tag:" + t.tag, name: "(sin etiqueta)", kind: "untagged", total: t.untagged_total, currency: m.currency, month: m.periods && m.periods.review }); }
+    });
+    return csvLines(["month", "dimension", "name", "kind", "creator", "dbu", "infra", "total", "previous_total", "share", "tags", "currency"], rows);
+  }
+  function signalsCsv(list) {
+    var cur = currentSnap && currentSnap.databricks_costs ? currentSnap.databricks_costs.currency : "";
+    return csvLines(["id", "code", "severity", "title", "object_kind", "object_name", "monthly_cost", "estimated_monthly_saving", "saving_kind", "saving_basis", "counted", "currency", "recommendation", "learn_url", "evidence"],
+      list.map(function (s) { return Object.assign({ currency: cur }, s); }));
+  }
+  document.getElementById("cost-attr-export").addEventListener("click", function () { downloadBlob("databricks-costes-por-carga.csv", costCsv(), "text/csv;charset=utf-8"); });
+  document.getElementById("export-costs-csv-btn").addEventListener("click", function () { downloadBlob("databricks-costes-por-carga.csv", costCsv(), "text/csv;charset=utf-8"); });
+  document.getElementById("cost-sig-export").addEventListener("click", function () { if (currentSnap && currentSnap.databricks_costs) { downloadBlob("databricks-senales-filtradas.csv", signalsCsv(filteredSignals(currentSnap.databricks_costs)), "text/csv;charset=utf-8"); } });
+  document.getElementById("export-signals-csv-btn").addEventListener("click", function () { if (currentSnap && currentSnap.databricks_costs) { downloadBlob("databricks-senales-optimizacion.csv", signalsCsv(currentSnap.databricks_costs.signals || []), "text/csv;charset=utf-8"); } });
+
+  var PRESENTATION = (rootData && rootData.presentation) || {};
+  var FOCUS = PRESENTATION.focus === "costs" ? "costs" : "configuration";
+  function renumberSections() {
+    var short = { "sec-finops": "Costes de Databricks", "sec-identity": "Workspace e identidad", "sec-executive": "Resumen ejecutivo y WAF", "sec-dependencies": "Mapa de dependencias",
+      "sec-inventory": "Inventario Lakehouse y ARM", "sec-findings": "Hallazgos y reglas", "sec-actions": "Plan de acción", "sec-sources": "Fuentes y metodología" };
+    var toc = document.getElementById("toc-menu");
+    clear(toc);
+    toc.appendChild(el("a", { href: "#sec-cover", text: "Portada y veredicto" }));
+    [].slice.call(document.querySelectorAll(".page > .chapter")).forEach(function (c, i) {
+      var h = c.querySelector(".sh h2");
+      if (h) { h.textContent = h.textContent.replace(/^\d+\.\s*/, (i + 1) + ". "); }
+      toc.appendChild(el("a", { href: "#" + c.id, text: (i + 1) + ". " + (short[c.id] || c.id) }));
+    });
+  }
+  function applyPresentation() {
+    var p = PRESENTATION, root = document.documentElement, css = "";
+    var theme = p.theme && typeof p.theme === "object" ? p.theme : {};
+    var rules = Object.keys(theme).filter(function (k) {
+      return /^--[a-z0-9-]{1,32}$/.test(k) && /^(#[0-9a-fA-F]{6}|rgba\([0-9.,\s]{7,40}\))$/.test(String(theme[k]));
+    }).map(function (k) { return k + ":" + theme[k]; });
+    if (rules.length) { css += ":root{" + rules.join(";") + "}"; root.classList.add("branded"); themeBtn.hidden = true; }
+    if (typeof p.display_font === "string" && /^data:font\/woff2;base64,[A-Za-z0-9+\/=]+$/.test(p.display_font)) {
+      css += "@font-face{font-family:\"Brand Display\";src:url(" + p.display_font + ") format(\"woff2\");font-weight:600;font-style:normal;font-display:swap}" +
+        ":root{--display:\"Brand Display\",Didot,\"Bodoni 72\",\"Bodoni MT\",Georgia,serif}";
+      root.classList.add("brand-font");
+    }
+    if (css) { var style = el("style", { id: "brand-style" }); style.textContent = css; document.head.appendChild(style); }
+    var client = rootData.client || {};
+    var barLogo = p.logo_placement === "bar" && client.logo_data_uri && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(client.logo_data_uri);
+    if (barLogo) {
+      root.classList.add("brand-bar");
+      var brand = document.querySelector(".bar .brand");
+      brand.insertBefore(el("img", { className: "client-logo", src: client.logo_data_uri, alt: client.logo_alt || client.name || "" }), brand.firstChild);
+    }
+    document.getElementById("bar-product").textContent = (FOCUS === "costs" ? "Costes y configuración de Azure Databricks" : "Dependencias Azure Databricks") +
+      (barLogo && client.name ? " · " + client.name : "");
+    if (FOCUS === "costs") {
+      document.querySelector(".page").insertBefore(document.getElementById("sec-finops"), document.getElementById("sec-identity"));
+      var nav = document.getElementById("bar-nav");
+      nav.insertBefore(nav.querySelector('a[href="#sec-finops"]'), nav.firstChild);
+      renumberSections();
+    }
+  }
+  function renderCostHero(snap) {
+    var m = snap.databricks_costs || {}, h = m.headline || {}, ws = snap.workspace || {};
+    if (FOCUS !== "costs" || !isNum(h.review_total)) { return; }
+    costCurrency = m.currency || "";
+    var month = monthName(h.review_month).split(" de ")[0], prev = monthName(h.previous_month).split(" de ")[0];
+    document.getElementById("cover-title").textContent = "Costes de Azure Databricks: " + monthName(h.review_month);
+    var parts = ["Databricks costó ", [money(h.review_total)], " en " + month + ", ", [signedPct(h.change_pct)], " frente a " + prev + ": el ", [NF0.format(h.dbu_share || 0) + "\u00a0%"],
+      " son DBU y el ", [NF0.format(100 - (h.dbu_share || 0)) + "\u00a0%"], " infraestructura."];
+    if (isNum(h.unattributed_share)) { parts = parts.concat([" El ", [sh(h.unattributed_share)], " no lo explica ninguna etiqueta de cómputo"]).concat(h.first_tag && isNum(h.first_tag.tagged_share) ? ["; vuestra etiqueta ", [h.first_tag.tag], " cubre el ", [sh(h.first_tag.tagged_share)], "."] : ["."]); }
+    if (isNum(h.estimated_monthly_savings)) { parts = parts.concat([" ", [String(h.savings_signals)], plural(h.savings_signals, " cambio ahorraría", " cambios ahorrarían"), " unos ", [money(h.estimated_monthly_savings)], " al mes."]); }
+    rich(document.getElementById("cover-lead"), parts);
+    var meta = document.getElementById("cover-badges");
+    clear(meta);
+    function chip(p, on) { meta.appendChild(rich(el("span", { className: on ? "on" : null }), p)); }
+    chip(["Generado ", [utc(snap.reference_utc)]]);
+    chip(["Workspace ", [ws.name || "—"]]);
+    chip([m.metric === "ActualCost" ? "Coste real · " : "Coste amortizado · ", [m.currency || "—"]]);
+    chip(["Entorno ", [snap.environment || "—"]]);
+    chip([snap.provenance === "SIMULATED" ? "DATOS SIMULADOS" : "DATOS " + (snap.provenance || "LIVE")], true);
+    var sev = h.signals_by_severity || {}, tone = "ok", title = "En línea";
+    if (sev.high) { tone = "act"; title = "Acción necesaria"; } else if (sev.medium) { tone = "warn"; title = "Revisión recomendada"; }
+    var verdict = document.getElementById("verdict");
+    verdict.className = "signal " + tone;
+    clear(verdict);
+    verdict.appendChild(el("div", { className: "k", text: "Veredicto" }));
+    verdict.appendChild(el("b", { text: title }));
+    verdict.appendChild(el("p", { text: [isNum(h.estimated_monthly_savings) ? "Ahorro estimado ≈ " + money(h.estimated_monthly_savings) + "/mes" : null,
+      isNum(h.unattributed_share) ? sh(h.unattributed_share) + " sin atribuir" : null, h.signals + plural(h.signals, " señal", " señales")].filter(Boolean).join(" · ") }));
+    var dist = document.getElementById("severity-dist");
+    clear(dist);
+    dist.hidden = !h.signals;
+    if (!h.signals) { return; }
+    var head = el("div", { className: "dist-head" }, [el("span", { text: "Señales de optimización por severidad" })]);
+    head.appendChild(rich(el("span"), [[num(h.signals)], plural(h.signals, " señal", " señales") + " en " + month]));
+    dist.appendChild(head);
+    var track = el("div", { className: "track", role: "img", "aria-label": ["high", "medium", "low"].map(function (s) { return (sev[s] || 0) + " " + L.sev[s].toLowerCase(); }).join(", ") });
+    var legend = el("div", { className: "legend" });
+    ["high", "medium", "low"].forEach(function (s) {
+      if (!sev[s]) { return; }
+      var seg = el("i", { title: L.sev[s] + ": " + sev[s] });
+      seg.style.width = (100 * sev[s] / h.signals) + "%";
+      seg.style.background = SEV_BAR[s];
+      track.appendChild(seg);
+      var key = el("i");
+      key.style.background = SEV_BAR[s];
+      legend.appendChild(el("span", null, [key, L.sev[s] + " ", el("b", { text: String(sev[s]) })]));
+    });
+    dist.appendChild(track);
+    dist.appendChild(legend);
   }
 
   function renderActions(snap) {
@@ -1601,12 +2271,12 @@ a{color:inherit;text-decoration:none}
   function cssString(s) { return String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/[\r\n]+/g, " ").replace(/</g, "\\3c "); }
   function renderFooter(snap) {
     var ws = snap.workspace || {}, client = (snap.client && snap.client.name) || "CLIENTE";
-    var when = utc(snap.reference_utc);
+    var when = utc(snap.reference_utc), costs = FOCUS === "costs";
     document.getElementById("report-footer").textContent = "Generado por Azure SRE Agent · Solo lectura · generate-databricks-dependency-report · " + when + " · " + client;
-    document.title = (ws.name ? ws.name + " · " : "") + "Revisión Azure Databricks | Mapa de dependencias y configuración";
+    document.title = (ws.name ? ws.name + " · " : "") + (costs ? "Costes de Azure Databricks | Origen del coste y optimización" : "Revisión Azure Databricks | Mapa de dependencias y configuración");
     var style = document.getElementById("print-page-style");
     if (!style) { style = el("style", { id: "print-page-style" }); document.head.appendChild(style); }
-    var foot = "Revisión Azure Databricks · " + (ws.name || "—") + " · " + when + (snap.provenance === "SIMULATED" ? " · DATOS SIMULADOS" : "");
+    var foot = (costs ? "Costes de Azure Databricks · " : "Revisión Azure Databricks · ") + (ws.name || "—") + " · " + when + (snap.provenance === "SIMULATED" ? " · DATOS SIMULADOS" : "");
     style.textContent = '@page { @bottom-left { content: "' + cssString(foot) + '"; font: 8pt "Segoe UI", sans-serif; color: #667085; } @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 8pt "Segoe UI", sans-serif; color: #667085; } }';
   }
 
@@ -1619,6 +2289,7 @@ a{color:inherit;text-decoration:none}
     (snap.findings || []).forEach(function (f) { if (counts[f.severity] !== undefined) { counts[f.severity]++; } });
     var sc = (snap.dependencies && snap.dependencies.summary_counts) || {};
     renderHero(snap, g, counts);
+    renderCostHero(snap);
     renderKpis(snap, g, counts);
     renderFacts(snap);
     renderExecutive(snap, g);
@@ -1631,6 +2302,7 @@ a{color:inherit;text-decoration:none}
     document.getElementById("dep-graph-note").textContent = num(sc.nodes_total || 0) + " nodos · " + num(sc.edges_total || 0) + " relaciones en total";
     renderInventory(snap);
     renderFinops(snap);
+    renderCosts(snap);
     renderActions(snap);
     renderSources(snap);
     renderFooter(snap);
@@ -1639,6 +2311,7 @@ a{color:inherit;text-decoration:none}
     renderReferenceArchitecture();
   }
 
+  applyPresentation();
   if (isMulti) {
     var selWrap = document.getElementById("workspace-selector-wrap");
     var sel = document.getElementById("workspace-selector");

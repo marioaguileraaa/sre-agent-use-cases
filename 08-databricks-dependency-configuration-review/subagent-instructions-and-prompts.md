@@ -28,7 +28,7 @@ Follow skill databricks-dependency-live and use ONLY generate-databricks-depende
 Observe only its fixed approved workspace allowlist and explicit managed identity configuration.
 Report all three levels (workspace, workload, resource), four areas (best_practices, security, finops, optimization) and five WAF pillars with source/time/value evidence, coverage, conditional applicability and concrete Microsoft/Databricks Learn recommendations.
 Keep the dependency graph provenance strict: classify every relationship as OBSERVED (exact native ID/key join across collected APIs), INFERRED (explicit URI/hostname reference to an uncollected external resource) or UNKNOWN (uncollected runtime table/column lineage in system.access.table_lineage, notebook code internals, or untested data-plane reachability).
-Never fabricate table lineage from job or notebook names, and never start a cluster or SQL Warehouse to query system tables.
+Never fabricate table lineage from job or notebook names, and never start a cluster or SQL Warehouse to query system tables (the only exception is the fixed billing statement the operator enables with system_tables_warehouse_id on an existing warehouse).
 Keep Azure Resource Manager (ARM) control-plane access separate from Azure Databricks Workspace and Unity Catalog REST authorization. Azure Lighthouse delegates ARM reads only, never Workspace or Unity Catalog access.
 If the tool returns configuration_required or cross_tenant_configuration_required, report that exact unconfigured/cross-tenant state and stop; never substitute simulated data or healthy zeros.
 Scores are local assessment indicators, never official Azure WAF or Databricks certification grades. Always present evaluated, not_evaluated (No evaluado) and not_applicable (No aplica) counts beside any score.
@@ -37,6 +37,8 @@ For native_ui, immediately render all four provided *_url values (report_url, sn
 http_verified=false does not suppress provided links; written is not download verification. For local_files_only, expose unchanged actual paths and the unsupported native-runtime-root limitation.
 For questions use typed local filters (view, workload_name, classification, area, level, severity, status, limit, offset) and disclose exact paging totals. A new call is a fresh collection, not a persistent cursor.
 FinOps preserves observed ARM ActualCost rows and currency separately from Por estimar / No calculado savings; never invent DBU workload splits or dollar savings.
+For Databricks costs (view=costs, report section 6) answer from Cost Management grouped by Databricks tags: month total and change, DBU vs infrastructure, top clusters/jobs/SQL warehouses/pools, the share no tag explains (shared services and serverless DBUs) and the top signals. Every saving is an estimate with its saving_kind and formula; only counted=true savings add up. If databricks_costs.status is denied, ask for Cost Management Reader on the subscription and show no figures.
+Use operation=self_test only when the user explicitly asks for a demo without a workspace; its files are SIMULATED and you must say so. Never use it in place of a failed or unconfigured live run.
 Never read secret values (/api/2.0/secrets/get), spark_env_vars, spark_conf, notebook code or job parameter values, and never grant roles, consent apps, create federation policies, start compute or modify Azure/Databricks resources.
 ```
 
@@ -162,4 +164,31 @@ not_configured, incluyendo el modo de autenticación cross-tenant configurado.
 
 ```json
 {"operation":"query","view":"coverage","limit":25}
+```
+
+### 7. Databricks costs: where they come from and how to optimise them (`view="costs"`)
+
+```text
+@databricks-dependency-live Usa query con view=costs para
+<APPROVED_DATABRICKS_WORKSPACE_NAME>. ¿Cuánto costó Databricks el último mes
+cerrado frente al anterior, cuánto es DBU y cuánto infraestructura, qué
+clústeres, jobs, SQL warehouses y pools concentran el coste, qué parte no
+explica ninguna etiqueta y qué cambios ahorrarían más? Indica cómo se estima
+cada ahorro y no sumes dos ahorros del mismo objeto.
+```
+
+```json
+{"operation":"query","view":"costs","workspace_name":"<APPROVED_DATABRICKS_WORKSPACE_NAME>","limit":25}
+```
+
+### 8. Demo without a workspace (`self_test`, SIMULATED)
+
+```text
+@databricks-dependency-live Ejecuta operation=self_test para una demostración
+con el workspace simulado incorporado y entrégame los cuatro archivos, dejando
+claro que los datos son SIMULADOS.
+```
+
+```json
+{"operation":"self_test"}
 ```

@@ -18,7 +18,8 @@ implementation and cross-tenant onboarding guide is in English.
 | A deep dependency graph classifying **OBSERVED** native ID/key joins, explicit **INFERRED** URI/hostname references and **UNKNOWN** blind spots, plus referential-integrity detection (`G05`) | Runtime SQL table/column lineage fabricated from job or notebook names, or untested data-plane network reachability |
 | A local assessment indicator **beside coverage and check counts** across 36 rules, 3 levels, 4 areas and 5 WAF pillars | An official Microsoft Well-Architected Review, Databricks certification or production SLA guarantee |
 | First-party-grounded **cross-tenant authentication modes** separating Azure Resource Manager (ARM) from Databricks Workspace and Unity Catalog REST APIs | That a Tenant-A SRE User-Assigned Managed Identity (UAMI) automatically acquires Tenant-B tokens or workspace permissions without administrator setup |
-| Control-plane and metadata-only REST reads that **never start clusters or SQL Warehouses** and never execute billable SQL statements | Historical DBU workload attribution (`system.billing.usage`) or runtime table lineage (`system.access.table_lineage`), which require running a SQL Warehouse |
+| Control-plane and metadata-only REST reads that **never start clusters or SQL Warehouses**; a billable SQL statement runs only if you opt in to system tables | Runtime table lineage (`system.access.table_lineage`), or per-run and per-user DBU detail unless you opt in to `system.billing.usage` on an existing SQL warehouse |
+| **Databricks costs: where they come from and how to optimise them** (report section 6): Cost Management grouped by the tags Databricks puts on clusters, jobs, SQL warehouses and pools, DBU vs infrastructure, the cost no tag explains, and optimisation signals with documented savings estimates | Exact savings: each estimate is labelled lower bound, upper bound or estimate and shows its formula; no estimate is shown where cost data is missing |
 | Four native downloadable files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) from one complete report call | Remediation, RBAC/Unity Catalog grants, secret rotation or unattended compute changes |
 
 > [!IMPORTANT]
@@ -42,6 +43,17 @@ implementation and cross-tenant onboarding guide is in English.
 > resource-group `Reader` assignment ([`native-readiness-validation.json`](native-readiness-validation.json),
 > [`visual-evidence.json`](visual-evidence.json)).
 
+> [!NOTE]
+> **Databricks costs (November 2026).** Report section 6 now answers *where does
+> our Databricks cost come from and how do we optimise it?*
+> ([details](#databricks-costs-where-they-come-from-and-how-to-optimise-them)).
+> The Cost Management query shapes were validated read-only against a lab
+> subscription on **2026-11-12**. That lab has no Databricks workspace, so the
+> cost screenshots and the `self_test` demo use a built-in workspace labelled
+> `SIMULATED` everywhere (provenance chip, banner and `simulated-*` file names).
+> `self_test` is an explicit demo operation; it is never substituted for an
+> unconfigured or failed live run.
+
 ## Contents
 
 - [Brief and validation state](#brief-and-validation-state)
@@ -50,6 +62,7 @@ implementation and cross-tenant onboarding guide is in English.
 - [How the pieces fit together](#how-the-pieces-fit-together)
 - [Source, dependency and coverage contract](#source-dependency-and-coverage-contract)
 - [Customer scope coverage and rule catalog](#customer-scope-coverage-and-rule-catalog)
+- [Databricks costs: where they come from and how to optimise them](#databricks-costs-where-they-come-from-and-how-to-optimise-them)
 - [Prerequisites](#prerequisites)
 - [Files to download](#files-to-download)
 - [Step 0 - Identify the reporting identity and approve cross-tenant or same-tenant scope](#step-0---identify-the-reporting-identity-and-approve-cross-tenant-or-same-tenant-scope)
@@ -70,9 +83,9 @@ implementation and cross-tenant onboarding guide is in English.
 |---|---|
 | Title / folder | Azure Databricks dependency mapping, configuration and FinOps review / `08-databricks-dependency-configuration-review` |
 | Customer problem | Platform, data engineering, security and FinOps teams need an evidence-backed assessment of Azure Databricks workspace configuration, workloads, associated Azure resources (Storage/ADLS Gen2, VNet, NSG, NAT Gateway, Private Endpoints, DNS, Key Vault, Access Connector) and internal/external dependencies without starting clusters or running billable queries. |
-| Business value | Consolidates control-plane ARM, Databricks Workspace REST and Unity Catalog metadata into one dependency graph (`OBSERVED`, `INFERRED`, `UNKNOWN`) and 36-rule review workpaper so owners can identify broken task/compute references, interactive cluster waste and governance gaps before production incidents occur. No fabricated ROI or savings are claimed. |
+| Business value | Consolidates control-plane ARM, Databricks Workspace REST and Unity Catalog metadata into one dependency graph (`OBSERVED`, `INFERRED`, `UNKNOWN`) and 36-rule review workpaper so owners can identify broken task/compute references, interactive cluster waste and governance gaps before production incidents occur. Report section 6 explains the month's Databricks cost by cluster, job, SQL warehouse, pool and allocation tag and lists optimisation signals; savings are estimated only where Cost Management data allows, with the formula shown, and are never fabricated. |
 | Workload and exact scope | One to five fixed, operator-approved `Microsoft.Databricks/workspaces` instances, their Workspace/Unity Catalog REST metadata and whitelisted associated Azure resources in the approved subscription. |
-| Exclusions | No cluster or SQL Warehouse start/stop, no `/api/2.0/sql/statements` execution, no `system.access.table_lineage` / `system.billing.usage` SQL queries, no `/api/2.0/secrets/get` secret-value reads, no `spark_env_vars` / `spark_conf` / init-script bodies / notebook source / job parameter values, and no RBAC or Unity Catalog grants. |
+| Exclusions | No cluster or SQL Warehouse start/stop, no `/api/2.0/sql/statements` execution (except the fixed read-only `system.billing.usage` statement when `system_tables_warehouse_id` is set; off by default), no `system.access.table_lineage` SQL queries, no `/api/2.0/secrets/get` secret-value reads, no `spark_env_vars` / `spark_conf` / init-script bodies / notebook source / job parameter values, and no RBAC or Unity Catalog grants. |
 | Provenance | Live collector outputs carry collector-path label `LIVE` (`provenance="LIVE"` in `configuration_required` readiness responses identifies the live code path, not a connected source); isolated unit/UI test fixtures are permanently labeled `SIMULATED` and `LAB` inside `tests/` only. |
 | Validation state | Code `OFFLINE_VALIDATED` (34+ unit, browser UI, media and privacy checks passing); native SRE tool/skill/specialist saved, read back and readiness-validated on `2026-10-16` ([`native-readiness-validation.json`](native-readiness-validation.json)); colleague Tenant-B Databricks source remains `UNKNOWN_NOT_CONFIGURED` / `NOT_RUN`. |
 | Runtime specialist model | Platform-supported Azure SRE Agent default (`llmModelName=null`). *(Authoring note: repository authoring subagents ran on `Gemini 4 Argon` with `high` reasoning and `1M` context, which is a Copilot coding-agent setting and not an Azure SRE Agent runtime field.)* |
@@ -252,9 +265,11 @@ flowchart LR
     I --> A["Plane 1: ARM GETs<br/>Workspace + VNet/NSG/PE/Storage/KV/AccessConnector"]
     I --> D["Plane 2: Workspace REST<br/>Clusters/Pools/Policies/Jobs/Pipelines/Warehouses/Scopes"]
     I --> U["Plane 2: Unity Catalog REST<br/>Metastore/Catalogs/Schemas/Credentials/ExternalLocations"]
+    I --> K["Plane 1: Cost Management query<br/>grouped by Databricks tags (read-only POST)"]
     A --> M["Normalized snapshot<br/>OBSERVED / INFERRED / UNKNOWN graph + 36 rules"]
     D --> M
     U --> M
+    K --> M
     M --> R["Offline Spanish HTML<br/>full JSON + findings CSV + dependencies CSV"]
     R --> F["Four native links<br/>from this actual SRE thread"]
 ```
@@ -273,8 +288,11 @@ flowchart LR
 | `dbx_pipelines`, `dbx_pipeline_detail_*` & `dbx_sql_warehouses` | `GET /api/2.0/pipelines?max_results=50`, `GET /api/2.0/pipelines/{id}`, `GET /api/2.0/sql/warehouses` | Plane 2 (Databricks Workspace) | `page_token` / `next_page_token`; up to 100 pipeline detail GETs | Reads `spec.catalog`, `spec.schema` (and legacy `spec.target`), `spec.storage` and `spec.clusters` from `/api/2.0/pipelines/{id}`; denied detail GETs keep `detail_collected=False` (`UNKNOWN` / `W10` `not_evaluated`); never starts a warehouse | No query history or SQL statement execution |
 | `dbx_secret_scopes` & `dbx_init_scripts` | `GET /api/2.0/secrets/scopes/list`, `GET /api/2.0/global-init-scripts` | Plane 2 (Databricks Workspace) | `page_token` / `next_page_token` | Maps `AZURE_KEYVAULT` `resource_id`/`dns_name` to Key Vault nodes | `/api/2.0/secrets/get` is explicitly blocked; script bodies excluded |
 | `uc_metastore_summary`, `uc_catalogs`, `uc_schemas`, `uc_storage_credentials`, `uc_external_locations`, `uc_connections` | `GET /api/2.1/unity-catalog/...` | Plane 2 (Unity Catalog) | `page_token` / `next_page_token` | Joins External Locations -> Storage Credentials -> Access Connector -> ADLS Storage Accounts (`OBSERVED` vs `INFERRED`) | Never reads table data, volumes or files |
-| `uc_system_lineage` | `system.access.table_lineage`, `system.access.column_lineage`, `system.billing.usage` | Not queried in control-plane mode | N/A (`status="not_configured"`) | Permanently disclosed as `UNKNOWN` (`not_evaluated` on `G06` and `R06`) so no SQL Warehouse is started or billed | No SQL Warehouse startup or DBU spend |
+| `uc_system_lineage` | `system.access.table_lineage`, `system.access.column_lineage` | Not queried in control-plane mode | N/A (`status="not_configured"`) | Permanently disclosed as `UNKNOWN` (`not_evaluated` on `G06`) so no SQL Warehouse is started or billed | No SQL Warehouse startup or DBU spend |
 | `arm_advisor` & `azure_cost` | `GET .../Microsoft.Advisor/recommendations`, `POST .../Microsoft.CostManagement/query?api-version=2023-11-01` | Plane 1 (ARM) | `nextLink` paged | `cost_scope="disabled"` by default; preserves exact currency and ARM `ResourceId` rows without fabricating savings | No workload-level DBU split inferred from ARM resource totals |
+| `azure_cost_databricks` | `POST /subscriptions/{sub}/providers/Microsoft.CostManagement/query?api-version=2025-03-01` (about 12 queries, `AmortizedCost` by default) | Plane 1 (ARM), Cost Management Reader | Filter: workspace `ResourceId` (+ `approved_cost_resource_ids`) **or** its managed resource group; previous month to today, monthly and daily; `nextLink` paged; patient retry on `429` honouring the `*retry-after` headers; skipped when the collection budget is short | One receipt with per-query status; `403` makes the whole section `denied` (never zero); a failed query stays missing, not zero | No resources outside the workspace and its managed resource group unless approved; no write |
+| `dbx_spark_versions` & `dbx_node_types` | `GET /api/2.0/clusters/spark-versions`, `GET /api/2.0/clusters/list-node-types` | Plane 2 (Databricks Workspace) | Single GETs | Feed the runtime and VM-family signals; when denied those signals are omitted | Catalog metadata only |
+| `dbx_system_billing` (opt-in) | `POST /api/2.0/sql/statements` with one fixed read-only `SELECT` over `system.billing.usage` and `system.billing.list_prices` | Plane 2 (Databricks SQL), only when `system_tables_warehouse_id` is set | `INLINE` JSON, 50 s wait then `CANCEL`, up to 600 rows | `not_configured` by default; any other statement text is rejected before sending | **Consumes DBUs** on your existing SQL warehouse; list prices only |
 
 ## Customer scope coverage and rule catalog
 
@@ -289,7 +307,89 @@ customer-requested areas (`best_practices`, `security`, `finops`,
 | **Workspace & Control Plane** (`C01–C12`) | `C01` SKU Premium, `C02` Secure Cluster Connectivity (`enableNoPublicIp`), `C03` VNet Injection (`customVirtualNetworkId`), `C04` Public Network Access & Private Link, `C05` Access Connector & Storage Firewall, `C06` CMK encryption, `C07` Enhanced Security & Compliance, `C08` ARM Diagnostic Settings, `C09` PAT Governance (`workspace-conf`), `C10` Unity Catalog default catalog, `C11` Global Init Scripts hygiene, `C12` Azure Advisor cached read | Evaluates ARM workspace properties, diagnostic settings, Advisor and workspace-level token/init-script settings. Conditional controls (`C03`, `C04`, `C06`, `C07`) remain `not_evaluated` when operator requirements are unconfirmed and the setting is absent. |
 | **Compute, Jobs, Pipelines & SQL Warehouses** (`W01–W10`) | `W01` All-Purpose autotermination (`<= 60m`), `W02` Cluster Policy binding (`policy_id`), `W03` Unity Catalog access mode (`USER_ISOLATION` / `SINGLE_USER` / `SHARED`), `W04` Runtime LTS version (`>= 13.x LTS`), `W05` Autoscaling or Instance Pool, `W06` Jobs using Job/Serverless compute instead of All-Purpose (`existing_cluster_id`), `W07` Job timeouts & failure notifications, `W08` Job `run_as` Service Principal ownership, `W09` SQL Warehouse `auto_stop_mins <= 30` & Serverless/Pro, `W10` Lakeflow Pipeline target in Unity Catalog | Evaluates every collected cluster, job, declarative pipeline and SQL warehouse individually. Missing workspace REST access keeps these checks `not_evaluated` rather than assuming zero workloads. |
 | **Governance, Dependency Map & Unity Catalog** (`G01–G08`) | `G01` Unity Catalog Metastore attached, `G02` Storage Credentials using Managed Identity (`access_connector_id`), `G03` External Locations governed (`credential_name` + `abfss://`), `G04` Secret Scopes backed by `AZURE_KEYVAULT`, `G05` Referential integrity across the dependency graph (broken task/cluster/pool/policy/pipeline/warehouse/credential references), `G06` Runtime table/column lineage (`not_evaluated` without SQL compute), `G07` Lakehouse Federation connections inventory, `G08` Outbound control-plane endpoints visibility | Validates both governance posture and the structural integrity of the dependency graph (`G05`), while keeping dynamic SQL table lineage (`G06`) explicitly `not_evaluated`. |
-| **Associated Azure Resources & FinOps** (`R01–R06`) | `R01` Storage HTTPS, TLS 1.2+ and `allowBlobPublicAccess=false`, `R02` Storage `allowSharedKeyAccess=false` and `publicNetworkAccess=Disabled`, `R03` Key Vault RBAC authorization and Purge Protection, `R04` NSG inbound administrative exposure from Internet, `R05` Private Endpoint `Approved` state, `R06` FinOps `ActualCost` vs DBU workload attribution (`not_evaluated` without `system.billing.usage`) | Evaluates collected ARM Storage accounts, Key Vaults, NSGs, Private Endpoints and optional ARM `ActualCost` rows. |
+| **Associated Azure Resources & FinOps** (`R01–R06`) | `R01` Storage HTTPS, TLS 1.2+ and `allowBlobPublicAccess=false`, `R02` Storage `allowSharedKeyAccess=false` and `publicNetworkAccess=Disabled`, `R03` Key Vault RBAC authorization and Purge Protection, `R04` NSG inbound administrative exposure from Internet, `R05` Private Endpoint `Approved` state, `R06` FinOps cost attribution by tags (evaluated from report section 6: passes when at most 10 % of the month's cost lacks the `Vendor` tag and the first allocation tag covers at least 80 %; `not_evaluated` without cost data) | Evaluates collected ARM Storage accounts, Key Vaults, NSGs, Private Endpoints, optional ARM `ActualCost` rows and the Databricks cost model. |
+
+## Databricks costs: where they come from and how to optimise them
+
+Customers who already tag Databricks often still cannot answer two questions:
+*where does the cost come from?* and *what do we change to pay less?* Report
+section 6 (and `view="costs"` in chat) answers both from Azure Cost Management
+plus the configuration the collector already reads. No cluster, job or warehouse
+is started and nothing is changed.
+
+| Question | How the report answers it |
+|---|---|
+| How much did Databricks cost? | Last closed month vs the month before, and month to date, as `AmortizedCost` (`COST_METRIC`, or `ActualCost` for the invoice view) in the billing currency. |
+| DBU or infrastructure? | DBU (`Azure Databricks` meter category, billed on the workspace resource) by compute type: all-purpose, jobs, SQL pro/classic, SQL serverless, serverless, DLT, AI. Infrastructure (VMs, disks, network in the managed resource group) by service and VM size. |
+| Who consumes it? | Cost Management grouped by the tags Databricks puts on compute: `ClusterName` (clusters), `JobId` (job compute only), `SqlEndpointId` (SQL warehouses), `DatabricksInstancePoolId` (pools), joined to the collected inventory for creator and custom tags; plus your own allocation tags (`COST_ALLOCATION_TAGS`, default `team`, `project`, `cost_center`) and their coverage. Short-lived job-run clusters are grouped; their detail is on the Jobs tab. |
+| What does no tag explain? | Cost without the `Vendor` tag that Databricks adds to all classic compute: shared workspace services (DBFS root storage, NAT, load balancer, egress) and **serverless DBUs**, which carry no Azure tags (use [serverless usage policies](https://learn.microsoft.com/azure/databricks/admin/account-settings/usage-detail-tags) or system tables to split them). |
+| What changed? | Clusters, jobs, warehouses and pools with the largest increase or decrease vs the previous month. |
+| How do we optimise it? | Signals from configuration + cost, each with evidence, the month's cost of the object, a savings estimate where the data allows it, the action and a Microsoft Learn link. |
+
+**Attribution facts the model relies on** ([Learn: usage detail tags](https://learn.microsoft.com/azure/databricks/admin/account-settings/usage-detail-tags)):
+`JobId` and `RunName` only propagate on job compute; when clusters are created
+from a pool, only workspace and pool tags reach the VMs (cluster tags do not);
+job tags propagate to the job clusters a run creates; serverless usage is not
+tagged in Azure. The report states these limits instead of guessing.
+
+**Optimisation signals and savings rules.** Only one saving per object counts
+towards the headline (the largest); the others are shown as *no suma*. Signals
+without a cost basis show *No estimable*.
+
+| Signal | Detected from | Savings estimate (per month) |
+|---|---|---|
+| All-purpose cluster without autotermination / with a long one (`> COST_AUTOTERMINATION_MAX_MINUTES`, default 60) | `autotermination_minutes`, state, uptime, daily cost | Off: weekend cost of that cluster (lower bound) |
+| Scheduled jobs on all-purpose compute | `existing_cluster_id` in scheduled, unpaused jobs | Cluster DBU × (1 − `COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO`, default 0.55) (upper bound) |
+| Workers without spot (all-purpose or job clusters) | `azure_attributes.availability`, workers, VM cost | VM cost × workers / (workers + 1) × `COST_SPOT_DISCOUNT` (default 0.6) |
+| Pool with idle instances always on | `min_idle_instances`, daily pool cost | Daily cost floor × days in the month |
+| SQL warehouse without auto-stop / long auto-stop (`> COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES`, default 30); classic or pro warehouse to evaluate serverless | `auto_stop_mins`, type, size | No auto-stop: warehouse cost × weekend share of the month |
+| Continuous jobs, Photon candidates, clusters without policy, policies that do not enforce allocation tags, missing allocation tags, unsupported runtimes, old VM families | Jobs, clusters, policies, `spark-versions`, `list-node-types` | Not estimated (no cost basis that would not be invented) |
+
+**Configuration (private copy).** Per workspace in `APPROVED_WORKSPACES`:
+`cost_analysis_enabled` (default `True`) and `system_tables_warehouse_id`
+(default `""`, off). Globals: `COST_METRIC`, `COST_ALLOCATION_TAGS` (up to three
+of your tag keys), `COST_AUTOTERMINATION_MAX_MINUTES`,
+`COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES`, `COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO`,
+`COST_SPOT_DISCOUNT`. Presentation hooks for a customer edition (validated
+before any source call): `REPORT_FOCUS` (`configuration` or `costs`, which opens
+the report with the cost verdict and KPIs), `BRAND_THEME` (documented CSS
+variables, `#RRGGBB` or `rgba()` only), `BRAND_DISPLAY_FONT_DATA_URI` (inline
+WOFF2 up to 80 KB for headings) and `BRAND_LOGO_PLACEMENT` (`hero` or `bar`).
+
+**Permissions.** The reporting identity needs **Cost Management Reader** (or
+Reader) on the subscription that holds the workspace and its managed resource
+group, in addition to the existing ARM Reader and Databricks workspace access.
+In cross-tenant modes, grant it to the identity that reads ARM in the target
+tenant. A `403` marks section 6 `denied`; it is never shown as zero.
+
+**Cost Management limits.** About a dozen queries run sequentially with patient
+retries on `429` (honouring the `x-ms-ratelimit-*-retry-after` headers, at most
+30 s per wait) inside the 420-second collection budget; a query that cannot run
+in time is `skipped` and stays missing. Cost data for the last one or two days
+can still change.
+
+**Optional system tables (off by default, costs DBUs).** Set
+`system_tables_warehouse_id` to an existing SQL warehouse to add per-run and
+per-user detail at list price from `system.billing.usage` and
+`system.billing.list_prices`. The statement consumes DBUs and, if the warehouse
+is stopped, starts it (it stops again after its own auto-stop). The identity
+then needs `CAN USE` on that warehouse and `SELECT` on both tables; the tool
+sends only one fixed, read-only statement and rejects any other text before
+sending it.
+
+**Demo without a workspace: `operation="self_test"`.** Writes the same four
+files from a built-in workspace (`dbx-analitica-prod`) with no authentication or
+network call. Everything is labelled `SIMULATED`, files start with
+`simulated-`, and the specialist only runs it when the user explicitly asks for
+a demo.
+
+![Report section 6 with the month's Databricks cost, DBU vs infrastructure and who consumes it, from SIMULATED data](images/17-report-databricks-costs.png)
+
+*Report section 6 rendered from `operation="self_test"` (`17-report-databricks-costs.png`, `SIMULATED`): **(1)** month cost, DBU · infrastructure split, unattributed share and estimated savings with the three-month trend; **(2)** DBU by compute type and infrastructure by service; **(3)** who consumes it, by cluster, job, SQL warehouse, pool, creator and allocation tag.*
+
+![Report section 6 optimisation signals with evidence, month cost, estimated saving and action, from SIMULATED data](images/18-report-databricks-cost-signals.png)
+
+*Optimisation signals (`18-report-databricks-cost-signals.png`, `SIMULATED`): **(1)** signal count and the counted savings (only the largest per object), with severity, savings and search filters and a filtered CSV; **(2)** each signal with its evidence, object, cost of the month, estimated saving and its basis, and what to do with a Microsoft Learn link.*
 
 ## Prerequisites
 
@@ -308,14 +408,14 @@ customer-requested areas (`best_practices`, `security`, `finops`,
 Use **Raw / Download raw file** in GitHub so you save plain Python, JSON and
 Markdown files (never an HTML sign-in wrapper):
 
-- Standalone Python tool: [`generate-databricks-dependency-report.py`](generate-databricks-dependency-report.py) (committed Git blob SHA-256: `dc2d82068e27286b14f9cc0bc8b05c887f92ba62f94cbfec6056aee816e799f8`)
-- Typed parameter schema: [`tool-parameters.schema.json`](tool-parameters.schema.json) (committed Git blob SHA-256: `d538cd8e1a86b1c388c1e6821505d601fa78a15c870164e780f8a167db272f95`)
+- Standalone Python tool: [`generate-databricks-dependency-report.py`](generate-databricks-dependency-report.py) (current LF SHA-256: `d2fca84a8ea2d2ceaefe8b616f68c2f62a0096631bbdb40172517516e780a972`; every change after the readiness receipt is listed in [`runtime-changes.json`](runtime-changes.json))
+- Typed parameter schema: [`tool-parameters.schema.json`](tool-parameters.schema.json) (current LF SHA-256: `5d90b8e2a6e8f8c6e118e7e0c7396ee2b7a40bf0de155b1f1e58b4ac12bf777c`)
 - Runtime dependencies reference: [`requirements.txt`](requirements.txt)
-- Runtime skill: [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md) (committed Git blob SHA-256: `84567687bb41484db594981466daf4eadd9c4b43a8e590a94e67538e841cad9a`)
-- Specialist instructions and EN/ES prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (committed Git blob SHA-256: `c54673596441a475db869c9ce083f5083ce02e6bb5b670f66db96f988909a79a`; LF copy-ready instruction block SHA-256: `4a9465000397e01316211bb998303c5faedb78738267f55f1faff5cd2d44de87`)
+- Runtime skill: [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md) (current LF SHA-256: `091520084062d3c7be0a732501b1c09ad8be8a733d09a8455ecc8ceadf006629`)
+- Specialist instructions and EN/ES prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (current LF SHA-256: `0d89b25559ce57d1520f329433642f94c598425c8f6199d84948d3e35cdb0733`; LF copy-ready instruction block SHA-256: `38ab022d0392095cf6af10d6c9a21bd4a60f7109cdf5615e6853465aa50e1f4a`)
 - Pinned rule catalog (already embedded in the standalone tool): [`rules_catalog.json`](rules_catalog.json)
 - Public native-readiness validation receipt: [`native-readiness-validation.json`](native-readiness-validation.json)
-- Public visual evidence manifest (16 annotated PNGs): [`visual-evidence.json`](visual-evidence.json)
+- Public visual evidence manifest (18 annotated PNGs): [`visual-evidence.json`](visual-evidence.json)
 
 ## Step 0 - Identify the reporting identity and approve cross-tenant or same-tenant scope
 
@@ -337,7 +437,10 @@ staging copy outside Git**, edit only the administrator constants at the top of
 `generate-databricks-dependency-report.py` (`SUBSCRIPTION_ID`, `SRE_TENANT_ID`,
 `TARGET_TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `FEDERATED_APP_CLIENT_ID`,
 `KEYVAULT_OAUTH_SECRET_URI`, `CROSS_TENANT_CERT_KEYVAULT_URL`, `CROSS_TENANT_CERT_NAME`, `CLIENT_NAME`, `CLIENT_LOGO_DATA_URI`,
-`CLIENT_LOGO_ALT`, `APPROVED_WORKSPACES`).
+`CLIENT_LOGO_ALT`, `APPROVED_WORKSPACES`). The Databricks cost section has its
+own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
+`COST_*`, `REPORT_FOCUS`, `BRAND_*`), described in
+[Databricks costs](#databricks-costs-where-they-come-from-and-how-to-optimise-them).
 
 - **Visual styling and private logo boundary:** The HTML report uses the
   corporate industrial navy/steel (`#003865`, `#0066a1`) and Databricks
@@ -384,8 +487,8 @@ staging copy outside Git**, edit only the administrator constants at the top of
 
 | Parameter | Runtime type | Default | Allowed values / constraint |
 |---|---|---|---|
-| `operation` | `string` | `report` | `report`, `query`, `list_workspaces` |
-| `view` | `string` | `summary` | `summary`, `workspace`, `compute`, `jobs`, `pipelines`, `warehouses`, `unity_catalog`, `resources`, `findings`, `finops`, `coverage`, `actions`, `dependencies` |
+| `operation` | `string` | `report` | `report`, `query`, `list_workspaces`, `self_test` (demo: four files from a built-in `SIMULATED` workspace, no authentication or network) |
+| `view` | `string` | `summary` | `summary`, `workspace`, `compute`, `jobs`, `pipelines`, `warehouses`, `unity_catalog`, `resources`, `findings`, `finops`, `costs`, `coverage`, `actions`, `dependencies` |
 | `workspace_name` | `string` | `""` | `""` or exact allowlisted workspace name (1–64 chars) |
 | `workspace_names` | `string` | `""` | 1–5 comma-separated allowlisted workspace names; mutually exclusive with `workspace_name` |
 | `workload_name` | `string` | `""` | Exact local name filter (cluster, job, pipeline, warehouse, UC object or resource) |
@@ -422,8 +525,8 @@ staging copy outside Git**, edit only the administrator constants at the top of
 In **Builder > Skills > Create skill**, create **`databricks-dependency-live`**
 using the exact content of
 [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md)
-(committed Git blob SHA-256:
-`84567687bb41484db594981466daf4eadd9c4b43a8e590a94e67538e841cad9a`) and bind
+(current LF SHA-256:
+`091520084062d3c7be0a732501b1c09ad8be8a733d09a8455ecc8ceadf006629`) and bind
 only `generate-databricks-dependency-report`.
 
 ![Saved databricks-dependency-live runtime skill profile](images/05-saved-runtime-skill.png)
@@ -441,7 +544,7 @@ In **Builder > Custom agents / Subagents > Create**, configure:
 - **Instructions:** Paste the copy-ready block from
   [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)
   (LF instruction block SHA-256:
-  `4a9465000397e01316211bb998303c5faedb78738267f55f1faff5cd2d44de87`).
+  `38ab022d0392095cf6af10d6c9a21bd4a60f7109cdf5615e6853465aa50e1f4a`).
 
 Read back the saved specialist profile and form to confirm that the single
 skill, single tool and instruction block are persisted.
@@ -522,10 +625,13 @@ from a real workspace.
 
   *Undeployed Lakehouse reference tab (`15-report-controls-and-reference.png`): **(1)** explicitly labeled **Propuesta de referencia - NO desplegada** tab; **(2)** Well-Architected Lakehouse reference diagram flagged as not deployed and trade-offs table, kept visually separate from the observed inventory.*
 
-- **Sections 4–8 (Inventory, Findings, FinOps, Actions, Source Ledger):** Drill
+- **Sections 4–8 (Inventory, Findings, Costs, Actions, Source Ledger):** Drill
   into clusters, jobs, DLT pipelines, SQL warehouses, Unity Catalog objects,
-  associated ARM resources (name, resource group and Portal link), FinOps
-  candidates and per-source HTTP receipts. The checks register lists failed
+  associated ARM resources (name, resource group and Portal link), the
+  Databricks cost section (see
+  [Databricks costs](#databricks-costs-where-they-come-from-and-how-to-optimise-them);
+  its tables export to CSV from the **Exportar** menu) and per-source HTTP
+  receipts. The checks register lists failed
   checks first, with sortable columns and a filtered CSV export; the action plan
   is grouped by horizon (`Quick-win`, `Corto plazo`, `Medio plazo`).
 
@@ -537,7 +643,9 @@ from a real workspace.
 
 Default operation is **on demand**. Create a scheduled task only if the
 customer explicitly requests recurring control-plane reviews after accepting the
-first report.
+first report. For the cost section, a monthly run on day 3 (once Cost Management
+has settled the closed month) fits the month-over-month view; a weekly run
+catches always-on clusters and warehouses sooner.
 
 ## Troubleshooting
 
@@ -550,7 +658,11 @@ first report.
 | `keyvault_secret_read_failed` | The SRE Agent identity cannot read the certificate (missing *Key Vault Secrets User*, or vault public network access disabled) | Re-run the setup script; enable public access or use a resource group exempted from the policy that disables it. |
 | `cross_tenant_auth_failed` | Entra FIC token exchange at `login.microsoftonline.com/<TARGET_TENANT_ID>/oauth2/v2.0/token` failed | Verify the multi-tenant App Registration in Tenant A has the UAMI's **Object (principal) ID** as `subject`, `issuer = https://login.microsoftonline.com/<SRE_TENANT_ID>/v2.0`, `audience = api://AzureADTokenExchange`, and is provisioned in Tenant B. |
 | `access_denied` on `dbx_*` or `uc_*` while `arm_workspace` is `complete` | Plane 1 (ARM) succeeded (e.g., via Lighthouse), but the service principal is not authorized inside the Databricks Workspace or Unity Catalog | Have the colleague's Databricks Workspace/Account Admin add the service principal in **Settings > Identity and access > Service principals** and grant read/browse privileges. |
-| `G06` / `R06` shown as `not_evaluated` (`No evaluado`) | Runtime table lineage (`system.access.table_lineage`) and DBU billing (`system.billing.usage`) require SQL Warehouse execution | Expected by design: this control-plane collector never starts compute or executes SQL statements. |
+| `G06` shown as `not_evaluated` (`No evaluado`) | Runtime table lineage (`system.access.table_lineage`) requires SQL Warehouse execution | Expected by design: this control-plane collector never starts compute or executes lineage SQL. |
+| Section 6 `Denegada` / `azure_cost_databricks` `denied` (`HTTP 403`) | The reporting identity cannot read Cost Management on the workspace subscription | Grant **Cost Management Reader** (or Reader) on that subscription to the identity that reads ARM; until then the section says so and shows no figures. |
+| Section 6 `Parcial`, a query `throttled` or `skipped` | Cost Management throttled (`429`) beyond the patient retries, or the 420-second budget ran out before that query | Run the report again later; missing queries stay missing (never zero) and the signals that need them show *No estimable*. |
+| `R06` shown as `not_evaluated` | No Databricks cost data (cost analysis disabled, denied or no usage in the month) | Enable `cost_analysis_enabled` and grant Cost Management Reader; `R06` then measures tag coverage. |
+| `dbx_system_billing` `error` / `denied` | `system_tables_warehouse_id` is set but the warehouse is stopped too long, the identity lacks `CAN USE`, or `SELECT` on `system.billing.usage` / `list_prices` | Fix the grant or clear `system_tables_warehouse_id` (the default); the rest of section 6 does not depend on it. |
 
 ## Evidence, screenshot plan and release gates
 
@@ -572,6 +684,7 @@ completed, colleague-tenant source captures remain **Not collected
 | Skill & restricted subagent | Saved `databricks-dependency-live` skill and specialist read back with `tools=["generate-databricks-dependency-report"]`, `allowedSkills=["databricks-dependency-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`, `llmModelName=null` | **Collected (`2026-10-16`):** [`05-saved-runtime-skill.png`](images/05-saved-runtime-skill.png), [`06-saved-restricted-specialist.png`](images/06-saved-restricted-specialist.png), [`07-saved-explicit-allowlists.png`](images/07-saved-explicit-allowlists.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
 | Selected-specialist unconfigured readiness chat | Registered specialist selected via `/agent`, composer chip verified, and real readiness turn returning `configuration_required` / `not_written` with zero source reads or fabricated files | **Collected (`2026-10-16`):** [`10-select-registered-specialist.png`](images/10-select-registered-specialist.png), [`11-selected-specialist-composer.png`](images/11-selected-specialist-composer.png), [`09-native-no-source-no-files.png`](images/09-native-no-source-no-files.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
 | Databricks dependency map & configuration dossier (report design) | Verdict-first summary (`CLIENTE`), `OBSERVED`/`INFERRED`/`UNKNOWN` dependency graph, undeployed reference tab and source ledger | **Regenerated (`2026-11-12`) from the sanitized synthetic test fixture after the report redesign** (connected-run delivery evidence of `2026-10-19` stays in [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png)): [`13-report-overview-and-pillars.png`](images/13-report-overview-and-pillars.png), [`14-report-dependency-graph.png`](images/14-report-dependency-graph.png), [`15-report-controls-and-reference.png`](images/15-report-controls-and-reference.png), [`16-report-source-coverage-ledger.png`](images/16-report-source-coverage-ledger.png) |
+| Databricks costs (report section 6) | Month cost, DBU vs infrastructure, who consumes it and optimisation signals | **Rendered (`2026-11-12`) from `operation="self_test"` (`SIMULATED`, no customer data)**; Cost Management query shapes validated read-only against a lab subscription without Databricks: [`17-report-databricks-costs.png`](images/17-report-databricks-costs.png), [`18-report-databricks-cost-signals.png`](images/18-report-databricks-cost-signals.png) |
 | Live four-file native delivery | Actual `report_url`, `snapshot_url`, `findings_csv_url`, `dependencies_csv_url` HTTP 200 downloads from a connected workspace run | **Collected (`2026-10-19`):** [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png), [`visual-evidence.json`](visual-evidence.json) |
 
 ## Technical boundaries and maintainer checks
@@ -650,4 +763,24 @@ Select `/agent databricks-dependency-live` in **New chat** and use any of these 
 - **English:**
   ```text
   @databricks-dependency-live Query the source coverage ledger (operation="query", workspace_name="all", view="sources") and explain which Plane 2 APIs (Clusters, Jobs, SQL Warehouses, Workspace Conf, Unity Catalog) returned HTTP 200 and how the collector preserves Plane 2 evaluation when Plane 1 ARM returns 403 in a cross-tenant setup.
+  ```
+
+### 7. Databricks Costs: Where They Come From and How to Optimise Them / Costes de Databricks: de donde vienen y como optimizarlos (`view="costs"`)
+- **Castellano:**
+  ```text
+  @databricks-dependency-live Consulta los costes de Databricks del ultimo mes cerrado (operation="query", view="costs") y explicame cuanto es DBU y cuanto infraestructura, que clusteres, jobs, SQL warehouses y pools concentran el coste, que parte no explica ninguna etiqueta y que cambios ahorrarian mas, indicando como se estima cada ahorro.
+  ```
+- **English:**
+  ```text
+  @databricks-dependency-live Query last closed month's Databricks costs (operation="query", view="costs") and explain the DBU vs infrastructure split, which clusters, jobs, SQL warehouses and pools drive the cost, what share no tag explains, and which changes would save the most, stating how each saving is estimated.
+  ```
+
+### 8. Demo Without a Workspace / Demostracion sin workspace (`self_test`, SIMULATED)
+- **Castellano:**
+  ```text
+  @databricks-dependency-live Ejecuta operation="self_test" para una demostracion con el workspace simulado incorporado y entregame los 4 archivos, dejando claro que los datos son SIMULADOS.
+  ```
+- **English:**
+  ```text
+  @databricks-dependency-live Run operation="self_test" for a demo with the built-in simulated workspace and deliver the 4 files, making clear the data is SIMULATED.
   ```

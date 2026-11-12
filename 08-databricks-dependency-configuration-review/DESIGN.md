@@ -14,6 +14,9 @@ colors:
   link: "#0058a3"
   focus: "#0b6bcb"
   chart: "#0066a1"
+  chart-2: "#8fb3d3"
+  up-ink: "#b42318"
+  down-ink: "#067647"
   edge: "#4d7aa3"
   button: "#003865"
   button-hover: "#002848"
@@ -30,6 +33,7 @@ colors:
   low: "#175cd3 on #d1e9ff, bar #2e90fa"
   info: "#344054 on #eaecf0, bar #98a2b3"
   ok: "#067647 on #dcfae6, bar #17b26a"
+  verdict-action: "#fdb022 on the hero, line rgba(253,176,34,.5)"
   observed: "#00603f on #ddf4ea, line #00875a"
   inferred: "#8a4b00 on #fff1d6, dashed line #c77700"
   unknown: "#475467 on #eaecf0, hollow dot #98a2b3"
@@ -86,6 +90,11 @@ typography:
     fontWeight: 700
     lineHeight: 1.05
     fontVariantNumeric: "tabular-nums"
+  brand-display:
+    fontFamily: '"Brand Display", Didot, "Bodoni 72", "Bodoni MT", Georgia, serif'
+    fontSize: "clamp(32px, 3.6vw, 48px)"
+    fontWeight: 600
+    lineHeight: 1.08
 rounded:
   card: "16px"
   control: "10px"
@@ -111,9 +120,14 @@ An offline Azure SRE Agent report in the family house style: a slim sticky top b
 
 - **Severity pills** use the shared family colours (critical, high, medium, low, info); check status uses a coloured dot with a Spanish label (`Cumple`, `No cumple`, `No evaluado`, `No aplica`).
 - **Dependency classification** has its own vocabulary: `OBSERVED` (solid teal-green), `INFERRED` (dashed amber), `UNKNOWN` (hollow grey). The graph places nodes in one column per layer, draws OBSERVED edges solid and INFERRED edges dashed, and shows a legend; tables always hold 100 % of nodes, edges and blind spots.
-- **Charts** are labelled horizontal bars with values (check status, areas, pillars, source status); no decorative charts.
+- **Charts** are labelled horizontal bars with values (check status, areas, pillars, source status); no decorative charts. Cost bars in section 6 share one track width per card (CSS subgrid), use `chart` for DBU and `chart-2` (`#8fb3d3`) for infrastructure, and hatch the partial current month.
+- **Cost section (6)**: stat block (`cstat`), monthly stacked DBU/infrastructure rows, cost tables with right-aligned `es-ES` amounts (`19.575 EUR`), change in `up-ink` (cost up, red family) or `down-ink` (cost down, green family), and an estimated-saving cell that states its basis and whether it counts towards the total.
 - **Tables** scroll inside their card with edge-shadow cues, sort by column, page long lists, and show long ARM IDs as name, resource group and a Portal link; raw JSON evidence stays behind a `JSON completo` disclosure.
 - **Print / PDF**: A4 with `@page` margins, colours kept, controls hidden, cards not split, and a running footer with the report title, workspace, UTC reference and page numbers. Dark mode is reset while printing.
+
+## Customer editions (presentation hooks)
+
+A private customer copy may set `BRAND_THEME` (only the documented CSS variables, `#RRGGBB` or `rgba()`), `BRAND_DISPLAY_FONT_DATA_URI` (inline WOFF2 up to 80 KB, applied to the hero title, section titles and verdict as `"Brand Display"`), `BRAND_LOGO_PLACEMENT` (`hero` plaque or `bar`, a white top bar with the logo and a brand rule) and `REPORT_FOCUS` (`configuration` or `costs`). Branded editions hide the theme toggle so the customer palette is shown as approved; layout, data and wording do not change. The generic repository keeps all four at their neutral defaults.
 
 ## Branding and Privacy Boundaries
 

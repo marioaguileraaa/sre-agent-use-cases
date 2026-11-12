@@ -18,7 +18,7 @@ class MediaAndDocumentationTests(unittest.TestCase):
         manifest = json.loads(raw_text)
         self.assertEqual(manifest["status"], "PARENT_VISUALLY_REVIEWED_READINESS_IMAGES_ONLY")
         images = manifest["images"]
-        self.assertEqual(len(images), 16)
+        self.assertEqual(len(images), 18)
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
         for item in images:

@@ -16,6 +16,17 @@
       },
       "reason": "Report presentation redesign only (report_template.html rebuilt into the standalone tool with build_tool.py): slim top bar with section navigation, export menu and print, verdict-first hero, KPI cards, layered dependency graph with legend, sortable and paged tables, A4 print footer and dark mode. Data collection, model, findings logic, parameters, output files and the tool-result JSON are unchanged.",
       "validated": "Offline test suite (python -m pytest -q) and browser renders of the synthetic fixture at 1440, 1280, 1024, 768, 390 and 320 px plus A4 print (Edge headless)."
+    },
+    {
+      "date_utc": "2026-11-12",
+      "files_sha256": {
+        "generate-databricks-dependency-report.py": "d2fca84a8ea2d2ceaefe8b616f68c2f62a0096631bbdb40172517516e780a972",
+        "tool-parameters.schema.json": "5d90b8e2a6e8f8c6e118e7e0c7396ee2b7a40bf0de155b1f1e58b4ac12bf777c",
+        "skills/databricks-dependency-live/SKILL.md": "091520084062d3c7be0a732501b1c09ad8be8a733d09a8455ecc8ceadf006629",
+        "subagent-instructions-and-prompts.md": "0d89b25559ce57d1520f329433642f94c598425c8f6199d84948d3e35cdb0733"
+      },
+      "reason": "Databricks costs module (report section 6, view=costs): read-only Cost Management queries (api-version 2025-03-01, AmortizedCost) for the workspace resource and its managed resource group grouped by the Databricks tags (Vendor, ClusterName, JobId, SqlEndpointId, DatabricksInstancePoolId) and up to three allocation tags; DBU vs infrastructure, attribution, the unattributed share, movers and optimisation signals with documented savings estimates counted once per object; runtime catalog reads (clusters/spark-versions, clusters/list-node-types); optional system.billing.usage detail through one fixed Statement Execution request, off by default; operation=self_test (built-in SIMULATED workspace, no network); validated presentation hooks for customer editions (REPORT_FOCUS, BRAND_THEME, BRAND_DISPLAY_FONT_DATA_URI, BRAND_LOGO_PLACEMENT); R06 evaluated from tag coverage. Parameter schema gains operation=self_test and view=costs; the skill and specialist instructions explain costs, estimates and when self_test may be used.",
+      "validated": "Offline test suite (python -m pytest -q, including tests/test_costs.py), Cost Management query shapes validated read-only against a lab subscription without Databricks (2026-11-12), Edge renders at 1440, 390 and A4 print plus dark mode, and a lab SRE Agent run of the customer edition built from this tool (self_test, four files HTTP 200)."
     }
   ]
 }
