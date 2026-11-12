@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "generate-azure-finops-review parameters",
+  "description": "All parameters are optional. The monthly scheduled task calls {\"operation\": \"report\"}. Scope (subscriptions or management group), cost metric, allocation tags and thresholds are set in the CONFIGURE block of the tool code, never by the agent.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": ["report", "query", "self_test"],
+      "default": "report",
+      "description": "report writes four files (offline HTML report, JSON snapshot, findings CSV, cost-by-resource CSV) and returns links, verdict, headline, KPIs, top actions and coverage. query returns one bounded chat view (no files). self_test writes the complete report from built-in SIMULATED data with no network and no configuration."
+    },
+    "view": {
+      "type": "string",
+      "enum": ["summary", "actions", "anomalies", "budgets", "savings", "resources", "allocation", "coverage"],
+      "default": "summary",
+      "description": "Chat view for operation=query only."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "default": 15,
+      "description": "Maximum rows for operation=query; the answer is also capped to 3,500 bytes (transport_capped=true when rows were dropped)."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "operation": { "enum": ["report", "self_test"] } } },
+      "then": { "properties": { "view": { "const": "summary" }, "limit": { "const": 15 } } }
+    }
+  ]
+}

@@ -293,6 +293,25 @@
       "full": "11-fabric-finops-chargeback/sample-run/fabric-finops-20261106T095840Z.html",
       "caption": "Sample report with anonymised data."
     },
+    "15-azure-finops-monthly-review": {
+      "family": "cost",
+      "name": "Monthly Azure FinOps review",
+      "latin": "finops-reviewer",
+      "key": "The Azure bill grows and nobody can say why",
+      "symptom": "Every month the Azure bill changes and we only find out why weeks later; budgets overrun before anyone notices, and the savings ideas are scattered across tools.",
+      "does": "On the 3rd of every month it reads Cost Management, the budgets, Azure Advisor and Azure Resource Graph, and builds the classic FinOps review: last month's cost and why it changed, the forecast against every budget, unusual days and jumps, savings without double counting, untagged cost and a short list of actions with their monthly saving.",
+      "runs": "Monthly, on the 3rd",
+      "reads": "Azure Cost Management, budgets, Azure Advisor and Azure Resource Graph",
+      "delivers": "HTML report, two CSVs and JSON",
+      "image": "site/img/plates/15.webp",
+      "thumb": "site/img/plates/15-thumb.webp",
+      "full": "15-azure-finops-monthly-review/sample-run/finops-review-2026-10-20261112T134248Z-1164c638.html",
+      "caption": "Real lab run with names and identifiers replaced.",
+      "compare": [
+        "11-fabric-finops-chargeback",
+        "04-aks-well-architected-review"
+      ]
+    },
     "case_0_v3": {
       "family": "build",
       "name": "The use-case builder",
