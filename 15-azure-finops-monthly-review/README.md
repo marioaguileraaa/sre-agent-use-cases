@@ -1,16 +1,16 @@
 # Case 15 - Monthly Azure FinOps review
 
-> **Azure SRE Agent** · Read-only Python tool · Runtime skill · Restricted subagent · Monthly task (`0 7 3 * *`) & on-demand chat questions · Cost Management Query API + budgets + Azure Advisor + Azure Resource Graph (Reader only) · Zero secrets · No added Azure cost · Offline HTML, JSON and two CSVs
+> **Azure SRE Agent** · Read-only Python tool · Runtime skill · Restricted subagent · Monthly task (`0 7 3 * *`) & on-demand chat questions · Cost Management Query API + budgets + Azure Advisor + Azure Resource Graph (Reader only) · Zero secrets · No added Azure cost · Offline HTML with a project filter, JSON and three CSVs
 
 **"What did Azure cost us last month and why did it change? Will we stay within budget this month? What can we save, how much of the bill can we charge back, and what should we do first?"** That is the classic monthly FinOps review. In most organizations someone builds it by hand, in Cost Management views and spreadsheets, a week after the month closes, and it covers half of those questions.
 
-A restricted SRE Agent subagent builds the whole review every month, on the 3rd, when the previous month's costs have settled. It reads Cost Management, the budgets, Azure Advisor and Azure Resource Graph for every configured subscription, and writes **one complete report**: verdict, trend, where the money goes, what changed (with simple statistics you can explain to finance), budgets and forecast, savings without double counting, allocation readiness and a prioritised action list with the estimated monthly saving of each action.
+A restricted SRE Agent subagent builds the whole review every month, on the 3rd, when the previous month's costs have settled. It reads Cost Management, the budgets, Azure Advisor and Azure Resource Graph for every configured subscription, and writes **one complete report**: verdict, trend, where the money goes, **cost per project**, what changed (with simple statistics you can explain to finance), budgets and forecast, savings without double counting, allocation readiness and a prioritised action list with the estimated monthly saving of each action.
 
 The agent **never changes anything**. It tells you where the money goes and what to do; a person decides and acts.
 
 ![Report overview: verdict, headline numbers and findings by severity](images/20-report-overview.png)
 
-*A real run in a Microsoft lab (names and identifiers pseudonymized, costs real): **October 5,051 USD, up 8.9 %** on September; November is heading for **4,847 USD, 129 % of the 3,750 USD budget**; **26 savings opportunities worth about 305 USD a month**; **100 % of the cost misses at least one allocation tag**. Verdict: **Action required**.*
+*A real run in a Microsoft lab (names and identifiers pseudonymized, costs real): **October 5,051 USD, up 8.9 %** on September; November is heading for **4,847 USD, 129 % of the 3,750 USD budget**; **26 savings opportunities worth about 305 USD a month**; **100 % of the cost misses at least one allocation tag**; the `Project` tag, **detected automatically**, allocates **98.4 % of the cost to 6 projects**. Verdict: **Action required**.*
 
 ## Contents
 
@@ -41,8 +41,9 @@ Azure Cost Management has every number you need, but a monthly review is not one
 - **Hard to explain.** "Cost went up 9 %" starts the conversation; finance wants to know which services, which resource groups, which days and whether it was planned.
 - **Savings counted twice.** Advisor's reservation and savings plan options are alternatives; an idle disk can appear both in Advisor and in a script. Adding everything inflates the number and erodes trust.
 - **Chargeback blocked by tags.** If resources do not carry the cost-center and owner tags, showback and chargeback stop at the subscription level.
+- **No project view.** Teams ask *"what does my project cost?"*, but a project is a tag, its name changes from one organization to the next (`Project`, `Proyecto`, `App`, `CostCenter`...) and it often sits on the resource group, not on the resource. The answer needs exports and pivot tables.
 
-**The short answer:** the subagent produces the review on the 3rd of every month in one offline HTML file (plus a JSON snapshot and two CSV files), with the numbers already reconciled: last full month and its change, month to date, forecast against the budget, the drivers of every change, savings without double counting, allocation readiness and a short list of actions. Follow-up questions in the chat ("why did it go up?", "where can we save?") are answered from the same data.
+**The short answer:** the subagent produces the review on the 3rd of every month in one offline HTML file (plus a JSON snapshot and three CSV files), with the numbers already reconciled: last full month and its change, month to date, forecast against the budget, the drivers of every change, the cost of every project, savings without double counting, allocation readiness and a short list of actions. Follow-up questions in the chat ("why did it go up?", "where can we save?") are answered from the same data.
 
 ## 2. What it solves and business value
 
@@ -54,6 +55,7 @@ Azure Cost Management has every number you need, but a monthly review is not one
 | Savings scattered across Advisor, scripts and spreadsheets, sometimes counted twice | One savings figure per month: Advisor, idle and orphaned resources and commitments, each resource and each commitment option counted once |
 | Commitments bought on intuition | The share of commitment-eligible compute that runs on reservations or savings plans, and Advisor's best option, presented as a finance decision |
 | Chargeback blocked by missing tags | The share of the cost without the allocation tags, and the resource groups to tag first |
+| Cost by subscription or resource group, while the teams think in projects | The cost of every project, from the project tag the tool detects (or the one you set), with a project filter that narrows the actions, the breakdown, the savings and the findings to one project |
 | A list of 200 findings nobody reads | A prioritised list of up to 8 actions with the estimated monthly saving, and a searchable register for the rest |
 
 **Business value**
@@ -61,10 +63,11 @@ Azure Cost Management has every number you need, but a monthly review is not one
 - **Fewer surprises at month end.** The forecast against the budget is visible on the 3rd (and every week if you raise the cadence), not when the invoice arrives.
 - **Savings you can act on.** Each saving has an owner location (resource group, subscription), a portal link and an action. In the lab run: **305 USD a month, about 6 % of the monthly bill**, without counting anything twice.
 - **Explainable numbers.** Unusual days and jumps use simple statistics (median, same weekday a week before, minimum amounts), so finance and engineering can check them in Cost Management.
+- **Showback per project.** Each project sees its cost, its change, this month so far, its savings and its actions, from the tags it already has. The report says which tag it used and why, so the customer can confirm it or name another one.
 - **Chargeback readiness.** The allocation section measures the share of the cost that carries the tags you use to charge back (configurable) and lists the resource groups to fix first. It complements [case 11 - Fabric FinOps chargeback](../11-fabric-finops-chargeback/).
 - **Governance.** Every subscription without a budget is a finding with a suggested amount, so budget coverage reaches 100 %.
 - **No new cost and no new risk.** The tool only reads, with **Reader**. It creates no exports, storage accounts or Log Analytics workspaces, and it cannot change budgets, tags, resources or commitments, even if asked.
-- **Audit trail.** A dated HTML report, JSON snapshot and two CSV files every month support cost governance reviews and FinOps maturity assessments.
+- **Audit trail.** A dated HTML report, JSON snapshot and three CSV files every month support cost governance reviews and FinOps maturity assessments.
 
 **Suggested 90-day pilot KPIs**
 
@@ -74,6 +77,7 @@ Azure Cost Management has every number you need, but a monthly review is not one
 | Budget coverage | Subscriptions with a subscription-level budget / reviewed subscriptions (target: 100 %) |
 | Forecast accuracy | Forecast on the 3rd vs. the real month-end cost (next month's report) |
 | Allocation readiness | `allocation.untagged_pct` (target: below 10 %) |
+| Cost allocated to a project | `projects.allocated_pct` (target: above 90 %) |
 | Commitment coverage | `commitment.coverage_pct` of commitment-eligible compute |
 | Time to prepare the monthly review | Hours before vs. minutes after |
 
@@ -82,21 +86,24 @@ Azure Cost Management has every number you need, but a monthly review is not one
 | Metric | Value |
 |---|---|
 | October cost | **5,051.32 USD**, +8.9 % on September (4,639.02 USD) |
-| November to date (12 Nov) | 1,848.76 USD, the same pace as the first 10 days of October |
+| November to date (12 Nov) | 1,870.80 USD, the same pace as the first 10 days of October |
 | November forecast | 4,846.51 USD, **129 % of the 3,750 USD budget** (Azure's own budget forecast: 4,784.60 USD) |
 | Savings identified | **304.78 USD a month**: commitments 200.00 (Advisor's best 1-year option), Advisor 8.98, idle and orphaned resources 95.80 (20 deallocated VMs whose disks keep billing, 2 unattached disks, 1 unassociated public IP) |
 | Commitment coverage | 0 % of 908.09 USD of commitment-eligible compute |
 | Allocation readiness | 100 % of the cost misses at least one of `costcenter`, `owner`, `environment` (`environment` is on every resource; `costcenter` on none) |
+| Cost per project | `Project` tag **detected automatically** (98.4 % of the cost, 7 values): Shared infrastructure 1,953.66 USD (38.7 %), E-commerce web 1,494.95 USD (29.6 %, +48 % with its AKS cluster), Sandbox 771.02 USD (15.3 %), Observability, Data platform, Security and identity; 81.95 USD (1.6 %) unallocated |
 | What changed | 1 unusual day (28 October, +26 %, Foundry Tools), 3 month-over-month jumps (the AKS node resource group and its parent doubled; Virtual Machines +45 %) |
 | Findings | 35: 4 high, 3 medium, 25 low, 3 info; 8 prioritised actions |
-| Coverage | 8 sources complete, 8 read-only requests, **22.7 s**, no throttling |
+| Coverage | 10 sources complete, 12 read-only requests, **68.6 s** (Cost Management throttled 2 requests; the tool waited 55 s and retried) |
 
-The jumps are what a cost owner wants to see first: the AKS cluster doubled its cost in October. The budget finding explains why November will overrun, and the action list starts with the commitment decision and the tagging work.
+The jumps are what a cost owner wants to see first: the AKS cluster doubled its cost in October, which is why the *E-commerce web* project grew 48 %. The budget finding explains why November will overrun, and the action list starts with the commitment decision and the tagging work.
+
+The lab's resource groups carry invented `Project` tags (six project types) to show the feature; the tool found the tag by itself.
 
 A pseudonymized copy of that run is in [`sample-run/`](sample-run/):
-- the [HTML report](sample-run/finops-review-2026-10-20261112T134248Z-1164c638.html) (download it and open it in a browser);
-- the [JSON snapshot](sample-run/finops-review-2026-10-20261112T134248Z-1164c638-snapshot.json);
-- the [findings CSV](sample-run/finops-review-2026-10-20261112T134248Z-1164c638-findings.csv) and the [cost-by-resource CSV](sample-run/finops-review-2026-10-20261112T134248Z-1164c638-cost-by-resource.csv);
+- the [HTML report](sample-run/finops-review-2026-10-20261112T161319Z-923eef2b.html) (download it and open it in a browser);
+- the [JSON snapshot](sample-run/finops-review-2026-10-20261112T161319Z-923eef2b-snapshot.json);
+- the [findings CSV](sample-run/finops-review-2026-10-20261112T161319Z-923eef2b-findings.csv), the [cost-by-resource CSV](sample-run/finops-review-2026-10-20261112T161319Z-923eef2b-cost-by-resource.csv) and the [cost-by-project CSV](sample-run/finops-review-2026-10-20261112T161319Z-923eef2b-cost-by-project.csv);
 - the [agent answer](sample-run/agent-answer.md).
 
 Subscriptions, resource groups, resource names and every GUID were replaced with fictitious values (`Contoso Production`, `rg-network-hubs-eus`, `aks-prod-swc`). The costs are the real ones.
@@ -109,18 +116,18 @@ flowchart LR
     U[Cost owner in chat<br/>@finops-reviewer] --> A
     A[Subagent<br/>finops-reviewer] -->|skill rules| K[Skill<br/>azure-finops-review]
     A -->|"report or query"| T[Python tool<br/>generate-azure-finops-review]
-    T -->|"Reader: 3 queries per subscription"| CM[Cost Management<br/>Query API]
-    T -->|"Reader"| B[Consumption<br/>budgets]
+    T -->|"Reader: 3 queries per subscription<br/>+ 1 for the project tag"| CM[Cost Management<br/>Query API]
+    T -->|"Reader"| B[Consumption<br/>budgets and tag keys]
     T -->|"Reader: 4 queries"| ARG[Azure Resource Graph<br/>resource groups and tags, idle resources,<br/>Azure Advisor cost recommendations]
-    T --> C[Analysis<br/>trend, breakdown, unusual days, jumps,<br/>forecast vs budget, savings, allocation]
-    C --> R[HTML report + JSON snapshot<br/>+ findings CSV + cost-by-resource CSV]
+    T --> C[Analysis<br/>trend, breakdown, projects, unusual days, jumps,<br/>forecast vs budget, savings, allocation]
+    C --> R[HTML report with a project filter<br/>+ JSON snapshot + findings CSV<br/>+ cost-by-resource CSV + cost-by-project CSV]
     R --> A
-    A --> O[Answer with links,<br/>verdict, key numbers,<br/>top actions and coverage]
+    A --> O[Answer with links,<br/>verdict, key numbers, projects,<br/>top actions and coverage]
 ```
 
 | Component | Name | What it does |
 |---|---|---|
-| Python tool | `generate-azure-finops-review` | Gets an Azure Resource Manager token with the agent managed identity, reads the sources below, analyses them and writes four files. 3 optional parameters |
+| Python tool | `generate-azure-finops-review` | Gets an Azure Resource Manager token with the agent managed identity, reads the sources below, analyses them and writes five files. 5 optional parameters |
 | Skill | `azure-finops-review` | Tells the agent which tool call answers which question, how to present the result, and that it must stay read only |
 | Subagent | `finops-reviewer` | Dedicated specialist with only that skill and that tool, no parallel calls |
 | Scheduled task | `Azure FinOps - Monthly cost review` | Runs the subagent on the 3rd of every month at 07:00 UTC, when the previous month's costs have settled |
@@ -129,23 +136,40 @@ flowchart LR
 
 | # | Source | API call | What it adds |
 |---|---|---|---|
-| 1 | Subscriptions and resource groups | `POST .../providers/Microsoft.ResourceGraph/resources` (`resourcecontainers`) | Names, resource group and subscription tags (tag inheritance) |
-| 2 | Resource tags | Azure Resource Graph (`resources` with tags) | Allocation readiness by resource |
+| 1 | Subscriptions and resource groups | `POST .../providers/Microsoft.ResourceGraph/resources` (`resourcecontainers`) | Names, resource group and subscription tags (tag inheritance, projects), and which groups are managed by another resource (AKS node resource groups) |
+| 2 | Resource tags | Azure Resource Graph (`resources` with tags) | Allocation readiness and the project of each resource |
 | 3 | Idle and orphaned resources | Azure Resource Graph, one query | Unattached disks, unassociated public IPs, VMs stopped but not deallocated, deallocated VMs, empty App Service plans, orphaned NICs, old snapshots, load balancers without backends, NAT gateways without subnets |
 | 4 | Azure Advisor cost recommendations | Azure Resource Graph (`advisorresources`) | Right-sizing, shutdown, reservations and savings plans, with Advisor's monthly estimate |
 | 5 | Budgets | `GET .../providers/Microsoft.Consumption/budgets` (subscription and management group) | Amount, spend, Azure's forecast and alert thresholds |
-| 6 | Monthly cost | `POST /subscriptions/{id}/providers/Microsoft.CostManagement/query`, monthly, by resource group and service | 6 full months plus the month to date |
-| 7 | Daily cost | Same API, daily, by service and pricing model | The last 60 days, unusual days and commitment coverage |
-| 8 | Cost by resource | Same API, monthly, by resource and region | The review month and the month before: top resources, idle savings and allocation |
+| 6 | Tag keys in the cost records | `GET .../providers/Microsoft.Consumption/tags` | The tag keys that Cost Management records, to detect the project tag (only when `PROJECT_TAG_KEYS` is empty; optional) |
+| 7 | Monthly cost | `POST /subscriptions/{id}/providers/Microsoft.CostManagement/query`, monthly, by resource group and service | 6 full months plus the month to date |
+| 8 | Daily cost | Same API, daily, by service and pricing model | The last 60 days, unusual days and commitment coverage |
+| 9 | Cost by resource | Same API, monthly, by resource, service and region | The month before, the review month and this month: top resources, idle savings, allocation and the cost of each project |
+| 10 | Cost by resource and project tag | Same API, monthly, by resource and the project tag (`TagKey`) | The project tag as the cost records carry it, for resources whose tag is no longer in Azure Resource Graph (optional) |
 
-That is **4 Azure Resource Graph queries, 1-2 budget reads and 3 Cost Management queries per subscription** each month. Cost Management queries run last and one at a time, because Cost Management has strict per-scope rate limits; the tool waits for `Retry-After` when it is throttled and states it in the coverage.
+That is **4 Azure Resource Graph queries, 1-2 budget reads, 1 tag-key read and 4 Cost Management queries per subscription** each month. Cost Management queries run last and one at a time, because Cost Management has strict per-scope rate limits; the tool waits for `Retry-After` when it is throttled and states it in the coverage.
+
+### How projects are identified
+
+A project is whatever your organization tags it as. The tool finds it in three steps:
+
+1. **Which tag means "project".** If `PROJECT_TAG_KEYS` is set (for example `["Proyecto"]`, or `["Project", "CostCenter"]` in priority order) the tool uses it. Otherwise it lists every tag key on resources, resource groups, subscriptions and cost records and scores the candidates:
+   - by **name**, without accents, case or separators, in English, Spanish and Catalan: *project, proyecto, projecte* count most; *application, aplicación, workload, service, servicio, product, producto* next; *cost center, centro de coste, CeCo, CC, business unit, BU, department, departamento, team, equipo* last;
+   - by the **share of the review month's cost** the tag covers;
+   - by a **sensible number of values** (2 to 60 distinct values).
+
+   The best candidate is used. The report shows the tag, why it was chosen, its coverage and the other candidates with their coverage, so the customer can confirm it or name another one. The agent can also use another tag for one run (`project_tag`).
+2. **The project of each resource** is the first match in this order: the tag on the resource; the tag on its resource group (for a managed group, such as an AKS node resource group, the tag of the resource that manages it, or of that resource's group); the tag on its subscription; the tag on its cost records; the resource group name rules of `PROJECT_RG_RULES`; otherwise **Unallocated**. Values are grouped without case (`ecommerce` and `Ecommerce` are one project).
+3. **Every month with today's tags.** The tags are read today and applied to the previous month and the month to date too, so the comparison by project is like for like. The report states the share of the cost allocated by each step.
+
+Cost Management can also copy resource group and subscription tags onto the cost records: enable [tag inheritance](https://learn.microsoft.com/azure/cost-management-billing/costs/enable-tag-inheritance) if you want chargeback by project in Azure itself.
 
 ## 4. Package contents
 
 | File | Purpose |
 |---|---|
 | [`generate-azure-finops-review.py`](generate-azure-finops-review.py) | Python tool code (paste into the **Code** tab) |
-| [`tool-parameters.schema.json`](tool-parameters.schema.json) | The 3 optional parameters |
+| [`tool-parameters.schema.json`](tool-parameters.schema.json) | The 5 optional parameters |
 | [`skills/azure-finops-review/SKILL.md`](skills/azure-finops-review/SKILL.md) | Skill content |
 | [`subagent-instructions.txt`](subagent-instructions.txt) | Subagent instructions |
 | [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | All the portal field values, copy-ready, plus the scheduled task and chat prompts |
@@ -153,7 +177,7 @@ That is **4 Azure Resource Graph queries, 1-2 budget reads and 3 Cost Management
 | [`deploy/deploy-sre-agent-components.py`](deploy/deploy-sre-agent-components.py) | Option B: creates the tool, skill, subagent and monthly task with one command |
 | [`deploy/sre-agent-components.json`](deploy/sre-agent-components.json) | Component definitions used by the deploy script |
 | [`requirements.txt`](requirements.txt) | The only package the tool imports (already present in the SRE Agent Python runtime) |
-| [`tests/`](tests/) | 34 offline unit tests with mocked HTTP: `python -m unittest discover -s tests` |
+| [`tests/`](tests/) | 47 offline unit tests with mocked HTTP: `python -m unittest discover -s tests` |
 | [`sample-run/`](sample-run/) | Pseudonymized output of a real run |
 | [`images/`](images/) | Screenshots used in this guide |
 
@@ -239,8 +263,8 @@ In the lab the script found Reader already assigned (`[already exists]`) and ass
 Open [`generate-azure-finops-review.py`](generate-azure-finops-review.py) and replace the two placeholders of the **CONFIGURE** block at the top of the file:
 
 ```python
-MANAGED_IDENTITY_CLIENT_ID = "<YOUR_MANAGED_IDENTITY_CLIENT_ID>"   # line 34
-SUBSCRIPTION_IDS = ["<YOUR_SUBSCRIPTION_ID>"]                      # line 35
+MANAGED_IDENTITY_CLIENT_ID = "<YOUR_MANAGED_IDENTITY_CLIENT_ID>"   # line 36
+SUBSCRIPTION_IDS = ["<YOUR_SUBSCRIPTION_ID>"]                      # line 37
 ```
 
 For example:
@@ -254,19 +278,21 @@ Optional settings (same block):
 
 | Line | Setting | Default | Meaning |
 |---|---|---|---|
-| 36 | `MANAGEMENT_GROUP_ID` | `""` | Review every subscription under a Management Group instead (leave `SUBSCRIPTION_IDS = []`), up to `MAX_SUBSCRIPTIONS` (25) |
-| 37 | `CLIENT_NAME` | `""` | Organization name shown in the report header |
-| 38 | `COST_METRIC` | `"AmortizedCost"` | `AmortizedCost` spreads reservations and savings plans over the days they cover; `ActualCost` is the invoice view |
-| 39 | `TREND_MONTHS` | `6` | Full months in the monthly trend, plus the month to date |
-| 40 | `ALLOCATION_TAGS` | `["costcenter", "owner", "environment"]` | The tags every cost should carry (case-insensitive, up to 5). Use your own chargeback tags |
-| 41 | `TAG_INHERITANCE` | `True` | A resource group or subscription tag also counts for the resources inside, like Cost Management tag inheritance |
-| 42 | `ANOMALY_MIN_DAILY_DELTA` | `20.0` | Minimum daily increase, in the billing currency, before a day can be unusual |
-| 43 | `MOM_MIN_DELTA` | `100.0` | Minimum month-over-month increase for a service or resource group jump |
-| 44 | `SNAPSHOT_MAX_AGE_DAYS` | `90` | Disk snapshots older than this are listed for review |
-| 45 | `EXCLUDED_RESOURCE_GROUPS` | `[]` | Regexes: idle-resource and Advisor findings in these resource groups are not listed (sandboxes, disaster recovery) |
-| 46 | `LOGO_DATA_URI` | `""` | Optional `data:image/svg+xml;base64,...` logo for the report header |
+| 38 | `MANAGEMENT_GROUP_ID` | `""` | Review every subscription under a Management Group instead (leave `SUBSCRIPTION_IDS = []`), up to `MAX_SUBSCRIPTIONS` (25) |
+| 39 | `CLIENT_NAME` | `""` | Organization name shown in the report header |
+| 40 | `COST_METRIC` | `"AmortizedCost"` | `AmortizedCost` spreads reservations and savings plans over the days they cover; `ActualCost` is the invoice view |
+| 41 | `TREND_MONTHS` | `6` | Full months in the monthly trend, plus the month to date |
+| 42 | `ALLOCATION_TAGS` | `["costcenter", "owner", "environment"]` | The tags every cost should carry (case-insensitive, up to 5). Use your own chargeback tags |
+| 43 | `TAG_INHERITANCE` | `True` | A resource group or subscription tag also counts for the resources inside, like Cost Management tag inheritance |
+| 44 | `PROJECT_TAG_KEYS` | `[]` | The tag (or up to 5 tags, in priority order) that names your projects, for example `["Proyecto"]`. Empty: the tool detects it (see [How projects are identified](#how-projects-are-identified)) |
+| 45 | `PROJECT_RG_RULES` | `[]` | Optional `("regex on the resource group name", "Project")` pairs for resource groups without a project tag, for example `[("^rg-shop-", "E-commerce web")]` (up to 30) |
+| 46 | `ANOMALY_MIN_DAILY_DELTA` | `20.0` | Minimum daily increase, in the billing currency, before a day can be unusual |
+| 47 | `MOM_MIN_DELTA` | `100.0` | Minimum month-over-month increase for a service or resource group jump |
+| 48 | `SNAPSHOT_MAX_AGE_DAYS` | `90` | Disk snapshots older than this are listed for review |
+| 49 | `EXCLUDED_RESOURCE_GROUPS` | `[]` | Regexes: idle-resource and Advisor findings in these resource groups are not listed (sandboxes, disaster recovery) |
+| 50 | `LOGO_DATA_URI` | `""` | Optional `data:image/svg+xml;base64,...` logo for the report header |
 
-Scale the two thresholds of lines 42-43 to the size of the bill: 20 and 100 suit a few thousand a month; for 100,000 a month use, for example, 200 and 2,000.
+Scale the two thresholds of lines 46-47 to the size of the bill: 20 and 100 suit a few thousand a month; for 100,000 a month use, for example, 200 and 2,000.
 
 If you paste the code without replacing the placeholders, the tool returns a clear `configuration_required` error. A Client ID or Subscription ID is not a secret, but keep your configured copy out of public repositories. `operation=self_test` needs no configuration at all: it writes the complete report from built-in simulated data.
 
@@ -289,28 +315,30 @@ There are two equivalent options. Use **Option A** the first time, to understand
 - paste the full content of `generate-azure-finops-review.py` in the editor.
 
 ```text
-Read-only monthly Azure FinOps review of the configured subscriptions (Cost Management Query API, budgets, Azure Advisor and Azure Resource Graph, Reader only): last month's cost and change, month to date and forecast against the budget, where the money goes, unusual days and month-over-month jumps, idle and orphaned resources, Advisor savings, commitment coverage and allocation readiness, with a prioritised action list. Writes an offline HTML report, a JSON snapshot and two CSV files. Never changes anything.
+Read-only monthly Azure FinOps review of the configured subscriptions (Cost Management Query API, budgets, Azure Advisor and Azure Resource Graph, Reader only): last month's cost and change, month to date and forecast against the budget, where the money goes, cost per project (from a project tag it detects or you set), unusual days and month-over-month jumps, idle and orphaned resources, Advisor savings, commitment coverage and allocation readiness, with a prioritised action list. Writes an offline HTML report with a project filter, a JSON snapshot and three CSV files. Never changes anything.
 ```
 
 ![Tool name, timeout, description and code](images/02-python-tool-code.png)
 
-**③** Scroll the editor to lines 34-35 and replace the two `<YOUR_...>` values with your Client ID and subscriptions (step 4).
+**③** Scroll the editor to lines 36-37 and replace the two `<YOUR_...>` values with your Client ID and subscriptions (step 4).
 
-![Configuration lines 34-35 in the editor](images/03-python-tool-config-placeholders.png)
+![Configuration lines 36-37 in the editor](images/03-python-tool-config-placeholders.png)
 
-**④** In the **Identity** tab, leave **Enable Azure Identity** **Off**. The tool gets its own token with the agent managed identity (the Client ID of line 34).
+**④** In the **Identity** tab, leave **Enable Azure Identity** **Off**. The tool gets its own token with the agent managed identity (the Client ID of line 36).
 
 ![Identity tab: Enable Azure Identity Off](images/04-python-tool-identity-off.png)
 
-**⑤** Open **Test playground**. The 3 optional parameters are detected from the code. Enter `operation` = `query` and `view` = `summary`, then select **Test**. In 10-40 seconds it returns the key numbers, the headline and the coverage, without writing files.
+**⑤** Open **Test playground**. The 5 optional parameters are detected from the code. Enter `operation` = `query` and `view` = `summary`, then select **Test**. In 10-40 seconds it returns the key numbers, the headline and the coverage, without writing files.
 
-![Test playground with the 3 optional parameters](images/05-python-tool-test-playground.png)
+![Test playground with the 5 optional parameters](images/05-python-tool-test-playground.png)
 
 | Parameter | Values | Default | Meaning |
 |---|---|---|---|
-| `operation` | `report`, `query`, `self_test` | `report` | `report` writes the four files; `query` returns one bounded view for chat questions; `self_test` writes the complete report from simulated data, with no network |
-| `view` | `summary`, `actions`, `anomalies`, `budgets`, `savings`, `resources`, `allocation`, `coverage` | `summary` | Only with `query` |
+| `operation` | `report`, `query`, `self_test` | `report` | `report` writes the five files; `query` returns one bounded view for chat questions; `self_test` writes the complete report from simulated data, with no network |
+| `view` | `summary`, `actions`, `anomalies`, `budgets`, `savings`, `resources`, `projects`, `allocation`, `coverage` | `summary` | Only with `query` |
 | `limit` | 1-50 | 15 | Only with `query`: maximum rows (answers are capped at 3,500 bytes) |
+| `project` | A project name | empty | Only with `query`: `summary`, `actions`, `savings`, `resources` and `projects` show that project only (`Unallocated` works too) |
+| `project_tag` | A tag name, or up to 5 separated by commas | empty | The tag that names the projects for this run (for example `Proyecto`); it overrides `PROJECT_TAG_KEYS` and the detection |
 
 **⑥** Select **Create tool**.
 
@@ -345,7 +373,7 @@ Read-only monthly Azure FinOps review of the configured subscriptions (Cost Mana
 **⑫** Set **Name** to `finops-reviewer`. Paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**, and this **Handoff description**:
 
 ```text
-Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.
+Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, cost per project, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.
 ```
 
 ![Subagent name and instructions](images/12-agent-name-instructions.png)
@@ -385,6 +413,7 @@ python deploy/deploy-sre-agent-components.py --endpoint https://<your-agent>.azu
 | `--subscription-id` | This or `--management-group-id` | Subscriptions to review; repeat it or separate with commas |
 | `--management-group-id` | This or `--subscription-id` | Review a Management Group instead |
 | `--client-name` | No | Organization name shown in the report |
+| `--project-tag` | No | The tag that names your projects (`PROJECT_TAG_KEYS`), for example `Project`; repeat it or separate with commas. Without it the tool detects the tag |
 | `--schedule` | No | Also creates the monthly scheduled task (step 7) |
 | `--dry-run` | No | Validates everything without calling the API |
 
@@ -400,7 +429,7 @@ The output shows `1/4 Python tool`, `2/4 Skill`, `3/4 Subagent` and `4/4 Schedul
 
 ![Run the subagent from the chat](images/16-chat-run-agent.png)
 
-**⑰** About a minute later the agent answers with the four files first. Click to download them.
+**⑰** About a minute later the agent answers with the five files first. Click to download them.
 
 ![Agent answer with the download links](images/17-chat-result-downloads.png)
 
@@ -408,9 +437,13 @@ Then come the verdict, the key numbers, the top actions with their estimated mon
 
 ![The agent's top actions with their monthly saving](images/17b-chat-result-answer.png)
 
+It also gives the cost per project, says which tag identified the projects and whether it was detected or configured, and asks you to confirm it.
+
+![The agent's cost per project and the tag it detected](images/17c-chat-result-projects.png)
+
 *Identifiers are redacted in these screenshots. The full pseudonymized answer is in [`sample-run/agent-answer.md`](sample-run/agent-answer.md).*
 
-For follow-up questions the agent calls the tool with `operation=query` and the matching view, without generating files. For example: *"Why did the cost go up?"*, *"Are we within budget?"*, *"Where can we save?"*. See [Copy-ready prompts](#copy-ready-prompts).
+For follow-up questions the agent calls the tool with `operation=query` and the matching view, without generating files. For example: *"Why did the cost go up?"*, *"Are we within budget?"*, *"Where can we save?"*, *"How much does each project cost?"*, *"What can the E-commerce web project save?"*. If your projects use a tag the tool did not pick, say so (*"our projects are in the tag Proyecto"*) and the agent runs the review again with that tag. See [Copy-ready prompts](#copy-ready-prompts).
 
 ### Reading the report
 
@@ -421,7 +454,8 @@ The HTML is a single offline file (inline CSS, no external requests, locked down
 - a verdict card: *Action required* (a budget is over or forecast over, or a high finding), *Review recommended* (medium findings), *On track*, or *Incomplete data* when no cost could be read, with the money-first reasons behind it;
 - the scope, the cost metric and currency, the review month, when the report was generated and the coverage;
 - the findings by severity;
-- six KPIs: last month's cost, month to date, forecast against the budget, savings identified, cost not fully tagged and anomalies.
+- six KPIs: last month's cost, month to date, forecast against the budget, savings identified, cost not fully tagged and anomalies;
+- the section bar with the **Project** filter on its left.
 
 ![Report overview](images/20-report-overview.png)
 
@@ -436,6 +470,14 @@ The HTML is a single offline file (inline CSS, no external requests, locked down
 **Where the money goes.** The review month by service, resource group, region and subscription, each with its share and its change on the month before, and the ten most expensive resources with a portal link.
 
 ![Where the money goes](images/23-report-breakdown.png)
+
+**Cost by project.** Every project with the cost of the review month and the month before, the change, its share, this month so far, its estimated savings and its findings, plus a total row. Underneath: the share of the cost by project and **How projects are identified**, with the tag used, why it was chosen, the share of the cost allocated at each step (resource tag, resource group tag, managed group, cost records, rules, unallocated) and the other tags that could name the project, with their coverage.
+
+![Cost by project and how projects are identified](images/31-report-projects.png)
+
+**Project filter.** Choose a project in the **Project** menu of the section bar, or click its name in the table. The actions, *Where the money goes*, the savings and the findings register then show that project only, a banner says what is filtered, and the sections that stay whole-environment (trend, what changed, budgets, allocation, coverage) are marked. **Print / PDF** prints the current selection with that banner. **Show all projects** goes back.
+
+![The report filtered by one project](images/32-report-project-filter.png)
 
 **What changed.** Unusual days with their drivers, the month-to-date pace against the same days of the previous month, month-over-month jumps of services and resource groups, and services or resource groups with cost for the first time.
 
@@ -465,9 +507,10 @@ The report is responsive, so it can be read on a phone: the tables become cards 
 
 <img src="images/30-report-mobile.png" alt="Report on a mobile phone" width="320">
 
-The other three files:
-- The **findings CSV** has one row per finding (severity, category, title, evidence, action, scope, monthly saving, resource ID, portal link).
-- The **cost-by-resource CSV** has one row per resource with the cost of the review month and the month before, the change, the type, the resource group, the subscription and the region.
+The other four files:
+- The **findings CSV** has one row per finding (severity, category, title, evidence, action, scope, project, monthly saving, resource ID, portal link).
+- The **cost-by-resource CSV** has one row per resource with the cost of the review month and the month before, the change, the type, the resource group, the subscription, the project and how it was allocated, and the region.
+- The **cost-by-project CSV** has one row per project with the cost of the review month and the month before, the change, the share, this month so far, the savings, the findings, the number of resources and resource groups, the top services and resource groups, and the tag used.
 - The **JSON snapshot** has the full result, for automation, Power BI or a comparison with the previous month.
 
 CSV cells are protected against formula injection.
@@ -490,7 +533,7 @@ CSV cells are protected against formula injection.
 | Agent autonomy | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
 
 ```text
-@finops-reviewer Run the monthly Azure FinOps review (operation=report). Give me the links to the HTML report, the JSON snapshot and the two CSV files first, then the verdict, the headline numbers, the prioritised actions with their estimated monthly savings, the budgets at risk, the unusual days and jumps, the allocation readiness and the coverage.
+@finops-reviewer Run the monthly Azure FinOps review (operation=report). Give me the links to the HTML report, the JSON snapshot and the three CSV files first, then the verdict, the headline numbers, the cost per project and which tag identifies the projects, the prioritised actions with their estimated monthly savings, the budgets at risk, the unusual days and jumps, the allocation readiness and the coverage.
 ```
 
 ![Scheduled task form](images/19-scheduled-task-form.png)
@@ -506,10 +549,10 @@ This guide schedules the review **monthly** because that is the classic FinOps c
 | Cadence | Cron (UTC) | What it gives you | Trade-off |
 |---|---|---|---|
 | **Monthly** (this guide) | `0 7 3 * *` | The authoritative review of the closed month, for finance and the monthly cost meeting | An overrun that starts on the 5th is visible on the 3rd of the next month |
-| **Weekly** (recommended for customers) | `0 7 * * 1` (Mondays) | The same report every Monday: month to date, forecast against the budget, new idle resources and jumps while you can still act this month | 4-5 runs a month instead of 1: more agent runs and Cost Management queries (3 per subscription each time) |
+| **Weekly** (recommended for customers) | `0 7 * * 1` (Mondays) | The same report every Monday: month to date, forecast against the budget, new idle resources and jumps while you can still act this month | 4-5 runs a month instead of 1: more agent runs and Cost Management queries (4 per subscription each time) |
 | **Daily** (anomaly alerts) | `0 7 * * *` with the prompt `@finops-reviewer Run operation=query view=anomalies and tell me only about unusual days of this month` | Early warning of a spike two days after it happens (the time Cost Management needs to settle the day) | About 30 runs a month; the daily answer is only as fresh as Cost Management's data; keep the full report weekly or monthly |
 
-Each run reads Cost Management with 3 queries per subscription, plus 4 Azure Resource Graph queries and the budgets: the queries themselves are free, but every run is an agent conversation that consumes Azure SRE Agent usage, and Cost Management throttles frequent queries on the same scope. A weekly report plus a daily `anomalies` query is a good balance for most customers. Cost Management's own [anomaly alerts](https://learn.microsoft.com/azure/cost-management-billing/understand/analyze-unexpected-charges) are a free complement for subscription-level spikes.
+Each run reads Cost Management with 4 queries per subscription, plus 4 Azure Resource Graph queries, the budgets and the tag keys: the queries themselves are free, but every run is an agent conversation that consumes Azure SRE Agent usage, and Cost Management throttles frequent queries on the same scope. A weekly report plus a daily `anomalies` query is a good balance for most customers. Cost Management's own [anomaly alerts](https://learn.microsoft.com/azure/cost-management-billing/understand/analyze-unexpected-charges) are a free complement for subscription-level spikes.
 
 ## How the numbers are calculated
 
@@ -527,18 +570,20 @@ The analysis is deterministic and explainable; every rule is covered by unit tes
 | Advisor | Advisor's monthly estimate, or the resource's cost last month when Advisor gives none. If Advisor and the idle checks flag the same resource, it counts once (the larger saving) and the row says *Advisor agrees* |
 | Commitments | Advisor's reservation and savings plan options are alternatives: per subscription only the best 1-year option counts. Coverage = cost on reservations or savings plans / commitment-eligible compute |
 | Allocation | Cost of the review month by resource, joined with the resource's tags in Azure Resource Graph today; resource group and subscription tags count when `TAG_INHERITANCE = True`. Cost not linked to a resource counts as untagged |
-| Actions | Findings of medium severity or higher, or with a saving, ranked by severity and saving; the first 8 |
+| Projects | The tag from `PROJECT_TAG_KEYS`, or the best candidate by name, cost covered and number of values. Each resource takes the first match: resource tag, resource group tag (or the tag of the resource that manages a managed group), subscription tag, cost-record tag, `PROJECT_RG_RULES`, otherwise *Unallocated*. Today's tags apply to every month. Savings belong to the project of their resource; jumps of a resource group to the project with most of its cost; budgets, commitments and unusual days stay whole-environment |
+| Actions | Findings of medium severity or higher, or with a saving, ranked by severity and saving; the first 8 (also per project) |
 
 ## Validation checklist
 
 - [ ] The agent identity has **Reader** on every subscription to review (or on the Management Group).
-- [ ] Lines 34-35 of the tool code have the real Client ID and subscriptions.
+- [ ] Lines 36-37 of the tool code have the real Client ID and subscriptions.
 - [ ] The tool test with `operation=query`, `view=summary` returns `status: ok` and complete coverage.
 - [ ] The skill has only the `generate-azure-finops-review` tool.
 - [ ] The subagent has only that skill and that tool.
-- [ ] The chat run returns the four links and the coverage is **ok** (or partial with a clear reason).
+- [ ] The chat run returns the five links and the coverage is **ok** (or partial with a clear reason).
+- [ ] *Cost by project* uses the tag your teams use for projects; if not, set `PROJECT_TAG_KEYS` (line 44) or `--project-tag`.
 - [ ] The monthly scheduled task exists (day 3, 07:00 UTC), uses the same chat thread and is enabled.
-- [ ] `ALLOCATION_TAGS` lists your real chargeback tags, and the thresholds of lines 42-43 fit the size of your bill.
+- [ ] `ALLOCATION_TAGS` lists your real chargeback tags, and the thresholds of lines 46-47 fit the size of your bill.
 - [ ] After the first month, review the actions with the cost owners and add sandboxes or disaster-recovery resource groups to `EXCLUDED_RESOURCE_GROUPS`.
 
 ## Troubleshooting
@@ -552,7 +597,10 @@ The analysis is deterministic and explainable; every rule is covered by unit tes
 | Budget forecast empty | The budget is new or Azure has not computed the forecast yet | Expected; the report shows the tool's own forecast |
 | A subscription is missing from the totals | It is billed in another currency | Expected; it is listed in the coverage. Review it separately |
 | Advisor shows nothing | Advisor has no cost recommendations for these subscriptions, or they are being refreshed | Expected; Advisor refreshes its recommendations periodically |
-| 100 % untagged | `ALLOCATION_TAGS` does not match your tag names | Set your own tags in line 40 |
+| 100 % untagged | `ALLOCATION_TAGS` does not match your tag names | Set your own tags in line 42 |
+| Every project is *Unallocated*, or the finding *No project tag found* | No tag name looks like a project, application, cost center or team | Set `PROJECT_TAG_KEYS` (line 44) to your tag, or map resource groups with `PROJECT_RG_RULES` (line 45) |
+| The wrong tag was picked for the projects | Another tag covers more cost or has a better name | Set `PROJECT_TAG_KEYS`, or ask the agent to use your tag (`project_tag`) for one run |
+| A project's past months look low | Resources deleted before the review have no tag in Azure Resource Graph | Expected; the cost-record tag step catches them when Cost Management recorded the tag; tag inheritance in Cost Management helps |
 | HTTP 401/403 in the deploy script | Your user lacks **SRE Agent Administrator** | Assign that role on the agent; Azure Owner does not replace it |
 | The agent rewrites the report or does not show links | Subagent without the skill, or other tools selected | Check steps ⑬-⑭: only that skill and that tool |
 
@@ -560,7 +608,7 @@ The analysis is deterministic and explainable; every rule is covered by unit tes
 
 - **Read only by design.** The code has a fixed allowlist:
   - `POST` only to the Azure Resource Graph query endpoint and to the Cost Management query endpoint of each configured subscription;
-  - `GET` only to the Consumption budgets of the configured subscriptions and Management Group.
+  - `GET` only to the Consumption budgets of the configured subscriptions and Management Group, and to the Consumption tag keys of the configured subscriptions.
 
   With Reader it cannot create, modify or delete anything (budgets, tags, resources, reservations, savings plans), and the instructions forbid it even if a user asks.
 - **No added Azure cost.** No exports, storage accounts, Log Analytics workspaces or other resources. The API calls are free.
@@ -586,6 +634,9 @@ The analysis is deterministic and explainable; every rule is covered by unit tes
 | Idle resources | `@finops-reviewer List the idle and orphaned resources and what they cost.` |
 | Top resources | `@finops-reviewer What are our most expensive resources and how did they change?` |
 | Allocation | `@finops-reviewer How much of our cost is untagged, and which resource groups should we tag first?` |
+| Projects | `@finops-reviewer How much does each project cost, and which tag did you use?` |
+| One project | `@finops-reviewer What can the E-commerce web project save, and what should it do first?` |
+| Our project tag | `@finops-reviewer Our projects are in the tag Proyecto. Run the review with that tag.` |
 | Coverage | `@finops-reviewer Is the cost data of this review complete?` |
 | Demo | `@finops-reviewer Run a self-test of the FinOps review.` |
 | Castellano | `@finops-reviewer ¿Cuánto costó Azure el mes pasado, por qué cambió y qué deberíamos hacer primero?` |
@@ -598,6 +649,7 @@ The analysis is deterministic and explainable; every rule is covered by unit tes
 - [Azure Advisor cost recommendations](https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations)
 - [Azure Resource Graph](https://learn.microsoft.com/azure/governance/resource-graph/overview)
 - [Tag inheritance in Cost Management](https://learn.microsoft.com/azure/cost-management-billing/costs/enable-tag-inheritance)
+- [Use tags to organize your Azure resources](https://learn.microsoft.com/azure/azure-resource-manager/management/tag-resources)
 - [Identify anomalies and unexpected changes in cost](https://learn.microsoft.com/azure/cost-management-billing/understand/analyze-unexpected-charges)
 - [FinOps Framework](https://www.finops.org/framework/) (FinOps Foundation)
 - [FinOps SRE Agent pack](https://github.com/dmauser/finops-sre-agent-pack) (community): a broader set of FinOps skills and scheduled tasks for Azure SRE Agent; this case condenses its core ideas into one monthly review

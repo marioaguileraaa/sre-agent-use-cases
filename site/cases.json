@@ -265,17 +265,18 @@
       "name": "Databricks dependencies and configuration",
       "latin": "databricks-dependency-live",
       "key": "No map of what our Databricks workspace depends on",
-      "symptom": "Our Databricks workspace connects to many things, and nobody has the full map or knows whether it is secure and cost-efficient.",
-      "does": "It maps how an Azure Databricks workspace connects to networks, storage, Key Vault, jobs, pipelines and Unity Catalog, marking what is observed, inferred or unknown, and checks 36 best practices for security, cost and optimisation.",
+      "symptom": "Our Databricks workspace connects to many things, nobody has the full map, and nobody can say where its cost comes from or how to reduce it.",
+      "does": "It maps how an Azure Databricks workspace connects to networks, storage, Key Vault, jobs, pipelines and Unity Catalog, marking what is observed, inferred or unknown; shows where the Databricks cost comes from (DBUs against infrastructure, per cluster, job, SQL warehouse and tag) with estimated savings; and checks 36 best practices for security, cost and optimisation.",
       "runs": "On demand",
-      "reads": "Azure Databricks and Unity Catalog",
+      "reads": "Azure Databricks, Unity Catalog and Cost Management",
       "delivers": "HTML report, two CSVs and JSON",
       "image": "site/img/plates/08.webp",
       "thumb": "site/img/plates/08-thumb.webp",
       "full": "08-databricks-dependency-configuration-review/images/13-report-overview-and-pillars.png",
       "caption": "Lab run, report in Spanish. Field marks: 1 exports (JSON, dependencies, findings) · 2 workspace cover and scope · 3 executive reading and coverage.",
       "compare": [
-        "04-aks-well-architected-review"
+        "04-aks-well-architected-review",
+        "15-azure-finops-monthly-review"
       ]
     },
     "11-fabric-finops-chargeback": {
@@ -299,13 +300,13 @@
       "latin": "finops-reviewer",
       "key": "The Azure bill grows and nobody can say why",
       "symptom": "Every month the Azure bill changes and we only find out why weeks later; budgets overrun before anyone notices, and the savings ideas are scattered across tools.",
-      "does": "On the 3rd of every month it reads Cost Management, the budgets, Azure Advisor and Azure Resource Graph, and builds the classic FinOps review: last month's cost and why it changed, the forecast against every budget, unusual days and jumps, savings without double counting, untagged cost and a short list of actions with their monthly saving.",
+      "does": "On the 3rd of every month it reads Cost Management, the budgets, Azure Advisor and Azure Resource Graph, and builds the classic FinOps review: last month's cost and why it changed, the cost of every project, the forecast against every budget, unusual days and jumps, savings without double counting, untagged cost and a short list of actions with their monthly saving.",
       "runs": "Monthly, on the 3rd",
       "reads": "Azure Cost Management, budgets, Azure Advisor and Azure Resource Graph",
-      "delivers": "HTML report, two CSVs and JSON",
+      "delivers": "HTML report with a project filter, three CSVs and JSON",
       "image": "site/img/plates/15.webp",
       "thumb": "site/img/plates/15-thumb.webp",
-      "full": "15-azure-finops-monthly-review/sample-run/finops-review-2026-10-20261112T134248Z-1164c638.html",
+      "full": "15-azure-finops-monthly-review/sample-run/finops-review-2026-10-20261112T161319Z-923eef2b.html",
       "caption": "Real lab run with names and identifiers replaced.",
       "compare": [
         "11-fabric-finops-chargeback",

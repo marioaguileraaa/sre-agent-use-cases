@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "generate-azure-finops-review parameters",
-  "description": "All parameters are optional. The monthly scheduled task calls {\"operation\": \"report\"}. Scope (subscriptions or management group), cost metric, allocation tags and thresholds are set in the CONFIGURE block of the tool code, never by the agent.",
+  "description": "All parameters are optional. The monthly scheduled task calls {\"operation\": \"report\"}. Scope (subscriptions or management group), cost metric, allocation tags, the project tag (PROJECT_TAG_KEYS) and thresholds are set in the CONFIGURE block of the tool code; the agent can only ask for another project tag for one run (project_tag).",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -9,13 +9,13 @@
       "type": "string",
       "enum": ["report", "query", "self_test"],
       "default": "report",
-      "description": "report writes four files (offline HTML report, JSON snapshot, findings CSV, cost-by-resource CSV) and returns links, verdict, headline, KPIs, top actions and coverage. query returns one bounded chat view (no files). self_test writes the complete report from built-in SIMULATED data with no network and no configuration."
+      "description": "report writes five files (offline HTML report, JSON snapshot, findings CSV, cost-by-resource CSV, cost-by-project CSV) and returns links, verdict, headline, KPIs (with the project summary), top actions and coverage. query returns one bounded chat view (no files). self_test writes the complete report from built-in SIMULATED data with no network and no configuration."
     },
     "view": {
       "type": "string",
-      "enum": ["summary", "actions", "anomalies", "budgets", "savings", "resources", "allocation", "coverage"],
+      "enum": ["summary", "actions", "anomalies", "budgets", "savings", "resources", "projects", "allocation", "coverage"],
       "default": "summary",
-      "description": "Chat view for operation=query only."
+      "description": "Chat view for operation=query only. projects lists the cost per project (or, with project, that project's top services, resource groups and resources)."
     },
     "limit": {
       "type": "integer",
@@ -23,12 +23,24 @@
       "maximum": 50,
       "default": 15,
       "description": "Maximum rows for operation=query; the answer is also capped to 3,500 bytes (transport_capped=true when rows were dropped)."
+    },
+    "project": {
+      "type": "string",
+      "maxLength": 64,
+      "default": "",
+      "description": "Only with operation=query: one project name (case-insensitive; Unallocated is accepted). summary, actions, savings, resources and projects then show that project only; the other views stay whole-environment."
+    },
+    "project_tag": {
+      "type": "string",
+      "maxLength": 300,
+      "default": "",
+      "description": "Tag name that names the project for this run, or up to 5 comma-separated names in priority order (for example Proyecto or Project,CostCenter). Overrides PROJECT_TAG_KEYS and the automatic detection. Empty: use PROJECT_TAG_KEYS, or detect the tag."
     }
   },
   "allOf": [
     {
       "if": { "properties": { "operation": { "enum": ["report", "self_test"] } } },
-      "then": { "properties": { "view": { "const": "summary" }, "limit": { "const": 15 } } }
+      "then": { "properties": { "view": { "const": "summary" }, "limit": { "const": 15 }, "project": { "const": "" } } }
     }
   ]
 }

@@ -16,10 +16,12 @@ class AllowlistTests(unittest.TestCase):
         check("POST", QUERY_URL)
         check("POST", ARG_URL)
         check("GET", f"https://management.azure.com/subscriptions/{SUB_A}/providers/Microsoft.Consumption/budgets?api-version=2023-05-01")
+        check("GET", f"https://management.azure.com/subscriptions/{SUB_A}/providers/Microsoft.Consumption/tags?api-version=2023-05-01")
         for method, url in (("GET", QUERY_URL), ("DELETE", ARG_URL), ("PUT", ARG_URL),
                             ("POST", f"https://management.azure.com/subscriptions/{SUB_A}/providers/Microsoft.Compute/virtualMachines/vm1/deallocate"),
                             ("POST", QUERY_URL.replace("https://", "http://")), ("POST", QUERY_URL.replace("management.azure.com", "evil.example.com")),
-                            ("GET", f"https://management.azure.com/subscriptions/{SUB_A}/providers/Microsoft.Consumption/budgets/../../x")):
+                            ("GET", f"https://management.azure.com/subscriptions/{SUB_A}/providers/Microsoft.Consumption/budgets/../../x"),
+                            ("GET", f"https://management.azure.com/subscriptions/{SUB_A}/providers/Microsoft.Consumption/tags/x")):
             with self.subTest(method=method, url=url):
                 with self.assertRaises(self.tool.FinOpsError) as ctx:
                     check(method, url)
@@ -96,7 +98,8 @@ class ThrottlingAndPagingTests(unittest.TestCase):
         empty_arg = Response({"data": []})
         cost_ok = Response({"properties": {"columns": [{"name": "Cost"}, {"name": "UsageDate"}, {"name": "ServiceName"}, {"name": "PricingModel"},
                                                        {"name": "Currency"}], "rows": [[3.0, 20261101, "Storage", "OnDemand", "USD"]]}})
-        script = [containers, empty_arg, empty_arg, empty_arg, Response({"value": []}), http_error(QUERY_URL, 403), cost_ok,
+        tag_keys = Response({"properties": {"tags": []}})
+        script = [containers, empty_arg, empty_arg, empty_arg, Response({"value": []}), tag_keys, http_error(QUERY_URL, 403), cost_ok,
                   Response({"properties": {"columns": [], "rows": []}})]
         reader, _ = self.reader(script)
         raw = self.tool.collect(reader, config, periods)

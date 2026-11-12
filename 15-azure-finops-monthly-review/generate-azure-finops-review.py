@@ -1,13 +1,14 @@
 # generate-azure-finops-review
 # Python tool for Azure SRE Agent: classic monthly FinOps review of the whole Azure environment.
-# Sources (all read-only): Cost Management Query API (3 queries per subscription), Consumption budgets,
-# Azure Resource Graph (resource groups and tags, idle and orphaned resources, Azure Advisor cost recommendations).
+# Sources (all read-only): Cost Management Query API (3 queries per subscription, plus 1 for the project tag),
+# Consumption budgets and tag keys, Azure Resource Graph (resource groups and tags, idle and orphaned resources,
+# Azure Advisor cost recommendations). Cost is also shown per project, from a project tag it detects or you set.
 # READ ONLY. The SRE Agent managed identity needs Reader on the configured subscriptions (or management group);
 # Reader includes cost and budget reads at subscription scope (Cost Management Reader is the cost-only alternative).
 # It never creates, modifies or deletes anything, and adds no Azure cost (no exports, storage or Log Analytics).
 # BEFORE PASTING IT into the Builder, replace <YOUR_MANAGED_IDENTITY_CLIENT_ID> and <YOUR_SUBSCRIPTION_ID> in the
 # CONFIGURE block. A Client ID or a Subscription ID is not a secret. operation=self_test needs no configuration.
-# Version 1.0 - November 2026
+# Version 1.1 - November 2026
 
 import base64
 import calendar
@@ -22,6 +23,7 @@ import re
 import ssl
 import tempfile
 import time
+import unicodedata
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -39,6 +41,8 @@ COST_METRIC = "AmortizedCost"                         # AmortizedCost (reservati
 TREND_MONTHS = 6                                      # full months in the monthly trend, plus the month to date
 ALLOCATION_TAGS = ["costcenter", "owner", "environment"]  # tags every cost should carry (case-insensitive), up to 5
 TAG_INHERITANCE = True                                # a resource group or subscription tag also counts for its resources
+PROJECT_TAG_KEYS = []                                 # tag key(s) that name the project, in priority order; empty = detect it
+PROJECT_RG_RULES = []                                 # optional ("regex on the resource group name", "Project") pairs for untagged groups
 ANOMALY_MIN_DAILY_DELTA = 20.0                        # minimum daily increase (billing currency) before a day is unusual
 MOM_MIN_DELTA = 100.0                                 # minimum month-over-month increase for a service or resource group jump
 SNAPSHOT_MAX_AGE_DAYS = 90                            # disk snapshots older than this are listed for review
@@ -51,7 +55,7 @@ FILE_PREFIX = "finops-review"                         # report file names: <pref
 # =======================================================================
 
 TOOL_NAME = "generate-azure-finops-review"
-TOOL_VERSION = "1.0"
+TOOL_VERSION = "1.1"
 ARM = "https://management.azure.com"
 ARG_API_VERSION = "2024-04-01"
 COST_API_VERSION = "2025-03-01"
@@ -60,10 +64,10 @@ SIDECAR_TOKEN_ISSUER = "adc-msi-sidecar"
 TRANSPORT_BYTES = 3500
 ARTIFACT_BYTES = 4_800_000
 HTTP_BYTES = 16_000_000
-MAX_HTTP_REQUESTS = 220
+MAX_HTTP_REQUESTS = 300
 MAX_ARG_PAGES = 60
-MAX_COST_PAGES = 12
-MAX_COST_ROWS = 60_000
+MAX_COST_PAGES = 20
+MAX_COST_ROWS = 100_000
 MAX_RETRY_WAIT = 65
 DATA_LATENCY_DAYS = 2
 DAILY_DAYS = 60
@@ -71,13 +75,22 @@ BASELINE_DAYS = 14
 ANOMALY_DAY_PCT = 25
 MOM_MIN_PCT = 20
 OPERATIONS = ("report", "query", "self_test")
-VIEWS = ("summary", "actions", "anomalies", "budgets", "savings", "resources", "allocation", "coverage")
+VIEWS = ("summary", "actions", "anomalies", "budgets", "savings", "resources", "projects", "allocation", "coverage")
+PROJECT_VARIANTS = 25
 SEV_RANK = {"critical": 5, "high": 4, "medium": 3, "low": 2, "info": 1}
 SEVERITIES = ("critical", "high", "medium", "low", "info")
 SEP, EMDASH, TIMES = " \u00b7 ", "\u2014", " \u00d7"
 GUID_RX = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 PLACEHOLDER_RX = re.compile(r"^\s*<[^>]*>\s*$")
 TAG_RX = re.compile(r"^[A-Za-z0-9 _.:/\-]{1,64}$")
+PROJECT_KEY_RX = re.compile(r"^(?=.*\S)[^<>%&\\?/,\x00-\x1f\x7f]{1,128}$")
+PROJECT_NAME_RX = re.compile(r"^(?=.*\S)[^<>\x00-\x1f\x7f]{1,64}$")
+# tag names that usually identify a project (EN/ES/CA), by strength; matched without accents, case or separators
+PROJECT_WORDS = ((3, ("project", "proyecto", "projecte")),
+                 (2, ("application", "aplicacion", "aplicacio", "app", "workload", "service", "servicio", "servei", "product", "producto", "producte")),
+                 (1, ("costcenter", "centrocoste", "centrocostes", "centrodecoste", "centrodecostes", "centredecost", "ceco", "cc", "businessunit",
+                      "unidaddenegocio", "bu", "department", "departamento", "departament", "team", "equipo", "equip")))
+PROJECT_SOURCES = ("resource", "rg", "managed", "sub", "cost", "rule", "none")
 LOGO_RX = re.compile(r"^data:image/(svg\+xml|png|jpeg|webp);base64,[A-Za-z0-9+/=]+$")
 COMMITMENT_SERVICES = frozenset({"virtual machines", "azure app service", "sql database", "sql managed instance",
                                  "azure kubernetes service", "azure cosmos db", "azure database for postgresql",
@@ -91,6 +104,7 @@ LEARN_TITLES = {
     "https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations": "Azure Advisor cost recommendations",
     "https://learn.microsoft.com/azure/governance/resource-graph/overview": "Azure Resource Graph",
     "https://learn.microsoft.com/azure/cost-management-billing/costs/enable-tag-inheritance": "Tag inheritance in Cost Management",
+    "https://learn.microsoft.com/azure/azure-resource-manager/management/tag-resources": "Tags to organize Azure resources",
     "https://learn.microsoft.com/azure/sre-agent/overview": "Azure SRE Agent",
 }
 LEARN_SOURCES = [
@@ -100,8 +114,10 @@ LEARN_SOURCES = [
     "https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations",
     "https://learn.microsoft.com/azure/governance/resource-graph/overview",
     "https://learn.microsoft.com/azure/cost-management-billing/costs/enable-tag-inheritance",
+    "https://learn.microsoft.com/azure/azure-resource-manager/management/tag-resources",
     "https://learn.microsoft.com/azure/sre-agent/overview",
 ]
+LEARN_TAG_INHERITANCE = "https://learn.microsoft.com/azure/cost-management-billing/costs/enable-tag-inheritance"
 
 # ------------------------- report copy (one table, so the report can be translated) -------------------------
 # @@TEXT-BEGIN@@
@@ -205,7 +221,7 @@ TEXT = {
     "st_complete": "Complete", "st_partial": "Partial", "st_denied": "Denied", "st_error": "Error", "st_skipped": "Skipped",
     "st_not_configured": "Not configured", "st_simulated": "Simulated",
     "src_containers": "Subscriptions and resource groups (Resource Graph)", "src_cost_monthly": "Monthly cost by resource group and service",
-    "src_cost_daily": "Daily cost by service and pricing model", "src_cost_resources": "Cost by resource and region (2 months)",
+    "src_cost_daily": "Daily cost by service and pricing model", "src_cost_resources": "Cost by resource, service and region (3 months)",
     "src_budgets": "Budgets (Consumption API)", "src_tags": "Resource tags (Resource Graph)", "src_idle": "Idle and orphaned resources (Resource Graph)",
     "src_advisor": "Azure Advisor cost recommendations (Resource Graph)",
     "method_h": "Method", "method_items": [
@@ -216,6 +232,7 @@ TEXT = {
         "Month-over-month jump: at least {mpct} and {mmin} more than the previous month. New: cost this month and none in the three months before.",
         "Savings are monthly estimates and are not added twice: reservations and savings plans are alternatives, so only the best option counts, and each resource counts once.",
         "Allocation: cost of {month} by resource, joined with the resource's tags in Azure Resource Graph today.",
+        "Projects: each resource takes the first project found in its own tag, its resource group's tag (or the tag of the resource that manages the group), its subscription's tag, its cost records' tag and the resource group name rules; the rest is Unallocated. Today's tags apply to every month.",
     ],
     "notcov_h": "Not covered", "notcov_items": [
         "Reservation and savings plan utilization (needs tenant-level Reservations Reader and Savings plan Reader).",
@@ -260,6 +277,54 @@ TEXT = {
     "advisor_impact": "Advisor impact {v}", "impact_v": "Impact {v}", "advisor_est": "Advisor: {v}", "imp_High": "High", "imp_Medium": "Medium", "imp_Low": "Low",
     "k8s_volume": "Kubernetes volume", "col_action": "Action", "col_resource_id": "Resource ID", "col_link": "Link", "filtered": "filtered",
     "tbl": "Table", "scrolls": "(scrolls sideways)",
+    # projects
+    "nav_projects": "Projects", "s_projects": "Cost by project",
+    "s_projects_sub": "{month} cost per project with the change on {prev}, this month so far, savings and findings. {pct} of the cost is allocated to a project.",
+    "pf_label": "Project", "pf_all": "All projects", "pf_clear": "Show all projects", "pf_note": "Whole environment: not filtered by project",
+    "pf_chip": "Project:", "pf_banner": "Showing project {name}: {cost} in {month} ({share} of the cost) and {n} findings.",
+    "pf_banner_one": "Showing project {name}: {cost} in {month} ({share} of the cost) and 1 finding.",
+    "pf_scope": "Actions, Where the money goes, Savings and the Findings register show this project. The figures at the top and the sections marked Whole environment are not filtered.",
+    "col_project": "Project", "col_mtd": "{month} to date", "col_psavings": "Savings a month", "col_findings": "Findings",
+    "proj_unallocated": "Unallocated", "proj_unalloc_sub": "No project tag or rule matches these resources.",
+    "proj_res": "{n} resources", "proj_res_one": "1 resource", "proj_rgs": "{n} resource groups", "proj_rgs_one": "1 resource group", "proj_top": "top: {v}",
+    "proj_total": "All projects", "proj_more": "Other {n} projects", "proj_pick": "Filter the report by project {name}",
+    "proj_none": "No cost could be linked to resources in {month}, so there is nothing to show per project.",
+    "sv_total_sub_p": "a month for this project: Advisor recommendations and idle resources, each resource counted once.",
+    "advisor_none_p": "Azure Advisor has no cost recommendations for this project's resources.", "idle_none_p": "No idle or orphaned resources were found in this project.",
+    "proj_share_h": "Share of {month}'s cost", "proj_share_sub": "Choose a project in the table or in the Project menu to filter the report.",
+    "pd_change": "vs {prev}", "pd_mtd": "{month} to date", "pd_savings": "savings a month", "pd_services": "Top services", "pd_rgs": "Top resource groups",
+    "pd_resources": "Top resources", "pd_findings": "{n} findings", "pd_findings_one": "1 finding", "act_none_p": "No actions for this project this month.",
+    "pid_h": "How projects are identified", "pid_tag": "Project tag", "pid_chip_detected": "Detected automatically", "pid_chip_configured": "Set in PROJECT_TAG_KEYS",
+    "pid_chip_parameter": "Set for this run (project_tag)", "pid_chip_none": "No project tag found",
+    "pid_why_detected": "Chosen because its name means {meaning}, it covers {cov} of {month}'s cost and it has {n} values.",
+    "pid_why_detected_cost": "Chosen because its name means {meaning}; it was found only in the cost records.",
+    "pid_why_configured": "Set in the CONFIGURE block of the tool. Tags cover {cov} of {month}'s cost.",
+    "pid_why_parameter": "Requested for this run. Tags cover {cov} of {month}'s cost.",
+    "pid_why_none": "No tag name in the reviewed scope looks like a project, application, cost center or team.",
+    "meaning_3": "project", "meaning_2": "application, workload, service or product", "meaning_1": "cost center, business unit, department or team",
+    "pid_order": "Each resource takes the first match, in this order (share of {month}'s cost):",
+    "pid_lvl_resource": "Tag on the resource", "pid_lvl_rg": "Tag on its resource group", "pid_lvl_managed": "Tag on the resource that manages its group (AKS, Databricks)",
+    "pid_lvl_sub": "Tag on its subscription", "pid_lvl_cost": "Tag on its cost records", "pid_lvl_rule": "Resource group name rules (PROJECT_RG_RULES)",
+    "pid_lvl_none": "Unallocated", "pid_cost_off": "not read", "pid_no_rules": "none set",
+    "pid_past": "Today's tags are applied to every month, so earlier months are allocated the same way.",
+    "pid_cand": "Tags that could name the project", "pid_cand_sub": "Found in this review, best match first.",
+    "col_tag": "Tag", "col_found": "Found on", "col_coverage": "Covers", "col_values": "Values", "pid_in_use": "in use", "not_measured": "not measured",
+    "where_resource": "resources", "where_rg": "resource groups", "where_sub": "subscriptions", "where_cost": "cost records",
+    "pid_override": "To confirm or change it, set PROJECT_TAG_KEYS = [\"{tag}\"] in the tool, or ask the agent to use another tag for one run (project_tag). "
+                    "PROJECT_RG_RULES maps resource group names to projects where there is no tag.",
+    "pid_override_none": "Set PROJECT_TAG_KEYS to the tag that names your projects, or map resource group names to projects with PROJECT_RG_RULES.",
+    "pid_inherit": "For chargeback in Azure itself, enable tag inheritance in Cost Management so cost records carry the tags of their resource group and subscription.",
+    "rule_arrow": "{p} \u2192 {v}",
+    "f_proj_none": "No project tag found", "f_proj_none_ev": "No tag name in the reviewed scope looks like a project, application, cost center or team; {pct} of {m}'s cost has no project.",
+    "a_proj_none": "Agree a project tag with the teams (for example Project), set it on the resource groups and add it to PROJECT_TAG_KEYS; PROJECT_RG_RULES can map resource group names meanwhile.",
+    "f_proj_low": "Only {pct} of the cost is allocated to a project ({tag} tag)", "f_proj_low_ev": "{v} of {total} in {m} has no project, mostly in {rgs}.",
+    "a_proj_low": "Tag those resource groups with {tag} (or add PROJECT_RG_RULES) and enable tag inheritance in Cost Management so cost records carry it.",
+    "src_cost_tag_keys": "Tag keys in cost records (Consumption API)", "src_cost_project": "Cost by resource and project tag (cost records)",
+    "optional": "optional", "csv_projects": "cost-by-project",
+    "cov_skipped": "{n} subscriptions not read (MAX_SUBSCRIPTIONS).", "cov_other_cur": "Excluded from totals (other billing currency): {v}",
+    "cov_invisible": "Not visible to the identity (no Reader): {v}", "cov_stats": "{n} read-only requests \u00b7 {s} s", "cov_identity": "identity: {v}",
+    "id_verified": "verified token", "id_unmatched": "token not matched to the configured identity (continuing)", "id_unreadable": "unreadable token (continuing)",
+    "id_self_test": "self-test (no identity)", "f_skipped": "{n} subscriptions not read (MAX_SUBSCRIPTIONS = {max})",
     "_types": {"microsoft.compute/virtualmachines": "Virtual machine", "microsoft.compute/disks": "Managed disk",
         "microsoft.compute/snapshots": "Disk snapshot", "microsoft.network/publicipaddresses": "Public IP address",
         "microsoft.network/azurefirewalls": "Azure Firewall", "microsoft.network/bastionhosts": "Bastion",
@@ -401,12 +466,44 @@ def portal_link(resource_id):
 
 
 # ------------------------- configuration and parameters -------------------------
+SELF_TEST_RULES = [(r"^rg-dev-(apps|build)", "Developer tools")]
+
+
+def project_settings(strict=True):
+    """PROJECT_TAG_KEYS and PROJECT_RG_RULES. strict=False (self_test) drops invalid entries instead of failing."""
+    raw_keys = PROJECT_TAG_KEYS if isinstance(PROJECT_TAG_KEYS, (list, tuple)) else None
+    valid = raw_keys is not None and len(raw_keys) <= 5 and all(isinstance(k, str) and PROJECT_KEY_RX.match(k.strip()) for k in raw_keys)
+    if not valid and strict:
+        raise FinOpsError("configuration_required", "PROJECT_TAG_KEYS must be a list of up to 5 tag names, or empty to detect the project tag.", "configuration")
+    keys = []
+    for k in raw_keys or []:
+        if isinstance(k, str) and PROJECT_KEY_RX.match(k.strip()) and k.strip().casefold() not in [x.casefold() for x in keys]:
+            keys.append(k.strip())
+    raw_rules = PROJECT_RG_RULES if isinstance(PROJECT_RG_RULES, (list, tuple)) else None
+    ok, rules = raw_rules is not None and len(raw_rules) <= 30, []
+    for rule in raw_rules or []:
+        good = (isinstance(rule, (list, tuple)) and len(rule) == 2 and all(isinstance(x, str) for x in rule) and 0 < len(rule[0]) <= 200
+                and bool(PROJECT_NAME_RX.match(rule[1].strip())))
+        try:
+            rx = re.compile("(?i)" + rule[0]) if good else None
+        except re.error:
+            good = False
+        if not good:
+            ok = False
+            continue
+        rules.append((rx, rule[1].strip()))
+    if not ok and strict:
+        raise FinOpsError("configuration_required", "PROJECT_RG_RULES must be a list of up to 30 (\"regex\", \"project name\") pairs.", "configuration")
+    return keys[:5], rules[:30]
+
+
 def validate_config(self_test=False):
     if self_test:
         return {"client_id": "00000000-0000-0000-0000-000000000000", "subscriptions": [], "management_group": "",
                 "client_name": CLIENT_NAME.strip() if isinstance(CLIENT_NAME, str) else "", "metric": COST_METRIC if COST_METRIC in ("AmortizedCost", "ActualCost") else "AmortizedCost",
                 "tags": [t_.lower() for t_ in ALLOCATION_TAGS if isinstance(t_, str) and TAG_RX.match(t_)][:5] if isinstance(ALLOCATION_TAGS, (list, tuple)) else [],
-                "inheritance": bool(TAG_INHERITANCE), "rg_patterns": [], "logo": LOGO_DATA_URI if isinstance(LOGO_DATA_URI, str) and LOGO_RX.match(LOGO_DATA_URI or "") else ""}
+                "inheritance": bool(TAG_INHERITANCE), "rg_patterns": [], "logo": LOGO_DATA_URI if isinstance(LOGO_DATA_URI, str) and LOGO_RX.match(LOGO_DATA_URI or "") else "",
+                "project_keys": [], "project_source": "", "project_rules": [(re.compile("(?i)" + p_), n_) for p_, n_ in SELF_TEST_RULES]}
     client = MANAGED_IDENTITY_CLIENT_ID
     if not isinstance(client, str) or PLACEHOLDER_RX.match(client) or not is_guid(client):
         raise FinOpsError("configuration_required", "Configuration required: set MANAGED_IDENTITY_CLIENT_ID in the CONFIGURE block to the Client ID "
@@ -457,12 +554,14 @@ def validate_config(self_test=False):
         raise FinOpsError("configuration_required", "LOGO_DATA_URI must be empty or a data:image/...;base64 URI under 400 KB.", "configuration")
     if not isinstance(OUTPUT_DIRECTORY, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,62}", OUTPUT_DIRECTORY):
         raise FinOpsError("configuration_required", "OUTPUT_DIRECTORY must be a single lowercase folder name.", "configuration")
+    project_keys, project_rules = project_settings()
     return {"client_id": client.strip().lower(), "subscriptions": subscriptions, "management_group": mg, "client_name": CLIENT_NAME.strip(),
             "metric": COST_METRIC, "tags": list(dict.fromkeys(x.strip().lower() for x in ALLOCATION_TAGS)), "inheritance": bool(TAG_INHERITANCE),
-            "rg_patterns": rg_patterns, "logo": LOGO_DATA_URI}
+            "rg_patterns": rg_patterns, "logo": LOGO_DATA_URI, "project_keys": project_keys, "project_source": "configured" if project_keys else "",
+            "project_rules": project_rules}
 
 
-def validate_parameters(operation="report", view="summary", limit=15):
+def validate_parameters(operation="report", view="summary", limit=15, project="", project_tag=""):
     operation = (operation or "report").strip().lower() if isinstance(operation, str) else operation
     if operation not in OPERATIONS:
         raise FinOpsError("invalid_parameter", "operation must be one of: report, query, self_test.", "parameters")
@@ -475,9 +574,27 @@ def validate_parameters(operation="report", view="summary", limit=15):
         limit = int(limit)
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 50:
         raise FinOpsError("invalid_parameter", "limit must be an integer from 1 to 50.", "parameters")
-    if operation != "query" and (view != "summary" or limit != 15):
-        raise FinOpsError("invalid_combination", "view and limit apply only to operation=query; operation=report always writes the complete review.", "parameters")
-    return {"operation": operation, "view": view, "limit": limit}
+    project = "" if project is None else project
+    if not isinstance(project, str) or (project.strip() and not PROJECT_NAME_RX.match(project.strip())):
+        raise FinOpsError("invalid_parameter", "project must be a project name of up to 64 characters (or empty for all projects).", "parameters")
+    project_tag = "" if project_tag is None else project_tag
+    keys = []
+    if not isinstance(project_tag, str) or len(project_tag) > 300:
+        raise FinOpsError("invalid_parameter", "project_tag must be a tag name, or up to 5 comma-separated tag names.", "parameters")
+    for key in project_tag.split(","):
+        key = key.strip()
+        if not key:
+            continue
+        if not PROJECT_KEY_RX.match(key):
+            raise FinOpsError("invalid_parameter", "project_tag must be a tag name, or up to 5 comma-separated tag names.", "parameters")
+        if key.casefold() not in [k.casefold() for k in keys]:
+            keys.append(key)
+    if len(keys) > 5:
+        raise FinOpsError("invalid_parameter", "project_tag accepts up to 5 tag names.", "parameters")
+    if operation != "query" and (view != "summary" or limit != 15 or project.strip()):
+        raise FinOpsError("invalid_combination", "view, limit and project apply only to operation=query; operation=report always writes the complete review "
+                          "(its HTML has a project filter).", "parameters")
+    return {"operation": operation, "view": view, "limit": limit, "project": project.strip(), "project_tag": keys}
 
 
 def review_periods(now):
@@ -557,6 +674,7 @@ class NoRedirect(HTTPRedirectHandler):
 ARM_POST_PATHS = (re.compile(r"^/providers/microsoft\.resourcegraph/resources$"),
                   re.compile(r"^/subscriptions/[0-9a-f-]{36}/providers/microsoft\.costmanagement/query$"))
 ARM_GET_PATHS = (re.compile(r"^/subscriptions/[0-9a-f-]{36}/providers/microsoft\.consumption/budgets$"),
+                 re.compile(r"^/subscriptions/[0-9a-f-]{36}/providers/microsoft\.consumption/tags$"),
                  re.compile(r"^/providers/microsoft\.management/managementgroups/[a-z0-9_().\-]{1,90}/providers/microsoft\.consumption/budgets$"))
 RETRYABLE = (429, 500, 502, 503, 504)
 
@@ -732,13 +850,37 @@ def cost_query(reader, sub, body, rec):
 
 
 def cost_body(metric, start, end, granularity, grouping):
+    """grouping: dimension names, or (type, name) pairs such as ("TagKey", "Project")."""
     body = {"type": metric, "timeframe": "Custom",
             "timePeriod": {"from": start.isoformat() + "T00:00:00Z", "to": end.isoformat() + "T23:59:59Z"},
             "dataset": {"aggregation": {"totalCost": {"name": "Cost", "function": "Sum"}},
-                        "grouping": [{"type": "Dimension", "name": g} for g in grouping]}}
+                        "grouping": [{"type": g[0], "name": g[1]} if isinstance(g, tuple) else {"type": "Dimension", "name": g} for g in grouping]}}
     if granularity:
         body["dataset"]["granularity"] = granularity
     return body
+
+
+def get_tag_keys(reader, sub, rec):
+    """Tag keys present in the subscription's cost records (Consumption Tags API, read-only)."""
+    url, keys = f"{ARM}/subscriptions/{sub}/providers/Microsoft.Consumption/tags?api-version={BUDGET_API_VERSION}", []
+    started = time.monotonic()
+    try:
+        for _ in range(5):
+            payload = reader.request("GET", url, rec["id"])
+            rec["pages"] += 1
+            props = payload.get("properties") if isinstance(payload.get("properties"), dict) else {}
+            for item in props.get("tags") or []:
+                key = clean((item or {}).get("key"), 128) if isinstance(item, dict) else ""
+                if key and PROJECT_KEY_RX.match(key):
+                    keys.append(key)
+            url = props.get("nextLink") or payload.get("nextLink")
+            if not url:
+                break
+    except FinOpsError as exc:
+        fail_receipt(rec, exc, bool(keys))
+    rec["records"] += len(keys)
+    rec["seconds"] = round(rec["seconds"] + time.monotonic() - started, 1)
+    return keys
 
 
 def get_budgets(reader, path, rec):
@@ -796,7 +938,7 @@ def q_idle(snapshot_days):
 def collect(reader, config, periods):
     """All reads, cheapest and most robust first: Resource Graph and budgets, then Cost Management (throttling-prone)."""
     raw = {"subs": [], "sub_names": {}, "sub_tags": {}, "rgs": {}, "cost": {}, "budgets": [], "tags": {}, "idle": [], "advisor": [],
-           "receipts": [], "skipped_subs": [], "invisible_subs": []}
+           "receipts": [], "skipped_subs": [], "invisible_subs": [], "cost_tag_keys": [], "project_detection": None}
     rec = receipt("containers", "src_containers")
     rows = arg_query(reader, arg_scope(config), Q_CONTAINERS, rec)
     raw["receipts"].append(rec)
@@ -824,11 +966,6 @@ def collect(reader, config, periods):
         return raw
     scope = arg_scope(config, subs)
     for source_id, query, key in (("tags", Q_TAGS, "tags"), ("idle", q_idle(SNAPSHOT_MAX_AGE_DAYS), "idle"), ("advisor", Q_ADVISOR, "advisor")):
-        if source_id == "tags" and not config["tags"]:
-            r = receipt("tags", "src_tags")
-            r["status"] = "not_configured"
-            raw["receipts"].append(r)
-            continue
         r = receipt(source_id, "src_" + source_id)
         rows = arg_query(reader, scope, query, r)
         raw["receipts"].append(r)
@@ -851,32 +988,59 @@ def collect(reader, config, periods):
     r["records"] = len(raw["budgets"])
     r["status"] = "complete" if all(s == "complete" for s in statuses) else ("partial" if any(s == "complete" for s in statuses) else statuses[0])
     raw["receipts"].append(r)
+    if not config.get("project_keys"):
+        r = receipt("cost_tag_keys", "src_cost_tag_keys")
+        r["optional"] = True
+        statuses, found = [], {}
+        for sub in subs:
+            part = receipt("cost_tag_keys", "src_cost_tag_keys")
+            for k in get_tag_keys(reader, sub, part):
+                found.setdefault(k.casefold(), k)
+            statuses.append(part["status"])
+            r["pages"] += part["pages"]
+            r["seconds"] = round(r["seconds"] + part["seconds"], 1)
+            r["errors"] += part["errors"][:1]
+        raw["cost_tag_keys"] = sorted(found.values(), key=str.casefold)
+        r["records"] = len(found)
+        r["status"] = "complete" if all(s == "complete" for s in statuses) else ("partial" if any(s == "complete" for s in statuses) else statuses[0])
+        raw["receipts"].append(r)
     plan = (("monthly", "src_cost_monthly", periods["trend_start"], periods["today"], "Monthly", ("ResourceGroupName", "ServiceName")),
             ("daily", "src_cost_daily", periods["daily_start"], periods["today"], "Daily", ("ServiceName", "PricingModel")),
-            ("resources", "src_cost_resources", periods["prev_start"], periods["review_end"], "Monthly", ("ResourceId", "ResourceLocation")))
+            ("resources", "src_cost_resources", periods["prev_start"], periods["today"], "Monthly", ("ResourceId", "ServiceName", "ResourceLocation")))
     for key, label, start, end, gran, grouping in plan:
-        agg = receipt("cost_" + key, label)
-        statuses = []
-        for sub in subs:
-            part = receipt(f"cost_{key}:{sub}", label, sub)
-            if reader.remaining() < 15:
-                part["status"] = "skipped"
-                part["errors"].append(FinOpsError("collection_deadline", "Skipped: collection budget nearly used.", part["id"]).public())
-                result = None
-            else:
-                result = cost_query(reader, sub, cost_body(config["metric"], start, end, gran, grouping), part)
-            raw["cost"].setdefault(sub, {})[key] = result
-            raw["cost"][sub][key + "_status"] = part["status"]
-            statuses.append(part["status"])
-            agg["pages"] += part["pages"]
-            agg["records"] += part["records"]
-            agg["seconds"] = round(agg["seconds"] + part["seconds"], 1)
-            if part["errors"]:
-                agg["errors"].append(dict(part["errors"][0], scope=sub))
-        agg["status"] = ("complete" if all(s == "complete" for s in statuses)
-                         else "partial" if any(s in ("complete", "partial") for s in statuses) else (statuses[0] if statuses else "skipped"))
-        raw["receipts"].append(agg)
+        collect_cost(reader, config, raw, subs, key, label, start, end, gran, grouping)
+    raw["project_detection"] = detect_project_key(raw, config, periods)
+    if raw["project_detection"]["keys"]:
+        tag_key = raw["project_detection"]["keys"][0]
+        collect_cost(reader, config, raw, subs, "project_tags", "src_cost_project", periods["prev_start"], periods["today"], "Monthly",
+                     ("ResourceId", ("TagKey", tag_key)), optional=True, min_seconds=60)
     return raw
+
+
+def collect_cost(reader, config, raw, subs, key, label, start, end, gran, grouping, optional=False, min_seconds=15):
+    agg = receipt("cost_" + key, label)
+    if optional:
+        agg["optional"] = True
+    statuses = []
+    for sub in subs:
+        part = receipt(f"cost_{key}:{sub}", label, sub)
+        if reader.remaining() < min_seconds:
+            part["status"] = "skipped"
+            part["errors"].append(FinOpsError("collection_deadline", "Skipped: collection budget nearly used.", part["id"]).public())
+            result = None
+        else:
+            result = cost_query(reader, sub, cost_body(config["metric"], start, end, gran, grouping), part)
+        raw["cost"].setdefault(sub, {})[key] = result
+        raw["cost"][sub][key + "_status"] = part["status"]
+        statuses.append(part["status"])
+        agg["pages"] += part["pages"]
+        agg["records"] += part["records"]
+        agg["seconds"] = round(agg["seconds"] + part["seconds"], 1)
+        if part["errors"]:
+            agg["errors"].append(dict(part["errors"][0], scope=sub))
+    agg["status"] = ("complete" if all(s == "complete" for s in statuses)
+                     else "partial" if any(s in ("complete", "partial") for s in statuses) else (statuses[0] if statuses else "skipped"))
+    raw["receipts"].append(agg)
 
 
 # ------------------------- analysis -------------------------
@@ -931,6 +1095,299 @@ def choose_variant(recs):
         look = str(ext.get("lookbackPeriod") or "")
         return (0 if term == "P1Y" else 1, {"30": 0, "60": 1, "7": 2}.get(look, 3))
     return sorted(recs, key=key)[0]
+
+
+def ranked_rows(items):
+    rows = [{"name": n, "scope": s, "cost": r2(c), "prev": r2(pv), "delta": r2(c - pv), "pct": pct(c - pv, pv), "new": pv <= 0.005 and c > 0}
+            for n, s, c, pv in items if c > 0.004 or pv > 0.004]
+    return sorted(rows, key=lambda r: -r["cost"])
+
+
+# ------------------------- projects: which tag names the project, and the project of every resource -------------------------
+PROJECT_WHERE = ("resource", "rg", "sub", "cost")
+
+
+def key_tokens(key):
+    text_value = unicodedata.normalize("NFKD", str(key or ""))
+    text_value = "".join(ch for ch in text_value if not unicodedata.combining(ch))
+    text_value = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text_value)
+    return [w for w in re.split(r"[^a-z0-9]+", text_value.lower()) if w]
+
+
+def project_name_match(key):
+    """(score, meaning) of a tag name. meaning 3 = project, 2 = application or workload, 1 = cost center or team.
+    The score is the meaning for an exact name (Proyecto, CostCenter, cost-center) and one less for a partial one (ProjectName)."""
+    tokens = key_tokens(key)
+    joined = "".join(tokens)
+    spans = {"".join(tokens[i:j]) for i in range(len(tokens)) for j in range(i + 1, len(tokens) + 1)}
+    best = (0, 0)
+    for weight, words in PROJECT_WORDS:
+        for word in words:
+            if joined == word:
+                score = weight
+            elif (len(word) >= 4 and word in spans) or (len(word) >= 7 and word in joined):
+                score = weight - 1
+            else:
+                continue
+            if score > best[0]:
+                best = (score, weight)
+    return best
+
+
+def ptags(tags):
+    """Tags with case-insensitive keys and tidy, non-empty values."""
+    out = {}
+    if isinstance(tags, dict):
+        for k, v in tags.items():
+            value = re.sub(r"\s+", " ", str(v if v is not None else "")).strip()
+            if value and str(k).strip():
+                out.setdefault(str(k).strip().casefold(), clean(value, 128))
+    return out
+
+
+def project_context(raw):
+    rg_tags, managed = {}, {}
+    for sub, groups in raw["rgs"].items():
+        for rg, g in groups.items():
+            rg_tags[(sub, rg)] = ptags(g.get("tags"))
+            if g.get("managed_by"):
+                managed[(sub, rg)] = str(g["managed_by"]).lower()
+    return {"res": {rid: ptags(tags) for rid, tags in raw["tags"].items()}, "rg": rg_tags, "managed": managed,
+            "sub": {s: ptags(tags) for s, tags in raw["sub_tags"].items()}}
+
+
+def first_value(tags, keys):
+    for k in keys:
+        if tags.get(k):
+            return tags[k]
+    return ""
+
+
+def arg_project(rid, keys, ctx):
+    """Project from today's tags in Azure Resource Graph: the resource, then its resource group (for a managed group such as
+    an AKS node resource group, the resource that manages it and that resource's group), then the subscription."""
+    sub, rg, _, _ = split_id(rid)
+    value = first_value(ctx["res"].get(rid, {}), keys)
+    if value:
+        return value, "resource"
+    rg = rg.lower()
+    value = first_value(ctx["rg"].get((sub, rg), {}), keys)
+    if value:
+        return value, "rg"
+    manager = ctx["managed"].get((sub, rg))
+    if manager:
+        msub, mrg, _, _ = split_id(manager)
+        value = first_value(ctx["res"].get(manager, {}), keys) or first_value(ctx["rg"].get((msub, mrg.lower()), {}), keys)
+        if value:
+            return value, "managed"
+    value = first_value(ctx["sub"].get(sub, {}), keys)
+    return (value, "sub") if value else ("", "")
+
+
+def review_resource_cost(raw, periods):
+    out = defaultdict(float)
+    for sub in raw["subs"]:
+        for row in raw["cost"].get(sub, {}).get("resources") or []:
+            if str(row.get("BillingMonth") or "")[:7] == periods["review_month"]:
+                out[str(row.get("ResourceId") or "").lower() or f"/subscriptions/{sub}/(not-a-resource)"] += num(row.get("Cost"))
+    return out
+
+
+def detect_project_key(raw, config, periods):
+    """The tag key(s) that name the project: PROJECT_TAG_KEYS or project_tag when set, else the best candidate found on resources,
+    resource groups, subscriptions and cost records, scored by name, by the share of the review month's cost it covers and by
+    a sensible number of distinct values (2 to 60)."""
+    stats = {}
+
+    def note(key, value, where):
+        k = str(key or "").strip()
+        if not k or not PROJECT_KEY_RX.match(k):
+            return
+        st = stats.setdefault(k.casefold(), {"names": defaultdict(int), "where": set(), "values": set()})
+        st["names"][k] += 0 if where == "cost" else 1  # Cost Management lowercases keys; prefer the casing seen on resources
+        st["where"].add(where)
+        v = re.sub(r"\s+", " ", str(value if value is not None else "")).strip()
+        if v:
+            st["values"].add(v.casefold())
+
+    for tags in raw["tags"].values():
+        for k, v in (tags.items() if isinstance(tags, dict) else ()):
+            note(k, v, "resource")
+    for groups in raw["rgs"].values():
+        for g in groups.values():
+            for k, v in ((g.get("tags") or {}).items() if isinstance(g.get("tags"), dict) else ()):
+                note(k, v, "rg")
+    for tags in raw["sub_tags"].values():
+        for k, v in (tags.items() if isinstance(tags, dict) else ()):
+            note(k, v, "sub")
+    for k in raw.get("cost_tag_keys") or []:
+        note(k, None, "cost")
+    costs = review_resource_cost(raw, periods)
+    total = sum(v for v in costs.values() if v > 0)
+    ctx = project_context(raw)
+    configured = list(config.get("project_keys") or [])
+    conf_f = [k.casefold() for k in configured]
+    for k in configured:
+        stats.setdefault(k.casefold(), {"names": defaultdict(int, {k: 0}), "where": set(), "values": set()})
+    candidates = []
+    for kf, st in stats.items():
+        display = max(st["names"], key=lambda n: (st["names"][n], n)) if st["names"] else kf
+        score_name, meaning = project_name_match(display)
+        if score_name < 1 and kf not in conf_f:
+            continue
+        in_arg = bool(st["where"] - {"cost"})
+        cov = (sum(c for rid, c in costs.items() if c > 0 and arg_project(rid, [kf], ctx)[0]) / total if total > 0 else 0.0) if in_arg else None
+        n = len(st["values"])
+        fit = 1.0 if 2 <= n <= 60 else 0.5 if n == 1 or 61 <= n <= 200 else 0.0
+        candidates.append({"key": display, "kf": kf, "where": [w for w in PROJECT_WHERE if w in st["where"]], "coverage": cov,
+                           "values": n if in_arg else None, "name_score": score_name, "meaning": meaning,
+                           "score": round(score_name + 2 * (cov or 0.0) + (fit if in_arg else 0.0), 3)})
+    candidates.sort(key=lambda c: (-c["score"], -(c["coverage"] or 0), c["key"].casefold()))
+    chosen = None
+    if configured:
+        keys, source = [next((c["key"] for c in candidates if c["kf"] == k.casefold()), k) for k in configured], config.get("project_source") or "configured"
+    else:
+        qualified = [c for c in candidates if c["name_score"] >= 1 and (c["coverage"] or 0) > 0]
+        cost_only = [c for c in candidates if c["coverage"] is None and c["name_score"] >= 2]
+        chosen = (qualified or cost_only or [None])[0]
+        keys, source = ([chosen["key"]], "detected") if chosen else ([], "none")
+    keys_f = [k.casefold() for k in keys]
+    for c in candidates:
+        c["chosen"] = c["kf"] in keys_f
+    candidates.sort(key=lambda c: not c["chosen"])
+    return {"keys": keys, "source": source, "candidates": candidates[:8], "chosen": chosen}
+
+
+def cost_record_projects(raw):
+    """Latest non-empty project tag value per resource in the cost records (TagKey grouping)."""
+    best = {}
+    for sub in raw["subs"]:
+        for row in raw["cost"].get(sub, {}).get("project_tags") or []:
+            value = re.sub(r"\s+", " ", str(row.get("TagValue") or "")).strip().strip('"')
+            rid = str(row.get("ResourceId") or "").lower()
+            month = str(row.get("BillingMonth") or "")[:7]
+            if value and rid and (rid not in best or month > best[rid][0]):
+                best[rid] = (month, clean(value, 128))
+    return {rid: v for rid, (_, v) in best.items()}
+
+
+def analyze_projects(raw, config, p, det, res_cost, res_svc, res_loc, names):
+    """Project of every resource (resource tag, resource group tag, subscription tag, cost-record tag, resource group name rule,
+    else Unallocated), using today's tags for every month, and the cost per project."""
+    keys = [k.casefold() for k in det["keys"]]
+    ctx = project_context(raw)
+    cost_tags = cost_record_projects(raw) if keys else {}
+    rules = config.get("project_rules") or []
+    review, prev, cur = p["review_month"], p["prev_month"], p["current_month"]
+
+    def rg_display(sub, rg):
+        return (raw["rgs"].get(sub, {}).get(rg.lower()) or {}).get("name") or rg
+
+    def resolve(rid):
+        sub, rg, _, _ = split_id(rid)
+        if keys:
+            value, source = arg_project(rid, keys, ctx)
+            if value:
+                return value, source
+            if cost_tags.get(rid):
+                return cost_tags[rid], "cost"
+        if rg:
+            for rx, project in rules:
+                if rx.search(rg_display(sub, rg)):
+                    return project, "rule"
+        return "", "none"
+
+    groups, by_source, proj_of, rg_votes = {}, defaultdict(float), {}, defaultdict(lambda: defaultdict(float))
+    total = 0.0
+    for rid, months in res_cost.items():
+        value, source = resolve(rid)
+        gk = value.casefold() if value else ""
+        g = groups.get(gk)
+        if g is None:
+            g = groups[gk] = {"gk": gk, "names": defaultdict(float), "cost": 0.0, "prev": 0.0, "mtd": 0.0, "res": set(), "src": defaultdict(float),
+                              "rg": defaultdict(lambda: [0.0, 0.0]), "svc": defaultdict(lambda: [0.0, 0.0]), "reg": defaultdict(float),
+                              "sub": defaultdict(lambda: [0.0, 0.0])}
+        c, pv, mtd = months.get(review, 0.0), months.get(prev, 0.0), months.get(cur, 0.0)
+        g["names"][value] += abs(c) + abs(pv) + abs(mtd) + 1e-9
+        g["cost"] += c
+        g["prev"] += pv
+        g["mtd"] += mtd
+        if max(abs(c), abs(pv), abs(mtd)) > 0.004:
+            g["res"].add(rid)
+        sub, rg, _, _ = split_id(rid)
+        g["rg"][(sub, rg.lower())][0] += c
+        g["rg"][(sub, rg.lower())][1] += pv
+        g["sub"][sub][0] += c
+        g["sub"][sub][1] += pv
+        g["reg"][region_name(res_loc.get(rid))] += c
+        for svc, sm in res_svc.get(rid, {}).items():
+            g["svc"][svc][0] += sm.get(review, 0.0)
+            g["svc"][svc][1] += sm.get(prev, 0.0)
+        g["src"][source] += c
+        by_source[source] += c
+        total += c
+        proj_of[rid] = (gk, source)
+        if rg:
+            rg_votes[(sub, rg.lower())][gk] += abs(c) + abs(pv)
+    named = sorted((g for gk, g in groups.items() if gk and max(abs(g["cost"]), abs(g["prev"]), abs(g["mtd"])) > 0.004),
+                   key=lambda g: (-g["cost"], -g["mtd"], -g["prev"], g["gk"]))
+    order = named + ([groups[""]] if "" in groups and max(abs(groups[""]["cost"]), abs(groups[""]["prev"]), abs(groups[""]["mtd"])) > 0.004 else [])
+    items, id_of = [], {}
+    for i, g in enumerate(order):
+        pid = f"p{i}"
+        id_of[g["gk"]] = pid
+        name = max(g["names"], key=lambda n: (g["names"][n], n)) if g["gk"] else t("proj_unallocated")
+        multi = len(raw["subs"]) > 1
+        items.append({"id": pid, "name": name, "unallocated": not g["gk"], "cost": r2(g["cost"]), "prev": r2(g["prev"]),
+                      "delta": r2(g["cost"] - g["prev"]), "pct": pct(g["cost"] - g["prev"], g["prev"]), "mtd": r2(g["mtd"]), "share": pct(g["cost"], total),
+                      "resources": len(g["res"]), "resource_groups": sum(1 for (s, rg), v in g["rg"].items() if rg and max(abs(v[0]), abs(v[1])) > 0.004),
+                      "by_rg": ranked_rows([(rg_display(s, rg) if rg else t("no_rg"), names.get(s, s) if multi else "", v[0], v[1]) for (s, rg), v in g["rg"].items()])[:50],
+                      "by_service": ranked_rows([(svc, "", v[0], v[1]) for svc, v in g["svc"].items()])[:50],
+                      "by_region": sorted(({"name": k, "cost": r2(v)} for k, v in g["reg"].items() if v > 0.004), key=lambda r: -r["cost"]),
+                      "by_sub": [{"id": s, "name": names.get(s, s), "cost": r2(v[0]), "prev": r2(v[1]), "delta": r2(v[0] - v[1]), "pct": pct(v[0] - v[1], v[1])}
+                                 for s, v in sorted(g["sub"].items(), key=lambda kv: -kv[1][0]) if max(abs(v[0]), abs(v[1])) > 0.004],
+                      "sources": {k: r2(v) for k, v in g["src"].items() if abs(v) > 0.004}, "variant": i < PROJECT_VARIANTS or not g["gk"],
+                      "savings": 0.0, "savings_idle": 0.0, "savings_advisor": 0.0, "findings": 0, "actions": [], "top_resources": []})
+    by_id = {it["id"]: it for it in items}
+
+    def project_of(rid):
+        """(id, name, source) of the project of a resource ID; empty strings when it is not a resource or there are no projects."""
+        if not split_id(rid)[2] and "(not-a-resource)" not in rid:
+            return "", "", ""
+        if rid in proj_of:
+            gk, source = proj_of[rid]
+        else:
+            value, source = resolve(rid)
+            gk = value.casefold()
+        pid = id_of.get(gk)
+        if not pid:
+            sub, rg, _, _ = split_id(rid)
+            pid = rg_project.get((sub, rg.lower()), ("",))[0] or id_of.get("")
+        return (pid, by_id[pid]["name"], source) if pid else ("", "", "")
+
+    rg_project = {}
+    for key, votes in rg_votes.items():
+        pid = id_of.get(max(votes, key=lambda k: (votes[k], k)))
+        if pid:
+            rg_project[key] = (pid, by_id[pid]["name"])
+    unalloc = groups.get("", {"rg": {}, "cost": 0.0})
+    multi = len(raw["subs"]) > 1
+    unalloc_rgs = sorted(([v[0], rg_display(s, rg) if rg else t("sub_level"), names.get(s, s) if multi else ""] for (s, rg), v in unalloc["rg"].items() if v[0] > 0.004),
+                         reverse=True)[:5]
+    allocated = total - (unalloc["cost"] if "" in groups else 0.0)
+    tagged = sum(by_source.get(s, 0.0) for s in ("resource", "rg", "managed", "sub"))
+    chosen = det.get("chosen")
+    summary = {"key": det["keys"][0] if det["keys"] else "", "keys": det["keys"], "source": det["source"],
+               "candidates": [{"key": c["key"], "where": c["where"], "coverage_pct": round(c["coverage"] * 100, 1) if c["coverage"] is not None else None,
+                               "values": c["values"], "meaning": c["meaning"], "name_score": c["name_score"], "chosen": c["chosen"]} for c in det["candidates"]],
+               "reason": {"meaning": chosen["meaning"], "coverage_pct": round((chosen["coverage"] or 0) * 100, 1) if chosen["coverage"] is not None else None,
+                          "values": chosen["values"]} if chosen else None,
+               "total": r2(total), "allocated": r2(allocated), "allocated_pct": pct(allocated, total), "tagged_pct": pct(tagged, total),
+               "by_source": {s: r2(by_source.get(s, 0.0)) for s in PROJECT_SOURCES}, "items": items, "named": len(named),
+               "rules": [{"pattern": rx.pattern[4:], "project": name} for rx, name in rules],
+               "cost_tags_read": bool(keys) and any(raw["cost"].get(s, {}).get("project_tags") is not None for s in raw["subs"]),
+               "unallocated_rgs": [{"rg": rg, "sub": sub, "cost": r2(c)} for c, rg, sub in unalloc_rgs]}
+    return summary, project_of, rg_project
 
 
 def analyze(raw, config, periods, now):
@@ -998,14 +1455,17 @@ def analyze(raw, config, periods, now):
                 model = clean(row.get("PricingModel"), 40) or "OnDemand"
                 pm_review[model] += c
                 pm_svc_review[svc][model] += c
-    # ---- resources (Q3)
+    # ---- resources (Q3: by resource, service and region; the previous month, the review month and this month)
     res_cost, res_loc = defaultdict(lambda: defaultdict(float)), {}
+    res_svc = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
     resources_ok = [s for s in subs if ok(s, "resources")]
     for sub in resources_ok:
         for row in raw["cost"][sub]["resources"]:
             m = str(row.get("BillingMonth") or "")[:7]
             rid = str(row.get("ResourceId") or "").lower() or f"/subscriptions/{sub}/(not-a-resource)"
-            res_cost[rid][m] += num(row.get("Cost"))
+            c = num(row.get("Cost"))
+            res_cost[rid][m] += c
+            res_svc[rid][clean(row.get("ServiceName"), 80) or "Other"][m] += c
             if row.get("ResourceLocation") and rid not in res_loc:
                 res_loc[rid] = str(row.get("ResourceLocation"))
     review, prev, cur = p["review_month"], p["prev_month"], p["current_month"]
@@ -1091,31 +1551,29 @@ def analyze(raw, config, periods, now):
     mom_min = float(MOM_MIN_DELTA)
     before3 = [month_key(add_months(p["review_start"], -k)) for k in (1, 2, 3)]
 
-    def consider(kind, name, series, scope):
+    def consider(kind, name, series, scope, key=None):
         c, pv = series.get(review, 0.0), series.get(prev, 0.0)
         if c <= 0:
             return
+        ref = {"sub_id": key[0], "rg_key": key[1]} if key else {}
         if all(series.get(m, 0.0) <= 0.005 for m in before3) and c >= max(mom_min / 4, 1.0):
-            new_items.append({"kind": kind, "name": name, "scope": scope, "cost": r2(c), "severity": "medium" if c >= mom_min else "low"})
+            new_items.append(dict(ref, kind=kind, name=name, scope=scope, cost=r2(c), severity="medium" if c >= mom_min else "low"))
             return
         delta = c - pv
         if delta >= mom_min and pv > 0 and delta / pv * 100 >= MOM_MIN_PCT:
-            jumps.append({"kind": kind, "name": name, "scope": scope, "cost": r2(c), "prev": r2(pv), "delta": r2(delta), "pct": delta / pv * 100,
-                          "severity": "high" if delta >= 3 * mom_min and delta / pv >= 0.5 else "medium"})
+            jumps.append(dict(ref, kind=kind, name=name, scope=scope, cost=r2(c), prev=r2(pv), delta=r2(delta), pct=delta / pv * 100,
+                              severity="high" if delta >= 3 * mom_min and delta / pv >= 0.5 else "medium"))
 
     for svc, series in m_svc.items():
         consider("service", svc, series, "")
     for (sub, rg), series in m_rg.items():
         if rg:
-            consider("rg", rg_names.get((sub, rg), rg), series, names.get(sub, sub))
+            consider("rg", rg_names.get((sub, rg), rg), series, names.get(sub, sub), (sub, rg))
     jumps.sort(key=lambda j: -j["delta"])
     new_items.sort(key=lambda j: -j["cost"])
 
     # ---- breakdowns for the review month
-    def ranked(items):
-        rows = [{"name": n, "scope": s, "cost": r2(c), "prev": r2(pv), "delta": r2(c - pv), "pct": pct(c - pv, pv), "new": pv <= 0.005 and c > 0}
-                for n, s, c, pv in items if c > 0.004 or pv > 0.004]
-        return sorted(rows, key=lambda r: -r["cost"])
+    ranked = ranked_rows
 
     by_rg = ranked([(rg_names.get((s, rg), rg) if rg else t("no_rg"), names.get(s, s), v.get(review, 0.0), v.get(prev, 0.0))
                     for (s, rg), v in m_rg.items()])
@@ -1321,12 +1779,28 @@ def analyze(raw, config, periods, now):
                       "per_tag": [{"tag": tg, "tagged": r2(per_tag[tg]), "pct": pct(per_tag[tg], total_alloc), "untagged": r2(total_alloc - per_tag[tg])} for tg in req],
                       "rgs": [{"rg": (raw["rgs"].get(s, {}).get(g) or {}).get("name") or g or t("sub_level"), "sub": names.get(s, s), "untagged": r2(v),
                                "share": pct(v, total_alloc)} for v, s, g in rgs_top]}
+    # ---- projects
+    det = raw.get("project_detection") or detect_project_key(raw, config, p)
+    projects, project_of, rg_project = analyze_projects(raw, config, p, det, res_cost, res_svc, res_loc, names)
+    for r in res_rows:
+        r["project_id"], r["project"], r["project_source"] = project_of(r["id"])
+    by_pid = {it["id"]: it for it in projects["items"]}
+    for r in res_rows:
+        item = by_pid.get(r["project_id"])
+        if item is not None and len(item["top_resources"]) < 10:
+            item["top_resources"].append(r)
+    for s in savings.values():
+        s["project_id"], s["project"], _ = project_of(s["id"])
+        item = by_pid.get(s["project_id"])
+        if item is not None:
+            item["savings"] = r2(item["savings"] + s["saving"])
+            item["savings_" + s["source"]] = r2(item["savings_" + s["source"]] + s["saving"])
     return {"currency": currency, "other_currency": other_currency, "names": names, "months": months, "monthly": monthly, "daily": daily,
             "unusual": unusual, "jumps": jumps, "new": new_items, "subs": sub_rows, "by_rg": by_rg, "by_service": by_service, "by_region": by_region,
             "resources": res_rows, "budgets": budgets, "no_budget": no_budget, "budget_total": r2(budget_total), "budget_forecast": r2(budget_fc),
             "budget_subs": sorted(budget_subs), "mg_budget": bool(mg_budget), "budget_cov": budget_cov, "savings": sorted(savings.values(), key=lambda x: -x["saving"]),
             "advisor": advisor, "commitment": commitment, "savings_total": r2(savings_total), "idle_saving": r2(idle_saving),
-            "advisor_saving": r2(advisor_saving), "allocation": allocation,
+            "advisor_saving": r2(advisor_saving), "allocation": allocation, "projects": projects, "rg_project": rg_project,
             "totals": {"review": r2(review_total) if review_total is not None else None, "prev": r2(prev_total) if prev_total is not None else None,
                        "delta": r2(review_total - prev_total) if review_total is not None and prev_total is not None else None,
                        "pct": pct(review_total - prev_total, prev_total) if review_total is not None and prev_total else None,
@@ -1397,11 +1871,15 @@ def build_findings(a, raw, config, periods, coverage):
     multi = len(a["subs"]) > 1
     mom_min = float(MOM_MIN_DELTA)
 
-    def add(sev, cat, title, evidence, action, scope="", rid="", saving=None, link=""):
+    def add(sev, cat, title, evidence, action, scope="", rid="", saving=None, link="", proj=("", "")):
         fid = hashlib.sha1("|".join((cat, title, scope, rid)).encode("utf-8")).hexdigest()[:8]
         findings.append({"id": fid, "severity": sev, "category": cat, "title": clean(title, 220), "evidence": clean(evidence, 400),
                          "action": clean(action, 300), "scope": clean(scope, 200), "resource_id": rid, "saving": r2(saving) if saving else None,
-                         "link": link or (portal_link(rid) if rid and "(not-a-resource)" not in rid else "")})
+                         "link": link or (portal_link(rid) if rid and "(not-a-resource)" not in rid else ""),
+                         "project_id": proj[0], "project": proj[1]})
+
+    def rg_proj(item):
+        return a["rg_project"].get((item.get("sub_id"), item.get("rg_key")), ("", ""))[:2] if item["kind"] == "rg" else ("", "")
 
     for b in a["budgets"]:
         if b["status"] == "ok":
@@ -1424,10 +1902,11 @@ def build_findings(a, raw, config, periods, coverage):
     for j in a["jumps"]:
         add(j["severity"], "anomaly", t("f_jump", kind=kind_name[j["kind"]], name=j["name"], pct=fpct(j["pct"], True)),
             t("f_jump_ev", prev=money(j["prev"], cur), pm=fmonth_name(prev), cost=money(j["cost"], cur), m=fmonth_name(review), delta="+" + money(j["delta"], cur)),
-            t("a_jump", name=j["name"]), (j["scope"] if multi else "") or (t("scope_all") if j["kind"] == "service" else kind_name[j["kind"]]))
+            t("a_jump", name=j["name"]), (j["scope"] if multi else "") or (t("scope_all") if j["kind"] == "service" else kind_name[j["kind"]]), proj=rg_proj(j))
     for n in a["new"]:
         add(n["severity"], "anomaly", t("f_new", kind_l=kind_name[n["kind"]].lower(), name=n["name"]),
-            t("f_new_ev", cost=money(n["cost"], cur), m=fmonth_name(review)), t("a_new", name=n["name"]), (n["scope"] if multi else "") or (t("scope_all") if n["kind"] == "service" else kind_name[n["kind"]]))
+            t("f_new_ev", cost=money(n["cost"], cur), m=fmonth_name(review)), t("a_new", name=n["name"]),
+            (n["scope"] if multi else "") or (t("scope_all") if n["kind"] == "service" else kind_name[n["kind"]]), proj=rg_proj(n))
     for s in a["savings"]:
         sev = "high" if s["saving"] >= mom_min else "medium" if s["saving"] >= mom_min / 5 else "low" if s["saving"] > 0 else "info"
         where = " \u00b7 ".join(x for x in (s["rg"], s["sub"] if multi else "") if x)
@@ -1440,7 +1919,8 @@ def build_findings(a, raw, config, periods, coverage):
             ev = " \u00b7 ".join(x for x in (s["type"], t("advisor_impact", v=impact_label(s["impact"])) if s["impact"] else "",
                                              t("ev_monthly", v=money(s["advisor_amount"], s["advisor_currency"])) if s["advisor_amount"] else "") if x)
             action = t("a_advisor")
-        add(sev, "savings" if s["saving"] > 0 else "hygiene", title, ev, action, where, s["id"], s["saving"] or None)
+        add(sev, "savings" if s["saving"] > 0 else "hygiene", title, ev, action, where, s["id"], s["saving"] or None,
+            proj=(s.get("project_id", ""), s.get("project", "")))
     c = a["commitment"]
     on_demand = c["eligible"].get("OnDemand", 0.0)
     if on_demand >= mom_min and (c["coverage_pct"] or 0) < 50:
@@ -1455,13 +1935,23 @@ def build_findings(a, raw, config, periods, coverage):
         title = t("f_alloc", pct=fpct(al["untagged_pct"]), tag=tags[0]) if len(tags) == 1 else t("f_alloc_multi", pct=fpct(al["untagged_pct"]), tags=", ".join(tags))
         add(sev, "allocation", title, t("f_alloc_ev", v=money(al["total"] - al["all_tagged"], cur), total=money(al["total"], cur), m=fmonth_name(review)),
             t("a_alloc", rg=al["rgs"][0]["rg"] if al["rgs"] else "\u2014"))
+    pj = a["projects"]
+    if pj["total"] > 0:
+        unalloc = r2(pj["total"] - pj["allocated"])
+        rgs = ", ".join(g["rg"] for g in pj["unallocated_rgs"][:3]) or "\u2014"
+        if pj["source"] == "none":
+            add("medium" if (pj["allocated_pct"] or 0) < 50 else "low", "allocation", t("f_proj_none"),
+                t("f_proj_none_ev", pct=fpct(100 - (pj["allocated_pct"] or 0)), m=fmonth_name(review)), t("a_proj_none"))
+        elif (pj["allocated_pct"] or 0) < 80:
+            add("medium" if (pj["allocated_pct"] or 0) < 50 else "low", "allocation", t("f_proj_low", pct=fpct(pj["allocated_pct"] or 0), tag=pj["key"]),
+                t("f_proj_low_ev", v=money(unalloc, cur), total=money(pj["total"], cur), m=fmonth_name(review), rgs=rgs), t("a_proj_low", tag=pj["key"]))
     for src in coverage["sources"]:
         if src["status"] in ("partial", "denied", "error", "skipped"):
             msg = src["errors"][0]["message"] if src["errors"] else src.get("notes") or src["status"]
-            add("high" if src["id"].startswith("cost_") and src["status"] != "partial" else "medium", "data",
-                t("f_cov", v=t(src["label"])), f"{t('st_' + src['status'])}: {clean(msg, 200)}", t("a_cov"))
+            sev = "low" if src.get("optional") else "high" if src["id"].startswith("cost_") and src["status"] != "partial" else "medium"
+            add(sev, "data", t("f_cov", v=t(src["label"])), f"{t('st_' + src['status'])}: {clean(msg, 200)}", t("a_cov"))
     if raw.get("skipped_subs"):
-        add("medium", "data", t("f_cov", v=f"{len(raw['skipped_subs'])} subscriptions not read (MAX_SUBSCRIPTIONS = {MAX_SUBSCRIPTIONS})"),
+        add("medium", "data", t("f_cov", v=t("f_skipped", n=len(raw["skipped_subs"]), max=MAX_SUBSCRIPTIONS)),
             ", ".join(raw["skipped_subs"][:5]), t("a_cov"))
     findings.sort(key=lambda f: (-SEV_RANK[f["severity"]], -(f["saving"] or 0), f["category"], f["title"]))
     return findings
@@ -1530,7 +2020,7 @@ def build_snapshot(raw, config, periods, now, stats, provenance="LIVE"):
     a = analyze(raw, config, periods, now)
     sources = [s for s in raw["receipts"]]
     core_failed = not a["have_cost"]
-    status = ("error" if core_failed else "ok" if all(s["status"] in ("complete", "not_configured") for s in sources) and not raw["skipped_subs"]
+    status = ("error" if core_failed else "ok" if all(s["status"] in ("complete", "not_configured") or s.get("optional") for s in sources) and not raw["skipped_subs"]
               and not a["other_currency"] and not raw["invisible_subs"] else "partial")
     coverage = {"status": status, "sources": sources, "requests": stats.get("requests", 0), "throttled": stats.get("throttled", 0),
                 "waited": round(stats.get("waited", 0.0), 1), "seconds": stats.get("seconds", 0.0), "identity": stats.get("identity", ""),
@@ -1540,6 +2030,11 @@ def build_snapshot(raw, config, periods, now, stats, provenance="LIVE"):
     actions = build_actions(findings)
     verdict = build_verdict(a, findings, status)
     lead = build_lead(a, periods)
+    projects = a["projects"]
+    for item in projects["items"]:
+        mine = [f for f in findings if f["project_id"] == item["id"]]
+        item["findings"] = len(mine)
+        item["actions"] = [f["id"] for f in build_actions(mine)]
     per = {k: (v.isoformat() if isinstance(v, date) else v) for k, v in periods.items()}
     per["data_through"] = a["data_through"].isoformat() if a["data_through"] else None
     return {"tool": TOOL_NAME, "version": TOOL_VERSION, "generated_utc": iso(now), "provenance": provenance, "status": status,
@@ -1551,11 +2046,13 @@ def build_snapshot(raw, config, periods, now, stats, provenance="LIVE"):
             "budgets": a["budgets"], "no_budget": [{"id": s["id"], "name": s["name"], "forecast": s["forecast"]} for s in a["no_budget"]],
             "budget_total": a["budget_total"], "budget_forecast": a["budget_forecast"], "budget_cov": a["budget_cov"],
             "savings": {"total": a["savings_total"], "idle": a["idle_saving"], "advisor": a["advisor_saving"], "commitments": a["commitment"]["best_saving"],
-                        "items": a["savings"]}, "commitment": a["commitment"], "allocation": a["allocation"],
+                        "items": a["savings"]}, "commitment": a["commitment"], "allocation": a["allocation"], "projects": projects,
             "findings": findings, "actions": actions, "verdict": verdict, "headline": {"html": lead, "text": plain(lead)},
             "coverage": coverage, "config": {"tags": config["tags"], "inheritance": config["inheritance"], "anomaly_min_daily_delta": ANOMALY_MIN_DAILY_DELTA,
                                              "mom_min_delta": MOM_MIN_DELTA, "trend_months": TREND_MONTHS, "snapshot_max_age_days": SNAPSHOT_MAX_AGE_DAYS,
-                                             "excluded_resource_groups": [p_.pattern[4:] for p_ in config["rg_patterns"]]}}
+                                             "excluded_resource_groups": [p_.pattern[4:] for p_ in config["rg_patterns"]],
+                                             "project_tag_keys": list(config.get("project_keys") or []),
+                                             "project_rg_rules": [[rx.pattern[4:], name] for rx, name in config.get("project_rules") or []]}}
 
 
 # ------------------------- chat views (operation=query) -------------------------
@@ -1563,13 +2060,21 @@ def response_bytes(value):
     return len(json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
 
 
-def compact_finding(f):
-    out = {"severity": f["severity"], "category": f["category"], "title": f["title"], "evidence": f["evidence"][:180]}
+def compact_finding(f, evidence=180):
+    out = {"severity": f["severity"], "category": f["category"], "title": f["title"], "evidence": f["evidence"][:evidence]}
     if f["saving"]:
         out["saving_month"] = f["saving"]
     if f["scope"]:
         out["scope"] = f["scope"][:80]
     return out
+
+
+def project_kpis(snapshot):
+    pj = snapshot.get("projects") or {}
+    named = [it for it in pj.get("items", []) if not it["unallocated"]]
+    return {"tag": pj.get("key") or None, "source": pj.get("source"), "allocated_pct": round(pj["allocated_pct"], 1) if pj.get("allocated_pct") is not None else None,
+            "count": len(named), "top": [{"name": it["name"][:40], "cost": it["cost"], "share_pct": round(it["share"], 1) if it["share"] is not None else None}
+                                         for it in named[:3]]}
 
 
 def kpis(snapshot):
@@ -1579,23 +2084,38 @@ def kpis(snapshot):
             "change_pct": round(tot["pct"], 1) if tot["pct"] is not None else None, "month_to_date": tot["mtd"], "forecast": tot["forecast"],
             "budget": snapshot["budget_total"] or None, "savings_month": snapshot["savings"]["total"],
             "untagged_pct": round(al["untagged_pct"], 1) if al and al["untagged_pct"] is not None else None,
-            "unusual_days": len(snapshot["unusual"]), "jumps": len(snapshot["jumps"]), "new": len(snapshot["new"])}
+            "unusual_days": len(snapshot["unusual"]), "jumps": len(snapshot["jumps"]), "new": len(snapshot["new"]), "projects": project_kpis(snapshot)}
 
 
 def compact_coverage(snapshot):
     issues = [f"{s['id']}: {s['status']}" + (f" ({clean(s['errors'][0]['message'], 90)})" if s["errors"] else "")
-              for s in snapshot["coverage"]["sources"] if s["status"] in ("partial", "denied", "error", "skipped")]
+              for s in snapshot["coverage"]["sources"] if s["status"] in ("partial", "denied", "error", "skipped") and not s.get("optional")]
     return {"status": snapshot["coverage"]["status"], "subscriptions": len(snapshot["scope"]["subscriptions"]),
             "throttled": snapshot["coverage"]["throttled"], "issues": issues[:3]}
+
+
+def find_project(snapshot, name):
+    """The project item named `name` (case-insensitive; 'unallocated' also matches the Unallocated group)."""
+    items = (snapshot.get("projects") or {}).get("items", [])
+    key = re.sub(r"\s+", " ", name).strip().casefold()
+    for it in items:
+        if it["name"].casefold() == key or (it["unallocated"] and key in ("unallocated", t("proj_unallocated").casefold())):
+            return it
+    known = ", ".join(it["name"] for it in items[:12]) or "none"
+    raise FinOpsError("unknown_project", f"No project is named '{clean(name, 64)}'. Projects in this review: {known}.", "parameters")
 
 
 def query_view(snapshot, params):
     view, limit = params["view"], params["limit"]
     cur = snapshot["currency"]
+    item = find_project(snapshot, params["project"]) if params.get("project") else None
+    pid = item["id"] if item else None
+    findings = [f for f in snapshot["findings"] if f.get("project_id") == pid] if item else None
+    actions = [f for f in findings if f["id"] in item["actions"]] if item else snapshot["actions"]
     if view == "summary":
-        rows = [compact_finding(f) for f in snapshot["actions"][:limit]]
+        rows = [compact_finding(f) for f in actions[:limit]]
     elif view == "actions":
-        rows = [dict(compact_finding(f), action=f["action"][:160]) for f in snapshot["actions"][:limit]]
+        rows = [dict(compact_finding(f, 110), action=f["action"][:120]) for f in actions[:limit]]
     elif view == "anomalies":
         rows = ([{"kind": "unusual_day", "date": u["date"], "cost": u["cost"], "typical": u["typical"], "pct": round(u["pct"], 1),
                   "drivers": [d["service"] for d in u["drivers"]]} for u in snapshot["unusual"]] +
@@ -1605,10 +2125,22 @@ def query_view(snapshot, params):
         rows = ([{"budget": b["name"], "scope": b["scope"], "amount": b["amount"], "spent": b["spent"], "forecast": b["forecast"], "status": b["status"]}
                  for b in snapshot["budgets"]] + [{"no_budget": s["name"], "forecast": s["forecast"]} for s in snapshot["no_budget"]])[:limit]
     elif view == "savings":
-        rows = [{"check": s["check"], "name": s["name"], "rg": s["rg"], "saving_month": s["saving"]} for s in snapshot["savings"]["items"] if s["saving"] > 0][:limit]
-        rows += [{"commitment": c["sku"], "region": c["region"], "term": c["term"], "saving_month": c["saving"]} for c in snapshot["commitment"]["items"]][:max(0, limit - len(rows))]
+        rows = [{"check": s["check"], "name": s["name"], "rg": s["rg"], "saving_month": s["saving"]} for s in snapshot["savings"]["items"]
+                if s["saving"] > 0 and (pid is None or s.get("project_id") == pid)][:limit]
+        if pid is None:
+            rows += [{"commitment": c["sku"], "region": c["region"], "term": c["term"], "saving_month": c["saving"]} for c in snapshot["commitment"]["items"]][:max(0, limit - len(rows))]
     elif view == "resources":
-        rows = [{"name": r["name"], "rg": r["rg"], "type": r["type"], "cost": r["cost"], "prev": r["prev"]} for r in snapshot["resources"][:limit]]
+        rows = [{"name": r["name"], "rg": r["rg"], "type": r["type"], "cost": r["cost"], "prev": r["prev"]} for r in snapshot["resources"]
+                if pid is None or r.get("project_id") == pid][:limit]
+    elif view == "projects":
+        if item:
+            rows = ([{"service": x["name"], "cost": x["cost"], "prev": x["prev"]} for x in item["by_service"][:5]] +
+                    [{"rg": x["name"], "cost": x["cost"], "prev": x["prev"]} for x in item["by_rg"][:5]] +
+                    [{"resource": r["name"], "rg": r["rg"], "cost": r["cost"]} for r in item["top_resources"][:5]])[:limit]
+        else:
+            rows = [{"project": it["name"], "cost": it["cost"], "prev": it["prev"], "change_pct": round(it["pct"], 1) if it["pct"] is not None else None,
+                     "mtd": it["mtd"], "share_pct": round(it["share"], 1) if it["share"] is not None else None, "savings_month": it["savings"],
+                     "findings": it["findings"]} for it in snapshot["projects"]["items"]][:limit]
     elif view == "allocation":
         al = snapshot["allocation"] or {}
         rows = [{"tag": p_["tag"], "tagged_pct": round(p_["pct"] or 0, 1), "untagged": p_["untagged"]} for p_ in al.get("per_tag", [])]
@@ -1619,9 +2151,19 @@ def query_view(snapshot, params):
     out = {"status": snapshot["status"], "operation": "query", "view": view, "provenance": snapshot["provenance"], "kpis": kpis(snapshot),
            "headline": snapshot["headline"]["text"][:400], "rows": rows, "row_count": len(rows), "currency": cur, "coverage": compact_coverage(snapshot),
            "read_only": True}
+    if view not in ("summary", "projects"):
+        kp = out["kpis"]
+        out["kpis"] = {k: kp[k] for k in ("currency", "review_month", "review_cost", "change_pct", "forecast", "savings_month")}
+        out["kpis"]["projects"] = {k: kp["projects"][k] for k in ("tag", "allocated_pct")}
+    if item:
+        out["project"] = {"name": item["name"], "cost": item["cost"], "prev": item["prev"], "mtd": item["mtd"],
+                          "share_pct": round(item["share"], 1) if item["share"] is not None else None, "savings_month": item["savings"], "findings": item["findings"]}
+        if view in ("anomalies", "budgets", "allocation", "coverage"):
+            out["project_scope"] = "whole_environment"
     while out["rows"] and response_bytes(out) > TRANSPORT_BYTES:
         out["rows"].pop()
         out["transport_capped"] = True
+    out["row_count"] = len(out["rows"])
     return out
 
 
@@ -1672,8 +2214,8 @@ h1{margin:0 0 14px;font-size:clamp(30px,3.2vw,42px);line-height:1.1;font-weight:
 .kpi .l{margin-top:8px;font-size:13.5px;line-height:1.35;font-weight:600;color:var(--ink)}.kpi .s{margin-top:4px;font-size:12.5px;line-height:1.4;color:var(--muted)}
 .up{color:var(--up);font-weight:600}.down{color:var(--down);font-weight:600}.flat{color:var(--muted)}
 .secnav{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);margin-top:22px}
-.secnav .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}.secnav .wrap::-webkit-scrollbar{display:none}
-.secnav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:600;padding:12px 10px 10px;border-bottom:2px solid transparent}
+.secnav .wrap{display:flex;align-items:center;gap:10px}.secnav .links{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1 1 auto}.secnav .links::-webkit-scrollbar{display:none}.secnav .links.ovf{padding-right:40px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.secnav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:13px;font-weight:600;padding:12px 9px 10px;border-bottom:2px solid transparent}
 .secnav a:hover,.secnav a.on{color:var(--ink);border-bottom-color:var(--accent)}.secnav a:focus-visible{outline-offset:-3px;border-radius:6px}.secnav a small{color:var(--faint);font-size:12px;margin-left:5px;font-weight:600}
 .body{padding-top:30px;padding-bottom:40px}.sec{margin:0 0 44px;scroll-margin-top:60px}.sh{margin:0 0 14px}.sh h2{margin:0;font-size:23px;line-height:1.2;letter-spacing:-.01em;color:var(--ink)}
 .sh p{margin:5px 0 0;color:var(--muted);max-width:68ch;font-size:14.5px}
@@ -1731,6 +2273,7 @@ a.pl.blk{display:flex;margin:4px 0 0;padding:3px 0}ul.plain a{display:inline-blo
 .ud b{color:var(--ink)}.ud .r{text-align:right;white-space:nowrap}.ud .x{grid-column:1/-1;color:var(--muted);font-size:13.5px}
 .svs{display:grid;grid-template-columns:1.3fr repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}.svs div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
 .svs b{display:block;font-size:24px;line-height:1.1;color:var(--ink)}.svs span{display:block;font-size:13px;color:var(--muted);margin-top:4px}.svs .tot{background:var(--accent-soft);border-color:#B9DCE2}.svs .tot b{font-size:30px;color:var(--accent2)}
+.svs.s3{grid-template-columns:1.3fr repeat(2,minmax(0,1fr))}.svs b>span{display:inline;margin:0;font-size:inherit;color:var(--muted)}.svs b>.up{color:var(--up)}.svs b>.down{color:var(--down)}.svs b>.tag.new{font-size:13px;color:var(--accent2);vertical-align:4px}
 .pm{display:flex;height:14px;border-radius:999px;overflow:hidden;background:#EAECF0;margin:10px 0 8px}.pm i{display:block;height:100%}
 .pm-OnDemand{background:#98A2B3}.pm-Reservation{background:var(--chart)}.pm-SavingsPlan{background:var(--accent)}.pm-Spot{background:var(--chart-soft)}
 .note{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;padding:11px 14px;border-radius:12px;background:var(--soft);border:1px solid var(--line);font-size:13.5px;color:var(--text)}
@@ -1746,13 +2289,32 @@ th[aria-sort=ascending] .sb:after{clip-path:polygon(50% 0,100% 100%,0 100%)}
 .st{display:inline-block;border-radius:6px;padding:0 8px;font-size:12px;font-weight:700;line-height:21px;white-space:nowrap}
 .st-complete{background:#DCFAE6;color:#085D3A}.st-partial,.st-skipped{background:#FEF0C7;color:#93370D}.st-denied,.st-error{background:#FEE4E2;color:#B42318}.st-not_configured,.st-simulated{background:#EAECF0;color:#344054}
 ul.plain{margin:0;padding-left:18px}ul.plain li{margin:4px 0;max-width:90ch}
+.pf{display:flex;align-items:center;gap:8px;flex:none;padding:5px 12px 5px 0;border-right:1px solid var(--line)}.pf label{font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.pf select{border:1px solid #C3CCD6;border-radius:9px;padding:5px 8px;font-size:13.5px;font-weight:600;background:#fff;color:var(--ink);max-width:220px;min-height:34px;cursor:pointer}
+.pf.on select{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.pfi{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 26px;padding:12px 16px;border-radius:14px;background:var(--accent-soft);border:1px solid var(--chart-soft);font-size:14px;color:var(--ink)}
+.pfi p{margin:0;flex:1 1 420px}.pfi p span{display:block;margin-top:2px;color:var(--muted);font-size:13px}.pfi b{font-weight:700}.card p.lvh{margin:14px 0 0}
+.pv[hidden],.pnote[hidden],.pchip[hidden]{display:none!important}
+.pchip,.pnote{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:3px 11px;border-radius:999px;font-size:12.5px;font-weight:600;line-height:1.45}
+.pchip{background:var(--accent-soft);color:var(--accent2);border:1px solid var(--chart-soft)}.pchip b{color:var(--ink)}.pnote{color:var(--muted);border:1px dashed #B7C0CB;background:#fff}
+.pnote svg{width:14px;height:14px;flex:none}.card>.pnote{margin:0 0 12px}
+.pick{font:inherit;font-weight:600;color:var(--accent);background:none;border:0;padding:2px 0;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--chart-soft);text-underline-offset:3px;overflow-wrap:anywhere}
+.pick:hover{color:var(--accent2);text-decoration-color:currentColor}.pick[aria-pressed=true]{color:var(--ink);text-decoration:none}
+tr.sel>td{background:var(--accent-soft)}tr.sel .pick:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:7px;vertical-align:1px}
+tr.ua .rn b,tr.ua .pick{font-style:italic}tr.tot>td{background:var(--soft);font-weight:700;border-top:1px solid var(--line)}tr.tot .mtr{display:none}table.pt td:first-child{min-width:230px}
+.lvl{list-style:none;margin:8px 0 0;padding:0;counter-reset:l}.lvl li{counter-increment:l;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--line2);font-size:13.5px}
+.lvl li:first-child{border-top:0}.lvl li:before{content:counter(l);font-weight:700;color:var(--muted);font-size:12.5px}.lvl li.z{color:var(--muted)}.lvl li b{white-space:nowrap;color:var(--ink)}.lvl li.ua:before{content:"\\2014"}
+.pkey{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:4px 0 10px}.pkey code{font-size:17px;font-weight:700;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:2px 10px}
+.pkey .arrow{color:var(--muted)}.card p.why{margin:0 0 4px;font-size:14px;max-width:72ch}.svs.pk{margin:6px 0 4px}.svs.pk b{font-size:21px}.svs.pk .tot b{font-size:26px}
 footer{background:var(--bar);color:var(--bar-muted);font-size:12.5px;padding:18px 0}footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (max-width:1200px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.g2w{grid-template-columns:minmax(0,1fr)}.svs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media screen and (max-width:960px){.hero-in{grid-template-columns:minmax(0,1fr)}.g2{grid-template-columns:minmax(0,1fr)}.tt{display:none}}
 @media screen and (max-width:720px){h1{font-size:28px}.lead{font-size:16px}.hero{padding-bottom:88px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-64px}
 .kpi{padding:12px 13px;border-radius:13px}.kpi .v{font-size:23px}.kpi .v small{font-size:12px}.kpi .l{font-size:13px;margin-top:5px}.kpi .s{font-size:12px}
 .chip{display:none}.pbtn{padding:0 11px}.pbtn span{display:none}.meta .m-gen{display:none}.verdict{padding:14px 16px}.verdict b{font-size:22px}
-.secnav .wrap{padding-right:40px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.secnav .wrap{gap:8px}.secnav .links{padding-right:40px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.pf{padding-right:8px}.pf label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.pf select{max-width:44vw;font-size:13px}
+table.pt td:first-child{min-width:0}.pfi{padding:11px 13px}table.stk.pt tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px}table.stk.pt td:first-child{grid-column:1/-1;margin-bottom:2px}table.stk.pt td:first-child:before{content:none}table.stk.pt td .nw{display:inline}.svs.s3,.svs.pk{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .card{padding:16px 15px;border-radius:14px}ol.actions li{grid-template-columns:30px minmax(0,1fr)}.a-side{grid-column:2;text-align:left}.a-sv{font-size:16px}
 .mc{gap:4px;height:210px}.mx{gap:4px}.mtrack{margin:0 6%}.dc{margin-left:38px;height:190px}.dgrid span{left:-38px}.dx{margin-left:38px}
 .hb{grid-template-columns:minmax(0,1fr) auto;row-gap:2px}.hb .t{grid-column:1/-1;grid-row:2}.hb .d{grid-column:2;grid-row:3;text-align:right}.mv,.mx{font-size:12px}
@@ -1771,6 +2333,7 @@ main{padding:16px 0 0}.sec{margin:0 0 20px}.sh,.card h3,.card .sub{break-after:a
 #reg .ev,#reg .do{font-size:11.5px}#reg td{padding:6px 8px}tr.xr[hidden]{display:table-row!important}.morerow{display:none!important}
 .g2,.g2w{grid-template-columns:minmax(0,1fr)}.tw{overflow:visible!important;background:none}thead{display:table-header-group}#reg{min-width:0;table-layout:auto}#reg col{width:auto!important}
 #reg tr.pg{display:table-row}.sh:after{content:"";display:block;height:140px;margin-bottom:-140px}#trend{break-before:page}table.bt td:first-child{min-width:170px}table.bt .rn b,table.bt .rn small{overflow-wrap:normal}.svs{break-inside:avoid}.a-t b,.ud b,#reg td>b,.rn b,.hb .n1{overflow-wrap:break-word}
+.pfb .btn{display:none}.pick{color:inherit;text-decoration:none}tr.sel>td{background:none}.pfi{margin-bottom:14px}table.pt{font-size:11.5px}table.pt td:first-child{min-width:150px}table.pt th{white-space:normal;font-size:10.5px}table.pt td,table.pt th{padding:6px 5px}table.pt .mtr{min-width:48px}
 footer{display:none}}
 """
 WORDMARK = ('<span class="wm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 3h5.6l6.2 18h-4.5l-1.5-4.6H8.4L9.9 12h3.8L12 6.6 6.4 21H2z" '
@@ -1824,6 +2387,8 @@ def res_cell(name, sub_line, rid="", badge=""):
 def hbars(rows, total, cur, limit=10, scope_key="scope"):
     if not rows:
         return f'<p class="empty">{esc(t("no_cost"))}</p>'
+    if len(rows) == limit + 1:
+        limit += 1
     top = rows[:limit]
     vmax = max(r["cost"] for r in top) or 1
     out = []
@@ -1911,7 +2476,7 @@ def render_daily(s):
             f'<span><i style="background:var(--chart-soft)"></i>{esc(t("daily_before", month=fmonth_name(review)))}</span></div></div>')
 
 
-def render_actions(s):
+def render_actions(s, empty_key="act_none"):
     cur = s["currency"]
     items = []
     for f in s["actions"]:
@@ -1922,7 +2487,7 @@ def render_actions(s):
             where += f'<a class="a-ln" href="{esc(f["link"])}"{NEW_TAB}>{ICON_EXT}{esc(t("open_portal"))}</a>'
         items.append(f'<li><div><div class="a-t">{sev_pill(f["severity"])}<b>{esc(f["title"])}</b></div><p class="a-ev">{esc(f["evidence"])}</p>'
                      f'<p class="a-do">{esc(f["action"])}</p></div><div class="a-side">{saving}{where}</div></li>')
-    body = f'<ol class="actions">{"".join(items)}</ol>' if items else f'<p class="empty">{esc(t("act_none"))}</p>'
+    body = f'<ol class="actions">{"".join(items)}</ol>' if items else f'<p class="empty">{esc(t(empty_key))}</p>'
     return f'<div class="card">{body}</div>'
 
 
@@ -2013,28 +2578,42 @@ def render_budgets(s):
     return f'<div class="card">{table}</div>{nobudget}'
 
 
-def render_savings(s):
+def pv_wrap(base, variants, fn):
+    """The whole-environment block plus one hidden copy per project, switched by the project filter."""
+    if not variants:
+        return base
+    return f'<div class="pv" data-pv="">{base}</div>' + "".join(f'<div class="pv" data-pv="{it["id"]}" hidden>{fn(it)}</div>' for it in variants)
+
+
+def pnote_html():
+    return f'<span class="pnote" hidden>{ICON_INFO}{esc(t("pf_note"))}</span>'
+
+
+def savings_strip(total, commitments, advisor, idle, cur, sub_key="sv_total_sub"):
+    tiles = [f'<div class="tot"><b>{esc(money_short(total, cur))}</b><span>{esc(t(sub_key))}</span></div>']
+    if commitments is not None:
+        tiles.append(f'<div><b>{esc(money_short(commitments, cur))}</b><span>{esc(t("sv_commit"))}</span></div>')
+    tiles.append(f'<div><b>{esc(money_short(advisor, cur))}</b><span>{esc(t("sv_rightsize"))}</span></div>')
+    tiles.append(f'<div><b>{esc(money_short(idle, cur))}</b><span>{esc(t("sv_idle"))}</span></div>')
+    return f'<div class="svs{"" if commitments is not None else " s3"}">{"".join(tiles)}</div>'
+
+
+def render_savings(s, variants=()):
     cur, per = s["currency"], s["periods"]
     multi = len(s["scope"]["subscriptions"]) > 1
     sv, c = s["savings"], s["commitment"]
-    strip = (f'<div class="svs"><div class="tot"><b>{esc(money_short(sv["total"], cur))}</b><span>{esc(t("sv_total_sub"))}</span></div>'
-             f'<div><b>{esc(money_short(sv["commitments"], cur))}</b><span>{esc(t("sv_commit"))}</span></div>'
-             f'<div><b>{esc(money_short(sv["advisor"], cur))}</b><span>{esc(t("sv_rightsize"))}</span></div>'
-             f'<div><b>{esc(money_short(sv["idle"], cur))}</b><span>{esc(t("sv_idle"))}</span></div></div>')
     pm_total = sum(c["eligible"].values())
     seg = "".join(f'<i class="pm-{k}" style="width:{100 * v / pm_total:.2f}%" title="{esc(t("pm_" + k))}: {esc(money(v, cur))}"></i>' for k, v in c["eligible"].items() if v > 0 and pm_total)
     leg = "".join(f'<span><i class="pm-{k}"></i>{esc(t("pm_" + k))} <b>{esc(money(v, cur))}</b></span>' for k, v in c["eligible"].items() if v > 0)
     items = "".join(f'<li><div><b>{esc(i["sku"])}</b><div class="small muted">{esc(SEP.join(x for x in (i["region"], (i["qty"] + TIMES) if i["qty"] else "", i["term"].replace("P1Y", t("term_1y")).replace("P3Y", t("term_3y")), i["sub"] if multi else "") if x))}'
                     f'{(SEP + esc(t("term_3y")) + ": " + esc(money(i["saving_3y"], cur))) if i.get("saving_3y") else ""}</div></div><div class="r"><b>{esc(money(i["saving"], cur))}</b></div></li>' for i in c["items"][:8])
     alt = "; ".join(f'{t("pm_SavingsPlan" if a_["kind"] == "sp" else "pm_Reservation")} {money(a_["saving"], cur)}' for a_ in c["alternatives"])
-    commit = (f'<div class="card"><h3>{esc(t("commit_h"))}</h3>'
+    commit = (f'<div class="card">{pnote_html() if variants else ""}<h3>{esc(t("commit_h"))}</h3>'
               + (f'<p class="sub">{esc(t("commit_txt", pct=fpct(c["coverage_pct"] or 0), month=fmonth_name(per["review_month"]), elig=money(c["eligible_total"], cur)))}</p>'
                  f'<div class="pm">{seg}</div><div class="dleg">{leg}</div>' if pm_total else f'<p class="empty">{esc(t("commit_none", month=fmonth_name(per["review_month"])))}</p>')
               + (f'<h3 class="h3b">{esc(t("commit_opts"))}</h3><ul class="ud">{items}</ul>' if items else "")
               + (f'<p class="small muted">{esc(t("commit_alt", v=alt))}</p>' if alt else "")
               + f'<div class="note">{ICON_INFO}<span>{esc(t("commit_util"))}</span></div></div>')
-    adv_rows = [x for x in sv["items"] if x["source"] == "advisor"]
-    idle_rows = [x for x in sv["items"] if x["source"] == "idle"]
 
     def table(rows, kind):
         trs = []
@@ -2051,11 +2630,19 @@ def render_savings(s):
         return (f'<div class="tw"><table class="stk"><thead><tr><th scope="col">{esc(t("col_check"))}</th><th scope="col">{esc(t("col_resource"))}</th>'
                 f'<th scope="col">{esc(t("col_detail"))}</th><th scope="col" class="n">{esc(t("col_saving"))}</th></tr></thead><tbody>{"".join(trs)}</tbody></table></div>')
 
-    adv = (f'<div class="card mt"><h3>{esc(t("advisor_h"))}</h3><p class="sub">{esc(tn("advisor_sub", len(adv_rows)))}</p>{table(adv_rows, "advisor")}</div>' if adv_rows
-           else f'<div class="card mt"><h3>{esc(t("advisor_h"))}</h3><p class="empty">{esc(t("advisor_none"))}</p></div>')
-    idle = (f'<div class="card mt"><h3>{esc(t("idle_h"))}</h3><p class="sub">{esc(t("idle_sub", month=fmonth_name(per["review_month"])))}</p>{table(idle_rows, "idle")}</div>' if idle_rows
-            else f'<div class="card mt"><h3>{esc(t("idle_h"))}</h3><p class="empty">{esc(t("idle_none"))}</p></div>')
-    return strip + commit + idle + adv
+    def tables(rows_all, suffix=""):
+        adv_rows = [x for x in rows_all if x["source"] == "advisor"]
+        idle_rows = [x for x in rows_all if x["source"] == "idle"]
+        adv = (f'<div class="card mt"><h3>{esc(t("advisor_h"))}</h3><p class="sub">{esc(tn("advisor_sub", len(adv_rows)))}</p>{table(adv_rows, "advisor")}</div>' if adv_rows
+               else f'<div class="card mt"><h3>{esc(t("advisor_h"))}</h3><p class="empty">{esc(t("advisor_none" + suffix))}</p></div>')
+        idle = (f'<div class="card mt"><h3>{esc(t("idle_h"))}</h3><p class="sub">{esc(t("idle_sub", month=fmonth_name(per["review_month"])))}</p>{table(idle_rows, "idle")}</div>' if idle_rows
+                else f'<div class="card mt"><h3>{esc(t("idle_h"))}</h3><p class="empty">{esc(t("idle_none" + suffix))}</p></div>')
+        return idle + adv
+
+    strip = pv_wrap(savings_strip(sv["total"], sv["commitments"], sv["advisor"], sv["idle"], cur), variants,
+                    lambda it: savings_strip(it["savings"], None, it["savings_advisor"], it["savings_idle"], cur, "sv_total_sub_p"))
+    lists = pv_wrap(tables(sv["items"]), variants, lambda it: tables([x for x in sv["items"] if x.get("project_id") == it["id"]], "_p"))
+    return strip + commit + lists
 
 
 def render_allocation(s):
@@ -2080,17 +2667,136 @@ def render_allocation(s):
             f'<div class="card"><h3>{esc(t("alloc_rg_h"))}</h3><p class="sub">{esc(t("alloc_rg_sub", month=fmonth_name(per["review_month"])))}</p>{rg_html}</div></div>')
 
 
+def project_view(s, it):
+    """A copy of the snapshot whose breakdown shows one project only."""
+    return dict(s, subscriptions=[dict(r, read=True) for r in it["by_sub"]], resource_groups=it["by_rg"], services=it["by_service"],
+                regions=it["by_region"], resources=it["top_resources"], totals=dict(s["totals"], review=it["cost"]))
+
+
+def pick_html(it, filtering):
+    if filtering and it["variant"]:
+        return (f'<button class="pick" type="button" data-pick="{it["id"]}" aria-pressed="false" aria-label="{esc(t("proj_pick", name=it["name"]))}">'
+                f'{esc(it["name"])}</button>')
+    return f'<b>{esc(it["name"])}</b>'
+
+
+def project_detail(s, it):
+    cur, per = s["currency"], s["periods"]
+    tiles = (f'<div class="svs pk"><div class="tot"><b>{esc(money_short(it["cost"], cur))}</b><span>{esc(fmonth(per["review_month"]))}</span></div>'
+             f'<div><b>{delta_span(it["delta"], it["pct"], cur, new=it["prev"] <= 0.005 and it["cost"] > 0)}</b><span>{esc(t("pd_change", prev=fmonth_name(per["prev_month"])))}</span></div>'
+             f'<div><b>{esc(money_short(it["mtd"], cur))}</b><span>{esc(t("pd_mtd", month=fmonth_name(per["current_month"])))}</span></div>'
+             f'<div><b>{esc(money_short(it["savings"], cur))}</b><span>{esc(t("pd_savings"))}</span></div></div>')
+    res = "".join(f'<li><div><b>{esc(r["name"])}</b><div class="small muted">{esc(SEP.join(x for x in (r["type"], r["rg"]) if x))}</div></div>'
+                  f'<div class="r"><b>{esc(money(r["cost"], cur))}</b></div></li>' for r in it["top_resources"][:5])
+    sub = SEP.join((tn("proj_res", it["resources"]), tn("proj_rgs", it["resource_groups"]), tn("pd_findings", it["findings"])))
+    return (f'<div class="card"><h3>{esc(it["name"])}</h3><p class="sub">{esc(sub)}</p>{tiles}'
+            f'<h3 class="h3b">{esc(t("pd_services"))}</h3>{hbars(it["by_service"], it["cost"], cur, 5)}'
+            f'<h3 class="h3b">{esc(t("pd_rgs"))}</h3>{hbars(it["by_rg"], it["cost"], cur, 5)}'
+            + (f'<h3 class="h3b">{esc(t("pd_resources"))}</h3><ul class="ud">{res}</ul>' if res else "") + "</div>")
+
+
+def render_projects(s, variants):
+    pj, cur, per = s["projects"], s["currency"], s["periods"]
+    filtering = bool(variants)
+    month, prevm = fmonth_name(per["review_month"]), fmonth_name(per["prev_month"])
+    items, total = pj["items"], pj["total"]
+    named = [it for it in items if not it["unallocated"]]
+    unalloc = [it for it in items if it["unallocated"]]
+    heads = (t("col_project"), month, prevm, t("col_change"), t("col_share"), t("col_mtd", month=fmonth(per["current_month"], True)), t("col_psavings"), t("col_findings"))
+
+    def row(it, cls="", name_html=None, line=""):
+        share = it["share"] or 0
+        return (f'<tr{(" class=" + cls) if cls else ""}><td data-h="{esc(heads[0])}"><div class="rn">{name_html or pick_html(it, filtering)}'
+                f'{("<small>" + esc(line) + "</small>") if line else ""}</div></td>'
+                f'<td class="n" data-h="{esc(heads[1])}"><b>{esc(money(it["cost"], cur))}</b></td><td class="n" data-h="{esc(heads[2])}">{esc(money(it["prev"], cur))}</td>'
+                f'<td class="n" data-h="{esc(heads[3])}">{delta_span(it["delta"], it["pct"], cur, new=it["prev"] <= 0.005 and it["cost"] > 0)}</td>'
+                f'<td data-h="{esc(heads[4])}"><div class="nw">{esc(fpct(share))}</div><div class="mtr"><i style="width:{max(0.0, min(100.0, share)):.1f}%"></i></div></td>'
+                f'<td class="n" data-h="{esc(heads[5])}">{esc(money(it["mtd"], cur))}</td>'
+                f'<td class="n" data-h="{esc(heads[6])}">{esc(money(it["savings"], cur) if it["savings"] else t("no_saving"))}</td>'
+                f'<td class="n" data-h="{esc(heads[7])}">{esc(str(it["findings"]) if it["findings"] else t("no_saving"))}</td></tr>')
+
+    if items:
+        rows = []
+        for it in named[:60]:
+            top = it["by_service"][0]["name"] if it["by_service"] else ""
+            rows.append(row(it, line=SEP.join(x for x in (tn("proj_res", it["resources"]), tn("proj_rgs", it["resource_groups"]), t("proj_top", v=top) if top else "") if x)))
+        rest = named[60:]
+        if rest:
+            agg = {k: r2(sum(x[k] for x in rest)) for k in ("cost", "prev", "mtd", "savings")}
+            agg.update(findings=sum(x["findings"] for x in rest), delta=r2(agg["cost"] - agg["prev"]), pct=pct(agg["cost"] - agg["prev"], agg["prev"]), share=pct(agg["cost"], total))
+            rows.append(row(agg, name_html=f'<b>{esc(t("proj_more", n=len(rest)))}</b>'))
+        for it in unalloc:
+            rows.append(row(it, "ua", line=t("proj_unalloc_sub")))
+        tot = {k: r2(sum(x[k] for x in items)) for k in ("cost", "prev", "mtd", "savings")}
+        tot.update(findings=sum(x["findings"] for x in items), delta=r2(tot["cost"] - tot["prev"]), pct=pct(tot["cost"] - tot["prev"], tot["prev"]),
+                   share=100.0 if tot["cost"] else 0.0)
+        rows.append(row(tot, "tot", name_html=f'<b>{esc(t("proj_total"))}</b>'))
+        ths = "".join(f'<th scope="col"{" class=n" if k not in (0, 4) else ""}>{esc(h)}</th>' for k, h in enumerate(heads))
+        table = (f'<div class="card"><div class="tw"><table class="stk pt" aria-label="{esc(t("s_projects"))}"><thead><tr>{ths}</tr></thead>'
+                 f'<tbody>{"".join(rows)}</tbody></table></div></div>')
+    else:
+        table = f'<div class="card"><p class="empty">{esc(t("proj_none", month=month))}</p></div>'
+    # how projects are identified
+    src, keys = pj["source"], pj["keys"]
+    key_html = '<span class="arrow" aria-hidden="true">\u2192</span>'.join(f"<code>{esc(k)}</code>" for k in keys) if keys else ""
+    chip = f'<span class="tag{" new" if src == "detected" else ""}">{esc(t("pid_chip_" + src))}</span>'
+    rs = pj["reason"]
+    if src == "detected" and rs:
+        why = (t("pid_why_detected", meaning=t("meaning_" + str(rs["meaning"])), cov=fpct(rs["coverage_pct"]), month=month, n=rs["values"])
+               if rs["coverage_pct"] is not None else t("pid_why_detected_cost", meaning=t("meaning_" + str(rs["meaning"]))))
+    elif src in ("configured", "parameter"):
+        why = t("pid_why_" + src, cov=fpct(pj["tagged_pct"] or 0), month=month)
+    else:
+        why = t("pid_why_none")
+    levels, bs = [], pj["by_source"]
+    for lvl in ("resource", "rg", "managed", "sub", "cost", "rule"):
+        v = bs.get(lvl, 0.0)
+        if lvl in ("managed", "sub") and abs(v) <= 0.004:
+            continue
+        extra = ""
+        if lvl == "cost" and not pj["cost_tags_read"]:
+            extra = t("pid_cost_off")
+        elif lvl == "rule":
+            extra = "; ".join(t("rule_arrow", p=r_["pattern"], v=r_["project"]) for r_ in pj["rules"][:4]) or t("pid_no_rules")
+        extra_html = f' <span class="small">({esc(extra)})</span>' if extra else ""
+        levels.append(f'<li{" class=z" if abs(v) <= 0.004 else ""}><span>{esc(t("pid_lvl_" + lvl))}{extra_html}</span><b>{esc(fpct(pct(v, total)) if total else EMDASH)}</b></li>')
+    v = bs.get("none", 0.0)
+    levels.append(f'<li class="ua{" z" if abs(v) <= 0.004 else ""}"><span>{esc(t("pid_lvl_none"))}</span><b>{esc(fpct(pct(v, total)) if total else EMDASH)}</b></li>')
+    crows = []
+    for c in pj["candidates"][:6]:
+        use = f' <span class="tag new">{esc(t("pid_in_use"))}</span>' if c["chosen"] else ""
+        where = ", ".join(t("where_" + w) for w in c["where"]) or EMDASH
+        cov = fpct(c["coverage_pct"]) if c["coverage_pct"] is not None else t("not_measured")
+        crows.append(f'<tr><td data-h="{esc(t("col_tag"))}"><code>{esc(c["key"])}</code>{use}</td><td data-h="{esc(t("col_found"))}" class="small">{esc(where)}</td>'
+                     f'<td class="n" data-h="{esc(t("col_coverage"))}">{esc(cov)}</td>'
+                     f'<td class="n" data-h="{esc(t("col_values"))}">{esc(str(c["values"]) if c["values"] is not None else EMDASH)}</td></tr>')
+    cand = (f'<h3 class="h3b">{esc(t("pid_cand"))}</h3><p class="sub">{esc(t("pid_cand_sub"))}</p><div class="tw"><table class="stk"><thead><tr>'
+            f'<th scope="col">{esc(t("col_tag"))}</th><th scope="col">{esc(t("col_found"))}</th><th scope="col" class="n">{esc(t("col_coverage"))}</th>'
+            f'<th scope="col" class="n">{esc(t("col_values"))}</th></tr></thead><tbody>{"".join(crows)}</tbody></table></div>') if crows else ""
+    override = t("pid_override", tag=keys[0]) if keys else t("pid_override_none")
+    notes = (f'<div class="note">{ICON_INFO}<span>{esc(t("pid_past"))} {esc(override)}</span></div>'
+             f'<div class="note">{ICON_INFO}<span>{esc(t("pid_inherit"))} <a href="{esc(LEARN_TAG_INHERITANCE)}"{NEW_TAB}>{esc(LEARN_TITLES[LEARN_TAG_INHERITANCE])}</a></span></div>')
+    ident = (f'<div class="card"><h3>{esc(t("pid_h"))}</h3><div class="pkey"><span class="small muted">{esc(t("pid_tag"))}</span>{key_html}{chip}</div>'
+             f'<p class="why">{esc(why)}</p><p class="sub lvh">{esc(t("pid_order", month=month))}</p><ol class="lvl">{"".join(levels)}</ol>{cand}{notes}</div>')
+    bars = sorted(({"name": it["name"], "scope": "", "cost": it["cost"], "delta": it["delta"], "pct": it["pct"], "new": it["prev"] <= 0.005 and it["cost"] > 0}
+                   for it in items), key=lambda r: -r["cost"])
+    share_card = (f'<div class="card"><h3>{esc(t("proj_share_h", month=month))}</h3>' + (f'<p class="sub">{esc(t("proj_share_sub"))}</p>' if filtering else "")
+                  + f'{hbars(bars, total, cur, 8)}</div>')
+    return table + f'<div class="g2 mt g2s">{pv_wrap(share_card, variants, lambda it: project_detail(s, it))}{ident}</div>'
+
+
 def render_register(s, stem):
     cur = s["currency"]
     cats = sorted({f["category"] for f in s["findings"]})
     rows = []
     for f in s["findings"]:
-        q = " ".join((f["title"], f["evidence"], f["scope"], f["action"], t("cat_" + f["category"]))).lower()
+        q = " ".join((f["title"], f["evidence"], f["scope"], f["action"], t("cat_" + f["category"]), f.get("project", ""))).lower()
         scope = esc(f["scope"] or "\u2014")
         if f["link"]:
             scope += f'<a class="pl blk" href="{esc(f["link"])}"{NEW_TAB}>{ICON_EXT}{esc(t("open_portal"))}</a>'
         rows.append(f'<tr data-sev="{f["severity"]}" data-rank="{SEV_RANK[f["severity"]]}" data-cat="{f["category"]}" data-saving="{f["saving"] or 0}" data-q="{esc(q)}"'
-                    f' data-scope="{esc(f["scope"])}" data-id="{esc(f["resource_id"])}" data-url="{esc(f["link"])}">'
+                    f' data-scope="{esc(f["scope"])}" data-id="{esc(f["resource_id"])}" data-url="{esc(f["link"])}" data-proj="{esc(f.get("project_id", ""))}"'
+                    f' data-pn="{esc(f.get("project", ""))}">'
                     f'<td class="c1">{sev_pill(f["severity"])}</td><td class="c2 small">{esc(t("cat_" + f["category"]))}</td>'
                     f'<td><b>{esc(f["title"])}</b><div class="ev">{esc(f["evidence"])}</div><div class="do">{esc(f["action"])}</div></td>'
                     f'<td class="small">{scope}</td><td class="n"><b>{esc(money(f["saving"], cur) if f["saving"] else t("no_saving"))}</b></td></tr>')
@@ -2102,7 +2808,7 @@ def render_register(s, stem):
             f'<select id="fc"><option value="">{esc(t("reg_all_cat"))}</option>{cat_opts}</select><button class="btn" type="button" id="fx">{esc(t("reg_clear"))}</button>'
             f'<button class="btn" type="button" id="fe">{esc(t("reg_export"))}</button><span class="fcount" id="fn" aria-live="polite"></span></div>'
             f'<div class="tw"><table id="reg" aria-label="{esc(t("s_register"))}" data-file="{esc(stem)}-{esc(t("csv_findings"))}" data-cur="{esc(cur)}" data-count="{esc(t("reg_count"))}" '
-            f'data-countf="{esc(t("reg_count_f"))}" data-csvh="{esc("|".join((t("col_evidence"), t("col_action"), t("col_resource_id"), t("col_link"), t("filtered"))))}"><colgroup><col class="w1"><col class="w2"><col><col class="w4"><col class="w5"></colgroup>'
+            f'data-countf="{esc(t("reg_count_f"))}" data-csvh="{esc("|".join((t("col_evidence"), t("col_action"), t("col_resource_id"), t("col_link"), t("filtered"), t("col_project"))))}"><colgroup><col class="w1"><col class="w2"><col><col class="w4"><col class="w5"></colgroup>'
             f'<thead><tr><th scope="col" data-k="rank" aria-sort="descending"><button class="sb" type="button">{esc(t("col_sev"))}</button><span class="pl-only">{esc(t("col_sev"))}</span></th>'
             f'<th scope="col" data-k="cat"><button class="sb" type="button">{esc(t("col_cat"))}</button><span class="pl-only">{esc(t("col_cat"))}</span></th><th scope="col">{esc(t("col_finding"))}</th>'
             f'<th scope="col">{esc(t("col_scope"))}</th><th scope="col" class="n" data-k="saving"><button class="sb" type="button">{esc(t("col_saving"))}</button><span class="pl-only">{esc(t("col_saving"))}</span></th></tr></thead>'
@@ -2110,9 +2816,18 @@ def render_register(s, stem):
             f'<div class="more"><button class="btn" type="button" id="fm">{esc(t("reg_more"))}</button></div></div>')
 
 
+def identity_label(value):
+    text_value = str(value or "")
+    for prefix, key in (("verified", "id_verified"), ("not matched", "id_unmatched"), ("unreadable", "id_unreadable"), ("self-test", "id_self_test")):
+        if text_value.startswith(prefix):
+            return t(key)
+    return text_value
+
+
 def render_coverage(s):
     cov, cur, per = s["coverage"], s["currency"], s["periods"]
-    rows = "".join(f'<tr><td data-h="{esc(t("cov_source"))}"><b>{esc(t(x["label"]))}</b>{("<div class=small>" + esc(clean(x["errors"][0]["message"], 220)) + "</div>") if x["errors"] else ""}</td>'
+    rows = "".join(f'<tr><td data-h="{esc(t("cov_source"))}"><b>{esc(t(x["label"]))}</b>{(" <span class=tag>" + esc(t("optional")) + "</span>") if x.get("optional") else ""}'
+                   f'{("<div class=small>" + esc(clean(x["errors"][0]["message"], 220)) + "</div>") if x["errors"] else ""}</td>'
                    f'<td data-h="{esc(t("cov_status"))}"><span class="st st-{x["status"]}">{esc(t("st_" + x["status"]))}</span></td>'
                    f'<td class="n" data-h="{esc(t("cov_records"))}">{esc(fnum(x["records"], 0))}</td><td class="n" data-h="{esc(t("cov_seconds"))}">{esc(fnum(x["seconds"], 1))}</td></tr>' for x in cov["sources"])
     method = "".join(f"<li>{esc(m)}</li>" for m in (x.format(metric=t("metric_" + s["metric"]), metric_note=t("metric_note_" + s["metric"]), currency=cur, lat=DATA_LATENCY_DAYS,
@@ -2124,14 +2839,14 @@ def render_coverage(s):
     if cov["throttled"]:
         notes.append(t("throttle_note", n=cov["throttled"], s=fnum(cov["waited"], 0)))
     if cov["skipped_subscriptions"]:
-        notes.append(f'{len(cov["skipped_subscriptions"])} subscriptions not read (MAX_SUBSCRIPTIONS).')
+        notes.append(t("cov_skipped", n=len(cov["skipped_subscriptions"])))
     if cov["other_currency_subscriptions"]:
-        notes.append("Excluded from totals (other billing currency): " + ", ".join(cov["other_currency_subscriptions"]))
+        notes.append(t("cov_other_cur", v=", ".join(cov["other_currency_subscriptions"])))
     if cov["invisible_subscriptions"]:
-        notes.append("Not visible to the identity (no Reader): " + ", ".join(cov["invisible_subscriptions"]))
+        notes.append(t("cov_invisible", v=", ".join(cov["invisible_subscriptions"])))
     note_html = "".join(f'<div class="note warn">{ICON_WARN}<span>{esc(n)}</span></div>' for n in notes)
     links = "".join(f'<li><a href="{esc(u)}"{NEW_TAB}>{esc(LEARN_TITLES.get(u, u))}</a></li>' for u in LEARN_SOURCES)
-    stats = f'{cov["requests"]} read-only requests \u00b7 {fnum(cov["seconds"], 1)} s' + (f' \u00b7 identity: {cov["identity"]}' if cov["identity"] else "")
+    stats = t("cov_stats", n=fnum(cov["requests"], 0), s=fnum(cov["seconds"], 1)) + (SEP + t("cov_identity", v=identity_label(cov["identity"])) if cov["identity"] else "")
     return (f'<div class="card"><div class="tw"><table class="stk" aria-label="{esc(t("s_coverage"))}"><thead><tr><th scope="col">{esc(t("cov_source"))}</th><th scope="col">{esc(t("cov_status"))}</th>'
             f'<th scope="col" class="n">{esc(t("cov_records"))}</th><th scope="col" class="n">{esc(t("cov_seconds"))}</th></tr></thead><tbody>{rows}</tbody></table></div>'
             f'{note_html}<p class="small muted">{esc(stats)}</p></div>'
@@ -2142,33 +2857,43 @@ def render_coverage(s):
 REPORT_JS = """
 (function(){var $=function(i){return document.getElementById(i)},each=function(s,f){[].forEach.call(document.querySelectorAll(s),f)};
 each('[data-print]',function(b){b.addEventListener('click',function(){window.print()})});
-var navs=[].slice.call(document.querySelectorAll('.secnav a')),strip=document.querySelector('.secnav .wrap');
+var navs=[].slice.call(document.querySelectorAll('.secnav a')),strip=document.querySelector('.secnav .links');
 if('IntersectionObserver' in window&&strip){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;navs.forEach(function(a){var on=a.getAttribute('href')==='#'+e.target.id;a.classList.toggle('on',on);
 if(on){a.setAttribute('aria-current','true');if(strip.scrollWidth>strip.clientWidth)strip.scrollLeft+=a.getBoundingClientRect().left-strip.getBoundingClientRect().left-24}else a.removeAttribute('aria-current')})})},{rootMargin:'-40% 0px -55% 0px'});each('section.sec[id]',function(s){io.observe(s)})}
 function tws(){each('.tw',function(w){var o=w.scrollWidth>w.clientWidth+1;if(o&&!w.hasAttribute('tabindex')){var c=w.closest('.card'),h=c&&c.querySelector('h3');w.tabIndex=0;w.setAttribute('role','region');w.setAttribute('aria-label',(h?h.textContent:document.body.getAttribute('data-tbl'))+' '+document.body.getAttribute('data-scroll'))}
-else if(!o&&w.hasAttribute('tabindex')){w.removeAttribute('tabindex');w.removeAttribute('role');w.removeAttribute('aria-label')}})}
+else if(!o&&w.hasAttribute('tabindex')){w.removeAttribute('tabindex');w.removeAttribute('role');w.removeAttribute('aria-label')}});if(strip){strip.classList.remove('ovf');strip.classList.toggle('ovf',strip.scrollWidth>strip.clientWidth+1)}}
 tws();var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(tws,200)});
 each('[data-more]',function(b){b.addEventListener('click',function(){var tb_=b.closest('tbody');[].forEach.call(tb_.querySelectorAll('tr.xr'),function(r){r.hidden=false});b.closest('tr').remove()})});
 window.addEventListener('beforeprint',function(){each('tr.xr',function(r){r.hidden=false});each('tr.morerow',function(r){r.remove()})});
 each('.secnav a',function(a){a.addEventListener('focus',function(){var st=a.parentNode;if(a.offsetLeft<st.scrollLeft||a.offsetLeft+a.offsetWidth>st.scrollLeft+st.clientWidth)st.scrollLeft=a.offsetLeft-24})});
-var tb=$('tb');if(!tb)return;var rows=[].slice.call(tb.rows),PAGE=25,limit=PAGE,key='rank',asc=false,reg=$('reg'),tpl=reg.getAttribute('data-count'),tplf=reg.getAttribute('data-countf');
-function vis(){var q=$('fq').value.toLowerCase().trim(),s=$('fs').value,c=$('fc').value;return rows.filter(function(r){var d=r.dataset;return(!s||d.sev===s)&&(!c||d.cat===c)&&(!q||d.q.indexOf(q)>=0)})}
-function val(r){var d=r.dataset;return key==='rank'?(+d.rank)*1e9+(+d.saving):key==='saving'?+d.saving:(d[key]||'')}
-function draw(){var v=vis();v.sort(function(x,y){var a=val(x),b=val(y);return a<b?(asc?-1:1):a>b?(asc?1:-1):0});rows.forEach(function(r){r.classList.add('f-hide');r.classList.remove('pg')});
-v.forEach(function(r,i){tb.appendChild(r);r.classList.remove('f-hide');if(i>=limit)r.classList.add('pg')});var fl=$('fq').value||$('fs').value||$('fc').value;
+var pf=$('pf'),pk='',hooks=[];
+function proj(k){pk=k||'';each('[data-pv]',function(e){e.hidden=e.getAttribute('data-pv')!==pk});var o=pf&&pk?pf.querySelector('option[value="'+pk+'"]'):null,nm=o?o.textContent:'';
+each('.pnote',function(e){e.hidden=!pk});each('.pchip',function(e){e.hidden=!pk;e.querySelector('b').textContent=nm});
+each('[data-pick]',function(b){var on=b.getAttribute('data-pick')===pk,r=b.closest('tr');b.setAttribute('aria-pressed',on?'true':'false');if(r)r.classList.toggle('sel',on)});
+if(pf){pf.value=pk;pf.parentNode.classList.toggle('on',!!pk)}hooks.forEach(function(h){h()});tws()}
+if(pf)pf.addEventListener('change',function(){proj(pf.value)});
+each('[data-pick]',function(b){b.addEventListener('click',function(){proj(b.getAttribute('data-pick'))})});
+each('[data-pclear]',function(b){b.addEventListener('click',function(){proj('');if(pf)pf.focus()})});
+var tb=$('tb');if(tb){var rows=[].slice.call(tb.rows),PAGE=25,limit=PAGE,key='rank',asc=false,reg=$('reg'),tpl=reg.getAttribute('data-count'),tplf=reg.getAttribute('data-countf');
+var vis=function(){var q=$('fq').value.toLowerCase().trim(),s=$('fs').value,c=$('fc').value;return rows.filter(function(r){var d=r.dataset;return(!pk||d.proj===pk)&&(!s||d.sev===s)&&(!c||d.cat===c)&&(!q||d.q.indexOf(q)>=0)})};
+var val=function(r){var d=r.dataset;return key==='rank'?(+d.rank)*1e9+(+d.saving):key==='saving'?+d.saving:(d[key]||'')};
+var draw=function(){var v=vis();v.sort(function(x,y){var a=val(x),b=val(y);return a<b?(asc?-1:1):a>b?(asc?1:-1):0});rows.forEach(function(r){r.classList.add('f-hide');r.classList.remove('pg')});
+v.forEach(function(r,i){tb.appendChild(r);r.classList.remove('f-hide');if(i>=limit)r.classList.add('pg')});var fl=$('fq').value||$('fs').value||$('fc').value||pk;
 $('fn').textContent=(fl?tplf:tpl).replace('{v}',Math.min(limit,v.length)).replace('{m}',v.length).replace('{t}',rows.length);$('fz').hidden=v.length>0;
-$('fm').parentNode.style.display=v.length>limit?'':'none';each('#reg th[data-k]',function(th){if(th.dataset.k===key)th.setAttribute('aria-sort',asc?'ascending':'descending');else th.removeAttribute('aria-sort')})}
+$('fm').parentNode.style.display=v.length>limit?'':'none';each('#reg th[data-k]',function(th){if(th.dataset.k===key)th.setAttribute('aria-sort',asc?'ascending':'descending');else th.removeAttribute('aria-sort')})};
+hooks.push(function(){limit=PAGE;draw()});
 ['fq','fs','fc'].forEach(function(i){$(i).addEventListener('input',function(){limit=PAGE;draw()})});$('fm').addEventListener('click',function(){limit+=PAGE;draw()});
-function clr(){$('fq').value='';$('fs').value='';$('fc').value='';limit=PAGE;draw()}$('fx').addEventListener('click',clr);$('fz2').addEventListener('click',clr);
+var clr=function(){$('fq').value='';$('fs').value='';$('fc').value='';limit=PAGE;draw()};$('fx').addEventListener('click',clr);$('fz2').addEventListener('click',function(){clr();if(pk)proj('')});
 each('#reg th[data-k] .sb',function(b){b.addEventListener('click',function(){var k=b.parentNode.dataset.k;if(key===k)asc=!asc;else{key=k;asc=k==='cat'}draw()})});
 var saved;window.addEventListener('beforeprint',function(){saved=[$('fq').value,$('fs').value,$('fc').value,limit];$('fq').value='';$('fs').value='';$('fc').value='';limit=rows.length;draw()});
 window.addEventListener('afterprint',function(){if(!saved)return;$('fq').value=saved[0];$('fs').value=saved[1];$('fc').value=saved[2];limit=saved[3];saved=null;draw()});
 $('fe').addEventListener('click',function(){var q=function(s){s=String(s).replace(/\\s+/g,' ').trim();if(/^[=+\\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'},tx=function(e){return e?e.textContent:''};
 var hd=[].map.call(document.querySelectorAll('#reg thead th'),function(th){return tx(th.querySelector('.pl-only')||th)});var cu=reg.getAttribute('data-cur');
-var xh=reg.getAttribute('data-csvh').split('|'),out=[hd.slice(0,4).concat([hd[4]+' ('+cu+')',xh[0],xh[1],xh[2],xh[3]]).map(q).join(',')];
-[].forEach.call(tb.rows,function(r){if(r.classList.contains('f-hide'))return;var c=r.cells,d=r.dataset;out.push([tx(c[0]),tx(c[1]),tx(c[2].querySelector('b')),d.scope,(+d.saving).toFixed(2),tx(c[2].querySelector('.ev')),tx(c[2].querySelector('.do')),d.id,d.url].map(q).join(','))});
-var fl=$('fq').value||$('fs').value||$('fc').value;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\\ufeff'+out.join('\\r\\n')],{type:'text/csv;charset=utf-8'}));a.download=reg.getAttribute('data-file')+(fl?'-'+xh[4]:'')+'.csv';
-document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)});draw()})();
+var xh=reg.getAttribute('data-csvh').split('|'),out=[hd.slice(0,4).concat([xh[5],hd[4]+' ('+cu+')',xh[0],xh[1],xh[2],xh[3]]).map(q).join(',')];
+[].forEach.call(tb.rows,function(r){if(r.classList.contains('f-hide'))return;var c=r.cells,d=r.dataset;out.push([tx(c[0]),tx(c[1]),tx(c[2].querySelector('b')),d.scope,d.pn,(+d.saving).toFixed(2),tx(c[2].querySelector('.ev')),tx(c[2].querySelector('.do')),d.id,d.url].map(q).join(','))});
+var fl=$('fq').value||$('fs').value||$('fc').value||pk;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\\ufeff'+out.join('\\r\\n')],{type:'text/csv;charset=utf-8'}));a.download=reg.getAttribute('data-file')+(fl?'-'+xh[4]:'')+'.csv';
+document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)});draw()}
+if(pf&&pf.value)proj(pf.value)})();
 """
 
 
@@ -2228,27 +2953,52 @@ def render_html(s, stem="finops-review", logo=""):
     anom_sub = " \u00b7 ".join((tn("anom_days", len(s["unusual"])), tn("anom_jumps", len(s["jumps"])), tn("anom_new", len(s["new"]))))
     kp.append((str(len(s["unusual"]) + len(s["jumps"]) + len(s["new"])), t("kpi_anom"), esc(anom_sub)))
     kpi_html = "".join(f'<div class="kpi"><div class="v">{_kpi_value(val)}</div><div class="l">{esc(label)}</div><div class="s">{sub}</div></div>' for val, label, sub in kp[:6])
+    pj = s["projects"]
+    variants = [it for it in pj["items"] if it["variant"]]
+    if sum(1 for it in variants if not it["unallocated"]) < 2:
+        variants = []
     sec = [("actions", t("nav_actions"), len(s["actions"])), ("trend", t("nav_trend"), None), ("breakdown", t("nav_breakdown"), None),
+           ("projects", t("nav_projects"), pj["named"]),
            ("changes", t("nav_changes"), len(s["unusual"]) + len(s["jumps"]) + len(s["new"])), ("budgets", t("nav_budgets"), len(s["budgets"])),
            ("savings", t("nav_savings"), sum(1 for x in s["savings"]["items"] if x["saving"] > 0) + len(s["commitment"]["items"])),
            ("allocation", t("nav_allocation"), None), ("register", t("nav_register"), len(s["findings"])), ("coverage", t("nav_coverage"), None)]
     nav = "".join(f'<a href="#{k}"' + (f' aria-label="{esc(lbl)} ({n})"' if n else "") + f'>{esc(lbl)}' + (f'<small aria-hidden="true">{n}</small>' if n else "") + "</a>" for k, lbl, n in sec)
+    filt = ""
+    if variants:
+        opts = "".join(f'<option value="{it["id"]}">{esc(it["name"])}</option>' for it in variants)
+        filt = (f'<div class="pf"><label for="pf">{esc(t("pf_label"))}</label><select id="pf" autocomplete="off"><option value="">{esc(t("pf_all"))}</option>{opts}</select></div>')
 
-    def section(key, title, sub, body):
-        return f'<section class="sec" id="{key}" aria-labelledby="h-{key}"><div class="sh"><h2 id="h-{key}">{esc(title)}</h2><p>{esc(sub)}</p></div>{body}</section>'
+    def section(key, title, sub, body, mode=""):
+        extra = ""
+        if variants and mode == "chip":
+            extra = f'<span class="pchip" hidden>{esc(t("pf_chip"))} <b></b></span>'
+        elif variants and mode == "env":
+            extra = pnote_html()
+        return f'<section class="sec" id="{key}" aria-labelledby="h-{key}"><div class="sh"><h2 id="h-{key}">{esc(title)}</h2><p>{esc(sub)}</p>{extra}</div>{body}</section>'
 
+    fmap = {f["id"]: f for f in s["findings"]}
     have = s["totals"]["review"] is not None
-    body = (section("actions", t("s_actions"), t("s_actions_sub"), render_actions(s)) +
+    body = (section("actions", t("s_actions"), t("s_actions_sub"),
+                    pv_wrap(render_actions(s), variants, lambda it: render_actions(dict(s, actions=[fmap[x] for x in it["actions"] if x in fmap]), "act_none_p")), "chip") +
             section("trend", t("s_trend"), t("s_trend_sub", n=TREND_MONTHS, d=len(s["daily"])),
-                    f'<div class="g2w">{render_monthly(s)}{render_daily(s)}</div>' if have else f'<p class="empty">{esc(t("lead_nodata"))}</p>') +
+                    f'<div class="g2w">{render_monthly(s)}{render_daily(s)}</div>' if have else f'<p class="empty">{esc(t("lead_nodata"))}</p>', "env") +
             section("breakdown", t("s_breakdown"), t("s_breakdown_sub", month=fmonth_name(review), prev=fmonth_name(prev)),
-                    render_breakdown(s) if have else f'<p class="empty">{esc(t("lead_nodata"))}</p>') +
-            section("changes", t("s_changes"), t("s_changes_sub"), render_changes(s)) +
-            section("budgets", t("s_budgets"), t("s_budgets_sub"), render_budgets(s)) +
-            section("savings", t("s_savings"), t("s_savings_sub"), render_savings(s)) +
-            section("allocation", t("s_allocation"), t("s_allocation_sub", month=fmonth_name(review), tags=", ".join(s["config"]["tags"]) or "\u2014"), render_allocation(s)) +
-            section("register", t("s_register"), t("s_register_sub"), render_register(s, stem)) +
-            section("coverage", t("s_coverage"), t("s_coverage_sub"), render_coverage(s)))
+                    pv_wrap(render_breakdown(s), variants, lambda it: render_breakdown(project_view(s, it))) if have else f'<p class="empty">{esc(t("lead_nodata"))}</p>', "chip") +
+            section("projects", t("s_projects"), t("s_projects_sub", month=fmonth_name(review), prev=fmonth_name(prev), pct=fpct(pj["allocated_pct"] or 0)),
+                    render_projects(s, variants)) +
+            section("changes", t("s_changes"), t("s_changes_sub"), render_changes(s), "env") +
+            section("budgets", t("s_budgets"), t("s_budgets_sub"), render_budgets(s), "env") +
+            section("savings", t("s_savings"), t("s_savings_sub"), render_savings(s, variants), "chip") +
+            section("allocation", t("s_allocation"), t("s_allocation_sub", month=fmonth_name(review), tags=", ".join(s["config"]["tags"]) or "\u2014"), render_allocation(s), "env") +
+            section("register", t("s_register"), t("s_register_sub"), render_register(s, stem), "chip") +
+            section("coverage", t("s_coverage"), t("s_coverage_sub"), render_coverage(s), "env"))
+    banner = ""
+    if variants:
+        def banner_text(it):
+            text_value = esc(tn("pf_banner", it["findings"], name="\x00", cost=money(it["cost"], cur), month=fmonth_name(review), share=fpct(it["share"] or 0)))
+            return (f'<div class="pfi"><p>{text_value.replace(chr(0), "<b>" + esc(it["name"]) + "</b>")}<span>{esc(t("pf_scope"))}</span></p>'
+                    f'<button class="btn" type="button" data-pclear>{esc(t("pf_clear"))}</button></div>')
+        banner = '<div class="pfb" aria-live="polite">' + "".join(f'<div class="pv" data-pv="{it["id"]}" hidden>{banner_text(it)}</div>' for it in variants) + "</div>"
     title_text = (client + " \u00b7 " if client else "") + t("doc_title") + " \u00b7 " + fmonth(review)
     footer_text = title_text + f' \u00b7 {s["generated_utc"][:10]} \u00b7 {t("internal")}'
     page_css = ('@page{size:A4;margin:11mm 10mm 14mm;@bottom-left{content:' + css_text(footer_text) + ';font:8pt "Segoe UI",system-ui,sans-serif;color:#475467}'
@@ -2262,8 +3012,8 @@ def render_html(s, stem="finops-review", logo=""):
     return (f'<!doctype html><html lang="{esc(TEXT["_lang"])}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="{REPORT_CSP}">'
             f'<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="referrer" content="no-referrer">'
             f'<title>{esc(title_text)}</title><style>{REPORT_CSS}{BRAND_CSS}{page_css}</style></head><body data-tbl="{esc(t("tbl"))}" data-scroll="{esc(t("scrolls"))}"><a class="skip" href="#main">{esc(t("skip"))}</a>'
-            f'{top}<main id="main">{hero}<div class="wrap"><div class="kpis">{kpi_html}</div></div><nav class="secnav" aria-label="{esc(t("sections"))}"><div class="wrap">{nav}</div></nav>'
-            f'<div class="wrap body">{body}</div></main><span id="newtab" class="vh">{esc(t("new_tab"))}</span><footer><div class="wrap"><span>{esc(t("footer", tool=TOOL_NAME, ver=TOOL_VERSION, gen=s["generated_utc"]))}</span>'
+            f'{top}<main id="main">{hero}<div class="wrap"><div class="kpis">{kpi_html}</div></div><nav class="secnav" aria-label="{esc(t("sections"))}"><div class="wrap">{filt}<div class="links">{nav}</div></div></nav>'
+            f'<div class="wrap body">{banner}{body}</div></main><span id="newtab" class="vh">{esc(t("new_tab"))}</span><footer><div class="wrap"><span>{esc(t("footer", tool=TOOL_NAME, ver=TOOL_VERSION, gen=s["generated_utc"]))}</span>'
             f'<span>{esc(client + SEP if client else "")}{esc(t("internal"))}</span></div></footer><script>{REPORT_JS}</script></body></html>')
 
 
@@ -2275,14 +3025,17 @@ def _kpi_value(value):
     return esc(value)
 
 
-# ------------------------- files (HTML, JSON, 2 CSV) and native sharing links -------------------------
+# ------------------------- files (HTML, JSON, 3 CSV) and native sharing links -------------------------
 ARTIFACT_SUFFIXES = {"report_path": ".html", "snapshot_path": "-" + TEXT["file_snapshot"] + ".json",
-                     "findings_csv_path": "-" + TEXT["csv_findings"] + ".csv", "costs_csv_path": "-" + TEXT["csv_costs"] + ".csv"}
+                     "findings_csv_path": "-" + TEXT["csv_findings"] + ".csv", "costs_csv_path": "-" + TEXT["csv_costs"] + ".csv",
+                     "projects_csv_path": "-" + TEXT["csv_projects"] + ".csv"}
 STEM_RX = re.compile(re.escape(FILE_PREFIX) + r"-[0-9]{4}-[0-9]{2}-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}")
 THREAD_ROOT_RX = re.compile(r"/(?:root/sreagent|usr)/terminalRoot/tmp/ThreadFiles/([0-9a-fA-F-]{36})")
-FINDING_FIELDS = ("severity", "category", "title", "evidence", "action", "scope", "saving_month", "currency", "resource_id", "link", "id")
-COST_FIELDS = ("resource_name", "resource_type", "resource_group", "subscription", "region", "cost_review_month", "cost_previous_month", "change",
-               "change_pct", "currency", "resource_id")
+FINDING_FIELDS = ("severity", "category", "title", "evidence", "action", "scope", "project", "saving_month", "currency", "resource_id", "link", "id")
+COST_FIELDS = ("resource_name", "resource_type", "resource_group", "subscription", "project", "region", "cost_review_month", "cost_previous_month", "change",
+               "change_pct", "currency", "project_source", "resource_id")
+PROJECT_FIELDS = ("project", "cost_review_month", "cost_previous_month", "change", "change_pct", "share_pct", "cost_month_to_date", "savings_month",
+                  "findings", "resources", "resource_groups", "top_services", "top_resource_groups", "currency", "project_tag")
 
 
 def csv_cell(value):
@@ -2307,15 +3060,26 @@ def csv_document(rows, fields):
 
 def findings_rows(s):
     return [{"severity": f["severity"], "category": f["category"], "title": f["title"], "evidence": f["evidence"], "action": f["action"],
-             "scope": f["scope"], "saving_month": f["saving"], "currency": s["currency"] if f["saving"] else "", "resource_id": f["resource_id"],
-             "link": f["link"], "id": f["id"]} for f in s["findings"]]
+             "scope": f["scope"], "project": f.get("project", ""), "saving_month": f["saving"], "currency": s["currency"] if f["saving"] else "",
+             "resource_id": f["resource_id"], "link": f["link"], "id": f["id"]} for f in s["findings"]]
 
 
 def cost_rows(s, resources):
-    return [{"resource_name": r["name"], "resource_type": r["type"], "resource_group": r["rg"], "subscription": r["sub"], "region": r["region"],
-             "cost_review_month": r["cost"], "cost_previous_month": r["prev"], "change": r["delta"],
-             "change_pct": round(r["pct"], 1) if r["pct"] is not None else "", "currency": s["currency"], "resource_id": r["id"] if "(not-a-resource)" not in r["id"] else ""}
+    return [{"resource_name": r["name"], "resource_type": r["type"], "resource_group": r["rg"], "subscription": r["sub"], "project": r.get("project", ""),
+             "region": r["region"], "cost_review_month": r["cost"], "cost_previous_month": r["prev"], "change": r["delta"],
+             "change_pct": round(r["pct"], 1) if r["pct"] is not None else "", "currency": s["currency"], "project_source": r.get("project_source", ""),
+             "resource_id": r["id"] if "(not-a-resource)" not in r["id"] else ""}
             for r in resources]
+
+
+def project_rows(s):
+    pj = s["projects"]
+    return [{"project": it["name"], "cost_review_month": it["cost"], "cost_previous_month": it["prev"], "change": it["delta"],
+             "change_pct": round(it["pct"], 1) if it["pct"] is not None else "", "share_pct": round(it["share"], 1) if it["share"] is not None else "",
+             "cost_month_to_date": it["mtd"], "savings_month": it["savings"], "findings": it["findings"], "resources": it["resources"],
+             "resource_groups": it["resource_groups"], "top_services": "; ".join(x["name"] for x in it["by_service"][:3]),
+             "top_resource_groups": "; ".join(x["name"] for x in it["by_rg"][:3]), "currency": s["currency"], "project_tag": ", ".join(pj["keys"])}
+            for it in pj["items"]]
 
 
 def artifact_directory():
@@ -2358,7 +3122,8 @@ def report_envelope(s, paths, root, stem):
     out.update({key: str(path) for key, path in paths.items()})
     out.update({"sharing_mode": links["sharing_mode"], "artifact_status": "written", "review_month": s["periods"]["review_month"],
                 "verdict": s["verdict"]["label"], "headline": s["headline"]["text"][:600], "kpis": kpis(s),
-                "top_actions": [compact_finding(f) for f in s["actions"][:5]], "coverage": compact_coverage(s), "read_only": True})
+                "top_actions": [compact_finding(f) for f in s["actions"][:5]], "actions_total": len(s["actions"]), "coverage": compact_coverage(s),
+                "read_only": True})
     while out["top_actions"] and response_bytes(out) > TRANSPORT_BYTES:
         out["top_actions"].pop()
     if response_bytes(out) > TRANSPORT_BYTES:
@@ -2372,7 +3137,8 @@ def build_documents(s, resources, logo, stem):
     contents = {"report_path": render_html(s, stem, logo).encode("utf-8"),
                 "snapshot_path": json.dumps(snap, ensure_ascii=False, indent=1, allow_nan=False, default=str).encode("utf-8"),
                 "findings_csv_path": csv_document(findings_rows(s), FINDING_FIELDS).encode("utf-8-sig"),
-                "costs_csv_path": csv_document(cost_rows(s, resources), COST_FIELDS).encode("utf-8-sig")}
+                "costs_csv_path": csv_document(cost_rows(s, resources), COST_FIELDS).encode("utf-8-sig"),
+                "projects_csv_path": csv_document(project_rows(s), PROJECT_FIELDS).encode("utf-8-sig")}
     for key, data in contents.items():
         if len(data) > ARTIFACT_BYTES:
             raise FinOpsError("artifact_size_exceeded", f"{key} would exceed 4.8 MB; reduce MAX_SUBSCRIPTIONS.", "artifact_storage")
@@ -2423,12 +3189,12 @@ SELF_TEST_SUBS = [("00000000-0000-0000-0000-0000000000a1", "Contoso Production")
 # (sub, resource group, service, provider/type, resource name, region, daily cost, pricing model, tags, pattern)
 SELF_TEST_ESTATE = [
     (0, "rg-web-prod", "Azure App Service", "microsoft.web/serverfarms", "asp-web-prod", "eu west", 19.2, "OnDemand", "co", "flat"),
-    (0, "rg-web-prod", "Azure Front Door Service", "microsoft.cdn/profiles", "afd-web-prod", "global", 6.4, "OnDemand", "co", "flat"),
+    (0, "rg-web-prod", "Azure Front Door Service", "microsoft.cdn/profiles", "afd-web-prod", "global", 6.4, "OnDemand", "cm", "flat"),
     (0, "rg-web-prod", "Storage", "microsoft.storage/storageaccounts", "stwebprod01", "eu west", 3.1, "OnDemand", "co", "flat"),
     (0, "rg-sql-prod", "SQL Database", "microsoft.sql/servers/databases", "sqlsrv-prod/sqldb-orders", "eu west", 13.5, "Reservation", "co", "flat"),
     (0, "rg-sql-prod", "SQL Database", "microsoft.sql/servers/databases", "sqlsrv-prod/sqldb-catalog", "eu west", 9.0, "OnDemand", "co", "flat"),
-    (0, "rg-aks-prod", "Virtual Machines", "microsoft.compute/virtualmachinescalesets", "aks-nodepool1-vmss", "eu west", 36.0, "OnDemand", "co", "growth"),
-    (0, "rg-aks-prod", "Load Balancer", "microsoft.network/loadbalancers", "kubernetes", "eu west", 1.6, "OnDemand", "co", "flat"),
+    (0, "MC_rg-aks-prod_aks-prod-weu_westeurope", "Virtual Machines", "microsoft.compute/virtualmachinescalesets", "aks-nodepool1-vmss", "eu west", 36.0, "OnDemand", "co", "growth"),
+    (0, "MC_rg-aks-prod_aks-prod-weu_westeurope", "Load Balancer", "microsoft.network/loadbalancers", "kubernetes", "eu west", 1.6, "OnDemand", "co", "flat"),
     (0, "rg-aks-prod", "Azure Kubernetes Service", "microsoft.containerservice/managedclusters", "aks-prod-weu", "eu west", 2.4, "OnDemand", "co", "flat"),
     (0, "rg-data-prod", "Storage", "microsoft.storage/storageaccounts", "stdatalakeprod", "eu west", 9.3, "OnDemand", "c", "flat"),
     (0, "rg-data-prod", "Azure Data Factory v2", "microsoft.datafactory/factories", "adf-ingest-prod", "eu west", 4.1, "OnDemand", "c", "flat"),
@@ -2454,7 +3220,13 @@ SELF_TEST_ESTATE = [
     (2, "rg-backup", "Storage", "microsoft.compute/snapshots", "snap-sql-migration-2025", "eu west", 0.21, "OnDemand", "", "flat"),
 ]
 SELF_TEST_TAGS = {"c": {"costcenter": "CC-1001"}, "co": {"costcenter": "CC-1001", "owner": "web-platform", "environment": "prod"},
+                  "cm": {"costcenter": "CC-1001", "owner": "web-platform", "environment": "prod", "project": "Marketing site"},
                   "e": {"environment": "dev", "owner": "dev-team"}, "o": {"owner": "network-team", "environment": "shared"}}
+SELF_TEST_RG_TAGS = {"rg-web-prod": {"project": "E-commerce web"}, "rg-sql-prod": {"project": "E-commerce web"}, "rg-aks-prod": {"project": "Customer API"},
+                     "rg-data-prod": {"costcenter": "CC-2002", "owner": "data-team", "project": "Data platform"}, "rg-ai-prod": {"project": "AI assistant"},
+                     "rg-network-hub": {"project": "Shared platform"}, "rg-monitoring": {"project": "Shared platform"},
+                     "rg-security": {"project": "Shared platform"}, "rg-backup": {"project": "Shared platform"}}
+SELF_TEST_AKS = "/subscriptions/{sub}/resourcegroups/rg-aks-prod/providers/microsoft.containerservice/managedclusters/aks-prod-weu"
 
 
 def self_test_estate(periods):
@@ -2526,11 +3298,21 @@ class SelfTestOpener:
             return FakeResponse(self.cost(path.split("/")[2], body))
         if path.endswith("/microsoft.consumption/budgets"):
             return FakeResponse({"value": self.budgets(path.split("/")[2] if path.startswith("/subscriptions/") else "")})
+        if path.endswith("/microsoft.consumption/tags"):
+            return FakeResponse({"id": path + "/self-test", "name": "self-test", "type": "Microsoft.Consumption/tags",
+                                 "properties": {"tags": [{"key": k, "value": []} for k in ("project", "costcenter", "owner", "environment")]}})
         raise HTTPError(url, 404, "not found", {}, None)
+
+    @staticmethod
+    def cost_tag(rid, rg, key):
+        """Tags as Cost Management records them: only on the resource itself (no inheritance), plus one group whose tag left ARG."""
+        if key.casefold() != "project":
+            return ""
+        return "Load testing" if rg == "rg-test-perf" else "Marketing site" if rid.endswith("/afd-web-prod") else ""
 
     def cost(self, sub, body):
         ds = body["dataset"]
-        groups = [g["name"] for g in ds.get("grouping", [])]
+        groups = [(g.get("type") or "Dimension", g["name"]) for g in ds.get("grouping", [])]
         start = parse_day(body["timePeriod"]["from"])
         end = parse_day(body["timePeriod"]["to"])
         agg = defaultdict(float)
@@ -2539,9 +3321,17 @@ class SelfTestOpener:
                 continue
             values = {"ResourceGroupName": rg, "ServiceName": svc, "PricingModel": model, "ResourceId": rid, "ResourceLocation": loc}
             when = f"{d.year:04d}-{d.month:02d}-01T00:00:00" if ds.get("granularity") == "Monthly" else int(d.strftime("%Y%m%d"))
-            agg[(when,) + tuple(values[g] for g in groups)] += cost
+            key = []
+            for gtype, gname in groups:
+                if gtype == "TagKey":
+                    value = self.cost_tag(rid, rg, gname)
+                    key += [gname.lower() if value else "", value]
+                else:
+                    key.append(values[gname])
+            agg[(when,) + tuple(key)] += cost
         date_col = "BillingMonth" if ds.get("granularity") == "Monthly" else "UsageDate"
-        cols = [{"name": "Cost", "type": "Number"}, {"name": date_col, "type": "Datetime"}] + [{"name": g, "type": "String"} for g in groups] + [{"name": "Currency", "type": "String"}]
+        names_ = [n for gtype, gname in groups for n in (("TagKey", "TagValue") if gtype == "TagKey" else (gname,))]
+        cols = [{"name": "Cost", "type": "Number"}, {"name": date_col, "type": "Datetime"}] + [{"name": g, "type": "String"} for g in names_] + [{"name": "Currency", "type": "String"}]
         rows = [[round(v, 4), k[0]] + list(k[1:]) + ["USD"] for k, v in sorted(agg.items(), key=lambda kv: str(kv[0]))]
         return {"properties": {"columns": cols, "rows": rows, "nextLink": None}}
 
@@ -2571,9 +3361,9 @@ class SelfTestOpener:
                 if (sx, rg) in seen:
                     continue
                 seen.add((sx, rg))
-                tags = {"costcenter": "CC-2002", "owner": "data-team"} if rg == "rg-data-prod" else {}
-                rows.append({"id": f"/subscriptions/{subs[sx][0]}/resourcegroups/{rg}", "type": "microsoft.resources/subscriptions/resourcegroups",
-                             "name": rg, "subscriptionId": subs[sx][0], "resourceGroup": rg, "tags": tags})
+                rows.append({"id": f"/subscriptions/{subs[sx][0]}/resourcegroups/{rg.lower()}", "type": "microsoft.resources/subscriptions/resourcegroups",
+                             "name": rg, "subscriptionId": subs[sx][0], "resourceGroup": rg, "tags": dict(SELF_TEST_RG_TAGS.get(rg, {})),
+                             "managedBy": SELF_TEST_AKS.format(sub=subs[sx][0]) if rg.startswith("MC_") else ""})
             return rows
         if query.startswith("resources | where isnotempty(tags)"):
             out, seen = [], set()
@@ -2668,18 +3458,22 @@ def resources_for_csv(snapshot):
     return snapshot.get("resources") or []
 
 
-def main(operation: str = "report", view: str = "summary", limit: int = 15) -> dict:
-    """Read-only monthly Azure FinOps review of the configured subscriptions (or management group).
+def main(operation: str = "report", view: str = "summary", limit: int = 15, project: str = "", project_tag: str = "") -> dict:
+    """Read-only monthly Azure FinOps review of the configured subscriptions (or management group), with cost per project.
 
-    operation: report (HTML + JSON snapshot + findings CSV + cost-by-resource CSV), query (bounded chat view, no files)
+    operation: report (HTML + JSON snapshot + findings CSV + cost-by-resource CSV + cost-by-project CSV), query (bounded chat view, no files)
                or self_test (the full report from built-in SIMULATED data, no network, no configuration needed).
-    view (query only): summary | actions | anomalies | budgets | savings | resources | allocation | coverage.
+    view (query only): summary | actions | anomalies | budgets | savings | resources | projects | allocation | coverage.
     limit (query only): 1-50 rows.
+    project (query only): one project name; summary, actions, savings, resources and projects then show that project only.
+    project_tag: tag name(s) that name the project for this run, comma-separated in priority order; overrides PROJECT_TAG_KEYS and detection.
     """
     try:
-        params = validate_parameters(operation, view, limit)
+        params = validate_parameters(operation, view, limit, project, project_tag)
         self_test = params["operation"] == "self_test"
         config = validate_config(self_test=self_test)
+        if params["project_tag"]:
+            config = dict(config, project_keys=params["project_tag"], project_source="parameter")
         now = utc_now()
         if self_test:
             snapshot = run_review(dict(config, subscriptions=[s for s, _ in SELF_TEST_SUBS]), now, SelfTestOpener(review_periods(now)), "SIMULATED")

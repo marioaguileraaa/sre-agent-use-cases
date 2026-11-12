@@ -23,13 +23,16 @@ class SelfTestOutputTests(unittest.TestCase):
         os.chdir(cls.cwd)
         shutil.rmtree(cls.work, ignore_errors=True)
 
-    def test_self_test_writes_four_files_without_configuration(self):
+    def test_self_test_writes_five_files_without_configuration(self):
         r = self.result
         self.assertEqual((r["status"], r["provenance"], r["artifact_status"]), ("ok", "SIMULATED", "written"))
-        for key in ("report_path", "snapshot_path", "findings_csv_path", "costs_csv_path"):
+        for key in ("report_path", "snapshot_path", "findings_csv_path", "costs_csv_path", "projects_csv_path"):
             path = Path(r[key])
             self.assertTrue(path.is_file(), key)
-            self.assertTrue(self.tool.STEM_RX.fullmatch(path.name.split(".")[0].replace("-snapshot", "").replace("-findings", "").replace("-cost-by-resource", "")))
+            stem = path.name.split(".")[0]
+            for suffix in ("-snapshot", "-findings", "-cost-by-resource", "-cost-by-project"):
+                stem = stem.replace(suffix, "")
+            self.assertTrue(self.tool.STEM_RX.fullmatch(stem))
         self.assertLessEqual(self.tool.response_bytes(r), self.tool.TRANSPORT_BYTES)
         self.assertGreater(r["kpis"]["savings_month"], 0)
         self.assertEqual(r["sharing_mode"], "local_files_only")
@@ -44,7 +47,7 @@ class SelfTestOutputTests(unittest.TestCase):
         self.assertNotRegex(page, r"<link\b|<img[^>]+src=\"https?:|<script[^>]+src=|@import|url\(https?:")
         for href in re.findall(r'href="(https?://[^"]+)"', page):
             self.assertTrue(href.startswith(("https://portal.azure.com/", "https://learn.microsoft.com/")), href)
-        for section in ("actions", "trend", "breakdown", "changes", "budgets", "savings", "allocation", "register", "coverage"):
+        for section in ("actions", "trend", "breakdown", "projects", "changes", "budgets", "savings", "allocation", "register", "coverage"):
             self.assertIn(f'id="{section}"', page)
 
     def test_csv_files_are_guarded_against_formula_injection(self):

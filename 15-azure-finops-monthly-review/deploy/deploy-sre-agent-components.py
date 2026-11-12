@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Automated deployment (Option B) of case 15 - Monthly Azure FinOps review - to an Azure SRE Agent.
 
-Creates or updates, idempotently, the Python tool (with its 3 optional parameters), the skill, the subagent and
+Creates or updates, idempotently, the Python tool (with its 5 optional parameters), the skill, the subagent and
 (optionally) the monthly scheduled task, using the files published in this folder. It is equivalent to the manual
 portal steps of the guide (Option A).
 
@@ -12,9 +12,9 @@ Examples:
   python deploy/deploy-sre-agent-components.py --endpoint https://<your-agent>.azuresre.ai \
       --agent-client-id <client-id> --subscription-id <sub-1> --subscription-id <sub-2> --schedule
 
-  # Management group scope (Reader on the management group) and optional report branding
+  # Management group scope (Reader on the management group), optional report branding and the tag that names projects
   python deploy/deploy-sre-agent-components.py --endpoint https://<your-agent>.azuresre.ai \
-      --agent-client-id <client-id> --management-group-id <mg-id> --client-name "Contoso"
+      --agent-client-id <client-id> --management-group-id <mg-id> --client-name "Contoso" --project-tag Project
 
   Add --dry-run to validate the configuration without calling the API.
 """
@@ -36,7 +36,9 @@ MARKERS = {
     "subs": 'SUBSCRIPTION_IDS = ["<YOUR_SUBSCRIPTION_ID>"]',
     "mg": 'MANAGEMENT_GROUP_ID = ""',
     "name": 'CLIENT_NAME = ""',
+    "project": "PROJECT_TAG_KEYS = []",
 }
+PROJECT_KEY = re.compile(r"^(?=.*\S)[^<>%&\\?/,\x00-\x1f\x7f]{1,128}$")
 
 
 def fail(message):
@@ -75,6 +77,11 @@ def configure_code(code, args):
         if len(args.client_name) > 80 or re.search(r"[\x00-\x1f\x7f<>]", args.client_name):
             fail("--client-name must be plain text of up to 80 characters.")
         code = code.replace(MARKERS["name"], "CLIENT_NAME = " + json.dumps(args.client_name))
+    keys = [k.strip() for v in args.project_tag for k in v.split(",") if k.strip()]
+    if keys:
+        if len(keys) > 5 or not all(PROJECT_KEY.match(k) for k in keys):
+            fail("--project-tag takes up to 5 tag names (repeatable or comma-separated).")
+        code = code.replace(MARKERS["project"], "PROJECT_TAG_KEYS = " + json.dumps(keys))
     compile(code, "tool", "exec")
     return code
 
@@ -184,6 +191,8 @@ def main():
     parser.add_argument("--subscription-id", action="append", default=[], help="Subscription to review. Repeatable or comma-separated")
     parser.add_argument("--management-group-id", default="", help="Optional management group scope instead of subscriptions")
     parser.add_argument("--client-name", default="", help="Optional organization name shown in the report header")
+    parser.add_argument("--project-tag", action="append", default=[], help="Optional tag that names the projects (PROJECT_TAG_KEYS), in priority "
+                        "order. Repeatable or comma-separated; leave it out to let the tool detect it")
     parser.add_argument("--schedule", action="store_true", help="Also create the monthly scheduled task (0 7 3 * * UTC)")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

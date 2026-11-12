@@ -42,11 +42,12 @@ class AssetTests(unittest.TestCase):
         deploy = importlib.util.module_from_spec(loader)
         loader.loader.exec_module(deploy)
         args = types.SimpleNamespace(agent_client_id="12345678-1234-4abc-8def-123456789abc", subscription_id=["aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"],
-                                     management_group_id="", client_name="Contoso")
+                                     management_group_id="", client_name="Contoso", project_tag=["Proyecto, CostCenter"])
         configured = deploy.configure_code(TOOL.read_text(encoding="utf-8"), args)
         self.assertIn('MANAGED_IDENTITY_CLIENT_ID = "12345678-1234-4abc-8def-123456789abc"', configured)
         self.assertIn('SUBSCRIPTION_IDS = ["aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"]', configured)
         self.assertIn('CLIENT_NAME = "Contoso"', configured)
+        self.assertIn('PROJECT_TAG_KEYS = ["Proyecto", "CostCenter"]', configured)
 
     def test_generic_file_keeps_placeholders(self):
         lines = TOOL.read_text(encoding="utf-8").splitlines()
@@ -57,7 +58,7 @@ class AssetTests(unittest.TestCase):
         source = TOOL.read_text(encoding="utf-8")
         imports = {line.split()[1].split(".")[0] for line in source.splitlines() if line.startswith(("import ", "from "))}
         self.assertFalse(imports - {"base64", "calendar", "csv", "hashlib", "html", "io", "json", "math", "os", "re", "ssl", "tempfile", "time",
-                                    "collections", "datetime", "pathlib", "urllib", "uuid"})
+                                    "unicodedata", "collections", "datetime", "pathlib", "urllib", "uuid"})
         self.assertIn("from azure.identity import ManagedIdentityCredential", source)
         self.assertTrue(source.isascii())
 

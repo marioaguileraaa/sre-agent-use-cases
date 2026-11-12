@@ -17,16 +17,18 @@ handler.
 | Field | Value |
 |---|---|
 | Name | `generate-azure-finops-review` |
-| Description | `Read-only monthly Azure FinOps review of the configured subscriptions (Cost Management Query API, budgets, Azure Advisor and Azure Resource Graph, Reader only): last month's cost and change, month to date and forecast against the budget, where the money goes, unusual days and month-over-month jumps, idle and orphaned resources, Advisor savings, commitment coverage and allocation readiness, with a prioritised action list. Writes an offline HTML report, a JSON snapshot and two CSV files. Never changes anything.` |
+| Description | `Read-only monthly Azure FinOps review of the configured subscriptions (Cost Management Query API, budgets, Azure Advisor and Azure Resource Graph, Reader only): last month's cost and change, month to date and forecast against the budget, where the money goes, cost per project (from a project tag it detects or you set), unusual days and month-over-month jumps, idle and orphaned resources, Advisor savings, commitment coverage and allocation readiness, with a prioritised action list. Writes an offline HTML report with a project filter, a JSON snapshot and three CSV files. Never changes anything.` |
 | Code | [`generate-azure-finops-review.py`](generate-azure-finops-review.py) with the 2 placeholders of the `CONFIGURE` block replaced (README, step 4) |
 | Timeout | `600` |
 | Identity tab | Leave the switch **Off**. The tool authenticates with the agent managed identity itself (`MANAGED_IDENTITY_CLIENT_ID`) |
 
 | Parameter | Type | Required | Description (paste as is) |
 |---|---|---|---|
-| `operation` | string | No | `report (default: HTML + JSON + findings CSV + cost-by-resource CSV), query (bounded chat view, no files) or self_test (complete report from built-in SIMULATED data, no network).` |
-| `view` | string | No | `Only with operation=query: summary (default), actions, anomalies, budgets, savings, resources, allocation or coverage.` |
+| `operation` | string | No | `report (default: HTML + JSON + findings CSV + cost-by-resource CSV + cost-by-project CSV), query (bounded chat view, no files) or self_test (complete report from built-in SIMULATED data, no network).` |
+| `view` | string | No | `Only with operation=query: summary (default), actions, anomalies, budgets, savings, resources, projects, allocation or coverage.` |
 | `limit` | int | No | `Only with operation=query: maximum rows, 1-50 (default 15); answers are capped to 3,500 bytes.` |
+| `project` | string | No | `Only with operation=query: one project name (case-insensitive, Unallocated accepted); summary, actions, savings, resources and projects then show that project only.` |
+| `project_tag` | string | No | `Optional tag name that names the project for this run (or up to 5 comma-separated, in priority order), for example Proyecto. Overrides PROJECT_TAG_KEYS and the automatic detection.` |
 
 The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameters.schema.json).
 
@@ -35,7 +37,7 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 | Field | Value |
 |---|---|
 | Name | `azure-finops-review` |
-| Description | `Read-only monthly FinOps review of the whole Azure environment (Cost Management, budgets, Azure Advisor, Azure Resource Graph) with cost trend, where the money goes, unusual days and jumps, budgets and forecast, savings, allocation readiness and a prioritised action list.` |
+| Description | `Read-only monthly FinOps review of the whole Azure environment (Cost Management, budgets, Azure Advisor, Azure Resource Graph) with cost trend, where the money goes, cost per project, unusual days and jumps, budgets and forecast, savings, allocation readiness and a prioritised action list.` |
 | Content | Paste [`skills/azure-finops-review/SKILL.md`](skills/azure-finops-review/SKILL.md) |
 | Tools | Choose tools -> `generate-azure-finops-review` |
 
@@ -45,7 +47,7 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 |---|---|
 | Name | `finops-reviewer` |
 | Instructions | Paste [`subagent-instructions.txt`](subagent-instructions.txt) (copy below) |
-| Handoff description | `Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.` |
+| Handoff description | `Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, cost per project, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.` |
 | Skills | Only `azure-finops-review` |
 | Tools | Only `generate-azure-finops-review` |
 
@@ -54,9 +56,9 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 ```text
 You are finops-reviewer, the specialized executor of the monthly Azure FinOps review.
 
-Use the azure-finops-review skill and call ONLY the generate-azure-finops-review tool. For the monthly review call it with {"operation": "report"}. For follow-up questions call it with operation "query" and the matching view: summary, actions, anomalies, budgets, savings, resources, allocation or coverage. Use operation "self_test" only when the user asks for a demo or a test, and say that its data is simulated. Never call it in parallel.
+Use the azure-finops-review skill and call ONLY the generate-azure-finops-review tool. For the monthly review call it with {"operation": "report"}. For follow-up questions call it with operation "query" and the matching view: summary, actions, anomalies, budgets, savings, resources, projects, allocation or coverage; add "project" (a project name) to see one project only. If the user names the tag that identifies their projects, pass it as "project_tag". Use operation "self_test" only when the user asks for a demo or a test, and say that its data is simulated. Never call it in parallel.
 
-Deliver the four files generated by the report without recreating them or changing their design. Always present report_url, snapshot_url, findings_csv_url and costs_csv_url FIRST as clickable Markdown links, plus their paths. Then give the verdict, the headline, the key numbers (last full month and its change, month to date, forecast against the budget, estimated monthly savings, untagged share, anomalies), the top actions as a short table with their estimated monthly saving, and the coverage. End with an "Artifacts & links" section with the four links.
+Deliver the five files generated by the report without recreating them or changing their design. Always present report_url, snapshot_url, findings_csv_url, costs_csv_url and projects_csv_url FIRST as clickable Markdown links, plus their paths. Then give the verdict, the headline, the key numbers (last full month and its change, month to date, forecast against the budget, estimated monthly savings, untagged share, anomalies), the cost per project with the tag that identifies the projects and how it was chosen (kpis.projects), the top actions as a short table with their estimated monthly saving (when actions_total is larger, get the rest with view actions), and the coverage. End with an "Artifacts & links" section with the five links.
 
 Always operate read only. Never create, modify or delete resources, budgets, tags, reservations or savings plans, even if asked: propose the action and remind the user that a person executes it through an approved change. Savings are estimates; reservations and savings plans are alternatives and a finance decision. If coverage is partial, or a source is denied, failed, throttled or skipped, say what is missing and the required action. Never invent results.
 
@@ -72,10 +74,10 @@ Answer in the user's language (English by default).
 | Frequency | Monthly, day 3, 07:00 UTC (`0 7 3 * *`) |
 | Message grouping for updates | Use same chat thread |
 | Agent autonomy | Autonomous (Default) |
-| Description | `Every month on the 3rd at 07:00 UTC, when the previous month's costs have settled: read-only FinOps review of the whole environment with trend, where the money goes, anomalies, budgets, savings, allocation readiness and prioritised actions.` |
+| Description | `Every month on the 3rd at 07:00 UTC, when the previous month's costs have settled: read-only FinOps review of the whole environment with trend, where the money goes, cost per project, anomalies, budgets, savings, allocation readiness and prioritised actions.` |
 
 ```text
-@finops-reviewer Run the monthly Azure FinOps review (operation=report). Give me the links to the HTML report, the JSON snapshot and the two CSV files first, then the verdict, the headline numbers, the prioritised actions with their estimated monthly savings, the budgets at risk, the unusual days and jumps, the allocation readiness and the coverage.
+@finops-reviewer Run the monthly Azure FinOps review (operation=report). Give me the links to the HTML report, the JSON snapshot and the three CSV files first, then the verdict, the headline numbers, the cost per project and which tag identifies the projects, the prioritised actions with their estimated monthly savings, the budgets at risk, the unusual days and jumps, the allocation readiness and the coverage.
 ```
 
 Optional higher cadence (see the README, *Choosing the cadence*):
@@ -96,5 +98,8 @@ Optional higher cadence (see the README, *Choosing the cadence*):
 | Savings | `@finops-reviewer Where can we save, and how much a month?` | `query`, `savings` |
 | Top resources | `@finops-reviewer What are our most expensive resources and how did they change?` | `query`, `resources` |
 | Allocation | `@finops-reviewer How much of our cost is untagged, and which resource groups should we tag first?` | `query`, `allocation` |
+| Projects | `@finops-reviewer How much does each project cost, and which tag did you use?` | `query`, `projects` |
+| One project | `@finops-reviewer What can the E-commerce web project save?` | `query`, `savings`, `project` |
+| Our project tag | `@finops-reviewer Our projects are in the tag Proyecto. Run the review with that tag.` | `report`, `project_tag` |
 | Coverage | `@finops-reviewer Is the cost data of this review complete?` | `query`, `coverage` |
 | Demo | `@finops-reviewer Run a self-test of the FinOps review.` | `self_test` |
