@@ -174,9 +174,12 @@
   function renderThumbs(families, cases) {
     thumbsEl.replaceChildren();
     const present = families.filter((f) => cases.some((c) => c.family === f.id));
-    thumbsEl.style.setProperty("--n", present.length);
+    // The rail shares its height among every tab: the Index tab plus one per family present.
+    thumbsEl.style.setProperty("--n", present.length + 1);
+    thumbsEl.append(el("a", { class: "tab tab-index", href: "#key", style: "--i:0", "data-tab": "index", "aria-label": "Quick-find index" },
+      el("span", {}, "Index")));
     present.forEach((f, i) => {
-      thumbsEl.append(el("a", { class: "tab", href: `#family-${f.id}`, style: `${famStyle(f)};--i:${i}`, "data-tab": f.id }, el("span", {}, f.short)));
+      thumbsEl.append(el("a", { class: "tab", href: `#family-${f.id}`, style: `${famStyle(f)};--i:${i + 1}`, "data-tab": f.id }, el("span", {}, f.short)));
     });
   }
 
@@ -191,20 +194,25 @@
     ].filter(([, v]) => v);
 
     const fullHref = c.full || c.image;
-    const fullLabel = c.full && c.full.endsWith(".html") ? "Open the sample report" : "View full size";
+    const isReport = Boolean(c.full && c.full.endsWith(".html"));
+    const fullLabel = isReport ? "Open the sample report" : "View full size";
     const showcase = Boolean(c.showcase);
     const flat = c.illustration && !showcase;
+    // Sample reports open in a new tab, so the guide stays where the reader left it.
+    const newTab = showcase || isReport;
+    const newTabNote = newTab ? " (opens in a new tab)" : "";
 
     const figure = el("figure", { class: `plate-fig${c.illustration ? " illustration" : ""}${showcase ? " showcase" : ""}` },
-      el("a", { class: "plate-frame", href: fullHref || guideUrl, rel: "noopener", target: showcase ? "_blank" : null, "aria-label": `${fullLabel}: ${c.name}` },
+      el("a", { class: "plate-frame", href: fullHref || guideUrl, rel: "noopener", target: newTab ? "_blank" : null, "aria-label": `${fullLabel}: ${c.name}${newTabNote}` },
         c.image
           ? el("img", { src: c.image, alt: c.alt || (c.illustration ? "Cartoon of a smiling engineer in a blue hard hat and overalls, holding a glowing wrench and a floating cloud dashboard with a green check mark." : `Report produced by the ${c.name} use case.`), width: showcase ? 1400 : (c.illustration ? 1000 : 1200), height: showcase ? 1050 : (c.illustration ? 1001 : 750), loading: "lazy", decoding: "async" })
           : el("span", { class: "plate-pending" }, "Screenshots are in the guide on GitHub")),
       el("figcaption", {},
         el("b", {}, `Plate ${c.no}. `),
         c.caption || "From the guide on GitHub.",
-        (c.full && !flat) ? el("a", { href: fullHref, rel: "noopener", target: showcase ? "_blank" : null }, fullLabel) : null,
-        c.fullPdf ? [" · ", el("a", { href: c.fullPdf, rel: "noopener", target: "_blank", class: "pdf" }, "PDF")] : null));
+        (c.full && !flat) ? el("a", { href: fullHref, rel: "noopener", target: newTab ? "_blank" : null }, fullLabel,
+          newTab ? el("span", { class: "vh" }, newTabNote) : null) : null,
+        c.fullPdf ? [" · ", el("a", { href: c.fullPdf, rel: "noopener", target: "_blank", class: "pdf" }, "PDF", el("span", { class: "vh" }, " (opens in a new tab)"))] : null));
 
     const text = el("div", { class: "plate-text" },
       el("div", { class: "plate-head" },
@@ -250,7 +258,7 @@
         el("span", { class: "tutorial-text" },
           el("b", {}, s.title || "Open a sample report", el("span", { class: "vh" }, " (opens in a new tab)")),
           el("span", {}, s.teaser))),
-      s.pdf ? el("p", { class: "sample-alt" }, "Same report as ", el("a", { href: s.pdf, target: "_blank", rel: "noopener" }, "PDF"), s.note ? ` · ${s.note}` : "") : null);
+      s.pdf ? el("p", { class: "sample-alt" }, "Same report as ", el("a", { href: s.pdf, target: "_blank", rel: "noopener" }, "PDF", el("span", { class: "vh" }, " (opens in a new tab)")), s.note ? ` · ${s.note}` : "") : null);
   }
 
   function buildPlayer(c) {
@@ -346,23 +354,29 @@
       current = id;
       tabs.forEach((t, k) => t.setAttribute("aria-current", String(k === id)));
       const tab = tabs.get(id);
-      // On narrow screens the tabs are a horizontal strip: keep the active one in view.
+      // On narrow screens the tabs are a horizontal strip: keep the active one in view, clear of the pinned Index tab.
       if (tab && thumbsEl.scrollWidth > thumbsEl.clientWidth) {
         const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        thumbsEl.scrollTo({ left: Math.max(0, tab.offsetLeft - 24), behavior: reduce ? "auto" : "smooth" });
+        const pin = tabs.get("index");
+        const pinned = pin && pin !== tab && getComputedStyle(pin).position === "sticky";
+        const clear = pinned ? parseFloat(getComputedStyle(thumbsEl).paddingLeft) + pin.offsetWidth + 8 : 24;
+        thumbsEl.scrollTo({ left: Math.max(0, tab.offsetLeft - clear), behavior: reduce ? "auto" : "smooth" });
       }
     };
-    const sections = [...platesEl.querySelectorAll("[data-family]")];
-    if (!("IntersectionObserver" in window) || !sections.length) return;
+    // The Index tab is current while the opening spread fills the middle of the screen, a family tab while its plates do.
+    const spread = document.querySelector(".spread");
+    const watched = new Map([...platesEl.querySelectorAll("[data-family]")].map((s) => [s, s.dataset.family]));
+    if (spread && tabs.has("index")) watched.set(spread, "index");
+    if (!("IntersectionObserver" in window) || !watched.size) return;
     const visible = new Map();
     const io = new IntersectionObserver((entries) => {
-      for (const e of entries) visible.set(e.target.dataset.family, e.isIntersecting ? e.intersectionRect.height : 0);
+      for (const e of entries) visible.set(watched.get(e.target), e.isIntersecting ? e.intersectionRect.height : 0);
       let best = null, max = 0;
       visible.forEach((h, k) => { if (h > max) { max = h; best = k; } });
       if (best) set(best);
       else { current = null; tabs.forEach((t) => t.setAttribute("aria-current", "false")); }
     }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1], rootMargin: "-20% 0px -40% 0px" });
-    sections.forEach((s) => io.observe(s));
+    watched.forEach((_, s) => io.observe(s));
   }
 
   function showError() {

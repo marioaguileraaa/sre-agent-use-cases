@@ -1,6 +1,15 @@
-Fonts in this folder are self-hosted subsets of:
+Fonts in this folder are self-hosted web subsets licensed under the SIL Open Font License,
+Version 1.1. The full licence, with the copyright notices, is in OFL.txt (https://openfontlicense.org).
 
-- Bricolage Grotesque, Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
-- Source Serif 4, Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'
+bricolage-normal.woff2, bricolage-normal-ext.woff2 ("Bricolage Grotesque")
+  A subset of Bricolage Grotesque 1.001: a Latin core file and a Latin Extended-A file.
+  Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage).
+  Bricolage Grotesque declares no Reserved Font Name, so the subset keeps its name.
 
-Both are licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org
+guideserif-normal.woff2, guideserif-normal-ext.woff2, guideserif-italic.woff2, guideserif-italic-ext.woff2 ("Guide Serif")
+  Modified Versions of Source Serif 4 (version 4.004, roman and italic): subset to Latin, variation
+  range narrowed (weight 400-600, optical size 15-23) and renamed "Guide Serif", because Source
+  Serif 4 has the Reserved Font Name "Source".
+  © 2014 - 2021 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name ‘Source’.
+  Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+  Guide Serif is not an Adobe font and is not endorsed by Adobe.

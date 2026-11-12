@@ -1,5 +1,10 @@
 /* A field guide to Azure SRE Agent use cases */
 
+/* Self-hosted variable subsets (SIL OFL 1.1, see fonts/LICENSE.txt). Each face is a Latin core file and a
+   Latin Extended-A file the browser fetches only when a page shows one of those letters. Bricolage keeps its
+   full axes. The serif is Guide Serif, Source Serif 4 subset and renamed because the OFL reserves the name
+   "Source" for the original; it is narrowed to the 400-600 weights and 15-23 px sizes this stylesheet sets, so a
+   serif weight or size outside them needs a rebuild (DESIGN.md, Typography). */
 @font-face {
   font-family: "Bricolage Grotesque";
   src: url("fonts/bricolage-normal.woff2") format("woff2");
@@ -7,20 +12,48 @@
   font-stretch: 75% 100%;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2190-2199, U+20AC, U+2122, U+2212, U+2215, U+FEFF;
 }
 @font-face {
-  font-family: "Source Serif 4";
-  src: url("fonts/sourceserif-normal.woff2") format("woff2");
-  font-weight: 200 900;
+  font-family: "Bricolage Grotesque";
+  src: url("fonts/bricolage-normal-ext.woff2") format("woff2");
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-017F;
 }
 @font-face {
-  font-family: "Source Serif 4";
-  src: url("fonts/sourceserif-italic.woff2") format("woff2");
-  font-weight: 200 900;
+  font-family: "Guide Serif";
+  src: url("fonts/guideserif-normal.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2190-2199, U+20AC, U+2122, U+2212, U+2215, U+FEFF;
+}
+@font-face {
+  font-family: "Guide Serif";
+  src: url("fonts/guideserif-normal-ext.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-017F;
+}
+@font-face {
+  font-family: "Guide Serif";
+  src: url("fonts/guideserif-italic.woff2") format("woff2");
+  font-weight: 400 600;
   font-style: italic;
   font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2190-2199, U+20AC, U+2122, U+2212, U+2215, U+FEFF;
+}
+@font-face {
+  font-family: "Guide Serif";
+  src: url("fonts/guideserif-italic-ext.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-017F;
 }
 
 :root {
@@ -38,7 +71,7 @@
   --rule-strong: #b9bfb9;
 
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --text: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --text: "Guide Serif", Georgia, "Times New Roman", serif;
 
   --edge: clamp(20px, 4vw, 56px);
   --board: clamp(16px, 1.8vw, 24px);
@@ -406,6 +439,8 @@ p { margin: 0; text-wrap: pretty; }
 .tab span { writing-mode: vertical-rl; transform: rotate(180deg); }
 .tab:hover { transform: translateX(9px); }
 .tab[aria-current="true"] { transform: translateX(0); }
+/* The Index tab is cut from the cover cloth: the book's own tab, back to the quick-find index. */
+.tab-index { --fam: var(--cloth); --on-fam: var(--cloth-ink); }
 
 .js .tab { animation: tab-in 0.9s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 70ms + 250ms); }
 @keyframes tab-in {
@@ -444,6 +479,18 @@ p { margin: 0; text-wrap: pretty; }
   .tab:hover { transform: translateY(2px); }
   .tab[aria-current="true"] { transform: translateY(0); }
   .js .tab { animation: none; }
+  /* The Index tab stays pinned at the start of the strip (the scroller's content edge, after its page margin);
+     family tabs slide under it and under the paper margin to its left. */
+  .tab-index { position: sticky; left: 0; z-index: 1; }
+  .tab-index::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    bottom: -8px;
+    right: 100%;
+    width: var(--edge);
+    background: var(--paper);
+  }
 }
 
 /* ---------- Families and plates ---------- */
