@@ -323,7 +323,7 @@
         "video": "case_0_v3/docs/video/sre-usecase-builder-tutorial.mp4",
         "poster": "site/img/tutorial-builder.webp",
         "thumb": "site/img/tutorial-builder-thumb.webp",
-        "duration": "2:22",
+        "duration": "2:06",
         "title": "From one sentence to a scheduled use case",
         "teaser": "A real run, start to finish: describe the idea, let the builder generate and test it, create it in Builder, run it and schedule it."
       }
