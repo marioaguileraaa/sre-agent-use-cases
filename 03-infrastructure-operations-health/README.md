@@ -193,12 +193,13 @@ accepted. It is not a shortcut around source/access approval.
 The copy-ready questions and focused parameter examples are in
 [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
 
-![Final real two-hour report: dated heading (1), fleet register (2), Arc/Azure scopes and resource evidence](images/infra03-current-overview.png)
+![Final two-hour report, sanitized: dated heading and window chips (1), verdict (2), then KPI cards and the evidence sections](images/infra03-current-overview.png)
 
-This is the actual final two-hour snapshot, collected on **October 10, 2026 at 11:54:41 UTC**.
-Use the heading's measurement window (1), then the fleet register (2) to select
-a resource and inspect its own source/units. The subscription identifier is
-masked; the displayed observations are real lab evidence.
+This screenshot re-renders the final two-hour snapshot, collected on **October 10, 2026 at 11:54:41 UTC**,
+with the current report design. Read the heading's window and provenance chips (1)
+and the verdict (2), then use the fleet register to select a resource and inspect
+its own source/units. Resource names, groups and identifiers are pseudonymized;
+the displayed observations are real lab evidence.
 
 [Full-resolution dated overview](images/infra03-current-overview.png).
 
@@ -393,8 +394,8 @@ a local copy for configuration/pasting. Private repository access is required.
 | [`tests/test_arc_administration.py`](tests/test_arc_administration.py) | Explicitly SIMULATED native envelopes, denials/partial pages, baseline/version boundaries, compatibility, cardinality/bytes and optional installed headless-Edge report checks; never a live collector invocation. |
 | [`tests/test_package_contract.py`](tests/test_package_contract.py) | Offline package contract checks: zero-side-effect `__main__` tool hydration, 16-parameter schema parity, relative link/anchor/image resolution and bilingual EN/ES prompt coverage. |
 | [`PRODUCT.md`](PRODUCT.md) | Scenario-local, confirmed product boundaries; no changes to earlier cases. |
-| [`DESIGN.md`](DESIGN.md) | Finished operations-ledger visual contract, extracted tokens and responsive behavior. |
-| [`images/`](images/) | Actual, reviewed and masked captures with red callouts. Historical UI examples are dated in their captions. |
+| [`DESIGN.md`](DESIGN.md) | Report visual contract (Azure SRE Agent report family in this scenario's petrol palette), tokens, responsive and print behavior. |
+| [`images/`](images/) | Captures with red callouts. Report screenshots re-render dated lab snapshots with pseudonymized names and identifiers; portal captures are actual, reviewed and masked. Historical UI examples are dated in their captions. |
 
 Raw API handoffs are ignored, private validation inputs. They are not a
 committed dataset, deployed fixture or sample report.
@@ -923,12 +924,12 @@ an Arc connection state or shorter undisclosed periods.
 
 ## Optional company logo
 
-The top-right header includes a restrained **`logo company`** placeholder.
-The cropped header below is from the actual report generated at
-**13:09:51 UTC on October 10, 2026**: the optional logo frame (1) stays separate
-from the dated snapshot stamp (2).
+The top bar includes a restrained **`logo company`** placeholder at its left,
+before the Azure SRE Agent mark. The cropped header below re-renders the report
+generated at **13:09:51 UTC on October 10, 2026** (sanitized): the optional logo
+frame (1) stays separate from the dated provenance and collection chips (2).
 
-![Actual optional logo company frame (1), with the dated snapshot stamp still visible (2)](images/infra03-company-logo-placeholder.png)
+![Optional logo company frame (1), with the dated provenance and collection chips still visible (2)](images/infra03-company-logo-placeholder.png)
 
 Configure these constants near the top of
 [`generate-infrastructure-operations-report.py`](generate-infrastructure-operations-report.py)
@@ -953,8 +954,8 @@ with the generated block, and set `COMPANY_LOGO_ALT_TEXT` to a descriptive name 
 as `"Your company logo"`. For a JPEG, use `data:image/jpeg;base64,` instead.
 There is no runtime filename/upload parameter, remote image fetch or CDN.
 The image stays inside the offline HTML; JSON/CSV evidence and chat responses
-do not carry logo bytes. The dated snapshot stamp remains visible beside or
-below the frame, including on phones.
+do not carry logo bytes. The dated provenance and collection chips remain
+visible in the summary band, including on phones.
 
 **Pillow is required only when a logo is configured**, to verify and decode the
 bounded raster; it is listed in `requirements.txt`. Invalid nonempty data,
@@ -1144,23 +1145,24 @@ not totals. Unsupported filter combinations fail explicitly.
 
 ### Read the dated Arc administration example
 
-These two reviewed, masked captures come from the **October 16, 2026
+These two captures re-render the snapshot of the **October 16, 2026
 10:27:24 UTC normal-chat report** described in
-[Verified lab outcomes](#october-16---arc-administration-and-normal-chat).
-They use lab names and a lab-only dated review target; they are not customer
-configuration, a new deployment form or a monthly task execution.
+[Verified lab outcomes](#october-16---arc-administration-and-normal-chat)
+with the current report design. Names and identifiers are pseudonymized; the
+lab-only dated review target is kept. They are not customer configuration,
+a new deployment form or a monthly task execution.
 
-![Actual dated Arc administration report: red 1 marks Agent below dated target; red 2 marks the eight-machine matching register, with ten collected Arc resources and 63 inventory resources retained](images/infra03-arc-administration-overview.png)
+![Dated Arc administration report, sanitized: red 1 marks Agent below dated target; red 2 marks the eight-machine matching view, with ten collected Arc resources and 63 inventory resources retained](images/infra03-arc-administration-overview.png)
 
 Choose **Arc administration -> Agent below dated target** (red **1**).
-The fleet register (red **2**) shows the **eight matching machines** while the
+The fleet register's summary row (red **2**) shows the **eight matching machines** while the
 scope still states **10 collected Arc resources / 63 inventory resources**.
 The other two Arc resources are connected Kubernetes clusters, not additional
 servers. This is filtering within one retained snapshot, not a narrower
 recollection or a way around the pre-filter 500-resource gate. Some rows have
 no collected runtime measurements; their review target does not supply them.
 
-![Actual Arc resource inspector: red 1 marks agent, OS, kernel, state/read clocks and support Unknown; red 2 marks dated lab-only baseline provenance and cautions; red 3 marks native extension metadata with separate policy Unknown](images/infra03-arc-administration-details.png)
+![Arc resource inspector, sanitized: red 1 marks agent, OS, kernel, state/read clocks and support Unknown; red 2 marks dated lab-only baseline provenance and cautions; red 3 marks native extension metadata with separate policy Unknown](images/infra03-arc-administration-details.png)
 
 In the resource inspector, red **1** separates the observed agent/OS/native
 kernel or build value, Arc status-change time and metadata-read UTC from
@@ -1182,19 +1184,20 @@ sensor health.
 [Full-resolution Arc administration overview](images/infra03-arc-administration-overview.png) ·
 [Full-resolution Arc administration details](images/infra03-arc-administration-details.png).
 
-The following October 10 CPU/source screenshots remain **earlier-version**
-examples; they are not receipts for the October 16 administration addition.
+The following CPU/source screenshots re-render the October 10 snapshot with the
+current report design (sanitized); they are not receipts for the October 16
+administration addition.
 
-![Actual Arc and Azure CPU recorder: choose the recorded metric (1), snapshot range (2) and complete trace export (3)](images/infra03-current-cpu-recorder.png)
+![Arc and Azure CPU recorder, sanitized: choose the recorded metric (1), snapshot range (2) and complete trace export (3)](images/infra03-current-cpu-recorder.png)
 
-Pin `arc-ubuntu-02` and `vm-linux-01` in the register. Select the metric (1)
+Pin the Arc server `arc-ubuntu-02` and `vm-linux-01` in the register. Select the metric (1)
 and recorded time range (2), optionally show source maxima, then inspect a bin
 or export the **full** pinned traces (3). This final dated capture preserves
 their different achieved CPU levels and missing bins; its Arc event was still
 Fired at the 11:54:41 collection. The later resolution is a separate verified
 event, not retroactively painted into this snapshot.
 
-![Actual source coverage ledger: inspect collection and source availability (1), including unsupported Arc platform CPU](images/infra03-current-source-coverage.png)
+![Source coverage, sanitized: status summary and source ledger (1), including unsupported Arc platform CPU](images/infra03-current-source-coverage.png)
 
 Read **Evidence coverage** (1) before deciding what is monitored. Arc platform
 host metrics being unsupported is expected: its guest evidence comes from the
@@ -1298,11 +1301,13 @@ envelope. It does not query newer 24-hour data to elaborate a monthly answer.
 Any grounded follow-up question belongs in a separate, explicitly requested
 chat; the HTML/JSON already contain the detailed measurements and limitations.
 
-![Final real monthly snapshot: previous-calendar-month window (1) and complete fleet register (2)](images/infra03-monthly-overview.png)
+![Final monthly snapshot, sanitized: previous-calendar-month window (1) and the complete 63-resource scope (2)](images/infra03-monthly-overview.png)
 
 The final report was collected on October 10 at **11:54:46 UTC**, but its
-measurement window (1) is **September 1-October 1 UTC**. The register (2) keeps
-the full 63-resource scope, not just currently running or connected machines.
+measurement window (1) is **September 1-October 1 UTC**. The resources card (2)
+and the fleet register keep the full 63-resource scope, not just currently
+running or connected machines. The screenshot re-renders that snapshot with the
+current report design; names and identifiers are pseudonymized.
 Current platform state and missing portions of that month remain qualified.
 
 ![Actual Automation controls: select this task only (1), then Run now (2)](images/infra03-monthly-run-now.png)
@@ -1664,8 +1669,9 @@ case must fail the artifact guard without writing or dropping records.
 
 When already installed, Playwright with headless Microsoft Edge also checks
 the actual offline HTML at **1440 px and 390 px**, administration/search/reset
-filters, resource/complete/CSV downloads, full decoder parity, no external
-requests, escaped source strings and no page overflow. It is optional local
+filters, register sorting, the print view, resource/complete/CSV downloads,
+full decoder parity, no external requests, escaped source strings and no page
+overflow. It is optional local
 validation tooling, not a new report runtime dependency or an agent tool.
 The latest local run for this extension (October 16, 2026 baseline receipt): **141 tests run; 131 passed, 10 pre-existing optional/private/platform skips; suite OK**. With the added
 [`tests/test_package_contract.py`](tests/test_package_contract.py) package-contract

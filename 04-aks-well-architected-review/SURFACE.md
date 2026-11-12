@@ -3,17 +3,21 @@
 **Target:** `report_template.html`.
 **Mode:** Read, with operating filters and local exports.
 
-The reader first identifies the client, cluster, lab/production context,
-reference time and evidence provenance. The executive section separates the
-engine's local index from its coverage, then presents only supplied priorities.
-Inventory and findings support category, namespace and workload drilldown.
-FinOps qualifies observed costs and candidates; a human action plan and
-source/method receipts close the dossier.
+The reader first sees the verdict: a one-sentence summary with the key counts,
+provenance chips (UTC reference, LIVE/SIMULATED, environment, cluster), the
+client plaque, a qualified verdict card and the severity distribution, then
+KPI cards. The scope card follows with client, cluster, lab/production context
+and identity. The executive section separates the engine's local index from
+its coverage, presents only supplied priorities and the first actions of the
+supplied plan. Inventory and findings support category, namespace and workload
+drilldown. FinOps qualifies observed costs and candidates; a human action plan
+and source/method receipts close the dossier.
 
 The assessment chart visualizes the supplied counts of passed, failed,
-not-evaluated and not-applicable checks. Its centre is the count of checks,
-not an invented health grade. A labelled data table and the separate supplied
-score/coverage stay alongside it. Unknowns are neutral, never green.
+not-evaluated and not-applicable checks as one labelled horizontal bar. Its
+total is the count of checks, not an invented health grade. A labelled data
+table and the separate supplied score/coverage stay alongside it. Unknowns are
+neutral, never green.
 
 FinOps separates a prominent observed amount/currency from estimated savings.
 Missing savings say **Por estimar / No calculado**, never zero. Scope,
@@ -43,12 +47,12 @@ health. Full JSON keeps the original wrapper; scope JSON filters only the
 selected snapshot and explicitly retains all other run snapshots/errors and
 the original aggregate.
 
-The pinned direction is a Fluent 2 consulting document, not a SaaS dashboard:
-white or neutral-dark reading pages, left-aligned Segoe UI, deliberate whitespace
-and ruled tables. The user's subsequent color direction adds Microsoft-blue
-chrome, a blue-toned cover and contents rail, and a four-color brand ribbon.
-The palette frames the document, not its health; severity color never stands in
-for a missing observation.
+The pinned direction is a consulting document in the Azure SRE Agent report
+family: slim Microsoft-blue top bar with section links, a "Solo lectura" chip
+and Print / PDF; a deep-blue verdict band with KPI cards on its lower edge;
+white cards on a neutral page, left-aligned Segoe UI and ruled tables. The
+four-color brand ribbon stays. The palette frames the document, not its
+health; severity color never stands in for a missing observation.
 
 The signature interaction is following a namespace or workload into the same
 complete evidence set, with matching-record counts and lossless local exports

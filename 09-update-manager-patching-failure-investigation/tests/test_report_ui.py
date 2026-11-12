@@ -82,6 +82,13 @@ class ReportUiTests(unittest.TestCase):
         self.assertIn("--accent-text: #C23800", template)
         self.assertIn("--line: #D8DCE3", template)
 
+    def test_pending_patch_findings_never_show_an_empty_kb_list(self):
+        unscheduled = [m for m in self.snapshot["machines"] if m["failure_category"] == "pending_security_patches_unscheduled"]
+        self.assertTrue(any(not m["pending_security_patches"] for m in unscheduled))
+        for machine in unscheduled:
+            for text in (machine["investigation_headline"], machine["recommended_human_action"]):
+                self.assertNotIn("()", text)
+
     def test_browser_interaction_filters_drawers_dark_mode_and_viewports(self):
         from playwright.sync_api import sync_playwright
 
@@ -104,7 +111,7 @@ class ReportUiTests(unittest.TestCase):
                 page.select_option("#filter-category", "assessment_stuck_or_readiness_undetermined")
                 self.assertIn("Mostrando 2 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
 
-                # Filter by hotpatch_or_patch_extension_error (matches vm-arc-host-weu via matched_categories and vm-arc-win-04)
+                # Filter by hotpatch_or_patch_extension_error (primary category of one machine, secondary of another via matched_categories)
                 page.select_option("#filter-category", "hotpatch_or_patch_extension_error")
                 self.assertIn("Mostrando 2 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
 
@@ -125,6 +132,16 @@ class ReportUiTests(unittest.TestCase):
                 self.assertTrue(page.locator("#drawer-machine-0").is_hidden())
                 page.click("#toggle-all-drawers-btn")
                 self.assertFalse(page.locator("#drawer-machine-0").is_hidden())
+
+                # Category breakdown rows drive the investigation filter; the register sorts by column
+                page.click('#category-breakdown button[data-cat="assessment_stuck_or_readiness_undetermined"]')
+                self.assertEqual(page.input_value("#filter-category"), "assessment_stuck_or_readiness_undetermined")
+                self.assertIn("Mostrando 2 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                page.click("#filter-reset-btn")
+                page.click('#machines-table button[data-sort="name"]')
+                names = page.locator("#machines-table tr.machine-row .nm").all_inner_texts()
+                self.assertEqual(names, sorted(names, key=str.lower))
+                self.assertEqual(page.locator("#machines-table th[aria-sort]").get_attribute("aria-sort"), "ascending")
 
                 # Dark mode toggle
                 page.click("#theme-toggle")

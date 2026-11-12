@@ -95,15 +95,15 @@ Open **New chat**, select the specialist via `/agent`, and run the report prompt
 
 ![HTML report cover and executive synthesis](images/04-report-cover-and-executive-synthesis.png)
 
-*HTML dossier cover and executive synthesis (`04-report-cover-and-executive-synthesis.png`, anonymized `CLIENTE` view): **(1)** top action bar with dark-mode toggle and local JSON/CSV/PDF exports; **(2)** provenance header and evaluation window; **(3)** executive synthesis and tabular KPI summary strip across incidents, anomalies, and prioritized actions.*
+*HTML dossier cover (`04-report-cover-and-executive-synthesis.png`, anonymized `CLIENTE` view rendered from sanitized demo data, labelled `SIMULATED`): **(1)** slim top bar with the client plaque, section navigation with live counts, `Solo lectura` chip, dark mode and `Imprimir / PDF`; **(2)** verdict-first header: evaluation window, one-sentence summary, generation/window/subscription/data-provenance/coverage chips, verdict card and severity distribution; **(3)** KPI cards for alerts, Service Health, control-plane and telemetry anomalies, recommended actions and resources, followed by the simulated-data and partial-coverage notices. Below them, the period summary opens with `Qué hacer ahora` (horizon counts and the top five prioritized actions) next to the executive synthesis and provenance.*
 
 ![Unified incidents and technical anomalies ledger](images/05-report-incidents-and-anomalies-ledger.png)
 
-*Unified incidents and technical anomalies ledger (`05-report-incidents-and-anomalies-ledger.png`): **(1)** interactive filters by stream category, severity, and resource search; **(2)** structured tables separating native Azure Monitor alerts and Service Health events from control-plane/extension failures and Log Analytics telemetry anomalies.*
+*Filters and registers (`05-report-incidents-and-anomalies-ledger.png`, filtered to one hybrid server): **(1)** a single filter card (search, evidence stream `category`, `severity`, action `horizon`, reset) that narrows every register at once with a live status line, plus the local downloads (full JSON, incidents/anomalies CSV, recommended-actions CSV); **(2)** sortable registers that separate native Azure Monitor alerts and Service Health communications from control-plane, extension and Log Analytics telemetry anomalies, each resource shown as name, resource group, type and Portal link.*
 
 ![Prioritized recommended actions matrix and source coverage ledger](images/06-report-recommended-actions-and-sources.png)
 
-*Prioritized recommended actions and source coverage ledger (`06-report-recommended-actions-and-sources.png`): **(1)** prioritized recommended actions (`Inmediato <24h`, `Corto plazo 1-7 días`, `Ciclo mensual`) linked to exact incident/anomaly IDs and Microsoft Learn URLs; **(2)** per-source HTTP receipts and methodological boundaries.*
+*Prioritized actions and source coverage (`06-report-recommended-actions-and-sources.png`, two excerpts of the same report): **(1)** recommended actions ordered by horizon (`Inmediato <24h`, `Corto plazo 1-7 días`, `Ciclo mensual`) and severity, each linked to the evidence IDs that justify it (a click jumps to the cited row) and to Microsoft Learn; **(2)** per-source collection receipts (status, records, pages, HTTP read signature and errors) that close the report together with the method notes.*
 
 ## Step 7 - Configure the monthly scheduled task (`30 8 1 * *`)
 

@@ -41,6 +41,8 @@
   --text: "Source Serif 4", Georgia, "Times New Roman", serif;
 
   --edge: clamp(20px, 4vw, 56px);
+  --board: clamp(16px, 1.8vw, 24px);
+  --masthead: 57px;
   --tabs: 0px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -171,20 +173,37 @@ p { margin: 0; text-wrap: pretty; }
 @media (max-width: 720px) {
   .masthead-nav a:not(.repo-link) { display: none; }
 }
+.wordmark, .masthead-nav a { white-space: nowrap; }
+/* At 320-400px (or 400% zoom) the link keeps its full name for screen readers but shows "GitHub". */
+@media (max-width: 400px) {
+  .masthead { gap: 12px; }
+  .repo-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+}
 
 /* ---------- Opening spread: cover + quick-find index ---------- */
 
 .spread {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  min-height: calc(100svh - 57px);
+  min-height: calc(100svh - var(--masthead));
 }
 
 .cover {
   background: var(--cloth);
   color: var(--cloth-ink);
-  padding: clamp(16px, 1.8vw, 24px);
+  padding: var(--board);
   display: flex;
+}
+
+/* The front board keeps one screen's height and stays put while a longer index scrolls past it.
+   Only where the whole board fits one screen (720px tall and up); shorter screens keep the stretched board. */
+@media (min-width: 960px) and (min-height: 720px) {
+  .cover { align-items: flex-start; }
+  .cover-frame {
+    position: sticky;
+    top: var(--board);
+    min-height: calc(100svh - var(--masthead) - 2 * var(--board));
+  }
 }
 
 .cover-frame {
@@ -278,20 +297,24 @@ p { margin: 0; text-wrap: pretty; }
   color: var(--ink-soft);
 }
 
+/* app.js deals whole family groups into balanced columns (--cols), shortest column first. */
 .key-groups {
   margin-top: clamp(18px, 2.4svh, 28px);
-  columns: 2 300px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
   column-gap: clamp(24px, 3vw, 40px);
+  align-items: start;
 }
 
-.key-group {
-  break-inside: avoid;
-  margin: 0 0 22px;
+.key-col {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
 }
 
 .key-group h3 {
   display: inline-block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   padding: 3px 10px 3px 8px;
   border-radius: 0 4px 4px 0;
   background: var(--fam);
@@ -330,7 +353,7 @@ p { margin: 0; text-wrap: pretty; }
   font-family: var(--display);
   font-size: 0.9875rem;
   font-weight: 500;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 .entry-no {
   font-family: var(--display);
@@ -426,6 +449,8 @@ p { margin: 0; text-wrap: pretty; }
 /* ---------- Families and plates ---------- */
 
 .plates { outline: none; }
+/* Hold the plates' place while the catalog loads, so the back cover never shows and then jumps away. */
+.js .plates:empty { min-height: 100svh; }
 
 .family-head {
   background: var(--fam);
@@ -532,6 +557,7 @@ p { margin: 0; text-wrap: pretty; }
   color: var(--ink-soft);
 }
 .marks .compare { grid-column: 1 / -1; }
+.marks .compare dd { display: grid; justify-items: start; gap: 4px; }
 .marks .compare a { color: var(--fam-ink); font-weight: 600; text-decoration-thickness: 1px; }
 .marks dd {
   margin: 3px 0 0;
@@ -570,24 +596,21 @@ p { margin: 0; text-wrap: pretty; }
   max-width: 560px;
   width: 100%;
   border: 1px solid var(--rule-strong);
-  border-radius: 8px;
+  border-radius: 6px;
   background: #fff;
   color: var(--ink);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.3s var(--ease), box-shadow 0.35s var(--ease);
+  transition: border-color 0.3s var(--ease);
 }
-.tutorial:hover {
-  border-color: var(--ink-soft);
-  box-shadow: 0 10px 24px -14px rgba(17, 45, 37, 0.45);
-}
+/* Like a plate frame: the border darkens; paper never takes a shadow. */
+.tutorial:hover { border-color: var(--ink-soft); }
 .tutorial-thumb {
   position: relative;
   display: block;
   width: 176px;
   aspect-ratio: 16 / 9;
-  border-radius: 5px;
   overflow: hidden;
   background: var(--cloth-deep);
 }
@@ -619,7 +642,7 @@ p { margin: 0; text-wrap: pretty; }
   right: 6px;
   bottom: 6px;
   padding: 1px 6px;
-  border-radius: 3px;
+  border-radius: 2px;
   background: rgba(17, 45, 37, 0.88);
   color: var(--cloth-ink);
   font-family: var(--display);
@@ -639,12 +662,15 @@ p { margin: 0; text-wrap: pretty; }
   color: var(--ink-soft);
 }
 
+/* Sized by height as well as width: title, 16:9 video and footer always fit one screen. */
 .player {
-  width: min(1240px, 94vw);
-  max-height: 94vh;
-  padding: clamp(16px, 2vw, 24px);
+  --pad: clamp(16px, 2vw, 24px);
+  width: min(1240px, 94vw, calc((94svh - 2 * var(--pad) - 120px) * 16 / 9 + 2 * var(--pad)));
+  max-width: none;
+  max-height: 94svh;
+  padding: var(--pad);
   border: 0;
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--cloth-deep);
   color: var(--cloth-soft);
   box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.6);
@@ -655,7 +681,8 @@ p { margin: 0; text-wrap: pretty; }
 .player[open]::backdrop { animation: backdrop-in 0.35s var(--ease) both; }
 @keyframes player-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } }
 @keyframes backdrop-in { from { opacity: 0; } }
-html:has(.player[open]) { overflow: hidden; }
+/* Keep the scrollbar's gutter while the dialog locks scrolling, so the page behind it does not jump sideways. */
+html:has(.player[open]) { overflow: hidden; scrollbar-gutter: stable; }
 .player :focus-visible { outline-color: var(--brass); }
 .player-head {
   display: flex;
@@ -688,7 +715,7 @@ html:has(.player[open]) { overflow: hidden; }
 .player-close .icon { width: 18px; height: 18px; }
 .player-screen {
   aspect-ratio: 16 / 9;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   background: #000;
 }
@@ -731,7 +758,7 @@ a.sample-main { text-decoration: none; }
   transition: transform 0.6s var(--ease), filter 0.6s var(--ease);
 }
 .plate-fig.showcase .plate-frame:hover img { transform: translateY(-4px); filter: drop-shadow(0 18px 22px rgba(17, 45, 37, 0.16)); }
-.plate-fig.showcase figcaption { max-width: 760px; margin-inline: auto; width: 100%; }
+.plate-fig.showcase figcaption { max-width: 54ch; margin-inline: max(0px, calc((100% - 760px) / 2)) 0; }
 @media (prefers-reduced-motion: reduce) {
   .plate-fig.showcase img { transition: none; }
   .plate-fig.showcase .plate-frame:hover img { transform: none; }
@@ -789,6 +816,8 @@ a.sample-main { text-decoration: none; }
 
 .plate-fig figcaption {
   margin-top: 12px;
+  /* 54ch of this grotesk is about 75 characters a line. */
+  max-width: 54ch;
   font-family: var(--display);
   font-size: 0.875rem;
   line-height: 1.4;

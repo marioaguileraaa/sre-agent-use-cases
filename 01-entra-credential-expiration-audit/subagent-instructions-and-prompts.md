@@ -101,4 +101,4 @@ Run the full Microsoft Entra credential expiration audit. Deliver the HTML repor
 2. With customer approval for an acceptance test, select only this task in **Automation** and click **Run now** (or **Run task now**) once.
 3. Open the task's **Run history** and click into the actual **execution thread** (`Success` on the list view only confirms thread handoff, not file delivery).
 4. Verify that `generate-entra-credential-expiration` ran with `{}` (no arguments), returned `coverage.status == "complete"` and `coverage.pagination_completed == true`, and attached a downloadable HTML report.
-5. Download the HTML report, open it in a browser, verify the `Reference UTC` banner and status cards, and test **Export visible rows as CSV**.
+5. Download the HTML report, open it in a browser, verify the `Reference UTC` banner and status counts, and test **Export visible rows as CSV**.

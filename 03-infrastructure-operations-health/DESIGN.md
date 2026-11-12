@@ -1,266 +1,256 @@
 ---
 name: "Infrastructure operations"
-description: "Source-qualified evidence on cool technical paper."
+description: "Verdict-first infrastructure evidence in the Azure SRE Agent report family, in petrol on cool paper."
 colors:
   paper: "#eef2f1"
   sheet: "#ffffff"
   ink: "#18312e"
   muted: "#526660"
   petrol: "#163d3a"
-  line: "#c8d2cd"
-  wash: "#e7efeb"
-  critical: "#9e302e"
-  critical-wash: "#fbeaea"
-  warning: "#875022"
-  warning-wash: "#f6eadb"
-  unknown: "#535d68"
-  unknown-wash: "#e9edf0"
-  blue: "#355f9c"
-  purple: "#745383"
+  petrol-2: "#24534d"
+  line: "#d0dad5"
+  line-soft: "#e3e9e6"
+  wash: "#e4eeea"
+  soft: "#f3f6f5"
+  link: "#155e55"
   focus: "#156dc0"
+  critical: "#b42318"
+  critical-bg: "#fee4e2"
+  critical-bar: "#d92d20"
+  high: "#b93815"
+  high-bg: "#ffead5"
+  high-bar: "#ef6820"
+  medium: "#93370d"
+  medium-bg: "#fef0c7"
+  medium-bar: "#f79009"
+  low: "#175cd3"
+  low-bg: "#d1e9ff"
+  low-bar: "#2e90fa"
+  info: "#344054"
+  info-bg: "#eaecf0"
+  info-bar: "#98a2b3"
+  observed: "#0f5a50"
+  observed-bg: "#dcefe9"
+  observed-bar: "#3f9e8b"
+  trace-2: "#355f9c"
+  trace-3: "#745383"
 typography:
   display:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "32px"
-    fontWeight: 650
-    lineHeight: 1.13
-    letterSpacing: "-0.025em"
+    fontFamily: '"Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif'
+    fontSize: "42px"
+    fontWeight: 700
+    lineHeight: 1.08
+    letterSpacing: "-0.02em"
   headline:
     fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "21px"
-    fontWeight: 650
+    fontSize: "22px"
+    fontWeight: 700
     lineHeight: 1.25
   title:
     fontFamily: '"Segoe UI", system-ui, sans-serif'
     fontSize: "17px"
+    fontWeight: 700
     lineHeight: 1.3
   body:
     fontFamily: '"Segoe UI", system-ui, sans-serif'
     fontSize: "15px"
     fontWeight: 400
+    lineHeight: 1.55
+  table:
+    fontFamily: '"Segoe UI", system-ui, sans-serif'
+    fontSize: "14px"
     lineHeight: 1.5
   label:
     fontFamily: '"Segoe UI", system-ui, sans-serif'
     fontSize: "13px"
     fontWeight: 600
     lineHeight: 1.5
-  stamp:
+  kpi:
     fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "12px"
-    fontWeight: 600
-    lineHeight: 1.6
+    fontSize: "38px"
+    fontWeight: 700
+    lineHeight: 1
   identifier:
-    fontFamily: "ui-monospace, Consolas, monospace"
-    fontSize: "11px"
-    lineHeight: 1.5
+    fontFamily: 'ui-monospace, "Cascadia Mono", Consolas, monospace'
+    fontSize: "12.5px"
+    lineHeight: 1.55
 rounded:
-  square: "0"
-  control: "3px"
-  stamp: "2px"
+  card: "12px"
+  control: "8px"
+  verdict: "16px"
+  pill: "999px"
 spacing:
   compact: "8px"
   small: "12px"
   base: "16px"
-  section: "24px"
-  group: "28px"
+  card: "20px"
+  section: "44px"
 components:
   button-primary:
     backgroundColor: "{colors.petrol}"
     textColor: "{colors.sheet}"
     rounded: "{rounded.control}"
-    padding: "7px 11px"
+    padding: "7px 16px"
   button-secondary:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    typography: "{typography.body}"
     rounded: "{rounded.control}"
-    padding: "7px 11px"
-  button-compact:
-    backgroundColor: "{colors.sheet}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.control}"
-    padding: "6px 9px"
+    padding: "7px 12px"
   input-search:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.control}"
-    padding: "7px 11px"
-  scope-tab:
-    backgroundColor: "{colors.sheet}"
-    textColor: "{colors.ink}"
-    rounded: "3px 3px 0 0"
-    padding: "8px 17px"
-  scope-tab-selected:
+    padding: "7px 12px"
+  segmented-selected:
     backgroundColor: "{colors.petrol}"
     textColor: "{colors.sheet}"
-    rounded: "3px 3px 0 0"
-    padding: "8px 17px"
+    rounded: "7px"
+    padding: "0 14px"
   stamp-review:
-    backgroundColor: "{colors.warning-wash}"
-    textColor: "{colors.warning}"
-    typography: "{typography.stamp}"
-    rounded: "{rounded.stamp}"
-    padding: "2px 7px"
+    backgroundColor: "{colors.medium-bg}"
+    textColor: "{colors.medium}"
+    rounded: "{rounded.pill}"
+    padding: "2px 10px"
   stamp-unknown:
-    backgroundColor: "{colors.unknown-wash}"
-    textColor: "{colors.unknown}"
-    typography: "{typography.stamp}"
-    rounded: "{rounded.stamp}"
-    padding: "2px 7px"
+    backgroundColor: "{colors.info-bg}"
+    textColor: "{colors.info}"
+    rounded: "{rounded.pill}"
+    padding: "2px 10px"
   stamp-observed:
-    backgroundColor: "{colors.wash}"
-    textColor: "{colors.petrol}"
-    typography: "{typography.stamp}"
-    rounded: "{rounded.stamp}"
-    padding: "2px 7px"
-  ledger-sheet:
+    backgroundColor: "{colors.observed-bg}"
+    textColor: "{colors.observed}"
+    rounded: "{rounded.pill}"
+    padding: "2px 10px"
+  card:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.square}"
+    rounded: "{rounded.card}"
 ---
 
 # Design System: Infrastructure operations
 
 ## Overview
 
-**Creative North Star: "Operations dispatch ledger"**
+**North Star: "Verdict first, evidence intact"**
 
-Cool technical paper, petrol ink and ruled registers make infrastructure evidence readable without suggesting certainty the sources cannot support. Square file tabs and compact status stamps provide personality through filing and annotation, not dashboard decoration.
+The report is a member of the Azure SRE Agent report family: a slim top bar, a verdict band, KPI cards on its edge, then white cards on a light neutral ground. This scenario keeps its own petrol-on-cool-paper palette and one signature move: **Unknown is drawn hollow or hatched wherever it appears**, so missing evidence never reads as zero or as healthy.
 
-Design for an operator and customer reviewing a laptop in a normally lit meeting room: readable system type, aligned measurements, explicit labels and persistent context. The world is customer-neutral and self-contained; it uses no external fonts, imagery or libraries.
+Design for an operator and a customer reviewing a laptop in a normally lit meeting room, and for a printed A4 copy of the same file: readable system type, aligned measurements, explicit labels and persistent context. The report is customer-neutral and self-contained; it uses no external fonts, imagery, libraries or network requests.
 
-This is the finished scenario-local system extracted from the CSS, markup and JavaScript of `REPORT_HTML` in `generate-infrastructure-operations-report.py`, including its opening five-block direction contract. Frontmatter is normative; `.impeccable/design.json` supplies preview snippets and extensions, not a second token authority.
+This record describes the shipped CSS, markup and JavaScript of `REPORT_HTML` in `generate-infrastructure-operations-report.py`, including its opening direction comment. Frontmatter is normative. `.impeccable/design.json` is an older generated preview sidecar of the previous operations-ledger layout; regenerate it before relying on its previews.
 
-**Key Characteristics:**
-- Cool paper and restrained petrol ink.
-- Ruled sheets, square-bodied tabs and compact status stamps.
-- System sans with tabular measurements and monospace identifiers.
-- Visible source, units, recorded time, coverage and unknowns.
+**Key characteristics:**
+- Petrol verdict band, white cards, cool paper ground.
+- Shared Azure SRE Agent severity colours for stamps and bars.
+- System sans with tabular numbers; monospace only for identifiers, timestamps and raw evidence.
+- Visible source, units, recorded time, coverage and unknowns next to every number.
 - Immediate, read-only interactions within a dated offline snapshot.
 
 ## Colors
 
-A low-chroma paper-and-ink foundation carries sparse semantic status color and three categorical trace inks.
+A low-chroma paper-and-ink foundation, a petrol brand band, the family's shared severity palette and three categorical trace inks.
 
 ### Primary
-- **Petrol ink** (`petrol`): file index, selected controls, resource links, observed stamps and the first recorder trace.
-- **Focus blue** (`focus`): keyboard outlines only; distinct from the blue comparison trace.
+- **Petrol** (`petrol`): verdict band, primary button, selected segmented controls, resource links and the first recorder trace. Hover uses `petrol-2`.
+- **Focus blue** (`focus`): keyboard outlines only; distinct from the blue trace.
 
-### Secondary
-- **Recorder blue** (`blue`) and **recorder plum** (`purple`): second and third resource traces, paired with named legends. These are categorical inks, not status or brand accents.
+### Severity and state (shared with the report family)
+- **Critical** text `critical` on `critical-bg`, bar `critical-bar`.
+- **High** text `high` on `high-bg`, bar `high-bar`.
+- **Medium** (the scenario's Review and Warning) text `medium` on `medium-bg`, bar `medium-bar`.
+- **Low** text `low` on `low-bg`, bar `low-bar`.
+- **Info / Unknown** text `info` on `info-bg`, bar `info-bar`. Unknown, Not collected and Not supported stamps use a hollow dot; Unknown in bars and in the hero distribution uses a grey hatch.
+- **Observed / Complete** text `observed` on `observed-bg`, bar `observed-bar`. Observed is a collected state, never a health grade.
 
-### Tertiary
-- **Critical red / pale critical wash** (`critical`, `critical-wash`): critical evidence and source-error emphasis.
-- **Review amber / pale review wash** (`warning`, `warning-wash`): review and warning stamps, never an overall health grade.
+### Categorical
+- **Trace inks** `petrol`, `trace-2`, `trace-3`: first, second and third pinned recorder traces, always paired with a named legend.
 
 ### Neutral
-- **Cool technical paper** (`paper`) surrounds **white sheets** (`sheet`).
-- **Deep green-black ink** (`ink`) carries primary text; **muted annotation ink** (`muted`) carries qualifications, labels and secondary context.
-- **Register rule** (`line`) separates sections; **pale petrol wash** (`wash`) supports observed stamps and neutral button hover.
-- **Unknown slate / pale slate wash** (`unknown`, `unknown-wash`) keep unknown, partial and error states legible without presenting them as healthy.
+- **Cool paper** (`paper`) surrounds **white cards** (`sheet`). `soft` fills table headers, segmented tracks and bar tracks; `wash` marks the current nav item and pressed states.
+- **Ink** (`ink`) carries primary text; **muted** carries qualifications, labels and secondary context (at least 5.4:1 on every light surface).
+- **Rules** (`line`, `line-soft`) separate card regions and table rows.
 
-**The Label Before Hue Rule.** Every evidence state is named; trace color identifies a resource, not a health grade.
-
-Sidecar tonal ramps are synthesized preview strips, not shipped tokens; do not apply their values to the report.
+**The Label Before Hue Rule.** Every evidence state is named; colour reinforces a label and never replaces it.
 
 ## Typography
 
-**Display and body font:** Segoe UI with system-ui and sans-serif fallbacks. **Identifier font:** ui-monospace with Consolas and monospace fallbacks.
-
-The hierarchy is compact and technical, not a display-font pairing or mathematical scale. Use the frontmatter roles; dense register text and annotations step down without replacing readable body copy.
+**Font:** Segoe UI with system fallbacks for everything; `ui-monospace` / Cascadia Mono / Consolas only for ARM IDs, event timestamps and raw evidence JSON. No embedded or remote fonts.
 
 ### Hierarchy
-- **Display:** page heading; compact layout sizes are recorded below.
-- **Headline:** section headings; the inspector uses a slightly smaller heading (20px).
-- **Title:** subordinate headings; preserve the built heading semantics rather than prescribing an unobserved custom weight.
-- **Body:** explanatory copy and normal controls; the main subtitle is bounded (72ch).
-- **Label:** field labels; register text is compact (13px), with smaller table headings and stamps (12px).
-- **Stamp:** semibold, sentence-case state names; the dated snapshot label is the deliberate uppercase exception.
-- **Identifier:** wrapping resource IDs; event timestamps use the same monospace stack at a slightly larger size (12px).
+- **Display:** the single H1 in the verdict band (42px; 36px under 900px; 32px on phones; 30px in print).
+- **Headline:** section H2 (22px), each followed by a one-line reason to read the section (14px, muted, at most 75 characters per line).
+- **Title:** card headings (17px); the inspector heading is 20px.
+- **Body:** 15px prose; the hero sentence is 18px.
+- **Table:** registers at 14px with 13px secondary lines; uppercase 12px column headings.
+- **KPI:** 38px tabular numbers with a 14px label and a 13px muted qualifier.
 
-Measurements, counts, dates and bin readouts use `font-variant-numeric: tabular-nums`. Do not apply numeric styling by stripping units or source context.
+All counts, measurements, dates and bin readouts use `font-variant-numeric: tabular-nums`.
 
 **The Measurement Context Rule.** Tabular numbers stay attached to visible units, measurement scope and recorded time.
 
 ## Layout
 
-Use a filing index beside a working sheet, with evidence grouped by rules and aligned columns. The workspace has a bounded width (1740px) and base padding (32px 36px 48px); the desktop index occupies a narrow track (190px). Repeated spacing tokens describe the built rhythm, not a requirement to round every local gutter to one scale step.
+A sticky 60px top bar (optional company logo, Azure SRE Agent mark, section nav with live counts, Read-only chip, Print / PDF), a full-width petrol band, then a centred 1320px column with 40px side padding (fluid down to 16px).
 
-The fleet register and inspector share one ruled sheet: register-to-inspector columns are `minmax(0,1.7fr) minmax(300px,1fr)`. The recorder follows with section spacing (24px); review and event sheets share a lower row (`1.15fr 1fr`, gap 24px). Register and source tables retain horizontal scrolling rather than squeezing evidence columns (minimum widths 570px and 680px).
+Reading order:
+1. **Verdict band:** H1, one sentence with the key counts, chips for provenance (LIVE or SIMULATED), collection time, window and bin width, scope; a verdict card (Action required, Needs attention, Coverage gaps, No review flagged or No resources collected) with its breakdown; the Review / Unknown / Observed distribution bar.
+2. **KPI cards** (six, overlapping the band by 64px): resources collected, resources to review, no runtime evidence, owner checks, native alerts, source requests complete.
+3. **Snapshot notice**, then **At a glance:** owner checks by reason and fleet by resource type as labelled horizontal bars with values.
+4. **Fleet register:** filters, hosting segmented control, live summary, sortable register and resource inspector in one card.
+5. **Time recorder**, then **Owner review** (what to check next, most severe first) beside the **Event log**.
+6. **Evidence coverage** (status bars and source ledger), **exports**, **Method and limits**, footer.
 
-### Responsive behavior
-- **Wide desktop (min-width 1600px):** workspace side padding expands (44px); the register/inspector ratio becomes `1.9fr` with a wider inspector minimum (330px).
-- **Laptop (max-width 1190px):** index narrows (165px), workspace padding becomes (26px 24px), inspector stacks beneath the register, filters use three columns and the owner field spans two. Display type reduces (29px).
-- **Compact (max-width 780px):** index becomes a static, wrapping horizontal header; workspace padding becomes (23px 16px 36px). Search and reset span the two-column filters. Review and event sheets stack; chart fields become full-width, legends and bin inspection stack, and exports wrap. Display and section headings reduce (28px and 19px). Chart height reduces (255px to 225px).
-- **Print:** hide navigation and interactive controls, flatten the layout, use white paper and retain the dated evidence and inspector. This is not a replacement for complete machine exports.
+Spacing follows a 4/8px rhythm: 8, 12, 16, 20 and 44px between sections.
 
-## Elevation & Depth
+### Responsive behaviour
+- **Up to 1240px:** nav items tighten.
+- **Up to 1180px:** the top-bar nav hides; the inspector stacks under the register; filters use three columns with full-width search.
+- **Up to 900px:** the verdict card stacks under the heading; Owner review and Event log stack; coverage bars stack above their export.
+- **Up to 640px:** KPI cards use two columns; filters use two columns; Print / PDF becomes an icon button with an accessible name; bars put the track under the label. No horizontal page overflow at 390px: wide tables scroll inside their card with edge-shadow cues, and IDs wrap only at `/`.
+- **Print (A4):** `@page` margins 14/12/16mm with a running footer (title, collection time, provenance) and page numbers. Controls, nav and buttons are hidden; colours are kept (`print-color-adjust: exact`); cards, rows and list items avoid breaking. The fleet register, owner review and event log print every matching row; the source ledger prints only results that are not complete and says so, because every result stays in the CSV and complete JSON exports.
 
-There are no shadows, gradients, animated entrances or floating cards. White sheets, pale annotation fields and thin rules provide depth. The masthead uses a stronger petrol rule (2px); other structural boundaries use thin rules (1px). Focus outlines are interaction feedback, not elevation.
+## Elevation and depth
 
-**The Ruled Sheet Rule.** Use borders and tonal fields to group evidence; do not substitute shadows or floating tiles for the ledger.
-
-State changes are immediate. Scrolling is automatic rather than animated; the built reduced-motion query disables transitions and smooth scrolling.
+White cards carry a 1px rule and a soft two-layer shadow (`0 1px 2px` plus `0 6px 18px -8px`, petrol-tinted). Print removes shadows. No gradients except the Unknown hatch and the table-edge scroll cues; no glass, glow or animated entrances. State changes are immediate; `prefers-reduced-motion` keeps it that way.
 
 ## Shapes
 
-Sheets and registers remain rectangular. Controls use minimal corner relief; status stamps use the smaller radius. Hosting tabs have only top-corner relief (`3px 3px 0 0`) and meet the register without a bottom border. Do not reinterpret square file tabs as pills.
-
-Borders, text labels and background fields express state. Recorder circles are legitimate data markers for isolated observations, not a forbidden rounded UI device.
+Cards 12px, controls 8px, the verdict card 16px; stamps, chips, nav counts and bar tracks are fully rounded. Segmented controls (hosting scope, event provenance) use a soft track with a petrol selected segment.
 
 ## Components
 
-### Buttons and fields
-Quiet, bordered native controls. Normal controls retain a minimum height (40px); contextual export/show-more actions use the built compact height (35px). Primary export uses petrol with white text and semibold weight; secondary controls use white with ink text. Hover uses tonal fill, active uses the built pressed fill, and disabled buttons reduce opacity (.58) without implying success. Keyboard focus is a clear outline (3px) with an offset (3px).
-
-Search and selects have persistent labels, not placeholder-only identification. The skip link becomes visible on focus. Hosting and event-provenance controls expose their selected state through `aria-pressed`; hosting tabs are filing controls, not interchangeable decorative chips.
-
-### Navigation and ruled sheets
-The petrol index uses a pale active entry and restrained hover/focus treatment. Its anchors select report sections; compact layouts wrap them rather than hiding navigation. Containers use white backgrounds and ruled headers, not detached metric cards.
-
-The fleet register separates inspection from comparison: resource-name buttons open evidence; native checkboxes pin up to three resources. Selection has a pale row fill. Empty results say what is absent and offer a next check without a reassuring score.
+### Top bar
+Logo frame (132 by 40px; 100 by 34px on phones), the Azure SRE Agent mark, section links with live counts (`aria-current="location"` follows the section in view), the Read-only chip and the primary Print / PDF button.
 
 ### Optional company logo
-The masthead's right-hand group contains a 180px by 56px bordered logo frame
-above the dated snapshot stamp. An empty configuration displays exactly
-`logo company`; an optional validated PNG/JPEG is contained without changing
-its aspect ratio or the ledger palette. On compact screens the frame narrows
-to 128px and wraps alongside the still-visible date stamp. The asset is
-embedded offline, with descriptive alternative text and no external requests.
+The frame sits at the left of the top bar. An empty configuration displays exactly `logo company`; an optional validated PNG/JPEG is contained without changing its aspect ratio or the palette. The asset is embedded offline, with descriptive alternative text and no external requests. The dated provenance and collection chips stay visible in the verdict band, including on phones.
 
-### Resource inspector
-A pale annotation sheet holds ownership, native state, source-qualified measurements and expandable evidence. Changing the recorded metric refreshes both inspector and recorder. Resource selection hands keyboard focus to the inspector heading; comparison and pin actions restore control focus after redraw. IDs wrap rather than truncating the evidence. “Open resource” is an explicit external portal link, not an embedded live integration.
+### Verdict band and KPI cards
+Counts come straight from the snapshot summary; nothing is scored or weighted. KPI numbers take the severity text colour only when the count carries meaning (review, unknown, critical or partial/error sources).
 
-Arc machines add a separately labeled administration assessment, exact native
-agent/OS metadata, baseline provenance/validity and a ruled extension list.
-Configured and instance-view versions and the two upgrade settings stay distinct.
-Unknown is visible, not a new guest-health grade. The extra Arc administration
-filter combines with existing hosting/type/owner/state/search filters; search
-also matches safe extension metadata. Resource/complete exports retain every
-matched child record, not just visible register rows. Long metadata wraps
-inside the inspector without changing the palette or company-logo placeholder.
+### Fleet register and inspector
+Search, type, state, owner and Arc administration filters with persistent labels; Reset; the hosting segmented control; a live summary of the current view. Column headers are sort buttons with `aria-sort`; missing measurements always sort last. Resource names open the inspector and hand it keyboard focus; checkboxes pin up to three resources for the recorder. Each row shows name, hosting, type and resource group; the inspector shows facts, the selected metric, Pin / Resource JSON / Open in Azure portal, the full ARM ID (wrapped only at `/`) and expandable Arc administration, measurements, signals and native state.
 
 ### Time recorder
-Petrol, blue and plum traces retain named source/unit/grain/coverage legends. Solid lines follow the recorded primary aggregation; optional dashed lines show supplied source maxima only. Missing or noncontiguous bins remain gaps. Isolated samples remain visible as small filled primary markers or hollow maximum markers (radius 2.8px). A keyboard-operable range control inspects recorded bins; it does not interpolate values.
+Petrol, blue and plum traces keep named source/unit/grain/coverage legends. Solid lines follow the recorded primary aggregation; optional dashed lines show supplied source maxima only. Missing or noncontiguous bins remain gaps; isolated samples stay visible as small markers. A keyboard-operable range control inspects recorded bins; it never interpolates.
 
-### Review, events, coverage and exports
-Owner reviews are evidence-linked register entries, not remediation buttons. Event provenance keeps native events separate from local observations. Source rows distinguish complete requests, missing monitoring, unsupported metrics and errors.
+### Owner review, event log and coverage
+Owner review items are evidence-linked checks, most severe first, with the resource as a button and the owner tag; no remediation runs from the report. Native alert-rule titles show the rule name, rule kind and resource group, with the full ID beneath in the event log. Event provenance keeps native events separate from local observations. Coverage summarises results by status before the ledger; complete, partial, error, not collected, not supported and not configured stay distinct.
 
-Native ARM alert titles and source/details wrap without truncation, including on mobile. Review-title flex children can shrink; horizontal table scrolling is local to the table, never hidden by a page-wide overflow mask.
-
-Exports preserve the evidence, not just the visible page: filtered CSVs carry snapshot provenance, collection date and window; trace CSV additionally carries unit, source, aggregation, grain and observed/expected coverage. Complete JSON is the complete embedded snapshot. Export and selection feedback uses a polite live region; no live polling, synthetic deployment claim or composite health score belongs in this system.
+### Exports
+Filtered CSVs carry snapshot provenance, collection date and window; the trace CSV adds unit, source, aggregation, grain and coverage. Complete JSON is the complete embedded snapshot. Export, sort and selection feedback use a polite live region.
 
 ## Do's and Don'ts
 
-### Do:
-- Do keep units, source, recorded time and unknown labels adjacent to measurements.
-- Do use ruled sheets, aligned registers and compact named status stamps.
-- Do preserve keyboard focus and announce local interaction outcomes.
-- Do keep component previews free of invented telemetry, brands and deployment claims.
+### Do
+- Keep units, source, recorded time and Unknown labels next to measurements.
+- Use the shared severity colours, named stamps and labelled bars with values.
+- Preserve keyboard focus, visible focus rings and announced interaction outcomes.
+- Keep component previews free of invented telemetry, brands and deployment claims.
 
-### Don't:
-- Don't replace evidence with decorated scores or imply that an observed state certifies health.
-- Don't turn missing data into zero, connect gaps or invent maxima.
-- Don't introduce gradients, floating card grids, pill-shaped file tabs or external assets.
-- Don't label source replay as live validation or publish private replay screenshots as product assets.
+### Don't
+- Replace evidence with a composite health score or imply that Observed certifies health.
+- Turn missing data into zero, connect gaps or invent maxima.
+- Add emoji icons, gradient text, glass, neon or decorative charts, or nest cards inside cards.
+- Load external fonts, scripts or images, or label source replay as live validation.

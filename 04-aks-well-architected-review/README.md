@@ -8,14 +8,14 @@ namespace or workload into its evidence, inspect confirmed resource
 relationships, and compare them with a clearly **undeployed Azure reference
 proposal**. The report is in Spanish; this deployment guide is in English.
 
-![Actual-source report, privacy-masked as client NAME](images/aks04-report-00-cover.png)
+![Report cover rendered from the SIMULATED public fixture: verdict, provenance chips and KPI cards](images/aks04-report-00-cover.png)
 
-**The screenshots are evidence, not mockups.** Builder images show the real
-Azure SRE Agent interface. Report captions distinguish an actual downloaded
-file from a locally rendered, dated source replay. Customer branding is burned
-over with **client NAME**; identifiers, private addresses and configured code
-are masked only in the image, never removed from the original evidence.
-See the [capture manifest](images/capture-manifest.json).
+**Builder screenshots are evidence, not mockups**: they show the real Azure
+SRE Agent interface. **Report screenshots** are rendered from the permanently
+**SIMULATED** public test fixture through the real engine and the current
+report design; they contain no customer, tenant or lab data. Where Builder
+images show private values, those are masked only in the image, never removed
+from the original evidence. See the [capture manifest](images/capture-manifest.json).
 
 | What you get | What it does not claim |
 |---|---|
@@ -36,7 +36,8 @@ See the [capture manifest](images/capture-manifest.json).
 > **2026-10-14T09:25:00Z / 09:26:26Z** per-cluster references passed the actual
 > UI/export/print gate and all four native HTTP 200 downloads. Its first
 > cluster still has 19 Kubernetes 502 blind spots; the second remains stopped.
-> These older baseline/replay screenshots retain their original source dates.
+> These dated results come from the live baseline; the report screenshots in
+> this guide use the SIMULATED fixture instead.
 > [Dated evidence and release state](#dated-evidence-and-release-state).
 
 ## Contents
@@ -819,19 +820,22 @@ JSON beside it privately; the HTML already embeds the complete model.
 
 ### Start with identity, date and coverage
 
-1. Read the cover: client, cluster, environment, **LIVE/SIMULATED** provenance
-   and UTC reference are different facts.
-2. Open **Resumen ejecutivo**. Read the local index **beside** coverage.
+1. Read the blue band at the top: the **Veredicto** card, the one-line summary
+   and the chips (UTC reference, **LIVE/SIMULATED** provenance, environment,
+   cluster) are different facts. The severity bar and the KPI cards below it
+   repeat supplied counts; they do not recompute anything.
+2. Open **Resumen ejecutivo**. Read the local index **beside** coverage, then
+   **Qué hacer a continuación** (the first actions of the supplied plan).
 3. Use the chart's table to distinguish **Superadas**, **Con hallazgo**,
-   **No evaluadas** and **No aplicables**. Its centre is a count, not a health
-   grade. Unknowns are neutral, never green.
+   **No evaluadas** and **No aplicables**. Its total is a count of checks, not
+   a health grade. Unknowns are neutral, never green.
 
-![Actual-source assessment reading with separate score and coverage](images/aks04-report-01-assessment.png)
+![SIMULATED assessment reading with separate score, status bar and coverage](images/aks04-report-01-assessment.png)
 
 The local index is `100 × passed / (passed + failed)`. Coverage is
 `100 × evaluated / (evaluated + not_evaluated)`; N/A is excluded. No evaluated
-checks means `null` / **No evaluado**. Read the caption's source time: replay
-is not a fresh collection and an earlier high pass indicator is not recovery.
+checks means `null` / **No evaluado**. A screenshot is not a fresh collection,
+and a high pass indicator with low coverage is not a healthy cluster.
 
 ### Follow namespace, workload and resource evidence
 
@@ -845,11 +849,11 @@ is not a fresh collection and an earlier high pass indicator is not recovery.
    scores remain the supplied whole-snapshot values; filters do not improve
    the score.
 
-![Actual historical-source namespace and workload drilldown](images/aks04-report-02-drilldown.png)
+![SIMULATED namespace and workload drilldown with scope path and matching count](images/aks04-report-02-drilldown.png)
 
 When current Kubernetes reads are unavailable there are no current manifest
-records to drill into. This dated historical example demonstrates the actual
-controls; it must not be merged into the fresh HTTP 502 snapshot.
+records to drill into. This SIMULATED example demonstrates the controls; it is
+not observed cluster data.
 
 ### Inspect observed architecture, then the undeployed proposal
 
@@ -863,7 +867,7 @@ controls; it must not be merged into the fresh HTTP 502 snapshot.
 4. Check **Relaciones no evaluadas**. An unavailable kind or missing exact join
    is not an invented edge.
 
-![Actual-source observed architecture and complete property receipts](images/aks04-report-03-observed-architecture.png)
+![SIMULATED observed architecture with exact-ID neighbourhood and property receipts](images/aks04-report-03-observed-architecture.png)
 
 The illustration shows a bounded neighbourhood (at most thirteen nodes) and
 its visible/total counts. Complete node/edge/unknown tables and JSON retain all
@@ -895,7 +899,7 @@ view merely because it appears in an architecture example.
    MonthToDate rows can include historical/deleted resources and VMSS child IDs.
    They are not workload invoices or proof of ownership.
 
-![Actual-source FinOps amount, billing scope and independently uncalculated savings](images/aks04-report-05-finops.png)
+![SIMULATED FinOps reading: observed amount, billing scope and independently uncalculated savings](images/aks04-report-05-finops.png)
 
 Current CPU/memory samples do not establish 30-day sustained underuse.
 Requests are configuration, not consumption. Applicable prices, a
@@ -907,7 +911,8 @@ are needed before a monetary savings figure is meaningful.
 The multi-cluster document has a separate supplied aggregate and an explicit
 **Clúster de la lectura detallada** selector. Selecting a cluster resets local
 filters. A failed primary read shows its error and **no borrowed score, cost,
-workload or topology**. Configured roster entries absent from the artifact are
+workload or topology**. In the top band, the **Clúster 1 de 2 · cambiar** chip
+jumps to that selector. Configured roster entries absent from the artifact are
 marked unavailable for local selection; choosing them requires a new approved
 SRE call.
 
@@ -920,8 +925,11 @@ Original IDs and timestamps are never rewritten in display or exports.
 **JSON completo** preserves the original wrapper and every run, including
 errors. Scope JSON filters only the selected snapshot and explicitly preserves
 all other snapshots/errors and the original aggregate. CSV exports include all
-matching records, not just the visible page. **Imprimir / PDF** expands the
-matching evidence; both architecture views retain the undeployed label.
+matching records, not just the visible page. **Hallazgos** are sorted by
+severity by default (**Ordenar** restores the engine order); exports keep the
+engine order. **Imprimir / PDF** expands the matching evidence into an A4
+document with a running footer (title, cluster, UTC reference, page number);
+both architecture views retain the undeployed label.
 
 ## Step 7 - Keep reporting cadence optional
 

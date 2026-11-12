@@ -96,15 +96,15 @@ Open **New chat**, select the specialist via `/agent`, and run the report prompt
 
 ![HTML report cover and post-patching cycle summary](images/04-report-cover-and-cycle-summary.png)
 
-*HTML dossier cover and executive summary (`04-report-cover-and-cycle-summary.png`, anonymized `CLIENTE` view): **(1)** top action bar with dark-mode toggle and local JSON/CSV/PDF exports; **(2)** provenance header and UTC window; **(3)** tabular KPI strip summarizing evaluated machines, maintenance cycles (`UpdateSuccessfullyApplied` vs `ShutdownOrUnresponsive`), and root-cause categories.*
+*HTML dossier cover and executive summary (`04-report-cover-and-cycle-summary.png`, anonymized `CLIENTE` view rendered from synthetic data): **(1)** top bar with the read-only chip, dark mode, the JSON/CSV export menu and Print / PDF; **(2)** verdict-first header: one sentence with the key numbers, UTC window and LIVE/SIMULATED provenance chips, the verdict card with the first action to take, and the machines-by-severity bar; **(3)** KPI ledger summarizing evaluated machines, machines with blockers, maintenance cycles (`UpdateSuccessfullyApplied` vs `ShutdownOrUnresponsive`), installation runs, pending security patches and failed extensions.*
 
 ![Automated per-machine failure root-cause investigation ledger](images/05-report-automated-failure-investigation.png)
 
-*Automated per-machine root-cause investigation ledger (`05-report-automated-failure-investigation.png`): **(1)** interactive filters by failure category, hosting plane (`azure`/`arc`) and machine search; **(2)** per-machine diagnostic table and expandable root-cause evidence drawer showing exact error codes, extension log paths, and human remediation steps.*
+*Automated per-machine root-cause investigation ledger (`05-report-automated-failure-investigation.png`): **(1)** filters by failure category, hosting plane (`azure`/`arc`), severity and free-text search, plus reset, CSV of the current view and collapse/expand all; **(2)** sortable per-machine register with severity pills and the expandable root-cause evidence drawer showing the correlated evidence, the recommended human action, and the ARG reference (machine name + resource group + Portal link) or guest extension log path.*
 
 ![Maintenance cycles, software patches and source coverage ledger](images/06-report-cycles-patches-and-sources.png)
 
-*Maintenance cycles, pending/installed KBs, and source receipts (`06-report-cycles-patches-and-sources.png`): **(1)** maintenance window executions and software patches ledger; **(2)** 7/7 read-only Azure Resource Graph source receipts and methodological boundaries.*
+*Maintenance cycles, pending/installed KBs, and source receipts (`06-report-cycles-patches-and-sources.png`): **(1)** maintenance window executions and installation runs, newest first, with `ShutdownOrUnresponsive` in red and correlation IDs shortened to configuration name + resource group + Portal link; **(2)** the sticky section index with live counts leads to the software patches ledger, guest extensions and the 7/7 read-only Azure Resource Graph source receipts with methodological boundaries. The prioritised action plan sits right after the executive summary.*
 
 ## Step 7 - Configure the monthly scheduled task (`0 8 1 * *`)
 

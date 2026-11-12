@@ -1,137 +1,102 @@
 ---
 name: Azure Databricks dependency and configuration dossier
-description: An offline Fluent 2 consulting dossier blending industrial corporate navy/steel and Databricks lakehouse lava accents for qualified dependency and WAF evidence.
+description: An offline, verdict-first Azure SRE Agent report in the family house style, framed by corporate navy/steel and the Databricks lava/teal ribbon, for qualified dependency and WAF evidence.
 colors:
-  canvas: "#f4f6f8"
+  paper: "#f2f5f8"
   surface: "#ffffff"
-  subtle: "#f8fafc"
-  wash: "#edf1f5"
-  ink: "#1b242c"
-  muted: "#52606d"
-  line: "#cbd5e1"
-  field-line: "#7b8794"
-  accent: "#003865"
-  accent-hover: "#002848"
-  accent-wash: "#eef4f9"
-  chrome: "#003865"
-  chrome-hover: "#002848"
-  chrome-line: "#b8d0e5"
-  cover: "#eef4f9"
-  cover-ink: "#002b4e"
-  cover-muted: "#334e68"
-  nav: "#e6eff7"
-  nav-ink: "#002b4e"
-  nav-muted: "#3e5871"
-  plaque-ink: "#334155"
-  critical: "#a4262c"
-  critical-wash: "#fde7e9"
-  high: "#9c2b13"
-  high-wash: "#ffede8"
-  medium: "#795b00"
-  medium-wash: "#fff8d6"
-  low: "#475569"
-  low-wash: "#edf2f7"
-  brand-corporate-navy: "#003865"
-  brand-databricks-lava: "#ff3621"
-  brand-corporate-steel: "#0066a1"
-  brand-databricks-teal: "#00875a"
-  dark-canvas: "#141a1f"
-  dark-surface: "#1b242c"
-  dark-subtle: "#24303a"
-  dark-wash: "#2e3c48"
-  dark-ink: "#f1f5f9"
-  dark-muted: "#cbd5e1"
-  dark-line: "#475569"
-  dark-field-line: "#94a3b8"
-  dark-accent: "#7cc4fa"
-  dark-accent-hover: "#a5d8ff"
-  dark-accent-wash: "#1b3348"
-  dark-chrome: "#002848"
-  dark-chrome-hover: "#003865"
-  dark-chrome-line: "#84b6de"
-  dark-cover: "#162b3d"
-  dark-cover-ink: "#d0e8ff"
-  dark-nav: "#132535"
-  dark-critical: "#ffb3b8"
-  dark-critical-wash: "#442326"
-  dark-high: "#ffbaa8"
-  dark-high-wash: "#42251d"
-  dark-medium: "#f5d875"
-  dark-medium-wash: "#383323"
-  dark-low: "#d6d6d6"
-  dark-low-wash: "#2e3c48"
-  print-muted: "#475569"
-  print-line: "#94a3b8"
+  soft: "#eef2f6"
+  hover: "#f6f9fc"
+  ink: "#16212c"
+  title: "#002b4e"
+  muted: "#4f5d6b"
+  line: "#dde3ea"
+  line2: "#c2ccd6"
+  link: "#0058a3"
+  focus: "#0b6bcb"
+  chart: "#0066a1"
+  edge: "#4d7aa3"
+  button: "#003865"
+  button-hover: "#002848"
+  hero-a: "#003865"
+  hero-b: "#00223c"
+  hero-muted: "#c3d5e8"
+  brand-navy: "#003865"
+  brand-lava: "#ff3621"
+  brand-steel: "#0066a1"
+  brand-teal: "#00875a"
+  critical: "#b42318 on #fee4e2, bar #d92d20"
+  high: "#b93815 on #ffead5, bar #ef6820"
+  medium: "#93370d on #fef0c7, bar #f79009"
+  low: "#175cd3 on #d1e9ff, bar #2e90fa"
+  info: "#344054 on #eaecf0, bar #98a2b3"
+  ok: "#067647 on #dcfae6, bar #17b26a"
+  observed: "#00603f on #ddf4ea, line #00875a"
+  inferred: "#8a4b00 on #fff1d6, dashed line #c77700"
+  unknown: "#475467 on #eaecf0, hollow dot #98a2b3"
+  dark-paper: "#0d141b"
+  dark-surface: "#15202a"
+  dark-soft: "#1c2834"
+  dark-ink: "#e6edf3"
+  dark-muted: "#a9b7c5"
+  dark-line: "#26333f"
+  dark-link: "#8cc8ff"
+  dark-hero-a: "#0a2742"
+  dark-hero-b: "#061626"
 typography:
   display:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "40px"
-    fontWeight: 600
-    lineHeight: 1.3
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "clamp(28px, 3vw, 44px)"
+    fontWeight: 700
+    lineHeight: 1.12
     letterSpacing: "-.02em"
   headline:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "28px"
-    fontWeight: 600
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "23px"
+    fontWeight: 700
     lineHeight: 1.3
     letterSpacing: "-.01em"
   title:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "20px"
-    fontWeight: 600
-    lineHeight: 1.35
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "17px"
+    fontWeight: 700
+    lineHeight: 1.3
   body:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "16px"
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "15px"
     fontWeight: 400
-    lineHeight: 1.5
-  body-small:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "14px"
+    lineHeight: 1.55
+  table-dense:
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "13.5px"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.55
   label:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "13px"
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "12.5px"
     fontWeight: 600
-    lineHeight: 1.5
+    lineHeight: 1.55
   technical:
-    fontFamily: "Consolas, ui-monospace, monospace"
-    fontSize: "12px"
+    fontFamily: 'ui-monospace, "Cascadia Mono", Consolas, monospace'
+    fontSize: "12.5px"
     fontWeight: 400
-    lineHeight: 1.5
-  financial:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "38px"
-    fontWeight: 600
-    lineHeight: 1.25
-  financial-unknown:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "32px"
-    fontWeight: 600
-    lineHeight: 1.25
-  coverage-value:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "24px"
-    fontWeight: 600
-    lineHeight: 1.5
-  chart-count:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "34px"
-    fontWeight: 600
-    lineHeight: 1.25
+    lineHeight: 1.55
+  kpi-value:
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "33px"
+    fontWeight: 700
+    lineHeight: 1.05
+    fontVariantNumeric: "tabular-nums"
 rounded:
-  control: "4px"
-  track: "2px"
+  card: "16px"
+  control: "10px"
+  pill: "999px"
 spacing:
   tight: "4px"
   compact: "8px"
   control: "12px"
   base: "16px"
-  section: "24px"
-  wide: "32px"
-  page: "48px"
-  chapter: "56px"
+  card: "20px"
+  section: "48px"
 ---
 
 # Design System: Azure Databricks Dependency and Configuration Dossier
@@ -140,7 +105,15 @@ spacing:
 
 **Creative North Star: "The Lakehouse Dependency Dossier"**
 
-This offline consulting document pairs corporate deep navy and industrial steel tones (`#003865`, `#0066a1`) with Azure Databricks lakehouse lava and teal accents (`#ff3621`, `#00875a`) inside a Fluent 2 reading layout.
+An offline Azure SRE Agent report in the family house style: a slim sticky top bar (product mark, section navigation, `Solo lectura` chip, dark mode, an export menu and Print / PDF), a verdict-first navy band (title, one sentence with the key numbers, provenance chips, `CLIENTE` plaque, verdict card, severity distribution), KPI cards overlapping the band, then white cards on a light neutral ground. Corporate deep navy and industrial steel (`#003865`, `#0066a1`) carry the chrome and the hero; the Databricks lava and teal accents (`#ff3621`, `#00875a`) live in the four-colour brand ribbon.
+
+## Components
+
+- **Severity pills** use the shared family colours (critical, high, medium, low, info); check status uses a coloured dot with a Spanish label (`Cumple`, `No cumple`, `No evaluado`, `No aplica`).
+- **Dependency classification** has its own vocabulary: `OBSERVED` (solid teal-green), `INFERRED` (dashed amber), `UNKNOWN` (hollow grey). The graph places nodes in one column per layer, draws OBSERVED edges solid and INFERRED edges dashed, and shows a legend; tables always hold 100 % of nodes, edges and blind spots.
+- **Charts** are labelled horizontal bars with values (check status, areas, pillars, source status); no decorative charts.
+- **Tables** scroll inside their card with edge-shadow cues, sort by column, page long lists, and show long ARM IDs as name, resource group and a Portal link; raw JSON evidence stays behind a `JSON completo` disclosure.
+- **Print / PDF**: A4 with `@page` margins, colours kept, controls hidden, cards not split, and a running footer with the report title, workspace, UTC reference and page numbers. Dark mode is reset while printing.
 
 ## Branding and Privacy Boundaries
 

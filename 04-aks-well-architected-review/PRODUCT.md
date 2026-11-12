@@ -75,6 +75,12 @@ WARA's Contoso sample output informs the report narrative; Polaris informs
 global-to-category-to-namespace-to-workload wayfinding. Neither is installed,
 copied as a scoring engine, or represented as the issuer of the local index.
 
+The 2026-11 direction aligns this report with the Azure SRE Agent report
+family (slim top bar with section links, verdict band, KPI cards, white cards,
+shared severity colours, A4 print with a running footer). Microsoft-blue
+chrome, the ribbon, Segoe UI, the client plaque and Spanish copy remain this
+case's brand.
+
 ## Evidence on Hand
 
 The confirmed brief supplies the audience, scene, language, brand, structure and

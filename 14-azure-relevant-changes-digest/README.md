@@ -394,17 +394,19 @@ For follow-up questions the agent calls the tool with `operation=query` and the 
 
 ## Step 6 - Read the report
 
-The HTML is a single offline file (inline CSS and SVG, no external requests). It opens in any browser, prints cleanly and can be attached to a change review or an incident.
+The HTML is a single offline file (inline CSS, no external requests, locked down by a Content Security Policy). It opens in any browser and can be attached to a change review or an incident. The **Print / PDF** button prints it on A4 with the report colours, every property diff expanded, the complete list of non-noise changes and a footer with the title, date and page numbers.
 
 **Overview.** The top of the report shows:
 - the verdict in one sentence and the top five highlights;
-- the window in local time and UTC, the scope and the coverage;
+- a verdict card: *Needs attention* (at least one high item), *Review recommended* (medium items only), *No relevant changes*, or *Incomplete data* when Change Analysis could not be read, with the counts behind it;
+- the window in local time and UTC, the scope, when the report was generated and the coverage;
 - six KPIs: relevant changes, deleted resources, security-relevant changes and events, new role assignments, unusual flags and noise filtered;
-- the signal vs noise bar.
+- the signal vs noise bar;
+- below it, the non-noise changes over the window (per hour for the last 24 hours, each bar labelled with its count, off-hours shaded) and who made them and how.
 
 ![Report overview](images/20-report-overview.png)
 
-**What changed that matters.** High and medium changes, grouped by resource, worst first. For each change you see:
+**What changed that matters.** High and medium changes, grouped by resource, worst first. A row of resource links at the top jumps to the cards, and each card links to the resource in the Azure portal (unless it was deleted). For each change you see:
 - when it happened (local time and UTC);
 - who made it and how (actor class and client);
 - why it matters, and its flags;
@@ -449,11 +451,13 @@ Here, the NSG of the sample: the RDP rule opened to the Internet, the SSH rule w
 
 ![Noise filtered out](images/27-report-noise.png)
 
+**All non-noise changes.** One searchable table with filters for level, change type, actor class and resource group, sortable columns (also with the keyboard), a visible row count and an **Export CSV** button that downloads exactly the rows you filtered.
+
 **Coverage and sources.** Per-source status, pages, records and caps, the retention, what is not covered, and links to the Microsoft Learn documentation. A source that could not be read is shown as a blind spot, never as a clean result.
 
 ![Coverage and sources](images/28-report-coverage.png)
 
-The report is responsive, so it can be read on a phone:
+The report is responsive, so it can be read on a phone: the tables become cards and the section bar follows you as you scroll.
 
 <img src="images/29-report-mobile.png" alt="Report on a mobile phone" width="320">
 

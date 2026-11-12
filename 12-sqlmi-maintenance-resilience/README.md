@@ -77,7 +77,7 @@ This case adds a **specialist advisor** to Azure SRE Agent (`sqlmi-maintenance-a
 | Know what is coming | Upcoming planned maintenance (Service Health) with tracking ID, affected instances and **applications at risk**. |
 | Measure user impact | Correlation with Application Insights: SQL errors per application and how many **reached the user** versus how many were absorbed by retries. |
 | Choose the best window | Recommended window per instance from real load (hour-by-day heat map), with different windows on primary and secondary. |
-| Act | Prioritized actions (High, Medium, Low) with the exact command, for the team to validate and run. |
+| Act | Prioritized actions (High, Medium, Info) with the exact command, for the team to validate and run. |
 | Cadence with no effort | A scheduled task that every Monday produces the report for the previous week. |
 | Reusable deliverables | 4 downloadable files: **HTML**, full **JSON**, **instances CSV** and **impact CSV**. |
 
@@ -473,11 +473,11 @@ For the demo add `Use demo data.` at the end.
 
 ### What the HTML report contains
 
-Click **Abrir informe HTML** (open HTML report). The report is self-contained (works offline) and readable on a phone.
+Click **Abrir informe HTML** (open HTML report). The report is self-contained (works offline), readable on a phone and prints to A4 with **Imprimir / PDF**. It opens with the verdict (*Requiere atención* - needs attention) and the actions by priority; every table has search, filters, sorting and CSV export, and every command has a **Copiar** (copy) button.
 
 | Section (Spanish title - meaning) | Screenshot |
 |---|---|
-| Header, short answer and KPIs of the period | ![KPIs](images/report-01-header-kpis.png) |
+| Header: verdict, short answer, actions by priority and KPIs of the period | ![KPIs](images/report-01-header-kpis.png) |
 | *Próximo mantenimiento* - next maintenance, affected instances and applications at risk | ![Next maintenance](images/report-02-next-maintenance.png) |
 | *Acciones priorizadas* - prioritized actions with their command | ![Actions](images/report-03-actions.png) |
 | *Instancias y ventanas* - current window, connection type, failover group and recommended window per instance | ![Instances](images/report-04-instances-windows.png) |

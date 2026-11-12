@@ -19,7 +19,7 @@ It asks no questions unless it cannot know where the data lives.
 
 [![Tutorial video: the SRE use-case builder from one sentence to a scheduled use case](docs/video/sre-usecase-builder-tutorial-poster.jpg)](docs/video/sre-usecase-builder-tutorial.mp4)
 
-*Click the image to play the video (MP4, 2:06, no voice-over: it opens on the finished report, every step is captioned on screen, and the camera zooms into each highlighted area so it reads well on a projector). It is also on the [use-case field guide](https://marioaguileraaa.github.io/sre-agent-use-cases/#tutorial).*
+*Click the image to play the video (MP4, 2:05, no voice-over: it opens on the finished report, every step is captioned on screen, and the camera zooms into each highlighted area so it reads well on a projector). It is also on the [use-case field guide](https://marioaguileraaa.github.io/sre-agent-use-cases/#tutorial).*
 
 A real run on a lab Azure SRE Agent (names and identifiers replaced), sped up while the agent works. Steps 5 and 6 were
 recorded again with kit 3.1, after updating the generated tool, to show the new report design and its PDF:

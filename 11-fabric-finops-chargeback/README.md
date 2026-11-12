@@ -456,13 +456,13 @@ Day 2 gives Cost Management the 24-48 h it needs to publish the last days of the
 
 ![Summary](images/01-summary-real-cost.png)
 
-Billed cost, consumed / idle / storage bar, hours on, cost per hour, CU-h paid vs used and identified saving. **Sample run:** 876.15 USD in 30 days = **68.60 consumed (7.8 %)**, **790.00 idle (90.2 %)**, 17.55 storage. The F32 capacity was on **142.9 h of 729 (20 %)** and used **8 %** while on: **4,770 CU-h paid vs 381 CU-h used**, at 5.76 USD/h.
+The opening screen leads with the verdict: a headline sentence with the billed cost, a verdict card (*Action required* when more than half of the bill is idle capacity, *Needs attention* when idle reaches 20 % or there is a saving or risk to act on, otherwise *On track*) with the action breakdown, the consumed / idle / storage bar, and five key figures: billed cost, hours on, cost per hour, CU-h paid vs used and identified saving. The top bar has a **Print / PDF** button (A4, colours kept, page footer with title and date). **Sample run:** 876.15 USD in 30 days = **68.60 consumed (7.8 %)**, **790.00 idle (90.2 %)**, 17.55 storage. The F32 capacity was on **142.9 h of 729 (20 %)** and used **8 %** while on: **4,770 CU-h paid vs 381 CU-h used**, at 5.76 USD/h.
 
 ### 9.2 FinOps actions - what to do, with amount and evidence
 
 ![Recommended actions](images/02-recommended-actions.png)
 
-10-12 actions sorted by type (saving, avoided spend, scenario, risk, governance). **Sample run (11 actions):** pause 1 h after the last job → **472.25 USD/month** (or, simpler, bring the automatic pause forward to 21:00 UTC → 168.45 USD/month with no work cut); do not switch the capacity on during the 8 days with no load → **576.61 USD** in the period; **do not buy a reservation** (break-even 59.5 % uptime vs 19.6 % actual) → avoids **19,569.68 USD/year**; F16 right-size scenario → **410.98 USD/month**; paused, empty, untagged F64 → **8,294.40 USD/month** risk if resumed by mistake; plus governance: dedicated Copilot capacity, cost-center tags, 2 failed refreshes, trial capacity end and 230 items unchanged for 90+ days.
+10-12 actions sorted by type (saving, avoided spend, scenario, risk, governance), with one filter button per type. **Sample run (11 actions):** pause 1 h after the last job → **472.25 USD/month** (or, simpler, bring the automatic pause forward to 21:00 UTC → 168.45 USD/month with no work cut); do not switch the capacity on during the 8 days with no load → **576.61 USD** in the period; **do not buy a reservation** (break-even 59.5 % uptime vs 19.6 % actual) → avoids **19,569.68 USD/year**; F16 right-size scenario → **410.98 USD/month**; paused, empty, untagged F64 → **8,294.40 USD/month** risk if resumed by mistake; plus governance: dedicated Copilot capacity, cost-center tags, 2 failed refreshes, trial capacity end and 230 items unchanged for 90+ days.
 
 ### 9.3 Where the money goes - cost breakdown
 

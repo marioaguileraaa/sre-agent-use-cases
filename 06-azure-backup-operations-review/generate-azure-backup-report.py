@@ -985,11 +985,11 @@ def write_report(snapshot, branding):
 
 HTML_TEMPLATE = r"""<!doctype html>
 <!--
-THESIS: A backup shift workpaper puts the observable window before the outcome; it refuses a success-score dashboard.
-OWN-WORLD: Supplied-pixel yellow #FBC807, charcoal #1E1C18, neutral evidence sheets, system sans and ruled ledgers. Brand is not warning severity.
-STORY: Qualify scope and history, inspect native job states and errors, review item evidence, then make a human decision.
-FIRST VIEWPORT: Charcoal mast with yellow customer frame, sparse yellow navigation, a wide window/coverage sheet and complete-file actions; job filters follow immediately.
-FORM: Brief-pinned Operate workpaper, not a new identity tournament. Inline disclosure is the signature interaction; desktop rows become labeled mobile records.
+THESIS: A backup shift workpaper: the verdict and the observable window come first, then native evidence; it refuses a success-score dashboard.
+OWN-WORLD: Supplied-pixel yellow #FBC807 and charcoal #1E1C18 (plaque, stripe, primary file action), neutral sheets, system sans, shared severity colours. Brand is not severity.
+STORY: Read the verdict, the window and its blind spots, follow the prioritised review steps, inspect native job states and errors, then make a human decision.
+FIRST VIEWPORT: Charcoal bar with the yellow customer plaque, a charcoal verdict band with the UTC window and provenance, KPI cards on its edge, then window qualification and complete-file actions.
+FORM: Operate workpaper in the Azure SRE Agent report family. Inline disclosure stays the signature interaction; ledger records become labeled cards on phones.
 -->
 <html lang="en">
 <head>
@@ -999,241 +999,325 @@ FORM: Brief-pinned Operate workpaper, not a new identity tournament. Inline disc
 <title>Azure Backup | Operations review</title>
 <style>
 :root{
-  color-scheme:light;--brand:#FBC807;--charcoal:#1E1C18;--canvas:#F2F4F5;--sheet:#FFFFFF;
-  --ink:#24272B;--muted:#535D66;--line:#CCD2D7;--field:#6C7680;--wash:#F6F8F9;
-  --error:#A51E29;--error-wash:#FFF0F1;--warning:#854400;--warning-wash:#FFF4E9;
-  --unknown:#4F5971;--unknown-wash:#F0F2F8;--complete:#276442;--complete-wash:#EEF7F1;
-  --active:#175A83;--active-wash:#EDF5FA;--radius:3px
+  color-scheme:light;--brand:#FBC807;--charcoal:#1E1C18;--bar:#151411;--canvas:#F2F4F5;--sheet:#FFFFFF;
+  --ink:#24272B;--muted:#535D66;--line:#D5DADF;--field:#6C7680;--wash:#F6F8F9;--link:#18577D;
+  --critical:#B42318;--critical-wash:#FEE4E2;--critical-bar:#D92D20;--high:#B93815;--high-wash:#FFEAD5;--high-bar:#EF6820;
+  --low:#175CD3;--low-wash:#D1E9FF;--low-bar:#2E90FA;--info:#344054;--info-wash:#EAECF0;--info-bar:#98A2B3;
+  --ok:#067647;--ok-wash:#DCFAE6;--ok-bar:#17B26A;--hero-muted:#D7D3CB;--hero-line:rgba(255,255,255,.2);
+  --radius:8px;--card:12px;--shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08)
 }
 *{box-sizing:border-box}
-html{scroll-behavior:auto;scroll-padding-top:20px}
-body{margin:0;background:var(--canvas);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif;overflow-wrap:anywhere}
+html{scroll-padding-top:20px;scrollbar-color:#B8C0C7 var(--canvas);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+::selection{background:#FDE68A;color:var(--charcoal)}
 [hidden]{display:none!important}
-a{color:#18577D;text-underline-offset:3px}
-button,input,select{font:inherit;min-height:44px;border:1px solid var(--field);border-radius:var(--radius);background:var(--sheet);color:var(--ink);padding:8px 12px;max-width:100%}
+a{color:var(--link);text-underline-offset:3px}
+button,input,select{font:inherit;min-height:44px;border:1px solid var(--field);border-radius:var(--radius);background:var(--sheet);color:var(--ink);padding:8px 14px;max-width:100%;caret-color:var(--charcoal)}
 button{cursor:pointer;font-weight:600}
 button:hover:not(:disabled),input:hover,select:hover{background:#EDF0F2}
 button:active:not(:disabled){background:#DCE2E6}
-button:disabled{cursor:not-allowed;color:#636C75;background:#E8ECEF}
+button:disabled{cursor:not-allowed;color:#636C75;background:#E8ECEF;border-color:#C3CAD0}
 button.primary{background:var(--brand);border-color:var(--charcoal);color:var(--charcoal)}
 button.primary:hover:not(:disabled){background:#EDB900}
+input::placeholder{color:#5F6971;opacity:1}
 button,input,select,a,summary{touch-action:manipulation}
-:focus-visible{outline:3px solid #18577D;outline-offset:3px}
-.skip{position:absolute;top:-100px;left:16px;z-index:4;background:var(--sheet);padding:12px 20px}
+:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+.skip{position:absolute;top:-100px;left:16px;z-index:30;background:var(--sheet);padding:12px 20px;border-radius:var(--radius)}
 .skip:focus{top:12px}
-.mast{background:var(--charcoal);color:#FFFFFF}
-.mast-inner{max-width:1552px;margin:auto;padding:28px 32px;display:grid;grid-template-columns:190px minmax(0,1fr) auto;gap:28px;align-items:center}
-.brand-frame{background:var(--brand);color:var(--charcoal);border:1px solid var(--brand);padding:14px;min-height:92px;display:flex;align-items:center;justify-content:center}
-.brand-frame img{display:block;max-width:100%;max-height:64px;width:auto;height:auto;object-fit:contain}
-.placeholder{font-size:22px;font-weight:750;line-height:1.2;letter-spacing:.02em;text-align:center}
-.placeholder small{display:block;font-size:12px;letter-spacing:0;font-weight:500;margin-top:9px}
-h1{font-size:30px;line-height:1.2;letter-spacing:-.02em;margin:0 0 10px;font-weight:650;text-wrap:balance}
-.mast p{color:#D7D5D0;margin:0;max-width:68ch}
-.stamp{font-size:13px;text-align:right;max-width:240px}
-.stamp strong{display:block;color:var(--brand);font-size:14px;margin-bottom:6px}
-.navigation{background:var(--brand);color:var(--charcoal)}
-.navigation-inner{max-width:1552px;margin:auto;display:flex;gap:4px;padding:0 28px;flex-wrap:wrap}
-.navigation a{padding:12px;color:var(--charcoal);font-weight:600;text-decoration:none;min-height:48px;border-bottom:3px solid transparent}
-.navigation a:hover,.navigation a:focus-visible{background:#EDB900;border-bottom-color:var(--charcoal)}
-main{max-width:1552px;margin:auto;padding:28px 32px 48px;min-width:0}
-section{scroll-margin-top:20px;margin-bottom:28px;background:var(--sheet);border:1px solid var(--line);padding:28px;min-width:0}
-h2{font-size:24px;line-height:1.3;letter-spacing:-.015em;margin:0 0 12px;font-weight:650;text-wrap:balance}
-h3{font-size:18px;line-height:1.35;margin:28px 0 12px;font-weight:650}
-p{margin:0 0 12px;max-width:75ch}
-.muted,.note{color:var(--muted);font-size:14px}
-.intro{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:32px}
-.intro-actions{padding-left:28px;border-left:1px solid var(--line)}
-.intro-actions h3{margin-top:0}
-.downloads{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
-.downloads button{font-size:14px}
-.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;margin:20px 0}
+.icon{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bar{background:var(--bar);color:#ECE9E3}
+.bar-in{max-width:1320px;margin:0 auto;padding:8px clamp(16px,3vw,40px);display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap}
+.brand-frame{background:var(--brand);color:var(--charcoal);border:1px solid var(--brand);border-radius:6px;min-height:46px;min-width:112px;padding:4px 12px;display:flex;align-items:center;justify-content:center}
+.brand-frame img{display:block;max-height:36px;max-width:180px;width:auto;height:auto;object-fit:contain}
+.placeholder{font-size:15px;font-weight:750;line-height:1.1;letter-spacing:.02em;text-align:center}
+.placeholder small{display:block;font-size:11px;letter-spacing:0;font-weight:600;margin-top:2px}
+.wordmark{font-weight:650;font-size:16px;color:#FFFFFF;white-space:nowrap}
+.wordmark span{color:#BDB8AE;font-weight:500}
+.navigation{display:flex;flex-wrap:wrap;gap:2px}
+.navigation a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:var(--radius);color:#D9D5CD;font-size:14px;font-weight:600;text-decoration:none}
+.navigation a:hover{background:rgba(255,255,255,.08);color:#FFFFFF}
+.acts{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tag{font-size:13px;font-weight:600;color:#D9D5CD;border:1px solid #4A463F;border-radius:999px;padding:5px 12px;white-space:nowrap}
+.print-button{display:inline-flex;align-items:center;gap:8px;background:transparent;color:#FFFFFF;border-color:#6B665C}
+.print-button:hover:not(:disabled){background:rgba(255,255,255,.1)}
+.print-button:disabled{background:transparent;color:#8C877D;border-color:#3A3731}
+.bar :focus-visible,.hero :focus-visible{outline-color:var(--brand)}
+@media(min-width:1000px){.bar{position:sticky;top:0;z-index:20}html{scroll-padding-top:84px}}
+main{display:block;min-width:0}
+.page{max-width:1320px;margin:0 auto;padding:0 clamp(16px,3vw,40px) 48px}
+.state-page{padding-top:32px}
+.hero{background:var(--charcoal);color:#FFFFFF;border-top:4px solid var(--brand);padding:clamp(28px,4vw,48px) clamp(16px,3vw,40px) 108px}
+.hero-in{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:24px 48px;align-items:start}
+.hero h1{font-size:clamp(30px,3.4vw,44px);line-height:1.1;letter-spacing:-.02em;font-weight:700;margin:0 0 14px;text-wrap:balance}
+.lead{font-size:18px;line-height:1.55;max-width:66ch;margin:0;color:#E9E6E0}
+.lead b{color:#FFFFFF}
+.meta{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0;padding:0}
+.meta li{font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--hero-line);color:var(--hero-muted)}
+.meta li.on{color:var(--brand);border-color:rgba(251,200,7,.55);font-weight:700}
+.signal{border:1px solid var(--hero-line);background:rgba(255,255,255,.05);border-radius:var(--card);padding:20px 22px}
+.signal p{margin:0;color:var(--hero-muted);font-size:14px}
+.signal .k{font-size:13px;font-weight:600;margin-bottom:6px}
+.signal .verdict{display:flex;align-items:center;gap:10px;font-size:26px;line-height:1.15;font-weight:700;color:var(--tone,#FFFFFF);margin:0 0 8px}
+.verdict i{width:12px;height:12px;border-radius:3px;flex:none;background:currentColor}
+.tone-critical{--tone:#FDA29B}.tone-high{--tone:#FEB273}.tone-low{--tone:#84CAFF}.tone-info{--tone:#D0D5DD}.tone-ok{--tone:#75E0A7}
+.dist{grid-column:1/-1}
+.dist p{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--hero-muted)}
+.track{display:flex;gap:2px;height:14px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12)}
+.track i{display:block;height:100%}
+.legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 20px;margin:10px 0 0;padding:0;font-size:14px;color:var(--hero-muted)}
+.legend li{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:10px;height:10px;border-radius:3px}
+.legend b{color:#FFFFFF}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin:-64px 0 0;position:relative;z-index:2}
+.kpi{background:var(--sheet);border:1px solid var(--line);border-radius:var(--card);padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+.kpi dd{order:1;margin:0;font-size:40px;line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--charcoal)}
+.kpi dd.word{font-size:28px;line-height:1.15;color:var(--info)}
+.kpi dd.alert-critical{color:var(--critical)}.kpi dd.alert-high{color:var(--high)}
+.kpi dt{order:2;margin:10px 0 0;font-size:14px;font-weight:650;color:var(--ink)}
+.kpi dt span{display:block;margin-top:2px;font-size:13px;font-weight:400;color:var(--muted)}
+.notice{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;padding:12px 16px;border:1px solid #C5CCD6;background:var(--info-wash);color:var(--info);border-radius:var(--card);font-size:14px;max-width:none}
+.notice.sim{background:#FFFAEB;border-color:#FEDF89;color:#7A2E0E;font-weight:600}
+.notice .icon{margin-top:1px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px;margin-top:24px}
+.card,.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:var(--card);padding:24px;min-width:0}
+.sheet{margin-top:32px}
+h2{font-size:22px;line-height:1.25;letter-spacing:-.01em;margin:0 0 6px;font-weight:700;color:var(--charcoal);text-wrap:balance}
+.card h2{font-size:19px}
+h3{font-size:17px;line-height:1.35;margin:28px 0 8px;font-weight:650;color:var(--charcoal)}
+p{margin:0 0 12px;max-width:75ch;text-wrap:pretty}
+.sub{color:var(--muted);font-size:15px;margin-bottom:16px}
+.note{color:var(--muted);font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 24px;margin:16px 0}
 .facts div{min-width:0}
-dt{font-size:13px;color:var(--muted);margin-bottom:4px}
-dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
-.notice{padding:14px 16px;border:1px solid var(--unknown);background:var(--unknown-wash);color:var(--unknown);margin:20px 0 0;font-size:14px;max-width:none}
-.notice.error{border-color:var(--error);background:var(--error-wash);color:var(--error)}
-.count-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:24px 0 0;padding-top:20px;border-top:1px solid var(--line)}
-.count-strip dd{font-size:23px}
-.section-head{display:flex;align-items:start;justify-content:space-between;gap:20px}
-.section-head p{font-size:14px;color:var(--muted)}
-fieldset{margin:20px 0;padding:16px;border:1px solid var(--line);background:var(--wash);min-width:0}
-legend{padding:0 8px;font-weight:600;font-size:14px}
-.filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px}
+dt{font-size:13px;color:var(--muted);margin-bottom:2px}
+dd{margin:0;font-weight:600}
+.downloads{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.downloads button{font-size:15px}
+.steps{list-style:none;margin:4px 0 0;padding:0;counter-reset:step}
+.steps li{counter-increment:step;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0;padding-top:2px}
+.steps li::before{content:counter(step);grid-row:span 2;align-self:start;width:28px;height:28px;border-radius:50%;background:var(--charcoal);color:#FFFFFF;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steps b{grid-column:2;font-weight:650}
+.steps b .pill{margin:0 0 0 6px;vertical-align:1px}
+.steps p{grid-column:2;margin:0;font-size:14px;color:var(--muted)}
+.steps button,.steps a{grid-column:3;grid-row:1/span 2;font-size:14px;white-space:nowrap}
+.steps a{display:inline-flex;align-items:center;min-height:44px;font-weight:600}
+.bars{display:grid;gap:10px;margin-top:4px}
+.brow{display:grid;grid-template-columns:minmax(120px,40%) minmax(0,1fr) 48px;gap:12px;align-items:center;font-size:14px}
+.brow .bt{height:12px;background:var(--wash);border:1px solid #E4E7EC;border-radius:999px;overflow:hidden}
+.brow .bt i{display:block;height:100%;min-width:4px;border-radius:999px}
+.brow b{text-align:right}
+.sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;margin-bottom:4px}
+.sh p{margin:0}
+.sh .sub{margin:0}
+fieldset{margin:20px 0 16px;padding:16px;border:1px solid var(--line);border-radius:var(--card);background:var(--wash);min-width:0}
+legend{padding:0 8px;font-weight:650;font-size:14px}
+.filters{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:14px 18px}
 label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600;min-width:0}
 label select,label input{width:100%;font-weight:400;min-width:0}
 .filter-footer{display:flex;align-items:center;gap:16px;justify-content:space-between;margin-top:16px}
 .filter-footer p{margin:0}
 .filters-summary{font-size:14px;color:var(--muted);margin:12px 0}
-.table-region{overflow:auto;max-width:100%;border:1px solid var(--line)}
-table{border-collapse:collapse;width:100%;table-layout:fixed}
-caption{text-align:left;font-size:14px;color:var(--muted);padding:12px;background:var(--wash);border-bottom:1px solid var(--line)}
-th{text-align:left;font-size:13px;font-weight:650;color:var(--muted);background:var(--wash)}
-td,th{padding:12px;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
-td{font-size:14px}
-tbody tr:last-child td{border-bottom:0}
-td strong{font-weight:650}
-td small{display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-top:5px}
-td time{display:block;font-variant-numeric:tabular-nums}
-.jobs-table th:nth-child(1){width:25%}
-.jobs-table th:nth-child(2){width:16%}
-.jobs-table th:nth-child(3){width:17%}
-.jobs-table th:nth-child(4){width:21%}
-.jobs-table th:nth-child(5){width:21%}
-.pill{display:inline-block;padding:3px 8px;border:1px solid currentColor;font-size:12px;font-weight:650;border-radius:var(--radius);margin-bottom:4px}
-.pill.failed,.pill.Error,.pill.denied,.pill.error{color:var(--error);background:var(--error-wash)}
-.pill.warning,.pill.Warning,.pill.partial{color:var(--warning);background:var(--warning-wash)}
-.pill.completed,.pill.complete{color:var(--complete);background:var(--complete-wash)}
-.pill.in_progress,.pill.Attention{color:var(--active);background:var(--active-wash)}
-.pill.unknown,.pill.Unknown,.pill.cancelled,.pill.not_collected{color:var(--unknown);background:var(--unknown-wash)}
+.filters-summary b{color:var(--ink)}
+.review-tools{min-width:220px}
+.table-region{max-width:100%;border:1px solid var(--line);border-radius:var(--card);overflow:hidden;background:var(--sheet)}
+.table-region:focus-visible{outline-offset:2px}
+.ledger{display:block;width:100%;border-collapse:collapse}
+.ledger caption{display:block;text-align:left;font-size:14px;color:var(--muted);padding:12px 16px;background:var(--wash);border-bottom:1px solid var(--line)}
+.ledger thead,.ledger tbody{display:block}
+.ledger tr{display:grid;grid-template-columns:var(--cols);border-bottom:1px solid var(--line)}
+.ledger thead tr{background:var(--wash)}
+.ledger tbody tr:last-child{border-bottom:0}
+.ledger tbody tr:hover{background:#FAFBFC}
+.ledger th,.ledger td{display:block;min-width:0;padding:12px 16px;text-align:left}
+.ledger th{font-size:12.5px;font-weight:650;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.ledger td{font-size:14px}
+.ledger .evidence-head{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ledger td.evidence{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;padding:0 16px 6px;margin-top:-6px}
+.ledger td.evidence details{order:-1}
+.ledger td.evidence details[open]{flex-basis:100%}
+.jobs-table{--cols:minmax(0,1.25fr) minmax(0,.9fr) minmax(0,1.15fr) minmax(0,1fr)}
+.review-table{--cols:minmax(120px,.4fr) minmax(0,1.3fr) minmax(0,1.5fr)}
+.history-table{--cols:minmax(0,.9fr) minmax(0,1.1fr) minmax(0,1.2fr) minmax(0,.8fr)}
+.item-table{--cols:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr)}
+.source-table{--cols:minmax(0,1.1fr) minmax(0,.65fr) minmax(0,1fr) minmax(0,1.3fr)}
+td strong{display:block;font-weight:650}
+td small{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:3px}
+td.evidence .id{margin:0}
+td time{display:block}
+.id{display:block;font-size:13px;line-height:1.5;color:var(--muted);margin-top:3px}
+.id span{white-space:nowrap}
+.id b{font-weight:600;margin-right:6px}
+.nw{white-space:nowrap}
+td small.flag{color:var(--high);font-weight:600}
+.portal{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:13px;font-weight:600}
+.portal .icon{width:14px;height:14px}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.5;margin-bottom:4px;background:var(--info-wash);color:var(--info)}
+.pill.failed,.pill.Error,.pill.denied,.pill.error{background:var(--critical-wash);color:var(--critical)}
+.pill.warning,.pill.Warning,.pill.partial{background:var(--high-wash);color:var(--high)}
+.pill.completed,.pill.complete{background:var(--ok-wash);color:var(--ok)}
+.pill.in_progress,.pill.Attention{background:var(--low-wash);color:var(--low)}
 details{min-width:0}
-summary{cursor:pointer;color:#18577D;font-weight:600;min-height:44px;padding:8px 0}
+summary{cursor:pointer;color:var(--link);font-weight:600;font-size:14px;min-height:44px;padding:10px 0;display:list-item}
+summary::marker{color:var(--muted)}
 summary:hover{text-decoration:underline}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:12px/1.6 Consolas,monospace;background:var(--wash);border:1px solid var(--line);padding:12px;max-height:440px;overflow:auto;margin:8px 0}
-.evidence-block{margin-top:12px}
-.evidence-block h4{font-size:14px;margin:12px 0 6px}
-.empty{padding:28px 20px;border:1px dashed var(--field);background:var(--wash);margin:16px 0;color:var(--muted)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:12.5px/1.55 ui-monospace,"Cascadia Mono",Consolas,monospace;background:var(--wash);border:1px solid var(--line);border-radius:var(--radius);padding:12px;max-height:440px;overflow:auto;margin:4px 0 8px}
+.empty{padding:24px 20px;border:1px dashed var(--field);border-radius:var(--card);background:var(--wash);margin:16px 0;color:var(--muted)}
 .pager{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:16px}
 .pager p{margin:0;font-size:14px;color:var(--muted)}
 .pager-controls{display:flex;gap:8px;flex-wrap:wrap;max-width:100%}
-.queue{display:grid;gap:0}
-.review-record{padding:18px 0;border-bottom:1px solid var(--line)}
-.review-record:last-child{border-bottom:0;padding-bottom:0}
-.review-record:first-child{padding-top:0}
-.review-title{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
-.review-record p{font-size:14px;margin-bottom:6px}
-.identity{font-size:12px;color:var(--muted)}
-.history-table th:nth-child(1){width:23%}
-.history-table th:nth-child(2){width:25%}
-.history-table th:nth-child(3){width:30%}
-.history-table th:nth-child(4){width:22%}
-.source-table th:nth-child(1){width:25%}
-.source-table th:nth-child(2){width:17%}
-.source-table th:nth-child(3){width:20%}
-.source-table th:nth-child(4){width:38%}
-.item-table th:nth-child(1){width:28%}
-.item-table th:nth-child(2){width:24%}
-.item-table th:nth-child(3){width:21%}
-.item-table th:nth-child(4){width:27%}
-.limits-list{padding-left:20px;font-size:14px;max-width:85ch}
-.limits-list li{margin:8px 0}
-.hash{font:12px/1.6 Consolas,monospace;overflow-wrap:anywhere;max-width:none}
-footer{max-width:1488px;margin:0 auto 32px;padding:0 32px;color:var(--muted);font-size:13px}
-footer p{max-width:90ch}
+.limits-list{padding-left:20px;font-size:15px;max-width:85ch;margin:12px 0 16px}
+.limits-list li{margin:6px 0}
+.hash{font:12.5px/1.6 ui-monospace,"Cascadia Mono",Consolas,monospace;max-width:none;color:var(--muted)}
+footer{background:var(--bar);color:#CFCAC1;margin-top:16px}
+.foot-in{max-width:1320px;margin:0 auto;padding:20px clamp(16px,3vw,40px) 28px;font-size:13px;display:grid;gap:6px}
+footer p{margin:0;max-width:120ch}
+footer strong{color:#FFFFFF}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:1000px){
-  .mast-inner{grid-template-columns:160px minmax(0,1fr);gap:20px}
-  .stamp{grid-column:2;text-align:left;max-width:none}
-  .intro{grid-template-columns:1fr}
-  .intro-actions{padding:20px 0 0;border-left:0;border-top:1px solid var(--line)}
-  .count-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-in{grid-template-columns:1fr}
+  .tag,.wordmark span{display:none}
 }
+@media(max-width:480px){.wordmark{display:none}}
+@media(max-width:360px){.id span{white-space:normal}}
 @media(max-width:640px){
-  .mast-inner{padding:22px 18px;grid-template-columns:1fr;gap:18px}
-  .brand-frame{max-width:190px;min-height:76px}
-  .stamp{grid-column:auto}
-  h1{font-size:26px}
-  .navigation-inner{padding:0 8px;gap:0}
-  .navigation a{padding:11px 10px;font-size:14px}
-  main{padding:18px 12px 24px}
-  section{padding:20px 16px;margin-bottom:18px}
-  h2{font-size:21px}
+  .bar-in{padding:8px 12px;gap:6px 12px}
+  .navigation{order:3;width:100%;gap:0}
+  .navigation a{padding:0 9px}
+  .hero{padding:24px 16px 96px}
+  .lead{font-size:16px}
+  .page{padding:0 12px 32px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-72px}
+  .kpi{padding:14px}
+  .kpi dd{font-size:30px}
+  .kpi dd.word{font-size:22px}
+  .card,.sheet{padding:18px 14px}
+  .sheet{margin-top:20px}
   .facts,.filters{grid-template-columns:1fr;gap:14px}
-  .count-strip{gap:16px}
-  .count-strip dt{font-size:12px}
-  .section-head{display:block}
-  .section-head button{margin-top:8px}
-  fieldset{padding:12px}
-  .filter-footer{align-items:start;flex-direction:column}
   .downloads{display:grid;grid-template-columns:1fr}
-  .table-region{overflow:visible}
-  table,tbody,thead,tr,td,th,caption{display:block;width:auto!important}
-  thead{position:absolute;width:1px!important;height:1px;overflow:hidden;clip-path:inset(50%)}
-  tbody tr{padding:8px 0;border-bottom:1px solid var(--field)}
-  tbody tr:last-child{border:0}
-  tbody td{border:0;display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;padding:8px 12px}
-  tbody td::before{content:attr(data-label);font-size:12px;font-weight:650;color:var(--muted)}
-  footer{padding:0 18px}
+  .filter-footer{align-items:stretch;flex-direction:column}
+  .review-tools{min-width:0;width:100%}
+  .brow{grid-template-columns:minmax(0,1fr) 44px}
+  .brow .bt{grid-column:1/-1;grid-row:2}
+  .ledger caption{padding:10px 12px}
+  .ledger thead{position:absolute;width:1px!important;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .ledger tr{display:block;padding:6px 0}
+  .ledger td,.ledger td.evidence{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;padding:8px 12px;margin:0}
+  .ledger td::before{content:attr(data-label);font-size:12px;font-weight:650;color:var(--muted)}
+  .ledger td>.pill{justify-self:start}
+  .ledger td.evidence{display:block;padding:2px 12px 10px}
+  .ledger td.evidence::before{content:none}
+  .steps li{grid-template-columns:28px minmax(0,1fr)}
+  .steps button,.steps a{grid-column:2;grid-row:auto;justify-self:start;margin-top:6px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @media print{
-  @page{size:landscape;margin:12mm}
+  @page{size:A4 landscape;margin:11mm 11mm 15mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html{scroll-padding-top:0}
   body{background:#FFFFFF;font-size:10pt}
-  .mast{print-color-adjust:exact;-webkit-print-color-adjust:exact}
-  .mast-inner{padding:16px;grid-template-columns:150px minmax(0,1fr) 230px}
-  .stamp{grid-column:auto;text-align:right}
-  h1{font-size:23pt}
-  .navigation,.downloads,.pager-controls,.filter-footer button,.section-head button,.skip{display:none!important}
-  main{padding:12px 0;max-width:none}
-  section{padding:14px;margin-bottom:18px;break-inside:auto}
-  .intro{grid-template-columns:1.5fr 1fr;gap:20px}
-  .intro-actions{padding:0 0 0 20px;border-top:0;border-left:1px solid var(--line)}
-  .filters{grid-template-columns:repeat(3,minmax(0,1fr))}
-  fieldset{display:none}
-  .count-strip{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .bar{position:static}
+  .bar-in{padding:0 0 6px;max-width:none}
+  .skip,.navigation,.acts,fieldset,.downloads,.pager-controls,.review-tools,.filter-footer,.notice .icon,button{display:none!important}
+  .hero{padding:16px 20px 72px}
+  .hero-in{grid-template-columns:minmax(0,1fr) 250px;gap:12px 28px;max-width:none}
+  .hero h1{font-size:24pt}
+  .lead{font-size:11pt}
+  .signal .verdict{font-size:17pt}
+  .page{max-width:none;padding:0}
+  .kpis{margin-top:-54px;grid-template-columns:repeat(6,minmax(0,1fr))}
+  .kpi{box-shadow:none;padding:10px 12px}
+  .kpi dd{font-size:22pt}.kpi dd.word{font-size:15pt}
+  .grid2{grid-template-columns:1fr 1fr;margin-top:14px;align-items:start}
+  .kpi,.signal,.notice,.steps li,.brow,.facts div{break-inside:avoid}
+  .card{padding:14px}
+  .sheet{margin-top:16px;padding:14px;break-inside:auto}
+  .sh,h2,h3{break-after:avoid}
   .table-region{overflow:visible}
-  table{table-layout:fixed}
-  tr,.review-record{break-inside:avoid}
-  thead{display:table-header-group}
-  td,th{padding:7px;font-size:9pt}
-  pre{max-height:none;overflow:visible;font-size:8pt}
-  summary{min-height:0;padding:4px 0}
-  details{break-inside:auto}
-  button{display:none}
-  footer{padding:0}
+  .ledger th,.ledger td{padding:6px 8px;font-size:8.5pt}
+  .ledger td.evidence{padding:0 8px 6px}
+  .ledger tbody tr>td:not(.evidence){break-inside:avoid}
+  td small{font-size:8pt}
+  pre{max-height:none;overflow:visible;font-size:7pt;line-height:1.35;padding:6px}
+  summary{min-height:0;padding:2px 0}
+  footer{background:none;color:var(--muted);margin-top:12px}
+  .foot-in{padding:8px 0;max-width:none}
+  footer strong{color:var(--ink)}
 }
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to evidence</a>
-<header class="mast">
-  <div class="mast-inner">
-    <div class="brand-frame" aria-label="Customer branding">__LOGO__</div>
-    <div><h1>Azure Backup operations</h1><p>Existing jobs. Native evidence. A human decision.</p><p id="client-name">__CLIENT__</p></div>
-    <div class="stamp"><strong id="provenance">DATED OFFLINE SNAPSHOT</strong><span id="reference">Opening recorded evidence</span></div>
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand-frame">__LOGO__</div>
+    <span class="wordmark">Azure SRE Agent<span> &middot; Backup operations</span></span>
+    <nav class="navigation" aria-label="Report sections"><a href="#overview">Summary</a><a href="#jobs">Jobs</a><a href="#review">Human review</a><a href="#items">Items &amp; coverage</a><a href="#sources">Sources</a></nav>
+    <div class="acts"><span class="tag">Read-only</span><button type="button" class="print-button" id="print" disabled><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>Print / PDF</button></div>
   </div>
 </header>
-<nav class="navigation" aria-label="Report sections"><div class="navigation-inner">
-  <a href="#window">Window &amp; scope</a><a href="#jobs">Jobs</a><a href="#review">Human review</a><a href="#items">Items &amp; coverage</a><a href="#sources">Sources</a>
-</div></nav>
 <main id="main" tabindex="-1">
-<noscript><section><h2>JavaScript is disabled</h2><p>This offline report needs local JavaScript for filters and disclosure. Use the accompanying full JSON and ordinary CSV files. No live source is queried by this page.</p></section></noscript>
-<section id="opening" role="status"><h2>Opening the complete local snapshot</h2><p>No network request or live polling is performed.</p></section>
-<section id="fatal" hidden role="alert"><h2>Evidence could not be opened</h2><p id="fatal-message"></p><p>Use the accompanying JSON/CSV files and report this artifact failure. Do not interpret this view as an empty or successful backup review.</p></section>
+<noscript><div class="page state-page"><section class="sheet"><h2>JavaScript is disabled</h2><p>This offline report needs local JavaScript for filters and disclosure. Use the accompanying full JSON and ordinary CSV files. No live source is queried by this page.</p></section></div></noscript>
+<div class="page state-page" id="opening" role="status"><section class="sheet"><h2>Opening the complete local snapshot</h2><p>No network request or live polling is performed.</p></section></div>
+<div class="page state-page" id="fatal" hidden role="alert"><section class="sheet"><h2>Evidence could not be opened</h2><p id="fatal-message"></p><p>Use the accompanying JSON/CSV files and report this artifact failure. Do not interpret this view as an empty or successful backup review.</p></section></div>
 <div id="report" hidden>
-<section id="window">
-  <div class="intro">
+<section class="hero" id="overview" aria-labelledby="report-title">
+  <div class="hero-in">
     <div>
-      <h2>Read the window before the result</h2>
-      <p>This is a review of observed operations, not a protection or recovery certification. Monthly is the review cadence, not the amount of available history.</p>
-      <dl class="facts">
-        <div><dt>Requested start, inclusive (UTC)</dt><dd id="requested-start"></dd></div>
-        <div><dt>Requested end, exclusive (UTC)</dt><dd id="requested-end"></dd></div>
-        <div><dt>Fixed approved vaults</dt><dd id="vault-count"></dd></div>
-        <div><dt id="finished-label">Current collection finished (UTC)</dt><dd id="finished"></dd></div>
-      </dl>
-      <p id="coverage-notice" class="notice"></p>
+      <h1 id="report-title">Azure Backup operations review</h1>
+      <p class="lead" id="hero-summary"></p>
+      <ul class="meta" aria-label="Snapshot facts">
+        <li class="on" id="provenance">DATED OFFLINE SNAPSHOT</li><li id="reference">Opening recorded evidence</li><li id="hero-window"></li><li id="hero-scope"></li><li id="client-name">__CLIENT__</li>
+      </ul>
     </div>
-    <div class="intro-actions">
-      <h3>Keep the whole workpaper</h3>
-      <p class="note">Downloads always include every received record and source, regardless of filters or the visible page. Full JSON is the exact embedded UTF-8 byte sequence, not a reserialized display model.</p>
-      <div class="downloads">
-        <button type="button" class="primary" id="export-json" disabled>Full source JSON</button>
-        <button type="button" id="export-jobs" disabled>All jobs CSV</button>
-        <button type="button" id="export-coverage" disabled>Items / coverage CSV</button>
-        <button type="button" id="print" disabled>Print matching evidence</button>
-      </div>
-      <p class="note">No incident/ticket, attachment or closure is created here. Review decisions remain with IT Operations.</p>
-      <details><summary>Scope and source boundaries</summary><pre id="scope-text"></pre></details>
-    </div>
+    <aside class="signal" aria-labelledby="verdict-label">
+      <p class="k" id="verdict-label">Verdict</p>
+      <p class="verdict" id="verdict"></p>
+      <p id="verdict-detail"></p>
+    </aside>
+    <div class="dist"><p>Human review queue by severity, requested window</p><div class="track" id="dist-track" role="img"></div><ul class="legend" id="dist-legend"></ul></div>
   </div>
-  <dl class="count-strip">
-    <div><dt>Backup records in requested window</dt><dd id="backup-count"></dd></div>
-    <div><dt>Restore / Delete / other records</dt><dd id="other-count"></dd></div>
-    <div><dt>Observed protected-item records</dt><dd id="item-count"></dd></div>
-    <div><dt>Expected protection denominator</dt><dd>Unknown</dd></div>
-  </dl>
 </section>
-<section id="jobs">
-  <div class="section-head"><div><h2>Native job ledger</h2><p>List and later JobDetails observations remain separate. Failed, warnings, InProgress, Completed, Cancelled and unknown states are not merged into a success rate.</p></div><button type="button" id="today">Focus last 24 hours</button></div>
+<div class="page">
+<dl class="count-strip kpis" id="summary">
+  <div class="kpi"><dt>Failed<span>Backup records in the requested window</span></dt><dd id="failed-count"></dd></div>
+  <div class="kpi"><dt>With warnings<span>Backup records; not relabeled Completed</span></dt><dd id="warning-count"></dd></div>
+  <div class="kpi"><dt>Backup records in requested window<span id="received-note"></span></dt><dd id="backup-count"></dd></div>
+  <div class="kpi"><dt>Restore / Delete / other records<span>Kept separate from Backup</span></dt><dd id="other-count"></dd></div>
+  <div class="kpi"><dt>Observed protected-item records<span>As returned by the permitted source</span></dt><dd id="item-count"></dd></div>
+  <div class="kpi"><dt>Expected protection denominator<span>Policy schedules not evaluated</span></dt><dd class="word">Unknown</dd></div>
+</dl>
+<p class="notice sim" id="sim-banner" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18h.01"/></svg><span id="sim-text"></span></p>
+<p id="coverage-notice" class="notice"></p>
+<section id="window" class="grid2" aria-label="Window, scope and complete files">
+  <div class="card">
+    <h2>Read the window before the result</h2>
+    <p class="sub">This is a review of observed operations, not a protection or recovery certification. Monthly is the review cadence, not the amount of available history.</p>
+    <dl class="facts">
+      <div><dt>Requested start, inclusive (UTC)</dt><dd id="requested-start"></dd></div>
+      <div><dt>Requested end, exclusive (UTC)</dt><dd id="requested-end"></dd></div>
+      <div><dt>Fixed approved vaults</dt><dd id="vault-count"></dd></div>
+      <div><dt id="finished-label">Current collection finished (UTC)</dt><dd id="finished"></dd></div>
+    </dl>
+    <details><summary>Scope and source boundaries</summary><pre id="scope-text"></pre></details>
+  </div>
+  <div class="card" id="files">
+    <h2>Keep the whole workpaper</h2>
+    <p class="sub">Downloads always include every received record and source, regardless of filters or the visible page. Full JSON is the exact embedded UTF-8 byte sequence, not a reserialized display model.</p>
+    <div class="downloads">
+      <button type="button" class="primary" id="export-json" disabled>Full source JSON</button>
+      <button type="button" id="export-jobs" disabled>All jobs CSV</button>
+      <button type="button" id="export-coverage" disabled>Items / coverage CSV</button>
+    </div>
+    <p class="note">No incident/ticket, attachment or closure is created here; review decisions remain with IT Operations. Print / PDF renders every matching job record and opens all evidence.</p>
+  </div>
+</section>
+<div class="grid2">
+  <section class="card" id="actions" aria-labelledby="next-title"><h2 id="next-title">What to do next</h2><p class="sub">Review steps for the analyst, ordered by severity; the report itself changes no backup, policy or ticket.</p><ol class="steps" id="next-steps"></ol></section>
+  <section class="card" aria-labelledby="states-title"><h2 id="states-title">Backup records by native state</h2><p class="sub">Backup operations in the requested window, counted by their native state word; Completed alone does not demonstrate a restore.</p><div class="bars" id="state-bars"></div></section>
+</div>
+<section id="jobs" class="sheet" aria-labelledby="jobs-title">
+  <div class="sh"><div><h2 id="jobs-title">Native job ledger</h2><p class="sub">List and later JobDetails observations remain separate. Failed, warnings, InProgress, Completed, Cancelled and unknown states are not merged into a success rate.</p></div><button type="button" id="today">Focus last 24 hours</button></div>
   <fieldset><legend>Filter this snapshot</legend><div class="filters">
     <label for="vault-filter">Vault (full-ID scope)<select id="vault-filter"></select></label>
     <label for="window-filter">Job-start window<select id="window-filter">
@@ -1244,54 +1328,61 @@ footer p{max-width:90ch}
     <label for="operation-filter">Native operation<select id="operation-filter"></select></label>
     <label for="item-filter">Exactly linked protected item<select id="item-filter"></select></label>
     <label for="job-filter">Job ID / entity text<input id="job-filter" type="search" maxlength="512" autocomplete="off" placeholder="Filter the recorded jobs"></label>
+    <label for="job-sort">Order<select id="job-sort"><option value="priority">Review priority, then newest start</option><option value="newest">Newest start first</option><option value="oldest">Oldest start first</option><option value="source">Source order</option></select></label>
   </div><div class="filter-footer"><p class="note">Vault selection also filters items, history, review and sources. Other controls filter jobs only; they never hide source blind spots. Counts above always describe the full approved scope.</p><button type="button" id="reset">Reset filters</button></div></fieldset>
   <p class="filters-summary" id="filter-summary" aria-live="polite"></p>
   <p class="note" id="retained-note"></p>
   <div id="jobs-empty" class="empty" hidden>No matching job records. This does not establish that no backup was required or that all backups succeeded. Check window, source access, paging and item coverage.</div>
   <div class="table-region" id="jobs-region" role="region" aria-label="Native job records" tabindex="0">
-    <table class="jobs-table"><caption>Native dates and duration are retained; missing values are Unknown. Expand Evidence for original list/detail properties and errors.</caption>
-      <thead><tr><th scope="col">Job / entity</th><th scope="col">Native state</th><th scope="col">Operation / workload</th><th scope="col">UTC dates / duration</th><th scope="col">Source evidence</th></tr></thead><tbody id="jobs-body"></tbody>
+    <table class="ledger jobs-table"><caption>Native dates and duration are retained; missing values are Unknown. Expand Evidence for original list/detail properties and errors.</caption>
+      <thead><tr><th scope="col">Job / entity</th><th scope="col">Native state</th><th scope="col">Operation / workload</th><th scope="col">UTC dates / duration</th><th scope="col" class="evidence-head">Source evidence</th></tr></thead><tbody id="jobs-body"></tbody>
     </table>
   </div>
   <div class="pager"><p id="page-note"></p><div class="pager-controls"><button type="button" id="previous">Previous records</button><button type="button" id="next">Next records</button></div></div>
 </section>
-<section id="review">
-  <h2>Human review, not incidents</h2>
-  <p class="note">Native failures/warnings, unfinished/cancelled work, unknown metadata and source/history blind spots. Job candidates respect the selected vault and job-start window; source/history uncertainty remains visible. No invented SLA or overdue threshold.</p>
-  <p class="filters-summary" id="review-note"></p><div class="queue" id="review-records"></div>
+<section id="review" class="sheet" aria-labelledby="review-title">
+  <div class="sh"><div><h2 id="review-title">Human review, not incidents</h2><p class="sub">Native failures/warnings, unfinished/cancelled work, unknown metadata and source/history blind spots. Job candidates respect the selected vault and job-start window; source/history uncertainty remains visible. No invented SLA or overdue threshold.</p></div>
+    <label class="review-tools" for="review-filter">Severity<select id="review-filter"><option value="all">All severities</option><option value="Error">Error</option><option value="Warning">Warning</option><option value="Attention">Attention</option><option value="Unknown">Unknown</option></select></label></div>
+  <p class="filters-summary" id="review-note" aria-live="polite"></p>
+  <div id="review-empty" class="empty" hidden>No review candidates in this selection. This is not proof of successful protection or recovery.</div>
+  <div class="table-region" id="review-region" role="region" aria-label="Human review queue" tabindex="0"><table class="ledger review-table">
+    <caption>Ordered by severity. Each record links to its original evidence; no incident or ticket is created.</caption>
+    <thead><tr><th scope="col">Severity</th><th scope="col">Record</th><th scope="col">Why it needs a human</th><th scope="col" class="evidence-head">Original evidence</th></tr></thead><tbody id="review-records"></tbody>
+  </table></div>
 </section>
-<section id="items">
-  <h2>Item coverage without an invented denominator</h2>
-  <p>These are the protected items actually returned by the permitted source, not the list of everything that should be protected. A policy ID is not an evaluated schedule. No friendly-name join is used.</p>
+<section id="items" class="sheet" aria-labelledby="items-title">
+  <h2 id="items-title">Item coverage without an invented denominator</h2>
+  <p class="sub">These are the protected items actually returned by the permitted source, not the list of everything that should be protected. A policy ID is not an evaluated schedule. No friendly-name join is used.</p>
   <h3>Requested versus verified history</h3>
-  <div class="table-region" role="region" aria-label="History coverage by vault" tabindex="0"><table class="history-table">
+  <div class="table-region" role="region" aria-label="History coverage by vault" tabindex="0"><table class="ledger history-table">
     <caption>Observed job min/max dates are a span of returned records, never proof of continuous history or retention. ARG's 14-day job history is not a universal REST limit.</caption>
-    <thead><tr><th scope="col">Approved vault</th><th scope="col">Requested / observed</th><th scope="col">Verified availability / gaps</th><th scope="col">Read evidence</th></tr></thead><tbody id="history-body"></tbody>
+    <thead><tr><th scope="col">Approved vault</th><th scope="col">Requested / observed</th><th scope="col">Verified availability / gaps</th><th scope="col">Read evidence</th><th scope="col" class="evidence-head">History receipt</th></tr></thead><tbody id="history-body"></tbody>
   </table></div>
   <h3>Observed protected items</h3>
   <p class="note">An exact full-ID job association can be absent or ambiguous. Zero exact links does not establish a missed backup. Current lastBackupStatus/lastRecoveryPoint metadata is not a restore or integrity test.</p>
   <div id="items-empty" class="empty" hidden>No protected-item records were returned for this selection. This is not proof of an empty expected scope; inspect each source receipt.</div>
-  <div class="table-region" id="items-region" role="region" aria-label="Observed protected items" tabindex="0"><table class="item-table">
+  <div class="table-region" id="items-region" role="region" aria-label="Observed protected items" tabindex="0"><table class="ledger item-table">
     <caption>Expected jobs, missed occurrences and intended protection coverage remain Unknown; policy schedules/intent were not evaluated.</caption>
-    <thead><tr><th scope="col">Item / source identity</th><th scope="col">Native protection metadata</th><th scope="col">Latest native dates</th><th scope="col">Association / evidence</th></tr></thead><tbody id="items-body"></tbody>
+    <thead><tr><th scope="col">Item / source identity</th><th scope="col">Native protection metadata</th><th scope="col">Latest native dates</th><th scope="col">Association</th><th scope="col" class="evidence-head">Item evidence</th></tr></thead><tbody id="items-body"></tbody>
   </table></div>
 </section>
-<section id="sources">
-  <h2>Source and pagination ledger</h2>
-  <p class="note">A received HTTP 200 is a read receipt, not a Completed job. Explicit empty arrays, denied reads, malformed responses and partial paging remain different. Every received page, including pages preceding an error, stays in the full JSON and coverage CSV.</p>
+<section id="sources" class="sheet" aria-labelledby="sources-title">
+  <h2 id="sources-title">Source and pagination ledger</h2>
+  <p class="sub">A received HTTP 200 is a read receipt, not a Completed job. Explicit empty arrays, denied reads, malformed responses and partial paging remain different. Every received page, including pages preceding an error, stays in the full JSON and coverage CSV.</p>
   <p class="filters-summary" id="source-note"></p>
-  <div class="table-region" role="region" aria-label="Source receipts" tabindex="0"><table class="source-table">
+  <div class="table-region" role="region" aria-label="Source receipts" tabindex="0"><table class="ledger source-table">
     <caption>Expand each source for original response fields, native error/warning evidence, request path, collection UTC and any sanitized transport errors. Headers and tokens are excluded.</caption>
-    <thead><tr><th scope="col">Source / scope</th><th scope="col">Read status</th><th scope="col">Pages / records</th><th scope="col">Receipt / original fields</th></tr></thead><tbody id="sources-body"></tbody>
+    <thead><tr><th scope="col">Source / scope</th><th scope="col">Read status</th><th scope="col">Pages / records</th><th scope="col">Read errors</th><th scope="col" class="evidence-head">Full source receipt</th></tr></thead><tbody id="sources-body"></tbody>
   </table></div>
 </section>
-<section id="limits"><h2>Business limits that travel with the evidence</h2><ul class="limits-list" id="limits-list"></ul>
+<section id="limits" class="sheet" aria-labelledby="limits-title"><h2 id="limits-title">Business limits that travel with the evidence</h2><ul class="limits-list" id="limits-list"></ul>
   <p class="note">Precision-sensitive source numbers are shown as exact text in disclosure. Original JSON numeric types and bytes are preserved in the full JSON download. CSV formula-like text is apostrophe-prefixed for spreadsheet safety; the JSON keeps the original text.</p>
   <p class="hash">Embedded full JSON SHA-256: <span id="snapshot-hash">__SNAPSHOT_HASH__</span></p>
 </section>
 </div>
+</div>
 </main>
-<footer><p>A dated, offline operations review. No live refresh, recovery action, protection change, ticket or notification. Shared captures require separate privacy review; SIMULATED data is never live evidence.</p></footer>
+<footer><div class="foot-in"><p><strong>Azure SRE Agent</strong> &middot; Read-only &middot; Azure Backup operations review &middot; <span id="footer-ref">dated offline snapshot</span></p><p>A dated, offline operations review. No live refresh, recovery action, protection change, ticket or notification. Shared captures require separate privacy review; SIMULATED data is never live evidence.</p></div></footer>
 <script id="snapshot-bytes" type="application/octet-stream">__SNAPSHOT_B64__</script>
 <script id="jobs-csv-bytes" type="application/octet-stream">__JOBS_CSV_B64__</script>
 <script id="coverage-csv-bytes" type="application/octet-stream">__COVERAGE_CSV_B64__</script>
@@ -1307,11 +1398,46 @@ footer p{max-width:90ch}
     return element;
   };
   const cell = (label, ...children) => {
-    const td = node("td"); td.dataset.label = label;
+    const td = node("td"); td.dataset.label = label; td.setAttribute("role","cell");
     for (const child of children) td.append(child);
     return td;
   };
+  const row = () => { const tr = node("tr"); tr.setAttribute("role","row"); return tr; };
   const pill = (value, kind) => node("span", value, "pill " + (["failed","warning","completed","in_progress","cancelled","unknown","complete","partial","denied","error","not_collected","Error","Warning","Attention","Unknown"].includes(kind) ? kind : "unknown"));
+  const plural = (count, word) => count + " " + word + (count === 1 ? "" : "s");
+  const SEVERITIES = ["Error","Warning","Attention","Unknown"];
+  const TONE = {Error:"critical",Warning:"high",Attention:"low",Unknown:"info"};
+  const BAR = {critical:"var(--critical-bar)",high:"var(--high-bar)",low:"var(--low-bar)",info:"var(--info-bar)",ok:"var(--ok-bar)"};
+  const RANK = {failed:0,warning:1,in_progress:2,cancelled:2,unknown:3,completed:4};
+  const CATEGORY_TONE = {failed:"critical",warning:"high",in_progress:"low",cancelled:"info",unknown:"info",completed:"ok"};
+  const WINDOW_LABEL = {in_requested_window:"In requested window",outside_requested_window:"Outside requested window",unknown:"Start time Unknown"};
+  function category(value) {
+    if (typeof value !== "string") return "unknown";
+    const compact = value.replace(/[\s_-]/g,"").toLowerCase();
+    return {failed:"failed",completedwithwarnings:"warning",completedwithwarning:"warning",warning:"warning",warnings:"warning",inprogress:"in_progress",
+      completed:"completed",cancelled:"cancelled",canceled:"cancelled"}[compact] || "unknown";
+  }
+  const segment = (id, key) => {
+    const match = typeof id === "string" ? new RegExp("/" + key + "/([^/]+)","i").exec(id) : null;
+    return match ? match[1] : null;
+  };
+  function idText(value, label) {
+    // Full native IDs stay visible and copyable; they wrap only after "/" or ";", never inside a GUID or name.
+    const span = node("span", undefined, "id");
+    if (label) span.append(node("b",label));
+    if (typeof value !== "string" || !value) { span.append("Unknown"); return span; }
+    for (const part of value.match(/[^/;]*[/;]?/g)) if (part) span.append(part.length > 44 ? part : node("span",part),document.createElement("wbr"));
+    return span;
+  }
+  const identity = (title, ...lines) => { const box = node("div",undefined,"who"); box.append(node("strong",title),...lines.map(line => node("small",line))); return box; };
+  function dated(tag, value) {
+    // ISO timestamps never wrap at their hyphens.
+    const element = node(tag), source = text(value); let last = 0;
+    for (const match of source.matchAll(/\d{4}-\d{2}-\d{2}T[\d:.]+Z?/g)) { element.append(source.slice(last,match.index),node("span",match[0],"nw")); last = match.index + match[0].length; }
+    element.append(source.slice(last));
+    return element;
+  }
+  const scopeLine = id => "Vault " + text(segment(id,"vaults")) + " \u00B7 RG " + text(segment(id,"resourceGroups"));
   function bytes(id) {
     const binary = atob(byId(id).textContent.trim());
     const result = new Uint8Array(binary.length);
@@ -1345,6 +1471,11 @@ footer p{max-width:90ch}
     detail.append(node("summary", label), node("pre", JSON.stringify(value, null, 2)));
     return detail;
   };
+  const evidenceCell = (label, value, ...notes) => {
+    const td = cell(label, disclosure(label, value), ...notes);
+    td.className = "evidence";
+    return td;
+  };
   const download = (id, filename, mime) => {
     const url = URL.createObjectURL(new Blob([bytes(id)], {type:mime}));
     const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename;
@@ -1376,6 +1507,17 @@ footer p{max-width:90ch}
       && (!item || (job.matched_item_id || "").toLowerCase() === item.toLowerCase())
       && (!query || [job.id,job.name,job.entity_name].some(value => typeof value === "string" && value.toLowerCase().includes(query))));
   }
+  const jobRank = job => Math.min(RANK[job.state_category] ?? 3, RANK[category(job.list_status)] ?? 3, RANK[category(job.detail_status)] ?? 3);
+  const started = job => { const value = Date.parse(job.start_time); return Number.isFinite(value) ? value : null; };
+  function ordered(jobs) {
+    const mode = byId("job-sort").value, indexed = jobs.map((job,index) => [job,index]);
+    const newest = (a,b) => (started(b[0]) ?? -Infinity) - (started(a[0]) ?? -Infinity) || a[1]-b[1];
+    if (mode === "source") return jobs;
+    if (mode === "newest") indexed.sort(newest);
+    else if (mode === "oldest") indexed.sort((a,b) => (started(a[0]) ?? Infinity) - (started(b[0]) ?? Infinity) || a[1]-b[1]);
+    else indexed.sort((a,b) => jobRank(a[0]) - jobRank(b[0]) || newest(a,b));
+    return indexed.map(pair => pair[0]);
+  }
   function rawRecord(reference) {
     if (!reference) return null;
     const body = sourceMap.get(reference.source_id).responses[reference.page].body;
@@ -1385,30 +1527,27 @@ footer p{max-width:90ch}
     return {normalized:job, native_list:rawRecord(job.list_ref), native_job_details:rawRecord(job.detail_ref)};
   }
   function renderJobs() {
-    const matches = matchingJobs();
+    const matches = ordered(matchingJobs());
     const pages = Math.max(1, Math.ceil(matches.length/pageSize));
     page = Math.min(page,pages-1);
     const visible = printing ? matches : matches.slice(page*pageSize,(page+1)*pageSize);
     const body = byId("jobs-body"); body.replaceChildren();
     for (const job of visible) {
-      const row = node("tr"); row.dataset.recordKey = job.record_key;
-      const identity = node("div");
-      identity.append(node("strong",job.entity_name || job.name || "Unidentified source row"),node("small",job.id),node("small","Vault: " + job.vault_name));
+      const tr = row(); tr.dataset.recordKey = job.record_key;
       const status = node("div");
-      status.append(pill(job.native_status,job.state_category),node("small","List: " + text(job.list_status)),node("small","Details: " + text(job.detail_status)));
-      if (job.state_changed) status.append(node("small","State changed between reads; both retained."));
+      status.append(pill(job.native_status,job.state_category),node("small","List: " + text(job.list_status)),node("small","Details: " + text(job.detail_status)),
+        node("small","Details read: " + job.details_collection_status));
+      if (job.state_changed) status.append(node("small","State changed between reads; both retained.","flag"));
       const operation = node("div");
-      operation.append(node("strong",job.operation),node("small","Group: " + job.operation_group),
-        node("small","Management: " + text(job.backup_management_type)),node("small","Workload: " + text(job.workload_type)),
-        node("small","Job type: " + text(job.job_type)),node("small","Source type: " + text(job.source_resource_type)));
+      operation.append(node("strong",job.operation),node("small","Group: " + job.operation_group + " \u00B7 Management: " + text(job.backup_management_type)),
+        node("small","Workload: " + text(job.workload_type) + " \u00B7 Job type: " + text(job.job_type)),node("small","Source type: " + text(job.source_resource_type)));
       const dates = node("div");
-      dates.append(node("time",job.start_time),node("small","End: " + text(job.end_time)),node("small","Native duration: " + text(job.duration_native)),
-        node("small",job.window_membership));
-      const evidence = node("div");
-      evidence.append(node("small","Details read: " + job.details_collection_status),node("small","Item link: " + job.association_status),
-        disclosure("Evidence / errors",jobEvidence(job)));
-      row.append(cell("Job / entity",identity),cell("Native state",status),cell("Operation",operation),cell("UTC / duration",dates),cell("Evidence",evidence));
-      body.append(row);
+      dates.append(dated("time",job.start_time),dated("small","End: " + text(job.end_time)),node("small","Native duration: " + text(job.duration_native)),
+        node("small",WINDOW_LABEL[job.window_membership] || text(job.window_membership)));
+      tr.append(cell("Job / entity",identity(job.entity_name || job.name || "Unidentified source row","Job " + text(job.name),scopeLine(job.vault_id),"Item link: " + job.association_status)),
+        cell("Native state",status),cell("Operation",operation),cell("UTC / duration",dates),
+        evidenceCell("Evidence / errors",jobEvidence(job),idText(job.id,"Job ID")));
+      body.append(tr);
     }
     byId("jobs-empty").hidden = matches.length !== 0;
     byId("jobs-region").hidden = matches.length === 0;
@@ -1416,62 +1555,84 @@ footer p{max-width:90ch}
     byId("next").disabled = printing || page+1 >= pages;
     const shown = visible.length;
     byId("page-note").textContent = matches.length ? (printing ? "All " + matches.length + " matching records printed." : "Records " + (page*pageSize+1) + "-" + (page*pageSize+shown) + " of " + matches.length + "; page " + (page+1) + " of " + pages + ".") : "0 matching records. Source coverage is separate.";
-    byId("filter-summary").textContent = matches.length + " matching / " + snapshot.jobs.length + " received job records. Window: " + byId("window-filter").selectedOptions[0].textContent
+    const summary = byId("filter-summary"); summary.replaceChildren(node("b",matches.length + " matching / " + snapshot.jobs.length + " received job records."));
+    summary.append(" Window: " + byId("window-filter").selectedOptions[0].textContent
       + "; vault: " + (byId("vault-filter").selectedOptions[0]?.textContent || "All") + "; state: " + byId("state-filter").selectedOptions[0].textContent
       + "; operation: " + byId("operation-filter").selectedOptions[0].textContent + "; item: " + (byId("item-filter").selectedOptions[0]?.textContent || "All")
-      + "; text: " + (byId("job-filter").value || "none") + ". Full-file downloads ignore filters.";
+      + "; text: " + (byId("job-filter").value || "none") + "; order: " + byId("job-sort").selectedOptions[0].textContent + ". Full-file downloads ignore filters.");
+  }
+  function reviewTitle(row) {
+    if (row.kind === "job") { const job = jobMap.get(row.record_key); return [job.entity_name || job.name || "Unidentified job", "Job " + text(job.name) + " \u00B7 " + text(row.operation)]; }
+    if (row.kind === "protected_item") { const item = itemMap.get(row.record_key); return [text(item.name), "Protected item \u00B7 current metadata"]; }
+    if (row.kind === "source") return ["Source read: " + text(sourceMap.get(row.source_id)?.kind), text(row.source_id)];
+    return ["Requested history", "Vault history coverage"];
+  }
+  function reviewEvidence(row) {
+    if (row.kind === "job") return jobEvidence(jobMap.get(row.record_key));
+    if (row.kind === "protected_item") { const item = itemMap.get(row.record_key); return {normalized:item,native:rawRecord(item.source_ref)}; }
+    if (row.kind === "source") return sourceMap.get(row.source_id);
+    return snapshot.history_coverage.find(item => item.vault_id === row.vault_id);
   }
   function renderReview() {
-    const rows = snapshot.human_review.filter(row => selectedVault(row.vault_id)
+    const severity = byId("review-filter").value;
+    const scoped = snapshot.human_review.filter(row => selectedVault(row.vault_id)
       && (row.kind !== "job" || matchesWindow(jobMap.get(row.record_key))));
-    const container = byId("review-records"); container.replaceChildren();
-    byId("review-note").textContent = rows.length + " candidates / blind spots in this vault/window selection. Not incident records.";
-    if (!rows.length) container.append(node("p","No review candidates in this selection. This is not proof of successful protection or recovery.","empty"));
-    for (const row of rows) {
-      const article = node("article",undefined,"review-record");
-      const title = node("div",undefined,"review-title");
-      title.append(pill(row.severity,row.severity),node("strong",row.kind.replaceAll("_"," ")));
-      article.append(title,node("p",row.reason),node("p",row.resource_id,"identity"));
-      let evidence;
-      if (row.kind === "job") evidence = jobEvidence(jobMap.get(row.record_key));
-      else if (row.kind === "protected_item") {
-        const item = itemMap.get(row.record_key); evidence = {normalized:item,native:rawRecord(item.source_ref)};
-      } else if (row.kind === "source") evidence = sourceMap.get(row.source_id);
-      else evidence = snapshot.history_coverage.find(item => item.vault_id === row.vault_id);
-      article.append(disclosure("Review original evidence",evidence));
-      container.append(article);
+    const rows = scoped.map((row,index) => [row,index]).filter(pair => severity === "all" || pair[0].severity === severity)
+      .sort((a,b) => (SEVERITIES.indexOf(a[0].severity) + 5) % 5 - (SEVERITIES.indexOf(b[0].severity) + 5) % 5 || a[1]-b[1]).map(pair => pair[0]);
+    const counts = SEVERITIES.map(name => scoped.filter(row => row.severity === name).length + " " + name.toLowerCase());
+    byId("review-note").replaceChildren(node("b",rows.length + " of " + scoped.length + " candidates / blind spots"),
+      " in this vault/window selection (" + counts.join(", ") + "). Not incident records.");
+    const body = byId("review-records"); body.replaceChildren();
+    byId("review-empty").hidden = rows.length !== 0;
+    byId("review-region").hidden = rows.length === 0;
+    for (const item of rows) {
+      const tr = row(), [title, line] = reviewTitle(item);
+      tr.append(cell("Severity",pill(item.severity,item.severity)),
+        cell("Record",identity(title,line,scopeLine(item.vault_id))),
+        cell("Why",node("span",item.reason)),evidenceCell("Review original evidence",reviewEvidence(item),idText(item.resource_id,"ID")));
+      body.append(tr);
     }
   }
+  const portalLink = id => {
+    if (typeof id !== "string" || !/^\/subscriptions\/[0-9a-f-]{36}\/resourceGroups\/[^/]+\/providers\/Microsoft\.RecoveryServices\/vaults\/[^/]+$/i.test(id)) return "";
+    const link = node("a",undefined,"portal"); link.href = "https://portal.azure.com/#@/resource" + encodeURI(id); link.target = "_blank"; link.rel = "noopener noreferrer";
+    link.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+    link.append("Vault in Azure portal");
+    return link;
+  };
   function renderHistory() {
     const body = byId("history-body"); body.replaceChildren();
     for (const history of snapshot.history_coverage.filter(row => selectedVault(row.vault_id))) {
-      const row = node("tr"), dates = node("div"), availability = node("div"), read = node("div");
-      dates.append(node("div",history.requested_window.start_utc + " to " + history.requested_window.end_utc),
-        node("small","Returned starts: " + text(history.observed_job_start_min) + " to " + text(history.observed_job_start_max)),
+      const tr = row(), dates = node("div"), availability = node("div"), read = node("div");
+      const vault = identity(text(segment(history.vault_id,"vaults")),"RG " + text(segment(history.vault_id,"resourceGroups")),"Approved vault");
+      dates.append(dated("div",history.requested_window.start_utc + " to " + history.requested_window.end_utc),
+        dated("small","Returned starts: " + text(history.observed_job_start_min) + " to " + text(history.observed_job_start_max)),
         node("small","Returned span is not continuous coverage."));
       availability.append(pill(history.history_status,"unknown"));
       if (!history.verified_available_intervals.length) availability.append(node("div","No verified availability interval."));
-      for (const interval of history.verified_available_intervals) availability.append(node("small","Verified: " + interval.start_utc + " to " + interval.end_utc));
-      for (const interval of history.unverified_or_unknown_intervals) availability.append(node("small","Unknown/unverified: " + interval.start_utc + " to " + interval.end_utc));
-      read.append(pill(history.query_status,history.query_status),node("small","Pagination complete: " + history.pagination_complete),disclosure("History receipt",history));
-      row.append(cell("Vault",node("strong",history.vault_id.split("/").at(-1)),node("small",history.vault_id)),
-        cell("UTC windows",dates),cell("Availability",availability),cell("Read evidence",read));
-      body.append(row);
+      for (const interval of history.verified_available_intervals) availability.append(dated("small","Verified: " + interval.start_utc + " to " + interval.end_utc));
+      for (const interval of history.unverified_or_unknown_intervals) availability.append(dated("small","Unknown/unverified: " + interval.start_utc + " to " + interval.end_utc));
+      read.append(pill(history.query_status,history.query_status),node("small","Pagination complete: " + history.pagination_complete));
+      tr.append(cell("Vault",vault),cell("UTC windows",dates),cell("Availability",availability),cell("Read evidence",read),
+        evidenceCell("History receipt",history,idText(history.vault_id,"Vault ID"),portalLink(history.vault_id)));
+      body.append(tr);
     }
   }
   function renderItems() {
     const items = snapshot.protected_items.filter(item => selectedVault(item.vault_id));
     const body = byId("items-body"); body.replaceChildren();
     for (const item of items) {
-      const row = node("tr"), identity = node("div"), state = node("div"), dates = node("div"), association = node("div");
-      identity.append(node("strong",item.name),node("small",item.id),node("small","Source: " + text(item.source_resource_id)));
-      state.append(node("div","State: " + text(item.protection_state)),node("small","Protection status: " + text(item.protection_status)),
-        node("small","Last backup status: " + text(item.last_backup_status)),node("small","Policy: " + text(item.policy_id)));
-      dates.append(node("div","Last backup: " + text(item.last_backup_time)),node("small","Latest recovery point: " + text(item.last_recovery_point)));
+      const tr = row(), state = node("div"), dates = node("div"), association = node("div");
+      const who = identity(text(item.name),"Vault " + text(item.vault_name) + " \u00B7 " + text(item.workload_type),
+        "Source: " + text(typeof item.source_resource_id === "string" ? item.source_resource_id.split("/").at(-1) : null) + " \u00B7 RG " + text(segment(item.source_resource_id,"resourceGroups")));
+      state.append(pill(item.last_backup_status,category(item.last_backup_status)),node("div","State: " + text(item.protection_state)),node("small","Protection status: " + text(item.protection_status)),
+        node("small","Last backup status: " + text(item.last_backup_status)),node("small","Policy: " + text(segment(item.policy_id,"backupPolicies") || item.policy_id)));
+      dates.append(dated("div","Last backup: " + text(item.last_backup_time)),dated("small","Latest recovery point: " + text(item.last_recovery_point)));
       association.append(node("div",item.matched_backup_job_records + " exact-linked Backup records in requested window"),
-        node("small","Expected / missed jobs: Unknown"),node("small","Association: " + item.job_association_status),
-        disclosure("Item evidence",{normalized:item,native:rawRecord(item.source_ref)}));
-      row.append(cell("Item identity",identity),cell("Native metadata",state),cell("Native dates",dates),cell("Association",association)); body.append(row);
+        node("small","Expected / missed jobs: Unknown"),node("small","Association: " + item.job_association_status));
+      tr.append(cell("Item identity",who),cell("Native metadata",state),cell("Native dates",dates),cell("Association",association),
+        evidenceCell("Item evidence",{normalized:item,native:rawRecord(item.source_ref)},idText(item.id,"Item ID"),idText(item.source_resource_id,"Source resource ID")));
+      body.append(tr);
     }
     byId("items-empty").hidden = items.length !== 0;
     byId("items-region").hidden = items.length === 0;
@@ -1480,16 +1641,16 @@ footer p{max-width:90ch}
     const rows = snapshot.sources.filter(source => source.kind === "subscription" || selectedVault(source.scope_id));
     const body = byId("sources-body"); body.replaceChildren();
     const errors = rows.filter(source => source.status !== "complete").length;
-    byId("source-note").textContent = rows.length + " source receipts; " + errors + " incomplete/denied/not-collected reads. Complete reads may legitimately return zero rows.";
+    byId("source-note").replaceChildren(node("b",rows.length + " source receipts; " + errors + " incomplete/denied/not-collected reads.")," Complete reads may legitimately return zero rows.");
     for (const source of rows) {
-      const row = node("tr"), identity = node("div"), status = node("div"), counts = node("div"), receipt = node("div");
-      identity.append(node("strong",source.kind),node("small",source.source_id),node("small",source.scope_id));
+      const tr = row(), status = node("div"), counts = node("div"), receipt = node("div");
       status.append(pill(source.status,source.status),node("small","Pagination complete: " + source.pagination_complete));
       counts.append(node("div",source.responses.length + " received pages / " + source.records_received + " source records"),
-        node("small","Latest received UTC: " + text(source.responses.at(-1)?.received_utc)));
-      receipt.append(node("small",source.errors.length ? source.errors.map(error => error.code + ": " + error.message).join("\n") : "No read errors recorded."),
-        disclosure("Full source receipt",source));
-      row.append(cell("Source / scope",identity),cell("Read status",status),cell("Pages / rows",counts),cell("Original receipt",receipt)); body.append(row);
+        dated("small","Latest received UTC: " + text(source.responses.at(-1)?.received_utc)));
+      receipt.append(node("small",source.errors.length ? source.errors.map(error => error.code + ": " + error.message).join("\n") : "No read errors recorded."));
+      tr.append(cell("Source / scope",identity(source.kind,source.source_id,source.kind === "subscription" ? "Fixed subscription" : scopeLine(source.scope_id))),cell("Read status",status),cell("Pages / rows",counts),cell("Read errors",receipt),
+        evidenceCell("Full source receipt",source,idText(source.scope_id,"Scope ID")));
+      body.append(tr);
     }
   }
   function renderAll() { renderJobs(); renderReview(); renderHistory(); renderItems(); renderSources(); }
@@ -1507,7 +1668,70 @@ footer p{max-width:90ch}
     byId("operation-filter").value = "all";
     byId("item-filter").value = "";
     byId("job-filter").value = "";
+    byId("job-sort").value = "priority";
+    byId("review-filter").value = "all";
     page = 0; renderAll();
+  }
+  function renderOverview(provenance) {
+    const summary = snapshot.summary, states = summary.backup_state_categories || {}, count = key => Number(states[key] || 0);
+    const window = snapshot.requested_window, short = value => String(value).slice(0,16).replace("T"," ");
+    const queue = snapshot.human_review.filter(row => row.kind !== "job" || jobMap.get(row.record_key)?.window_membership === "in_requested_window");
+    const bySeverity = Object.fromEntries(SEVERITIES.map(name => [name, queue.filter(row => row.severity === name).length]));
+    const lead = byId("hero-summary"), parts = [[count("failed"),"Failed"],[count("warning"),"with warnings"],[count("in_progress")+count("cancelled"),"unfinished or cancelled"],[count("unknown"),"in an unknown native state"]]
+      .filter((part,index) => index < 2 || part[0] > 0);
+    lead.append(node("b",summary.backup_job_records_in_window)," Backup record" + (summary.backup_job_records_in_window === 1 ? "" : "s") + " in the requested window: ");
+    parts.forEach((part,index) => lead.append(index ? (index === parts.length-1 ? " and " : ", ") : "",node("b",part[0])," " + part[1]));
+    lead.append(". ",node("b",queue.length)," review record" + (queue.length === 1 ? "" : "s") + " wait for a human decision; expected protection is ",node("b","Unknown"),".");
+    byId("hero-window").textContent = (window.period === "last_24h" ? "Last 24 hours" : "Last 14 days") + ": " + short(window.start_utc) + " to " + short(window.end_utc) + " UTC";
+    byId("hero-scope").textContent = plural(snapshot.scope.approved_vault_ids.length,"approved vault") + " \u00B7 " + (snapshot.assessment_status === "partial" ? "partial assessment" : "read complete");
+    const verdict = bySeverity.Error ? ["Failures to review","critical"] : bySeverity.Warning ? ["Warnings to review","high"] : bySeverity.Attention ? ["Unfinished work to review","low"]
+      : bySeverity.Unknown ? ["Blind spots to review","info"] : ["Nothing flagged for review","ok"];
+    const label = byId("verdict"); label.replaceChildren(node("i"),verdict[0]); label.className = "verdict tone-" + verdict[1];
+    label.firstChild.setAttribute("aria-hidden","true");
+    const breakdown = SEVERITIES.filter(name => bySeverity[name]).map(name => bySeverity[name] + " " + name.toLowerCase());
+    byId("verdict-detail").textContent = queue.length ? plural(queue.length,"review record") + " for a human decision: " + breakdown.join(", ") + "."
+      : "This snapshot records no native failure, warning or blind spot; Completed alone does not demonstrate recoverability.";
+    const track = byId("dist-track"), legend = byId("dist-legend");
+    track.setAttribute("aria-label","Human review queue: " + (breakdown.join(", ") || "empty"));
+    for (const name of SEVERITIES) {
+      if (!bySeverity[name]) continue;
+      const segment = node("i"); segment.style.width = (100*bySeverity[name]/queue.length) + "%"; segment.style.background = BAR[TONE[name]]; track.append(segment);
+      const key = node("li"), swatch = node("i"); swatch.style.background = BAR[TONE[name]]; key.append(swatch,name + " ",node("b",bySeverity[name])); legend.append(key);
+    }
+    byId("failed-count").textContent = count("failed");
+    byId("warning-count").textContent = count("warning");
+    if (count("failed")) byId("failed-count").className = "alert-critical";
+    if (count("warning")) byId("warning-count").className = "alert-high";
+    byId("received-note").textContent = "of " + plural(summary.job_records_received,"job record") + " received";
+    if (snapshot.provenance !== "LIVE") {
+      byId("sim-text").textContent = provenance + ": " + (snapshot.provenance === "SIMULATED" ? "generated from synthetic fixtures; figures are not real." : "a recorded replay, not a fresh collection.");
+      byId("sim-banner").hidden = false;
+    }
+    const steps = byId("next-steps"), copy = {
+      Error:["Investigate","error record","Native Failed was observed on a job or protected item. Read the list/detail timeline and the source error evidence before deciding."],
+      Warning:["Check","warning record","Native warnings stay separate from Completed. Review the warning, error and task details."],
+      Attention:["Follow up","attention record","Unfinished or cancelled work, or native error text. No overdue or missed-schedule conclusion is inferred."],
+      Unknown:["Close","blind spot","Unverified history, incomplete source reads or unknown states. Verify them before reading missing evidence as a successful backup."]};
+    for (const name of SEVERITIES) {
+      if (!bySeverity[name]) continue;
+      const item = node("li"), title = node("b"), show = node("button","Show " + name.toLowerCase() + " records");
+      title.append(copy[name][0] + " " + plural(bySeverity[name],copy[name][1]) + " ",pill(name,name));
+      show.type = "button";
+      show.addEventListener("click",() => { byId("review-filter").value = name; renderReview(); byId("review-filter").focus(); });
+      item.append(title,node("p",copy[name][2]),show); steps.append(item);
+    }
+    const close = node("li"), files = node("a","Complete files"); files.href = "#files";
+    close.append(node("b",queue.length ? "Record the human decision" : "Nothing is flagged in this snapshot"),
+      node("p",(queue.length ? "Keep the four complete files with the decision" : "Completed jobs do not demonstrate recoverability, integrity or RPO/RTO") + "; any incident or ticket is raised outside this report."),files);
+    steps.append(close);
+    const native = Object.entries(summary.backup_native_states || {}).sort((a,b) => (RANK[category(a[0])] ?? 3) - (RANK[category(b[0])] ?? 3) || b[1]-a[1] || a[0].localeCompare(b[0]));
+    const max = Math.max(1,...native.map(entry => entry[1])), bars = byId("state-bars");
+    if (!native.length) bars.append(node("p","No Backup records in the requested window. This does not establish that no backup was required or that all backups succeeded.","note"));
+    for (const [state,total] of native) {
+      const line = node("div",undefined,"brow"), track = node("span",undefined,"bt"), fill = node("i");
+      fill.style.width = (100*total/max) + "%"; fill.style.background = BAR[CATEGORY_TONE[category(state)]]; track.append(fill); track.setAttribute("aria-hidden","true");
+      line.append(node("span",state,"bl"),track,node("b",total)); bars.append(line);
+    }
   }
   try {
     const raw = new TextDecoder("utf-8",{fatal:true}).decode(bytes("snapshot-bytes"));
@@ -1524,6 +1748,18 @@ footer p{max-width:90ch}
     };
     if (!Object.hasOwn(provenanceLabels,snapshot.provenance)) throw new Error("Unknown evidence provenance.");
     byId("provenance").textContent = provenanceLabels[snapshot.provenance];
+    byId("footer-ref").textContent = provenanceLabels[snapshot.provenance] + " \u00B7 Reference UTC " + snapshot.reference_utc;
+    const printStyle = node("style"), safe = value => String(value).replace(/[^0-9A-Za-z:. /-]/g,""), box = ';font:8pt "Segoe UI",system-ui,sans-serif;color:#535D66}';
+    for (const table of document.querySelectorAll(".ledger")) {
+      // Grid-styled ledgers keep explicit table semantics for assistive technology.
+      table.setAttribute("role","table");
+      for (const group of table.querySelectorAll("thead,tbody")) group.setAttribute("role","rowgroup");
+      for (const header of table.querySelectorAll("thead tr")) header.setAttribute("role","row");
+      for (const header of table.querySelectorAll("th")) header.setAttribute("role","columnheader");
+    }
+    printStyle.textContent = '@page{@bottom-left{content:"Azure Backup operations review \\00B7  ' + safe(provenanceLabels[snapshot.provenance]) + ' \\00B7  Reference UTC ' + safe(snapshot.reference_utc)
+      + '"' + box + '@bottom-right{content:"Page " counter(page) " of " counter(pages)' + box + '}';
+    document.head.append(printStyle);
     if (snapshot.provenance === "RECORDED_REPLAY") byId("finished-label").textContent="Recorded probe finished (UTC), not replay time";
     byId("requested-start").textContent = snapshot.requested_window.start_utc;
     byId("requested-end").textContent = snapshot.requested_window.end_utc;
@@ -1544,7 +1780,9 @@ footer p{max-width:90ch}
     const itemSelect = byId("item-filter"), allItems = node("option","All / no exact item link"); allItems.value = ""; itemSelect.append(allItems);
     for (const item of snapshot.protected_items) { if (typeof item.id === "string") { const option = node("option",text(item.name) + " | " + item.id); option.value = item.id; itemSelect.append(option); } }
     for (const message of snapshot.business_limits) byId("limits-list").append(node("li",message));
-    for (const id of ["vault-filter","window-filter","state-filter","operation-filter","item-filter"]) byId(id).addEventListener("change",() => { page=0; renderAll(); });
+    renderOverview(provenanceLabels[snapshot.provenance]);
+    for (const id of ["vault-filter","window-filter","state-filter","operation-filter","item-filter","job-sort"]) byId(id).addEventListener("change",() => { page=0; renderAll(); });
+    byId("review-filter").addEventListener("change",renderReview);
     byId("job-filter").addEventListener("input",() => { page=0; renderJobs(); });
     byId("reset").addEventListener("click",reset);
     byId("today").addEventListener("click",() => { byId("window-filter").value="last24"; page=0; renderAll(); byId("window-filter").focus(); });

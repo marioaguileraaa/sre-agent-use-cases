@@ -34,19 +34,21 @@ is claimed.
 [6. Monthly task](#6-configure-and-verify-the-monthly-task) |
 [Troubleshooting](#troubleshooting-and-boundaries).
 
-The annotated pictures show **actual saved lab objects and dated reports**,
-not creation wizards or customer-specific values to copy. Portal releases can
+The annotated setup pictures show **actual saved lab objects**, not creation
+wizards or customer-specific values to copy. The annotated report pictures are
+**SIMULATED renders of the current report design** from sanitized sample data;
+they contain no customer, tenant or lab identifiers. Portal releases can
 call the authoring area **Builder** or **Build + setup**, and **Skills** or
 **Skill builder**. Use the named object/field and saved readback when a label
 differs; do not infer access or successful deployment from a visible button.
 
-![Actual Service Health report overview, with customer branding replaced by CLIENTE and opaque identifiers masked](images/report-01-overview.png)
+![Simulated Service Health report overview rendered from sanitized sample data](images/report-01-overview.png)
 
-**Actual normal snapshot, 2026-10-14 22:14:58 UTC.** Callout **1** separates
-the requested September last-update interval from the source-read times and
-365-day retained query. Callout **2** keeps the overlapping temporal lanes
-separate. Customer-name/logo pixels are replaced by `CLIENTE`; dates, counts,
-provider text and uncertainty are unchanged.
+**SIMULATED sample render.** Callout **1** keeps the dated reference, the
+requested last-update window, the retained lookback and the coverage state in
+view. Callout **2** shows the separate review counts; the temporal views overlap
+and are not additive. The hero's review status, the "Review next" steps and the
+type/state bar summarise the same evidence; none is a workload-health verdict.
 
 ## Source and evidence contract
 
@@ -329,7 +331,7 @@ COMPANY_LOGO_ALT_TEXT = "Customer logo"
 | `TENANT_ID` | That subscription's tenant GUID |
 | `MANAGED_IDENTITY_CLIENT_ID` | The existing SRE UAMI **Client ID**, not Object/Principal ID |
 | `CLIENT_NAME` | `CLIENTE` is valid; an authorized private customer label must be 1-120 plain characters |
-| `COMPANY_LOGO_DATA_URI` | Leave `""` for the placeholder, or one authorized embedded PNG/JPEG data URI |
+| `COMPANY_LOGO_DATA_URI` | Leave `""` for the default Azure SRE Agent wordmark, or one authorized embedded PNG/JPEG data URI |
 | `COMPANY_LOGO_ALT_TEXT` | Descriptive plain text, 1-120 characters; keep `Customer logo` when blank |
 
 On an explicit `main()` call, placeholders fail **before authentication or
@@ -342,8 +344,9 @@ An optional authorized embedded PNG/JPEG must decode as a real Pillow-validated
 raster, matching its MIME, one frame, at most **100,000 bytes** and
 **2048 x 2048 pixels**. Invalid branding fails before collection. No remote logo
 fetch or SVG is accepted. Use adjacent short Base64 strings, **less than 10,000
-characters per line**, for the target editor. With an empty logo the visible
-`CLIENTE` / Customer logo frame remains.
+characters per line**, for the target editor. With an empty logo the report's
+top bar shows the Azure SRE Agent wordmark and the hero shows `CLIENTE`; no
+empty logo frame is drawn. A configured logo replaces the wordmark.
 
 For an optional logo, prepare the data URI locally in approved private tooling:
 `data:image/png;base64,` plus the Base64 of the **complete file bytes** (or
@@ -673,7 +676,7 @@ child of the actual guarded runtime cwd:
 
 | File | Contract |
 |---|---|
-| HTML | Self-contained offline report, filters, complete filtered exports, event/resource detail, source ledger and print; no network, CDN, fonts or live polling |
+| HTML | Self-contained offline report: review status and counts, prioritised review steps, filters, sortable register, complete filtered exports, event/resource detail, source ledger and A4 print; no network, CDN, fonts or live polling |
 | Complete JSON | All accepted in-scope fields/records, source envelopes, original timestamps/IDs, partial pages, source status/request/attempts and uncertainty |
 | Events CSV | One row per accepted event observation, ordinary columns and complete `details_json` |
 | Impacted-resources CSV | One row per accepted association record, ordinary columns and complete `details_json`; absent target IDs remain explicit |
@@ -725,26 +728,28 @@ proof of no impact; denied/partial reads cannot be signed off as healthy zeroes.
 
 ### Read the actual report without changing its evidence
 
-The following views all come from the **same unchanged downloaded normal
-HTML**, collected at **2026-10-14T22:14:58Z**. Filters, expanded details and
-viewport changes are report interactions, not new Azure reads.
+The following views come from one **SIMULATED** sample report in the current
+design, rendered from sanitized data with no customer, tenant or lab
+identifiers. Your downloaded HTML has the same layout with your own dated
+evidence. Filters, expanded details and viewport changes are report
+interactions, not new Azure reads.
 
 <details>
-<summary>Requested updates: four records, not four new incidents</summary>
+<summary>Requested updates: in-window updates, not new incidents</summary>
 
-![Actual requested-updates lane showing four September last-update records](images/report-02-requested-updates.png)
+![Simulated requested-updates lane showing five last-update records in the requested window](images/report-02-requested-updates.png)
 
-Callout **1** selects the last-update lane for the requested September UTC
-interval. **2** shows all four matching records and explains complete filtered
-exports. A September update does not establish a September impact start or
-first publication.
+Callout **1** selects the last-update lane for the requested UTC interval.
+**2** shows the five matching records and that filtered downloads include every
+match, not only the visible rows. An in-window update does not establish an
+in-window impact start or first publication.
 
 </details>
 
 <details>
 <summary>Active maintenance: retain the source state and qualify its dates</summary>
 
-![Actual Active maintenance communication with source dates and explicit impact uncertainty](images/report-03-active-date-context.png)
+![Simulated Active maintenance communication with source dates and explicit impact uncertainty](images/report-03-active-date-context.png)
 
 Callout **1** preserves the native **Active** state. **2** preserves the source
 dates and their interpretation: this record's published mitigation precedes
@@ -757,42 +762,42 @@ is inferred.
 <details>
 <summary>Potential resource associations: source evidence, not outage proof</summary>
 
-![Actual published resource association with opaque identifiers masked](images/report-04-potential-resource.png)
+![Simulated published resource association shown as name, resource group, type and portal link](images/report-04-potential-resource.png)
 
-Callout **1** expands an actual returned association. Its resource type,
-region and observation time remain visible; opaque resource/event IDs are
-masked. **2** preserves the workload, support-case, ownership and newness
-limits. There are two association records across the accepted full report,
-not two measured workload outages.
+Callout **1** expands a returned association: resource name, resource group,
+type, an Azure portal link, the full resource ID, region, observation time and
+the original record. **2** preserves the workload, support-case, ownership and
+newness limits. The sample has three association records across the report,
+not three measured workload outages.
 
 </details>
 
 <details>
 <summary>Source ledger: received, in-scope and excluded are different counts</summary>
 
-![Actual complete returned-page ledger with declared category exclusions and per-event resource receipts](images/report-05-source-ledger.png)
+![Simulated complete returned-page ledger with declared category exclusions and per-event resource receipts](images/report-05-source-ledger.png)
 
 Callout **1** keeps the completeness qualification visible. **2** shows the
-actual feed receipt: **29 received, 15 in scope, 14 other-category exclusions**.
-The per-event resource reads below retain their individual complete or
-successful-empty outcomes. Zero incomplete sources is not a complete-history
-or healthy-workload claim.
+feed receipt: **30 received, 16 in scope, 14 other-category exclusions**.
+The status strip counts the receipts, and the per-event resource reads below
+retain their individual complete or successful-empty outcomes. Zero incomplete
+sources is not a complete-history or healthy-workload claim.
 
 </details>
 
 <details>
 <summary>Mobile: retain UTC context and coverage</summary>
 
-![Actual narrow-screen report with CLIENTE branding and dated UTC context](images/report-06-mobile.png)
+![Simulated narrow-screen report with CLIENTE, dated UTC context and review status](images/report-06-mobile.png)
 
-Callouts **1-2** preserve the dated LIVE snapshot, requested interval,
-observed reads, retained lower bound and uncertainty on a 430-pixel viewport.
-The mobile check also selected an event, moved focus to its detail, and
-confirmed no page-wide horizontal overflow.
+Callouts **1-2** preserve the dated snapshot, requested window, retained
+lookback, coverage and review status on a 430-pixel viewport. Selecting an
+event moves focus to its detail, and the page has no horizontal overflow.
 
 </details>
 
-The accepted HTML's **Full source JSON** download matched the original native
+In the 2026-10-14 lab acceptance, the accepted HTML's **Full source JSON**
+download matched the original native
 JSON bytes exactly. Full/filtered JSON and CSV checks preserved every selected
 record/field; browser CSV quoting can differ from the standalone CSV while
 parsed cells remain equal. The requested-updates print check included all
@@ -1022,14 +1027,16 @@ deployment, role assignment, a collection or a task execution.
 
 The early oversized default HTML and the diagnostic-only model were rejected
 as normal-report acceptance. Their private failure history was retained.
-The accepted screenshots above use the later actual normal bundle; they do
-not relabel a replay, diagnostic render or test-logo image as live evidence.
+The six report pictures in this guide were regenerated on 2026-11-12 as
+**SIMULATED** renders of the redesigned report from sanitized sample data;
+they are not lab evidence and do not relabel a replay, diagnostic render or
+test-logo image as live evidence.
 
-There are **six actual report captures and seven actual saved-setup/chat/task
-captures**. Only the final masked PNGs and English captions are committed.
-Report customer-name/logo pixels are replaced by **CLIENTE**; opaque
-identifiers, profiles and private configuration are masked or outside the
-crop. Facts, source text, dates, counts and uncertainty remain intact. Sparse
+There are **six simulated report renders and seven actual saved-setup/chat/task
+captures**. Only the final PNGs and English captions are committed. The setup
+captures mask opaque identifiers, profiles and private configuration or keep
+them outside the crop. Facts, source text, dates, counts and uncertainty
+remain intact. Sparse
 red numbered boxes are annotations, not original UI controls. Raw captures,
 privacy-mask rectangles, annotation rectangles, credentials, native URLs,
 private code/configuration and full source/export receipts remain outside Git.

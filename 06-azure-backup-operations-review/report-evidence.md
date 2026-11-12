@@ -1,7 +1,7 @@
 # Actual SRE setup, normal report and monthly-task evidence
 
-These are **real saved SRE UI and downloaded-report captures**, not synthetic
-examples, a new collection or a recreated UI. Two accepted executions remain
+These are **real saved SRE UI captures and report views rendered from the
+actual downloaded run**, not synthetic examples or a new collection. Two accepted executions remain
 separate: the normal report at **2026-10-14T19:55:26Z** and the monthly task's
 single manual validation report at **2026-10-14T22:03:00Z**. Both have actual
 four-file download receipts. The later all-Completed result is not substituted
@@ -21,20 +21,26 @@ end-exclusive. The report completed collection at **2026-10-14T19:55:53Z**.
 Local browser inspection and these screenshots preserve that dated snapshot.
 
 The original customer logo and all visible customer-name pixels were
-irreversibly replaced with **CLIENTE**. Opaque gray pixels redact private
-resource/job/scope IDs, vault/account names and URLs where visible. The images
-are flattened RGB PNGs without metadata or removable overlays. The six report
-images were annotated directly from their existing masked pixels, without
-another browser visit or any data re-render. Pixel proof is separate at each
-stage: original to masked differs only within declared privacy rectangles;
-masked to annotated differs only within declared annotation rectangles.
-Original pixels remain identical outside the **union** of those two sets,
-and the selected native-value regions remain unchanged. Original files,
-unannotated masked baselines, raw captures, both rectangle sets, full provenance
-and browser receipts remain private and are not committed.
+irreversibly replaced with **CLIENTE**. In the SRE UI captures, opaque gray
+pixels redact private resource/job/scope IDs, vault/account names and URLs
+where visible. The images are flattened RGB PNGs without metadata or removable
+overlays. Original files, masked baselines, raw captures, full provenance and
+browser receipts remain private and are not committed.
+
+The six report views (`step5-01` to `step5-06`) were **re-rendered on
+2026-11-12** for the current report design, offline and without any new
+collection: the current tool rendered the accepted normal run's saved complete
+JSON after every GUID, both file-share item hashes, the subscription display
+name and tags, and the resource-group, vault and storage-account names were
+replaced with neutral placeholders such as `00000000-0000-4000-8000-000000000001`,
+`rsv-backup-lab` and `stbackuplab001`. Counts, native states, dates, durations,
+task evidence, item names and source receipts are unchanged, and the same
+numbered callouts were re-applied. The redesign changed only the report's
+presentation; collection, model, review logic, exports and file names are
+those of the accepted run.
 Red numbered callouts on report and SRE captures explain real controls/evidence;
-red is an annotation style, not an Azure Backup failure or severity. No underlying
-UI content was fabricated or changed. Read-only inspection used an isolated UTC
+red is an annotation style, not an Azure Backup failure or severity. Apart from
+those placeholders, no underlying content was fabricated or changed. Read-only inspection used an isolated UTC
 browser, an explicitly authorized existing operator identity and exact-host
 authorization held in memory. All non-read HTTP methods were blocked. No Save,
 Run test, Run now, role control, deployment or report call was performed during
@@ -140,8 +146,9 @@ approved vaults, 56 observed Backup records, four protected items and an
 **Unknown** expected-protection denominator. The qualification explicitly says
 three vault histories are unverified and zero source reads are incomplete.
 The full JSON and two CSV actions export the entire collection, not the
-currently filtered rows. The yellow/charcoal appearance is the actual report
-style; only customer branding and private identifiers were masked.
+currently filtered rows. The charcoal verdict band and yellow customer plaque
+are the current report style; only customer branding and private identifiers
+were replaced.
 
 ### 2. The two actual InProgress Backup records
 

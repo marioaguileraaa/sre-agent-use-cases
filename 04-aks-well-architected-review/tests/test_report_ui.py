@@ -1173,6 +1173,56 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertIn("37,3 / 100", self.page.locator("#area-scores").inner_text())
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
 
+    def test_verdict_band_and_kpis_are_qualified_and_never_a_healthy_zero(self):
+        snapshot = fixture(8)
+        self.open_report(snapshot)
+        critical = sum(row["severity"] == "critical" for row in snapshot["findings"])
+        self.assertGreater(critical, 0)
+        self.assertEqual(self.page.locator("#verdict .verdict-value").inner_text(), "Acción prioritaria")
+        self.assertIn(f"{critical} crític", self.page.locator("#verdict").inner_text())
+        self.assertIn(f"{len(snapshot['findings'])} hallazgos", self.page.locator("#hero-summary").inner_text())
+        self.assertEqual(self.page.locator("#kpis .kpi").count(), 5)
+        self.assertIn("No evaluado", self.page.locator("#kpis").inner_text())
+        for check in snapshot["checks"]:
+            check.update(status="not_evaluated", evidence=[], reason="Sin acceso autorizado.")
+        snapshot["actions"] = []
+        refresh_fixture(snapshot)
+        self.open_report(snapshot)
+        self.assertEqual(self.page.locator("#verdict .verdict-value").inner_text(), "No evaluado")
+        first_kpi = self.page.locator("#kpis .kpi").first
+        self.assertEqual(first_kpi.locator(".kpi-value").inner_text(), "No evaluado")
+        self.assertIn("ninguna comprobación evaluada", first_kpi.inner_text())
+        self.assertIn("0 hallazgos aportados", self.page.locator("#severity-distribution").inner_text())
+
+    def test_findings_default_to_severity_order_and_engine_order_is_selectable(self):
+        snapshot = fixture(8)
+        self.open_report(snapshot)
+        rank = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+        for group in self.page.locator(".findings-group").all():
+            keys = [row.get_attribute("data-detail-key").removeprefix("finding:") for row in group.locator(".finding").all()]
+            severities = [next(row["severity"] for row in snapshot["findings"] if row["check_id"] == key) for key in keys]
+            self.assertEqual(severities, sorted(severities, key=rank.get))
+        self.page.locator("#findings-order").select_option("model")
+        shown = [row.get_attribute("data-detail-key").removeprefix("finding:") for row in self.page.locator(".finding").all()]
+        expected = [row["check_id"] for level in ("cluster", "workload", "resource")
+                    for row in snapshot["findings"] if row["level"] == level]
+        self.assertEqual(shown, expected)
+        self.assertEqual([row["check_id"] for row in self.csv_rows(self.download("#export-findings"))],
+                         [row["check_id"] for row in snapshot["findings"]])
+
+    def test_print_moves_table_receipts_full_width_without_adding_rows(self):
+        snapshot = fixture(8)
+        self.open_report(snapshot)
+        self.page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+        rows = self.page.locator('table[data-collection="checks"] tbody tr')
+        self.assertEqual(rows.count(), len(snapshot["checks"]))
+        self.assertEqual(rows.locator("details.receipt").count(), 0)
+        receipts = self.page.locator("#checks-table .print-receipts details.receipt")
+        self.assertEqual(receipts.count(), len(snapshot["checks"]))
+        self.assertEqual(json.loads(receipts.first.locator("pre").inner_text()), snapshot["checks"][0])
+        self.page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+        self.assertEqual(self.page.locator("#checks-table .print-receipts").count(), 0)
+
     def test_no_actual_critical_finding_produces_zero_not_a_fake_top_five(self):
         snapshot = fixture(8)
         for check in snapshot["checks"]:

@@ -687,7 +687,7 @@ for native details, distinct items and the separate history/source ledgers.
 
 | Artifact | Full contents |
 |---|---|
-| HTML | Offline filterable ledgers, human review, original source/details, exact full-file downloads and matching-record print |
+| HTML | Verdict band, KPI cards and prioritised next steps; offline filterable ledgers, severity-ordered human review, original source/details, exact full-file downloads and matching-record A4 print |
 | JSON | Entire normalized snapshot plus all original parsed source pages, details, envelopes, errors and coverage |
 | Jobs CSV | Every received job row, every normalized field, native list/detail JSON columns, UTC/provenance context |
 | Items/coverage CSV | Typed `protected_item`, `source_ledger`, `history_coverage` rows; complete normalized and native source JSON cells |

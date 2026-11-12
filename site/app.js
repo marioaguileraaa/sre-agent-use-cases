@@ -125,20 +125,50 @@
 
   function renderKey(families, cases) {
     keyEl.replaceChildren();
-    for (const f of families) {
+    families.forEach((f, order) => {
       const items = cases.filter((c) => c.family === f.id);
-      if (!items.length) continue;
-      const group = el("section", { class: "key-group", style: famStyle(f), "aria-label": f.name },
+      if (!items.length) return;
+      const group = el("div", { class: "key-group", style: famStyle(f), "data-order": order },
         el("h3", {}, f.name),
         el("ul", { class: "key-list" }, items.map((c) =>
           el("li", {},
             el("a", { class: "entry", href: `#plate-${c.no}`, "data-entry": c.folder },
               el("img", { src: c.thumb || c.image || "site/img/plates/blank.svg", alt: "", width: 60, height: 38, loading: "eager", decoding: "async" }),
               el("span", { class: "entry-text" }, c.key),
-              el("span", { class: "entry-no" }, el("span", { class: "vh" }, "Plate "), c.no)))))
+              el("span", { class: "entry-no" }, el("span", { class: "vh" }, ", plate "), c.no)))))
       );
       keyEl.append(group);
+    });
+    keyWidth = 0;
+    layoutKey();
+  }
+
+  // Deal whole family groups into balanced columns: each group, in family order, joins the shortest column.
+  const KEY_MIN_COL = 280;
+  let keyWidth = 0;
+  function layoutKey() {
+    const groups = [...keyEl.querySelectorAll(".key-group")].sort((a, b) => a.dataset.order - b.dataset.order);
+    const width = keyEl.clientWidth;
+    if (!groups.length || width === keyWidth) return;
+    keyWidth = width;
+    const gap = parseFloat(getComputedStyle(keyEl).columnGap) || 0;
+    const n = Math.max(1, Math.min(2, Math.floor((width + gap) / (KEY_MIN_COL + gap))));
+    const focused = keyEl.contains(document.activeElement) ? document.activeElement : null;
+    const cols = Array.from({ length: n }, () => el("div", { class: "key-col" }));
+    keyEl.style.setProperty("--cols", n);
+    keyEl.replaceChildren(...cols);
+    cols[0].append(...groups);
+    if (n > 1) {
+      const heights = groups.map((g) => g.getBoundingClientRect().height);
+      const rowGap = parseFloat(getComputedStyle(cols[0]).rowGap) || 0;
+      const filled = cols.map(() => 0);
+      groups.forEach((g, i) => {
+        const k = filled.indexOf(Math.min(...filled));
+        cols[k].append(g);
+        filled[k] += heights[i] + rowGap;
+      });
     }
+    if (focused) focused.focus({ preventScroll: true });
   }
 
   function renderThumbs(families, cases) {
@@ -186,7 +216,7 @@
       el("dl", { class: "marks", "data-marks": "" },
         marks.map(([k, v]) => el("div", {}, el("dt", {}, k), el("dd", {}, v))),
         compareWith.length ? el("div", { class: "compare" }, el("dt", {}, "Compare with"),
-          el("dd", {}, compareWith.map((o, i) => [i ? ", " : "", el("a", { href: `#plate-${o.no}` }, `No. ${o.no} ${o.name}`)]))) : null),
+          el("dd", {}, compareWith.map((o) => el("a", { href: `#plate-${o.no}` }, `No. ${o.no} ${o.name}`)))) : null),
       el("a", { class: "guide", href: guideUrl, rel: "noopener" }, "Open the step-by-step guide", icon()),
       c.tutorial ? tutorialCard(c) : null,
       c.sample ? sampleCard(c) : null);
@@ -196,13 +226,14 @@
 
   function tutorialCard(c) {
     const t = c.tutorial;
+    // Name from content: "Watch the tutorial (2:06)" first, then the teaser; the time badge is visual only.
     const card = el("button", { class: "tutorial", type: "button", "aria-haspopup": "dialog", "data-tutorial": "" },
       el("span", { class: "tutorial-thumb" },
         el("img", { src: t.thumb || t.poster, alt: "", width: 208, height: 117, loading: "lazy", decoding: "async" }),
         el("span", { class: "tutorial-play" }, svg('<path d="M8.5 5.8v12.4c0 .6.7 1 1.2.6l9.3-6.2c.5-.3.5-1 0-1.3L9.7 5.2c-.5-.4-1.2 0-1.2.6z"/>', "play")),
-        el("span", { class: "tutorial-time" }, el("span", { class: "vh" }, "Length "), t.duration)),
+        el("span", { class: "tutorial-time", "aria-hidden": "true" }, t.duration)),
       el("span", { class: "tutorial-text" },
-        el("b", {}, "Watch the tutorial"),
+        el("b", {}, "Watch the tutorial", el("span", { class: "vh" }, ` (${t.duration})`)),
         el("span", {}, t.teaser)));
     card.addEventListener("click", () => openPlayer(c, card));
     return card;
@@ -214,10 +245,10 @@
     return el("div", { class: "sample" },
       el("a", { class: "tutorial sample-main", href: s.html, target: "_blank", rel: "noopener" },
         el("span", { class: "tutorial-thumb sample-thumb" },
-          el("img", { src: s.thumb, alt: "", width: 352, height: 198, loading: "lazy", decoding: "async" }),
-          el("span", { class: "tutorial-time" }, "HTML + PDF")),
+          el("img", { src: s.thumb, alt: "", width: 832, height: 468, loading: "lazy", decoding: "async" }),
+          el("span", { class: "tutorial-time", "aria-hidden": "true" }, "HTML + PDF")),
         el("span", { class: "tutorial-text" },
-          el("b", {}, s.title || "Open a sample report"),
+          el("b", {}, s.title || "Open a sample report", el("span", { class: "vh" }, " (opens in a new tab)")),
           el("span", {}, s.teaser))),
       s.pdf ? el("p", { class: "sample-alt" }, "Same report as ", el("a", { href: s.pdf, target: "_blank", rel: "noopener" }, "PDF"), s.note ? ` · ${s.note}` : "") : null);
   }
@@ -229,6 +260,7 @@
     video.muted = true;
     const close = el("button", { class: "player-close", type: "button", "aria-label": "Close the tutorial" },
       svg('<path d="M6 6l12 12M18 6 6 18"/>', "icon"));
+    const download = el("a", { href: t.video, download: "" }, "Download the video");
     const dlg = el("dialog", { class: "player", "aria-labelledby": "player-title" },
       el("div", { class: "player-head" },
         el("h2", { id: "player-title" }, t.title),
@@ -236,9 +268,14 @@
       el("div", { class: "player-screen" }, video),
       el("p", { class: "player-foot" },
         `Plate ${c.no}, ${c.name.toLowerCase()} · ${t.duration} · no voice-over, every step is captioned on screen · `,
-        el("a", { href: t.video, download: "" }, "Download the video"),
+        download,
         " · ",
         el("a", { href: `${repoUrl}/tree/main/${c.folder}`, rel: "noopener" }, "Step-by-step guide")));
+    // Say how big the download is before anyone taps it on a phone.
+    fetch(t.video, { method: "HEAD" }).then((r) => {
+      const bytes = Number(r.headers.get("content-length"));
+      if (r.ok && bytes > 0) download.textContent = `Download the video (MP4, ${Math.max(1, Math.round(bytes / 1e6))} MB)`;
+    }).catch(() => {});
     close.addEventListener("click", () => dlg.close());
     dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
     dlg.addEventListener("close", () => {
@@ -331,19 +368,24 @@
   function showError() {
     keyEl.replaceChildren(el("p", { class: "load-error" }, "The list of use cases could not be loaded right now. ",
       el("a", { href: repoUrl }, "Browse them on GitHub"), "."));
+    // Nothing will fill the plates now: let the back cover follow the cover instead of a screen of blank paper.
+    platesEl.hidden = true;
   }
 
   async function main() {
-    let curated;
-    try { curated = await getJson("site/cases.json"); } catch { showError(); return; }
-    let rows = [];
-    try { rows = parseTable(await getText("README.md")); } catch { /* use the curated plates only */ }
+    // Both sources load in parallel; the README is optional (curated plates only without it).
+    const [curatedRes, readmeRes] = await Promise.allSettled([getJson("site/cases.json"), getText("README.md")]);
+    if (curatedRes.status !== "fulfilled") { showError(); return; }
+    const curated = curatedRes.value;
+    const rows = readmeRes.status === "fulfilled" ? parseTable(readmeRes.value) : [];
     const cases = mergeCases(curated, rows);
     const families = curated.families;
     renderKey(families, cases);
     renderThumbs(families, cases);
     renderPlates(families, cases);
     trackFamilies();
+    if ("ResizeObserver" in window) new ResizeObserver(() => layoutKey()).observe(keyEl);
+    document.fonts?.ready.then(() => { keyWidth = 0; layoutKey(); });
     const more = () => thumbsEl.classList.toggle("has-more", thumbsEl.scrollLeft + thumbsEl.clientWidth < thumbsEl.scrollWidth - 2);
     thumbsEl.addEventListener("scroll", more, { passive: true });
     addEventListener("resize", more, { passive: true });

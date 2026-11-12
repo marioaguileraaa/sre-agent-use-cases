@@ -1397,130 +1397,185 @@ def main(operation: str = "report", period: str = "last_30d", identities: str = 
 
     # ================================================================== v5 STYLE (same visual world as v4)
     CSS = """
-:root{--ink:#0f1f2e;--muted:#4b5e71;--line:#d5e2ec;--paper:#f3f7fa;--panel:#fff;--teal:#117865;--teal-deep:#0b5345;
+:root{--ink:#0f1f2e;--muted:#4b5e71;--line:#d5e2ec;--line-soft:#e6edf2;--paper:#f3f7fa;--panel:#fff;--teal:#117865;--teal-deep:#0b5345;
 --teal-soft:#e6f4f1;--on:#cfe9e3;--idle:#d99a2b;--idle-soft:#fdf1dc;--spark:#6a3d9a;--amber:#a14306;--amber-soft:#fef0c7;
---crit:#b42318;--crit-soft:#fee4e2;--ok:#18794e;--ok-soft:#e8f7ef;--info:#1d5c8f;--info-soft:#e6f0f9;--r:10px;
+--crit:#b42318;--crit-soft:#fee4e2;--ok:#067647;--ok-soft:#dcfae6;--info:#175cd3;--info-soft:#d1e9ff;--r:12px;
+--hero:#0b5345;--hero-deep:#062e26;--hero-muted:#cfe8e0;--hero-line:rgba(255,255,255,.24);--focus:#0b6b58;
+--shadow:0 1px 2px rgba(16,24,40,.06),0 10px 24px -12px rgba(16,24,40,.28);
+--fade:linear-gradient(90deg,#fff 30%,rgba(255,255,255,0)) left/32px 100% no-repeat local,linear-gradient(270deg,#fff 30%,rgba(255,255,255,0)) right/32px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(16,24,40,.16),rgba(16,24,40,0)) left/12px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(16,24,40,.16),rgba(16,24,40,0)) right/12px 100% no-repeat scroll;
 --serif:"Palatino Linotype",Palatino,Georgia,serif;--sans:"Aptos","Segoe UI",-apple-system,sans-serif;--mono:"Cascadia Mono",Consolas,monospace}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:64px}
-body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);font-variant-numeric:tabular-nums}
-.wrap{max-width:1240px;margin:0 auto;padding-left:28px;padding-right:28px}
-header.top{background:var(--teal-deep);color:#fff;padding:34px 0 28px}
-header.top h1{font-family:var(--serif);font-weight:700;font-size:clamp(28px,3.4vw,40px);line-height:1.12;margin:0 0 10px;letter-spacing:-.01em;text-wrap:balance}
-header.top p.lede{margin:0 0 18px;max-width:78ch;color:#d5ece6;font-size:16px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
-.chips li{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:4px 12px;font-size:13px;color:#eef8f5}
-.chips li b{font-weight:600;color:#fff}
-nav.toc{position:sticky;top:0;z-index:5;background:rgba(243,247,250,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-nav.toc ol{display:flex;gap:4px;margin:0 auto;padding:8px 28px;list-style:none;overflow-x:auto;max-width:1240px;scrollbar-width:thin}
-nav.toc a{display:block;white-space:nowrap;padding:6px 8px;border-radius:6px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
-nav.toc a:hover{background:#e3edf2;color:var(--ink)}
-main{padding:28px 0 56px}
-section{margin:0 0 40px}
-h2{font-family:var(--serif);font-size:26px;line-height:1.2;margin:0 0 6px;text-wrap:balance}
-h3{font-size:15px;margin:0 0 10px}
-p.sub{margin:0 0 16px;color:var(--muted);max-width:84ch}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}
-.panel+.panel,.panel+.tbl-wrap,.tbl-wrap+.panel,.tbl-wrap+.tbl-wrap,.split+.panel,.panel+.split,.split+.tbl-wrap{margin-top:18px}
-.hero{display:grid;grid-template-columns:minmax(240px,330px) 1fr;gap:32px;align-items:start}
-.total-label{font-size:13px;color:var(--muted);margin:0}
-.total-figure{font-family:var(--serif);font-size:clamp(40px,5vw,56px);font-weight:700;line-height:1.05;margin:4px 0 6px;color:var(--teal-deep);white-space:nowrap}
-.total-figure small{font-size:.42em;font-weight:600;margin-left:6px;color:var(--muted);letter-spacing:.02em}
-.total-meta{margin:0;color:var(--muted);font-size:14px}
-.verdict{font-family:var(--serif);font-size:clamp(19px,2vw,23px);line-height:1.35;margin:0 0 16px;max-width:60ch}
-.verdict b{color:var(--amber)}
-.stack{display:flex;height:24px;border-radius:6px;overflow:hidden;background:#e9eff3;margin:0 0 14px}
-.stack span{display:block;height:100%;transform-origin:left;animation:grow .8s cubic-bezier(.2,.7,.2,1) both}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px;scrollbar-color:#b4c6d3 var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--sans);font-variant-numeric:tabular-nums}
+::selection{background:#bfe3d9;color:var(--ink)}
+a{color:var(--teal-deep);text-underline-offset:3px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:32px;padding-right:32px}
+.topbar{background:var(--hero-deep);color:#fff}
+.topbar .wrap{display:flex;align-items:center;gap:16px;min-height:56px}
+.mark{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em;white-space:nowrap}
+.mark i{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:#fff}
+.mark svg{width:18px;height:18px;fill:var(--teal-deep)}
+.ctx{min-width:0;padding-left:16px;border-left:1px solid var(--hero-line);color:var(--hero-muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-acts{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tag{font-size:12.5px;font-weight:600;color:#e6f4f1;border:1px solid var(--hero-line);border-radius:999px;padding:4px 12px;white-space:nowrap}
+.print{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border:0;border-radius:8px;background:#fff;color:var(--teal-deep);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.print:hover{background:var(--teal-soft)}
+.print svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero{background:var(--hero);color:#fff;padding:40px 0 104px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px 48px;align-items:start}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,3.1vw,42px);line-height:1.12;letter-spacing:-.01em;margin:0 0 16px;text-wrap:balance}
+.lead{margin:0 0 12px;max-width:66ch;font-size:18px;line-height:1.5}
+.lead .idle-t{color:#f8c96a}
+.prov{margin:0;max-width:68ch;color:var(--hero-muted);font-size:14px}
+.meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.meta li{font-size:13px;color:var(--hero-muted);border:1px solid var(--hero-line);border-radius:999px;padding:4px 12px}
+.meta b{color:#fff;font-weight:600}.meta .live{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.verdict{border:1px solid var(--hero-line);background:rgba(255,255,255,.07);border-radius:14px;padding:20px 24px}
+.verdict p{margin:0}.verdict .vk{font-size:13px;font-weight:600;color:var(--hero-muted)}
+.verdict .vw{font-family:var(--serif);font-size:28px;line-height:1.15;font-weight:700;margin:4px 0 8px;color:#fcd17d}
+.verdict.crit .vw{color:#ffb5a8}.verdict.ok .vw{color:#a6f4c5}.verdict.info .vw{color:#c9e3ff}
+.verdict .vl{font-size:14px;color:var(--hero-muted)}.verdict .vl+.vl{margin-top:4px}.verdict .vl b{color:#fff}
+.dist{grid-column:1/-1}
+.stack{display:flex;gap:2px;height:14px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.14)}
+.stack span{display:block;height:100%;min-width:3px;transform-origin:left;animation:grow .8s cubic-bezier(.2,.7,.2,1) both}
 @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
-.legend li{font-size:13px;color:var(--muted)}
-.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:0}
-.legend strong{display:block;font-size:19px;color:var(--ink);margin-top:2px}
-.facts{display:flex;flex-wrap:wrap;gap:10px 30px;margin:20px 0 0;padding:16px 0 0;border-top:1px solid var(--line);list-style:none}
+.legend{display:flex;flex-wrap:wrap;gap:8px 28px;margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:var(--hero-muted)}
+.legend li{display:inline-flex;align-items:center;gap:8px}.legend b{color:#fff}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0}.legend .sw{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin:-64px 0 0;padding:0;list-style:none;position:relative;z-index:2}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);min-width:0}
+.kpi .v{display:block;font-size:clamp(24px,2.2vw,30px);line-height:1.15;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.kpi .v small{font-size:14px;font-weight:600;letter-spacing:0;margin-left:5px;color:var(--muted)}
+.kpi .k{display:block;margin-top:8px;font-size:14px;font-weight:600}
+.kpi .s{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
+.kpi.accent .v{color:var(--teal-deep)}
+#resumen{margin:0}
+nav.toc{position:sticky;top:0;z-index:10;margin-top:24px;background:rgba(243,247,250,.97);border-bottom:1px solid var(--line)}
+nav.toc ol{position:relative;display:flex;max-width:1240px;margin:0 auto;padding:8px 23px;list-style:none;overflow-x:auto;scrollbar-width:none;background:linear-gradient(90deg,var(--paper) 30%,rgba(243,247,250,0)) left/32px 100% no-repeat local,linear-gradient(270deg,var(--paper) 30%,rgba(243,247,250,0)) right/32px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(16,24,40,.12),rgba(16,24,40,0)) left/12px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(16,24,40,.12),rgba(16,24,40,0)) right/12px 100% no-repeat scroll}
+nav.toc ol::-webkit-scrollbar{display:none}
+nav.toc a{display:block;white-space:nowrap;padding:8px 9px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600}
+nav.toc a:hover{background:#e3edf2;color:var(--ink)}nav.toc a[aria-current]{background:var(--teal-soft);color:var(--teal-deep)}
+.body{padding-top:32px;padding-bottom:64px}
+section{margin:0 0 48px}
+h2{font-family:var(--serif);font-size:24px;line-height:1.25;margin:0 0 8px;text-wrap:balance}
+h3{font-size:16px;line-height:1.35;margin:0 0 12px}
+p.sub{margin:0 0 16px;color:var(--muted);max-width:72ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.panel+.panel,.panel+.tbl-wrap,.tbl-wrap+.panel,.tbl-wrap+.tbl-wrap,.split+.panel,.panel+.split,.split+.tbl-wrap{margin-top:16px}
+.panel .tbl-wrap{border-width:1px 0;border-radius:0;margin:0 -24px}
+.panel>.tbl-wrap:last-child{border-bottom:0;margin-bottom:-24px;border-radius:0 0 var(--r) var(--r)}
+.panel .tbl-wrap :is(th,td):first-child{padding-left:24px}.panel .tbl-wrap :is(th,td):last-child{padding-right:24px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 32px;margin:20px 0 0;padding:16px 0 0;border-top:1px solid var(--line);list-style:none}
 .facts li{font-size:13px;color:var(--muted)}.facts b{display:block;color:var(--ink);font-size:17px}
-.save-strip{display:flex;flex-wrap:wrap;gap:12px 36px;align-items:baseline;background:var(--teal-deep);color:#e6f4f1;border-radius:var(--r);padding:18px 22px;margin:0 0 16px}
-.save-strip .big{font-family:var(--serif);font-size:32px;font-weight:700;color:#fff;line-height:1}
-.save-strip p{margin:0;font-size:14px;max-width:70ch}
-.actions{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:a}
-.actions li{display:grid;grid-template-columns:36px minmax(0,1fr) 170px;gap:6px 16px;align-items:start;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
-.actions li::before{counter-increment:a;content:counter(a);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--teal-soft);color:var(--teal-deep);font-weight:700;font-size:13px;grid-row:1/3}
+.save-strip{display:flex;flex-wrap:wrap;gap:8px 32px;align-items:center;background:var(--teal-soft);border:1px solid #b9dcd2;border-radius:var(--r);padding:16px 24px;margin:0 0 16px}
+.save-strip .big{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1.1;color:var(--teal-deep);white-space:nowrap}
+.save-strip p{margin:0;font-size:14px;max-width:72ch;color:#24394a}
+.afilter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.afilter button{font:inherit;font-size:13px;font-weight:600;min-height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#33495c;cursor:pointer}
+.afilter button:hover{border-color:var(--teal)}.afilter button[aria-pressed=true]{background:var(--teal-deep);border-color:var(--teal-deep);color:#fff}
+.acount{margin-left:auto;font-size:13px;color:var(--muted)}
+.actions{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.actions li{display:grid;grid-template-columns:28px minmax(0,1fr) 176px;gap:4px 16px;align-items:start;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 20px}
+.actions li[hidden]{display:none}
+.actions li::before{content:attr(data-n);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--teal-soft);color:var(--teal-deep);font-weight:700;font-size:13px;grid-row:1/3}
+.actions li:not([data-n])::before{visibility:hidden}
 .actions h3{margin:0 0 4px;font-size:16px}
 .actions p{margin:0;font-size:14px;color:var(--muted)}
-.actions .ev{grid-column:2/3;font-size:13px;color:#33495c;margin-top:6px}
+.actions .ev{grid-column:2/3;font-size:13px;color:#33495c;margin-top:8px}
 .actions .ev code{font-family:var(--mono);font-size:12px;background:#f1f5f8;border-radius:4px;padding:1px 5px}
 .actions .val{grid-column:3;grid-row:1/3;text-align:right}
-.actions .val b{display:block;font-family:var(--serif);font-size:21px;color:var(--teal-deep);white-space:nowrap}
-.actions .val span{font-size:12px;color:var(--muted)}
-.notice{display:flex;gap:14px;align-items:flex-start;background:var(--info-soft);border:1px solid #c7dbee;border-radius:var(--r);padding:14px 18px;margin:0 0 18px;font-size:14px}
-.notice.warn{background:var(--amber-soft);border-color:#f3d48a}
+.actions .val b{display:block;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.01em;color:var(--teal-deep);white-space:nowrap}
+.actions .val span{font-size:12.5px;color:var(--muted)}
+.notice{display:flex;gap:12px;align-items:flex-start;background:var(--info-soft);border:1px solid #b2ddff;border-radius:var(--r);padding:12px 16px;margin:0 0 16px;font-size:14px}
+.notice.warn{background:#fffaeb;border-color:#fedf89}
 .notice b{display:block;margin-bottom:2px}.notice p{margin:0}
-.chart{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.chart svg{display:block;min-width:720px;width:100%;height:auto}
-.chart text{font-family:var(--sans);fill:#4b5e71;font-size:11px}
-.chart .lbl{font-size:11px;fill:#33495c}
-.keys{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
-.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.chart{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--fade)}
+.chart svg{display:block;min-width:860px;width:100%;height:auto}
+.chart text{font-family:var(--sans);fill:#4b5e71;font-size:13px}
+.chart .lbl{fill:#33495c}
+.keys{display:flex;flex-wrap:wrap;gap:8px 20px;margin:12px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--fade),#fff}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-thead th{background:#f6faf9;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;position:sticky;top:0}
-tbody tr:hover{background:#f4fbf9}
-tfoot td{font-weight:700;background:#f6faf9;border-bottom:0}
+th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{background:#f5f9f8;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;border-bottom-color:var(--line)}
+tbody tr:hover{background:#f2faf7}
+tfoot td{font-weight:700;background:#f5f9f8;border-bottom:0;border-top:1px solid var(--line)}
+table:not(:has(tfoot)) tbody tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right;white-space:nowrap}
-table.dense{font-size:13px}table.dense th,table.dense td{padding:8px 9px}
-.sortbtn{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:center;border-radius:4px}
-.sortbtn::after{content:"↕";opacity:.35;font-size:11px}
-th[aria-sort=ascending] .sortbtn::after{content:"↑";opacity:1}
-th[aria-sort=descending] .sortbtn::after{content:"↓";opacity:1}
+table.dense{font-size:13.5px}table.dense th,table.dense td{padding:8px 12px}
+.sortbtn{all:unset;cursor:pointer;display:inline-flex;gap:6px;align-items:center;border-radius:4px}
+.sortbtn::after{content:"";width:8px;height:5px;background:currentColor;clip-path:polygon(0 0,100% 0,50% 100%);opacity:.35}
+.sortbtn:hover,th[aria-sort] .sortbtn{color:var(--ink)}th[aria-sort] .sortbtn::after{opacity:1}
+th[aria-sort=ascending] .sortbtn::after{transform:rotate(180deg)}
 .id{font-family:var(--mono);font-size:12px;color:#2b4458}
-.cell-strong{font-weight:600}.cell-sub{display:block;font-size:12px;color:var(--muted)}
+.cell-strong{font-weight:600}.cell-sub{display:block;font-size:12.5px;color:var(--muted)}
 .nw{white-space:nowrap}.muted{color:var(--muted)}
 .mini{display:flex;width:120px;height:8px;border-radius:4px;overflow:hidden;background:#e9eff3;margin-top:6px}
 .mini span{display:block;height:100%}
-.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;white-space:nowrap}
-.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--amber-soft);color:var(--amber)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:#fef0c7;color:#93370d}
 .pill.crit{background:var(--crit-soft);color:var(--crit)}.pill.info{background:var(--info-soft);color:var(--info)}
-.pill.neutral{background:#eef2f5;color:#3d5163}
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.pill.neutral{background:#eaecf0;color:#344054}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 .split>*{margin-top:0!important;min-width:0}
 .split.wide{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+.duo{display:grid;gap:24px;margin-top:24px}.duo>*{min-width:0}
 .bars{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .bars li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:14px}
-.bars .track{grid-column:1/-1;height:8px;border-radius:4px;background:#e9eff3;overflow:hidden}
-.bars .fill{height:100%;border-radius:4px}
-.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
-.kv.types{grid-template-columns:repeat(6,minmax(0,1fr))}
-.kv li{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;font-size:13px;color:var(--muted)}
-.kv b{display:block;font-family:var(--serif);font-size:24px;color:var(--ink);line-height:1.15;margin-top:2px}
-.heat td{padding:0;border:0;width:3.4%;height:22px}
-.heat th{font-size:11px;font-weight:600;color:var(--muted);padding:2px 6px;border:0;background:none;position:static}
+.bars .track{grid-column:1/-1;height:8px;border-radius:999px;background:#e9eff3;overflow:hidden}
+.bars .fill{height:100%;border-radius:999px;min-width:2px}
+.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:0;padding:0;list-style:none;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.kv li{padding:16px 20px;font-size:13px;color:var(--muted);min-width:0;box-shadow:-1px 0 0 var(--line-soft),0 -1px 0 var(--line-soft)}
+.kv b{display:block;margin:2px 0;font-size:24px;line-height:1.25;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.kv.types{grid-template-columns:repeat(6,minmax(0,1fr))}.kv.cols2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.panel .kv{border:0;border-radius:0;margin:0 -16px}.panel .kv li{padding:12px 16px}.panel .kv b{font-size:22px}
+.heat td{padding:0;border:0;width:3.9%;height:22px}
+.heat th{font-size:12px;font-weight:600;color:var(--muted);padding:2px 6px;border:0;background:none}
 .heat td span{display:block;height:20px;margin:1px;border-radius:3px}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
-.btn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--teal);color:var(--teal-deep);background:#fff;border-radius:8px;padding:7px 13px;cursor:pointer;text-decoration:none;display:inline-block}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.btn{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--teal);border-radius:8px;color:var(--teal-deep);background:#fff;cursor:pointer;text-decoration:none}
 .btn:hover{background:var(--teal-soft)}
-.qs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.qs article{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
-.qs h3{font-size:14px;color:var(--teal-deep);margin:0 0 10px}
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.qs article{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 24px}
+.qs h3{font-size:15px;color:var(--teal-deep);margin:0 0 12px}
 .qs ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.qs li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;font-size:14px}
-.qs li button{font:inherit;font-size:12px;border:1px solid var(--line);background:#f6faf9;border-radius:6px;padding:3px 9px;cursor:pointer;color:var(--muted)}
-.method{display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:14px}
-.method ul{margin:0;padding-left:18px}.method li{margin:0 0 6px}
-footer{color:var(--muted);font-size:12px;padding:20px 0 40px;border-top:1px solid var(--line)}
-:focus-visible{outline:3px solid #f5c46b;outline-offset:2px}
-@media (max-width:900px){.wrap{padding-left:16px;padding-right:16px}nav.toc ol{padding:8px 16px}
-.hero,.split,.split.wide,.method,.qs{grid-template-columns:minmax(0,1fr)}.legend{grid-template-columns:repeat(2,minmax(0,1fr))}
-.kv,.kv.types{grid-template-columns:repeat(2,minmax(0,1fr))}
-.actions li{grid-template-columns:32px minmax(0,1fr)}.actions .val{grid-column:2;grid-row:auto;text-align:left}
-.actions .ev{grid-column:2}}
+.qs li{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;font-size:14px}
+.qs li button{font:inherit;font-size:12.5px;font-weight:600;min-height:28px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:#f6faf9;color:#33495c;cursor:pointer}
+.qs li button:hover{border-color:var(--teal);color:var(--teal-deep)}
+.method{display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:14px}
+.method ul{margin:0;padding-left:20px}.method li{margin:0 0 8px}
+details.panel>summary{cursor:pointer}details.panel>summary::marker{color:var(--teal)}
+footer{color:var(--muted);font-size:13px;padding:24px 0 40px;border-top:1px solid var(--line)}
+:focus-visible,.sortbtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.topbar :focus-visible,.hero :focus-visible{outline-color:#f8c96a}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-grid{grid-template-columns:minmax(0,1fr) 280px}}
+@media (max-width:900px){.wrap{padding-left:16px;padding-right:16px}nav.toc ol{padding:8px 7px}.ctx{display:none}
+.hero{padding:28px 0 88px}.hero-grid{grid-template-columns:minmax(0,1fr)}.lead{font-size:17px}
+.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.kpi{padding:14px 16px}.kpi:last-child:nth-child(odd){grid-column:1/-1}
+.split,.split.wide,.method,.qs{grid-template-columns:minmax(0,1fr)}.kv,.kv.types{grid-template-columns:repeat(2,minmax(0,1fr))}
+.actions li{grid-template-columns:28px minmax(0,1fr)}.actions .val{grid-column:2;grid-row:auto;text-align:left}.actions .ev{grid-column:2}
+.acount{width:100%;margin-left:0}}
+@media (max-width:600px){table:has(thead th:nth-child(5)){min-width:620px}table:has(thead th:nth-child(5)) td:first-child{min-width:190px}}
+@media (max-width:520px){.tag{display:none}.print{padding:0 10px}.print .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}h2{font-size:22px}}
 @media (prefers-reduced-motion:reduce){.stack span{animation:none}html{scroll-behavior:auto}}
-@media print{body{background:#fff}nav.toc,.toolbar,.qs button{display:none}header.top{background:#fff;color:var(--ink);border-bottom:2px solid var(--teal-deep)}
-header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:var(--ink);border:2px solid var(--teal-deep)}.save-strip .big{color:var(--teal-deep)}
-.panel,.tbl-wrap,.actions li{break-inside:avoid}thead th{position:static}.chart svg{min-width:0}}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}html,body{background:#fff}body{font-size:12.5px}
+nav.toc,.toolbar,.qs button,.print,.afilter{display:none!important}
+.topbar{background:#fff;color:var(--ink);border-bottom:1px solid var(--line)}.topbar .wrap{min-height:40px}.mark i{background:var(--teal-deep)}.mark svg{fill:#fff}
+.ctx,.tag{display:block;color:var(--muted);border-color:var(--line)}
+.hero{padding:24px 0 84px}.hero-grid{grid-template-columns:minmax(0,1fr) 230px;gap:16px 24px}.hero h1{font-size:28px}.lead{font-size:15px}
+.verdict{padding:14px 16px}.verdict .vw{font-size:22px}.stack span{animation:none}
+.kpis{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:-60px}.kpi{box-shadow:none;padding:12px}.kpi .v{font-size:18px}.kpi .v small{font-size:12px}.kpi .k{font-size:12px}.kpi .s{font-size:12px}
+.kpi:last-child:nth-child(odd){grid-column:auto}
+.body{padding-top:24px}section{margin-bottom:28px}h2{font-size:20px}
+.panel,.kpi,.kv,.actions li,.qs article,.verdict,.save-strip,.bars li,tr,p.sub{break-inside:avoid}h2,h3,p.sub{break-after:avoid}
+thead{display:table-header-group}.tbl-wrap,.chart{overflow:visible;background:#fff}.chart svg{min-width:0}
+table,table.dense{font-size:12px}th,td,table.dense th,table.dense td{padding:6px 7px}footer{padding:12px 0}}
 """
 
     JS = """
 (function(){
-  document.querySelectorAll('table[data-sortable]').forEach(function(table){
+  function all(s,r){return [].slice.call((r||document).querySelectorAll(s));}
+  all('table[data-sortable]').forEach(function(table){
     var ths=table.querySelectorAll('thead th[data-sort]');
     ths.forEach(function(th){
       var btn=th.querySelector('.sortbtn'); if(!btn) return;
@@ -1542,15 +1597,49 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
     var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},500);
   }
-  document.querySelectorAll('[data-csv]').forEach(function(b){
+  all('[data-csv]').forEach(function(b){
     b.addEventListener('click',function(){ var s=document.getElementById(b.dataset.csv); if(s) dl(b.dataset.name, s.textContent); });
   });
-  document.querySelectorAll('[data-copy]').forEach(function(b){
+  all('[data-copy]').forEach(function(b){
     b.addEventListener('click',function(){
       var t=b.dataset.copy, o=b.textContent, done=function(){b.textContent='Copied';setTimeout(function(){b.textContent=o;},1500);};
       if(navigator.clipboard) navigator.clipboard.writeText(t).then(done,done); else done();
     });
   });
+  all('[data-print]').forEach(function(b){b.addEventListener('click',function(){window.print();});});
+  var af=document.querySelector('.afilter'), list=document.querySelector('ol.actions');
+  if(af&&list){
+    var cnt=af.querySelector('.acount'), items=all('li[data-kind]',list);
+    af.addEventListener('click',function(ev){
+      var b=ev.target.closest('button[data-kind]'); if(!b) return;
+      all('button[data-kind]',af).forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});
+      var k=b.dataset.kind, n=0;
+      items.forEach(function(li){var on=k==='all'||li.dataset.kind===k; li.hidden=!on; if(on) n++;});
+      cnt.textContent=(n===items.length?'':n+' of ')+items.length+' actions';
+    });
+  }
+  var shown=[];
+  window.addEventListener('beforeprint',function(){
+    all('details:not([open])').forEach(function(d){d.open=true;shown.push(d);});
+    all('ol.actions li[hidden]').forEach(function(li){li.hidden=false;shown.push(li);});
+  });
+  window.addEventListener('afterprint',function(){
+    shown.forEach(function(x){if(x.tagName==='DETAILS') x.open=false; else x.hidden=true;}); shown=[];
+  });
+  var links={};
+  all('nav.toc a').forEach(function(a){links[a.hash.slice(1)]=a;});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        Object.keys(links).forEach(function(k){links[k].removeAttribute('aria-current');});
+        var a=links[e.target.id]; if(!a) return;
+        a.setAttribute('aria-current','true');
+        var ol=a.closest('ol'); if(ol.scrollWidth>ol.clientWidth) ol.scrollLeft=a.parentNode.offsetLeft-24;
+      });
+    },{rootMargin:'-15% 0px -75% 0px'});
+    Object.keys(links).forEach(function(k){var s=document.getElementById(k); if(s) io.observe(s);});
+  }
 })();
 """
 
@@ -1701,7 +1790,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
     cat_order = [c for c, _ in sorted(cat_cost.items(), key=lambda kv: (kv[0] != "idle", kv[0] == "storage", -kv[1])) if cat_cost[c] > 0.005]
 
     def svg_daily_cost():
-        W, H, L, R, T, B = 1100, 300, 58, 14, 14, 64
+        W, H, L, R, T, B = 1100, 312, 58, 14, 30, 64
         n = len(all_days)
         if not n:
             return ""
@@ -1737,7 +1826,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
             if on > 0.05:
                 g.append(f'<rect x="{L + i * bw + bw * .14:.1f}" y="{H - B + 36}" width="{bw * .72:.1f}" height="4" rx="2" fill="#117865" opacity="{min(.25 + on / 24, 1):.2f}"/>')
         g.append(f'<text x="{L}" y="{H - 4}" class="lbl">Thin bottom bar: hours the capacity was running that day (darker = more hours)</text>')
-        g.append(f'<text x="{L - 50}" y="{T + 2}" class="lbl">{E(CUR)}</text></svg>')
+        g.append(f'<text x="{L - 8}" y="{T - 14}" text-anchor="end" class="lbl">{E(CUR)}</text></svg>')
         return "".join(g)
 
     act_hour = Counter((t.strftime("%Y%m%d"), t.hour) for t in work_times)
@@ -1872,7 +1961,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
     def svg_monthly():
         if not mon_keys:
             return ""
-        W, H, L, R, T, B = 1100, 250, 64, 16, 22, 40
+        W, H, L, R, T, B = 1100, 262, 64, 16, 34, 40
         mx = nice_max(max(mon_tot.values()))
         bw = (W - L - R) / len(mon_keys)
         g = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="mtt"><title id="mtt">Monthly Fabric cost in Cost Management</title>']
@@ -1899,7 +1988,7 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
                      f'<text x="{x + bw * .32:.1f}" y="{H - B + 16}" text-anchor="middle">{mlabel(k)}</text>')
             if k == cur_month:
                 g.append(f'<text x="{x + bw * .32:.1f}" y="{H - B + 30}" text-anchor="middle" class="lbl">in progress</text>')
-        g.append(f'<text x="{L - 50}" y="{T - 6}" class="lbl">{E(CUR)}</text></svg>')
+        g.append(f'<text x="{L - 8}" y="{T - 18}" text-anchor="end" class="lbl">{E(CUR)}</text></svg>')
         return "".join(g)
 
     subc = raw.get("sub_costs") or []
@@ -1933,21 +2022,75 @@ header.top p.lede,.chips li{color:var(--ink)}.save-strip{background:#fff;color:v
            ("quien", "Who consumes"), ("reparto", "Chargeback"), ("acceso", "Access and groups"), ("compromisos", "Reservation and size"),
            ("gobierno", "Governance"), ("preguntas", "Questions"), ("fuentes", "Sources")]
     ok_src = sum(1 for v in sources.values() if v.get("status") == "ok")
-    parts = []
-    parts.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Microsoft Fabric FinOps · {E(period_label)} · real data</title><style>{CSS}</style></head><body>
-<header class="top"><div class="wrap"><h1>Microsoft Fabric FinOps: what you pay for, what you use and what you can save</h1>
-<p class="lede">Report generated by Azure SRE Agent from a live read of the tenant: the Azure Cost Management invoice, running hours from the
-Activity Log, user activity, Spark runs, and Fabric inventory and configuration. No sample data.</p>
-<ul class="chips"><li><b>{E(period_label)}</b> · {dmon(win0)} → {dmon(gen, ' %Y %H:%M')} UTC</li>
-<li>Main capacity <b>{E(focus_name)}</b> ({E(focus_sku)} · {E(focus.get('location') or '')})</li>
-<li><b>{ok_src}/{len(sources)}</b> sources read</li><li>Identities {'visible' if show_ids else 'masked'}</li></ul></div></header>
-<nav class="toc" aria-label="Sections"><ol>{''.join(f'<li><a href="#{a}">{b}</a></li>' for a, b in nav)}</ol></nav><main><div class="wrap">""")
 
     def no_cost(sec_id, title, what):
         return (f'<section id="{sec_id}"><h2>{title}</h2><div class="notice warn"><div><b>Requires the Cost Management invoice</b>'
                 f'<p>{what} {E(cost_why)}</p></div></div></section>')
 
+    # hero: verdict first (sentence, verdict card, cost split), then the key figures
+    idle_pct = idle_cost / total_cost if total_cost else 0
+    stor = cat_cost.get("storage", 0.0)
+    seg = [("Consumed by workloads", consumption_cost, "#5cc8ad"), ("Running with no load", idle_cost, "#e8a93c"), ("Storage", stor, "#aebdcb")]
+    stack = "".join(f'<span style="width:{(v / total_cost * 100) if total_cost else 0:.2f}%;background:{c}" title="{E(lbl)}: {money(v)}"></span>' for lbl, v, c in seg if v > 0)
+    legend = "".join(f'<li><span class="sw" style="background:{c}"></span>{E(lbl)} <b>{money(v)}</b> {pc(v / total_cost if total_cost else 0)}</li>' for lbl, v, c in seg)
+    verdict = (f"The {E(focus_sku)} capacity was running for <b>{fn(on_hours, 0)} h</b> ({pc(uptime, 0)} of the period), and during that time "
+               f"only <b>{pc(util_all, 0)}</b> of what was paid for was used. <b class=idle-t>{pc(idle_pct, 0)}</b> of the invoice is capacity running with no load.") \
+        if focus_cu and cu_billed else ""
+    est_on = hourly * on_hours
+    if cost_ok:
+        lead = f"<b>{money(total_cost)}</b> billed in the {E(period_label.lower())}." + (f" {verdict}" if verdict else "")
+    else:
+        lead = (f"At the public price, the <b>{fn(on_hours, 0)} h</b> that {E(focus_sku)} was running come to about <b>{money(est_on, 0)}</b> "
+                f"({money(hourly)}/h). This is a reference, not the invoice: it excludes storage and the operations Fabric bills when the capacity is paused.")
+    n_kind = Counter(a["kind"] for a in actions)
+    if not cost_ok:
+        v_cls, v_word, v_line = "info", "Partial view", "Billed cost not available in this run."
+    else:
+        v_cls, v_word = (("crit", "Action required") if idle_pct >= 0.5 else
+                         ("warn", "Needs attention") if idle_pct >= 0.2 or headline_save >= 1 or n_kind.get("risk") else ("ok", "On track"))
+        v_line = f"<b>{pc(idle_pct, 0)}</b> of the invoice is capacity running with no load."
+    k_word = {"save": ("saving", "savings"), "avoid": ("avoided spend", "avoided spend"), "scenario": ("scenario", "scenarios"),
+              "review": ("review", "reviews"), "risk": ("risk", "risks"), "gov": ("governance", "governance")}
+    v_line += (f"</p><p class=vl><b>{len(actions)} action{'' if len(actions) == 1 else 's'}</b>"
+               + (": " + ", ".join(f"{n_kind[k]} {k_word[k][n_kind[k] != 1]}" for k in k_word if n_kind.get(k)) if actions else ""))
+    dist = (f'<div class="dist"><div class="stack" role="img" aria-label="{E("; ".join(f"{lb}: {money(v)}" for lb, v, _ in seg if v > 0))}">{stack}</div>'
+            f'<ul class="legend">{legend}</ul></div>') if cost_ok and total_cost else ""
+    n_caps = len({c["rid"] for c in crow})
+
+    def kpi(v, unit, label, sub, cls=""):
+        return (f'<li class="kpi{cls}"><span class="v">{v}{f"<small>{unit}</small>" if unit else ""}</span>'
+                f'<span class="k">{label}</span><span class="s">{sub}</span></li>')
+
+    kpis = [kpi(fn(total_cost, 2), E(CUR), "Actual cost",
+                f"{E(period_label.lower())} · {len(meters)} meters · {n_caps} capacit{'y' if n_caps == 1 else 'ies'}") if cost_ok else
+            kpi("—", "", "Billed cost", f"{E(period_label.lower())} · not available in this run"),
+            kpi(fn(on_hours, 1), "h", "Running hours", f"of {fn(win_hours, 0)} h in the period ({pc(uptime, 0)})"),
+            kpi(fn(hourly, 2), E(CUR), "Cost per running hour", f"{focus_cu} CU × <span class=nw>{money(price_cu, 4)}/CU-h</span>"),
+            kpi(f"{fn(cu_billed, 0)} / {fn(cu_consumed, 0)}" if cost_ok else "—", "", "CU-h paid vs used",
+                f"average {fn(avg_cu_on, 1)} CU used per running hour" if cost_ok else "requires the Cost Management invoice"),
+            kpi(fn(headline_save, 0), f"{E(CUR)}/month", "Savings identified", "without changing SKU or touching workloads", " accent")]
+    meta = (f'<li>Generated <b>{dmon(gen, " %Y %H:%M")} UTC</b></li><li><b>{E(period_label)}</b> · {dmon(win0)} → {dmon(gen, " %Y")}</li>'
+            f'<li>Main capacity <b>{E(focus_name)}</b> ({E(focus_sku)} · {E(focus.get("location") or "")})</li>'
+            f'<li class="live">Live data · {ok_src}/{len(sources)} sources read</li><li>Identities {"visible" if show_ids else "masked"}</li>')
+    page_css = ('@page{size:A4;margin:12mm 11mm 15mm;@bottom-left{content:"Microsoft Fabric FinOps · ' + E(period_label) + " · generated "
+                + dmon(gen, " %Y %H:%M") + ' UTC";font:8.5pt "Segoe UI",sans-serif;color:#4b5e71}'
+                '@bottom-right{content:counter(page) " / " counter(pages);font:8.5pt "Segoe UI",sans-serif;color:#4b5e71}}')
+    parts = []
+    parts.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Microsoft Fabric FinOps · {E(period_label)} · real data</title><style>{CSS}{page_css}</style></head><body>
+<header class="topbar"><div class="wrap"><span class="mark"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 3h5.6l6.2 18h-4.5l-1.5-4.6H8.4L9.9 12h3.8L12 6.6 6.4 21H2z"/></svg></i>Azure SRE Agent</span>
+<span class="ctx">Microsoft Fabric FinOps and chargeback</span><div class="top-acts"><span class="tag">Read-only</span>
+<button type="button" class="print" data-print><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg><span class="lbl">Print / PDF</span></button></div></div></header>
+<main><div class="hero"><div class="wrap hero-grid"><div><h1>Microsoft Fabric FinOps: what you pay for, what you use and what you can save</h1>
+<p class="lead">{lead}</p>
+<p class="prov">Report generated by Azure SRE Agent from a live read of the tenant: the Azure Cost Management invoice, running hours from the
+Activity Log, user activity, Spark runs, and Fabric inventory and configuration. No sample data.</p></div>
+<div class="verdict {v_cls}"><p class="vk">Verdict</p><p class="vw">{v_word}</p><p class="vl">{v_line}</p></div>
+<ul class="meta">{meta}</ul>
+{dist}</div></div>
+<div class="wrap"><section id="resumen" aria-label="Key figures"><ul class="kpis">{''.join(kpis)}</ul></section></div>
+<nav class="toc" aria-label="Sections"><ol>{''.join(f'<li><a href="#{a}">{b}</a></li>' for a, b in nav)}</ol></nav><div class="wrap body">""")
     if not cost_ok:
         parts.append(f'<div class="notice warn"><div><b>Billed cost not available in this run</b><p>{E(cost_why)} '
                      'Running hours, activity, Spark, governance and pause savings are real and complete; '
@@ -1955,49 +2098,26 @@ Activity Log, user activity, Spark runs, and Fabric inventory and configuration.
     elif not crow:
         parts.append('<div class="notice warn"><div><b>No cost in the period</b><p>Cost Management returned no amounts for Fabric capacities. '
                      'Check the Cost Management Reader role on the subscription, or whether the capacities are billed to another subscription.</p></div></div>')
-    idle_pct = idle_cost / total_cost if total_cost else 0
-    stor = cat_cost.get("storage", 0.0)
-    seg = [("Consumed by workloads", consumption_cost, "#117865"), ("Running with no load", idle_cost, "#d99a2b"), ("Storage", stor, "#4f6378")]
-    stack = "".join(f'<span style="width:{(v / total_cost * 100) if total_cost else 0:.2f}%;background:{c}" title="{E(lbl)}: {money(v)}"></span>' for lbl, v, c in seg if v > 0)
-    legend = "".join(f'<li><span class="sw" style="background:{c}"></span>{E(lbl)}<strong>{money(v)}</strong>{pc(v / total_cost if total_cost else 0)}</li>' for lbl, v, c in seg)
-    verdict = (f"The {E(focus_sku)} capacity was running for <b>{fn(on_hours, 0)} h</b> ({pc(uptime, 0)} of the period), and during that time "
-               f"only <b>{pc(util_all, 0)}</b> of what was paid for was used. <b>{pc(idle_pct, 0)}</b> of the invoice is capacity running with no load.") \
-        if focus_cu and cu_billed else "Summary of the cost billed in the period."
-    est_on = hourly * on_hours
-    if cost_ok:
-        hero_l = (f'<p class="total-label">Actual cost in the {E(period_label.lower())}</p><p class="total-figure">{fn(total_cost, 2)}<small>{E(CUR)}</small></p>'
-                  f'<p class="total-meta">Azure Cost Management · ActualCost · {len(meters)} meters · {len({c["rid"] for c in crow})} capacity(ies) with charges</p>')
-        hero_r = f'<p class="verdict">{verdict}</p><div class="stack">{stack}</div><ul class="legend">{legend}</ul>'
-        kv_cu = f'<li>CU-h paid vs used<b>{fn(cu_billed, 0)} / {fn(cu_consumed, 0)}</b>average {fn(avg_cu_on, 1)} CU used per running hour</li>'
-    else:
-        hero_l = (f'<p class="total-label">Billed cost in the {E(period_label.lower())}</p><p class="total-figure">—</p>'
-                  f'<p class="total-meta">Not available in this run</p>')
-        hero_r = (f'<p class="verdict">At the public price, the <b>{fn(on_hours, 0)} h</b> that {E(focus_sku)} was running come to about <b>{money(est_on, 0)}</b> '
-                  f'({money(hourly)}/h). This is a reference, not the invoice: it excludes storage and the operations Fabric bills when the capacity is paused.</p>')
-        kv_cu = '<li>CU-h paid vs used<b>—</b>requires the Cost Management invoice</li>'
-    parts.append(f"""<section id="resumen"><h2>Summary</h2><p class="sub">Actual amount billed by Azure for the Fabric capacities, and how it splits between real usage and idle capacity.</p>
-<div class="panel hero"><div>{hero_l}</div>
-<div>{hero_r}</div></div>
-<ul class="kv" style="margin-top:18px">
-<li>Running hours<b>{fn(on_hours, 1)} h</b>of {fn(win_hours, 0)} h in the period</li>
-<li>Cost per running hour<b>{money(hourly)}</b>{focus_cu} CU × {money(price_cu, 4)}/CU-h</li>
-{kv_cu}
-<li>Savings identified<b>{money(headline_save, 0)}/month</b>without changing SKU or touching workloads</li></ul></section>""")
 
     # actions
     kind_lbl = {"save": ("Saving", "ok"), "avoid": ("Avoided spend", "info"), "scenario": ("Scenario", "info"), "review": ("Review", "warn"),
                 "risk": ("Risk", "crit"), "gov": ("Governance", "neutral")}
     ali = []
-    for a in actions:
+    for n_, a in enumerate(actions, 1):
         kl, kc = kind_lbl.get(a["kind"], ("", "neutral"))
         val = f'<b>{money(a["value"], 0)}</b><span>{E(a["unit"])}</span>' if a.get("value") else f'<span>{pill(kc, kl)}</span>'
-        ali.append(f'<li><div><h3>{E(a["title"])} {pill(kc, kl) if a.get("value") else ""}</h3><p>{E(a["why"])}</p></div>'
+        ali.append(f'<li data-kind="{E(a["kind"])}" data-n="{n_}"><div><h3>{E(a["title"])} {pill(kc, kl) if a.get("value") else ""}</h3><p>{E(a["why"])}</p></div>'
                    f'<div class="val">{val}</div><div class="ev"><b>Evidence:</b> {E(a["evidence"] or "—")} · <i>{E(a["src"])}</i></div></li>')
+    k_names = {"save": "Savings", "avoid": "Avoided spend", "scenario": "Scenarios", "review": "Review", "risk": "Risks", "gov": "Governance"}
+    afilter = ('<div class="afilter" role="group" aria-label="Show actions by type">'
+               f'<button type="button" data-kind="all" aria-pressed="true">All <b>{len(actions)}</b></button>'
+               + "".join(f'<button type="button" data-kind="{k}" aria-pressed="false">{v} <b>{n_kind[k]}</b></button>' for k, v in k_names.items() if n_kind.get(k))
+               + f'<span class="acount" aria-live="polite">{len(actions)} actions</span></div>') if len(actions) > 3 else ""
     parts.append(f"""<section id="acciones"><h2>Prioritized FinOps actions</h2>
 <p class="sub">Each action is calculated from this tenant's data and shows its evidence. Monthly figures project the observed period to 30 days.</p>
 <div class="save-strip"><span class="big">{money(headline_save, 0)}/month</span><p>Estimated direct saving from adjusting when the capacity is paused, with a 1 h buffer after the last activity.
 The other actions avoid spend or risk and are not added to this figure.</p></div>
-<ol class="actions">{''.join(ali) or '<li><div><h3>No actions</h3><p>No opportunities were detected with the available data.</p></div></li>'}</ol></section>""")
+{afilter}<ol class="actions">{''.join(ali) or '<li><div><h3>No actions</h3><p>No opportunities were detected with the available data.</p></div></li>'}</ol></section>""")
 
     # pieces
     cat_rows = []
@@ -2027,11 +2147,11 @@ The other actions avoid spend or risk and are not added to this figure.</p></div
     trend_html = ""
     if mon_keys or subc:
         prev = full_months[-1] if full_months else None
-        trend_html = f"""<div class="panel" style="margin-top:18px"><h3>Monthly Fabric trend</h3>
+        trend_html = f"""<div class="panel" style="margin-top:16px"><h3>Monthly Fabric trend</h3>
 <p class="muted" style="margin:0 0 8px">Monthly invoice for the Fabric capacities (includes capacities that have since been deleted).{f' Last closed month ({mlabel(prev)}): <b>{money(mon_tot[prev])}</b>.' if prev else ''}
 {f' Current month to date: <b>{money(mon_tot.get(cur_month, 0))}</b>.' if cur_month in mon_tot else ''}</p>
 <div class="chart">{svg_monthly()}</div><ul class="keys">{''.join(f'<li><span class="sw" style="background:{MON_COL[j % len(MON_COL)]}"></span>{E(c)}</li>' for j, c in enumerate(mon_caps)) if len(mon_caps) > 1 else ''}{f'<li><span class="sw" style="background:none;border-top:2px dashed #a14306;height:0;width:16px"></span>Average of closed months: <b>{money(mon_avg, 0)}</b></li>' if mon_avg else ''}</ul></div>
-<div class="split" style="margin-top:18px"><div class="panel"><h3>Fabric within the subscription</h3>
+<div class="split" style="margin-top:16px"><div class="panel"><h3>Fabric within the subscription</h3>
 <p class="muted" style="margin:0 0 12px">Same period, whole subscription: Fabric is <b>{pc(fabric_sub / sub_total if sub_total else 0, 0)}</b> of {money(sub_total)}.</p>
 <ul class="bars">{svc_rows}</ul></div>
 {f'<div class="panel"><h3>Other Azure resources with “fabric” in their name or resource group ({money(fab_adj_total)})</h3><p class="muted" style="margin:0 0 8px">They are not billed on the capacity. Check whether they are part of the solution (e.g. Data Agent apps or mirroring) or unrelated resources in the same group.</p><ul class="bars">{adj_rows}</ul></div>' if fab_adj else ''}</div>"""
@@ -2044,13 +2164,13 @@ The other actions avoid spend or risk and are not added to this figure.</p></div
 <div class="panel"><div class="chart">{svg_daily_cost()}</div>
 <ul class="keys">{''.join(f'<li>{cat_sw(c)}{E(CATS[c][0])}</li>' for c in cat_order)}</ul></div>
 <div class="split"><div class="panel"><h3>By workload type</h3><ul class="bars">{''.join(cat_rows)}</ul></div>
-<div class="panel"><h3>How to read the Fabric invoice</h3><p class="muted" style="margin:0 0 10px">An {E(focus_sku or 'F')} capacity is paid for by the running hour
+<div class="panel"><h3>How to read the Fabric invoice</h3><p class="muted" style="margin:0 0 12px">An {E(focus_sku or 'F')} capacity is paid for by the running hour
 ({money(hourly)}/h). Microsoft breaks that amount down into meters: each workload (Spark, AI, Real-Time…) bills the CUs it used and the rest appears as
 “Compute Pool”. That is why a high Compute Pool means capacity running unused, not a specific workload.</p>
 <p class="muted" style="margin:0">When the capacity is paused, Fabric bills all pending smoothed operations at once; that is why on some days the total exceeds {focus_cu or 'the'} CUs × running hours.
 On days with no load the invoice matches the running hours{f' with a maximum error of {pc(match_err, 1)}' if match_err is not None else ''}, which validates the running-hours calculation.</p></div></div>
 {trend_html}
-<div class="toolbar" style="margin-top:18px"><button class="btn" type="button" data-csv="csv-meters" data-name="fabric-daily-cost-by-meter.csv">Download daily CSV by meter</button></div>
+<div class="toolbar" style="margin-top:16px"><button class="btn" type="button" data-csv="csv-meters" data-name="fabric-daily-cost-by-meter.csv">Download daily CSV by meter</button></div>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Meter', 0)}{th('Type', 1)}{th('Quantity', 2, 'num', 'num')}{th('Days with charges', 3, 'num', 'num')}{th('Cost', 4, 'num', 'num')}{th('%', 5, 'num', 'num')}<th>Items that use it most</th></tr></thead>
 <tbody>{''.join(mrows)}</tbody><tfoot><tr><td colspan="4">Total</td><td class="num">{money(total_cost)}</td><td class="num">100%</td><td></td></tr></tfoot></table></div></section>""")
 
@@ -2071,7 +2191,7 @@ On days with no load the invoice matches the running hours{f' with a maximum err
     pre_note = (f"Hatched bands are before {dmon(act0)}: the Fabric activity log only keeps {act_days} days, "
                 "so those bands show when the capacity was running but not the work done.") if act0 and act0 > win0 else ""
     if cost_ok:
-        bill_col = f"""<div><h3>Invoice versus running hours, day by day</h3><p class="muted" style="margin:0 0 10px">Billed CU-h, CU-h used by workloads, and the ratio invoice ÷ (hours × {focus_cu or '—'} CU).
+        bill_col = f"""<div><h3>Invoice versus running hours, day by day</h3><p class="muted" style="margin:0 0 12px">Billed CU-h, CU-h used by workloads, and the ratio invoice ÷ (hours × {focus_cu or '—'} CU).
 Ratio 1.00 = the invoice matches the running hours.</p>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Day', 0)}{th('Running', 1, 'num', 'num')}{th('CU-h paid', 2, 'num', 'num')}{th('CU-h used', 3, 'num', 'num')}{th('Use', 4, 'num', 'num')}{th('Cost', 5, 'num', 'num')}<th class="num">Ratio</th></tr></thead>
 <tbody>{''.join(drows)}</tbody></table></div></div>"""
@@ -2085,12 +2205,12 @@ the purple line is Spark sessions and amber marks the time the capacity stayed o
 <li>After the last work<b>{fn(tail_h, 1)} h</b>{len(cov_runs)} running periods with recorded activity</li>
 <li>{'Automatic' if auto_suspend else 'Manual'} pause<b>{hhmm(susp_times[-1]) if susp_times else '—'} UTC</b>{f'median {int(suspend_hour_med):02d}:{int((suspend_hour_med % 1) * 60):02d} UTC' if suspend_hour_med is not None else 'no pauses in the period'}</li>
 <li>Who starts it<b>{len(callers_resume)}</b>{E(', '.join(plabel(pkey(c)) for c, _ in callers_resume.most_common(2))) or '—'}</li></ul>
-<div class="panel" style="margin-top:18px"><div class="chart">{svg_timeline()}</div>
+<div class="panel" style="margin-top:16px"><div class="chart">{svg_timeline()}</div>
 <ul class="keys"><li><span class="sw" style="background:#cfe9e3"></span>Running</li><li><span class="sw" style="background:#d99a2b;opacity:.6"></span>Running after the last work</li>
 <li><span class="sw" style="background:#0b5345"></span>Operations per hour</li><li><span class="sw" style="background:#6a3d9a"></span>Spark</li>
 {'<li><span class="sw" style="background:#c9d4dd"></span>No activity log</li>' if pre_note else ''}</ul></div>
-<div class="split" style="margin-top:18px"><div><h3>What if the automatic pause were earlier?</h3>
-<p class="muted" style="margin:0 0 10px">Hours that would have been avoided across the {len(cov_runs)} running periods with recorded activity, and whether any real work would have been cut off.</p>
+<div class="duo"><div><h3>What if the automatic pause were earlier?</h3>
+<p class="muted" style="margin:0 0 12px">Hours that would have been avoided across the {len(cov_runs)} running periods with recorded activity, and whether any real work would have been cut off.</p>
 <div class="tbl-wrap"><table class="dense"><thead><tr><th>Pause at</th><th class="num">Hours avoided</th><th class="num">Observed saving</th><th class="num">Per month</th><th class="num">Days</th><th>Impact</th></tr></thead>
 <tbody>{wrows}</tbody></table></div></div>
 {bill_col}</div></section>""")
@@ -2117,12 +2237,12 @@ the purple line is Spark sessions and amber marks the time the capacity stayed o
 Administrative operations and this report's own reads are excluded. Identities {'visible' if show_ids else 'masked; request the report with visible identities if the recipient is authorized'}.</p>
 <ul class="kv"><li>Active people<b>{n_users}</b>with work operations</li><li>Apps and service principals<b>{len(humans) - n_users}</b>with operations</li>
 <li>Work operations<b>{fn(len(work_ev))}</b>out of {fn(len(evs))} audited events</li><li>Spark sessions<b>{len(livy)}</b>{fn(livy_total_s / 3600, 1)} h of execution</li></ul>
-<div class="tbl-wrap" style="margin-top:18px"><table data-sortable class="dense"><thead><tr>{th('Identity', 0)}{th('Operations', 1, 'num', 'num')}{th('Active days', 2, 'num', 'num')}<th>Workload type</th><th>Workspaces</th>{th('Spark', 5, 'num', 'num')}{th('Last', 6)}</tr></thead>
+<div class="tbl-wrap" style="margin-top:16px"><table data-sortable class="dense"><thead><tr>{th('Identity', 0)}{th('Operations', 1, 'num', 'num')}{th('Active days', 2, 'num', 'num')}<th>Workload type</th><th>Workspaces</th>{th('Spark', 5, 'num', 'num')}{th('Last', 6)}</tr></thead>
 <tbody>{''.join(prow) or '<tr><td colspan="7">No work operations in the period.</td></tr>'}</tbody></table></div>
-<div class="panel" style="margin-top:18px"><h3>When people work (day × hour, UTC)</h3>{heat_html()}</div>
-<div class="panel" style="margin-top:18px"><h3>System identities</h3><p class="muted" style="margin:0 0 10px">Fabric and Power BI processes with no person behind them.</p>
+<div class="panel" style="margin-top:16px"><h3>When people work (day × hour, UTC)</h3>{heat_html()}</div>
+<div class="panel" style="margin-top:16px"><h3>System identities</h3><p class="muted" style="margin:0 0 12px">Fabric and Power BI processes with no person behind them.</p>
 <div class="tbl-wrap"><table class="dense"><thead><tr><th>Identity</th><th class="num">Events</th><th>Operations</th></tr></thead><tbody>{nh or '<tr><td colspan="3">—</td></tr>'}</tbody></table></div></div>
-<h3 style="margin-top:22px">Most-used items</h3>
+<h3 style="margin-top:24px">Most-used items</h3>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Item', 0)}{th('Workspace', 1)}{th('Operations', 2, 'num', 'num')}{th('Identities', 3, 'num', 'num')}<th>Workload</th>{th('Last', 5)}</tr></thead>
 <tbody>{irows or '<tr><td colspan="6">—</td></tr>'}</tbody></table></div></section>""")
 
@@ -2168,17 +2288,17 @@ The total reconciles exactly with the billed amount.</p>
 <li>{cat_sw('storage')}<b>Storage, OneLake transactions and other</b> → platform, not assignable with the available data</li></ul></div>
 <div class="panel"><h3>Reconciliation with the invoice</h3><ul class="facts" style="border:0;margin:0;padding:0">
 <li>Workspaces<b>{money(cb_sum)}</b></li><li>Not assignable<b>{money(total_cost - cb_sum)}</b></li><li>Total billed<b>{money(total_cost)}</b></li></ul>
-<p class="muted" style="margin:14px 0 0">For precise per-person internal billing, the reference is the Capacity Metrics app{' (installed in the tenant)' if cm_installed else ''} with the “Show user data” setting enabled.</p></div></div>
-<div class="toolbar" style="margin-top:18px"><button class="btn" type="button" data-csv="csv-chargeback" data-name="fabric-chargeback-workspaces.csv">Download chargeback CSV</button></div>
+<p class="muted" style="margin:16px 0 0">For precise per-person internal billing, the reference is the Capacity Metrics app{' (installed in the tenant)' if cm_installed else ''} with the “Show user data” setting enabled.</p></div></div>
+<div class="toolbar" style="margin-top:16px"><button class="btn" type="button" data-csv="csv-chargeback" data-name="fabric-chargeback-workspaces.csv">Download chargeback CSV</button></div>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Workspace', 0)}{th('Operations', 1, 'num', 'num')}{th('AI queries', 2, 'num', 'num')}{th('Spark', 3, 'num', 'num')}{th('Direct cost', 4, 'num', 'num')}{th('Idle running share', 5, 'num', 'num')}{th('Total', 6, 'num', 'num')}{th('%', 7, 'num', 'num')}</tr></thead>
 <tbody>{''.join(cbrows)}</tbody><tfoot>{ex_html}<tr><td colspan="6">Total</td><td class="num">{money(total_cost)}</td><td class="num">100%</td></tr></tfoot></table></div>
-{f'<p class="muted" style="margin:10px 0 0"><b>{len(cb_zero)} workspaces with no billable consumption in the period:</b> {E(", ".join(sorted(cb_zero, key=str.lower)))}.</p>' if cb_zero else ''}
+{f'<p class="muted" style="margin:12px 0 0"><b>{len(cb_zero)} workspaces with no billable consumption in the period:</b> {E(", ".join(sorted(cb_zero, key=str.lower)))}.</p>' if cb_zero else ''}
 """
     else:
         cb_block = ('<div class="notice warn"><div><b>Requires the Cost Management invoice</b><p>The chargeback by workspace distributes the billed amount of each meter. '
                     f'{E(cost_why)} In the meantime, “Who consumes” shows real usage by workspace, identity and item.</p></div></div>\n')
     parts.append(f"""<section id="reparto"><h2>Cost chargeback by workspace</h2>
-{cb_block}<h3 style="margin-top:22px">Spark notebooks and jobs</h3><p class="muted" style="margin:0 0 10px">{f"Spark cost ({money(spark_cost)}) allocated by the real execution seconds of each session." if cost_ok else "Real execution hours of each session; the cost appears when the invoice is available."}</p>
+{cb_block}<h3 style="margin-top:24px">Spark notebooks and jobs</h3><p class="muted" style="margin:0 0 12px">{f"Spark cost ({money(spark_cost)}) allocated by the real execution seconds of each session." if cost_ok else "Real execution hours of each session; the cost appears when the invoice is available."}</p>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Notebook', 0)}{th('Sessions', 1, 'num', 'num')}{th('Scheduled', 2, 'num', 'num')}{th('Failed', 3, 'num', 'num')}{th('Execution', 4, 'num', 'num')}{th('% Spark', 5, 'num', 'num')}{th('Cost', 6, 'num', 'num')}<th>Last (UTC)</th></tr></thead>
 <tbody>{nbrows or '<tr><td colspan="8">No Spark sessions in the period.</td></tr>'}</tbody></table></div></section>""")
 
@@ -2222,8 +2342,8 @@ The total reconciles exactly with the billed amount.</p>
         head = ('<summary style="cursor:pointer"><b>' + E(g["name"]) + "</b> · " + str(g["active"]) + " of " + str(g["n_members"])
                 + " members used its resources" + ((" · " + money(g["member_cost"])) if cost_ok else "") + "</summary>")
         if not g["res"]:
-            gdet.append('<details class="panel" style="margin-top:10px">' + head
-                        + '<p class="muted" style="margin:10px 0 0">No member used the resources granted to this group in the period.</p></details>')
+            gdet.append('<details class="panel" style="margin-top:12px">' + head
+                        + '<p class="muted" style="margin:12px 0 0">No member used the resources granted to this group in the period.</p></details>')
             continue
         rrows = "".join('<tr><td class="cell-strong">' + E(rk[1]) + "</td><td>" + E(ws_label(rk[0])) + '</td><td class="num">' + fn(o)
                         + '</td><td class="num">' + (money(c) if cost_ok else "—") + "</td></tr>" for rk, o, c in g["res"][:12])
@@ -2231,17 +2351,17 @@ The total reconciles exactly with the billed amount.</p>
                         + (money(m["cost"]) if cost_ok else "—") + "</td><td>" + res_list(m["top"], True) + '</td><td class="num">'
                         + fn(m["total_ops"]) + ' ops<span class="cell-sub">' + (money(m["total_cost"]) if cost_ok else "") + "</span></td></tr>"
                         for m in g["mdetail"][:25])
-        gdet.append('<details class="panel" style="margin-top:10px">' + head
-                    + '<h3 style="margin-top:14px">Group resources used by its members</h3>'
+        gdet.append('<details class="panel" style="margin-top:12px">' + head
+                    + '<h3 style="margin-top:16px">Group resources used by its members</h3>'
                     + '<div class="tbl-wrap"><table class="dense"><thead><tr><th>Item</th><th>Workspace</th><th class="num">Operations</th><th class="num">Cost</th></tr></thead><tbody>'
                     + rrows + "</tbody></table></div>"
-                    + '<h3 style="margin-top:14px">What each group member consumes</h3>'
+                    + '<h3 style="margin-top:16px">What each group member consumes</h3>'
                     + '<div class="tbl-wrap"><table class="dense"><thead><tr><th>Person</th><th class="num">Operations</th><th class="num">Cost</th>'
                     + '<th>Resources used</th><th class="num">Person’s total</th></tr></thead><tbody>' + mrows + "</tbody></table></div>"
                     + ('<p class="muted" style="margin:8px 0 0">Showing the 25 members with the highest consumption out of ' + str(len(g["mdetail"])) + ".</p>" if len(g["mdetail"]) > 25 else "")
                     + "</details>")
-    grp_detail = ('<h3 style="margin-top:22px">Detail by group: which resources are consumed and by whom</h3>'
-                  '<p class="muted" style="margin:0 0 6px">Expand a group to see which of the resources granted to it are used by its members, and how much each person consumes. '
+    grp_detail = ('<h3 style="margin-top:24px">Detail by group: which resources are consumed and by whom</h3>'
+                  '<p class="muted" style="margin:0 0 8px">Expand a group to see which of the resources granted to it are used by its members, and how much each person consumes. '
                   '“Person’s total” includes everything that person did in Fabric, including outside the group’s resources.</p>' + "".join(gdet)) if gdet else ""
 
     pmax = 40
@@ -2262,7 +2382,7 @@ The total reconciles exactly with the billed amount.</p>
                      'Both are read-only. In the meantime, the “Cost of what it can use” column allocates cost by the resources each group has access to.</p></div></div>')
     else:
         gm_notice = ""
-    tech_note = (f'<p class="muted" style="margin:10px 0 0">{E(", ".join(g["name"] for g in grp_tech))} is not shown: it is the technical group that gives the SRE Agent read access '
+    tech_note = (f'<p class="muted" style="margin:12px 0 0">{E(", ".join(g["name"] for g in grp_tech))} is not shown: it is the technical group that gives the SRE Agent read access '
                  f'({len(grp_tech[0]["ws"])} workspaces and {len(grp_tech[0]["items"])} items).</p>') if grp_tech else ""
     if acc_ok:
         acc_block = f"""<p class="sub">Who has access to each workspace (roles) and to each item (shared permissions), including groups, read from the Fabric admin APIs
@@ -2270,14 +2390,14 @@ in read-only mode{f" ({E(items_src.get('note') or '')})" if items_src.get("note"
 <ul class="kv"><li>Groups with access<b>{len(grp_list)}</b>to workspaces or items</li><li>People with access<b>{len(people_list)}</b>{'directly or through a group' if members_known else 'assigned directly'}</li>
 <li>With access but no activity<b>{len(no_activity)}</b>in the last {act_ok or act_days} days</li><li>New users<b>{len(new_people) if members_known else '—'}</b>{'created in the period' if members_known else 'requires permission to read users'}</li></ul>
 {gm_notice}
-<h3 style="margin-top:22px">Consumption by group</h3>
-<p class="muted" style="margin:0 0 10px"><strong>Member consumption</strong>: cost of what the group's members did in the workspaces and items granted to the group (same per-meter allocation as the chargeback). If someone also has access directly or through another group, their use of a resource counts in every group that grants it.
+<h3 style="margin-top:24px">Consumption by group</h3>
+<p class="muted" style="margin:0 0 12px"><strong>Member consumption</strong>: cost of what the group's members did in the workspaces and items granted to the group (same per-meter allocation as the chargeback). If someone also has access directly or through another group, their use of a resource counts in every group that grants it.
 <strong>Cost of what it can use</strong>: cost of the workspaces where the group has a role plus the items shared with it. These columns cannot be added up across groups.</p>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Group', 0)}<th>Access</th>{th('Active members', 2, 'num', 'num')}{th('Operations', 3, 'num', 'num')}{th('Member consumption', 4, 'num', 'num')}{th('Cost of what it can use', 5, 'num', 'num')}</tr></thead>
 <tbody>{''.join(grows) or '<tr><td colspan="6">No groups have access to workspaces or items (apart from the SRE Agent technical group).</td></tr>'}</tbody></table></div>{tech_note}
 {grp_detail}
-<h3 style="margin-top:22px">People with access</h3>
-<p class="muted" style="margin:0 0 10px">A person can have access and not appear in “Who consumes” because they have not worked in the period{'' if members_known else ', or because they get access through a group whose members cannot be read yet'}.{f' Showing the first {pmax} of {len(people_list)}.' if len(people_list) > pmax else ''}</p>
+<h3 style="margin-top:24px">People with access</h3>
+<p class="muted" style="margin:0 0 12px">A person can have access and not appear in “Who consumes” because they have not worked in the period{'' if members_known else ', or because they get access through a group whose members cannot be read yet'}.{f' Showing the first {pmax} of {len(people_list)}.' if len(people_list) > pmax else ''}</p>
 <div class="tbl-wrap"><table data-sortable class="dense"><thead><tr>{th('Person', 0)}<th>Via</th>{th('Access', 2, 'num', 'num')}{th('Operations', 3, 'num', 'num')}{th('Consumption', 4, 'num', 'num')}<th>What they consume</th><th>Last (UTC)</th><th>Status</th></tr></thead>
 <tbody>{''.join(prow_acc) or '<tr><td colspan="8">No people with access.</td></tr>'}</tbody></table></div>"""
     else:
@@ -2311,21 +2431,21 @@ in read-only mode{f" ({E(items_src.get('note') or '')})" if items_src.get("note"
                     f'<td>{pill("ok", "Viable on average") if s_["peak_load"] < 0.6 else (pill("warn", "Tight") if s_["peak_load"] < 0.9 else pill("crit", "Insufficient"))}</td></tr>'
                     for s_ in sizes)
     if cost_ok:
-        size_html = f"""<h3 style="margin-top:22px">Size scenarios</h3>
-<p class="muted" style="margin:0 0 10px">Load = CUs used per running hour ÷ CUs of the SKU. “Peak” is the busiest day by hourly average{f" ({dlabel(peak_day['date'])})" if peak_day else ''}.
+        size_html = f"""<h3 style="margin-top:24px">Size scenarios</h3>
+<p class="muted" style="margin:0 0 12px">Load = CUs used per running hour ÷ CUs of the SKU. “Peak” is the busiest day by hourly average{f" ({dlabel(peak_day['date'])})" if peak_day else ''}.
 It does not capture bursts lasting a few minutes: confirm in Capacity Metrics before changing size.</p>
 <div class="tbl-wrap"><table class="dense"><thead><tr><th>SKU</th><th class="num">CU</th><th class="num">Average load</th><th class="num">Peak-day load</th><th class="num">Saving/month</th><th>Assessment</th></tr></thead>
 <tbody><tr><td class="cell-strong">{E(focus_sku)} (current)</td><td class="num">{focus_cu}</td><td class="num">{pc(avg_cu_on / focus_cu if focus_cu else 0, 0)}</td><td class="num">{pc(peak_day_avg / focus_cu if focus_cu else 0, 0)}</td><td class="num">—</td><td>{pill("neutral", "Current")}</td></tr>{srows}</tbody></table></div>"""
     else:
-        size_html = ('<h3 style="margin-top:22px">Size scenarios</h3><div class="notice warn"><div><b>Requires the Cost Management invoice</b>'
+        size_html = ('<h3 style="margin-top:24px">Size scenarios</h3><div class="notice warn"><div><b>Requires the Cost Management invoice</b>'
                      f'<p>The hourly load is calculated from the billed and consumed CU-h. {E(cost_why)}</p></div></div>')
     parts.append(f"""<section id="compromisos"><h2>Capacity reservation and size</h2>
 <p class="sub">Public Azure prices for {E(focus_region or 'the region')} and real running hours. A reservation is paid for 24 hours a day; it only pays off if the capacity is running almost all the time.</p>
 <div class="split"><div class="panel"><h3>Annual cost compared</h3><ul class="bars">{cmp_html or '<li>No prices available.</li>'}</ul>
-<p class="muted" style="margin:14px 0 0">Pay-as-you-go price: {money(price_cu, 4)}/CU-h · {E(price_src)}.</p></div>
-<div class="panel"><h3>Break-even threshold</h3><ul class="kv" style="grid-template-columns:1fr 1fr">
+<p class="muted" style="margin:16px 0 0">Pay-as-you-go price: {money(price_cu, 4)}/CU-h · {E(price_src)}.</p></div>
+<div class="panel"><h3>Break-even threshold</h3><ul class="kv cols2">
 <li>Running now<b>{pc(uptime, 0)}</b>{fn(on_hours, 0)} h of {fn(win_hours, 0)} h</li>{be_html}</ul>
-<p class="muted" style="margin:14px 0 0">{'With current usage, pay-as-you-go plus pausing is cheaper than any reservation.' if breakeven and uptime < min(breakeven.values()) else 'Current usage is above the break-even threshold of at least one reservation.'}</p></div></div>
+<p class="muted" style="margin:16px 0 0">{'With current usage, pay-as-you-go plus pausing is cheaper than any reservation.' if breakeven and uptime < min(breakeven.values()) else 'Current usage is above the break-even threshold of at least one reservation.'}</p></div></div>
 {size_html}</section>""")
 
     # governance
@@ -2345,13 +2465,13 @@ It does not capture bursts lasting a few minutes: confirm in Capacity Metrics be
 <ul class="kv"><li>Capacities<b>{len(caps_tbl)}</b>{sum(1 for c in caps_tbl if c['state'].lower() == 'active')} active</li>
 <li>Workspaces<b>{len(workspaces)}</b>{sum(1 for w in workspaces if (w.get('capacity_id') or '').lower() in paid_caps)} on paid capacity</li>
 <li>Items<b>{fn(len(items))}</b>{len(stale_items)} unchanged in 90 days</li><li>OneLake read<b>{fn(ol_bytes / 1024 ** 3, 2)} GB</b>{E(ol_line)}</li></ul>
-<h3 style="margin-top:22px">Capacities</h3>
+<h3 style="margin-top:24px">Capacities</h3>
 <div class="tbl-wrap"><table class="dense"><thead><tr><th>Capacity</th><th>SKU</th><th>State</th><th class="num">Workspaces</th><th class="num">Items</th><th class="num">Period cost</th><th>Tags</th><th>Finding</th></tr></thead>
 <tbody>{crows}</tbody></table></div>
-<div class="panel" style="margin-top:18px"><h3>Items by type</h3><ul class="kv types">{itypes}</ul></div>
-<div class="panel" style="margin-top:18px"><h3>Tenant settings that affect cost</h3><div class="tbl-wrap"><table class="dense"><thead><tr><th>Setting</th><th>Status</th><th>Scope</th></tr></thead>
+<div class="panel" style="margin-top:16px"><h3>Items by type</h3><ul class="kv types">{itypes}</ul></div>
+<div class="panel" style="margin-top:16px"><h3>Tenant settings that affect cost</h3><div class="tbl-wrap"><table class="dense"><thead><tr><th>Setting</th><th>Status</th><th>Scope</th></tr></thead>
 <tbody>{tsrows or '<tr><td colspan="3">—</td></tr>'}</tbody></table></div></div>
-<h3 style="margin-top:22px">Model and dataflow refreshes</h3>
+<h3 style="margin-top:24px">Model and dataflow refreshes</h3>
 <div class="tbl-wrap"><table class="dense"><thead><tr><th>Item</th><th>Type</th><th>Last</th><th class="num">Days</th><th>Status</th><th>Scheduled</th></tr></thead>
 <tbody>{rrows or '<tr><td colspan="6">No refreshable items.</td></tr>'}</tbody></table></div></section>""")
 
@@ -2378,9 +2498,9 @@ It does not capture bursts lasting a few minutes: confirm in Capacity Metrics be
             "Which tenant settings affect cost, and how are they configured?",
             "Generate the report with visible identities for the FinOps team."]),
     ]
-    qhtml = "".join(f'<article><h3>{E(g)}</h3><ul>' + "".join(f'<li><span>{E(q)}</span><button type="button" data-copy="{E(q)}">Copy</button></li>' for q in qs) + "</ul></article>" for g, qs in QS)
+    qhtml = "".join(f'<article><h3>{E(g)}</h3><ul>' + "".join(f'<li><span>{E(q)}</span><button type="button" data-copy="{E(q)}" aria-label="Copy: {E(q)}">Copy</button></li>' for q in qs) + "</ul></article>" for g, qs in QS)
     parts.append(f"""<section id="preguntas"><h2>Ask the agent</h2>
-<p class="sub">Copy any of these questions into the Azure SRE Agent chat (agent <b>fabric-chargeback-live</b>). The agent reads the tenant live again and answers with figures from this same model.</p>
+<p class="sub">Copy any of these questions into the Azure SRE Agent chat (agent <b class="nw">fabric-chargeback-live</b>). The agent reads the tenant live again and answers with figures from this same model.</p>
 <div class="qs">{qhtml}</div></section>""")
 
     # sources
@@ -2413,7 +2533,7 @@ It does not capture bursts lasting a few minutes: confirm in Capacity Metrics be
 <p class="sub">Everything is read when the report is generated, in read-only mode, {'with a multi-tenant app identity in the Fabric tenant (certificate in Key Vault or federated credential, no secrets in the code)' if raw.get('auth_mode', 'cross_tenant') == 'cross_tenant' else 'with the SRE Agent managed identity, no secrets'}. This is the actual status of each source in this run.</p>
 <div class="tbl-wrap"><table class="dense"><thead><tr><th>Source</th><th>Status</th><th class="num">HTTP</th><th class="num">Records</th><th class="num">Time</th><th>Note</th></tr></thead>
 <tbody>{''.join(srcrows)}</tbody></table></div>
-<div class="method panel" style="margin-top:18px"><div><h3>How it is calculated</h3><ul>
+<div class="method panel" style="margin-top:16px"><div><h3>How it is calculated</h3><ul>
 <li>Cost is the actual Cost Management amount (ActualCost) for <code>microsoft.fabric/capacities</code> resources, by day and meter, in {E(CUR)}.</li>
 <li>Running hours come from the resume/suspend events in the Activity Log and are validated against the invoice (ratio invoice ÷ hours × CU).</li>
 <li>Real work means operations in the Fabric activity log plus Spark sessions; administrative operations and this report's own operations are excluded.</li>

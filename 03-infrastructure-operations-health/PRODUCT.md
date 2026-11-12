@@ -91,6 +91,12 @@ instruction to continue autonomously, as an explicitly stated assumption.
 The built world is recorded in this folder's DESIGN.md, not inferred from
 the older scenarios.
 
+In November 2026 the owner asked for every report to join the Azure SRE Agent
+report family. The presentation now uses its top bar, verdict band, KPI cards
+and shared severity colours, while this scenario keeps its petrol palette,
+Unknown-is-never-zero semantics, data contract and exports. README report
+screenshots re-render dated lab snapshots with pseudonymized names.
+
 The parent supplied verified real Arc/native telemetry, deployed restricted
 components, final monthly/current native downloads, actual automatic incident
 invocations, bounded operator CPU measurements, worker cleanup and original

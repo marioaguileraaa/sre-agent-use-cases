@@ -492,13 +492,21 @@ skill, single tool and instruction block are persisted.
 
 ## Step 6 - Read and explore the HTML dependency and configuration dossier
 
-- **Section 1 & 2 (Cover & Executive Reading):** Verify the workspace identity,
-  `auth_mode`, cross-tenant badge, UTC reference and local pass percentage
-  beside coverage.
+The report opens verdict-first: a slim top bar (section navigation, `Solo lectura`
+chip, dark mode, an **Exportar** menu with the snapshot JSON, dependencies CSV and
+checks CSV, and **Imprimir / PDF**), a navy summary band with the key numbers and
+the verdict, then KPI cards. Printing gives an A4 PDF with a running footer
+(workspace and UTC reference). The images below are rendered from the sanitized
+synthetic test fixture (`SIMULATED`, Plane 1 ARM reads returning `HTTP 403`), not
+from a real workspace.
 
-  ![Spanish HTML dossier cover and executive overview with local score beside coverage](images/13-report-overview-and-pillars.png)
+- **Summary and sections 1-2 (Workspace identity & Executive Reading):** Verify
+  the verdict, the local index beside coverage, the workspace identity,
+  `auth_mode`, cross-tenant chip and UTC reference.
 
-  *Generated Spanish HTML dossier cover and executive overview (`13-report-overview-and-pillars.png`, customer-neutral `CLIENTE` rendering): **(1)** top action bar with dark-mode toggle and local JSON/CSV/PDF exports; **(2)** live cross-tenant provenance card (`cross_tenant_multitenant_fic`, `LIVE`, `LAB`); **(3)** executive reading and local score paired with `Evaluados` (`4`) and `No evaluado` (`31`) across the four areas and five WAF pillars.*
+  ![Spanish HTML dossier summary with verdict, local index beside coverage and KPI cards](images/13-report-overview-and-pillars.png)
+
+  *Report summary (`13-report-overview-and-pillars.png`, customer-neutral `CLIENTE` plaque): **(1)** slim top bar with section navigation, `Solo lectura` chip, dark-mode toggle, **Exportar** menu (JSON / dependencies CSV / checks CSV) and **Imprimir / PDF**; **(2)** verdict-first summary with provenance chips (`cross_tenant_multitenant_fic`, `LAB`, `DATOS SIMULADOS`), verdict card and severity distribution; **(3)** KPI cards pairing the local index (`75 %`) with coverage (`32` of `42` applicable checks evaluated, `10` `No evaluado`).*
 
 - **Section 3 (Deep Dependency Map):** Filter by layer (`control_plane`,
   `compute`, `orchestration`, `governance`, `associated_resource`) and
@@ -508,19 +516,22 @@ skill, single tool and instruction block are persisted.
 
   ![Deep dependency map showing OBSERVED native joins and INFERRED ADLS Gen2 URI references](images/14-report-dependency-graph.png)
 
-  *Section 3 Deep Dependency Map (`14-report-dependency-graph.png`): **(1)** observed vs. undeployed reference tabs and interactive layer/classification filters (`OBSERVED`, `INFERRED`, `UNKNOWN`); **(2)** visual dependency graph cards across the 5 layers showing solid `OBSERVED` joins and dashed amber `INFERRED` ADLS Gen2 storage references; **(3)** complete dependency edges table with exact join fields and source IDs.*
+  *Section 3 Deep Dependency Map (`14-report-dependency-graph.png`): **(1)** classification counts, observed vs. undeployed reference tabs and interactive layer/classification/search filters (`OBSERVED`, `INFERRED`, `UNKNOWN`); **(2)** layered neighbourhood graph (one column per layer) with solid `OBSERVED` joins and dashed amber `INFERRED` ADLS Gen2 and Key Vault references; **(3)** sortable dependency edges table with exact join fields and source IDs.*
 
   ![Undeployed Azure Databricks Well-Architected Lakehouse reference architecture tab](images/15-report-controls-and-reference.png)
 
-  *Undeployed Lakehouse reference tab (`15-report-controls-and-reference.png`): **(1)** explicitly labeled **Propuesta de referencia - NO desplegada** tab; **(2)** Well-Architected Lakehouse reference diagram and trade-offs table kept visually separate from observed customer inventory.*
+  *Undeployed Lakehouse reference tab (`15-report-controls-and-reference.png`): **(1)** explicitly labeled **Propuesta de referencia - NO desplegada** tab; **(2)** Well-Architected Lakehouse reference diagram flagged as not deployed and trade-offs table, kept visually separate from the observed inventory.*
 
 - **Sections 4–8 (Inventory, Findings, FinOps, Actions, Source Ledger):** Drill
   into clusters, jobs, DLT pipelines, SQL warehouses, Unity Catalog objects,
-  associated ARM resources, FinOps candidates and per-source HTTP receipts.
+  associated ARM resources (name, resource group and Portal link), FinOps
+  candidates and per-source HTTP receipts. The checks register lists failed
+  checks first, with sortable columns and a filtered CSV export; the action plan
+  is grouped by horizon (`Quick-win`, `Corto plazo`, `Medio plazo`).
 
   ![Section 8 Source Coverage and HTTP Receipts Ledger](images/16-report-source-coverage-ledger.png)
 
-  *Section 8 Source Coverage & HTTP Receipts Ledger (`16-report-source-coverage-ledger.png`): **(1)** Plane 1 ARM receipts honestly recorded as `denied` (`HTTP 403`) when target resource-group `Reader` is pending; **(2)** Plane 2 Databricks Workspace & Unity Catalog REST sources returning `complete` (`HTTP 200`) via `cross_tenant_multitenant_fic`.*
+  *Section 8 Source Coverage & HTTP Receipts Ledger (`16-report-source-coverage-ledger.png`): **(1)** Plane 1 ARM receipts honestly recorded as `Denegada` (`HTTP 403`) when target resource-group `Reader` is pending; **(2)** Plane 2 Databricks Workspace & Unity Catalog REST sources recorded as `Completa` via `cross_tenant_multitenant_fic`.*
 
 ## Step 7 - Keep reporting cadence optional
 
@@ -560,7 +571,7 @@ completed, colleague-tenant source captures remain **Not collected
 | Tool, schema & unconfigured safety gate | Saved `generate-databricks-dependency-report`, `timeoutSeconds=900`, `authEnabled=false`, 12 typed parameters (`limit`/`offset` as `int`), and 2 native Python tests (API + UI) returning `configuration_required` / `not_written` before auth | **Collected (`2026-10-16`):** [`08-create-drop-down-arrow.png`](images/08-create-drop-down-arrow.png), [`02-private-code-and-timeout.png`](images/02-private-code-and-timeout.png), [`03-identity-access-off.png`](images/03-identity-access-off.png), [`01-saved-tool-and-12-parameters.png`](images/01-saved-tool-and-12-parameters.png), [`04-native-unconfigured-test.png`](images/04-native-unconfigured-test.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
 | Skill & restricted subagent | Saved `databricks-dependency-live` skill and specialist read back with `tools=["generate-databricks-dependency-report"]`, `allowedSkills=["databricks-dependency-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`, `llmModelName=null` | **Collected (`2026-10-16`):** [`05-saved-runtime-skill.png`](images/05-saved-runtime-skill.png), [`06-saved-restricted-specialist.png`](images/06-saved-restricted-specialist.png), [`07-saved-explicit-allowlists.png`](images/07-saved-explicit-allowlists.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
 | Selected-specialist unconfigured readiness chat | Registered specialist selected via `/agent`, composer chip verified, and real readiness turn returning `configuration_required` / `not_written` with zero source reads or fabricated files | **Collected (`2026-10-16`):** [`10-select-registered-specialist.png`](images/10-select-registered-specialist.png), [`11-selected-specialist-composer.png`](images/11-selected-specialist-composer.png), [`09-native-no-source-no-files.png`](images/09-native-no-source-no-files.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
-| Live Databricks dependency map & configuration dossier | HTML cover (`CLIENTE`), `OBSERVED`/`INFERRED`/`UNKNOWN` dependency graph, undeployed reference tab, FinOps and source ledger from a connected workspace | **Collected (`2026-10-19`):** [`13-report-overview-and-pillars.png`](images/13-report-overview-and-pillars.png), [`14-report-dependency-graph.png`](images/14-report-dependency-graph.png), [`15-report-controls-and-reference.png`](images/15-report-controls-and-reference.png), [`16-report-source-coverage-ledger.png`](images/16-report-source-coverage-ledger.png) |
+| Databricks dependency map & configuration dossier (report design) | Verdict-first summary (`CLIENTE`), `OBSERVED`/`INFERRED`/`UNKNOWN` dependency graph, undeployed reference tab and source ledger | **Regenerated (`2026-11-12`) from the sanitized synthetic test fixture after the report redesign** (connected-run delivery evidence of `2026-10-19` stays in [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png)): [`13-report-overview-and-pillars.png`](images/13-report-overview-and-pillars.png), [`14-report-dependency-graph.png`](images/14-report-dependency-graph.png), [`15-report-controls-and-reference.png`](images/15-report-controls-and-reference.png), [`16-report-source-coverage-ledger.png`](images/16-report-source-coverage-ledger.png) |
 | Live four-file native delivery | Actual `report_url`, `snapshot_url`, `findings_csv_url`, `dependencies_csv_url` HTTP 200 downloads from a connected workspace run | **Collected (`2026-10-19`):** [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png), [`visual-evidence.json`](visual-evidence.json) |
 
 ## Technical boundaries and maintainer checks

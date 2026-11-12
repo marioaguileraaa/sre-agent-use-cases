@@ -196,6 +196,17 @@ class OutputTests(unittest.TestCase):
         for section in ("matters", "deletes", "security", "who", "clickops", "unusual", "noise", "all", "coverage"):
             self.assertIn(f'id="{section}"', html_text)
 
+    def test_report_is_locked_down_and_print_ready(self):
+        snap, _ = snapshot(self.t, demo_rows(2))
+        snap["client_name"] = 'Contoso "</style><script>alert(1)</script>'
+        page = self.t.render_html(snap)
+        style = page[page.index("<style>") + len("<style>"):page.index("</style>")]
+        self.assertIn("default-src 'none'", page)
+        self.assertIn("data-print", page)
+        self.assertIn("@page", style)
+        self.assertNotIn("<", style)
+        self.assertEqual(page.count("<script>"), 1)
+
     def test_very_large_estates_drop_low_level_detail_instead_of_failing(self):
         snap, _ = snapshot(self.t, demo_rows(150))
         full, note = self.t.build_documents(snap)

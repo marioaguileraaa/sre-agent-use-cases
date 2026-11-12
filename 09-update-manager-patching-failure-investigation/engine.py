@@ -1148,7 +1148,7 @@ def investigate_machines(raw, window, reference_utc):
                         "Azure Update Manager registró estado 'ShutdownOrUnresponsive' en la configuración '" + conf_name
                         + "' (último ciclo fallido: " + str(latest_unresp.get("start_utc")) + " -> "
                         + str(latest_unresp.get("end_utc")) + "). La máquina se encontraba apagada/desasignada o el agente "
-                        "invitado no respondió durante las franjas nocturnas programadas (20:50 UTC / 02:50 UTC), aunque sí "
+                        "invitado no respondió durante la ventana programada, aunque sí "
                         "completó " + str(len(succeeded_insts)) + " instalaciones cuando estuvo encendida."
                     ),
                     "log_or_source_reference": (
@@ -1215,7 +1215,7 @@ def investigate_machines(raw, window, reference_utc):
                 "recommended_human_action": (
                     "Desbloquear el proceso apt/dpkg o gestor de paquetes en el host Linux Arc, verificar soporte de "
                     "distribución en Azure Update Manager (Ubuntu 24.04 + azcmagent) y vincular la máquina a una "
-                    "Maintenance Configuration activa (actualmente mc-poc-arc-linux-demo está etiquetada como Unassigned-NoPatchExecution)."
+                    "Maintenance Configuration activa."
                 ),
             })
 
@@ -1280,13 +1280,14 @@ def investigate_machines(raw, window, reference_utc):
                 for p in pend
                 if any(c.lower() in ("security", "critical", "updaterollup") for c in p["classifications"])
             ]
+            kb_text = " (" + ", ".join(kb_list[:6]) + ")" if kb_list else ""
             detected_issues.append({
                 "failure_category": "pending_security_patches_unscheduled",
                 "severity": "medium",
                 "investigation_headline": (
                     str(counts["security"]) + " parches Security y " + str(counts["update_rollup"])
-                    + " UpdateRollUp pendientes (" + ", ".join(kb_list[:6])
-                    + ") sin configuración de mantenimiento asignada ni ejecuciones en el periodo."
+                    + " UpdateRollUp pendientes" + kb_text
+                    + " sin configuración de mantenimiento asignada ni ejecuciones en el periodo."
                 ),
                 "root_cause_evidence": (
                     "La evaluación automática en '" + m["name"] + "' finalizó correctamente el "
@@ -1294,13 +1295,12 @@ def investigate_machines(raw, window, reference_utc):
                     + " actualizaciones disponibles (" + str(counts["security"]) + " Security, "
                     + str(counts["update_rollup"]) + " UpdateRollUp, " + str(counts["updates"])
                     + " Updates, " + str(counts["definition"]) + " Definition), pero patchModeConfiguration.status es '"
-                    + str(patch_mode_status) + "' y existen 0 asignaciones en microsoft.maintenance/configurationassignments "
-                    "(la configuración 'mc-windows-monthly' tiene etiqueta SafetyMode='Unassigned-NoPatchExecution')."
+                    + str(patch_mode_status) + "' y existen 0 asignaciones en microsoft.maintenance/configurationassignments."
                 ),
                 "log_or_source_reference": "arg_patch_assessments :: " + ass["resource_id"],
                 "recommended_human_action": (
                     "Crear el vínculo microsoft.maintenance/configurationAssignments hacia la ventana de mantenimiento "
-                    "aprobada para instalar los KBs pendientes (" + ", ".join(kb_list[:6]) + ")."
+                    "aprobada para instalar los KBs pendientes" + kb_text + "."
                 ),
             })
 

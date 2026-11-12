@@ -2156,113 +2156,151 @@ def compact_counts(counts):
 # ------------------------- offline HTML report -------------------------
 REPORT_CSS = """
 :root{--bar:#161B22;--hero:#0D2F33;--accent:#0E7C86;--accent-strong:#0A626A;--accent-soft:#E3F3F4;--accent-dark:#7FD6CF;
---bg:#F3F5F7;--card:#fff;--text:#1B1F24;--muted:#59636E;--line:#DCE2E8;--line2:#EDF0F3;
---high:#B42318;--high-bg:#FDECEC;--high-line:#F3C3BF;--medium:#A64B06;--medium-bg:#FEF3E4;--medium-line:#F4D2A6;
---low:#4A5565;--low-bg:#EEF1F4;--low-line:#D5DBE2;--noise:#8792A0;--old-bg:#FCEBEA;--old:#8A1C12;--new-bg:#E5F4EA;--new:#0B5D2A}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}body{margin:0;background:var(--bg);color:var(--text);
+--bg:#F3F5F7;--card:#fff;--text:#1B1F24;--muted:#59636E;--faint:#667085;--line:#DCE2E8;--line2:#EDF0F3;--off:#EEF1F4;
+--high:#B93815;--high-bg:#FFEAD5;--high-line:#F7C9A6;--high-bar:#EF6820;--high-tint:#FFF7F0;
+--medium:#93370D;--medium-bg:#FEF0C7;--medium-line:#F2D27F;--medium-bar:#F79009;--medium-tint:#FFFBEE;
+--low:#175CD3;--low-bg:#D1E9FF;--low-line:#B2D6FA;--low-bar:#2E90FA;--info-bar:#98A2B3;
+--old-bg:#FCEBEA;--old:#8A1C12;--new-bg:#E5F4EA;--new:#0B5D2A}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px;scrollbar-color:#C5CED8 transparent}body{margin:0;background:var(--bg);color:var(--text);
 font:14px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+::selection{background:#BFE6E8;color:var(--text)}:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 code,.mono{font-family:"Cascadia Mono",Consolas,"SFMono-Regular",Menlo,monospace;font-size:12.5px}
-a{color:var(--accent-strong)}.wrap{max-width:1360px;margin:0 auto;padding:0 40px}
+a{color:var(--accent-strong);text-underline-offset:3px}.wrap{max-width:1360px;margin:0 auto;padding:0 40px}.nw{white-space:nowrap}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .top{background:var(--bar);color:#fff}.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:56px}
+.top :focus-visible{outline-color:var(--accent-dark)}
 .wm{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:17px;white-space:nowrap}
 .wm svg{width:28px;height:28px;padding:5px;border-radius:7px;background:var(--accent);flex:none}
 .wm small{font-weight:400;color:#AEB8C3;font-size:13px;margin-left:4px}
-.pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pill{border:1px solid #3B4450;border-radius:999px;padding:4px 11px;font-size:12px;color:#DCE3EA;white-space:nowrap}
-.pill.ro{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.pills{display:flex;gap:8px;align-items:center;justify-content:flex-end}.pill{border:1px solid #3B4450;border-radius:999px;padding:4px 11px;font-size:12px;color:#DCE3EA;white-space:nowrap}
+.pill.ro{border-color:#3D7F84;color:#BFEAE6;font-weight:600}
+.pbtn{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 14px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.pbtn:hover{background:var(--accent-strong)}.pbtn svg{width:16px;height:16px;flex:none}
 .hero{background:var(--hero);color:#fff;padding:34px 0 30px}
+.hero-in{display:grid;grid-template-columns:minmax(0,1fr) 300px;grid-template-areas:"head card" "hl card" "meta meta" "kpis kpis" "sn sn";column-gap:48px}
+.hero-head{grid-area:head}.hl{grid-area:hl}.meta{grid-area:meta}.kpis{grid-area:kpis}.sn{grid-area:sn}
 .eyebrow{color:var(--accent-dark);font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
-h1{font-size:36px;line-height:1.12;margin:8px 0 12px;font-weight:700;letter-spacing:-.01em}
-.verdict{font-size:19px;line-height:1.45;max-width:980px;margin:0 0 14px;color:#fff;font-weight:600}
-.hl{list-style:none;margin:0 0 18px;padding:0;max-width:1040px}.hl li{position:relative;padding:3px 0 3px 20px;color:#D7E2E6;font-size:14.5px}
-.hl li:before{content:"";position:absolute;left:2px;top:11px;width:8px;height:8px;border-radius:2px;background:#F0857B}
+h1{font-size:40px;line-height:1.1;margin:8px 0 12px;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+.verdict{font-size:19px;line-height:1.45;max-width:64ch;margin:0 0 14px;color:#fff;font-weight:600;text-wrap:pretty}
+.hl{list-style:none;margin:0 0 20px;padding:0}.hl li{position:relative;padding:3px 0 3px 20px;color:#D7E2E6;font-size:14.5px}
+.hl li:before{content:"";position:absolute;left:2px;top:11px;width:8px;height:8px;border-radius:2px;background:var(--high-bar)}
+.vcard{grid-area:card;align-self:start;margin-top:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:18px 20px}
+.vcard .k{font-size:12.5px;font-weight:600;color:#C3D0D6}.vcard b{display:block;font-size:25px;line-height:1.15;margin:5px 0 8px;font-weight:700}
+.vcard p{margin:0;font-size:13.5px;color:#D3DDE2}.vcard p+p{margin-top:6px}.v-high b,.v-warn b{color:#FDB022}.v-review b{color:#FEDF89}.v-ok b{color:#75E0A7}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}.meta span{border:1px solid rgba(255,255,255,.16);border-radius:7px;padding:5px 10px;font-size:12.5px;color:#D3DDE2}
-.meta b{color:#fff;font-weight:600}.meta .st-partial{border-color:#E7A35A;color:#FFD9AE}
+.meta b{color:#fff;font-weight:600}.meta span.st-partial{background:rgba(247,144,9,.14);border-color:#F5B25E;color:#FFDDB0}
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-.kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);border-top:3px solid var(--accent-dark);border-radius:10px;padding:13px 15px}
-.kpi b{display:block;font-size:32px;line-height:1.05;font-weight:700;font-variant-numeric:tabular-nums}.kpi span{display:block;color:#C3D0D6;font-size:12.5px;margin-top:4px}
-.kpi.k-high{border-top-color:#F0857B}.kpi.k-del{border-top-color:#F2B36B}.kpi.k-sec{border-top-color:#F0857B}.kpi.k-rbac{border-top-color:#9DB8F5}.kpi.k-unu{border-top-color:#C9B6F2}
+.kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:14px 15px}
+.kpi b{display:block;font-size:32px;line-height:1.05;font-weight:700;font-variant-numeric:tabular-nums}.kpi span{display:block;color:#C3D0D6;font-size:13px;margin-top:5px}
 .sn{margin-top:22px}.sn-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:#C3D0D6;margin-bottom:8px}.sn-h b{color:#fff}
 .bar{display:flex;height:14px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.08)}.bar i{display:block;height:100%}
-.b-high{background:#E5534B}.b-medium{background:#E59A3C}.b-low{background:#8FA3B5}.b-noise{background:#3E5A60}
-.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:9px;font-size:12.5px;color:#C3D0D6}.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}.hero .legend b{color:#fff}.card .legend b{color:var(--text)}
+.b-high{background:var(--high-bar)}.b-medium{background:var(--medium-bar)}.b-low{background:var(--low-bar)}.b-noise{background:#41605F}.b-off{background:var(--off);box-shadow:inset 0 0 0 1px var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:9px;font-size:12.5px;color:#C3D0D6}.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}.hero .legend b{color:#fff}.card .legend{color:var(--muted)}.card .legend b{color:var(--text)}
 .secnav{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
 .secnav .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}.secnav .wrap::-webkit-scrollbar{display:none}
 .secnav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:13px;font-weight:600;padding:13px 10px 11px;border-bottom:2px solid transparent}
-.secnav a:hover,.secnav a.on{color:var(--text);border-bottom-color:var(--accent)}.secnav a small{color:var(--noise);font-weight:600;margin-left:3px}
-main{padding:26px 0 30px}.sec{margin:0 0 30px}.sec-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-h2{font-size:21px;margin:0;font-weight:700;letter-spacing:-.005em}.sec-n{font-size:13px;font-weight:700;color:var(--accent-strong);background:var(--accent-soft);border-radius:999px;padding:1px 9px}
-.sec-sub{color:var(--muted);margin:4px 0 14px;max-width:920px}
+.secnav a:hover,.secnav a.on{color:var(--text);border-bottom-color:var(--accent)}.secnav a small{color:var(--faint);font-size:12px;font-weight:600;margin-left:4px}
+main{padding:26px 0 36px}.sec{margin:0 0 36px}.sec-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2{font-size:22px;line-height:1.25;margin:0;font-weight:700;letter-spacing:-.005em}.sec-n{font-size:13px;font-weight:700;color:var(--accent-strong);background:var(--accent-soft);border-radius:999px;padding:1px 9px}
+.sec-sub{color:var(--muted);margin:4px 0 14px;max-width:75ch}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}.card h3{font-size:15px;margin:0 0 3px}
-.card .sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 12px;max-width:80ch}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid2>*,.grid3>*{min-width:0}
-.ov{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:30px}
-.lvl{display:inline-block;border:1px solid;border-radius:5px;padding:0 7px;font-size:11.5px;font-weight:700;letter-spacing:.02em;line-height:19px;white-space:nowrap}
+.ov{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}.ov>*{min-width:0}
+.lvl{display:inline-block;border:1px solid;border-radius:5px;padding:0 7px;font-size:12px;font-weight:700;letter-spacing:.01em;line-height:20px;white-space:nowrap}
 .lvl-high{color:var(--high);background:var(--high-bg);border-color:var(--high-line)}.lvl-medium{color:var(--medium);background:var(--medium-bg);border-color:var(--medium-line)}
 .lvl-low{color:var(--low);background:var(--low-bg);border-color:var(--low-line)}
-.ct{display:inline-block;font-size:11.5px;font-weight:700;border-radius:4px;padding:0 6px;line-height:19px;background:var(--line2);color:#33404D}
+.ct{display:inline-block;font-size:12px;font-weight:700;border-radius:4px;padding:0 6px;line-height:20px;background:var(--line2);color:#33404D;white-space:nowrap}
 .ct-delete{background:#2B3036;color:#fff}.ct-create{background:var(--accent-soft);color:var(--accent-strong)}
-.flag{display:inline-block;border:1px solid var(--line);background:#F7F9FA;border-radius:5px;padding:0 7px;font-size:11.5px;line-height:19px;margin:2px 4px 2px 0;color:#38434F;white-space:nowrap}
+.flag{display:inline-block;border:1px solid var(--line);background:#F7F9FA;border-radius:5px;padding:0 7px;font-size:12px;line-height:20px;margin:2px 4px 2px 0;color:#38434F;white-space:nowrap}
 .flag.risk{border-color:var(--high-line);background:var(--high-bg);color:var(--high);font-weight:700}.flag.prod{border-color:#C8B5EE;background:#F4EFFD;color:#5B3A9B;font-weight:600}
-.cls{display:inline-block;font-size:11.5px;color:var(--muted);white-space:nowrap}
-.rc{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--low-line);border-radius:12px;margin-bottom:14px;overflow:hidden}
-.rc.l-high{border-left-color:var(--high)}.rc.l-medium{border-left-color:#E08A2C}
+.cls{display:inline-block;font-size:12px;color:var(--muted);white-space:nowrap}
+.rindex{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 16px}.rindex .k{font-size:12px;font-weight:700;color:var(--muted);margin:0 2px 0 6px}.rindex .k:first-child{margin-left:0}
+.ri{display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 9px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--text);text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap}
+.ri:hover{border-color:var(--accent);color:var(--accent-strong)}.ri i{width:8px;height:8px;border-radius:50%;background:var(--low-bar);flex:none}.ri.more{border-style:dashed;color:var(--accent-strong)}
+.ri.l-high i{background:var(--high-bar)}.ri.l-medium i{background:var(--medium-bar)}.ri span{color:var(--faint);font-variant-numeric:tabular-nums}
+.rc{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;scroll-margin-top:64px}
 .rc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:14px 18px 12px;border-bottom:1px solid var(--line2)}
+.rc.l-high .rc-head{background:var(--high-tint)}.rc.l-medium .rc-head{background:var(--medium-tint)}
 .rc-id{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}.rc-id h3{margin:0;font-size:16.5px;overflow-wrap:anywhere}
-.rc-type{color:var(--muted);font-size:13px}.rc-where{color:var(--muted);font-size:12.5px;text-align:right;overflow-wrap:anywhere}
+.rc-type{color:var(--muted);font-size:13px}.rc-where{color:var(--muted);font-size:12.5px;text-align:right}.rc-where a{font-weight:600}
 .ev{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:13px 18px;border-top:1px solid var(--line2)}.ev:first-child{border-top:0}
 .ev-when{font-variant-numeric:tabular-nums}.ev-when b{display:block;font-size:13.5px}.ev-when span{display:block;color:var(--muted);font-size:12px}
-.ev-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:5px}.who{font-weight:600;overflow-wrap:anywhere}
-.why{margin:0 0 6px;font-size:14px}.why b{font-weight:600}
+.ev-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:5px}.who{font-weight:600;overflow-wrap:break-word;min-width:0}
+.why{margin:0 0 6px;font-size:14px;line-height:1.45}.why b{font-weight:600}
 table.diff{width:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;border-collapse:separate;border-spacing:0;margin-top:8px;background:#FBFCFD}
 table.diff td{padding:5px 10px;border-bottom:1px solid var(--line2);vertical-align:top}table.diff tr:last-child td{border-bottom:0}
-.d-path{min-width:200px;max-width:420px}.d-path code{color:#33404D;overflow-wrap:anywhere}.d-arr{color:var(--noise);padding:5px 2px!important}
+.d-path{min-width:200px;max-width:420px}.d-path code{color:#33404D;overflow-wrap:break-word}.d-arr{color:var(--faint);padding:5px 2px!important}
 .d-old,.d-new{display:inline-block;border-radius:4px;padding:0 6px;overflow-wrap:anywhere;font-family:"Cascadia Mono",Consolas,monospace;font-size:12.5px;max-width:420px}
 .d-old{background:var(--old-bg);color:var(--old);text-decoration:line-through;text-decoration-color:rgba(138,28,18,.45)}.d-new{background:var(--new-bg);color:var(--new)}
-.d-none{color:var(--noise);font-style:italic;font-size:12.5px;white-space:nowrap}
+.d-none{color:var(--faint);font-style:italic;font-size:12.5px;white-space:nowrap}
 tr.p-high .d-path code{color:var(--high);font-weight:600}
-.linkbtn{border:0;background:none;color:var(--accent-strong);font:inherit;font-size:12.5px;cursor:pointer;padding:0}.linkbtn:hover{text-decoration:underline}
+.linkbtn{border:0;background:none;color:var(--accent-strong);font:inherit;font-size:13px;cursor:pointer;padding:0}.linkbtn:hover{text-decoration:underline}
 .when-c{white-space:nowrap}.who-c{min-width:170px}
-.ev-meta{color:var(--noise);font-size:12px;margin-top:6px;overflow-wrap:anywhere}
+.ev-meta{color:var(--faint);font-size:12px;margin-top:6px;overflow-wrap:anywhere}
 table{border-collapse:collapse;width:100%}th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line2)}
-thead th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;background:#F7F9FA;border-bottom:1px solid var(--line)}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.tw{overflow-x:auto}.muted{color:var(--muted)}.small{font-size:12px}
-.empty{color:var(--muted);background:#F7F9FA;border:1px dashed var(--line);border-radius:10px;padding:14px 16px;font-size:13.5px}
+thead th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;background:#F7F9FA;border-bottom:1px solid var(--line)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.muted{color:var(--muted)}.small{font-size:12px}.sw{overflow-wrap:break-word}
+.tw{overflow-x:auto;background:linear-gradient(90deg,#fff 30%,rgba(255,255,255,0)) left/32px 100% no-repeat local,linear-gradient(270deg,#fff 30%,rgba(255,255,255,0)) right/32px 100% no-repeat local,
+radial-gradient(farthest-side at 0 50%,rgba(16,24,40,.18),rgba(16,24,40,0)) left/12px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(16,24,40,.18),rgba(16,24,40,0)) right/12px 100% no-repeat scroll;background-color:#fff}
+.empty{color:var(--muted);background:#F7F9FA;border:1px dashed var(--line);border-radius:10px;padding:14px 16px;font-size:13.5px}.card h3+.empty{margin-top:12px}
 .hb{display:grid;grid-template-columns:minmax(150px,1.1fr) 1fr 44px;gap:10px;align-items:center;margin:7px 0;font-size:13px}
 .hb .t{background:var(--line2);border-radius:4px;height:10px;overflow:hidden}.hb .t i{display:block;height:100%;background:var(--accent)}.hb b{text-align:right;font-variant-numeric:tabular-nums}
 .mx td{text-align:center;font-variant-numeric:tabular-nums}.mx th:first-child,.mx td:first-child{text-align:left}
 .mx td.h{background:rgba(14,124,134,var(--a));font-weight:700}
-.chart svg{width:100%;height:auto;display:block}.chart text{font-size:11px;fill:var(--muted)}
+.tl{margin-top:6px}.tl-p,.tl-x{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr))}
+.tl-p{height:156px;border-bottom:1px solid #B9C3CE}.tl-c{display:flex;flex-direction:column-reverse;padding-top:20px;min-width:0}.tl-c.off{background:var(--off)}
+.tl-c i{display:block;flex:none;margin:0 16%}.tl-c b{flex:none;display:flex;justify-content:center;font-size:12px;line-height:16px;margin-bottom:2px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.s-high{background:var(--high-bar)}.s-medium{background:var(--medium-bar)}.s-low{background:#84CAFF}
+.tl-x{margin-top:6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}.tl-x span{white-space:nowrap;border-left:1px solid #C5CED8;padding:1px 0 0 4px;line-height:15px}
 .split{display:flex;height:12px;border-radius:4px;overflow:hidden;background:var(--line2);margin:8px 0}
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
 .filters input,.filters select{border:1px solid #C5CED8;border-radius:7px;padding:7px 9px;font:inherit;font-size:13px;background:#fff;color:var(--text)}
-.filters input{min-width:240px}.btn{border:1px solid #C5CED8;background:#fff;border-radius:999px;padding:6px 13px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text)}
+.filters input{min-width:300px}.filters input::placeholder{color:var(--faint);opacity:1}
+.btn{border:1px solid #C5CED8;background:#fff;border-radius:999px;padding:6px 13px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text)}
 .btn:hover{background:var(--bg)}.fcount{margin-left:auto;color:var(--muted);font-size:12.5px}
-#tbl th[data-k]{cursor:pointer;white-space:nowrap}#tbl th.s:after{content:" \\25BE"}#tbl th.s.asc:after{content:" \\25B4"}
-#tbl{table-layout:fixed;min-width:980px}#tbl td{font-size:13px}#tbl tr.r-high td:first-child{box-shadow:inset 3px 0 0 var(--high)}#tbl tr.r-medium td:first-child{box-shadow:inset 3px 0 0 #E08A2C}
-#tbl tr.r-low td:first-child{box-shadow:inset 3px 0 0 var(--low-line)}.hide{display:none}.brk{overflow-wrap:anywhere}
+.sb{font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}.sb:hover{color:var(--text)}
+th[aria-sort] .sb{color:var(--text)}th[aria-sort] .sb:after{content:"";display:inline-block;width:8px;height:5px;margin-left:6px;vertical-align:2px;background:currentColor;clip-path:polygon(0 0,100% 0,50% 100%)}
+th[aria-sort=ascending] .sb:after{clip-path:polygon(50% 0,100% 100%,0 100%)}
+#tbl{table-layout:fixed;min-width:980px}#tbl td{font-size:13px}.f-hide,.pg{display:none}.brk{overflow-wrap:anywhere}
 .st{display:inline-block;border-radius:5px;padding:0 8px;font-size:12px;font-weight:700;line-height:20px;white-space:nowrap}
 .st-complete{background:#E3F4E7;color:#0E5A23}.st-partial,.st-skipped{background:#FEF0DC;color:#8A3B00}.st-denied,.st-error{background:#FDE7E7;color:#A4262C}
 .st-not_configured,.st-not_needed{background:var(--line2);color:var(--muted)}
-.note{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:6px;padding:10px 13px;font-size:13px;margin-top:12px}
+.note{background:var(--accent-soft);border:1px solid #C6E6E8;border-radius:8px;padding:10px 13px;font-size:13px;margin-top:12px}
 ul.plain{margin:0;padding-left:18px}ul.plain li{margin:3px 0}
 footer{background:var(--bar);color:#AEB8C3;font-size:12px;padding:18px 0}footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
 @media (max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.ov,.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
-@media (max-width:720px){.wrap{padding:0 16px}h1{font-size:27px}.verdict{font-size:16.5px}.kpis{grid-template-columns:repeat(2,1fr);gap:9px}.kpi b{font-size:26px}
-.pills .pill:not(.ro){display:none}.wm small{display:none}.grid3{grid-template-columns:1fr}.rc-head{flex-direction:column;gap:4px}.rc-where{text-align:left}
+@media screen and (max-width:960px){.hero-in{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "card" "hl" "meta" "kpis" "sn"}.vcard{margin:2px 0 18px}}
+@media screen and (max-width:720px){.wrap{padding:0 16px}h1{font-size:30px}.verdict{font-size:16.5px}.kpis{grid-template-columns:repeat(2,1fr);gap:9px}.kpi b{font-size:26px}
+.pills .pill:not(.ro){display:none}.wm small{display:none}.pbtn{padding:0 10px}.pbtn span{display:none}.meta .m-utc,.meta .m-gen{display:none}.meta span{padding:4px 8px;font-size:12px}
+.vcard{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:10px 14px;margin:0 0 16px}.vcard b{font-size:19px;margin:0}.vcard p{display:none}.vcard p+p{display:block;flex-basis:100%}
+.kpi{padding:10px 12px}.kpi span{font-size:12.5px;margin-top:3px}
+.secnav .wrap{padding-right:40px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.grid3{grid-template-columns:1fr}.rc-head{flex-direction:column;gap:4px}.rc-where{text-align:left}
 .ev{grid-template-columns:1fr;gap:4px;padding:12px 14px}.ev-when b,.ev-when span{display:inline;margin-right:8px}
-.card{padding:15px 14px}table.diff,table.diff tbody{display:block}table.diff tr{display:grid;grid-template-columns:minmax(0,auto) 18px minmax(0,1fr);align-items:start;border-bottom:1px solid var(--line2)}
+.card{padding:15px 14px}table.diff,table.diff tbody{display:block}table.diff tr{display:grid;grid-template-columns:fit-content(58%) 18px minmax(0,1fr);align-items:start;border-bottom:1px solid var(--line2)}
 table.diff tr[hidden]{display:none}table.diff tr:last-child{border-bottom:0}table.diff td{border:0;padding:3px 8px}table.diff td.d-path,table.diff tr.d-more td{grid-column:1/-1}
-.d-old,.d-new{max-width:100%}
+.d-path{min-width:0}.d-old,.d-new{max-width:100%}
 .filters input,.filters select{min-width:0;flex:1 1 140px}.fcount{margin-left:0;width:100%}
-#tbl{min-width:0}#tbl colgroup,#tbl thead{display:none}#tbl,#tbl tbody,#tbl tr,#tbl td{display:block;width:100%}#tbl tr{border:1px solid var(--line);border-radius:9px;margin-bottom:9px;padding:6px 4px;background:#fff}
-#tbl td{border:0;padding:3px 10px}#tbl tr.hide{display:none}#tbl tr td:first-child{box-shadow:none!important}
-.hb{grid-template-columns:1fr 70px 36px}.who-c{min-width:0}
+#tbl{min-width:0}#tbl colgroup,#tbl thead{display:none}#tbl,#tbl tbody{display:block;width:100%}#tbl tr{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;border:1px solid var(--line);border-radius:9px;margin-bottom:9px;padding:8px 4px;background:#fff}
+#tbl td{display:block;flex:1 1 100%;border:0;padding:3px 10px}#tbl td:nth-child(1){order:-2;flex:0 0 auto;padding-right:0}#tbl td:nth-child(3){order:-1;flex:0 0 auto;padding:3px 0}#tbl tr.f-hide,#tbl tr.pg{display:none}
+.hb{grid-template-columns:1fr 70px 36px}.who-c{min-width:0}.mx th,.mx td{padding:6px 5px}.mx thead th{letter-spacing:0;text-transform:none}
 table.stack thead{display:none}table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
 table.stack tr{border-bottom:1px solid var(--line);padding:8px 0}table.stack td{border:0;padding:2px 2px;text-align:left!important;white-space:normal}
 table.stack td[data-h]:before{content:attr(data-h) ": ";color:var(--muted);font-size:12px}table.stack td:empty{display:none}}
-@media print{.secnav,.filters,.btn,.more-row{display:none!important}.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{background:#fff}.rc,.card{break-inside:avoid}#tbl tr.hide.r-low{display:table-row}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}html{scroll-behavior:auto}body{background:#fff;font-size:12px}
+.secnav,.filters,.pbtn,.more-row,tr.d-more{display:none!important}.wrap{max-width:none;padding:0}a{color:inherit;text-decoration:none}
+.top{background:#fff;color:var(--text);border-bottom:1px solid var(--line)}.top .wrap{min-height:42px;padding:0 2px 6px}.wm small{color:var(--muted)}.pill{border-color:var(--line);color:var(--muted)}.pill.ro{color:var(--accent-strong)}
+.hero{border-radius:10px;margin-top:10px;padding:22px 0 20px}.hero .wrap{padding:0 22px}.hero-in{grid-template-columns:minmax(0,1fr) 200px;column-gap:24px}
+h1{font-size:28px}.verdict{font-size:15px}.hl li{font-size:12.5px;line-height:1.45;padding:1px 0 1px 18px}.hl li:before{top:8px}.vcard{padding:12px 14px}.vcard b{font-size:18px}.vcard p{font-size:12px}
+.meta{margin-bottom:14px}.kpis{grid-template-columns:repeat(6,1fr);gap:8px}.kpi{padding:9px 10px}.kpi b{font-size:22px}.kpi span{font-size:12px}
+main{padding:16px 0 0}.sec{margin:0 0 22px}.sec-h,.sec-sub,h2,h3,.card .sub,.rc-head,.rindex{break-after:avoid}
+.ev,tr,.kpi,.vcard,.hb,.grid3>.card,.ov>.card,.grid2>.card,.note,.empty{break-inside:avoid}thead{display:table-header-group}
+.ov{grid-template-columns:1.5fr 1fr}.tw{overflow:visible!important;background:none}.card{padding:12px 14px}
+th,td{padding:5px 7px}#tbl{min-width:0;table-layout:auto}#tbl col{width:auto!important}#tbl td{font-size:12px}#tbl tr.pg{display:table-row}
+.ri{padding:2px 8px;font-size:12px}footer{display:none}}
 """
 
 LEVEL_LABEL = {"high": "High", "medium": "Medium", "low": "Low", "noise": "Noise"}
@@ -2277,11 +2315,44 @@ WORDMARK = ('<span class="wm"><svg viewBox="0 0 24 24" aria-hidden="true"><path 
             'fill="#fff"/></svg>Azure SRE Agent<small>Change digest</small></span>')
 
 
+PRINT_BUTTON = ('<button class="pbtn" type="button" data-print aria-label="Print / PDF" title="Print / PDF"><svg viewBox="0 0 24 24" aria-hidden="true" '
+                'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/>'
+                '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>'
+                '<span>Print / PDF</span></button>')
+REPORT_CSP = "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
 PRIVILEGED_CHIP = ' <span class="flag risk">Privileged</span>'
 
 
 def esc(value):
     return html.escape(str(value if value is not None else ""), quote=True)
+
+
+def nw(value):
+    """Identifier that never wraps mid-token (GUIDs, resource group names)."""
+    return f'<span class="nw">{esc(value)}</span>'
+
+
+def nw_list(values):
+    return ", ".join(nw(v) for v in values)
+
+
+def ident(value):
+    """Actor or principal: GUIDs stay on one line, UPNs may break after '@'."""
+    return nw(value) if is_guid(str(value or "")) else esc_id(value)
+
+
+def short_id(value):
+    """GUID shortened like the tool's '(app 1234abcd)' names; the full value stays in the tooltip and the CSV files."""
+    return f'<span class="mono nw" title="{esc(value)}">{esc(value[:8])}&hellip;</span>' if is_guid(str(value or "")) else esc(value)
+
+
+def soft(value):
+    """Dotted or slashed identifiers (property paths, resource types) break only at '.', '/' or '['."""
+    return re.sub(r"([./])(?=.)", r"\1<wbr>", esc(value)).replace("[", "<wbr>[")
+
+
+def utc_short(ts_utc):
+    return str(ts_utc or "")[:16].replace("T", " ")
 
 
 def small_note(value):
@@ -2345,7 +2416,7 @@ def when_parts(ts_utc, zone):
 
 def when_inline(ts_utc, zone):
     day, local, utc = when_parts(ts_utc, zone)
-    return f'{esc(day)} {esc(local)} <span class="muted small">({esc(utc)})</span>' if day else ""
+    return f'<span class="nw">{esc(day)} {esc(local)}</span> <span class="muted small nw">({esc(utc)})</span>' if day else ""
 
 
 def when_cell(ts_utc, zone):
@@ -2364,12 +2435,12 @@ def render_diff(paths, visible=6):
         return ""
     rows = []
     for i, p in enumerate(sorted(paths, key=path_sort_key)):
-        old = (f'<span class="d-old" title="{esc(p["previous"])}">{esc(short_value(p["previous"]))}</span>' if p["previous"]
+        old = (f'<span class="d-old" title="{esc(p["previous"])}">{esc(short_value(p["previous"])).replace("/", "/<wbr>")}</span>' if p["previous"]
                else '<span class="d-none">not set</span>')
-        new = (f'<span class="d-new" title="{esc(p["new"])}">{esc(short_value(p["new"]))}</span>' if p["new"]
+        new = (f'<span class="d-new" title="{esc(p["new"])}">{esc(short_value(p["new"])).replace("/", "/<wbr>")}</span>' if p["new"]
                else '<span class="d-none">removed</span>')
         rows.append(f'<tr class="p-{esc(p["level"])}"{" hidden" if i >= visible else ""}><td class="d-path"><code title="{esc(p["path"])}">'
-                    f'{esc(display_path(p["path"]))}</code></td><td>{old}</td><td class="d-arr" aria-label="changed to">&rarr;</td><td>{new}</td></tr>')
+                    f'{soft(display_path(p["path"]))}</code></td><td>{old}</td><td class="d-arr" aria-label="changed to">&rarr;</td><td>{new}</td></tr>')
     extra = len(rows) - visible
     more = (f'<tr class="d-more"><td colspan="4"><button type="button" class="linkbtn" data-more="{extra}">Show {extra} more '
             f'propert{"y" if extra == 1 else "ies"}</button></td></tr>' if extra > 0 else "")
@@ -2379,11 +2450,11 @@ def render_diff(paths, visible=6):
 def render_event(c, zone):
     day, local, utc = when_parts(c["timestamp_utc"], zone)
     actor = c["actor"]
-    who = esc_id(actor["display_name"])
+    who = ident(actor["display_name"])
     raw_id = f' <span class="cls mono">{esc(actor["changed_by"])}</span>' if actor["display_name"] != actor["changed_by"] and actor["changed_by"] not in ("System", "Unspecified") else ""
     reasons = c["reasons"] or ["change"]
     why = f'<b>{nice(reasons[0])}</b>' + (f'<span class="muted"> &middot; {nice("; ".join(reasons[1:3]))}</span>' if len(reasons) > 1 else "")
-    meta = [f'Operation {esc(c["operation"])}' if c["operation"] and c["operation"] != "Unspecified" else "",
+    meta = [f'Operation {esc(c["operation"]).replace("/", "/<wbr>")}' if c["operation"] and c["operation"] != "Unspecified" else "",
             f'Correlation {esc(c["correlation_id"][:8])}&hellip;' if c["correlation_id"] else "",
             f'{c["noise_paths"]} noise propert{"y" if c["noise_paths"] == 1 else "ies"} hidden' if c["noise_paths"] else ""]
     return (f'<li class="ev"><div class="ev-when"><b>{esc(local)}</b><span>{esc(day)} &middot; {esc(utc)}</span></div><div>'
@@ -2403,21 +2474,32 @@ def render_matters(snapshot, zone):
         return '<div class="empty">No changes at or above the selected level in this window. Lower levels are still counted in the full table and the noise section.</div>'
     cards = sorted(groups.values(), key=lambda g: (-max(RANK[c["level"]] for c in g), -max(parse_time(c["timestamp_utc"]).timestamp() for c in g)))
     subs = {s["id"]: s["name"] for s in snapshot["scope"]["subscriptions"]}
-    out = []
-    for group in cards[:60]:
+    out, index = [], []
+    for n, group in enumerate(cards[:60], 1):
         top = max(group, key=lambda c: RANK[c["level"]])
         level = top["level"]
         name = min(group, key=lambda c: c["timestamp_utc"])["resource_name"]
+        rg = top["resource_group"] or "subscription scope"
         prod = '<span class="flag prod">prod</span>' if any(c["prod"] for c in group) else ""
         managed = '<span class="flag">managed RG</span>' if any(c["managed_rg"] for c in group) else ""
         events = "".join(render_event(c, zone) for c in sorted(group, key=lambda c: c["timestamp_utc"]))
-        out.append(f'<article class="rc l-{esc(level)}"><div class="rc-head"><div class="rc-id">{lvl_chip(level)}<h3>{esc(name)}</h3>'
-                   f'<span class="rc-type">{esc(top["resource_type_label"])}</span></div><div class="rc-where">{esc(top["resource_group"] or "subscription scope")}'
-                   f' &middot; {esc(subs.get(top["subscription_id"], top["subscription_id"]))} {prod}{managed}<br>{len(group)} change{"s" if len(group) != 1 else ""}</div></div>'
+        gone = max(group, key=lambda c: c["timestamp_utc"])["change_type"] == "Delete"
+        portal = (f' &middot; <a href="https://portal.azure.com/#resource{esc(top["resource_id"])}" target="_blank" rel="noopener">Azure portal</a>'
+                  if top["resource_id"].lower().startswith("/subscriptions/") and not gone else "")
+        count = f'{len(group)} change{"s" if len(group) != 1 else ""}'
+        index.append((level, f'<a class="ri l-{esc(level)}" href="#rc-{n}" title="{esc(top["resource_type_label"])} &middot; {esc(rg)} &middot; {count}">'
+                             f'<i></i>{esc(name)}<span>{len(group)}</span></a>'))
+        out.append(f'<article class="rc l-{esc(level)}" id="rc-{n}"><div class="rc-head"><div class="rc-id">{lvl_chip(level)}<h3>{esc(name)}</h3>'
+                   f'<span class="rc-type">{esc(top["resource_type_label"])}</span></div><div class="rc-where">{nw(rg)}'
+                   f' &middot; {esc(subs.get(top["subscription_id"], top["subscription_id"]))} {prod}{managed}<br>{count}{portal}</div></div>'
                    f'<ol class="events" style="list-style:none;margin:0;padding:0">{events}</ol></article>')
     if len(cards) > 60:
         out.append(f'<div class="note">{len(cards) - 60} more resources are listed in the full table and in the CSV files.</div>')
-    return "".join(out)
+    jump = "".join(f'<span class="k">{LEVEL_LABEL[lv]}</span>' + "".join(h for x, h in index[:16] if x == lv) for lv in ("high", "medium", "low")
+                   if any(x == lv for x, _ in index[:16]))
+    if len(index) > 16:
+        jump += f'<a class="ri more" href="#rc-17">+{len(index) - 16} more below</a>'
+    return (f'<nav class="rindex" aria-label="Jump to a resource">{jump}</nav>' if len(cards) > 1 else "") + "".join(out)
 
 
 def render_deletes(snapshot, zone):
@@ -2429,11 +2511,11 @@ def render_deletes(snapshot, zone):
 
     def rows(items):
         return "".join(
-            f'<tr><td>{lvl_chip(d["level"])}</td><td class="when-c">{when_cell(d["last_utc"], zone)}</td>'
-            f'<td><b>{d["deleted"]}</b> &middot; <span class="brk">{esc(", ".join(d["resources"][:6]))}{" &hellip;" if len(d["resources"]) > 6 else ""}</span>'
+            f'<tr><td>{lvl_chip(d["level"])}</td><td class="when-c" data-h="When">{when_cell(d["last_utc"], zone)}</td>'
+            f'<td data-h="Deleted"><b>{d["deleted"]}</b> &middot; <span class="brk">{esc(", ".join(d["resources"][:6]))}{" &hellip;" if len(d["resources"]) > 6 else ""}</span>'
             f'<div class="small muted">{esc(", ".join(type_label(t) for t in d["resource_types"][:4]))}</div></td>'
-            f'<td><span class="who">{esc_id(d["actor_display"])}</span><div class="small muted">{esc(ACTOR_LABELS.get(d["actor_class"], ""))} &middot; {esc(d["client_type"] or "no client")}</div></td>'
-            f'<td class="brk">{esc(", ".join(d["resource_groups"][:3]))}</td><td class="mono small">{esc(d["correlation_id"][:8])}</td></tr>' for d in items)
+            f'<td data-h="Who"><span class="who">{ident(d["actor_display"])}</span><div class="small muted">{esc(ACTOR_LABELS.get(d["actor_class"], ""))} &middot; {esc(d["client_type"] or "no client")}</div></td>'
+            f'<td data-h="Resource group">{nw_list(d["resource_groups"][:3])}</td><td class="mono small" data-h="Correlation">{esc(d["correlation_id"][:8])}</td></tr>' for d in items)
 
     head = '<thead><tr><th>Level</th><th>When</th><th>Deleted</th><th>Who</th><th>Resource group</th><th>Correlation</th></tr></thead>'
     html_out = (f'<div class="card tw"><table class="stack">{head}<tbody>{rows(main_chains)}</tbody></table></div>' if main_chains
@@ -2450,25 +2532,25 @@ def render_security(snapshot, zone):
     sec = sorted([c for c in snapshot["changes"] if c["security"]], key=lambda c: c["timestamp_utc"], reverse=True)
     sec.sort(key=lambda c: -RANK[c["level"]])
     sec_rows = "".join(
-        f'<tr><td>{lvl_chip(c["level"])}</td><td><b class="brk">{esc(c["resource_name"])}</b><div class="small muted">{esc(c["resource_type_label"])} &middot; {esc(c["resource_group"])}</div></td>'
+        f'<tr><td>{lvl_chip(c["level"])}</td><td><b class="brk">{esc(c["resource_name"])}</b><div class="small muted">{esc(c["resource_type_label"])} &middot; {nw(c["resource_group"])}</div></td>'
         f'<td>{ct_chip(c["change_type"])} {nice("; ".join(c["reasons"][:2]))}<div>{flag_chips([f for f in c["flags"] if f in ("internet-exposed", "exposure increased")])}</div></td>'
-        f'<td class="who-c">{esc_id(c["actor"]["display_name"])}</td><td class="when-c">{when_cell(c["timestamp_utc"], zone)}</td></tr>' for c in sec)
+        f'<td class="who-c" data-h="Who">{ident(c["actor"]["display_name"])}</td><td class="when-c" data-h="When">{when_cell(c["timestamp_utc"], zone)}</td></tr>' for c in sec)
     part1 = (f'<div class="tw"><table class="stack"><thead><tr><th>Level</th><th>Resource</th><th>What changed</th><th>Who</th><th>When</th></tr></thead><tbody>{sec_rows}</tbody></table></div>'
              if sec else '<div class="empty">No exposure, network rule, Key Vault, identity or encryption changes in this window.</div>')
     ras = snapshot["role_assignments"]
     ra_rows = "".join(
         f'<tr><td>{lvl_chip(r["level"])}</td><td><b>{esc(r["role_name"])}</b>{PRIVILEGED_CHIP if r["privileged"] else ""}'
-        f'<div class="small muted">{esc(r["kind"])}</div></td><td class="brk">{esc(r["scope_label"])}</td>'
-        f'<td class="brk">{esc(r["principal_display"] or r["principal_id"])}<div class="small muted">{esc(r["principal_type"])}</div></td>'
-        f'<td class="who-c">{esc_id(r["created_by"])}</td><td class="when-c">{when_cell(r["created_utc"], zone)}</td></tr>' for r in ras)
+        f'<div class="small muted">{esc(r["kind"])}</div></td><td class="brk" data-h="Scope">{esc(r["scope_label"])}</td>'
+        f'<td data-h="Principal">{ident(r["principal_display"] or r["principal_id"])}<div class="small muted">{esc(r["principal_type"])}</div></td>'
+        f'<td class="who-c" data-h="Created by">{ident(r["created_by"])}</td><td class="when-c" data-h="When">{when_cell(r["created_utc"], zone)}</td></tr>' for r in ras)
     part2 = (f'<div class="tw"><table class="stack"><thead><tr><th>Level</th><th>Role</th><th>Scope</th><th>Principal</th><th>Created by</th><th>When</th></tr></thead><tbody>{ra_rows}</tbody></table></div>'
              if ras else '<div class="empty">No new or updated role assignments in this window.</div>')
     gaps = snapshot["activity_log_gaps"] + snapshot["failed_attempts"]
     gap_rows = "".join(
         f'<tr{" class=muted" if g["status"] == "Failed" else ""}><td>{lvl_chip(g["level"])}</td><td><b>{esc(g["label"])}</b>'
         f'{small_note(g.get("error_code"))}</td>'
-        f'<td class="brk">{esc(g["resource_name"])}<div class="small muted">on {esc(g["target"])}</div></td><td class="who-c">{esc_id(g["caller"])}</td>'
-        f'<td class="when-c">{when_cell(g["time_utc"], zone)}</td></tr>' for g in gaps)
+        f'<td class="brk" data-h="Target">{esc(g["resource_name"])}<div class="small muted">on {nw(g["target"])}</div></td><td class="who-c" data-h="Caller">{ident(g["caller"])}</td>'
+        f'<td class="when-c" data-h="When">{when_cell(g["time_utc"], zone)}</td></tr>' for g in gaps)
     al_status = snapshot["coverage"]["activity_log"]
     part3 = (f'<div class="tw"><table class="stack"><thead><tr><th>Level</th><th>Event</th><th>Target</th><th>Caller</th><th>When</th></tr></thead><tbody>{gap_rows}</tbody></table></div>'
              if gaps else f'<div class="empty">{"No lock, role assignment delete, diagnostic setting or policy assignment events." if al_status in ("complete", "partial") else "Activity Log gap reader " + esc(STATUS_LABEL.get(al_status, al_status)).lower() + "."}</div>')
@@ -2485,13 +2567,13 @@ def render_actors(snapshot):
     if not actors:
         return '<div class="empty">No non-noise changes, so no actors to show.</div>'
     rows = "".join(
-        f'<tr><td><b class="brk">{esc(a["display_name"])}</b>'
-        f'{small_note(a["changed_by"]) if a["display_name"] != a["changed_by"] and a["changed_by"] not in ("System", "Unspecified") else ""}'
+        f'<tr><td><b>{ident(a["display_name"])}</b>'
+        f'{("<div class=small>" + ident(a["changed_by"]) + "</div>") if a["display_name"] != a["changed_by"] and a["changed_by"] not in ("System", "Unspecified") else ""}'
         f'<div class="small muted">{esc(a["changed_by_type"])} &middot; resolved by {esc(NAME_RESOLUTION.get(a["resolution"], a["resolution"]))}</div></td>'
         f'<td data-h="Class">{esc(ACTOR_LABELS.get(a["actor_class"], a["actor_class"]))}</td><td class="n" data-h="Changes"><b>{a["changes"]}</b></td>'
         f'<td class="n" data-h="Create / update / delete">{a["creates"]} / {a["updates"]} / {a["deletes"]}</td><td class="n" data-h="High / medium">{a["high"]} / {a["medium"]}</td>'
-        f'<td class="brk">{esc(", ".join(a["resource_groups"][:4]))}{" &hellip;" if a["resource_group_count"] > 4 else ""}</td>'
-        f'<td class="brk">{esc(", ".join(a["clients"]))}</td></tr>' for a in actors[:60])
+        f'<td data-h="Resource groups">{nw_list(a["resource_groups"][:4])}{" &hellip;" if a["resource_group_count"] > 4 else ""}</td>'
+        f'<td data-h="Clients">{", ".join(short_id(x) for x in a["clients"])}</td></tr>' for a in actors[:60])
     return (f'<div class="card tw"><table class="stack"><thead><tr><th>Actor</th><th>Class</th><th class="n">Changes</th><th class="n">Create / Update / Delete</th>'
             f'<th class="n">High / Medium</th><th>Resource groups</th><th>Clients</th></tr></thead><tbody>{rows}</tbody></table>'
             f'<div class="note">Attribution comes from Change Analysis (<code>changedBy</code>, <code>changedByType</code>, <code>clientType</code>). '
@@ -2533,11 +2615,11 @@ def render_unusual(snapshot, zone):
     after = [changes[i] for i in snapshot["unusual"]["after_hours"] if i in changes]
     hours = snapshot["window"]["business_hours"]
     after_html = "".join(f'<li>{lvl_chip(c["level"])} <b>{esc(c["resource_name"])}</b> <span class="muted">{esc(c["change_type"])} by '
-                         f'{esc(c["actor"]["display_name"])} &middot; {when_inline(c["timestamp_utc"], zone)}</span></li>' for c in after[:25])
-    first_html = "".join(f'<li><b>{esc_id(f["actor"])}</b> <span class="muted">on {esc(f["resource_group"])} &middot; {f["changes"]} '
+                         f'{ident(c["actor"]["display_name"])} &middot; {when_inline(c["timestamp_utc"], zone)}</span></li>' for c in after[:25])
+    first_html = "".join(f'<li><b>{ident(f["actor"])}</b> <span class="muted">on {nw(f["resource_group"])} &middot; {f["changes"]} '
                          f'non-noise change{"s" if f["changes"] != 1 else ""} &middot; first seen {when_inline(f["first_utc"], zone)}</span></li>'
                          for f in snapshot["unusual"]["first_time_actor_rg"][:25])
-    burst_html = "".join(f'<li><b>{esc_id(b["actor"])}</b> <span class="muted">{b["changes"]} changes, {b["deletes"]} delete{"s" if b["deletes"] != 1 else ""} &middot; '
+    burst_html = "".join(f'<li><b>{ident(b["actor"])}</b> <span class="muted">{b["changes"]} changes, {b["deletes"]} delete{"s" if b["deletes"] != 1 else ""} &middot; '
                          f'{when_inline(b["start_utc"], zone)}</span></li>' for b in snapshot["unusual"]["bursts"][:25])
     baseline_note = ("Not computed for last_14d: the window equals the 14-day retention." if snapshot["window"]["period"] == "last_14d"
                      else "None in this window.")
@@ -2560,12 +2642,12 @@ def render_noise(snapshot):
     peak = max(noise["by_reason"].values() or [1]) or 1
     reasons = "".join(f'<div class="hb"><span>{nice(r)}</span><span class="t"><i style="width:{max(3, 100 * n / peak):.0f}%"></i></span><b>{n}</b></div>'
                       for r, n in noise["by_reason"].items() if n)
-    by_type = "".join(f'<tr><td>{esc(t["label"])}<div class="small muted mono">{esc(t["resource_type"])}</div></td><td class="n">{t["changes"]}</td></tr>'
+    by_type = "".join(f'<tr><td>{esc(t["label"])}<div class="small muted mono sw">{soft(t["resource_type"])}</div></td><td class="n">{t["changes"]}</td></tr>'
                       for t in noise["top_types"])
-    paths = "".join(f'<tr><td class="mono brk">{esc(p["path_pattern"])}</td><td class="n">{p["occurrences"]}</td></tr>' for p in noise["top_paths"][:12])
-    low = "".join(f'<tr><td class="n"><b>{g["count"]}&times;</b></td><td>{nice(g["reason"])}<div class="small muted mono brk">{esc(", ".join(g["paths"]))}</div></td>'
-                  f'<td>{esc(g["type_label"])} <span class="muted">({g["resources"]} resource{"s" if g["resources"] != 1 else ""})</span></td>'
-                  f'<td class="brk">{esc(g["actor"])}</td></tr>' for g in noise["low_summaries"])
+    paths = "".join(f'<tr><td class="mono sw">{soft(p["path_pattern"])}</td><td class="n">{p["occurrences"]}</td></tr>' for p in noise["top_paths"][:12])
+    low = "".join(f'<tr><td class="n"><b>{g["count"]}&times;</b></td><td>{nice(g["reason"])}<div class="small muted mono sw">{soft(", ".join(g["paths"]))}</div></td>'
+                  f'<td data-h="Resource type">{esc(g["type_label"])} <span class="muted">({g["resources"]} resource{"s" if g["resources"] != 1 else ""})</span></td>'
+                  f'<td data-h="Actor">{ident(g["actor"])}</td></tr>' for g in noise["low_summaries"])
     actor_types = ", ".join(f"{k} {v}" for k, v in noise["by_changed_by_type"].items())
     return (f'<div class="grid2"><div class="card"><h3>{noise["total"]} changes filtered as noise ({counts["noise_filtered_pct"]}% of {counts["total"]})</h3>'
             f'<p class="sub">Updates whose changed properties are all platform metadata, timestamps or agent-reported inventory. Counted, never listed. '
@@ -2583,36 +2665,41 @@ def render_timeline(snapshot, zone):
     buckets = snapshot["timeline"]["buckets"]
     if not buckets:
         return ""
-    width, height, left, bottom = 760, 150, 30, 22
-    slot = (width - left) / len(buckets)
-    peak = max([b["high"] + b["medium"] + b["low"] for b in buckets] + [1])
     hours, days, step = snapshot["window"]["business_hours"], snapshot["window"]["business_days"], snapshot["timeline"]["step_hours"]
-    parts = [f'<line x1="{left}" y1="{height - bottom}" x2="{width}" y2="{height - bottom}" stroke="#DCE2E8"/>',
-             f'<text x="{left - 6}" y="12" text-anchor="end">{peak}</text><text x="{left - 6}" y="{height - bottom}" text-anchor="end">0</text>']
-    every = max(1, len(buckets) // 8)
+    totals = [b["high"] + b["medium"] + b["low"] for b in buckets]
+    peak = max(totals + [1])
+    starts = [parse_time(b["start_utc"]).astimezone(zone) for b in buckets]
+    if step == 1:
+        marks = [(i, b["label"]) for i, b in enumerate(buckets)][::max(1, len(buckets) // 8)]
+    else:
+        days_at = [i for i in range(1, len(buckets)) if starts[i].date() != starts[i - 1].date()]
+        marks = [(i, starts[i].strftime("%d %b")) for i in days_at][::max(1, -(-len(days_at) // 8))]
+    cols, shaded = [], False
     for i, b in enumerate(buckets):
-        x = left + i * slot
-        start = parse_time(b["start_utc"]).astimezone(zone)
-        if step == 1 and (start.weekday() not in days or not hours[0] <= start.hour < hours[1]):
-            parts.append(f'<rect x="{x:.1f}" y="0" width="{slot:.1f}" height="{height - bottom}" fill="#F1F3F6"/>')
-        y = height - bottom
-        for level, color in (("low", "#A9B6C3"), ("medium", "#E08A2C"), ("high", "#C8372D")):
-            h = (height - bottom - 8) * b[level] / peak
-            if h:
-                y -= h
-                parts.append(f'<rect x="{x + slot * 0.18:.1f}" y="{y:.1f}" width="{slot * 0.64:.1f}" height="{h:.1f}" fill="{color}" rx="1.5">'
-                             f'<title>{esc(b["label"])}: {b[level]} {level}</title></rect>')
-        if i % every == 0:
-            parts.append(f'<text x="{x + slot / 2:.1f}" y="{height - 6}" text-anchor="middle">{esc(b["label"])}</text>')
-    shaded = " Shaded hours are outside business hours." if step == 1 else ""
-    return (f'<div class="card chart"><h3>Non-noise changes over the window</h3><p class="sub">Per {"hour" if step == 1 else str(step) + " hours"}, '
-            f'local time ({esc(snapshot["window"]["timezone"])}).{shaded}</p><svg viewBox="0 0 {width} {height}" role="img" '
-            f'aria-label="Non-noise changes over time">{"".join(parts)}</svg></div>')
+        off = step == 1 and (starts[i].weekday() not in days or not hours[0] <= starts[i].hour < hours[1])
+        shaded = shaded or off
+        segs = "".join(f'<i class="s-{lv}" style="height:{100 * b[lv] / peak:.1f}%"></i>' for lv in ("low", "medium", "high") if b[lv])
+        tip = ", ".join(f'{b[lv]} {lv}' for lv in ("high", "medium", "low") if b[lv]) or "no changes"
+        cols.append(f'<div class="tl-c{" off" if off else ""}" title="{esc(b["label"])}: {tip}">{segs}{("<b>" + str(totals[i]) + "</b>") if totals[i] else ""}</div>')
+    ticks = [f'<span style="grid-column:{i + 1}/{(marks[k + 1][0] if k + 1 < len(marks) else len(buckets)) + 1}">{esc(label)}</span>'
+             for k, (i, label) in enumerate(marks)]
+    unit = "hour" if step == 1 else f"{step} hours"
+    top = totals.index(max(totals))
+    summary = (f"Non-noise changes per {unit}, local time: {sum(totals)} in total, at most {totals[top]} at {buckets[top]['label']}."
+               if any(totals) else f"No non-noise changes per {unit} in this window.")
+    legend = "".join(f'<span><i class="s-{lv}"></i>{LEVEL_LABEL[lv]}</span>' for lv in ("high", "medium", "low"))
+    legend += '<span><i class="b-off"></i>Outside business hours</span>' if shaded else ""
+    return (f'<div class="card chart"><h3>Non-noise changes over the window</h3><p class="sub">Per {unit}, local time ({esc(snapshot["window"]["timezone"])}). '
+            f'Numbers are changes per bar.</p><div class="tl" role="img" aria-label="{esc(summary)}" '
+            f'style="--n:{len(buckets)}"><div class="tl-p">{"".join(cols)}</div><div class="tl-x">{"".join(ticks)}</div></div>'
+            f'<div class="legend">{legend}</div></div>')
 
 
 def render_split(snapshot):
     by_actor, by_client = snapshot["counts"]["by_actor_class"], snapshot["counts"]["by_client_class"]
     total = sum(by_actor.values())
+    if not total:
+        return '<div class="card"><h3>Who and how</h3><div class="empty">No non-noise changes in this window.</div></div>'
     colors = {"human": "#0E7C86", "automation": "#5B7FD1", "expected-automation": "#8BA6E3", "platform": "#A9B6C3", "unknown": "#D5DBE2"}
     bar = "".join(f'<i style="width:{100 * n / total:.1f}%;background:{colors.get(k, "#ccc")}" title="{esc(ACTOR_LABELS.get(k, k))}: {n}"></i>'
                   for k, n in by_actor.items()) if total else ""
@@ -2630,7 +2717,7 @@ def render_table(snapshot, zone):
     rows = []
     for c in changes:
         day, local, utc = when_parts(c["timestamp_utc"], zone)
-        hidden = " hide" if RANK[c["level"]] < floor else ""
+        hidden = " f-hide" if RANK[c["level"]] < floor else ""
         search = " ".join([c["resource_name"], c["resource_group"], c["resource_type"], c["actor"]["display_name"], c["actor"]["changed_by"],
                            c["client"]["client_type"], " ".join(c["reasons"]), " ".join(c["flags"]), c["operation"]]).lower()
         rows.append(
@@ -2639,7 +2726,7 @@ def render_table(snapshot, zone):
             f'data-q="{esc(search)}"><td>{lvl_chip(c["level"])}</td><td class="n" style="text-align:left"><b>{esc(local)}</b>'
             f'<div class="small muted">{esc(day)} &middot; {esc(utc)}</div></td><td>{ct_chip(c["change_type"])}</td>'
             f'<td><b class="brk">{esc(c["resource_name"])}</b><div class="small muted">{esc(c["resource_type_label"])}</div></td>'
-            f'<td class="brk">{esc(c["resource_group"])}</td><td><span class="who">{esc_id(c["actor"]["display_name"])}</span>'
+            f'<td class="brk">{esc(c["resource_group"]).replace("_", "_<wbr>")}</td><td><span class="who">{ident(c["actor"]["display_name"])}</span>'
             f'<div class="small muted">{esc(ACTOR_LABELS.get(c["actor"]["actor_class"], ""))} &middot; {esc(c["client"]["client_type"] or "no client")}</div></td>'
             f'<td>{nice("; ".join(c["reasons"][:2]))}<div>{flag_chips(c["flags"])}</div></td></tr>')
     if not rows:
@@ -2650,14 +2737,18 @@ def render_table(snapshot, zone):
     actor_opts = "".join(f'<option value="{k}">{esc(v)}</option>' for k, v in ACTOR_LABELS.items())
     cap = (f'<div class="note">Showing the newest {MAX_TABLE_ROWS} of {len(snapshot["changes"])} changes; the CSV files contain every change.</div>'
            if len(snapshot["changes"]) > MAX_TABLE_ROWS else "")
-    return (f'<div class="card"><div class="filters"><input id="fq" type="search" placeholder="Search resource, actor, reason or operation" aria-label="Search">'
+    heads = "".join((f'<th data-k="{k}"' + (' aria-sort="descending"' if k == "t" else "") + f'><button type="button" class="sb">{label}</button></th>') if k
+                    else f'<th>{label}</th>' for k, label in (("rank", "Level"), ("t", "When"), ("type", "Change"), ("", "Resource"),
+                                                             ("rg", "Resource group"), ("actor", "Who and how"), ("", "Why")))
+    return (f'<div class="card" id="reg" data-file="change-digest-{esc(snapshot["window"]["end_utc"][:10])}-changes-view"><div class="filters">'
+            f'<input id="fq" type="search" placeholder="Search resource, actor, reason or operation" aria-label="Search">'
             f'<select id="fl" aria-label="Level">{level_opts}</select><select id="ft" aria-label="Change type"><option value="">All change types</option>'
             f'<option>Create</option><option>Update</option><option>Delete</option></select><select id="fa" aria-label="Actor class">'
             f'<option value="">All actors</option>{actor_opts}</select><select id="fr" aria-label="Resource group"><option value="">All resource groups</option>'
-            f'{rg_opts}</select><button class="btn" id="fx" type="button">Clear</button><span class="fcount" id="fc" aria-live="polite"></span></div>'
+            f'{rg_opts}</select><button class="btn" id="fx" type="button">Clear</button><button class="btn" id="fe" type="button">Export CSV</button>'
+            f'<span class="fcount" id="fc" aria-live="polite"></span></div>'
             f'<div class="tw"><table id="tbl"><colgroup><col style="width:86px"><col style="width:140px"><col style="width:78px"><col style="width:17%">'
-            f'<col style="width:14%"><col style="width:22%"><col></colgroup><thead><tr><th data-k="rank">Level</th><th data-k="t" class="s">When</th><th data-k="type">Change</th>'
-            f'<th>Resource</th><th data-k="rg">Resource group</th><th data-k="actor">Who and how</th><th>Why</th></tr></thead><tbody id="tb">{"".join(rows)}</tbody></table></div>'
+            f'<col style="width:14%"><col style="width:22%"><col></colgroup><thead><tr>{heads}</tr></thead><tbody id="tb">{"".join(rows)}</tbody></table></div>'
             f'<div class="more-row" style="text-align:center;margin-top:12px"><button class="btn" id="fm" type="button">Show more</button></div>{cap}</div>')
 
 
@@ -2682,8 +2773,8 @@ def render_coverage(snapshot):
             f'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Not covered by Change Analysis</h3><p class="sub">Absence of a change below is not '
             f'proof that nothing happened.</p><ul class="plain">{not_covered}</ul><div class="note">Retention is {cov["retention_days"]} days. '
             f'{esc(cov["latency_note"])} Anything that could not be read is a blind spot, never a clean result.</div></div>'
-            f'<div class="card"><h3>About this digest</h3><ul class="plain"><li>Window {esc(w["start_local"])} to {esc(w["end_local"])} '
-            f'({esc(w["start_utc"])} to {esc(w["end_utc"])}); time zone {esc(w["timezone"])} via {esc(w["timezone_source"])}.</li>'
+            f'<div class="card"><h3>About this digest</h3><ul class="plain"><li>Window {nw(w["start_local"])} to {nw(w["end_local"])} '
+            f'({nw(w["start_utc"])} to {nw(w["end_utc"])}); time zone {esc(w["timezone"])} via {esc(w["timezone_source"])}.</li>'
             f'<li>Business hours {w["business_hours"][0]:02d}:00-{w["business_hours"][1]:02d}:00, days {esc(", ".join("Mon Tue Wed Thu Fri Sat Sun".split()[d] for d in w["business_days"]))}.</li>'
             f'<li>{cov["http_requests"]} read-only HTTP requests in {cov["collection_seconds"]} s; {cov["throttled_waits"]} throttling waits.</li>'
             f'<li>Identity check: {esc(identity)}.</li><li>{cov["managed_resource_groups"]} platform-managed and {cov["prod_resource_groups"]} production-tagged resource groups.</li>'
@@ -2692,27 +2783,59 @@ def render_coverage(snapshot):
 
 
 REPORT_JS = """
-(function(){var $=function(i){return document.getElementById(i)},tb=$('tb');
-var navs=[].slice.call(document.querySelectorAll('.secnav a'));
-if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){navs.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id)})}})},{rootMargin:'-45% 0px -50% 0px'});
-document.querySelectorAll('section.sec').forEach(function(s){io.observe(s)})}
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details').forEach(function(d){d.open=true});document.querySelectorAll('table.diff tr[hidden]').forEach(function(r){r.hidden=false})});
-document.querySelectorAll('.linkbtn[data-more]').forEach(function(b){b.addEventListener('click',function(){var t=b.closest('tbody');t.querySelectorAll('tr[hidden]').forEach(function(r){r.hidden=false});b.closest('tr').remove()})});
+(function(){var $=function(i){return document.getElementById(i)},each=function(s,f){[].forEach.call(document.querySelectorAll(s),f)},tb=$('tb');
+each('[data-print]',function(b){b.addEventListener('click',function(){window.print()})});
+var navs=[].slice.call(document.querySelectorAll('.secnav a')),strip=document.querySelector('.secnav .wrap');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;navs.forEach(function(a){var on=a.getAttribute('href')==='#'+e.target.id;a.classList.toggle('on',on);
+if(on&&strip.scrollWidth>strip.clientWidth)strip.scrollLeft+=a.getBoundingClientRect().left-strip.getBoundingClientRect().left-24})})},{rootMargin:'-45% 0px -50% 0px'});each('section.sec[id]',function(s){io.observe(s)})}
+function tws(){each('.tw',function(w){var o=w.scrollWidth>w.clientWidth+1;if(o&&!w.hasAttribute('tabindex')){var c=w.closest('.card'),h=(c&&c.querySelector('h3'))||(w.closest('section')||document).querySelector('h2');
+w.tabIndex=0;w.setAttribute('role','region');w.setAttribute('aria-label',(h?h.textContent:'Table')+', scrolls sideways')}else if(!o&&w.hasAttribute('tabindex')){w.removeAttribute('tabindex');w.removeAttribute('role');w.removeAttribute('aria-label')}})}
+tws();var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(tws,200)});
+window.addEventListener('beforeprint',function(){each('details',function(d){d.open=true});each('table.diff tr[hidden]',function(r){r.hidden=false})});
+each('.linkbtn[data-more]',function(b){b.addEventListener('click',function(){var t=b.closest('tbody');[].forEach.call(t.querySelectorAll('tr[hidden]'),function(r){r.hidden=false});b.closest('tr').remove()})});
 if(!tb)return;var rows=[].slice.call(tb.rows),PAGE=40,limit=PAGE,key='t',asc=false,rank={high:3,medium:2,low:1};
 function vis(){var q=$('fq').value.toLowerCase(),l=rank[$('fl').value]||1,t=$('ft').value,a=$('fa').value,g=$('fr').value;
 return rows.filter(function(r){var d=r.dataset;return +d.rank>=l&&(!t||d.type===t)&&(!a||d.actor===a)&&(!g||d.rg===g)&&(!q||d.q.indexOf(q)>=0)})}
 function val(r){var d=r.dataset;return key==='rank'?+d.rank:(d[key]||'')}
 function draw(){var v=vis();v.sort(function(x,y){var a=val(x),b=val(y);return a<b?(asc?-1:1):a>b?(asc?1:-1):0});
-rows.forEach(function(r){r.classList.add('hide')});v.forEach(function(r,i){tb.appendChild(r);if(i<limit)r.classList.remove('hide')});
+rows.forEach(function(r){r.classList.add('f-hide');r.classList.remove('pg')});v.forEach(function(r,i){tb.appendChild(r);r.classList.remove('f-hide');if(i>=limit)r.classList.add('pg')});
 $('fc').textContent=Math.min(limit,v.length)+' of '+v.length+' matching changes ('+rows.length+' non-noise in total)';
 $('fm').parentNode.style.display=v.length>limit?'':'none';
-document.querySelectorAll('#tbl th[data-k]').forEach(function(th){th.classList.toggle('s',th.dataset.k===key);th.classList.toggle('asc',th.dataset.k===key&&asc)})}
+each('#tbl th[data-k]',function(th){if(th.dataset.k===key)th.setAttribute('aria-sort',asc?'ascending':'descending');else th.removeAttribute('aria-sort')})}
 ['fq','fl','ft','fa','fr'].forEach(function(i){$(i).addEventListener('input',function(){limit=PAGE;draw()})});
 $('fm').addEventListener('click',function(){limit+=PAGE;draw()});
+var saved,fs=['fq','fl','ft','fa','fr'];window.addEventListener('beforeprint',function(){saved=fs.map(function(i){return $(i).value}).concat(limit);fs.forEach(function(i){$(i).value=''});$('fl').value='low';limit=rows.length;draw()});
+window.addEventListener('afterprint',function(){if(!saved)return;fs.forEach(function(i,k){$(i).value=saved[k]});limit=saved[5];saved=null;draw()});
 $('fx').addEventListener('click',function(){$('fq').value='';$('ft').value='';$('fa').value='';$('fr').value='';$('fl').value='low';limit=PAGE;draw()});
-document.querySelectorAll('#tbl th[data-k]').forEach(function(th){th.addEventListener('click',function(){if(key===th.dataset.k)asc=!asc;else{key=th.dataset.k;asc=key!=='t'&&key!=='rank'}draw()})});
+each('#tbl th[data-k] .sb',function(b){b.addEventListener('click',function(){var k=b.parentNode.dataset.k;if(key===k)asc=!asc;else{key=k;asc=k!=='t'&&k!=='rank'}draw()})});
+$('fe').addEventListener('click',function(){var tx=function(e){return e?e.textContent:''},q=function(s){s=String(s).replace(/\\s+/g,' ').trim();if(/^[=+\\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};
+var out=[['Level','When (UTC)','Change','Resource','Resource type','Resource group','Who','Actor class and client','Why','Flags'].map(q).join(',')];
+[].forEach.call(tb.rows,function(r){if(r.classList.contains('f-hide'))return;var c=r.cells,w=c[6].cloneNode(true),f=w.querySelector('div'),fl=f?[].map.call(f.querySelectorAll('.flag'),tx).join('; '):'';if(f)f.remove();
+out.push([r.dataset.level,r.dataset.t,r.dataset.type,tx(c[3].querySelector('b')),tx(c[3].querySelector('div')),tx(c[4]),tx(c[5].querySelector('.who')),tx(c[5].querySelector('div')),tx(w),fl].map(q).join(','))});
+var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\\ufeff'+out.join('\\r\\n')],{type:'text/csv;charset=utf-8'}));a.download=$('reg').getAttribute('data-file')+'.csv';
+document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)});
 draw()})();
 """
+
+
+def css_text(value):
+    return '"' + re.sub(r'[<>"\\\r\n]', " ", str(value)) + '"'
+
+
+def verdict_card(snapshot):
+    counts, lv = snapshot["counts"], snapshot["counts"]["by_level"]
+    extra = counts["new_role_assignments"] + counts["activity_log_gaps"]
+    levels = {i["level"] for i in snapshot["items"]}
+    core_failed = any(s["id"] == "arg_resourcechanges" and s["status"] in ("denied", "error", "skipped") for s in snapshot["coverage"]["sources"])
+    if core_failed:
+        tone, word, detail = "warn", "Incomplete data", "Change Analysis could not be read completely; see Coverage."
+    elif levels & {"high", "medium"}:
+        tone, word = ("high", "Needs attention") if "high" in levels else ("review", "Review recommended")
+        detail = f'{lv["high"]} high &middot; {lv["medium"]} medium changes' + (f' &middot; {extra} RBAC and Activity Log event{"s" if extra != 1 else ""}' if extra else "")
+    else:
+        tone, word, detail = "ok", "No relevant changes", f'{counts["noise_filtered_pct"]}% of {counts["total"]} changes were platform noise.'
+    partial = "<p>Partial coverage: some sources are blind spots.</p>" if snapshot["status"] != "ok" and not core_failed else ""
+    return f'<aside class="vcard v-{tone}" aria-label="Verdict"><div class="k">Verdict</div><b>{word}</b><p>{detail}</p>{partial}</aside>'
 
 
 def render_html(snapshot):
@@ -2725,18 +2848,20 @@ def render_html(snapshot):
     unusual = counts["unusual"]
     unusual_total = unusual["after_hours"] + unusual["first_time_actor_rg"] + unusual["bursts"] + unusual["click_ops"]
     security_total = counts["security"] + counts["new_role_assignments"] + counts["updated_role_assignments"] + counts["activity_log_gaps"]
-    kpis = [("", counts["reported"], f'relevant changes &middot; {lv["high"]} high, {lv["medium"]} medium'),
-            ("k-del", counts["deletes"], f'deleted resources in {counts["delete_operations"]} operation{"s" if counts["delete_operations"] != 1 else ""}'),
-            ("k-sec", security_total, "security-relevant changes and events"),
-            ("k-rbac", counts["new_role_assignments"], f'new role assignments &middot; {counts["privileged_role_assignments"]} privileged'),
-            ("k-unu", unusual_total, "unusual activity flags"),
-            ("k-noise", f'{counts["noise_filtered_pct"]}%', f'filtered as noise ({lv["noise"]} of {counts["total"]})')]
-    kpi_html = "".join(f'<div class="kpi {c}"><b>{v}</b><span>{label}</span></div>' for c, v, label in kpis)
+    kpis = [(counts["reported"], f'relevant changes &middot; {lv["high"]} high, {lv["medium"]} medium'),
+            (counts["deletes"], f'deleted resources in {counts["delete_operations"]} operation{"s" if counts["delete_operations"] != 1 else ""}'),
+            (security_total, "security-relevant changes and events"),
+            (counts["new_role_assignments"], f'new role assignments &middot; {counts["privileged_role_assignments"]} privileged'),
+            (unusual_total, "unusual activity flags"),
+            (f'{counts["noise_filtered_pct"]}%', f'filtered as noise ({lv["noise"]} of {counts["total"]})')]
+    kpi_html = "".join(f'<div class="kpi"><b>{v}</b><span>{label}</span></div>' for v, label in kpis)
     subs = ", ".join(s["name"] for s in snapshot["scope"]["subscriptions"]) or snapshot["scope"]["management_group"]
     status = snapshot["status"]
+    provenance = "Live data" if snapshot.get("provenance", "LIVE") == "LIVE" else str(snapshot.get("provenance"))
     meta = [f'<span>Window <b>{esc(w["start_local"])}</b> &rarr; <b>{esc(w["end_local"])}</b></span>',
-            f'<span>{esc(w["start_utc"])} &rarr; {esc(w["end_utc"])}</span>', f'<span>Scope <b>{esc(subs)}</b></span>',
-            f'<span class="{"st-partial" if status != "ok" else ""}">{"Complete coverage" if status == "ok" else "Partial coverage, see Coverage"}</span>']
+            f'<span class="m-utc">UTC {esc(utc_short(w["start_utc"]))} &rarr; {esc(utc_short(w["end_utc"]))}</span>', f'<span>Scope <b>{esc(subs)}</b></span>',
+            f'<span class="m-gen">Generated <b>{esc(utc_short(snapshot["generated_utc"]))} UTC</b></span>',
+            f'<span class="{"st-partial" if status != "ok" else ""}">{esc(provenance)} &middot; {"complete coverage" if status == "ok" else "partial coverage, see Coverage"}</span>']
     if snapshot["parameters"]["resource_group"]:
         meta.append(f'<span>Focus <b>{esc(snapshot["parameters"]["resource_group"])}</b></span>')
     if snapshot.get("files_note"):
@@ -2755,7 +2880,8 @@ def render_html(snapshot):
         return f'<section class="sec" id="{key}"><div class="sec-h"><h2>{esc(title)}</h2>{badge}</div><p class="sec-sub">{esc(sub)}</p>{body}</section>'
 
     body = (
-        f'<div class="ov">{render_timeline(snapshot, zone)}{render_split(snapshot)}</div>' +
+        f'<section class="sec" id="overview" aria-labelledby="ovh"><h2 class="sr" id="ovh">Overview</h2>'
+        f'<div class="ov">{render_timeline(snapshot, zone)}{render_split(snapshot)}</div></section>' +
         sec("matters", "What changed that matters", f"{min_label} grouped by resource, worst first. Each change shows when, who, how, why it "
             "matters and the property diff (old \u2192 new).", render_matters(snapshot, zone)) +
         sec("deletes", "Deletes", "Deletes grouped by operation (correlation ID): one VM delete with its disks and NICs is one row. Deleted resources keep no snapshot.",
@@ -2772,12 +2898,18 @@ def render_html(snapshot):
         sec("coverage", "Coverage and sources", "What was read, how completely, and what Change Analysis cannot see.", render_coverage(snapshot))
     )
     title = (esc(client) + " &middot; " if client else "") + "Azure change digest &middot; " + esc(w["end_utc"][:10])
-    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<meta name="color-scheme" content="light"><title>{title}</title><style>{REPORT_CSS}</style></head><body>'
+    footer_text = ((client + " \u00b7 " if client else "") + f'Azure change digest \u00b7 {w["label"]} \u00b7 {w["end_utc"][:10]} \u00b7 '
+                   f'{TOOL_NAME} {TOOL_VERSION} \u00b7 Internal use')
+    page_css = ('@page{size:A4;margin:12mm 11mm 15mm;@bottom-left{content:' + css_text(footer_text) + ';font:8pt "Segoe UI",system-ui,sans-serif;color:#59636E}'
+                '@bottom-right{content:"Page " counter(page) " of " counter(pages);font:8pt "Segoe UI",system-ui,sans-serif;color:#59636E}}')
+    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="{REPORT_CSP}">'
+            f'<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>{title}</title>'
+            f'<style>{REPORT_CSS}{page_css}</style></head><body>'
             f'<header class="top"><div class="wrap">{WORDMARK}<div class="pills">{("<span class=pill>" + esc(client) + "</span>") if client else ""}'
-            f'<span class="pill">Change Analysis &middot; Azure Resource Graph</span><span class="pill ro">Read only</span></div></div></header>'
-            f'<section class="hero"><div class="wrap"><div class="eyebrow">Daily change digest &middot; {esc(w["label"])}</div><h1>Relevant Azure changes</h1>'
-            f'<p class="verdict">{arrows(head["verdict"])}</p>{("<ul class=hl>" + highlights + "</ul>") if highlights else ""}<div class="meta">{"".join(meta)}</div>'
+            f'<span class="pill">Change Analysis &middot; Azure Resource Graph</span><span class="pill ro">Read only</span>{PRINT_BUTTON}</div></div></header>'
+            f'<section class="hero" aria-labelledby="ttl"><div class="wrap hero-in"><div class="hero-head"><div class="eyebrow">Daily change digest &middot; {esc(w["label"])}</div>'
+            f'<h1 id="ttl">Relevant Azure changes</h1><p class="verdict">{arrows(head["verdict"])}</p></div>'
+            f'{("<ul class=hl>" + highlights + "</ul>") if highlights else ""}{verdict_card(snapshot)}<div class="meta">{"".join(meta)}</div>'
             f'<div class="kpis">{kpi_html}</div><div class="sn"><div class="sn-h"><span>Signal vs noise &middot; <b>{counts["total"]}</b> changes recorded</span>'
             f'<span>{counts["excluded_by_configuration"]} excluded by configuration</span></div><div class="bar">{bar}</div><div class="legend">{legend}</div></div></div></section>'
             f'<nav class="secnav" aria-label="Sections"><div class="wrap">{nav}</div></nav><main class="wrap">{body}</main>'

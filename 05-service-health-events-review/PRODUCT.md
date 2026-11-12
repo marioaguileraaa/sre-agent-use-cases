@@ -47,8 +47,9 @@ observation times, source retention qualification and pagination receipts.
 
 The supplied direction is binding: a distinctive readable yellow/charcoal
 identity, sparse yellow navigation/branding, neutral evidence sheets and named
-independent risk/Unknown colors. Generic source says `CLIENTE` with a visible
-customer-logo frame and no embedded logo. Private configured deployment may
+independent risk/Unknown colors. Generic source says `CLIENTE` in the hero and
+shows the Azure SRE Agent wordmark instead of a logo; no logo is embedded and
+no empty logo frame is drawn. Private configured deployment may
 use an authorized validated customer raster. Source-sampled colors are not
 represented as an official brand specification.
 
@@ -60,7 +61,9 @@ This case's test fixtures are permanently `SIMULATED`. Actual source access,
 normal/default and manual-monthly native downloads were verified in the
 approved lab on 2026-10-14 UTC. The README records their distinct 22:14:58Z and
 22:21:09Z references, complete returned-page qualification, actual monthly
-10:00 UTC recurrence and real masked screenshots. Raw private configuration,
+10:00 UTC recurrence and real masked setup/task screenshots; its report
+pictures are SIMULATED renders of the current design from sanitized sample
+data. Raw private configuration,
 exports, credentials, receipts and unmasked captures remain outside Git.
 The generic tool source is frozen. The generic package and masked lab captures
 are published in the private repository; customer deployment/acceptance and

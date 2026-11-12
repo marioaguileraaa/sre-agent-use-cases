@@ -714,256 +714,392 @@ def main() -> dict:
     json_doc.update({"summary": summary, "coverage": coverage, "assignments": rows})
     json_text = json.dumps(json_doc, ensure_ascii=False, indent=2)
 
-    def esc(v):
-        return html.escape(str(v if v is not None else ""))
+    def render_html(doc, logo_uri=""):
+        """Self-contained HTML report built only from the JSON document (a saved JSON can be re-rendered)."""
+        S, C, rows = doc["summary"], doc["coverage"], doc["assignments"]
+        org = (doc.get("organization") or "").strip()
 
-    def pct(n, d):
-        return f"{(100 * n / d):.0f}%" if d else "0%"
+        def e(v):
+            return html.escape(str(v if v is not None else ""))
 
-    total = len(rows)
-    seg = ""
-    for key, label in (("orphan", "Orphaned"), ("redundant", "Redundant"), ("review", "Individual review"), ("ok", "Compliant")):
-        n = dec_counts.get(key, 0)
-        if n:
-            seg += f'<span class="seg d-{key}" style="flex:{n}" title="{esc(label)}: {n}"><b>{n}</b></span>'
-    legend = "".join(
-        f'<span class="lg"><i class="dot d-{k}"></i>{esc(l)} <b>{dec_counts.get(k, 0)}</b></span>'
-        for k, l in (("orphan", "Remove · orphaned"), ("redundant", "Remove · redundant"), ("review", "Individual review"), ("ok", "Compliant")))
+        def nm(v):
+            return re.sub(r"([a-z])([A-Z])", r"\1<wbr>\2", re.sub(r"([/_.@·])", r"\1<wbr>", e(v)))
 
-    level_rows = ""
-    for lv in levels:
-        c = level_matrix[lv]
-        tot = sum(c.values())
-        if not tot:
-            continue
-        level_rows += (f"<tr><th>{esc(lv)}</th><td class='n'>{tot}</td><td class='n c-orphan'>{c.get('orphan', 0) or '·'}</td>"
-                       f"<td class='n c-redundant'>{c.get('redundant', 0) or '·'}</td><td class='n c-review'>{c.get('review', 0) or '·'}</td>"
-                       f"<td class='n c-ok'>{c.get('ok', 0) or '·'}</td></tr>")
+        def num(v):
+            return f"{v:,}" if isinstance(v, int) else e(v)
 
-    maxflag = max(flag_counts.values()) if flag_counts else 1
-    flag_bars = "".join(
-        f"<div class='bar'><span class='bl'>{esc(FLAG_LABEL[k])}</span><span class='bt'><i style='width:{max(4, 100 * v / maxflag):.0f}%'></i></span><b>{v}</b></div>"
-        for k, v in flag_counts.most_common()) or "<p class='muted'>No risk signals in the current assignments.</p>"
+        def opts(items):
+            return "".join(f"<option value='{e(v)}'>{e(t)} ({n})</option>" for v, t, n in items if n)
 
-    top_html = "".join(
-        f"<li><span class='who'>{esc(t['name'])}<small>{esc(t['type'])}</small></span><span class='cnt'>{t['count']}<small>{t['tier0']} tier 0</small></span></li>"
-        for t in top_principals) or "<li class='muted'>No identities with current privileged access.</li>"
+        def chip(t):
+            s = str(t).lower()
+            cls = "ok" if s in ("ok", "no privileged groups") else ("warn" if s.startswith(("partial", "not evaluated")) else "bad")
+            return f"<span class='st st-{cls}'>{e(t)}</span>"
 
-    def chip(status_text):
-        s = str(status_text).lower()
-        cls = "ok" if s in ("ok", "no privileged groups") else ("warn" if s.startswith(("partial", "not evaluated")) else "bad")
-        return f"<span class='st st-{cls}'>{esc(status_text)}</span>"
+        DEC = (("orphan", "Remove · orphaned"), ("redundant", "Remove · redundant"),
+               ("review", "Individual review"), ("ok", "Compliant"))
+        LEVELS = ("Root (/)", "Management Group", "Subscription", "Resource group", "Resource", "Other")
+        TYPES = ("User", "Group", "Application", "Managed identity", "External group", "Device", "Unknown")
+        I_WARN = ("<svg viewBox='0 0 20 20' aria-hidden='true'><path d='M10 3 2 17h16L10 3Zm0 5.5v3.5m0 2.6v.1' fill='none' "
+                  "stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+        total, dec = len(rows), Counter(r["decision"] for r in rows)
+        removable = dec["orphan"] + dec["redundant"]
+        tiers = Counter(r["tier"] for r in rows)
+        own = S.get("owner") or {}
+        ref = str(S.get("reference_utc") or "")
+        when = (ref[:16].replace("T", " ") + " UTC") if ref else ""
+        labels = {}
+        for r in rows:
+            labels.update(zip(r.get("flags") or [], r.get("flag_labels") or []))
+        sig = Counter(f for r in rows if r["decision"] == "review" for f in r.get("flags") or [])
 
-    cov_rows = ""
-    for c in sub_coverage:
-        cov_rows += (f"<tr><th>{esc(c['name'])}</th><td>{chip(c['role_assignments']['status'])} {c['role_assignments']['count']}</td>"
-                     f"<td>{chip(c['role_definitions']['status'])} {c['role_definitions']['count']}</td>"
-                     f"<td>{chip(c['pim_active']['status'])} {c['pim_active']['count']}</td>"
-                     f"<td>{chip(c['pim_eligible']['status'])} {c['pim_eligible']['count']}</td></tr>")
-    graph_rows = ""
-    for kind in ("Users", "Groups", "Apps and identities", "Other"):
-        c = graph_stats.get(kind)
-        if not c:
-            continue
-        graph_rows += (f"<tr><th>{esc(kind)}</th><td class='n'>{c.get('resolved', 0)}</td><td class='n{' c-orphan' if c.get('orphaned') else ''}'>{c.get('orphaned', 0)}</td>"
-                       f"<td class='n'>{c.get('denied', 0) + c.get('error', 0)}</td></tr>")
+        gi = C.get("graph_identities") or {}
+        unread = sum(v.get("denied", 0) + v.get("error", 0) for v in gi.values())
+        arm_bad = [s for s in C.get("subscriptions") or [] if (s.get("role_assignments") or {}).get("status") != "ok"
+                   or (s.get("role_definitions") or {}).get("status") != "ok"]
+        graph_ok = str(C.get("graph_token") or "ok").startswith("ok")
+        partial = C.get("status") != "complete"
+        issues = []
+        if arm_bad:
+            issues.append(f"{len(arm_bad)} subscription{'s' if len(arm_bad) > 1 else ''} not fully readable")
+        if not graph_ok:
+            issues.append("Microsoft Graph unavailable, identities not resolved")
+        if unread:
+            issues.append(f"{unread} identit{'ies' if unread > 1 else 'y'} could not be read in Microsoft Graph")
+        if partial and not issues:
+            issues.append("some reads failed")
+        cov_text = ("Partial coverage: " + "; ".join(issues) + ".") if partial else ""
+        verdict, tone = ("Action required", "warn") if removable or dec["review"] else (
+            ("Coverage incomplete", "warn") if partial else ("No action needed", "ok"))
+        vline = " · ".join(t for t in (f"{removable} to remove" if removable else "",
+                                      f"{dec['review']} to review" if dec["review"] else "", f"{dec['ok']} compliant") if t)
 
-    owner_total = len(owner_rows)
-    owner_removable = owner_dec.get("orphan", 0) + owner_dec.get("redundant", 0)
-    status_label = "Full coverage" if status == "complete" else "Partial coverage"
-    sub_list = ", ".join(c["name"] for c in sub_coverage)
-    data_json = json.dumps(rows, ensure_ascii=False).replace("</", "<\\/")
+        names = [s.get("name") or s.get("id") or "" for s in S.get("subscriptions") or []]
+        chips = [f"<span>Generated {e(when)}</span>",
+                 f"<span>Subscriptions: {e(', '.join(names[:3]) + (f' +{len(names) - 3} more' if len(names) > 3 else ''))}</span>",
+                 "<span class='on'>Live data</span>",
+                 "<a class='warn' href='#coverage'>Partial coverage</a>" if partial else "<span class='on'>Full coverage</span>",
+                 "<span>Managed identity · Reader + Graph read</span>"]
+        seg = "".join(f"<i class='d-{k}' style='width:{100 * dec[k] / total:.3f}%' title='{e(t)}: {dec[k]}'></i>" for k, t in DEC if dec[k])
+        legend = "".join(f"<span><i class='d-{k}'></i>{e(t)} <b>{dec[k]}</b></span>" for k, t in DEC)
 
-    logo_uri = (LOGO_DATA_URI or "").strip()
-    if logo_uri.startswith("data:image/"):
-        logo_html = f'<img class="logo" src="{esc(logo_uri)}" alt="{esc(org_name or "Organization logo")}">'
-    else:
-        logo_html = ('<span class="wm" role="img" aria-label="Azure SRE Agent"><svg viewBox="0 0 24 24" aria-hidden="true">'
-                     '<path d="M9.2 3h5.6l6.2 18h-4.5l-1.5-4.6H8.4L9.9 12h3.8L12 6.6 6.4 21H2z" fill="currentColor"/></svg>'
-                     '<span>Azure SRE Agent</span></span>')
-    title_prefix = esc(org_name) + " · " if org_name else ""
-    footer_org = " · Internal use · " + esc(org_name) if org_name else ""
+        orem = own.get("remove_orphaned", 0) + own.get("remove_redundant", 0)
+        kpis = [(own.get("total", 0), "Owner assignments analyzed", ""),
+                (orem, "Owner assignments removable without access loss",
+                 f"{own.get('remove_orphaned', 0)} orphaned + {own.get('remove_redundant', 0)} redundant"),
+                (own.get("individual_review", 0), "Owner assignments for individual review", f"{own.get('compliant', 0)} compliant"),
+                (S.get("total_role_assignments", 0), "Role assignments inventoried",
+                 f"{total} privileged · {S.get('distinct_principals', 0)} identities"),
+                (tiers[0], "Tier 0 · can grant access", f"Tier 1: {tiers[1]} · Tier 2: {tiers[2]}"),
+                (f"{S.get('standing_tier01_percent', 0)}%", "Of tier 0/1 is standing access",
+                 f"{S.get('pim_eligible_privileged', 0)} privileged PIM eligibilities")]
+        kpi_html = "".join(f"<div class='kpi'><div class='v'>{num(v)}</div><div class='l'>{e(l)}</div>{f'<div class=s>{e(s)}</div>' if s else ''}</div>"
+                           for v, l, s in kpis)
 
-    html_doc = """<!doctype html>
+        level_rows = ""
+        for lv in LEVELS:
+            c = Counter(r["decision"] for r in rows if r["scope_level"] == lv)
+            if c:
+                level_rows += (f"<tr><th scope='row'>{e(lv)}</th><td class='n'>{sum(c.values())}</td>" + "".join(
+                    f"<td class='n c-{k}'>{c[k]}</td>" if c[k] else "<td class='n nil'>·</td>" for k, _ in DEC) + "</tr>")
+
+        smax = max(sig.values()) if sig else 1
+        sig_html = "".join(
+            f"<button type='button' class='brow' data-sig='{e(k)}'><span class='bl'>{e(labels.get(k, k))}</span>"
+            f"<span class='bt'><i style='width:{max(3, 100 * v / smax):.0f}%'></i></span><b>{v}</b>"
+            f"<span class='vh'>: show them in the register</span></button>"
+            for k, v in sig.most_common()) or "<p class='muted'>No risk signals in the current assignments.</p>"
+
+        held, meta = Counter(), {}
+        for r in rows:
+            if r["decision"] in ("review", "ok"):
+                held[r["principal_id"]] += 1
+                meta[r["principal_id"]] = r
+        tops = held.most_common(8)
+        top_html = ""
+        for pid, n in tops:
+            t0 = sum(1 for r in rows if r["principal_id"] == pid and r["tier"] == 0 and r["decision"] in ("review", "ok"))
+            top_html += (f"<li><span class='bl'><b>{nm(meta[pid]['principal_name'])}</b> <small>{e(meta[pid]['principal_type'])} · {t0} tier 0</small></span>"
+                         f"<span class='bt'><i style='width:{max(3, 100 * n / tops[0][1]):.0f}%'></i></span><b class='bv'>{n}</b></li>")
+        top_html = top_html or "<li class='muted'>No identities with current privileged access.</li>"
+
+        def go(key, n):
+            return f" <a class='go' href='#register' data-go='{key}'>Show {n} in the register</a>" if n else ""
+
+        steps = (f"<li><b>Risk-free cleanup.</b> Remove the {removable} orphaned or redundant assignments through an approved change. "
+                 f"Effective access does not change.{go('remove', removable)}</li>"
+                 "<li><b>Human access to PIM.</b> Convert users' standing privilege into eligibility with JIT activation, MFA and approval."
+                 f"{go('sig:human_standing', sig['human_standing'])}</li>"
+                 "<li><b>Non-human identities.</b> Replace Owner/UAA on applications and managed identities with least-privilege roles "
+                 f"(Role Designer).{go('sig:nonhuman_tier0', sig['nonhuman_tier0'])}</li>"
+                 "<li><b>Groups by function and scope.</b> Assign through groups separated by environment and subscription, never to "
+                 "individual users at Management Group level.</li>"
+                 "<li><b>Periodic review.</b> Schedule this monthly review in the SRE Agent and track how the indicators evolve.</li>")
+
+        types, lvc = Counter(r["principal_type"] for r in rows), Counter(r["scope_level"] for r in rows)
+        tier_lbl = {r["tier"]: r["tier_label"] for r in rows}
+        cov_rows = "".join(
+            f"<tr><th scope='row'>{e(s.get('name') or s.get('subscription_id'))}</th>" + "".join(
+                f"<td class='nw'>{chip((s.get(k) or {}).get('status', '-'))} <span class='cv'>{num((s.get(k) or {}).get('count', 0))}</span></td>"
+                for k in ("role_assignments", "role_definitions", "pim_active", "pim_eligible")) + "</tr>"
+            for s in C.get("subscriptions") or [])
+        graph_rows = ""
+        for k in ("Users", "Groups", "Apps and identities", "Other"):
+            c = gi.get(k)
+            if c:
+                bad = c.get("denied", 0) + c.get("error", 0)
+                graph_rows += (f"<tr><th scope='row'>{e(k)}</th><td class='n'>{c.get('resolved', 0)}</td>"
+                               f"<td class='n{' c-orphan' if c.get('orphaned') else ''}'>{c.get('orphaned', 0)}</td>"
+                               f"<td class='n{' c-warn' if bad else ''}'>{bad}</td></tr>")
+        graph_rows = graph_rows or ("<tr><td colspan='4' class='muted'>" + ("No identities to resolve." if graph_ok else
+                                    "Microsoft Graph was not available: identities were not resolved.") + "</td></tr>")
+
+        logo = (logo_uri or "").strip()
+        if logo.startswith("data:image/"):
+            mark = f"<img class='logo' src='{e(logo)}' alt='{e(org or 'Organization logo')}'>"
+        else:
+            mark = ("<span class='wm'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M9.2 3h5.6l6.2 18h-4.5l-1.5-4.6H8.4L9.9 12h3.8L12 6.6 "
+                    "6.4 21H2z' fill='currentColor'/></svg><span>Azure SRE Agent</span></span>")
+        ptitle = ((org + " · " if org else "") + "Azure RBAC privileged access review · " + when).replace("\n", " ")
+        repl = {
+            "__TITLE__": e((org + " · " if org else "") + "Azure RBAC privileged access review · " + ref[:10]),
+            "__PTITLE__": '"' + ptitle.replace("\\", "\\\\").replace('"', '\\"').replace("<", "\\3c ") + '"',
+            "__MARK__": mark, "__TOTAL__": str(total), "__REMOVABLE__": str(removable), "__REVIEW__": str(dec["review"]),
+            "__CHIPS__": "".join(chips), "__TONE__": tone, "__VERDICT__": verdict, "__VLINE__": e(vline),
+            "__VCOV__": f"<p class='cov'>{I_WARN}<span>{e(cov_text)}</span></p>" if partial else "",
+            "__TRACK__": e("; ".join(f"{t}: {dec[k]}" for k, t in DEC)), "__SEG__": seg, "__LEGEND__": legend,
+            "__KPIS__": kpi_html, "__SIGNALS__": sig_html, "__TOP__": top_html, "__STEPS__": steps,
+            "__LEVELS__": level_rows or "<tr><td colspan='6' class='muted'>No privileged assignments.</td></tr>",
+            "__F_DEC__": opts([("remove", "Remove · all", removable)] + [(k, t, dec[k]) for k, t in DEC]),
+            "__F_TIER__": opts([(str(t), tier_lbl[t], tiers[t]) for t in sorted(tier_lbl)]),
+            "__F_TYPE__": opts([(t, t, types[t]) for t in list(TYPES) + sorted(set(types) - set(TYPES))]),
+            "__F_LVL__": opts([(x, x, lvc[x]) for x in LEVELS]),
+            "__F_SIG__": opts([(k, labels.get(k, k), v) for k, v in sig.most_common()]),
+            "__COVNOTE__": f"<p class='note'>{I_WARN}<span>{e(cov_text)}</span></p>" if partial else "",
+            "__COV__": cov_rows, "__GRAPH__": graph_rows, "__SIU__": chip(C.get("user_sign_in_activity", "not evaluated")),
+            "__SIS__": chip(C.get("service_principal_sign_in_activity", "not evaluated")),
+            "__MEM__": chip(C.get("group_membership", "not evaluated")),
+            "__WHEN__": e(when), "__ORG_FOOT__": (" · Internal use · " + e(org)) if org else "",
+            "__DATA__": json.dumps(rows, ensure_ascii=False).replace("</", "<\\/"),
+        }
+        page = r"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>__TITLE_PREFIX__Azure RBAC privileged access review · __DATE__</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>__TITLE__</title>
 <style>
-:root{--ink:#1B1F24;--navy:#243A5E;--navy2:#1B2C48;--accent:#0F6CBD;--accent2:#0C5A9E;--sky:#7CC3FF;--bg:#F3F5F8;--card:#fff;--text:#1B1F24;--muted:#57606A;--line:#DCE1E7;
---orphan:#C4314B;--redundant:#C25200;--review:#0F6CBD;--ok:#107C10}
-*{box-sizing:border-box}html,body{margin:0}body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45}
-.top{background:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 40px;position:sticky;top:0;z-index:5}
-.top img.logo{height:34px;display:block}.top .tag{color:#C9D1D9;font-size:12px;letter-spacing:.04em;display:flex;gap:10px;align-items:center}
-.wm{display:inline-flex;align-items:center;gap:10px;color:#fff;font-weight:600;font-size:18px;letter-spacing:.01em;white-space:nowrap}
-.wm svg{width:30px;height:30px;padding:5px;border-radius:8px;background:linear-gradient(135deg,#0F6CBD,#2899F5);color:#fff;flex:none}
-.pill{white-space:nowrap;border:1px solid #3D4651;border-radius:999px;padding:5px 12px;color:#E6EAEF}.pill.accent{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-.hero{background:linear-gradient(180deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;padding:42px 40px 34px}
-.eyebrow{color:var(--sky);font-weight:700;letter-spacing:.14em;font-size:12px;text-transform:uppercase}
-h1{font-size:40px;line-height:1.08;margin:10px 0 10px;font-weight:700;letter-spacing:-.01em}
-.lead{max-width:880px;color:#D5DEEA;font-size:16px;margin:0}
-.lead b{color:#fff}
-.meta{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 26px}.meta span{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 10px;font-size:12px;color:#DDE5EF}
-.big{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1100px}
-.big div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-left:5px solid var(--sky);border-radius:12px;padding:16px 18px}
-.big div:nth-child(2){border-left-color:#FF8C42}.big div:nth-child(3){border-left-color:#4FA3F7}
-.big b{display:block;font-size:46px;font-weight:700;line-height:1}.big span{color:#C9D4E2;font-size:13px}
-.decbar{display:flex;height:34px;border-radius:9px;overflow:hidden;margin:26px 0 10px;max-width:1100px;background:#152238}
-.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;min-width:34px}.seg b{font-weight:700}
-.d-orphan{background:var(--orphan)}.d-redundant{background:var(--redundant)}.d-review{background:var(--review)}.d-ok{background:var(--ok)}
-.legend{display:flex;flex-wrap:wrap;gap:18px;color:#D5DEEA;font-size:13px}.lg{display:flex;align-items:center;gap:7px}.lg b{color:#fff}
-.dot{width:11px;height:11px;border-radius:3px;display:inline-block}
-main{padding:28px 40px 40px;max-width:1440px}
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.kpi b{display:block;font-size:28px;font-weight:700;color:var(--ink)}.kpi span{color:var(--muted);font-size:12.5px}
-.kpi.hl{border-top:4px solid var(--accent)}
-.grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;margin-bottom:18px}
-.grid2>*{min-width:0}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
-h2{font-size:18px;margin:0 0 4px;color:var(--ink);font-weight:700}.sub{color:var(--muted);margin:0 0 14px;font-size:13px}
-table{border-collapse:collapse;width:100%}th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-thead th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;background:#F6F8FA}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}.c-orphan{color:var(--orphan);font-weight:700}.c-redundant{color:var(--redundant);font-weight:700}.c-review{color:var(--accent);font-weight:700}.c-ok{color:var(--ok);font-weight:700}
-.bar{display:grid;grid-template-columns:minmax(180px,1.4fr) 1fr 34px;gap:10px;align-items:center;margin:9px 0;font-size:13px}
-.bt{background:#E8EDF3;border-radius:6px;height:12px;overflow:hidden}.bt i{display:block;height:100%;background:var(--accent);border-radius:6px}.bar b{text-align:right}
-.top8{list-style:none;margin:0;padding:0}.top8 li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
-.who{min-width:0;overflow-wrap:anywhere}.cnt{flex:none}.who small,.cnt small{display:block;color:var(--muted);font-size:11.5px}.cnt{text-align:right;font-weight:700;font-size:18px}
-.filters{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px;align-items:center}
-.filters input,.filters select{border:1px solid #C3CCD6;border-radius:8px;padding:8px 10px;font:inherit;background:#fff;min-width:150px}
-.filters input{min-width:260px}.btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:9px 16px;font-weight:600;cursor:pointer;font:inherit;font-weight:600}
-.btn:hover{background:var(--accent2)}.btn.ghost{background:#fff;color:var(--ink);border:1px solid #C3CCD6}.btn.ghost:hover{background:#F3F5F8}.count{color:var(--muted);margin-left:auto;font-size:13px}
-.regwrap{overflow-x:auto}.reg{table-layout:fixed;min-width:1040px}
-.reg th{cursor:pointer;white-space:nowrap}.reg th.sorted:after{content:" ▾"}.reg th.sorted.asc:after{content:" ▴"}
-.reg td{font-size:13px;line-height:1.4;padding:11px 10px}.reg td .small,.reg td .tier{display:block}.reg td .tier{width:max-content;max-width:100%}
-.reg tr.r-orphan td:first-child{box-shadow:inset 3px 0 0 var(--orphan)}.reg tr.r-redundant td:first-child{box-shadow:inset 3px 0 0 var(--redundant)}.reg tr.r-review td:first-child{box-shadow:inset 3px 0 0 var(--review)}.reg tr.r-ok td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
-.reg tbody tr:hover{background:#FAFBFC}.brk{overflow-wrap:anywhere}.nm{overflow-wrap:anywhere}.why{color:#3B4450}.flags{margin-top:-2px}
-.more{text-align:center;margin-top:14px}
-.badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
-.b-orphan{background:var(--orphan)}.b-redundant{background:var(--redundant)}.b-review{background:var(--review)}.b-ok{background:var(--ok)}
-.tier{display:inline-block;font-size:11px;border-radius:6px;padding:1px 7px;margin-top:3px;font-weight:700}.t0{background:#FDE7EA;color:#A4262C}.t1{background:#FFF0E0;color:#8A3B00}.t2{background:#E5F1FB;color:#0B4F8A}
-.flag{display:inline-block;background:#F1F4F7;border:1px solid #DFE4EA;border-radius:6px;padding:2px 7px;font-size:11.5px;margin:2px 3px 2px 0}
-.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}a{color:var(--accent)}a.iam{white-space:nowrap;font-weight:700;text-decoration:none}
-.st{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700}.st-ok{background:#DFF6DD;color:#0E5C0E}.st-warn{background:#FFF0E0;color:#8A3B00}.st-bad{background:#FDE7EA;color:#A4262C}
-.steps{counter-reset:s;list-style:none;padding:0;margin:0}.steps li{counter-increment:s;position:relative;padding:0 0 12px 40px}
-.steps li:before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
-.note{background:#F3F7FB;border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;font-size:13px;margin-top:10px}
-footer{background:var(--ink);color:#AEB8C3;padding:22px 40px;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-footer img.logo{height:22px;display:block}footer .wm{font-size:14px;gap:8px}footer .wm svg{width:22px;height:22px;padding:4px;border-radius:6px}
-@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
-@media (max-width:640px){.top,.hero,main,footer{padding-left:16px;padding-right:16px}.top img.logo{height:30px}.top .wm{font-size:16px}.top .wm svg{width:26px;height:26px}.pill{font-size:11px;padding:5px 9px}.tag .pill:first-child{display:none}h1{font-size:28px}.big{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
-.card>table{display:block;overflow-x:auto}.card th,.card td{padding:7px 6px}.reg{min-width:0}.reg colgroup{display:none}.reg thead{display:none}.reg tr{display:block;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:8px 6px;background:#fff}.reg td{display:block;border:0;padding:4px 8px}.reg td:empty{display:none}.reg tr td:first-child{box-shadow:none!important}
-.filters input,.filters select{min-width:0;width:100%}.filters .btn{flex:1}.count{margin-left:0;width:100%}.meta span{white-space:normal}.bar{grid-template-columns:1fr 70px 26px}}
-@media print{.top{position:static}.filters,.btn{display:none}}
+:root{--ink:#101828;--text:#1d2939;--muted:#475467;--line:#e4e7ec;--line2:#d0d5dd;--paper:#f2f4f7;--soft:#f2f4f7;--bar:#14181f;--navy:#1b2c48;
+--accent:#0f6cbd;--accent2:#0b5a9e;--chart:#2d4b73;--hmuted:#c8d3e1;--hline:rgba(255,255,255,.16);
+--orphan:#b42318;--orphan-bg:#fee4e2;--orphan-bar:#d92d20;--redundant:#b93815;--redundant-bg:#ffead5;--redundant-bar:#ef6820;
+--review:#175cd3;--review-bg:#d1e9ff;--review-bar:#2e90fa;--ok:#067647;--ok-bg:#dcfae6;--ok-bar:#17b26a;
+--shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px rgba(16,24,40,.06)}
+*{box-sizing:border-box}html{scroll-padding-top:76px;scrollbar-color:#c3ccd6 var(--paper);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-variant-numeric:tabular-nums}
+::selection{background:#cce4f6;color:var(--ink)}a{color:var(--accent);text-underline-offset:3px}button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.top :focus-visible,.hero :focus-visible{outline-color:#84caff}
+.skip{position:absolute;left:12px;top:-80px;z-index:40;background:#fff;color:var(--ink);padding:8px 14px;border-radius:8px;font-weight:600}.skip:focus{top:10px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;min-height:60px;padding:10px clamp(16px,4vw,40px);background:var(--bar);color:#fff}
+.brand{display:flex;align-items:center;min-width:0;color:#fff;text-decoration:none}img.logo{height:34px;width:auto;max-width:210px;display:block}
+.wm{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:17px;white-space:nowrap;color:#fff}
+.wm svg{width:30px;height:30px;padding:5px;border-radius:8px;background:linear-gradient(135deg,#0f6cbd,#2899f5);flex:none}
+.top nav{display:flex;gap:2px}.top nav a{color:#c6ced8;text-decoration:none;font-size:14px;font-weight:600;padding:8px 12px;border-radius:8px}
+.top nav a:hover{background:rgba(255,255,255,.08);color:#fff}.acts{margin-left:auto;display:flex;align-items:center;gap:10px}
+.chip{font-size:12.5px;font-weight:600;color:#c6ced8;border:1px solid #3d4651;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:10px;border:1px solid transparent;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background-color .15s}
+.btn:hover{background:var(--accent2)}.btn svg{width:16px;height:16px;flex:none}.btn.ghost{background:#fff;color:var(--ink);border-color:var(--line2)}.btn.ghost:hover{background:var(--soft)}
+.btn.link{background:none;color:var(--accent);padding:0 10px}.btn.link:hover{text-decoration:underline}
+.hero{background:linear-gradient(180deg,#243a5e,var(--navy));color:#fff;padding:clamp(28px,4.5vw,48px) clamp(16px,4vw,40px) 100px}
+.hero-in{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px 48px;align-items:start}
+.kicker{margin:0 0 10px;color:#8fc8ff;font-weight:700;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
+h1{margin:0 0 12px;font-size:clamp(30px,3.3vw,44px);line-height:1.08;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+.lead{margin:0;max-width:66ch;font-size:17px;color:var(--hmuted)}.lead b{color:#fff;font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.meta>*{font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--hline);color:var(--hmuted);text-decoration:none}
+.meta .on{color:#fff;font-weight:600}.meta .warn{color:#fec84b;border-color:rgba(254,200,75,.5);font-weight:600}.meta a.warn:hover{background:rgba(254,200,75,.12)}
+.verdict{border-radius:16px;padding:20px 22px;background:rgba(255,255,255,.07);border:1px solid var(--hline)}.verdict .k{font-size:13px;font-weight:600;color:var(--hmuted)}
+.verdict b{display:block;margin-top:2px;font-size:28px;line-height:1.15;font-weight:700}.v-warn{border-color:rgba(254,200,75,.45)}.v-warn b{color:#fec84b}
+.v-ok{border-color:rgba(117,224,167,.45)}.v-ok b{color:#75e0a7}.verdict p{margin:8px 0 0;font-size:14px;color:var(--hmuted)}
+.verdict p.cov{display:flex;gap:8px;padding-top:12px;margin-top:14px;border-top:1px solid var(--hline);color:#fedf89}.verdict p.cov svg{width:16px;height:16px;flex:none;margin-top:2px}
+.dist{grid-column:1/-1}.dist-h{font-size:13.5px;color:var(--hmuted);margin-bottom:8px}.dist-h b{color:#fff}
+.track{display:flex;gap:2px;height:14px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12)}.track i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:10px;font-size:13.5px;color:var(--hmuted)}.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:10px;height:10px;border-radius:3px}.legend b{color:#fff}
+.d-orphan{background:var(--orphan-bar)}.d-redundant{background:var(--redundant-bar)}.d-review{background:var(--review-bar)}.d-ok{background:var(--ok-bar)}
+main{padding:0 clamp(16px,4vw,40px) 8px}main>*{max-width:1320px;margin-left:auto;margin-right:auto}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-top:-60px;position:relative;z-index:2}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.kpi .v{font-size:36px;line-height:1.05;font-weight:700;letter-spacing:-.02em;color:var(--ink)}.kpi .l{margin-top:8px;font-size:13.5px;line-height:1.35;font-weight:600}
+.kpi .s{margin-top:4px;font-size:12.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);min-width:0;scroll-margin-top:76px}
+.card h2{margin:0 0 4px;font-size:19px;line-height:1.3;color:var(--ink)}h3{margin:0 0 4px;font-size:17px;color:var(--ink)}.sub{margin:0 0 16px;font-size:13.5px;color:var(--muted);max-width:75ch}
+#register,#coverage{margin-top:44px;scroll-margin-top:76px}.sh{margin-bottom:14px}
+.sh h2{margin:0;font-size:24px;line-height:1.2;letter-spacing:-.01em;color:var(--ink)}.sh h2:focus{outline:none}.sh p{margin:4px 0 0;font-size:14px;color:var(--muted);max-width:75ch}
+.cn{display:inline-block;margin-left:2px;padding:0 10px;border-radius:999px;background:#e4e7ec;font-size:15px;vertical-align:3px;color:var(--text)}
+.wrap{overflow-x:auto;background:linear-gradient(90deg,#fff 30%,rgba(255,255,255,0)) left/36px 100% no-repeat local,linear-gradient(270deg,#fff 30%,rgba(255,255,255,0)) right/36px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(16,24,40,.16),rgba(16,24,40,0)) left/14px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(16,24,40,.16),rgba(16,24,40,0)) right/14px 100% no-repeat scroll}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th,.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl thead th{background:var(--soft);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);white-space:nowrap}.tbl tbody th{font-weight:600;color:var(--ink)}
+.tbl tbody tr:last-child>*{border-bottom:0}.n{text-align:right!important;white-space:nowrap}.nw{white-space:nowrap}.nil{color:#98a2b3}
+.c-orphan{color:var(--orphan);font-weight:700}.c-redundant{color:var(--redundant);font-weight:700}.c-review{color:var(--review);font-weight:700}.c-ok{color:var(--ok);font-weight:700}.c-warn{color:#b54708;font-weight:700}
+.info{display:flex;gap:10px;margin:16px 0 0;padding:12px 14px;border-radius:12px;background:var(--soft);font-size:13.5px}.info svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--accent)}
+.note{display:flex;gap:10px;align-items:flex-start;margin:0 0 16px;padding:12px 16px;border-radius:12px;background:#fffaeb;border:1px solid #fedf89;color:#7a2e0e;font-size:14px}.note svg{width:18px;height:18px;flex:none;margin-top:2px}
+.bars{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.brow,.ids li{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(70px,1fr) 40px;gap:12px;align-items:center;font-size:14px}
+.brow{width:calc(100% + 16px);margin:0 -8px;padding:6px 8px;border:0;border-radius:8px;background:none;text-align:left;cursor:pointer}.brow:hover{background:var(--soft)}.brow:hover .bl{text-decoration:underline;text-underline-offset:3px}
+.bt{height:10px;border-radius:999px;background:#eaecf0;overflow:hidden}.bt i{display:block;height:100%;border-radius:999px;background:var(--chart)}
+.brow>b,.bv{text-align:right;font-weight:700;color:var(--ink)}.ids li{padding:8px 0;border-bottom:1px solid var(--line)}.ids li:last-child{border-bottom:0}
+.ids .bl b{font-weight:600;color:var(--ink);overflow-wrap:break-word}.ids small{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.steps{counter-reset:s;display:grid;gap:14px;margin:0;padding:0;list-style:none}.steps li{counter-increment:s;position:relative;padding-left:40px;font-size:14px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-1px;width:26px;height:26px;border-radius:50%;background:#e0effc;color:#0b4f8a;font-weight:700;font-size:13px;display:grid;place-items:center}
+.steps b{color:var(--ink)}.go{display:inline-block;font-weight:600;white-space:nowrap}
+.flat{padding:0;overflow:hidden}.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 20px}
+.tools input,.tools select{min-height:40px;min-width:0;max-width:100%;border:1px solid var(--line2);border-radius:10px;padding:0 12px;background:#fff;color:var(--text)}
+.tools input{flex:1 1 240px;max-width:340px}.tools select{flex:0 1 auto;min-width:150px;max-width:240px}.tools input::placeholder{color:#667085;opacity:1}
+.tools input:focus,.tools select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,108,189,.22)}
+.tacts{display:flex;gap:4px;align-items:center}.cnt{margin:0 0 0 auto;font-size:13px;color:var(--muted)}.pcap{display:none}
+.reg{width:100%;min-width:1000px;border-collapse:collapse;table-layout:fixed;font-size:13.5px}
+.reg th{padding:0;border-bottom:1px solid var(--line);background:var(--soft);text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.reg th button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:7px;width:100%;padding:11px 12px;cursor:pointer}.reg th button:hover{color:var(--accent)}
+.reg th button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.reg th button::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.6px 1.6px 0;transform:translateY(-2px) rotate(45deg);opacity:0}
+.reg th[aria-sort] button::after{opacity:.9}.reg th[aria-sort=ascending] button::after{transform:translateY(2px) rotate(-135deg)}.reg th.c-iam{padding:11px 12px}
+.w-dec{width:160px}.w-role{width:166px}.w-id{width:25%}.w-scope{width:15%}.w-iam{width:76px}
+.reg td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}.reg tr.pg{display:none}.reg tbody tr:hover{background:#f9fafb}.reg tbody tr:last-child td{border-bottom:0}
+.reg b{font-weight:600;color:var(--ink)}.sm{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}.nm{overflow-wrap:break-word}
+.id{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:11.5px;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.p-orphan{background:var(--orphan-bg);color:var(--orphan)}.p-redundant{background:var(--redundant-bg);color:var(--redundant)}.p-review{background:var(--review-bg);color:var(--review)}.p-ok{background:var(--ok-bg);color:var(--ok)}
+.tier{display:block;width:max-content;max-width:100%;margin:4px 0 2px;padding:0 7px;border:1px solid;border-radius:6px;background:#fff;font-size:11.5px;font-weight:700;line-height:1.7}
+.t0{color:var(--orphan);border-color:#fecdca}.t1{color:var(--redundant);border-color:#f9dbaf}.t2{color:#344054;border-color:var(--line2)}
+.sig{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px;padding:0;list-style:none}.sig li{padding:1px 8px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font-size:12px;line-height:1.6}
+.why{margin:0 0 6px}.act{margin:0;font-size:12.5px;color:var(--muted)}.act b{color:var(--text)}
+.iam{display:inline-flex;align-items:center;gap:4px;font-weight:600;text-decoration:none;white-space:nowrap}.iam:hover{text-decoration:underline}.iam svg{width:14px;height:14px}
+td.empty{padding:28px 16px;text-align:center;color:var(--muted)}.more{display:flex;justify-content:center;gap:8px;padding:14px;border-top:1px solid var(--line)}.more[hidden]{display:none}
+.st{display:inline-block;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.7}.st-ok{background:var(--ok-bg);color:var(--ok)}.st-warn{background:#fef0c7;color:#93370d}.st-bad{background:var(--orphan-bg);color:var(--orphan)}
+.cv{margin-left:4px;font-weight:600;color:var(--ink)}.small{margin:12px 0 0;font-size:13px;color:var(--muted)}.muted{color:var(--muted)}
+.method{margin:20px 0 0;max-width:75ch;font-size:13.5px;color:var(--muted)}.method b{color:var(--text)}
+footer{margin-top:48px;background:var(--bar);color:#aeb8c3;font-size:12.5px}
+.fin{max-width:1400px;margin:0 auto;padding:20px clamp(16px,4vw,40px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px 24px}
+footer img.logo{height:24px}footer .wm{font-size:14px;gap:8px}footer .wm svg{width:22px;height:22px;padding:4px;border-radius:6px}
+@media screen and (max-width:1200px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-in{grid-template-columns:minmax(0,1fr) 300px}}
+@media screen and (max-width:1040px){.top nav{display:none}.hero-in{grid-template-columns:1fr}}
+@media screen and (max-width:900px){.grid2{grid-template-columns:1fr}}
+@media screen and (max-width:720px){.chip{display:none}.btn .lbl{display:none}.top .btn{padding:0 12px}.hero{padding-bottom:84px}.lead{font-size:16px}.verdict b{font-size:24px}
+.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-56px}.kpi{padding:14px}.kpi .v{font-size:28px}.card{padding:18px 16px}.flat{padding:0}.sh h2{font-size:21px}
+.tools{display:grid;grid-template-columns:1fr 1fr;padding:14px 16px}.tools input{grid-column:1/-1;max-width:none}.tacts,.cnt{grid-column:1/-1;margin:0}
+.reg{min-width:0;table-layout:auto}.reg thead{display:none}.reg,.reg tbody,.reg tr,.reg td{display:block}.reg tr{padding:14px 16px;border-bottom:1px solid var(--line)}
+.reg td{padding:2px 0;border:0}.reg td:first-child{margin-bottom:6px}.reg td.lb::before{content:attr(data-h);display:block;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.reg .tier{display:inline-block;margin:0 0 0 6px}.iam{padding:8px 0}.tbl th,.tbl td{padding:8px 10px}.brow,.ids li{grid-template-columns:minmax(0,1fr) 64px 30px;gap:10px}.fin{flex-direction:column;align-items:flex-start}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@page{size:A4;margin:12mm 11mm 15mm;@bottom-left{content:__PTITLE__;font:8pt "Segoe UI",system-ui,sans-serif;color:#475467}@bottom-right{content:"Page " counter(page) " of " counter(pages);font:8pt "Segoe UI",system-ui,sans-serif;color:#475467}}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}html,body{background:#fff}body{font-size:12px}
+.top{position:static;min-height:0;padding:8px 16px;border-radius:12px 12px 0 0}.top nav,.top .btn,.skip,.tools,.more,.np,.go,footer{display:none!important}
+.hero{padding:18px 20px 70px;border-radius:0 0 12px 12px}.hero-in{grid-template-columns:minmax(0,1fr) 210px;gap:12px 22px}h1{font-size:28px}.lead{font-size:13.5px}.kicker{font-size:10.5px}
+.meta{margin-top:12px;gap:5px}.meta>*{font-size:11px;padding:2px 8px}.verdict{padding:12px 14px}.verdict b{font-size:20px}.verdict p,.dist-h,.legend{font-size:11.5px}
+main{padding:0}.kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:-52px;padding:0 14px}.kpi{padding:10px 12px;border-radius:12px;box-shadow:none}
+.kpi .v{font-size:23px}.kpi .l{font-size:11.5px;margin-top:4px}.kpi .s{font-size:10.5px;margin-top:2px}.grid2{gap:10px;margin-top:12px}
+.card{padding:12px 14px;border-radius:12px;box-shadow:none}.card h2{font-size:14.5px}h3{font-size:14px}.sub{font-size:11px;margin-bottom:8px}
+#analysis{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)}.tbl{font-size:11px}.tbl th,.tbl td{padding:4px}.tbl thead th{font-size:9px;letter-spacing:0}.info,.note{font-size:11px;padding:8px 10px;margin-top:10px}.st{font-size:10.5px}
+.brow,.ids li,.steps li{font-size:11.5px}.brow,.ids li{gap:8px;grid-template-columns:minmax(0,2fr) minmax(40px,1fr) 24px}.brow{padding:2px 8px}.ids li{padding:4px 0}.ids small{font-size:10.5px}
+.steps{gap:8px}.steps li{padding-left:30px}.steps li::before{width:20px;height:20px;font-size:10.5px}
+.card,.kpi,.verdict,.brow,.ids li,.steps li,tr,.note,#coverage{break-inside:avoid}.flat{break-inside:auto}.sh,.card h2,h3{break-after:avoid}#register,#coverage{margin-top:18px}
+.sh h2{font-size:17px}.sh p,.method,.small{font-size:11px}.method{margin-top:10px}.cn{font-size:11px}.wrap{overflow:visible;background:none}.pcap{display:block;margin:0;padding:8px 10px;font-size:10.5px;color:var(--muted)}
+.reg{min-width:0;font-size:11px}.reg th{font-size:9.5px}.reg th button{display:none}.reg th[data-l]::before{content:attr(data-l);display:block;padding:5px 6px}.reg td{padding:5px 6px;line-height:1.35}.c-iam{display:none}
+.w-dec{width:16%}.w-role{width:15%}.w-id{width:25%}.w-scope{width:16%}.pill{font-size:9.5px;padding:1px 6px 1px 5px;gap:3px}.pill::before{width:5px;height:5px}
+.tier{font-size:9.5px;padding:0 4px}.sm,.act{font-size:10px}.sig li{font-size:9.5px;padding:0 5px}.id{font-size:9.5px;white-space:normal}tr.pg{display:table-row!important}thead{display:table-header-group}a{color:inherit;text-decoration:none}}
 </style></head><body>
-<header class="top">__LOGO__<div class="tag"><span class="pill">Azure RBAC · Microsoft Entra ID</span><span class="pill accent">Read only</span></div></header>
-<section class="hero">
-<div class="eyebrow">Access governance · Azure RBAC</div>
-<h1>Privileged access review</h1>
+<a class="skip" href="#register">Skip to the register</a>
+<header class="top"><a class="brand" href="#summary">__MARK__</a>
+<nav aria-label="Report sections"><a href="#summary">Summary</a><a href="#analysis">Analysis</a><a href="#actions">Next steps</a><a href="#register">Register</a><a href="#coverage">Coverage</a></nav>
+<div class="acts"><span class="chip">Read-only</span><button class="btn" type="button" data-print aria-label="Print or save as PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg><span class="lbl">Print / PDF</span></button></div></header>
+<section class="hero" id="summary" aria-labelledby="h-title"><div class="hero-in"><div>
+<p class="kicker">Access governance · Azure RBAC</p><h1 id="h-title">Privileged access review</h1>
 <p class="lead">Of <b>__TOTAL__ privileged assignments</b>, <b>__REMOVABLE__ can be removed without changing effective access</b> (deleted identities or duplicated permissions) and <b>__REVIEW__ need an individual review</b> with their owner.</p>
-<div class="meta"><span>Reference date: __REF__</span><span>Subscriptions: __SUBS__</span><span>__STATUS__</span><span>Managed identity · Reader + Graph read</span></div>
-<div class="big">
-<div><b>__OWNER__</b><span>Owner assignments analyzed</span></div>
-<div><b>__OWNER_RM__</b><span>Owner assignments removable without access loss (orphaned + redundant)</span></div>
-<div><b>__OWNER_RV__</b><span>Owner assignments for individual review</span></div>
+<div class="meta">__CHIPS__</div></div>
+<aside class="verdict v-__TONE__" aria-label="Verdict"><span class="k">Verdict</span><b>__VERDICT__</b><p>__VLINE__</p>__VCOV__</aside>
+<div class="dist"><div class="dist-h">Decision for <b>__TOTAL__</b> privileged assignments</div><div class="track" role="img" aria-label="__TRACK__">__SEG__</div><div class="legend">__LEGEND__</div></div>
+</div></section>
+<main id="main">
+<div class="kpis">__KPIS__</div>
+<div class="grid2" id="analysis">
+<section class="card" aria-labelledby="h-scope"><h2 id="h-scope">Decision by scope level</h2><p class="sub">Where privileged access is concentrated and what to do with it.</p>
+<div class="wrap"><table class="tbl"><thead><tr><th scope="col">Level</th><th scope="col" class="n">Total</th><th scope="col" class="n">Orphaned</th><th scope="col" class="n">Redundant</th><th scope="col" class="n">Review</th><th scope="col" class="n">Compliant</th></tr></thead><tbody>__LEVELS__</tbody></table></div>
+<p class="info"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 9v5m0-7.5v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>A <b>redundant</b> assignment repeats a permission the identity already receives without condition from a higher scope, at the same scope or through a group. Removing it does not change effective access.</span></p></section>
+<section class="card" aria-labelledby="h-sig"><h2 id="h-sig">Individual review signals</h2><p class="sub">Why a current assignment needs validation by its owner.<span class="np"> Select a signal to list those assignments.</span></p><div class="bars">__SIGNALS__</div></section>
+<section class="card" aria-labelledby="h-top"><h2 id="h-top">Identities with the most current privileges</h2><p class="sub">Assignments under review or compliant per identity, excluding those that can be removed.</p><ol class="bars ids">__TOP__</ol></section>
+<section class="card" id="actions" aria-labelledby="h-next"><h2 id="h-next">Next steps · 30-day pilot</h2><p class="sub">The agent proposes; people approve. No change is executed automatically.</p><ol class="steps">__STEPS__</ol></section>
 </div>
-<div class="decbar">__SEG__</div>
-<div class="legend">__LEGEND__</div>
-</section>
-<main>
-<div class="kpis">
-<div class="kpi hl"><b>__ALL__</b><span>role assignments inventoried</span></div>
-<div class="kpi"><b>__TOTAL__</b><span>privileged (tier 0, 1 and 2)</span></div>
-<div class="kpi"><b>__T0__</b><span>tier 0 · can grant access</span></div>
-<div class="kpi"><b>__PRINC__</b><span>identities with privileges</span></div>
-<div class="kpi"><b>__STANDING__</b><span>of tier 0/1 is standing access</span></div>
-<div class="kpi"><b>__ELIG__</b><span>privileged PIM eligibilities</span></div>
-</div>
-<div class="grid2">
-<div class="card"><h2>Decision by scope level</h2><p class="sub">Where privileged access is concentrated and what to do with it.</p>
-<table><thead><tr><th>Level</th><th class="n">Total</th><th class="n">Orphaned</th><th class="n">Redundant</th><th class="n">Review</th><th class="n">Compliant</th></tr></thead><tbody>__LEVELS__</tbody></table>
-<div class="note">A <b>redundant</b> assignment repeats a permission the identity already receives without condition from a higher scope, at the same scope or through a group. Removing it does not change effective access.</div></div>
-<div class="card"><h2>Individual review signals</h2><p class="sub">Why a current assignment needs validation by its owner.</p>__FLAGS__</div>
-</div>
-<div class="grid2">
-<div class="card"><h2>Identities with the most current privileges</h2><p class="sub">Assignments under review or compliant per identity, excluding those that can be removed.</p><ul class="top8">__TOP__</ul></div>
-<div class="card"><h2>Next steps · 30-day pilot</h2><p class="sub">The agent proposes; people approve. No change is executed automatically.</p>
-<ol class="steps">
-<li><b>Risk-free cleanup.</b> Remove the __REMOVABLE__ orphaned or redundant assignments through an approved change. Effective access does not change.</li>
-<li><b>Human access to PIM.</b> Convert users' standing privilege into eligibility with JIT activation, MFA and approval.</li>
-<li><b>Non-human identities.</b> Replace Owner/UAA on applications and managed identities with least-privilege roles (Role Designer).</li>
-<li><b>Groups by function and scope.</b> Assign through groups separated by environment and subscription, never to individual users at Management Group level.</li>
-<li><b>Periodic review.</b> Schedule this monthly review in the SRE Agent and track how the indicators evolve.</li>
-</ol></div>
-</div>
-<div class="card regcard" style="margin-bottom:18px">
-<h2>Privileged assignment register</h2><p class="sub">Filter, sort and export. Each row links to the scope's access control (IAM) blade in the Azure portal.</p>
-<div class="filters">
-<input id="q" type="search" placeholder="Search identity, role or scope…" aria-label="Search">
-<select id="fd" aria-label="Decision"><option value="">All decisions</option><option value="orphan">Remove · orphaned</option><option value="redundant">Remove · redundant</option><option value="review">Individual review</option><option value="ok">Compliant</option></select>
-<select id="ft" aria-label="Privilege tier"><option value="">All tiers</option><option value="0">Tier 0 · Access control</option><option value="1">Tier 1 · Full control</option><option value="2">Tier 2 · Service admin</option></select>
-<select id="fp" aria-label="Identity type"><option value="">All identities</option><option>User</option><option>Group</option><option>Application</option><option>Managed identity</option><option>Unknown</option></select>
-<select id="fl" aria-label="Scope"><option value="">All scopes</option><option>Management Group</option><option>Subscription</option><option>Resource group</option><option>Resource</option></select>
-<button class="btn" id="csv">Export filtered CSV</button><button class="btn ghost" id="rst">Clear</button><span class="count" id="cnt"></span>
-</div>
-<div class="regwrap"><table class="reg" id="reg"><colgroup><col style="width:150px"><col style="width:150px"><col style="width:22%"><col style="width:15%"><col><col style="width:19%"><col style="width:64px"></colgroup><thead><tr>
-<th data-k="decision">Decision</th><th data-k="role">Role and access</th><th data-k="principal_name">Identity</th><th data-k="scope_label">Scope</th><th data-k="flags">Reason and signals</th><th data-k="action">Recommended action</th><th>IAM</th>
+<section id="register" aria-labelledby="h-reg"><div class="sh"><h2 id="h-reg" tabindex="-1">Privileged assignment register <span class="cn">__TOTAL__</span></h2><p>Filter, sort and export. Each row links to the scope's access control (IAM) blade in the Azure portal.</p></div>
+<div class="card flat"><div class="tools">
+<input id="q" type="search" placeholder="Search identity, role, scope or ID…" aria-label="Search identity, role, scope or ID" autocomplete="off">
+<select id="fd" aria-label="Decision"><option value="">All decisions</option>__F_DEC__</select>
+<select id="ft" aria-label="Privilege tier"><option value="">All tiers</option>__F_TIER__</select>
+<select id="fp" aria-label="Identity type"><option value="">All identity types</option>__F_TYPE__</select>
+<select id="fl" aria-label="Scope level"><option value="">All scope levels</option>__F_LVL__</select>
+<select id="fs" aria-label="Review signal"><option value="">All review signals</option>__F_SIG__</select>
+<div class="tacts"><button class="btn ghost" type="button" id="csv"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10m-4-4 4 4 4-4M4 16h12"/></svg>Export CSV</button><button class="btn link" type="button" id="rst">Clear filters</button></div>
+<p class="cnt" id="cnt" aria-live="polite"></p></div>
+<p class="pcap" id="pcap"></p>
+<div class="wrap"><table class="reg" id="reg"><thead><tr>
+<th scope="col" class="w-dec" data-k="decision" data-l="Decision"><button type="button">Decision</button></th><th scope="col" class="w-role" data-k="role" data-l="Role and access"><button type="button">Role and access</button></th>
+<th scope="col" class="w-id" data-k="principal_name" data-l="Identity"><button type="button">Identity</button></th><th scope="col" class="w-scope" data-k="scope_label" data-l="Scope"><button type="button">Scope</button></th>
+<th scope="col" data-k="flags" data-l="Reason and action"><button type="button">Reason and action</button></th><th scope="col" class="w-iam c-iam">IAM</th>
 </tr></thead><tbody id="body"></tbody></table></div>
-<div class="more"><button class="btn ghost" id="more">Show more</button></div>
-</div>
-<div class="grid2">
-<div class="card"><h2>Review coverage</h2><p class="sub">Anything that could not be read is a blind spot, never a clean result.</p>
-<table><thead><tr><th>Subscription</th><th>Assignments</th><th>Definitions</th><th>PIM active</th><th>PIM eligible</th></tr></thead><tbody>__COV__</tbody></table></div>
-<div class="card"><h2>Identity resolution</h2><p class="sub">Microsoft Entra ID through Microsoft Graph (read only).</p>
-<table><thead><tr><th>Identities (Graph)</th><th class="n">Resolved</th><th class="n">Orphaned</th><th class="n">No permission</th></tr></thead><tbody>__GRAPH__</tbody></table>
-<p class="small" style="margin-top:10px">User sign-in: __SIU__ · Application sign-in: __SIS__ · Group membership: __MEM__</p></div>
-</div>
-<p class="small">Method: inventory of Azure RBAC assignments per subscription (including those inherited from Management Groups), role classification by its permissions (tier 0 = can write role assignments; tier 1 = full control-plane control; tier 2 = service administration roles), identity resolution in Microsoft Entra ID, PIM state and sign-in activity. An assignment is only marked as redundant when another permanent, unconditioned assignment of the same identity (or of a group it belongs to) already covers all its permissions at the same or a higher scope.</p>
+<div class="more" id="more"><button class="btn ghost" type="button" id="mb">Show more</button><button class="btn link" type="button" id="ma">Show all</button></div>
+</div></section>
+<section id="coverage" aria-labelledby="h-cov"><div class="sh"><h2 id="h-cov">Coverage and method</h2><p>What the review could read and how each decision is made.</p></div>
+__COVNOTE__<div class="grid2" style="margin-top:0">
+<div class="card"><h3>Review coverage</h3><p class="sub">Anything that could not be read is a blind spot, never a clean result.</p>
+<div class="wrap"><table class="tbl"><thead><tr><th scope="col">Subscription</th><th scope="col">Assignments</th><th scope="col">Definitions</th><th scope="col">PIM active</th><th scope="col">PIM eligible</th></tr></thead><tbody>__COV__</tbody></table></div></div>
+<div class="card"><h3>Identity resolution</h3><p class="sub">Microsoft Entra ID through Microsoft Graph (read only).</p>
+<div class="wrap"><table class="tbl"><thead><tr><th scope="col">Identities (Graph)</th><th scope="col" class="n">Resolved</th><th scope="col" class="n">Orphaned</th><th scope="col" class="n">No permission</th></tr></thead><tbody>__GRAPH__</tbody></table></div>
+<p class="small">User sign-in: __SIU__ · Application sign-in: __SIS__ · Group membership: __MEM__</p></div></div>
+<p class="method"><b>Method.</b> Inventory of Azure RBAC assignments per subscription (including those inherited from Management Groups), role classification by its permissions (tier 0 = can write role assignments; tier 1 = full control-plane control; tier 2 = service administration roles), identity resolution in Microsoft Entra ID, PIM state and sign-in activity. An assignment is only marked as redundant when another permanent, unconditioned assignment of the same identity (or of a group it belongs to) already covers all its permissions at the same or a higher scope.</p>
+</section>
 </main>
-<footer>__LOGO__<span>Report generated by Azure SRE Agent · read only · __REF____FOOTER_ORG__</span></footer>
+<footer><div class="fin">__MARK__<span>Report generated by Azure SRE Agent · read only · __WHEN____ORG_FOOT__</span></div></footer>
 <script>
 const DATA=__DATA__;
-const L={orphan:"Remove · orphaned",redundant:"Remove · redundant",review:"Individual review",ok:"Compliant"};
-const R={orphan:0,redundant:1,review:2,ok:3};
-let sortK="decision",asc=true,limit=20;
-const PAGE=20;
-const $=id=>document.getElementById(id);
-const e=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function rows(){const q=$("q").value.toLowerCase(),d=$("fd").value,t=$("ft").value,p=$("fp").value,l=$("fl").value;
-return DATA.filter(r=>(!d||r.decision===d)&&(!t||String(r.tier)===t)&&(!p||r.principal_type===p)&&(!l||r.scope_level===l)&&
-(!q||[r.principal_name,r.principal_detail,r.role,r.scope_label,r.scope,r.reason].join(" ").toLowerCase().includes(q)))
-.sort((a,b)=>{let x=a[sortK],y=b[sortK];if(sortK==="decision"){x=R[x];y=R[y]}if(sortK==="flags"){x=a.flags.length;y=b.flags.length}
-if(x<y)return asc?-1:1;if(x>y)return asc?1:-1;return 0})}
-function render(){const all=rows(),rs=all.slice(0,limit);$("cnt").textContent=(all.length>rs.length?rs.length+" shown · ":"")+all.length+" of "+DATA.length+" assignments";
-$("more").parentNode.style.display=all.length>rs.length?"":"none";$("more").textContent="Show "+Math.min(PAGE,all.length-rs.length)+" more";
-$("body").innerHTML=rs.map(r=>`<tr class="r-${r.decision}"><td data-h="Decision"><span class="badge b-${r.decision}">${L[r.decision]}</span></td>
-<td data-h="Role"><b>${e(r.role)}</b><span class="tier t${r.tier}">${e(r.tier_label)}</span><span class="small">${e(r.access)}${r.end_date?' until '+e(r.end_date):''}${r.condition?' · with condition':''}</span></td>
-<td data-h="Identity"><b class="nm">${e(r.principal_name)}</b><span class="small brk">${e(r.principal_type)}${r.principal_detail?" · "+e(r.principal_detail):""}</span>${r.last_sign_in?'<span class="small">Last sign-in: '+e(r.last_sign_in)+'</span>':''}</td>
-<td data-h="Scope"><span class="brk">${e(r.scope_label)}</span><span class="small">${e(r.scope_level)}</span></td>
-<td data-h="Reason">${r.decision==="review"&&r.flag_labels.length?'<div class="flags">'+r.flag_labels.map(f=>'<span class="flag">'+e(f)+'</span>').join("")+'</div>':'<div class="why">'+e(r.reason)+'</div>'}</td>
-<td data-h="Action">${e(r.action)}</td><td data-h="IAM">${r.portal_url?'<a class="iam" target="_blank" rel="noopener" href="'+e(r.portal_url)+'" title="Open the scope access control (IAM)">Open ↗</a>':''}</td></tr>`).join("")||'<tr><td colspan="7" class="muted">No results for the current filter.</td></tr>';
-document.querySelectorAll(".reg th[data-k]").forEach(th=>{th.classList.toggle("sorted",th.dataset.k===sortK);th.classList.toggle("asc",th.dataset.k===sortK&&asc)})}
-document.querySelectorAll(".reg th[data-k]").forEach(th=>th.addEventListener("click",()=>{if(sortK===th.dataset.k)asc=!asc;else{sortK=th.dataset.k;asc=true}render()}));
-["q","fd","ft","fp","fl"].forEach(id=>{const f=()=>{limit=PAGE;render()};$(id).addEventListener("input",f);$(id).addEventListener("change",f)});
-$("more").onclick=()=>{limit+=PAGE;render()};
-$("rst").onclick=()=>{["q","fd","ft","fp","fl"].forEach(id=>$(id).value="");limit=PAGE;render()};
-$("csv").onclick=()=>{const h=["decision","role","tier","identity","type","upn_or_appid","scope","scope_level","access","signals","reason","action","assignment_id","portal_iam"];
-const c=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
-const lines=[h.join(",")].concat(rows().map(r=>[L[r.decision],r.role,r.tier_label,r.principal_name,r.principal_type,r.principal_detail,r.scope,r.scope_level,r.access,r.flag_labels.join(" | "),r.reason,r.action,r.assignment_id,r.portal_url].map(c).join(",")));
-const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\\ufeff"+lines.join("\\r\\n")],{type:"text/csv;charset=utf-8"}));a.download="rbac-privileged-access-filtered.csv";a.click();URL.revokeObjectURL(a.href)};
+const L={orphan:"Remove · orphaned",redundant:"Remove · redundant",review:"Individual review",ok:"Compliant"},R={orphan:0,redundant:1,review:2,ok:3};
+const PAGE=20,F=["q","fd","ft","fp","fl","fs"],$=id=>document.getElementById(id);
+let sortK="decision",asc=true,limit=PAGE,tq;
+const e=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nm=s=>e(s).replace(/([\/_.@·])/g,"$1<wbr>").replace(/([a-z])([A-Z])/g,"$1<wbr>$2");
+const det=s=>/[0-9a-f]{8}-[0-9a-f]{4}-/i.test(s)?e(s).replace(/\b([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})\b/gi,'<span class="id">$1-<wbr>$2-<wbr>$3-<wbr>$4-<wbr>$5</span>'):nm(s);
+const EXT='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 3.5h-3v9h9v-3M9.5 3.5h3v3M12.5 3.5 7 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function hit(r){const q=$("q").value.trim().toLowerCase(),d=$("fd").value,t=$("ft").value,p=$("fp").value,l=$("fl").value,s=$("fs").value;
+return(!d||(d==="remove"?R[r.decision]<2:r.decision===d))&&(!t||String(r.tier)===t)&&(!p||r.principal_type===p)&&(!l||r.scope_level===l)&&(!s||(r.decision==="review"&&r.flags.includes(s)))&&
+(!q||[r.principal_name,r.principal_detail,r.principal_id,r.role,r.scope_label,r.scope,r.reason,r.action,r.flag_labels.join(" "),r.assignment_id].join(" ").toLowerCase().includes(q))}
+function list(){const k=sortK;return DATA.filter(hit).sort((a,b)=>{let x=a[k],y=b[k];if(k==="decision"){x=R[x];y=R[y]}else if(k==="flags"){x=a.flags.length;y=b.flags.length}
+else{x=String(x??"").toLowerCase();y=String(y??"").toLowerCase()}return(x<y?-1:x>y?1:0)*(asc?1:-1)})}
+function scope(r){const p=String(r.scope_label||"").split(" · ");return r.scope_level==="Resource"&&p.length>1?`<span class="nm">${nm(p[0])}</span><span class="sm">Resource · ${nm(p.slice(1).join(" · "))}</span>`:`<span class="nm">${nm(r.scope_label)}</span><span class="sm">${e(r.scope_level)}</span>`}
+function tr(r,i){const why=r.decision==="review"&&r.flag_labels.length?'<ul class="sig">'+r.flag_labels.map(f=>"<li>"+e(f)+"</li>").join("")+"</ul>":'<p class="why">'+e(r.reason)+"</p>";
+return`<tr${i>=limit?' class="pg"':""}><td><span class="pill p-${r.decision}">${L[r.decision]}</span></td><td><b>${e(r.role)}</b><span class="tier t${r.tier}">${e(r.tier_label)}</span><span class="sm">${e(r.access)}${r.end_date?" until "+e(r.end_date):""}${r.condition?" · with condition":""}</span></td>`+
+`<td><b class="nm">${nm(r.principal_name)}</b><span class="sm">${e(r.principal_type)}${r.last_sign_in?" · last sign-in "+e(r.last_sign_in):""}</span>${r.principal_detail?'<span class="sm">'+det(r.principal_detail)+"</span>":""}</td>`+
+`<td class="lb" data-h="Scope">${scope(r)}</td><td class="lb" data-h="Reason and action">${why}<p class="act"><b>Action:</b> ${e(r.action)}</p></td>`+
+`<td class="c-iam">${r.portal_url?`<a class="iam" href="${e(r.portal_url)}" target="_blank" rel="noopener noreferrer" aria-label="Open the access control (IAM) of ${e(r.scope_label)} in the Azure portal">Open${EXT}</a>`:""}</td></tr>`}
+function picked(){return["fd","ft","fp","fl","fs"].map($).filter(s=>s.value).map(s=>s.getAttribute("aria-label")+": "+s.options[s.selectedIndex].text.replace(/ \(\d+\)$/,""))}
+function render(){const all=list(),n=all.length,shown=Math.min(n,limit),q=$("q").value.trim(),f=picked().concat(q?['Search: "'+q+'"']:[]);
+$("body").innerHTML=all.map(tr).join("")||'<tr><td colspan="6" class="empty">'+(DATA.length?'No assignments match the current filters. <button class="btn link" type="button" data-clear>Clear filters</button>':'No privileged assignments in this review.')+"</td></tr>";
+$("cnt").textContent=(n>shown?"Showing "+shown+" of "+n+" assignments":n+" assignment"+(n===1?"":"s"))+(n<DATA.length?" · filtered from "+DATA.length:"");
+$("pcap").textContent=n+" of "+DATA.length+" privileged assignments"+(f.length?" · "+f.join(" · "):" · no filter");
+$("more").hidden=n<=shown;$("mb").textContent="Show "+Math.min(PAGE,n-shown)+" more";$("ma").textContent="Show all "+n;
+document.querySelectorAll("#reg th[data-k]").forEach(th=>th.dataset.k===sortK?th.setAttribute("aria-sort",asc?"ascending":"descending"):th.removeAttribute("aria-sort"))}
+function reset(){F.forEach(id=>$(id).value="");limit=PAGE}
+F.forEach(id=>$(id).addEventListener(id==="q"?"input":"change",()=>{clearTimeout(tq);tq=setTimeout(()=>{limit=PAGE;render()},id==="q"?120:0)}));
+document.querySelectorAll("#reg th[data-k] button").forEach(b=>b.addEventListener("click",()=>{const k=b.parentNode.dataset.k;if(sortK===k)asc=!asc;else{sortK=k;asc=true}render()}));
+$("mb").addEventListener("click",()=>{limit+=PAGE;render()});$("ma").addEventListener("click",()=>{limit=Infinity;render()});$("rst").addEventListener("click",()=>{reset();render()});
+document.addEventListener("click",ev=>{const c=ev.target.closest("[data-clear]"),g=ev.target.closest("[data-go],[data-sig]");if(c){reset();render();$("q").focus()}
+if(g){reset();const v=g.dataset.go||"sig:"+g.dataset.sig;if(v==="remove")$("fd").value="remove";else{$("fd").value="review";$("fs").value=v.slice(4)}render();
+if(!g.matches("a")){ev.preventDefault();$("register").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}$("h-reg").focus({preventScroll:true})}});
+$("csv").addEventListener("click",()=>{const h=["decision","role","tier","identity","type","upn_or_appid","scope","scope_level","access","signals","reason","action","assignment_id","portal_iam"],c=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+const lines=[h.join(",")].concat(list().map(r=>[L[r.decision],r.role,r.tier_label,r.principal_name,r.principal_type,r.principal_detail,r.scope,r.scope_level,r.access,r.flag_labels.join(" | "),r.reason,r.action,r.assignment_id,r.portal_url].map(c).join(",")));
+const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}));a.download="rbac-privileged-access-filtered.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)});
+document.querySelector("[data-print]").addEventListener("click",()=>window.print());
 render();
 </script></body></html>"""
-    repl = {
-        "__TITLE_PREFIX__": title_prefix, "__FOOTER_ORG__": footer_org,
-        "__DATE__": esc(report_date), "__LOGO__": logo_html, "__TOTAL__": str(total), "__REMOVABLE__": str(removable),
-        "__REVIEW__": str(dec_counts.get("review", 0)), "__REF__": esc(reference_iso.replace("T", " ").replace("Z", " UTC")),
-        "__SUBS__": esc(sub_list), "__STATUS__": esc(status_label), "__OWNER__": str(owner_total), "__OWNER_RM__": str(owner_removable),
-        "__OWNER_RV__": str(owner_dec.get("review", 0)), "__SEG__": seg, "__LEGEND__": legend, "__ALL__": str(len(raw_rows)),
-        "__T0__": str(tier_counts.get(0, 0)), "__PRINC__": str(summary["distinct_principals"]),
-        "__STANDING__": f"{summary['standing_tier01_percent']}%", "__ELIG__": str(eligible_priv), "__LEVELS__": level_rows,
-        "__FLAGS__": flag_bars, "__TOP__": top_html, "__COV__": cov_rows, "__GRAPH__": graph_rows,
-        "__SIU__": chip(signin_user_status), "__SIS__": chip(signin_sp_status), "__MEM__": chip(membership_status),
-    }
-    for k, v in repl.items():
-        html_doc = html_doc.replace(k, v)
-    html_doc = html_doc.replace("__DATA__", data_json)
+        return re.sub(r"__[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*__", lambda m: repl.get(m.group(0), m.group(0)), page)
+
+    html_doc = render_html(json_doc, LOGO_DATA_URI)
 
     files = {"report": (base + ".html", html_doc), "csv": (base + ".csv", csv_text), "json": (base + ".json", json_text)}
     out = {}

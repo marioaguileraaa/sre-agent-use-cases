@@ -1,324 +1,252 @@
 ---
 name: "CLIENTE Service Health review"
-description: "A readable yellow/charcoal frame around neutral, source-qualified evidence sheets."
+description: "A charcoal and yellow review hero over white evidence cards, in the Azure SRE Agent report family."
 colors:
   yellow: "#fbc807"
   charcoal: "#1e1c18"
-  paper: "#f1f2f3"
+  paper: "#f3f4f5"
   sheet: "#ffffff"
-  ink: "#252722"
+  soft: "#f4f5f7"
+  hover: "#f8f9fa"
+  ink: "#1f2328"
+  title: "#16181b"
   muted: "#555b61"
-  line: "#c8ccd0"
-  quiet: "#e8ebed"
-  incident: "#9b2f27"
-  incident-wash: "#fceeea"
-  maintenance: "#854a09"
-  maintenance-wash: "#fff1da"
-  info: "#1e5b75"
-  info-wash: "#eaf3f8"
-  unknown: "#535b67"
-  unknown-wash: "#eceef1"
+  line: "#e1e4e8"
+  line-strong: "#c4c9cf"
+  hero-muted: "#d4d0c8"
+  link: "#155da4"
   focus: "#155da4"
+  incident: "#b42318"
+  incident-wash: "#fee4e2"
+  incident-bar: "#d92d20"
+  maintenance: "#93370d"
+  maintenance-wash: "#fef0c7"
+  maintenance-bar: "#f79009"
+  active: "#175cd3"
+  active-wash: "#d1e9ff"
+  neutral: "#344054"
+  neutral-wash: "#eaecf0"
+  neutral-bar: "#98a2b3"
 typography:
   display:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "clamp(27px, 3vw, 36px)"
-    fontWeight: 650
-    lineHeight: 1.2
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "clamp(32px, 4vw, 44px)"
+    fontWeight: 700
+    lineHeight: 1.1
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
     fontSize: "22px"
-    fontWeight: 650
-    lineHeight: 1.2
+    fontWeight: 700
+    lineHeight: 1.3
   title:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
     fontSize: "19px"
-    fontWeight: 650
-    lineHeight: 1.2
+    fontWeight: 700
+    lineHeight: 1.3
+  kpi:
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "36px"
+    fontWeight: 700
+    lineHeight: 1
   body:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
     fontSize: "15px"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.55
+  table:
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.55
   label:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
     fontSize: "13px"
     fontWeight: 600
     lineHeight: 1.5
-  small:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
+  kicker:
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
     fontSize: "13px"
-    fontWeight: 400
+    fontWeight: 700
     lineHeight: 1.5
-  record-title:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
-    fontSize: "13px"
-    fontWeight: 650
-    lineHeight: 1.45
-  tag:
-    fontFamily: '"Segoe UI", system-ui, sans-serif'
+    letterSpacing: "0.08em"
+  pill:
+    fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif'
     fontSize: "12px"
     fontWeight: 650
     lineHeight: 1.5
   mono:
-    fontFamily: "ui-monospace, Consolas, monospace"
-    fontSize: "12px"
+    fontFamily: 'ui-monospace, "Cascadia Mono", Consolas, monospace'
+    fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.6
 rounded:
-  compact: "3px"
-  tag: "2px"
+  control: "10px"
+  card: "16px"
+  pill: "999px"
 spacing:
-  space-1: "6px"
-  space-2: "12px"
-  space-3: "18px"
+  space-1: "4px"
+  space-2: "8px"
+  space-3: "16px"
   space-4: "24px"
+  space-5: "40px"
 components:
-  button-default:
+  print-button:
+    backgroundColor: "{colors.charcoal}"
+    textColor: "{colors.sheet}"
+    rounded: "{rounded.control}"
+    padding: "0 16px"
+  ghost-button:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.compact}"
-    padding: "8px 12px"
-  button-default-hover:
-    backgroundColor: "{colors.quiet}"
-  button-default-disabled:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.muted}"
-  download-action:
+    rounded: "{rounded.control}"
+    padding: "0 14px"
+  download-link:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    typography: "{typography.small}"
-    rounded: "{rounded.compact}"
-    padding: "8px 12px"
+    rounded: "{rounded.control}"
+    padding: "0 12px"
   input-field:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    typography: "{typography.small}"
-    rounded: "{rounded.compact}"
-    padding: "8px 10px"
-  select-field:
-    backgroundColor: "{colors.sheet}"
-    textColor: "{colors.ink}"
-    typography: "{typography.small}"
-    rounded: "{rounded.compact}"
-    padding: "8px 10px"
+    rounded: "{rounded.control}"
+    padding: "7px 12px"
   temporal-lane:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.compact}"
-    padding: "11px 15px"
+    rounded: "{rounded.pill}"
+    padding: "5px 6px 5px 14px"
   temporal-lane-selected:
     backgroundColor: "{colors.yellow}"
     textColor: "{colors.charcoal}"
-  evidence-tag:
-    typography: "{typography.tag}"
-    rounded: "{rounded.tag}"
-    padding: "3px 7px"
-  tag-incident:
+  pill-incident:
     backgroundColor: "{colors.incident-wash}"
     textColor: "{colors.incident}"
-  tag-maintenance:
+  pill-maintenance:
     backgroundColor: "{colors.maintenance-wash}"
     textColor: "{colors.maintenance}"
-  tag-partial:
-    backgroundColor: "{colors.maintenance-wash}"
-    textColor: "{colors.maintenance}"
-  tag-info:
-    backgroundColor: "{colors.info-wash}"
-    textColor: "{colors.info}"
-  tag-unknown:
-    backgroundColor: "{colors.unknown-wash}"
-    textColor: "{colors.unknown}"
-  evidence-sheet:
+  pill-active:
+    backgroundColor: "{colors.active-wash}"
+    textColor: "{colors.active}"
+  pill-neutral:
+    backgroundColor: "{colors.neutral-wash}"
+    textColor: "{colors.neutral}"
+  card:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.compact}"
-  event-open:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    typography: "{typography.record-title}"
-    padding: "0"
+    rounded: "{rounded.card}"
+    padding: "20px 24px"
+  kpi-card:
+    backgroundColor: "{colors.sheet}"
+    textColor: "{colors.title}"
+    rounded: "{rounded.card}"
+    padding: "16px 18px"
 ---
 
 # Design System: CLIENTE Service Health review
 
 ## Overview
 
-**Creative North Star: "The Evidence Workpaper"**
+**Creative North Star: "The Evidence Workpaper, in the report family"**
 
-The built system is a readable yellow/charcoal customer frame around flat neutral evidence sheets. Its character is compact, practical and restrained: branding establishes identity, typography organizes reading, and independently named evidence colors distinguish states without painting the whole workpaper yellow.
+The report shares the structure of the Azure SRE Agent report family (slim top bar, verdict-first hero, KPI cards overlapping the hero, white cards on a light ground, a register, then sources and method) and keeps this case's own identity: a charcoal hero with yellow accents, yellow for selection, and named evidence colours that never come from the brand.
 
-The generic presentation keeps CLIENTE and an empty Customer logo frame. The supplied, source-sampled identity colors are visual authority, not an official customer brand specification; the same readable identity applies to generic Git and authorized private rendering. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` retains the local task sequence and composition decisions; those are not global design tokens.
+Without a configured logo the top bar shows the **Azure SRE Agent** wordmark and the hero kicker carries the configured client name (`CLIENTE` in generic source). A configured, validated customer raster replaces the wordmark, and the Read-only chip then reads "Azure SRE Agent · Read-only". No empty logo frame is drawn. The source-sampled yellow and charcoal are visual authority, not an official customer brand specification. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` keeps the local task sequence.
 
-**Key Characteristics:**
-- Sparse yellow branding and selected navigation; charcoal text on yellow.
-- White, thin-bordered sheets on a pale neutral field; no shadows.
-- Native system type for reading, wrapping monospace for receipts.
-- Explicit text labels alongside independent evidence-state colors.
-- Visible keyboard focus and responsive evidence access.
+**Key characteristics:**
+- Charcoal hero with a 4 px yellow top rule, yellow kicker and yellow review status; white type on charcoal.
+- One sans family (the system UI stack), tabular numerals everywhere, monospace only for identifiers and original records.
+- White cards with a soft two-layer shadow on a pale neutral ground.
+- Pills with a leading dot for event types and source states; text always names the meaning.
+- Visible keyboard focus, sortable column headers as real buttons, and no network or external assets.
 
 ## Colors
 
-The palette combines a warm, distinctive identity with quiet working neutrals and separate foreground/wash pairs for evidence.
+### Brand
 
-### Primary
+- **Client Yellow** (`yellow`): hero top rule, kicker, review status, provenance chip, selected temporal lane, selected-row tint, the step numbers and the skip link.
+- **Client Charcoal** (`charcoal`): hero ground, print button, selected-lane count, chart bars and dark lettering on yellow.
 
-- **Client Yellow** (`yellow`): customer frame, provenance marker, selected temporal navigation and the keyboard skip link.
-- **Client Charcoal** (`charcoal`): the title frame and the dark lettering and rules paired with yellow.
+### Evidence (shared report-family pills and bars)
 
-### Secondary
-
-These are semantic evidence and attention colors, not additional customer brand accents.
-
-- **Incident Red** (`incident`, `incident-wash`): service-incident tags and visible initialization/no-script errors.
-- **Maintenance Brown** (`maintenance`, `maintenance-wash`): planned-maintenance tags and partial-coverage warnings.
-- **Evidence Blue** (`info`, `info-wash`): Active source-state tags, explanatory evidence notes and ordinary text links.
-- **Unknown Slate** (`unknown`, `unknown-wash`): Unknown and other non-Active source-state tags, uncertainty text and neutral coverage receipts.
-- **Focus Blue** (`focus`): the shared keyboard outline, independent of evidence classification.
-
-These foreground/wash pairs are not tonal ramps. No synthesized palette steps are recorded.
+- **Incident red** (`incident`, `incident-wash`, `incident-bar`): service-incident pills and the Active-incident share of the hero bar.
+- **Maintenance amber** (`maintenance`, `maintenance-wash`, `maintenance-bar`): planned-maintenance pills, partial-coverage pills, incomplete-source KPI and the Active-maintenance share.
+- **Active blue** (`active`, `active-wash`): the native **Active** source state.
+- **Neutral slate** (`neutral`, `neutral-wash`, `neutral-bar`): Resolved and other non-Active states, complete or successful-empty receipts and the Resolved share. **Unknown** state uses a hatched slate bar segment.
+- **Link / focus blue** (`link`, `focus`): links, "Review next" actions and the 3 px focus outline.
 
 ### Neutral
 
-- **Paper** (`paper`): the surrounding work area and disabled controls.
-- **Sheet White** (`sheet`): working sheets, controls and the action toolbar.
-- **Reading Ink** (`ink`): primary working text and communication-title buttons.
-- **Muted Text** (`muted`): labels, qualifications, timestamps and supporting counts.
-- **Sheet Rule** (`line`): sheet edges, dividers and subdued control boundaries.
-- **Quiet Hover** (`quiet`): the shared neutral hover treatment for ordinary action controls.
+- **Paper** (`paper`) page ground; **Sheet** (`sheet`) cards and controls; **Soft** (`soft`) table headers, count badges and code blocks; **Hover** (`hover`) row hover.
+- **Ink** (`ink`) body text, **Title** (`title`) headings and KPI values, **Muted** (`muted`) labels and notes (at least 6.9:1 on white).
+- **Line** (`line`) card borders and rules; **Line strong** (`line-strong`) control borders.
+- **Hero muted** (`hero-muted`) secondary text on charcoal (about 10:1).
 
-### Named Rules
+### Named rules
 
-**The Dark-on-Yellow Rule.** Use charcoal lettering on yellow identity and selected-navigation surfaces, never white lettering.
+**The Dark-on-Yellow Rule.** Yellow surfaces always carry charcoal lettering, never white.
 
-**The Separate Semantics Rule.** Yellow identifies branding and selection; evidence states retain their named foreground/wash pairs and explicit text labels.
+**The Separate Semantics Rule.** Yellow marks identity and selection only. Evidence states keep their own pill colours and an explicit text label; a completed receipt is slate, never a green health verdict.
 
 ## Typography
 
-**Display and Body Font:** Segoe UI, with system-ui and sans-serif fallbacks.
-**Receipt Font:** ui-monospace, with Consolas and monospace fallbacks.
+**Font:** Segoe UI with system-ui, -apple-system and sans-serif fallbacks; no embedded fonts. **Receipts:** ui-monospace, Cascadia Mono, Consolas.
 
-**Character:** One native sans-serif family provides the reading hierarchy without external font assets. Weight and size establish emphasis; monospace is reserved for identifiers and original-record material rather than decorative labels.
-
-### Hierarchy
-
-- **Display:** the fluid `display` role is the report heading, with slightly tightened tracking.
-- **Headline / Title:** `headline` and `title` provide the two descending heading steps. These headings use balanced wrapping and the same compact line-height as Display.
-- **Body:** `body` is the default reading text. Paragraphs have a maximum measure of (74ch).
-- **Label / Small:** `label` emphasizes field names and disclosure summaries; `small` carries ordinary supporting text, toolbar actions and field values. Fields inherit the smaller label context, not the larger body size.
-- **Record title:** `record-title` distinguishes repeated communication-title buttons inside the register.
-- **Tag:** `tag` is the compact, semibold evidence-label role; table headings use the same size and weight with their own neutral treatment.
-- **Mono:** `mono` wraps long identifiers and original records instead of imposing a single unbroken line.
-
-### Named Rules
-
-**The Reading-and-Receipts Rule.** Use the native sans-serif for reading and controls, and wrapping monospace for identifiers and original records.
+- **Display** (H1): fluid 32 to 44 px, bold, tight tracking, at most two lines.
+- **Headline** (section H2) 22 px; **Title** (card H2, dossier H3) 19 px; dossier H4 15 px.
+- **KPI** values 36 px bold (30 px under 640 px).
+- **Body** 15 px / 1.55, measure at most 75ch. **Table** 14 px. **Label** 13 px semibold for field names and filter labels. **Kicker** 13 px uppercase, tracked, yellow on charcoal.
+- **Pill** 12 px semibold. **Mono** 13 px for tracking IDs, receipt IDs and resource IDs; secondary table lines (times, "total unknown") 13 px.
+- `font-variant-numeric: tabular-nums` is set on the body so counts and times align.
 
 ## Layout
 
-The built report uses a centered, bounded content area, flexible grids with zero-minimum columns, and closely aligned bordered sheets. The recurring spacing vocabulary matches the first four declared spacing steps; the CSS currently applies these lengths as literals rather than consuming the spacing custom properties. Smaller inline gaps and control insets remain component-specific.
+- Top bar: sticky, 60 px, white, with the wordmark or logo, section links (Summary, Communications, Sources, Method), the Read-only chip and the Print / PDF button.
+- Hero: full-bleed charcoal; a two-column grid (copy and meta chips, then the review-status card) and a full-width distribution bar with legend. Content width 1320 px.
+- KPI row: six cards pulled 64 px up over the hero edge; three columns under 1180 px, two under 640 px.
+- Overview: "Review next" beside a stack of "Named in communications" and "The window matters"; one column under 1040 px.
+- Review: one card with temporal lanes, filters, the result count and the four downloads; below it the register (left) and the selected-communication dossier (right). On wide screens the dossier is sticky with its own scroll; under 1100 px it stacks below the register.
+- Then the source and coverage ledger, the method and limits card and a footer with the reference.
+- Spacing follows 4/8 px steps (4, 8, 16, 24, 40) with 12, 14 and 20 px insets inside dense components.
+- Under 640 px the lanes and downloads become two-column grids with 44 px targets, the register keeps a 560 px minimum width and scrolls inside its card with edge shadows, and the page never scrolls sideways at 390 px.
 
-The wide report places the register beside its dossier. That arrangement is this surface's implementation, not a universal layout requirement. At the first breakpoint (maximum width 1100px), the workbench becomes one column, context becomes two columns with the final group spanning the row, and filters become three columns.
+## Print
 
-At the compact breakpoint (maximum width 620px), the customer/title frame stacks, branding becomes a horizontal row, the toolbar wraps, navigation becomes a two-column button grid, and filters use two columns with full-width search. Context and dossier metadata become single-column. Evidence is retained: the register scrolls inside its own focusable region, long values wrap, and disclosures remain available. Toolbar action minimum heights increase from (42px) to (44px); compact navigation uses a minimum height of (48px). Export actions remain in normal document flow, not a sticky overlay.
+`@page` is A4 with 14/12/16 mm margins and a running footer (title, client, reference, provenance, "Page n of m"). Print text keeps an 11 px floor. Print keeps colours exactly, hides the section links, Print button, filters, downloads, pager and review links, renders every matching register row, keeps the selected dossier, removes scroll caps, avoids breaking KPI cards, steps, ledger entries and rows, and starts the source ledger on a new page. The PDF is the browser's print of this same HTML.
 
-Print is a separate built layout: actions, filters, pagination controls and the skip link are hidden; all matching register rows are rendered; the selected dossier remains; raw-text height caps are removed; and the source ledger starts a new page. Print is not a replacement for the complete exports.
+## Elevation and depth
 
-## Elevation & Depth
-
-The system has no box-shadow vocabulary. Depth comes from the contrast between Paper and Sheet White, fine borders, neutral table headers, and restrained state washes. Selected-row and hover tints are local table treatments, not new elevation levels. Keyboard outlines are attention affordances, not shadows.
-
-### Named Rules
-
-**The Flat Sheet Rule.** Separate work areas with neutral surfaces and fine rules rather than shadow elevation.
+Cards and KPI cards share one soft shadow (`0 1px 2px` plus `0 8px 24px`, both at low opacity). Depth otherwise comes from the paper/sheet contrast and fine borders. Print drops shadows.
 
 ## Shapes
 
-The form is nearly rectangular: sheets and ordinary controls share the `compact` radius, while tags and the provenance marker use the smaller `tag` radius. Borders are fine (1px). Wide navigation rounds only its upper corners and meets a lower rule; compact navigation becomes individually bordered buttons with all corners rounded. Tags are small rectangles, not pills.
-
-The generic customer-logo position remains a visible outlined frame with no embedded customer image. Its dimensions respond to the report header rather than becoming a reusable asset-size scale.
+Controls and download links use a 10 px radius, cards 16 px, pills and temporal lanes are fully rounded, step numbers are circles. Borders are 1 px.
 
 ## Components
 
-### Buttons
-
-Neutral and direct, without a yellow-filled primary-action tier.
-
-- Ordinary buttons use Sheet White, Reading Ink, the compact radius and the `button-default` insets; their minimum height is (42px).
-- Hover uses Quiet Hover. Disabled buttons use Paper, Muted Text and a subdued border, with the default cursor.
-- Download links have the same bordered-action silhouette, smaller toolbar typography and no text underline.
-- All focus-visible controls use an outline (3px) in Focus Blue with an offset (3px). The skip link becomes visible when focused.
-- There are no authored button transitions or custom active-state animations.
-
-### Inputs / Fields
-
-Compact, explicitly labeled native controls.
-
-- Search and selects share white backgrounds, dark values, fine borders, compact corners and the recorded field insets.
-- Labels use the semibold label role; input/select values use the regular small role. Placeholder text remains Muted Text at full opacity.
-- Fields use the shared focus outline. No custom field-error or disabled-select appearance is established by this template.
-
-### Navigation
-
-Pressed-state buttons, not a decorative tab imitation.
-
-- The group exposes its purpose and each button exposes `aria-pressed`.
-- The selected button uses Client Yellow and Client Charcoal with semibold text; unselected buttons remain neutral.
-- Counts use tabular numerals. Hover changes the relevant neutral or yellow fill without removing the selected-state distinction.
-- The compact layout retains every button in a two-column grid. The temporal-lane names and overlap semantics remain local to `SURFACE.md`.
-
-### Chips
-
-Small, non-interactive evidence labels.
-
-- Tags use the recorded tag typography, radius and insets; foreground and wash stay paired.
-- Incident and maintenance describe event categories. Active source state uses Evidence Blue; other native states use Unknown Slate.
-- Partial coverage uses Maintenance Brown. Completed returned-page receipts remain slate rather than becoming a green workload-health verdict.
-- Meaning remains readable in the text, not just in the color.
-
-### Cards / Containers
-
-Flat evidence sheets with context-specific padding.
-
-- Sheets share Sheet White, the fine Sheet Rule border and compact corners.
-- The template does not establish one universal card-padding token: context, dossier and ledger have different insets.
-- Supporting blue notes and red error blocks use existing semantic pairs rather than a separate decorative card palette.
-
-### Communication Register and Dossier
-
-A compact table with an explicit title-button selection affordance.
-
-- Column headings, supporting timestamps and repeated receipt identifiers have distinct type roles; timestamps and counts use tabular numerals where authored.
-- A selected row receives a pale warm tint. Hover preserves the selected/unselected distinction. These contextual tints are not general-purpose palette tokens.
-- The communication title is a real button with `aria-controls` and `aria-pressed`, not a whole-row click target.
-- Selection refreshes the dossier, focuses its `tabindex="-1"` section with `preventScroll`, then scrolls that section into view on both wide and compact layouts.
-- The empty view explicitly distinguishes no filter matches, partial collection and successful-empty reads rather than presenting a health-success card.
-
-### Source Disclosures
-
-Native disclosure rows retain the original-record reading affordance.
-
-- Resource records, full descriptions and source receipts use native `details`/`summary` controls and the shared visible focus treatment.
-- Original records use wrapping monospace on a quiet neutral field. Long source text and record blocks scroll within bounded heights on screen; print removes those height limits.
-- Resource identifiers wrap rather than being visually truncated. Disclosure rows use fine separating rules, not elevated nested cards.
+- **Review status card** (hero aside): "Partial coverage", "Review needed", "No communications returned" or "Nothing Active when read", with a one-line breakdown. It summarises evidence; it is not a workload-health verdict.
+- **Distribution bar**: in-scope records by type and native state (Active incidents, Active maintenance, Resolved, Unknown), with legend counts and an accessible label.
+- **KPI cards**: In scope, Active when read, Updated in window, Future maintenance, Resource associations, Incomplete sources (amber when above zero).
+- **Review next**: up to five numbered steps derived from the counts; each opens the matching lane, state filter or the ledger.
+- **Named in communications**: top six published services and regions as labelled bars with values.
+- **Temporal lanes**: pressed-state buttons with counts (`aria-pressed`); the selected lane is yellow with a charcoal count.
+- **Register**: sortable headers (`aria-sort`), title buttons with `aria-controls`/`aria-pressed`, type pill and tracking ID under the title, impact start and last update as date over time (no mid-token wrap), resource counts right-aligned, selected row tinted yellow.
+- **Dossier**: type and state pills, title, field grid, published text, plain-text and original-record disclosures, resource associations shown as name, resource group and type with an Azure portal link and the full ID wrapping only after "/", then unknowns and receipt IDs.
+- **Source ledger**: a strip of status counts, then one disclosure per receipt; incomplete receipts are tinted amber.
+- **Simulated banner**: hatched amber strip whenever provenance is not LIVE.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** use yellow sparsely for branding and pressed navigation, with charcoal lettering.
-- **Do** pair incident, maintenance, information and Unknown foregrounds with their matching washes and explicit labels.
-- **Do** keep evidence sheets flat and reserve monospace for records and identifiers.
-- **Do** preserve visible keyboard focus, native controls and focus transfer to the refreshed dossier.
-- **Do** retain wrapping, disclosures and local table scrolling in compact layouts instead of dropping evidence.
+- **Do** keep yellow for identity and selection, with charcoal lettering.
+- **Do** keep event-type and state meaning in text, not only in colour.
+- **Do** keep every in-scope record, receipt and uncertainty reachable on every viewport.
+- **Do** preserve visible focus, native controls and focus transfer to the refreshed dossier.
 
 ### Don't:
 
-- **Don't** put white lettering on yellow.
-- **Don't** recolor all evidence yellow or replace Unknown with a reassuring success color.
-- **Don't** embed real customer branding in the generic CLIENTE name or empty Customer logo frame.
-- **Don't** promote the local temporal strategy, composition choice or surface seed into global design tokens.
-- **Don't** describe these source-sampled colors as an official customer brand specification or this template as live evidence.
+- **Don't** put white lettering on yellow or turn a complete receipt into a green health verdict.
+- **Don't** draw an empty logo frame or embed real customer branding in generic source.
+- **Don't** add external fonts, images, CDNs or network calls.
+- **Don't** describe these source-sampled colours as an official customer brand specification or this template as live evidence.

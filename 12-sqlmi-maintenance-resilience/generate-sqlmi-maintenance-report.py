@@ -944,152 +944,346 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                 "maintenance_alert": kpis["maintenance_alert"], "sources": sources}
 
     # ==== Informe HTML ==================================================================================
+    # Presentation only: same data, sections and order. Self-contained (no network), responsive, A4 print.
     E = lambda v: html.escape("" if v is None else str(v))
+    NIL = '<span class="nil">—</span>'
+
+    def N(v):
+        # Thousands with a narrow no-break space: unambiguous in Spanish and English.
+        return f"{v:,}".replace(",", "\u202f") if isinstance(v, int) and not isinstance(v, bool) else E(v)
+
+    def nw(text):
+        # Resource names never break at their hyphens.
+        return re.sub(r"\S+", lambda m: f'<span class="nw">{m.group(0)}</span>', E(text))
+
+    def win_html(w):
+        name, _, hours = WINDOWS[w].partition(" · ")
+        return f"{E(name)}<small>{E(hours)}</small>" if hours else E(name)
+
+    def pill(text, tone):
+        return f'<span class="pill t-{tone}">{E(text)}</span>'
+
+    def td(body, raw=None, n=None, cls="", label=""):
+        attrs = (("data-raw", raw), ("data-n", n), ("class", cls or None), ("data-label", label or None))
+        return "<td" + "".join(f' {k}="{E(v)}"' for k, v in attrs if v is not None) + f">{body}</td>"
+
+    def dtable(stub, label, cols, rows, filters="", stack=False, empty="Sin datos."):
+        # Search, filters, sortable headers, CSV export of the visible rows and a live row count.
+        if not rows:
+            return f'<div class="card"><p class="empty">{E(empty)}</p></div>'
+        th = "".join(f'<th scope="col" data-l="{E(h)}"{" class=n" if k else ""}><button type="button" class="sort" data-i="{i}">{E(h)}</button></th>'
+                     for i, (h, k) in enumerate(cols))
+        return (f'<div class="card dt" data-file="{stub}-{stamp}"><div class="tools"><input class="f-q" type="search" placeholder="Buscar…" '
+                f'aria-label="Buscar en {E(label)}">{filters}<button class="btn ghost f-csv" type="button">{ICON["dl"]}Exportar CSV</button>'
+                f'<span class="cnt" aria-live="polite"></span></div><div class="wrap" role="region" tabindex="0" aria-label="Tabla: {E(label)}">'
+                f'<table{" class=stack" if stack else ""}><thead><tr>{th}</tr></thead><tbody>{"".join(rows)}</tbody></table></div></div>')
+
+    def fselect(key, label, opts):
+        return (f'<select data-f="{key}" aria-label="{label}"><option value="">{label}: todas</option>'
+                + "".join(f'<option value="{E(v)}">{E(v)} ({c})</option>' for v, c in opts) + "</select>")
+
+    def section(sid, title, why, body):
+        return f'<section id="{sid}" aria-labelledby="h-{sid}"><div class="sh"><h2 id="h-{sid}">{E(title)}</h2><p>{E(why)}</p></div>{body}</section>'
+    ICON = {k: f'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{d}"/></svg>' for k, d in {
+        "print": "M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z",
+        "dl": "M12 3v12m0 0 5-5m-5 5-5-5M4 21h16",
+        "alert": "M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
+        "ext": "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"}.items()}
+    # Shared severity palette of the report family: tone class + bar colour.
+    SEVT = {"Alta": ("high", "#ef6820"), "Media": ("med", "#f79009"), "Info": ("neu", "#98a2b3")}
+    VT = {"Sin reintentos": ("crit", "#d92d20"), "Parcial": ("med", "#f79009"), "Resiliente": ("ok", "#12b76a")}
+    RT = {"Planned": ("low", "#0078d4"), "Unplanned": ("crit", "#d92d20"), "UserInitiated": ("neu", "#667085"), "Detected": ("med", "#dc6803")}
+    stamp_utc = now_utc.strftime("%Y-%m-%d %H:%M")
+    title = "Resiliencia de Azure SQL Managed Instance ante mantenimiento"
+    sevn = {s: sum(1 for f in findings if f["severity"] == s) for s in SEVT}
+    attention = bool(sevn["Alta"] or sevn["Media"])
+    PL = {"Alta": ("alta", "altas"), "Media": ("media", "medias"), "Info": ("info", "info")}
+    vdetail = (f"{len(findings)} {'acción' if len(findings) == 1 else 'acciones'}: "
+               + ", ".join(f"{n} {PL[s][n != 1]}" for s, n in sevn.items() if n)) if findings else "Sin acciones pendientes."
+    g4 = lambda t: re.sub(r"(?<![\d.,])\d{4,}(?![\d.,])", lambda m: N(int(m.group(0))), t)
+    a_lead, a_sep, a_rest = answer.partition("La ventana decide")
+    a_key, a_dot, a_tail = (a_sep + a_rest).partition("lo nota.")
     CSS = """
-*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:#F4F7FB;color:#1B2A3A;font-size:14px;line-height:1.45}
-.wrap{max-width:1180px;margin:0 auto;padding:0 18px 40px}
-header{background:#243A5E;color:#fff;padding:18px 0 22px;border-bottom:5px solid #0078D4}
-header .wrap{display:flex;gap:18px;align-items:center;padding-bottom:0}
-header svg{flex:0 0 auto}
-header h1{margin:0;font-size:22px;font-weight:600}header p{margin:4px 0 0;opacity:.9;font-size:13px}
-.demo{background:#FFF4E5;color:#7A4A00;border:1px solid #F0C27B;border-radius:8px;padding:8px 12px;margin:16px 0 0;font-weight:600}
-h2{color:#243A5E;font-size:18px;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid #D6E4F2}
-.answer{background:#fff;border-left:6px solid #0078D4;border-radius:8px;padding:14px 18px;margin-top:18px;box-shadow:0 1px 3px rgba(0,40,90,.08);font-size:15px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
-@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,40,90,.08);border-top:4px solid #243A5E}
-.kpi b{display:block;font-size:24px;color:#243A5E}.kpi span{font-size:12px;color:#5A6B7D}
-.kpi.bad{border-top-color:#C62828}.kpi.bad b{color:#C62828}.kpi.warn{border-top-color:#B26A00}.kpi.warn b{color:#B26A00}
-.card{background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,40,90,.08);margin-bottom:12px}
-.card.up{border-left:6px solid #C62828}
-.tw{overflow-x:auto;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,40,90,.08)}
-table{border-collapse:collapse;width:100%;min-width:720px}th{background:#243A5E;color:#fff;text-align:left;font-weight:600;font-size:12.5px}
-th,td{padding:8px 10px;vertical-align:top;border-bottom:1px solid #E3EAF2}tr:nth-child(even) td{background:#F9FBFD}
-code{background:#EEF3F9;border-radius:4px;padding:2px 5px;font-size:12px;word-break:break-all;font-family:Consolas,monospace}
-.sev{display:inline-block;border-radius:12px;padding:2px 9px;font-size:12px;font-weight:700;color:#fff}
-.Alta{background:#C62828}.Media{background:#B26A00}.Info{background:#6B7C93}
-.v{display:inline-block;border-radius:12px;padding:2px 9px;font-size:12px;font-weight:600}
-.v0{background:#FDE7E7;color:#C62828}.v1{background:#FFF1DC;color:#8A5200}.v2{background:#E3F4EA;color:#1E7B45}.v3,.v4{background:#EEF1F5;color:#5A6B7D}
-.ok{color:#1E7B45;font-weight:600}.ko{color:#C62828;font-weight:600}
-.hm{display:grid;grid-template-columns:38px repeat(24,1fr);gap:2px;font-size:10px;min-width:640px}
-.hm div{height:18px;border-radius:2px;display:flex;align-items:center;justify-content:center}
-.hm .lab{background:none;color:#5A6B7D;justify-content:flex-start}
-.hm .w{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 2px,transparent 2px 5px)}
-.hm .r{box-shadow:inset 0 0 0 2px #0078D4}
-.legend{font-size:12px;color:#5A6B7D;margin:6px 0 2px}.legend i{display:inline-block;width:14px;height:12px;vertical-align:middle;margin:0 4px 0 10px;border-radius:2px}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.cols .card h3{margin:0 0 8px;font-size:15px;color:#243A5E}.cols ul{margin:0;padding-left:18px}.cols li{margin:4px 0}
-.small{font-size:12px;color:#5A6B7D}footer{margin-top:30px;font-size:12px;color:#5A6B7D}
-svg text{font-family:'Segoe UI',Arial,sans-serif}
-@media(max-width:640px){header h1{font-size:18px}header svg{width:42px;height:42px}.kpi b{font-size:20px}body{font-size:13px}}
+:root{--paper:#f3f5f8;--ink:#172338;--title:#1d3354;--muted:#526075;--line:#dfe5ee;--line2:#c3cddb;--soft:#eef2f7;--blue:#0078d4;--link:#0063b1;--hm:#c9d4e3;--mono:ui-monospace,'Cascadia Mono',Consolas,monospace;--sh:0 1px 2px rgba(23,35,56,.05),0 10px 28px rgba(23,35,56,.07)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scrollbar-color:var(--line2) var(--paper)}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;font-variant-numeric:tabular-nums}
+::selection{background:#cfe4f7}a{color:var(--link);text-underline-offset:3px}button,input,select{font:inherit;color:inherit}:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.skip{position:absolute;left:-999px;top:8px;z-index:30;background:#fff;padding:8px 14px}.skip:focus{left:12px}
+.bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px max(clamp(16px,4vw,40px),calc(50% - 660px));background:#fff;box-shadow:0 1px 0 var(--line)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--title);text-decoration:none;font-weight:700;font-size:16px;white-space:nowrap}.brand svg{width:30px;height:30px}
+.ctx{color:var(--muted);font-size:13.5px;white-space:nowrap;padding-left:14px;border-left:1px solid var(--line)}.bar nav{display:flex}
+.bar nav a{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;padding:7px 9px;border-radius:8px}.bar nav a:hover{background:var(--soft);color:var(--title)}
+.acts{margin-left:auto;display:flex;gap:8px;align-items:center}.tag{font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line2);border-radius:99px;padding:4px 11px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 15px;border-radius:10px;border:1px solid transparent;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#0067b8}.btn.ghost,.copy{background:#fff;color:var(--title);border:1px solid var(--line2)}.btn.ghost:hover,.copy:hover{background:var(--soft)}
+.hero{position:relative;background:linear-gradient(150deg,#243a5e,#172a48);color:#fff;padding:clamp(28px,4.4vw,52px) clamp(16px,4vw,40px) 104px}.hero::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:var(--blue)}
+.hero-in{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px 48px;align-items:start}
+.hero h1{margin:0 0 14px;font-size:clamp(30px,3.3vw,44px);line-height:1.1;letter-spacing:-.02em;text-wrap:balance}.lead{margin:0 0 10px;font-size:18px;max-width:68ch;color:#eef3f9}
+.thesis{margin:0;max-width:72ch;color:var(--hm)}.thesis b{color:#fff;font-weight:600}.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.meta span{font-size:12.5px;padding:4px 11px;border-radius:99px;border:1px solid rgba(255,255,255,.24);color:var(--hm);white-space:nowrap}.meta .on{color:#fff;font-weight:700;border-color:#fedf89}
+.verdict{border-radius:16px;padding:18px 20px;background:rgba(255,255,255,.07);border:1px solid rgba(254,223,137,.5);color:var(--hm);font-size:14px}
+.verdict b{display:block;margin:2px 0 8px;font-size:26px;line-height:1.2;color:#fedf89}.verdict.good{border-color:rgba(166,244,197,.5)}.verdict.good b{color:#a6f4c5}
+.dist{grid-column:1/-1}.track{display:flex;height:12px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.18)}
+.legend,.keys,.scale{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--muted)}.legend{color:var(--hm);font-size:13.5px}.legend b{color:#fff}
+.legend span,.keys span,.scale span{display:inline-flex;align-items:center;gap:7px}.legend i,.keys i,.scale i{width:11px;height:11px;border-radius:3px}.keys i{border-radius:50%}
+.body{max-width:1400px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 40px}.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:-64px;position:relative}
+.kpi,.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--sh);min-width:0}.card{padding:20px 22px}
+.kpi .v{font-size:36px;line-height:1.05;font-weight:700;letter-spacing:-.02em;color:var(--title);white-space:nowrap}.kpi small{font-size:16px;font-weight:600;color:var(--muted);margin-left:5px;letter-spacing:0}
+.kpi .l{margin-top:8px;font-size:14px;font-weight:600;line-height:1.3}.kpi .f{margin-top:8px;font-size:13px;color:var(--muted)}
+.kpi .bad,.kpi .warn,.kpi .good{color:#b42318;font-weight:600}.kpi .warn{color:#93370d}.kpi .good{color:#067647}
+.sim{display:flex;gap:10px;align-items:center;margin-top:18px;padding:11px 16px;border-radius:12px;background:repeating-linear-gradient(135deg,#fffaeb 0 12px,#fef0c7 12px 24px);color:#7a2e0e;font-weight:600;font-size:14px;border:1px solid #fedf89}
+section{margin-top:44px;scroll-margin-top:72px}.sh{margin-bottom:14px}
+.sh h2{margin:0;font-size:22px;line-height:1.25;color:var(--title)}.sh p,.sub,.note{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:75ch}
+.card h3{margin:0 0 4px;font-size:17px;line-height:1.3;color:var(--title)}.sub{margin-bottom:14px;font-size:13.5px}.note{margin:10px 2px 0;font-size:13.5px;max-width:110ch}
+.grid2,.grid3,.hm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px}.grid3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.pill,.sev{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:99px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.sev{font-weight:700}.sev::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.t-ok{background:#dcfae6;color:#067647}.t-crit{background:#fee4e2;color:#b42318}.t-high{background:#ffead5;color:#b93815}.t-med{background:#fef0c7;color:#93370d}.t-low{background:#d1e9ff;color:#175cd3}.t-neu{background:#eaecf0;color:#344054}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{font-size:13px;background:var(--soft);border-radius:8px;padding:2px 9px;white-space:nowrap}.chips.risk span{background:#fee4e2;color:#b42318;font-weight:600}
+.up-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 20px;flex-wrap:wrap}.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:16px 24px;margin:16px 0 0}
+.facts dt{font-size:12.5px;font-weight:700;color:var(--muted)}.facts dd{margin:4px 0 0}.facts .wide{grid-column:span 2}.ok-t{color:#067647;font-weight:600}
+.dt,.flat{padding:0;overflow:hidden}.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:16px 18px}
+.tools input,.tools select{min-height:40px;border:1px solid var(--line2);border-radius:10px;padding:0 12px;background:#fff;max-width:100%;min-width:0}.tools input{flex:1 1 220px;max-width:340px}
+.tools input::placeholder{color:var(--muted)}.cnt{margin-left:auto;font-size:13px;color:var(--muted)}
+.wrap,.tl-scroll,.hm-scroll{overflow-x:auto;background:linear-gradient(90deg,#fff 30%,rgba(255,255,255,0)) left/36px 100% no-repeat local,linear-gradient(270deg,#fff 30%,rgba(255,255,255,0)) right/36px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(16,24,40,.16),rgba(16,24,40,0)) left/14px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(16,24,40,.16),rgba(16,24,40,0)) right/14px 100% no-repeat scroll}.wrap{border-top:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:var(--soft);color:var(--title);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:left;padding:0;border-bottom:1px solid var(--line);vertical-align:bottom}
+th .sort,th .th{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:6px;width:100%;padding:11px 14px}th .sort{cursor:pointer}th .sort:hover{color:var(--link)}
+th .sort:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}th.n .sort{justify-content:flex-end}
+th[aria-sort] .sort::after{content:"";border:5px solid transparent;border-top-color:currentColor;margin-top:5px}th[aria-sort=ascending] .sort::after{border-color:transparent transparent currentColor;margin:0 0 5px}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:last-child td{border-bottom:0}tbody tr:hover td{background:#f8fafc}
+td.n{text-align:right;white-space:nowrap}td small{display:block;color:var(--muted);font-size:12.5px}.nw{white-space:nowrap}.nil,.empty{color:var(--muted)}.empty{margin:0}
+.ext{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600}.ext .i{width:13px;height:13px}.u{color:#b42318;font-weight:700}
+.c-t{min-width:180px}.c-s{min-width:140px}.c-d{min-width:240px}.c-a{min-width:320px}.c-w{min-width:170px}.c-c{min-width:170px}
+.cmd{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#f6f8fb;overflow:hidden}.cmd div{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 4px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--muted)}
+.copy{border-radius:7px;font-size:12.5px;font-weight:600;padding:2px 10px;cursor:pointer}.cmd code{display:block;padding:8px 10px;font:12.5px/1.5 var(--mono);white-space:pre-wrap;color:#1d2939}
+.tl{min-width:640px;padding-right:22px;font-size:12.5px;color:var(--muted)}.tl-row{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center}
+.tl-row>b{font-weight:600;color:var(--ink);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:10px}
+.tl-track{position:relative;height:52px}.tl-track::before{content:"";position:absolute;left:0;right:0;top:64%;height:1px;background:var(--line2)}
+.gl{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}.tl-ax .tl-track{height:24px}.tl-ax .tl-track::before{display:none}
+.tk{position:absolute;top:4px;transform:translateX(-50%);white-space:nowrap}.ev{position:absolute;top:64%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #fff;opacity:.92}
+.evn{position:absolute;transform:translateX(-50%);color:#b42318;font-weight:700;font-size:12px;white-space:nowrap}
+.bars{display:grid;gap:10px}.brow{display:grid;grid-template-columns:minmax(120px,32%) 1fr minmax(96px,auto);gap:12px;align-items:center;font-size:14px}
+.bl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt{position:relative;height:12px;background:var(--soft);border-radius:99px;overflow:hidden}.bt i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:#c3cddb}
+.brow b{text-align:right;font-weight:600;white-space:nowrap}.brow small{color:var(--muted);font-weight:400}.lg{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.lg li{display:grid;grid-template-columns:170px 1fr;gap:10px;align-items:baseline;font-size:14px}.lg .pill{justify-self:start}.hm-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,560px),1fr))}
+.hm-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}.hm-meta b{color:var(--ink);font-weight:600}
+.hm{display:grid;grid-template-columns:34px repeat(24,minmax(16px,1fr));gap:2px;min-width:520px;margin-top:12px;font-size:11.5px;color:var(--muted)}.hm span{height:20px;border-radius:3px}
+.hm .lab{height:auto;text-align:center}.hm .d{text-align:left}.w{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.62) 0 2px,transparent 2px 5px)}.r{box-shadow:inset 0 0 0 2px #067647}
+.scale .ramp{width:72px;background:linear-gradient(90deg,rgba(0,75,147,.06),#004b93)}
+.az ul,.az ol{margin:0;padding-left:20px;display:grid;gap:9px}.az li::marker{color:#12b76a}.az .no li::marker{color:#d92d20}.az ol li::marker{color:var(--title);font-weight:700}
+footer{max-width:1400px;margin:0 auto;padding:8px clamp(16px,4vw,40px) 40px;color:var(--muted);font-size:13px}footer p{margin:4px 0}
+@media (max-width:1399px){.ctx{display:none}}@media (max-width:1100px){.bar nav{display:none}.hero-in{grid-template-columns:1fr}}
+@media (max-width:760px){.tag,.btn .lbl{display:none}.btn{padding:0 12px}.kpi .v{font-size:30px}.lead{font-size:16.5px}.hero{padding-bottom:88px}.facts .wide{grid-column:auto}
+.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+.stack tr{padding:14px 16px;border-bottom:1px solid var(--line)}.stack td{border:0;padding:2px 0;min-width:0}
+.stack td[data-label]::before{content:attr(data-label);display:block;margin-top:10px;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.brow{grid-template-columns:1fr auto}.brow .bt{grid-column:1/-1;grid-row:2}.lg li{grid-template-columns:1fr}.cnt{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{background:#fff;font-size:12px}.bar{position:static;box-shadow:none;border-bottom:1px solid var(--line);padding:0 0 8px}
+.bar nav,.acts .btn,.tools,.copy,.skip{display:none!important}.hero{padding:22px 22px 80px}.body,footer{padding-left:0;padding-right:0}.hero h1{font-size:28px}.lead{font-size:14px}
+.hero-in{grid-template-columns:minmax(0,1fr) 220px;gap:14px 24px}.verdict b{font-size:19px}.kpis{grid-template-columns:repeat(3,1fr);margin-top:-60px}.kpi .v{font-size:26px}.kpi,.card{box-shadow:none}
+section{margin-top:22px}.sh{break-inside:avoid;break-after:avoid}.sh h2{font-size:18px}.sh p,.sub,.note{font-size:12px}h2,h3{break-after:avoid}.card{padding:14px 16px}.dt,.flat{padding:0}.card h3{font-size:14px}
+.card,.kpi,tr,.brow,.tl-row,.cmd,.hm-card{break-inside:avoid}.dt{break-inside:auto}.dt,.flat,.wrap,.tl-scroll,.hm-scroll{overflow:visible;background:none}
+thead{display:table-header-group}table{font-size:11px}th{font-size:10px;letter-spacing:.02em}td{padding:5px 6px;overflow-wrap:anywhere}th .th{padding:5px 6px}
+th .sort{display:none}th[data-l]::after{content:attr(data-l);display:block;padding:5px 6px}th.n::after{text-align:right}
+td small,.pill,.sev{font-size:10.5px}.pill,.sev{padding:1px 7px}.c-s,.c-w,.tl,.hm{min-width:0}.c-t{min-width:110px}.c-d{min-width:150px}.c-c{min-width:120px}.c-a{min-width:250px}.cmd code{font-size:10px}
+.grid2,.hm-grid{grid-template-columns:1fr}.grid3{grid-template-columns:repeat(3,1fr)}.brow,.lg li{font-size:12px}a{color:inherit;text-decoration:none}}
 """
-
-    def kpi(v, lab, cls=""):
-        return f'<div class="kpi {cls}"><b>{E(v)}</b><span>{E(lab)}</span></div>'
-    VCLS = {k: f"v{n}" for k, n in ORDER.items()}
-    out = [f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-           f'<title>SQL MI · Resiliencia ante mantenimiento</title><style>{CSS}</style></head><body>',
-           f'<header><div class="wrap"><svg width="52" height="52" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="10" fill="#fff"/><g fill="none" stroke="#0078D4" stroke-width="3"><ellipse cx="24" cy="13" rx="12" ry="5"/><path d="M12 13v22c0 2.8 5.4 5 12 5s12-2.2 12-5V13M12 24c0 2.8 5.4 5 12 5s12-2.2 12-5"/></g></svg><div>'
-           f'<h1>Resiliencia de Azure SQL Managed Instance ante mantenimiento</h1>'
-           f'<p>{E(period_label)} · generado {E(fmt_local(now_utc))} ({E(LOCAL_TIMEZONE)}) · Azure SRE Agent</p></div></div></header><div class="wrap">']
+    JS = r"""
+(()=>{const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+$$('.dt').forEach(card=>{const tb=card.querySelector('tbody'),rows=[...tb.rows],q=card.querySelector('.f-q'),sels=$$('select[data-f]',card),cnt=card.querySelector('.cnt');
+const val=c=>c.dataset.raw!==undefined?c.dataset.raw:c.textContent.trim();
+const draw=()=>{const t=q.value.trim().toLowerCase();let m=0;rows.forEach(r=>{const ok=(!t||r.textContent.toLowerCase().includes(t))&&sels.every(s=>!s.value||r.dataset[s.dataset.f]===s.value);r.hidden=!ok;if(ok)m++});
+cnt.textContent=m+' de '+rows.length+' filas'};q.addEventListener('input',draw);sels.forEach(s=>s.addEventListener('change',draw));
+$$('th .sort',card).forEach(b=>b.addEventListener('click',()=>{const th=b.parentNode,i=+b.dataset.i,asc=th.getAttribute('aria-sort')!=='ascending';
+$$('th',card).forEach(h=>h.removeAttribute('aria-sort'));th.setAttribute('aria-sort',asc?'ascending':'descending');
+rows.sort((a,z)=>{const x=a.cells[i],y=z.cells[i],nx=x.dataset.n,ny=y.dataset.n,d=(nx!==undefined&&ny!==undefined)?nx-ny:val(x).localeCompare(val(y),'es',{numeric:true,sensitivity:'base'});return asc?d:-d});
+rows.forEach(r=>tb.appendChild(r))}));
+card.querySelector('.f-csv').addEventListener('click',()=>{const Q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+const lines=[$$('thead th',card).map(h=>Q(h.textContent.trim())).join(';')].concat(rows.filter(r=>!r.hidden).map(r=>[...r.cells].map(c=>Q(val(c))).join(';')));
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));
+a.download=card.dataset.file+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});draw()});
+$$('[data-copy]').forEach(b=>b.addEventListener('click',()=>{const c=b.closest('.cmd').querySelector('code'),done=()=>{b.textContent='Copiado';setTimeout(()=>{b.textContent='Copiar'},1600)};
+const sel=()=>{const r=document.createRange();r.selectNodeContents(c);const s=getSelection();s.removeAllRanges();s.addRange(r);try{if(document.execCommand('copy'))done()}catch(e){}};
+if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(c.textContent).then(done,sel);else sel()}));
+$$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})();
+"""
+    pf = 'font:8px/1.2 "Segoe UI",Arial,sans-serif;color:#667085'
+    out = ['<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" '
+           'content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'">'
+           f'<title>SQL MI · Resiliencia ante mantenimiento</title><style>{CSS}@page{{size:A4;margin:12mm 10mm 14mm;@bottom-left{{content:"{title} · {stamp_utc} UTC";{pf}}}'
+           f'@bottom-right{{content:"Página " counter(page) " de " counter(pages);{pf}}}}}</style></head><body><a class="skip" href="#main">Saltar al contenido</a>'
+           '<header class="bar"><a class="brand" href="#resumen"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0078d4"/>'
+           '<g fill="none" stroke="#fff" stroke-width="2.2"><ellipse cx="16" cy="9.5" rx="8" ry="3.2"/><path d="M8 9.5v13c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2v-13M8 16c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2"/>'
+           '</g></svg>Azure SRE Agent</a><span class="ctx">SQL Managed Instance · mantenimiento</span><nav aria-label="Secciones del informe">'
+           + "".join(f'<a href="#{a.lower()}">{a}</a>' for a in ("Resumen", "Acciones", "Instancias", "Eventos", "Aplicaciones", "Carga", "Fuentes"))
+           + f'</nav><div class="acts"><span class="tag">Solo lectura</span><button class="btn" type="button" data-print aria-label="Imprimir o guardar como PDF">{ICON["print"]}'
+           '<span class="lbl">Imprimir / PDF</span></button></div></header><main id="main">']
+    # Hero: verdict first (the short answer, the verdict and the priority mix)
+    chips = [f"Generado {stamp_utc} UTC", period_label, f"Horas en {LOCAL_TIMEZONE}", f"{len(insts)} instancias · {len(prd)} de producción"]
+    gaps = sum(1 for s in sources if s["status"] != "ok")
+    out.append(f'<div class="hero" id="resumen"><div class="hero-in"><div><h1>{E(title)}</h1><p class="lead">{g4(E(a_lead.strip()))}</p>'
+               + (f'<p class="thesis"><b>{E(a_key + a_dot)}</b> {g4(E(a_tail.strip()))}</p>' if a_sep else "")
+               + '<div class="meta">' + "".join(f"<span>{E(c)}</span>" for c in chips)
+               + f'<span class="on">{"DATOS SIMULADOS (demo)" if MODE == "demo" else "DATOS REALES"}</span>'
+               + (f'<span class="on">Cobertura parcial: {gaps} de {len(sources)} fuentes sin datos completos</span>' if gaps else "") + "</div></div>"
+               f'<div class="verdict{"" if attention else " good"}" role="group" aria-label="Veredicto">Veredicto<b>{"Requiere atención" if attention else "Sin incidencias relevantes"}</b>{E(vdetail)}</div>')
+    if findings:
+        out.append(f'<div class="dist"><div class="track" role="img" aria-label="Acciones por prioridad: {E(vdetail)}">'
+                   + "".join(f'<i style="width:{100 * n / len(findings):.2f}%;background:{SEVT[s][1]}"></i>' for s, n in sevn.items() if n)
+                   + '</div><div class="legend">' + "".join(f'<span><i style="background:{SEVT[s][1]}"></i>{s} <b>{n}</b></span>' for s, n in sevn.items() if n) + "</div></div>")
+    nm = kpis["next_maintenance"].split(" ")
+    DAYS = dict(zip(DIAS, ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")))
+    ue = kpis["user_errors"]
+    K = [(N(ue), "errores vistos por usuarios", f"{kpis['user_errors_no_retry_pct']} % en apps sin reintentos" if ue else "", "bad"),
+         (f"{N(kpis['apps_no_retry'])}<small>/{N(kpis['apps_total'])}</small>", "apps sin reintentos",
+          f"+{kpis['apps_partial']} parciales" if kpis["apps_partial"] else "", "warn"),
+         (N(kpis["reconfigurations"]), "reconfiguraciones", f"{kpis['planned']} planif. · {kpis['unplanned']} no planif.", ""),
+         (f"{E(kpis['avg_duration_s'])}<small>s</small>", "duración media", f"máx {E(kpis['max_duration_s'])} s", ""),
+         (f"{N(kpis['prd_on_default_window'])}<small>/{N(kpis['managed_instances_prd'])}</small>", "producción en ventana por defecto",
+          f"{N(kpis['managed_instances_prd'])} SQL MI de producción", ""),
+         (f"{E(nm[1])}<small>{E(nm[2])}</small>" if len(nm) == 3 else E(nm[0]),
+          f"próximo mantenimiento · {DAYS.get(nm[0], nm[0])}" if len(nm) == 3 else "próximo mantenimiento",
+          "con alerta de mantenimiento" if kpis["maintenance_alert"] else "sin alerta de mantenimiento", "good" if kpis["maintenance_alert"] else "bad")]
+    out.append('</div></div><div class="body"><div class="kpis">' + "".join(
+        f'<div class="kpi"><div class="v">{v}</div><div class="l">{E(lab)}</div>' + (f'<div class="f {t}">{f}</div>' if f else "") + "</div>"
+        for v, lab, f, t in K) + "</div>")
     if MODE == "demo":
-        out.append('<div class="demo">MODO DEMO — datos simulados para mostrar el informe. Configura la tool (README paso 4) para analizar tu entorno.</div>')
-    out.append(f'<div class="answer"><b>Respuesta corta.</b> {E(answer)}</div><div class="kpis">')
-    out += [kpi(kpis["managed_instances_prd"], "SQL MI de producción"),
-            kpi(f"{kpis['prd_on_default_window']}/{kpis['managed_instances_prd']}", "en ventana por defecto", "warn" if kpis["prd_on_default_window"] else ""),
-            kpi(kpis["reconfigurations"], f"reconfiguraciones ({kpis['planned']} planif. · {kpis['unplanned']} no planif.)"),
-            kpi(f"{kpis['avg_duration_s']} s", f"duración media (máx {kpis['max_duration_s']} s)"),
-            kpi(kpis["user_errors"], "errores vistos por usuarios", "bad" if kpis["user_errors"] else ""),
-            kpi(f"{kpis['apps_no_retry']}/{kpis['apps_total']}", f"apps sin reintentos (+{kpis['apps_partial']} parciales)", "bad" if kpis["apps_no_retry"] else ""),
-            kpi(kpis["next_maintenance"], "próximo mantenimiento"),
-            kpi("Sí" if kpis["maintenance_alert"] else "No", "alerta de mantenimiento", "" if kpis["maintenance_alert"] else "bad")]
-    out.append("</div>")
+        out.append(f'<div class="sim" role="note">{ICON["alert"]}MODO DEMO — datos simulados para mostrar el informe. Configura la tool (README paso 4) para analizar tu entorno.</div>')
 
-    out.append("<h2>Próximo mantenimiento</h2>")
-    if not raw["upcoming"]:
-        out.append('<div class="card">No hay mantenimientos planificados publicados en Service Health para tus SQL MI.</div>')
+    # Próximo mantenimiento
+    ups = []
     for u in sorted(raw["upcoming"], key=lambda x: x["start"]):
         at = sorted({a["app"] for m in u["impacted"] for a in apps_by_mi.get(m, []) if a["app"] in risky})
-        out.append(f'<div class="card {"up" if at else ""}"><b>{E(u["title"])}</b> <span class="small">· {E(u["tracking_id"])} · {E(u["source"])}</span><br>'
-                   f'{E(fmt_local(parse_dt(u["start"])))} → {E(fmt_local(parse_dt(u["end"])))} · Instancias: {E(", ".join(u["impacted"]) or "—")}<br>'
-                   + (f'<span class="ko">Aplicaciones en riesgo (sin reintentos o parciales): {E(", ".join(at))}</span>' if at
-                      else '<span class="ok">Sin aplicaciones en riesgo detectadas.</span>') + "</div>")
+        st_, en_ = parse_dt(u["start"]), parse_dt(u["end"])
+        dd = (st_ - now_utc).days
+        when = ((f"empieza en {dd} día{'s' if dd != 1 else ''}" if dd >= 1 else "empieza en menos de 24 h") if st_ > now_utc
+                else "en curso" if en_ >= now_utc else "finalizado")
+        ups.append(f'<div class="card"><div class="up-h"><div><h3>{E(u["title"])}</h3><p class="sub">{E(u["tracking_id"])} · {E(u["source"])} · {when}</p></div>'
+                   + (pill(f"{len(at)} aplicaciones en riesgo", "crit") if at else pill("Sin aplicaciones en riesgo", "ok"))
+                   + f'</div><dl class="facts"><div><dt>Inicio (hora local)</dt><dd>{E(fmt_local(st_))}</dd></div><div><dt>Fin (hora local)</dt><dd>{E(fmt_local(en_))}</dd></div>'
+                   + '<div><dt>Instancias</dt><dd class="chips">' + ("".join(f"<span>{E(m)}</span>" for m in u["impacted"]) or NIL) + "</dd></div>"
+                   + '<div class="wide"><dt>Aplicaciones en riesgo (sin reintentos o parciales)</dt>'
+                   + (f'<dd class="chips risk">{"".join(f"<span>{E(a)}</span>" for a in at)}</dd>' if at else '<dd class="ok-t">Sin aplicaciones en riesgo detectadas.</dd>')
+                   + "</div></dl></div>")
+    out.append(section("proximo", "Próximo mantenimiento", "Lo que Azure ya ha publicado en Service Health para tus instancias y qué aplicaciones lo notarán.",
+                       "".join(ups) or '<div class="card"><p class="empty">No hay mantenimientos planificados publicados en Service Health para tus SQL MI.</p></div>'))
 
-    out.append('<h2>Acciones priorizadas</h2><div class="tw"><table><tr><th>Prioridad</th><th>Hallazgo</th><th>Ámbito</th><th>Detalle</th>'
-               '<th>Qué hacer</th></tr>')
+    # Acciones priorizadas (findings register)
+    rows = []
     for f in findings:
-        out.append(f'<tr><td><span class="sev {f["severity"]}">{E(f["severity"])}</span></td><td><b>{E(f["title"])}</b></td><td>{E(f["scope"])}</td>'
-                   f'<td>{E(f["detail"])}</td><td>{E(f["action"])}' + (f'<br><code>{E(f["command"])}</code>' if f["command"] else "") + "</td></tr>")
-    out.append("</table></div>")
+        cmd = (f'<div class="cmd"><div>Comando<button class="copy" type="button" data-copy>Copiar</button></div><code>'
+               + re.sub(r"[^\s/]+|/", lambda m: "/<wbr>" if m.group(0) == "/" else f'<span class="nw">{m.group(0)}</span>', E(f["command"])) + "</code></div>"
+               if f["command"] else "")
+        rows.append(f'<tr data-sev="{E(f["severity"])}">' + td(f'<span class="sev t-{SEVT[f["severity"]][0]}">{E(f["severity"])}</span>', f["severity"], SEV[f["severity"]])
+                    + td(f'<b>{E(f["title"])}</b>', f["title"], cls="c-t", label="Hallazgo") + td(nw(f["scope"]), f["scope"], cls="c-s", label="Ámbito")
+                    + td(E(f["detail"]), f["detail"], cls="c-d", label="Detalle")
+                    + td(E(f["action"]) + cmd, f["action"] + (" | " + f["command"] if f["command"] else ""), cls="c-a", label="Qué hacer") + "</tr>")
+    out.append(section("acciones", "Acciones priorizadas", "Ordenadas por prioridad y con el comando exacto. El agente no cambia nada: tu equipo valida y ejecuta.",
+                       dtable("sqlmi-acciones", "Acciones priorizadas", [("Prioridad", ""), ("Hallazgo", ""), ("Ámbito", ""), ("Detalle", ""), ("Qué hacer", "")], rows,
+                              fselect("sev", "Prioridad", [(s, n) for s, n in sevn.items() if n]), True, "Sin acciones: ninguna regla se ha cumplido en esta ejecución.")))
 
-    out.append('<h2>Instancias y ventanas</h2><div class="tw"><table><tr><th>Instancia</th><th>Región</th><th>Tier</th><th>Entorno</th>'
-               '<th>Ventana actual</th><th>Conexión</th><th>Failover group</th><th>Ventana recomendada</th><th>Errores usuario (planificados)</th></tr>')
+    # Instancias y ventanas
+    rows = []
     for i in sorted(insts, key=lambda x: (x["env"] != "prd", x["name"])):
-        fg = f'{i["fog"]} · {"primario" if i["fog_role"] == "Primary" else "secundario"}' if i.get("fog") else "—"
-        rec = WINDOWS[i["recommended"]] if i["recommended"] and i["recommended"] != i["window"] else ("Mantener" if i["recommended"] else "—")
-        est = (f'{i["user_errors_planned"]} → ~{i["user_errors_est"]}' if i["user_errors_planned"] and i["recommended"] != i["window"]
-               else str(i["user_errors_planned"]))
-        out.append(f'<tr><td><b>{E(i["name"])}</b></td><td>{E(region_label(i["location"]))}</td><td>{E("BC" if i["tier"] == "BusinessCritical" else "GP")} · '
-                   f'{E(i["vcores"])} vCores</td><td>{E(i["env"])}</td><td>{E(WINDOWS[i["window"]])}</td>'
-                   f'<td class="{"ko" if i["proxy"] == "Proxy" else ""}">{E(i["proxy"])}</td><td>{E(fg)}</td><td>{E(rec)}</td><td>{E(est)}</td></tr>')
-    out.append('</table></div><p class="small">La estimación de errores aplica la carga media de la ventana recomendada a los eventos planificados '
-               'reales. Es orientativa: solo los reintentos eliminan el impacto.</p>')
+        bc = i["tier"] == "BusinessCritical"
+        change = i["recommended"] and i["recommended"] != i["window"]
+        est = (f'{N(i["user_errors_planned"])} → ~{N(i["user_errors_est"])}' if i["user_errors_planned"] and i["recommended"] != i["window"]
+               else N(i["user_errors_planned"]))
+        rows.append("<tr>" + td(f'<b class="nw">{E(i["name"])}</b><small>{E(i["rg"])}</small><a class="ext" href="https://portal.azure.com/#@/resource{E(i["id"])}" '
+                                f'target="_blank" rel="noopener noreferrer">Portal{ICON["ext"]}</a>', i["name"])
+                    + td(E(region_label(i["location"])), cls="nw")
+                    + td(f'<abbr title="{"Business Critical" if bc else "General Purpose"}">{"BC" if bc else "GP"}</abbr> · {E(i["vcores"])} vCores',
+                         f'{"BC" if bc else "GP"} · {i["vcores"]} vCores', cls="nw")
+                    + td(pill(i["env"], "low" if i["env"] == "prd" else "neu"), i["env"]) + td(win_html(i["window"]), WINDOWS[i["window"]], cls="c-w")
+                    + td(pill("Proxy", "high") if i["proxy"] == "Proxy" else E(i["proxy"]), i["proxy"])
+                    + td(f'{E(i["fog"])}<small>{"primario" if i["fog_role"] == "Primary" else "secundario"}</small>' if i.get("fog") else NIL,
+                         f'{i["fog"]} · {i["fog_role"]}' if i.get("fog") else "—", cls="nw")
+                    + td(win_html(i["recommended"]) if change else pill("Mantener", "ok") if i["recommended"] else NIL,
+                         WINDOWS[i["recommended"]] if change else "Mantener" if i["recommended"] else "—", cls="c-w")
+                    + td(est, est.replace("\u202f", ""), i["user_errors_planned"], "n") + "</tr>")
+    out.append(section("instancias", "Instancias y ventanas", "Ventana actual frente a la recomendada por la carga real de cada instancia.",
+                       dtable("sqlmi-instancias", "Instancias y ventanas", [("Instancia", ""), ("Región", ""), ("Tier", ""), ("Entorno", ""), ("Ventana actual", ""),
+                              ("Conexión", ""), ("Failover group", ""), ("Ventana recomendada", ""), ("Errores usuario (planificados)", "n")], rows,
+                              empty="No hay instancias en el inventario.")
+                       + '<p class="note">La estimación de errores aplica la carga media de la ventana recomendada a los eventos planificados reales. '
+                         'Es orientativa: solo los reintentos eliminan el impacto.</p>'))
 
-    lanes = sorted({e["mi"] for e in events}, key=lambda m: list(by_name).index(m))
+    # Reconfiguraciones y errores de usuario: timeline in HTML so the text keeps its size on a phone and on paper
+    body = ""
     if events:
-        W, L, LH = 1000, 200, 34
-        H = 40 + LH * len(lanes)
-        RC = {"Planned": "#0078D4", "Unplanned": "#C62828", "UserInitiated": "#6B7C93", "Detected": "#B26A00"}
-        sv = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Línea de tiempo de reconfiguraciones">']
         span = (now_utc - start_utc).total_seconds()
-        for k in range(0, period_days + 1, max(1, period_days // 6)):
-            x = L + (W - L - 20) * k / period_days
-            sv.append(f'<line x1="{x:.0f}" y1="10" x2="{x:.0f}" y2="{H - 22}" stroke="#E3EAF2"/>'
-                      f'<text x="{x:.0f}" y="{H - 6}" font-size="11" fill="#5A6B7D" text-anchor="middle">{E((to_local(start_utc + timedelta(days=k))).strftime("%d/%m"))}</text>')
-        for n, m in enumerate(lanes):
-            y = 26 + n * LH
-            sv.append(f'<text x="6" y="{y + 4}" font-size="12" fill="#1B2A3A">{E(m)}</text><line x1="{L}" y1="{y}" x2="{W - 20}" y2="{y}" stroke="#C9D6E4"/>')
-            groups = []
+        ticks = [(100 * k / period_days, to_local(start_utc + timedelta(days=k)).strftime("%d/%m")) for k in range(0, period_days + 1, max(1, period_days // 6))]
+        grid = "".join(f'<i class="gl" style="left:{x:.2f}%"></i>' for x, _ in ticks)
+        tl = []
+        for m in sorted({e["mi"] for e in events}, key=lambda m: list(by_name).index(m)):
+            dots, groups = [], []
             for e in sorted((x for x in events if x["mi"] == m), key=lambda x: x["_t"]):
-                x = L + (W - L - 20) * (e["_t"] - start_utc).total_seconds() / span
+                x = max(0.0, min(100.0, 100 * (e["_t"] - start_utc).total_seconds() / span))
                 r = 4 + min(9, e["duration_s"] / 3)
-                sv.append(f'<circle cx="{x:.1f}" cy="{y}" r="{r:.1f}" fill="{RC.get(e["reason"], "#999")}" fill-opacity=".85">'
-                          f'<title>{E(e["local"])} · {E(e["reason_es"])} · {e["duration_s"]} s · {e["user_errors"]} errores usuario</title></circle>')
+                dots.append(f'<span class="ev" style="left:{x:.2f}%;width:{2 * r + 4:.0f}px;height:{2 * r + 4:.0f}px;background:{RT.get(e["reason"], ("", "#98a2b3"))[1]}" '
+                            f'title="{E(e["local"])} · {E(e["reason_es"])} · {e["duration_s"]} s · {e["user_errors"]} errores usuario"></span>')
                 # Reconfiguraciones muy próximas (p. ej. 2 en el mismo mantenimiento) comparten una sola etiqueta.
-                if groups and x - groups[-1][0] < 14:
+                if groups and x - groups[-1][0] < 1.8:
                     groups[-1][1] += e["user_errors"]
                     groups[-1][2] = max(groups[-1][2], r)
                     groups[-1][3] += 1
                 else:
                     groups.append([x, e["user_errors"], r, 1])
-            for x, u, r, c in groups:
-                if u:
-                    lbl = f'{u} ({c} reconf.)' if c > 1 else str(u)
-                    sv.append(f'<text x="{x:.1f}" y="{y - r - 3:.1f}" font-size="10.5" fill="#C62828" text-anchor="middle" font-weight="700">{lbl}</text>')
-        sv.append("</svg>")
-        out.append('<h2>Reconfiguraciones y errores de usuario</h2><div class="card">' + "".join(sv) +
-                   '<div class="legend"><i style="background:#0078D4"></i>Planificado<i style="background:#C62828"></i>No planificado'
-                   '<i style="background:#6B7C93"></i>Manual (drill)<i style="background:#B26A00"></i>Detectado por telemetría · '
-                   'número rojo = errores vistos por usuarios · tamaño = duración</div></div>')
-        out.append('<div class="tw"><table><tr><th>Fecha (hora local)</th><th>Instancia</th><th>Tipo</th><th>Duración</th><th>¿En ventana?</th>'
-                   '<th>Fallos SQL transitorios</th><th>Errores usuario</th><th>Aplicaciones</th></tr>')
-        for e in reversed(events):
-            out.append(f'<tr><td>{E(e["local"])}</td><td>{E(e["mi"])}</td><td>{E(e["reason_es"])}</td><td>{e["duration_s"]} s</td>'
-                       f'<td>{("Sí" if e["in_window"] else "No") if e["reason"] == "Planned" else "n/a"}</td><td>{e["dep_failures"]}</td><td class="{"ko" if e["user_errors"] else ""}">{e["user_errors"]}</td>'
-                       f'<td>{E(", ".join(e["apps"]) or "—")}</td></tr>')
-        out.append("</table></div>")
+            lab = "".join(f'<span class="evn" style="left:{x:.2f}%;bottom:calc(36% + {r + 5:.0f}px)">{N(u)}{f" ({c} reconf.)" if c > 1 else ""}</span>'
+                          for x, u, r, c in groups if u)
+            tl.append(f'<div class="tl-row"><b title="{E(m)}">{E(m)}</b><div class="tl-track">{grid}{"".join(dots)}{lab}</div></div>')
+        tl.append('<div class="tl-row tl-ax"><span></span><div class="tl-track">' + "".join(f'<span class="tk" style="left:{x:.2f}%">{t}</span>' for x, t in ticks) + "</div></div>")
+        body = (f'<div class="card"><div class="tl-scroll"><div class="tl" role="img" aria-label="Línea de tiempo de {len(events)} reconfiguraciones por instancia; '
+                'el detalle está en la tabla siguiente">' + "".join(tl) + '</div></div><div class="keys">'
+                + "".join(f'<span><i style="background:{RT[k][1]}"></i>{REASON[k]}</span>' for k in RT)
+                + '<span>número rojo = errores vistos por usuarios · tamaño = duración</span></div></div><div style="height:16px"></div>')
+    rows = []
+    for e in reversed(events):
+        inw = ("Sí" if e["in_window"] else "No") if e["reason"] == "Planned" else "n/a"
+        rows.append(f'<tr data-tipo="{E(e["reason_es"])}">' + td(E(e["local"]), e["local"], e["_t"].timestamp(), "nw") + td(f'<span class="nw">{E(e["mi"])}</span>', e["mi"])
+                    + td(pill(e["reason_es"], RT.get(e["reason"], ("neu",))[0]), e["reason_es"]) + td(f'{e["duration_s"]} s', e["duration_s"], e["duration_s"], "n")
+                    + td(pill(inw, "high") if inw == "No" else inw, inw) + td(N(e["dep_failures"]), e["dep_failures"], e["dep_failures"], "n")
+                    + td(f'<span class="u">{N(e["user_errors"])}</span>' if e["user_errors"] else "0", e["user_errors"], e["user_errors"], "n")
+                    + td(nw(", ".join(e["apps"])) if e["apps"] else NIL, ", ".join(e["apps"]), cls="c-d") + "</tr>")
+    tipos = sorted({e["reason_es"] for e in events})
+    out.append(section("eventos", "Reconfiguraciones y errores de usuario", "Cada reconfiguración corta las conexiones unos segundos; el número rojo indica cuántos errores vieron los usuarios.",
+                       body + dtable("sqlmi-reconfiguraciones", "Reconfiguraciones", [("Fecha (hora local)", ""), ("Instancia", ""), ("Tipo", ""), ("Duración", "n"),
+                                     ("¿En ventana?", ""), ("Fallos SQL transitorios", "n"), ("Errores usuario", "n"), ("Aplicaciones", "")], rows,
+                                     fselect("tipo", "Tipo", [(t, sum(1 for e in events if e["reason_es"] == t)) for t in tipos]),
+                                     empty="No hubo reconfiguraciones en el periodo analizado.")))
 
-    out.append('<h2>Aplicaciones: ¿absorben la reconfiguración?</h2><div class="tw"><table><tr><th>Aplicación</th><th>Instancias</th>'
-               '<th>Llamadas SQL</th><th>Reconfig. afectadas</th><th>Fallos SQL transitorios</th><th>Errores usuario</th><th>Ratio</th>'
-               '<th>Veredicto</th><th>Códigos</th></tr>')
+    # Aplicaciones: bar = SQL transient failures, coloured part = the ones users saw
+    body = ""
+    if apps:
+        top = max([max(a["dep_failures"], a["user_errors"]) for a in apps] + [1])
+        body = ('<div class="grid2"><div class="card"><h3>Errores de usuario frente a fallos SQL</h3><p class="sub">Barra gris = fallos SQL transitorios durante '
+                'reconfiguraciones; tramo de color = los que llegaron al usuario.</p><div class="bars">'
+                + "".join(f'<div class="brow"><span class="bl" title="{E(a["app"])}">{E(a["app"])}</span><span class="bt"><i style="width:{100 * a["dep_failures"] / top:.1f}%"></i>'
+                          f'<i style="width:{100 * a["user_errors"] / top:.1f}%;background:{VT.get(a["verdict"], ("", "#98a2b3"))[1]}"></i></span>'
+                          f'<b>{N(a["user_errors"])} <small>de {N(a["dep_failures"])}</small></b></div>' for a in apps)
+                + '</div></div><div class="card"><h3>Cómo se lee el veredicto</h3><p class="sub">Ratio = errores de usuario (peticiones HTTP 5xx) ÷ fallos SQL '
+                'transitorios durante la reconfiguración.</p><ul class="lg">'
+                f'<li>{pill("Sin reintentos", "crit")}<span>Ratio ≥ 0.5: el error llega al usuario.</span></li>'
+                f'<li>{pill("Parcial", "med")}<span>Entre 0.05 y 0.5: reintenta en algunos caminos, no en todos.</span></li>'
+                f'<li>{pill("Resiliente", "ok")}<span>Ratio &lt; 0.05: la aplicación absorbe la reconfiguración.</span></li>'
+                f'<li>{pill("Sin impacto observado", "neu")}<span>Sin fallos SQL transitorios durante las reconfiguraciones.</span></li></ul></div></div>'
+                '<div style="height:16px"></div>')
+    rows = []
     for a in apps:
-        out.append(f'<tr><td><b>{E(a["app"])}</b></td><td>{E(", ".join(a["mis"]))}</td><td>{a["sql_calls"]:,}</td><td>{a["events"]}</td>'
-                   f'<td>{a["dep_failures"]}</td><td>{a["user_errors"]}</td><td>{E(a["ratio"] if a["ratio"] is not None else "—")}</td>'
-                   f'<td><span class="v {VCLS.get(a["verdict"], "v4")}">{E(a["verdict"])}</span></td><td>{E(a["codes"] or "—")}</td></tr>')
-    out.append('</table></div><p class="small">Ratio = errores de usuario (peticiones HTTP 5xx) ÷ fallos SQL transitorios durante la '
-               'reconfiguración. ≥ 0,5: el error llega al usuario (sin reintentos). &lt; 0,05: la aplicación lo absorbe.</p>')
+        rows.append(f'<tr data-ver="{E(a["verdict"])}">' + td(f'<b class="nw">{E(a["app"])}</b>', a["app"]) + td(nw(", ".join(a["mis"])), ", ".join(a["mis"]))
+                    + "".join(td(N(a[k]), a[k], a[k], "n") for k in ("sql_calls", "events", "dep_failures"))
+                    + td(f'<span class="u">{N(a["user_errors"])}</span>' if a["user_errors"] else "0", a["user_errors"], a["user_errors"], "n")
+                    + (td(E(a["ratio"]), a["ratio"], a["ratio"], "n") if a["ratio"] is not None else td(NIL, "—", -1, "n"))
+                    + td(pill(a["verdict"], VT.get(a["verdict"], ("neu",))[0]), a["verdict"], ORDER.get(a["verdict"], 9))
+                    + td(E(a["codes"]) if a["codes"] else NIL, a["codes"] or "—", cls="c-c") + "</tr>")
+    out.append(section("aplicaciones", "Aplicaciones: ¿absorben la reconfiguración?", "Mismas reconfiguraciones, distinto resultado: la diferencia la marcan los reintentos.",
+                       body + dtable("sqlmi-aplicaciones", "Aplicaciones", [("Aplicación", ""), ("Instancias", ""), ("Llamadas SQL", "n"), ("Reconfig. afectadas", "n"),
+                                     ("Fallos SQL transitorios", "n"), ("Errores usuario", "n"), ("Ratio", "n"), ("Veredicto", ""), ("Códigos", "")], rows,
+                                     fselect("ver", "Veredicto", [(v, sum(1 for a in apps if a["verdict"] == v)) for v in ORDER if any(a["verdict"] == v for a in apps)]),
+                                     empty="No hay aplicaciones con telemetría SQL en el periodo.")))
 
-    out.append("<h2>Carga real vs. ventanas de mantenimiento</h2>")
+    # Carga real vs. ventanas de mantenimiento
+    cards = []
     for i in insts:
         hm = heat.get(i["name"])
         if not hm or i.get("fog_role") == "Secondary":
@@ -1097,42 +1291,53 @@ svg text{font-family:'Segoe UI',Arial,sans-serif}
         peak = max(max(r) for r in hm) or 1
         cw = WINDOW_CELLS.get(i["window"], set())
         rw = WINDOW_CELLS.get(i["recommended"], set()) if i["recommended"] and i["recommended"] != i["window"] else set()
-        cells = ['<div class="lab"></div>'] + [f'<div class="lab" style="justify-content:center">{hh}</div>' for hh in range(24)]
+        cells = ['<span class="lab"></span>'] + [f'<span class="lab">{hh}</span>' for hh in range(24)]
         for d_ in range(7):
-            cells.append(f'<div class="lab">{DIAS[d_]}</div>')
+            cells.append(f'<span class="lab d">{DIAS[d_]}</span>')
             for hh in range(24):
-                a_ = 0.06 + 0.94 * hm[d_][hh] / peak
-                cls = ("w " if (d_, hh) in cw else "") + ("r" if (d_, hh) in rw else "")
-                cells.append(f'<div class="{cls}" style="background-color:rgba(0,75,147,{a_:.2f})" title="{DIAS[d_]} {hh:02d}:00 · {hm[d_][hh]:,.0f}"></div>')
-        sc = " · ".join(f"{w}: {i['scores'][w]}" for w in ("Default", "Weekday", "Weekend") if i["scores"].get(w) is not None)
-        out.append(f'<div class="card"><b>{E(i["name"])}</b> <span class="small">· fuente: {E(heat_src.get(i["name"], "—"))} · '
-                   f'actual: {E(WINDOWS[i["window"]])}' + (f' · recomendada: <b>{E(WINDOWS[i["recommended"]])}</b>' if rw else "") +
-                   (f' · batch {E(i["batch_label"])}' if i["batch_label"] else "") +
-                   f'</span><div style="overflow-x:auto;margin-top:8px"><div class="hm">{"".join(cells)}</div></div>'
-                   f'<div class="legend">Azul más intenso = más carga · <i class="w" style="background:#7FA5CC;background-image:repeating-linear-gradient(45deg,'
-                   f'rgba(255,255,255,.6) 0 2px,transparent 2px 5px)"></i>ventana actual<i style="box-shadow:inset 0 0 0 2px #0078D4"></i>ventana '
-                   f'recomendada · puntuación (menor = mejor): {E(sc)}</div></div>')
+                cls = " ".join(c for c, on in (("w", (d_, hh) in cw), ("r", (d_, hh) in rw)) if on)
+                ca = f' class="{cls}"' if cls else ""
+                cells.append(f'<span{ca} style="background-color:rgba(0,75,147,{0.06 + 0.94 * hm[d_][hh] / peak:.2f})" '
+                             f'title="{DIAS[d_]} {hh:02d}:00 · {hm[d_][hh]:,.0f}"></span>')
+        sc = {w: s for w, s in i["scores"].items() if s is not None}
+        best = min(sc, key=sc.get) if sc else None
+        score = " · ".join(f"<b>{E(WINDOWS[w].split(' · ')[0])} {s}</b>" if w == best else f"{E(WINDOWS[w].split(' · ')[0])} {s}" for w, s in sc.items())
+        cards.append(f'<div class="card hm-card"><h3>{E(i["name"])}</h3><div class="hm-meta"><span>Fuente: <b>{E(heat_src.get(i["name"], "—"))}</b></span>'
+                     f'<span>Actual: <b>{E(WINDOWS[i["window"]])}</b></span>' + (f'<span>Recomendada: <b>{E(WINDOWS[i["recommended"]])}</b></span>' if rw else "")
+                     + (f'<span>Batch <b>{E(i["batch_label"])}</b></span>' if i["batch_label"] else "")
+                     + f'</div><div class="hm-scroll"><div class="hm" role="img" aria-label="Carga media por día y hora local de {E(i["name"])}; ventana actual {E(WINDOWS[i["window"]])}'
+                     + (f'; recomendada {E(WINDOWS[i["recommended"]])}' if rw else "") + '">' + "".join(cells) + '</div></div><div class="scale"><span><i class="ramp"></i>menos → más carga</span>'
+                     '<span><i class="w" style="background-color:#7fa5cc"></i>ventana actual</span><span><i class="r"></i>ventana recomendada</span></div>'
+                     + (f'<p class="note">Puntuación (menor = mejor): {score}</p>' if score else "") + "</div>")
+    out.append(section("carga", "Carga real vs. ventanas de mantenimiento", "Carga media por día y hora local: la mejor ventana es la que cae donde hay menos carga.",
+                       f'<div class="hm-grid">{"".join(cards)}</div>' if cards else '<div class="card"><p class="empty">Sin datos de carga por hora para estas instancias.</p></div>'))
 
-    out.append('<h2>Qué permite Azure, qué no y qué hacer</h2><div class="cols">'
-               '<div class="card"><h3>Lo que Azure permite</h3><ul><li>3 ventanas: por defecto (17:00–08:00), entre semana (Lun–Jue 22:00–06:00) y '
-               'fin de semana (Vie–Dom 22:00–06:00), en hora local de la región.</li><li>Aviso 24 h antes, al inicio y al final mediante alertas de '
-               'Service Health.</li><li>Ventanas distintas en primario y secundario de un failover group.</li><li>Conexión Redirect (menos '
-               'desconexiones por mantenimiento del gateway).</li><li>Failover manual para ensayar (máx. 1 cada 15 min).</li></ul></div>'
-               '<div class="card"><h3>Lo que Azure no permite</h3><ul><li>Elegir día y hora exactos ni ventanas a medida como en on-premises.</li>'
-               '<li>Posponer o cancelar un mantenimiento concreto.</li><li>Evitar eventos no planificados (hardware, red) ni actualizaciones '
-               'críticas que pueden aplicarse fuera de ventana.</li><li>Una reconfiguración sin desconexión: siempre corta conexiones unos segundos.</li></ul></div>'
-               '<div class="card"><h3>Qué hacer (en este orden)</h3><ul><li><b>Reintentos</b> con backoff en todas las aplicaciones: elimina el '
-               'impacto en planificados y no planificados.</li><li>Alerta de mantenimiento + comunicación a negocio.</li><li>Ventana entre semana o '
-               'fin de semana según la carga real; ventanas distintas en el failover group.</li><li>Redirect en lugar de Proxy.</li>'
-               '<li>Ensayo trimestral en preproducción con failover manual.</li></ul></div></div>')
-
-    out.append('<h2>Fuentes y cobertura</h2><div class="tw"><table><tr><th>Fuente</th><th>Estado</th><th>Detalle</th></tr>')
-    for s in sources:
-        out.append(f'<tr><td>{E(s["source"])}</td><td class="{"ok" if s["status"] == "ok" else "ko" if s["status"] == "error" else ""}">{E(s["status"])}</td>'
-                   f'<td>{E(s["detail"])}</td></tr>')
-    out.append('</table></div><footer>Informe de solo lectura generado por Azure SRE Agent · tool generate-sqlmi-maintenance-report v1.0. '
-               'Referencias: Microsoft Learn — Maintenance window (SQL MI), Advance notifications, Connection types, Configurable retry logic (SqlClient).</footer>'
-               '</div></body></html>')
+    out.append(section("azure", "Qué permite Azure, qué no y qué hacer", "Los límites de la plataforma y el orden de las medidas que sí dependen de ti.",
+                       '<div class="grid3 az">'
+                       '<div class="card"><h3>Lo que Azure permite</h3><ul><li>3 ventanas: por defecto (17:00–08:00), entre semana (Lun–Jue 22:00–06:00) y '
+                       'fin de semana (Vie–Dom 22:00–06:00), en hora local de la región.</li><li>Aviso 24 h antes, al inicio y al final mediante alertas de '
+                       'Service Health.</li><li>Ventanas distintas en primario y secundario de un failover group.</li><li>Conexión Redirect (menos '
+                       'desconexiones por mantenimiento del gateway).</li><li>Failover manual para ensayar (máx. 1 cada 15 min).</li></ul></div>'
+                       '<div class="card"><h3>Lo que Azure no permite</h3><ul class="no"><li>Elegir día y hora exactos ni ventanas a medida como en on-premises.</li>'
+                       '<li>Posponer o cancelar un mantenimiento concreto.</li><li>Evitar eventos no planificados (hardware, red) ni actualizaciones '
+                       'críticas que pueden aplicarse fuera de ventana.</li><li>Una reconfiguración sin desconexión: siempre corta conexiones unos segundos.</li></ul></div>'
+                       '<div class="card"><h3>Qué hacer (en este orden)</h3><ol><li><b>Reintentos</b> con backoff en todas las aplicaciones: elimina el '
+                       'impacto en planificados y no planificados.</li><li>Alerta de mantenimiento + comunicación a negocio.</li><li>Ventana entre semana o '
+                       'fin de semana según la carga real; ventanas distintas en el failover group.</li><li>Redirect en lugar de Proxy.</li>'
+                       '<li>Ensayo trimestral en preproducción con failover manual.</li></ol></div></div>'))
+    STT = {"ok": "ok", "partial": "med", "error": "crit"}
+    out.append(section("fuentes", "Fuentes y cobertura", "Qué se consultó y con qué resultado. Todo en modo solo lectura con la identidad del agente.",
+                       '<div class="card flat"><div class="wrap" role="region" tabindex="0" aria-label="Tabla: Fuentes y cobertura" style="border-top:0"><table><thead><tr>'
+                       + "".join(f'<th scope="col"><span class="th">{h}</span></th>' for h in ("Fuente", "Estado", "Detalle")) + "</tr></thead><tbody>"
+                       + "".join(f'<tr><td>{E(s["source"])}</td><td>{pill(s["status"], STT.get(s["status"], "neu"))}</td><td>{E(s["detail"]) or NIL}</td></tr>' for s in sources)
+                       + "</tbody></table></div></div>"))
+    LEARN = "https://learn.microsoft.com/azure/azure-sql/managed-instance/"
+    refs = [("Maintenance window (SQL MI)", LEARN + "maintenance-window"), ("Advance notifications", LEARN + "advance-notifications"),
+            ("Connection types", LEARN + "connection-types-overview"),
+            ("Configurable retry logic (SqlClient)", "https://learn.microsoft.com/sql/connect/ado-net/configurable-retry-logic")]
+    out.append(f'</div></main><footer><p>Informe de solo lectura generado por Azure SRE Agent · tool generate-sqlmi-maintenance-report v1.0 · {stamp_utc} UTC.</p>'
+               '<p>Referencias: Microsoft Learn — ' + ", ".join(f'<a href="{u}" target="_blank" rel="noopener noreferrer">{t}</a>' for t, u in refs)
+               + f'.</p></footer><script>{JS}</script></body></html>')
     html_doc = "".join(out)
 
     # ==== Salidas ======================================================================================

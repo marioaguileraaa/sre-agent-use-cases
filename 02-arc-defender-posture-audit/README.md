@@ -17,17 +17,18 @@ the customer implementing this guide.
 |---|---|---|
 | Audience | Reusable Defender for Cloud / SRE demo for any customer | Hybrid Arc demonstration |
 | Resource scope | One configured Enabled subscription; source-visible ARM resources plus explicitly labeled Defender-indexed child assets | 200 fictional Arc hosts, 142 on-premises / 58 GCP |
-| Visual identity | Neutral navy/blue/slate, system typography, no Retail logo | Forest/emerald, serif headline, white Retail logo plaque |
+| Visual identity | Neutral navy hero, system typography, neutral shield mark in the top bar | Forest/emerald hero, serif headline, approved logo in the white top bar |
 | Tool | `generate-defender-cloud-report` | `simulate-arc-defender-retail` |
 | Skill / subagent | `defender-cloud-live` | `arc-defender-retail` |
 | Output | HTML, inventory CSV, finding CSV, full JSON; additional section exports in HTML | Same formats, all explicitly SIMULATED |
 | Cloud changes | None; GET reads plus read-only Resource Graph POST queries | No cloud access at all |
 
-![Actual V2 LIVE overview: neutral branding, explicit Arc-only metrics and subscription posture](images/v2-live-overview.png)
+![LIVE report overview: verdict-first header, KPI cards and prioritised actions (sanitized sample data)](images/v2-live-overview.png)
 
-*Historical LIVE capture, 9 October 2026: (1) neutral subscription report,
-(2) section navigation. Its 554 resources and other counts belong to that
-snapshot, not a new customer's estate. [Open full resolution](images/v2-live-overview.png).*
+*Sanitized sample render of the current LIVE report: a fictional subscription
+rendered offline through the LIVE pipeline, no customer or lab evidence.
+(1) Verdict-first header, (2) section navigation. Counts belong to the sample,
+not to any customer's estate. [Open full resolution](images/v2-live-overview.png).*
 
 > [!IMPORTANT]
 > **Native risk is not technical severity.** Recommendation risk comes from
@@ -184,26 +185,32 @@ flowchart LR
 
 ### Report navigation
 
-The first viewport highlights actionable evidence, rather than the older
-Arc-only flat finding list. Section navigation leads to:
+The report opens verdict-first: a slim top bar (brand mark, section links,
+**Read-only** chip, **Print / PDF**), a header with the key numbers, a verdict
+card with source coverage and a distribution of resources by review priority,
+then five KPI cards. Section navigation leads to:
 
 | Section | What to show |
 |---|---|
-| **Posture** | Classic score and native-risk/status counts; control current/max and potential headroom. |
+| **Actions** | Every derived review action in priority order, with affected resources and the evidence source it comes from. |
+| **Posture** | Classic score and subscription context, unhealthy recommendation records by native risk *and* by technical severity (two separate bars), control current/max and potential headroom. |
 | **Attack paths** | Real graph entities, edge labels, entry/target, insights, linked assessments and recommended breaks. No edges are invented for a one-node path. |
-| **Resources** | Service-group posture, exact native IDs, ARM versus indexed-only source, ownership tags, OS/location, recommendation distribution and observed protection configuration. |
-| **Recommendations** | Grouped definitions by risk/status/category, record counts and affected resources; complete resource-level records remain available. |
+| **Evidence** | One filter panel that drives the grouped recommendations (definitions by risk/status, record counts, affected resources), the resource ledger and the complete resource-level finding records; every CSV exports all filtered matches. |
+| **Resources** | Service-group posture, exact native IDs, ARM versus indexed-only source, ownership tags, OS/location, recommendation distribution and observed protection configuration. Selecting a name in the ledger opens its detail. |
 | **Software / CVEs** | Observed software inventory plus embedded source CVE occurrences and patch evidence; full exports avoid chat-sized payloads. |
 | **Compliance** | Standard/control observations with passed, failed, skipped and unsupported separate; not certification. |
-| **Sources / plans** | Availability, scope, errors and observed paid-plan configuration; licensing is not runtime-health proof. |
+| **Sources** | Availability, scope, errors, observed paid-plan configuration and capability boundaries; licensing is not runtime-health proof. |
 
 The resource detail panel displays a disclosed first-30 finding sample and
 exports **all** selected-resource findings/CVEs. The complete normalized
 evidence remains in the JSON snapshot.
 Finding and grouped-recommendation tables render in 50-row pages with **Show
-more** and an explicit displayed/matched/total count. Their CSV buttons export
-**all filtered matches**, not just the current rendered page. The compact
-payload reconstructs the full dataset before filtering or rendering.
+more** and an explicit displayed/matched/total count; the resource ledger shows
+its first 50 matches and long static tables their first 25 rows, each with a
+**Show all** control. Their CSV buttons export **all filtered matches**, not
+just the current rendered page. The compact payload reconstructs the full
+dataset before filtering or rendering. Printing (A4) expands the paged rows,
+hides the interactive controls and adds a title/date/page footer.
 
 Priorities now follow the general Defender scope, not the old Arc-only order:
 active serious alerts first when observed, then **native High/Critical attack
@@ -808,22 +815,25 @@ finding CSV fields, ordinary CSV contents and all-match export semantics are
 unchanged. The **4,800,000-byte guard applies to HTML/JSON, not a new CSV cap**.
 No source CVE, historical status, source field or occurrence is removed.
 
-The actual resource view shows the service-group totals and **Resource
-details** selector (1), then the selected native resource (2):
+The resource view shows the service-group totals and **Resource details**
+selector (1), then the selected native resource (2). Selecting a resource name
+in the ledger opens the same panel:
 
-![Actual V2 service groups and arc-sql-01 resource selector](images/v2-live-resource-sql.png)
+![Resource view: service groups, Resource details selector and the selected Arc SQL host (sanitized sample)](images/v2-live-resource-sql.png)
 
-The **9 October historical** selected-resource evidence retains
+The **9 October historical** lab run's selected SQL host retained
 **103 Unhealthy / 1 Healthy**, native
-**93 Low / 10 Medium**, **2054 CVE occurrences** and **22 software rows**.
-The source SQL update is visibly **Medium native risk / High technical
-severity**; extension success remains separate from Unknown sensor health.
+**93 Low / 10 Medium**, **2054 CVE occurrences** and **22 software rows**;
+its source SQL update was **Medium native risk / High technical severity**,
+and extension success stayed separate from Unknown sensor health. The images
+here are sanitized sample renders of the current design, so their counts are
+smaller; the panel keeps the same separations.
 
-![Actual V2 arc-sql-01 details: status/risk reconciliation, software and embedded CVEs](images/v2-live-resource-sql-details.png)
+![Resource detail: status/risk reconciliation, patch evidence and per-resource exports (sanitized sample)](images/v2-live-resource-sql-details.png)
 
-*Historical LIVE detail: (1) the selected lab resource, (2) its recommendation
+*Sanitized sample detail: (1) the selected resource, (2) its recommendation
 status breakdown. The same panel separates installation from sensor health,
-software/CVE occurrences and Medium native risk from High technical severity.
+software/CVE occurrences and native risk from technical severity.
 [Open selector image](images/v2-live-resource-sql.png) /
 [open detail image at full resolution](images/v2-live-resource-sql-details.png).*
 
@@ -1332,11 +1342,12 @@ Keep LIVE and SIMULATED threads and claims separate.
 The current Arc demo keeps its approved green identity and adds two
 **illustrative simulated chains**, not customer topology or native detections:
 
-![Actual V2 SIMULATED Arc overview: green branding, fictional chains and source-like evidence](images/v2-simulated-overview.png)
+![SIMULATED Arc overview: green identity, verdict-first header and SIMULATED banner (logo replaced by a placeholder)](images/v2-simulated-overview.png)
 
-*Historical SIMULATED report: (1) fictional 200-host provenance,
-(2) navigation. Its two illustrative chains and baseline ratio are not native
-customer detections or Defender Secure Score.
+*SIMULATED report in the current design: (1) fictional 200-host provenance,
+(2) navigation. In this public capture the approved logo is replaced by a
+neutral placeholder. Its two illustrative chains and baseline ratio are not
+native customer detections or Defender Secure Score.
 [Open full resolution](images/v2-simulated-overview.png).*
 
 The older [SIMULATED Production answer](images/step4-04-simulated-production-question-detail.png)
@@ -2000,16 +2011,18 @@ performed by this documentation-only revision.
 
 ## Screenshot catalogue
 
-All **25 existing PNGs are retained unchanged**. They are actual historical
-portal/report captures; a screenshot of the offline report is real media of
-**fictional data**, not LIVE evidence. Click each link for full resolution.
-The `v2-` filenames identify the **9 October general-report revision/layout**,
-not a newly captured 13 October codec-validation screen.
+The **17 portal and chat PNGs are retained unchanged**; they are actual
+historical captures. The **8 report images** (`report-*-overview.png`,
+`v2-live-overview.png`, `v2-live-resource-sql*.png` and
+`v2-simulated-overview.png`) were regenerated on 12 November 2026 with the
+current report design from **sanitized sample data**: a fictional subscription
+rendered offline through the LIVE pipeline, and the SIMULATED fixture with its
+logo replaced by a neutral placeholder. A screenshot of a sample or offline
+report is real media of **fictional data**, not LIVE evidence. Click each link
+for full resolution. The `v2-` filenames are kept for link stability.
 
-The earlier **LIVE V1 Arc-only** report also used green/logo styling. It must
-not be relabeled SIMULATED, used as the canonical neutral LIVE design, or
-presented as a new customer's environment. The current LIVE/SIMULATED paths
-are defined by source, tool and provenance, not color alone.
+The current LIVE/SIMULATED paths are defined by source, tool and provenance,
+not color alone.
 
 | Full-resolution capture | Provenance / what the image demonstrates |
 |---|---|
@@ -2025,16 +2038,16 @@ are defined by source, tool and provenance, not color alone.
 | [SIMULATED V1 downloads](images/step4-02-simulated-report-downloads.png) | Four explicitly SIMULATED fixture files, not a customer inventory. Older recommendation counts are revision-specific. |
 | [LIVE V1 question](images/step4-03-live-conversational-question.png) | Three historical Expired Arc hosts across bounded query pages; extension Succeeded is not current sensor telemetry. |
 | [SIMULATED Production question](images/step4-04-simulated-production-question-detail.png) | Fictional full filtered total 90 = 62 on-premises + 28 GCP despite a smaller returned page. |
-| [LIVE V1 desktop](images/report-live-desktop-overview.png) | Older **LIVE**, Arc-only eight-host report with historical green/logo design and partial coverage. Not the current neutral general report or SIMULATED media. |
-| [LIVE V1 mobile](images/report-live-mobile-overview.png) | Narrow-viewport version of that same older LIVE snapshot/design; counts remain historical. |
-| [SIMULATED V1 desktop](images/report-simulated-desktop-overview.png) | Green offline 200-host fiction with separate synthetic sensor observations; not live MDE health. |
-| [SIMULATED V1 mobile](images/report-simulated-mobile-overview.png) | Narrow-viewport offline fixture, visibly SIMULATED; does not establish a customer deployment. |
-| [LIVE V2 overview](images/v2-live-overview.png) | 9 October general LIVE: neutral header, 554 combined resources, Arc-specific connectivity/P2 labels, subscription context and section navigation. |
+| [LIVE desktop](images/report-live-desktop-overview.png) | Current LIVE design at 1440 px from the sanitized sample: top bar, verdict-first header, priority distribution and KPI cards. Fictional counts, not a customer estate. |
+| [LIVE mobile](images/report-live-mobile-overview.png) | The same sanitized LIVE sample at 390 px: stacked header and verdict, scrollable section links, two-column KPI cards. |
+| [SIMULATED desktop](images/report-simulated-desktop-overview.png) | Green offline 200-host fiction in the current design, logo replaced by a placeholder; separate synthetic sensor observations, not live MDE health. |
+| [SIMULATED mobile](images/report-simulated-mobile-overview.png) | Narrow-viewport offline fixture, visibly SIMULATED; does not establish a customer deployment. |
+| [LIVE overview](images/v2-live-overview.png) | Sanitized LIVE sample at 1600 px: (1) verdict-first header with Arc-specific connectivity/P2 KPI labels, (2) section navigation. |
 | [LIVE V2 four downloads](images/v2-live-four-downloads.png) | 9 October general LIVE report conversation with four native file links, compact priorities and partial health qualification. |
 | [LIVE V2 graph answer](images/v2-live-graph-conversation.png) | Historical native three-node/two-edge Azure IP/NIC/VM graph, High path risk and no exact Arc association; not an observed attack or root cause. |
-| [LIVE V2 resource selector](images/v2-live-resource-sql.png) | Service-group totals plus (1) selector and (2) selected historical SQL lab host; inventory versus indexed-only scope is explained. |
-| [LIVE V2 resource details](images/v2-live-resource-sql-details.png) | Historical 103 Unhealthy / 1 Healthy, 93 Low / 10 Medium native risk, 22 software rows and 2,054 CVE occurrences; installation and Unknown sensor health remain separate. |
-| [SIMULATED V2 overview](images/v2-simulated-overview.png) | Expanded fictional fixture: 200 hosts, two illustrative chains, source-like recommendations and baseline ratio explicitly not native Secure Score. |
+| [LIVE resource selector](images/v2-live-resource-sql.png) | Sanitized sample: service-group totals plus (1) selector and (2) the selected fictional Arc SQL host; inventory versus indexed-only scope is explained. |
+| [LIVE resource details](images/v2-live-resource-sql-details.png) | Sanitized sample detail: (1) selected resource, (2) recommendation statuses; native risk, technical severity, patch evidence and per-resource exports; installation and Unknown sensor health remain separate. |
+| [SIMULATED overview](images/v2-simulated-overview.png) | Expanded fictional fixture in the current design (logo placeholder): 200 hosts, two illustrative chains, source-like recommendations and baseline ratio explicitly not native Secure Score. |
 | [LIVE V1 task history before](images/step5-01-monthly-task-run-now.png) | Older task name/history view with a Run task now control and no executions shown; not proof of a successful execution. |
 | [LIVE V1 task history after](images/step5-02-monthly-task-executed.png) | Historical Success row with No thread found; a UI state, not self-sufficient report/download evidence. |
 | [LIVE V2 Automation list](images/v2-monthly-run-now-and-count.png) | 9 October selected owned task, enabled list-toolbar Run now and three completed runs. Proves that dated manual UI state, not a current timer firing. |

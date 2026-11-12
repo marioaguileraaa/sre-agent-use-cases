@@ -8,7 +8,7 @@ The agent **never changes anything**. It proposes the cleanup; a person executes
 
 ![Report overview: executive summary, Owner decisions and KPIs](images/20-report-overview.png)
 
-*Overview of a real run in a Microsoft lab (identifiers redacted): **175** role assignments read, **69 privileged** across **46 identities**, **30 Owner** assignments of which **14 can be removed without any loss of access** (10 orphaned + 4 redundant) and **16 need an individual review**.*
+*Overview of a real run in a Microsoft lab (sanitized [sample run](sample-run/), identifiers replaced with fictitious values): **175** role assignments read, **69 privileged** across **46 identities**, **30 Owner** assignments of which **14 can be removed without any loss of access** (10 orphaned + 4 redundant) and **16 need an individual review**.*
 
 ## Contents
 
@@ -397,25 +397,25 @@ The output shows `1/4 Python tool`, `2/4 Skill`, `3/4 Subagent` and `4/4 Schedul
 
 ### What the HTML report contains
 
-The HTML is a single offline file (no external dependencies). It opens in any browser and can be attached to an audit or a change request.
+The HTML is a single offline file (no external dependencies). It opens in any browser and can be attached to an audit or a change request. It starts with the verdict (**Action required** when something can be removed or needs a review), the decision bar and the Owner KPIs; the top bar links to each section and has a **Print / PDF** button.
 
-**Scope and signals:** reviewed subscriptions, Management Groups and the count of each review signal.
+**Scope and signals:** the decision per scope level (Management Group, subscription, resource group, resource) and the count of each review signal. Select a signal to list its assignments in the register.
 
 ![Scope and review signals](images/21-report-scope-and-signals.png)
 
-**Top identities and next steps:** the identities with more privileged assignments and the recommended actions in order (safe cleanup first, then individual review, then PIM).
+**Top identities and next steps:** the identities with more privileged assignments and the recommended actions in order (safe cleanup first, then individual review, then PIM). Each step links to the matching assignments in the register.
 
 ![Top identities and next steps](images/22-report-top-identities-next-steps.png)
 
-**Assignment register:** every privileged assignment with decision, reason, role, tier, scope, principal type, last sign-in and signals. It can be filtered (here, *Remove · orphaned*) and exported to CSV.
+**Assignment register:** every privileged assignment with decision, reason, recommended action, role, tier, scope, principal type, last sign-in and signals. It can be searched (names, scopes or IDs), sorted, filtered by decision (here, *Remove · orphaned*), tier, identity type, scope level or review signal, and exported to CSV.
 
 ![Register filtered to Remove · orphaned](images/23-report-register-filtered.png)
 
-**Coverage:** what was read correctly and what failed, so the reader knows whether the review is complete.
+**Coverage and method:** what was read correctly and what failed, so the reader knows whether the review is complete (a partial review is also flagged in the verdict), and how each decision is made.
 
 ![Coverage section](images/24-report-coverage.png)
 
-The report is responsive, so it can be read on a phone:
+The report is responsive, so it can be read on a phone (on narrow screens each register row becomes a labelled card). **Print / PDF** produces an A4 document with every assignment of the register, not only the rows shown on screen, and the report title, date and page numbers in the footer:
 
 <img src="images/25-report-mobile.png" alt="Report on a mobile phone" width="320">
 

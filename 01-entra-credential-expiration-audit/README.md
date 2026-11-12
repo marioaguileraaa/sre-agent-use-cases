@@ -11,7 +11,7 @@ Find **expired and soon-to-expire secrets and certificates** across all Microsof
 | **Goal** | Identify expired and soon-to-expire application and service principal credentials so owners can review rotation before dependent sign-ins are disrupted. |
 | **Business value** | Helps reduce expiration-related disruption, consolidates manual reviews and produces dated evidence for internal review. It does not guarantee avoided outages or audit compliance. See [Business value](#business-value). |
 | **Security** | Read-only. The flow never rotates, creates or deletes credentials, and never exposes secrets, tokens or certificate content. |
-| **Result** | A self-contained HTML report (risk cards, filters, sorting, CSV export, “Review in Entra” links) plus an executive summary in the chat. |
+| **Result** | A self-contained HTML report (risk signal, status breakdown with next steps, filters, sorting, CSV export, “Review in Entra” links, A4 print layout) plus an executive summary in the chat. |
 | **Effort** | The original lab setup estimate was ~30 minutes, excluding customer access/consent lead time. Monthly operation depends on accepted setup, approved scheduling and continued source/runtime access. |
 
 ---
@@ -574,9 +574,9 @@ to invent from it.
 
 Complete coverage means the two inventories finished, **not** that every
 credential has a usable expiry. Inspect any `UNKNOWN` count/row separately;
-the five standard risk cards and expired/critical signal are not a substitute
-for that review. An object with no password/key credentials contributes to
-scanned-object totals but adds no credential row. Application and service
+the five standard status counts and the expired/critical signal are not a
+substitute for that review (the report adds an `UNKNOWN` step when present).
+An object with no password/key credentials contributes to scanned-object totals but adds no credential row. Application and service
 principal rows remain distinct; owner lookup, credential use, rotation
 success, federated credentials and managed-identity SP credentials are not
 collected.
@@ -594,17 +594,21 @@ runs on the same date; the source filename is date-based, not run-unique.
 
 The report is a single self-contained HTML file that you can open in any browser:
 
-![Report – risk signal, coverage and risk posture](images/report-01-overview.png)
+![Report – risk signal, risk posture and coverage](images/report-01-overview.png)
 
-1. **Risk signal:** *Action required* when there are expired or critical credentials.
-2. **Coverage:** applications, non-managed service principals, credentials in scope, and pagination status.
-3. **Risk posture:** counts by status, computed against one single UTC reference time.
+1. **Risk signal:** *Action required* when there are expired or critical credentials, with the count of each status below it.
+2. **Risk posture:** counts by status in one bar, computed against one single UTC reference time.
+3. **Coverage:** credentials in scope (client secrets and certificates), applications, non-managed service principals and pagination status.
+
+Below the summary, **Risk posture and next steps** lists each status, most urgent first, with what to do and a **Show** button that filters the inventory to it. **Where the risk sits** shows the objects with most credentials to act on and the split by credential and object type.
 
 ![Report – inventory with filters, CSV export and Entra links](images/report-02-inventory-filters.png)
 
-1. **Filters:** credential name, minimum/maximum days left, risk status and object type. Column headers are sortable.
+1. **Filters:** credential name, minimum/maximum days left, risk status and object type. Column headers are sortable; **Clear filters** resets them.
 2. **Export visible rows as CSV:** exports exactly what is filtered on screen.
 3. **Review in Entra:** opens the application page in Microsoft Entra, so the owner can plan the rotation.
+
+The report ends with coverage and method notes (scope, exclusions, thresholds, what is not collected). **Print / PDF** prints the same report on A4, without the filters.
 
 > The screenshots above use **synthetic** data (Contoso/Fabrikam names). Download [`sample-report/entra-credential-expiration-audit-SAMPLE.html`](sample-report/entra-credential-expiration-audit-SAMPLE.html) and open it in your browser to try the filters and the CSV export.
 
@@ -641,19 +645,19 @@ before `html_document = f"""<!doctype html>`, paste the generated block, then:
     )
 ```
 
-Inside the existing HTML `<style>`, add this rule. **Double braces are required**
-because this template is a Python f-string:
+At the end of the `report_css` string (plain CSS, so single braces), before its
+closing `"""`, add these rules:
 
 ```css
-    .company-logo {{ display: block; width: 240px; max-width: 100%; height: 64px; object-fit: contain; padding: 8px; margin-bottom: 16px; background: #fff; border-radius: 8px; }}
+.company-logo{display:block;flex:none;width:auto;max-width:180px;height:36px;object-fit:contain;}
+@media (max-width:640px){.company-logo+.wordmark{display:none;}}
 ```
 
-Insert `{company_logo_html}` just before the existing eyebrow, keeping it:
+Insert `{company_logo_html}` at the start of the top bar's brand link, keeping
+the wordmark:
 
 ```html
-          <div>
-            {company_logo_html}
-            <div class="eyebrow">Identity operations / credential watch</div>
+  <a class="brand" href="#top">{company_logo_html}<span class="wordmark">Azure SRE Agent</span>
 ```
 
 The logo is embedded in the offline HTML, not fetched or added to Graph reads,

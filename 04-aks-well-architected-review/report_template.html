@@ -1,10 +1,10 @@
 <!doctype html>
 <!--
-THESIS: A consulting dossier connects a dated AKS assessment to its evidence and human action plan; it refuses the generic SaaS card dashboard.
-OWN-WORLD: Fluent 2 pages framed by Microsoft-blue chrome and cover, a four-color brand ribbon, Segoe UI and ruled tables; color never substitutes for evidence.
-STORY: Establish provenance, read the local index beside coverage, follow category/namespace/workload evidence, then decide on qualified actions.
-FIRST VIEWPORT: Quiet contents rail; a wide document cover with client plaque, cluster identity and UTC reference; executive reading follows, not a hero metric.
-FORM: User-pinned Read-mode dossier with operating filters. WARA narrative and Polaris wayfinding are references, not scoring engines. No tournament or random seed.
+THESIS: A consulting dossier that leads with its verdict, then connects a dated AKS assessment to its evidence and a human action plan.
+OWN-WORLD: Azure SRE Agent report family: Microsoft-blue chrome with the four-color ribbon, a deep-blue verdict band, white cards on a neutral page, Segoe UI and ruled tables; color never substitutes for evidence.
+STORY: Read the verdict and its qualifiers, check scope and provenance, read the local index beside coverage, follow category/namespace/workload evidence, then decide on qualified actions.
+FIRST VIEWPORT: Slim blue bar with section links; deep-blue band with title, key numbers, provenance chips, client plaque, verdict and severity distribution; KPI cards overlap its lower edge.
+FORM: Read-mode dossier with operating filters. WARA narrative and Polaris wayfinding are references, not scoring engines. No tournament or random seed.
 -->
 <html lang="es-ES">
 <head>
@@ -16,58 +16,78 @@ FORM: User-pinned Read-mode dossier with operating filters. WARA narrative and P
 <style>
 :root {
   color-scheme: light;
-  --canvas: #f5f5f5; --surface: #ffffff; --subtle: #fafafa; --wash: #f0f0f0;
-  --ink: #242424; --muted: #616161; --line: #d1d1d1; --field-line: #8a8a8a;
-  --accent: #0f6cbd; --accent-hover: #115ea3; --accent-wash: #eff6fc; --on-accent: #ffffff;
-  --critical: #a4262c; --critical-wash: #fde7e9; --high: #8a3700; --high-wash: #fff1e5;
-  --medium: #795b00; --medium-wash: #fff8d6; --low: #616161; --low-wash: #f0f0f0;
-  --chrome: #0f6cbd; --chrome-hover: #0b5797; --on-chrome: #ffffff; --chrome-line: #d6e7f5;
-  --cover: #eff6fc; --cover-ink: #074b83; --cover-muted: #39576e;
-  --nav: #eaf3fb; --nav-ink: #074b83; --nav-muted: #3d5870;
+  --canvas: #f3f4f6; --surface: #ffffff; --subtle: #f7f8fa; --wash: #eceef1;
+  --ink: #1f1f1f; --muted: #5c5c5c; --line: #e0e3e7; --field-line: #8a8a8a; --heading: #0c3b5e;
+  --accent: #0f6cbd; --accent-hover: #115ea3; --accent-wash: #ebf3fc; --on-accent: #ffffff;
+  --critical: #b42318; --critical-wash: #fee4e2; --critical-bar: #d92d20;
+  --high: #b93815; --high-wash: #ffead5; --high-bar: #ef6820;
+  --medium: #93370d; --medium-wash: #fef0c7; --medium-bar: #f79009;
+  --low: #175cd3; --low-wash: #d1e9ff; --low-bar: #2e90fa;
+  --chrome: #0f6cbd; --chrome-hover: #0b5797; --on-chrome: #ffffff; --chrome-line: #9cc8ef;
+  --cover: #0c3b5e; --cover-ink: #ffffff; --cover-muted: #c7def2; --cover-line: #3f6b90;
+  --nav: #114b77; --nav-ink: #ffffff; --nav-muted: #d0e4f6;
   --brand-red: #f25022; --brand-green: #7fba00; --brand-blue: #00a4ef; --brand-yellow: #ffb900;
-  --radius: 4px; --space: 16px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .07);
+  --shadow-raised: 0 10px 24px -10px rgba(16, 24, 40, .24), 0 2px 6px rgba(16, 24, 40, .06);
+  --cue: rgba(16, 24, 40, .24);
+  --radius: 8px; --radius-card: 12px; --space: 16px;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: #171717; --surface: #1f1f1f; --subtle: #292929; --wash: #333333;
-  --ink: #f5f5f5; --muted: #c2c2c2; --line: #525252; --field-line: #949494;
-  --accent: #78b5e6; --accent-hover: #a3d1f2; --accent-wash: #203448; --on-accent: #171717;
-  --critical: #ffb3b8; --critical-wash: #442326; --high: #ffb98f; --high-wash: #3b2e25;
-  --medium: #f5d875; --medium-wash: #383323; --low: #d6d6d6; --low-wash: #333333;
-  --chrome: #073e63; --chrome-hover: #0d507d; --on-chrome: #f5f5f5; --chrome-line: #91bfdf;
-  --cover: #17334c; --cover-ink: #c5e4ff; --cover-muted: #c2dff1;
-  --nav: #162c3e; --nav-ink: #c5e4ff; --nav-muted: #bdd8ef;
+  --canvas: #141414; --surface: #1f1f1f; --subtle: #262626; --wash: #2e2e2e;
+  --ink: #f2f2f2; --muted: #c2c2c2; --line: #3b3b3b; --field-line: #949494; --heading: #d6e9fa;
+  --accent: #6cb2eb; --accent-hover: #9ccaf1; --accent-wash: #1d3347; --on-accent: #141414;
+  --critical: #ffb3ae; --critical-wash: #4a1f1c; --critical-bar: #f04438;
+  --high: #ffbe94; --high-wash: #46281a; --high-bar: #f97a3a;
+  --medium: #fedf89; --medium-wash: #3f3115; --medium-bar: #fdb022;
+  --low: #a9d3ff; --low-wash: #17304f; --low-bar: #53a6fb;
+  --chrome: #0e4775; --chrome-hover: #115486; --on-chrome: #f5f5f5; --chrome-line: #6d9cc6;
+  --cover: #0a2438; --cover-ink: #f5f5f5; --cover-muted: #b9d5ee; --cover-line: #2e5578;
+  --nav: #0f3554; --nav-ink: #f5f5f5; --nav-muted: #c0daf1;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .45);
+  --shadow-raised: 0 10px 24px -10px rgba(0, 0, 0, .7), 0 2px 6px rgba(0, 0, 0, .45);
+  --cue: rgba(0, 0, 0, .6);
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: auto; scroll-padding-top: 24px; }
-body { margin: 0; background: var(--canvas); color: var(--ink); font: 16px/1.5 "Segoe UI", system-ui, sans-serif; overflow-wrap: anywhere; }
+html { scroll-behavior: auto; scroll-padding-top: 84px; scrollbar-color: var(--field-line) var(--canvas); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 15px/1.55 "Segoe UI", system-ui, sans-serif; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+::selection { background: var(--accent); color: var(--on-accent); }
 [hidden] { display: none !important; }
 button, input, select { font: inherit; }
 button, input, select, summary, a { touch-action: manipulation; }
-button, select, input { min-height: 44px; border: 1px solid var(--field-line); border-radius: var(--radius); background: var(--surface); color: var(--ink); padding: 8px 12px; }
+button, select, input { min-height: 44px; border: 1px solid var(--field-line); border-radius: var(--radius); background: var(--surface); color: var(--ink); padding: 8px 12px; accent-color: var(--accent); }
 button { cursor: pointer; font-weight: 600; }
-button:hover:not(:disabled), select:hover, input:hover { background: var(--wash); }
+button:hover:not(:disabled), select:hover:not(:disabled), input:hover { background: var(--wash); }
 button:active:not(:disabled) { background: var(--line); }
-button:disabled { opacity: .55; cursor: not-allowed; }
+button:disabled, select:disabled { opacity: .55; cursor: not-allowed; }
 button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
 input::placeholder { color: var(--muted); opacity: 1; }
 a { color: var(--accent); text-underline-offset: 3px; }
 a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-.skip { position: absolute; left: 16px; top: -100px; z-index: 5; padding: 12px 16px; background: var(--surface); border: 2px solid var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.document:focus { outline: none; }
+code, .mono { font-family: Consolas, ui-monospace, monospace; font-size: .92em; }
+.skip { position: absolute; left: 16px; top: -100px; z-index: 30; padding: 12px 16px; background: var(--surface); border: 2px solid var(--accent); border-radius: var(--radius); }
 .skip:focus { top: 12px; }
-.toolbar { border-bottom: 1px solid var(--chrome-line); background: var(--chrome); color: var(--on-chrome); }
-.toolbar-inner { max-width: 1440px; margin: auto; display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 16px 32px; }
-.toolbar-title { font-size: 18px; font-weight: 600; }
-.toolbar-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.theme-field { display: flex; gap: 8px; align-items: center; font-size: 14px; }
-.toolbar button, .toolbar select { font-size: 14px; }
-.toolbar select { color-scheme: only light; background: #ffffff; color: #074b83; border-color: var(--chrome-line); }
+.toolbar { position: sticky; top: 0; z-index: 20; background: var(--chrome); color: var(--on-chrome); }
+.toolbar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 8px 20px; padding: 8px 40px; min-height: 60px; }
+.toolbar-brand { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+.toolbar-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.toolbar-subtitle { display: none; font-size: 14px; }
+.toolbar-nav { display: flex; gap: 2px; min-width: 0; }
+.toolbar-nav a { color: var(--on-chrome); text-decoration: none; font-size: 14px; font-weight: 600; padding: 8px 10px; border-radius: var(--radius); white-space: nowrap; }
+.toolbar-nav a:hover { background: var(--chrome-hover); }
+.toolbar-controls { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.readonly-chip { font-size: 12.5px; font-weight: 600; border: 1px solid var(--chrome-line); border-radius: 999px; padding: 4px 11px; white-space: nowrap; }
+.theme-field, .jump-field { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.jump-field { display: none; }
+.toolbar button, .toolbar select { font-size: 14px; min-height: 40px; padding: 6px 12px; }
+.toolbar select { color-scheme: only light; background: #ffffff; color: #0b3a5e; border-color: var(--chrome-line); }
 .toolbar button { background: transparent; color: var(--on-chrome); border-color: var(--chrome-line); }
 .toolbar button:hover:not(:disabled) { background: var(--chrome-hover); }
-.toolbar button.primary { background: #ffffff; color: #074b83; border-color: #ffffff; }
-.toolbar button.primary:hover:not(:disabled) { background: #eaf3fb; border-color: #eaf3fb; }
+.toolbar button.primary { background: #ffffff; color: #0b3a5e; border-color: #ffffff; }
+.toolbar button.primary:hover:not(:disabled) { background: #e6f0fa; border-color: #e6f0fa; }
 .toolbar :focus-visible { outline-color: var(--on-chrome); }
 .brand-ribbon { display: flex; height: 4px; }
 .brand-ribbon span { flex: 1; }
@@ -75,184 +95,263 @@ a:hover { text-decoration-thickness: 2px; }
 .brand-ribbon .green { background: var(--brand-green); }
 .brand-ribbon .blue { background: var(--brand-blue); }
 .brand-ribbon .yellow { background: var(--brand-yellow); }
-.theme-note { max-width: 1376px; margin: 0 auto; padding: 0 32px 12px; font-size: 14px; }
+.theme-note { max-width: 1400px; margin: 0 auto; padding: 0 40px 10px; font-size: 14px; }
 .toolbar .theme-note { color: var(--on-chrome); }
-.shell { max-width: 1440px; margin: auto; display: grid; grid-template-columns: 218px minmax(0, 1fr); }
-.contents { padding: 40px 24px 24px 32px; align-self: start; position: sticky; top: 0; background: var(--nav); min-height: calc(100vh - 80px); }
-.contents h2 { font-size: 16px; margin: 0 0 16px; color: var(--nav-ink); }
-.contents ol { padding: 0; margin: 0; list-style: none; display: grid; gap: 4px; }
-.contents a { display: block; font-size: 14px; min-height: 44px; padding: 10px 8px; border-radius: var(--radius); color: var(--nav-ink); text-decoration: none; }
-.contents a:hover, .contents a:focus-visible { background: var(--accent-wash); color: var(--accent); }
-.contents .contents-note { margin-top: 32px; font-size: 13px; color: var(--nav-muted); }
-.mobile-contents { display: none; }
-.document { min-width: 0; background: var(--surface); border-left: 1px solid var(--line); padding: 48px 48px 32px; }
-.opening-state { max-width: 900px; margin: 48px auto; padding: 32px; border: 1px solid var(--line); background: var(--surface); }
-.opening-state h1 { font-size: 28px; }
-h1 { margin: 0 0 20px; font-size: 40px; line-height: 1.3; font-weight: 600; letter-spacing: -.02em; max-width: 22ch; }
-h2 { margin: 0 0 16px; font-size: 28px; line-height: 1.3; font-weight: 600; letter-spacing: -.01em; color: var(--cover-ink); }
-h3 { margin: 0 0 12px; font-size: 20px; line-height: 1.35; font-weight: 600; }
-h4 { margin: 0 0 10px; font-size: 16px; font-weight: 600; }
-p { margin: 0 0 16px; }
+.opening-state { max-width: 900px; margin: 48px auto; padding: 32px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow); }
+.opening-state h1 { font-size: 28px; color: var(--heading); }
+.document { display: block; min-width: 0; padding-bottom: 56px; }
+.page { max-width: 1320px; margin: 0 auto; padding: 0 40px; }
+h1 { margin: 0 0 16px; font-size: 40px; line-height: 1.15; font-weight: 600; letter-spacing: -.02em; max-width: 22ch; text-wrap: balance; }
+h2 { margin: 0 0 12px; font-size: 24px; line-height: 1.25; font-weight: 600; letter-spacing: -.01em; color: var(--heading); text-wrap: balance; }
+h3 { margin: 0 0 12px; font-size: 18px; line-height: 1.35; font-weight: 600; color: var(--heading); }
+h4 { margin: 0 0 8px; font-size: 15px; line-height: 1.4; font-weight: 600; }
+p { margin: 0 0 12px; }
 .prose { max-width: 72ch; }
 .muted, .qualification { color: var(--muted); }
 .qualification { font-size: 14px; max-width: 75ch; }
-.cover-head { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 32px; align-items: start; background: var(--cover); border: 1px solid var(--line); padding: 24px; border-radius: var(--radius); }
-.cover-head h1, .cover-head .client-name { color: var(--cover-ink); }
-.cover-head .introduction { max-width: 62ch; font-size: 18px; color: var(--cover-muted); margin: 0; }
-.brand { min-width: 0; display: grid; justify-items: start; gap: 12px; }
-.brand-plaque { color-scheme: only light; background: #ffffff; color: #424242; border: 1px solid #d1d1d1; width: 220px; max-width: 100%; min-height: 76px; padding: 16px; display: flex; align-items: center; justify-content: center; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); padding: 20px 24px; min-width: 0; }
+.card-sub { margin: -6px 0 16px; color: var(--muted); font-size: 14px; max-width: 75ch; }
+.hero { background: var(--cover); color: var(--cover-ink); padding: 44px 40px 104px; }
+.hero-inner { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px 56px; align-items: start; }
+.hero h1 { color: var(--cover-ink); }
+.hero .introduction { font-size: 18px; line-height: 1.5; max-width: 60ch; margin: 0 0 10px; color: var(--cover-ink); }
+.hero-summary { margin: 0; max-width: 72ch; color: var(--cover-muted); }
+.hero-summary b { color: var(--cover-ink); font-weight: 600; }
+.provenance { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.chip { display: inline-flex; align-items: center; font-size: 12.5px; line-height: 1.4; padding: 5px 11px; border: 1px solid var(--cover-line); border-radius: 999px; color: var(--cover-muted); white-space: nowrap; }
+.chip.strong { color: var(--cover-ink); font-weight: 600; border-color: var(--cover-muted); }
+a.chip { text-decoration: none; }
+a.chip:hover { color: var(--cover-ink); border-color: var(--cover-ink); }
+.hero-side { display: grid; gap: 16px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.brand-plaque { color-scheme: only light; background: #ffffff; color: #424242; border: 1px solid #d1d1d1; border-radius: var(--radius); width: 220px; max-width: 100%; min-height: 76px; padding: 16px; display: flex; align-items: center; justify-content: center; flex: none; }
 .brand-plaque img { max-width: 100%; width: auto; height: auto; max-height: 56px; object-fit: contain; display: block; }
 .brand-placeholder { color: #424242; font-size: 20px; font-weight: 600; letter-spacing: .04em; overflow-wrap: anywhere; }
-.client-name { margin: 0; font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
-.provenance { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
-.label { display: inline-block; font-size: 13px; font-weight: 600; line-height: 1.5; border: 1px solid var(--line); background: var(--subtle); padding: 5px 9px; border-radius: var(--radius); }
-.cover-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 28px; padding: 28px 0; margin: 0; }
-.cover-facts div { min-width: 0; }
-dt { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-dd { margin: 0; overflow-wrap: anywhere; }
-.cover-facts dd { font-size: 16px; font-weight: 600; }
-.cover-id { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; padding-top: 12px; border-top: 1px solid var(--line); }
-.cover-id strong { font-weight: 600; }
-.snapshot-note { padding: 16px 20px; background: var(--subtle); border: 1px solid var(--line); margin: 24px 0 0; font-size: 14px; }
-.chapter { padding-top: 56px; margin-top: 48px; border-top: 1px solid var(--line); min-width: 0; }
-.chapter-head { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px; }
-.chapter-head h2 { margin-bottom: 8px; }
-.chapter-head p { margin: 0; }
-.chapter-head button { font-size: 14px; }
-.score-layout { display: grid; grid-template-columns: 225px minmax(0, 1fr); gap: 36px; margin: 28px 0; }
-.global-index { padding-right: 28px; border-right: 1px solid var(--line); }
-.global-index h3 { font-size: 18px; }
-.score-value { display: block; font-size: 44px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; margin: 16px 0 12px; }
-.score-value.unknown { font-size: 28px; }
-.global-index p { font-size: 14px; margin-bottom: 10px; }
-.score-row { padding: 0 0 16px; margin: 0 0 16px; border-bottom: 1px solid var(--line); }
-.score-row:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
-.score-row-head { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-.score-number { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.score-track { height: 8px; background: var(--wash); border-radius: 2px; overflow: hidden; border: 1px solid var(--line); }
-.score-fill { background: var(--accent); height: 100%; }
-.score-caption { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
-.pillar-scores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; margin: 20px 0 28px; }
-.pillar-scores .score-row { margin-bottom: 20px; padding-bottom: 12px; }
-.coverage-note { padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 24px 0; }
-.coverage-note p { margin: 0 0 6px; font-size: 14px; }
-.coverage-note p:last-child { margin-bottom: 0; }
-.assessment-chart { margin: 28px 0 32px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; align-items: center; padding: 24px; background: var(--accent-wash); border: 1px solid var(--line); }
-.assessment-chart h3 { margin-bottom: 8px; }
-.assessment-chart svg { width: 200px; max-width: 100%; height: auto; display: block; margin: auto; }
-.assessment-chart .chart-total { fill: var(--ink); font: 600 34px "Segoe UI", system-ui, sans-serif; }
-.assessment-chart .chart-unit { fill: var(--muted); font: 14px "Segoe UI", system-ui, sans-serif; }
-.assessment-chart figcaption { grid-column: 1 / -1; margin: 0; font-size: 14px; }
-.assessment-chart table { background: var(--surface); }
-.assessment-chart th, .assessment-chart td { padding: 9px 12px; }
-.status-swatch { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border: 1px solid var(--ink); vertical-align: -.05em; }
-.status-swatch.passed { background: var(--accent); }
-.status-swatch.failed { background: var(--high); }
-.status-swatch.not_evaluated { background: var(--field-line); }
-.status-swatch.not_applicable { background: var(--surface); }
-.coverage-number { display: inline; font-size: 24px; font-weight: 600; color: var(--cover-ink); font-variant-numeric: tabular-nums; }
-.cluster-overview { margin: 0 0 32px; padding: 24px; border: 1px solid var(--line); background: var(--subtle); }
-.cluster-overview h2 { font-size: 24px; }
-.cluster-picker { max-width: 540px; margin: 20px 0; }
-.cluster-error { padding: 24px; border: 1px solid var(--critical); background: var(--critical-wash); margin-bottom: 32px; }
-.cluster-error h2 { color: var(--critical); }
-.severity-distribution { margin: 28px 0; }
-.distribution-track { display: flex; height: 12px; background: var(--wash); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; margin: 14px 0; }
+.client-line { margin: 0; min-width: 0; font-size: 13px; color: var(--cover-muted); }
+.client-name { display: block; font-size: 16px; font-weight: 600; color: var(--cover-ink); overflow-wrap: anywhere; }
+.verdict { background: var(--nav); color: var(--nav-ink); border: 1px solid var(--cover-line); border-radius: var(--radius-card); padding: 18px 20px; }
+.verdict-label { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--nav-muted); }
+.verdict-value { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; letter-spacing: -.01em; color: var(--nav-ink); }
+.verdict.tone-critical .verdict-value { color: #ffb4ab; }
+.verdict.tone-high .verdict-value { color: #fec84b; }
+.verdict.tone-medium .verdict-value { color: #fedf89; }
+.verdict-detail { margin: 8px 0 0; font-size: 14px; }
+.verdict-note { margin: 6px 0 0; font-size: 13px; color: var(--nav-muted); }
+.hero-distribution { grid-column: 1 / -1; min-width: 0; }
+.distribution-head { display: flex; justify-content: space-between; gap: 4px 16px; flex-wrap: wrap; margin: 0 0 8px; font-size: 13.5px; color: var(--cover-muted); }
+.distribution-head b { color: var(--cover-ink); font-weight: 600; }
+.distribution-track { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--cover-line); }
 .distribution-segment { height: 100%; }
-.distribution-segment.critical { background: var(--critical); }
-.distribution-segment.high { background: var(--high); }
-.distribution-segment.medium { background: var(--medium); }
-.distribution-segment.low { background: var(--low); }
-.distribution-legend { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 14px; }
-.severity { display: inline-block; font-size: 13px; font-weight: 600; line-height: 1.5; border: 1px solid currentColor; border-radius: var(--radius); padding: 3px 8px; }
+.distribution-segment.critical { background: var(--critical-bar); }
+.distribution-segment.high { background: var(--high-bar); }
+.distribution-segment.medium { background: var(--medium-bar); }
+.distribution-segment.low { background: var(--low-bar); }
+.distribution-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 10px; font-size: 13.5px; color: var(--cover-muted); }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.legend-item b { color: var(--cover-ink); font-weight: 600; }
+.legend-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.legend-swatch.critical { background: var(--critical-bar); }
+.legend-swatch.high { background: var(--high-bar); }
+.legend-swatch.medium { background: var(--medium-bar); }
+.legend-swatch.low { background: var(--low-bar); }
+.kpis { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: -64px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-raised); padding: 18px 20px; min-width: 0; }
+.kpi-value { margin: 0; font-size: 34px; line-height: 1.1; font-weight: 600; letter-spacing: -.02em; color: var(--ink); white-space: nowrap; }
+.kpi-value.unknown { font-size: 22px; line-height: 1.6; color: var(--muted); white-space: normal; }
+.kpi-unit { margin-left: 4px; font-size: 15px; font-weight: 600; letter-spacing: 0; color: var(--muted); }
+.kpi-label { margin: 8px 0 0; font-size: 14px; font-weight: 600; }
+.kpi-note { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.sim-note { margin: 16px 0 0; padding: 10px 16px; border: 1px solid var(--medium-bar); border-radius: var(--radius); background: var(--medium-wash); color: var(--medium); font-size: 14px; }
+.sim-note strong { font-weight: 600; }
+.scope-card { margin-top: 16px; }
+.scope-card h2 { font-size: 20px; margin-bottom: 4px; }
+.cover-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px 24px; margin: 16px 0; }
+.cover-facts div { min-width: 0; }
+.cover-facts .wide-fact { grid-column: span 2; }
+.cover-facts dd { overflow-wrap: break-word; }
+dt { font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+dd { margin: 0; overflow-wrap: anywhere; }
+.cover-facts dd { font-size: 15px; font-weight: 600; }
+.cover-id { color: var(--muted); font-size: 13px; padding-top: 12px; border-top: 1px solid var(--line); }
+.cover-id p { margin: 0 0 6px; }
+.cover-id .portal-link { margin-left: 8px; }
+.snapshot-note { padding: 12px 16px; background: var(--subtle); border: 1px solid var(--line); border-radius: var(--radius); margin: 16px 0 0; font-size: 14px; }
+.snapshot-note p { margin: 0; }
+.snapshot-note p + p { margin-top: 4px; color: var(--muted); }
+.chapter, .filter-section, .cluster-overview, .cluster-error { margin-top: 48px; min-width: 0; }
+.chapter-head { display: flex; gap: 12px 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; }
+.chapter-head h2 { margin-bottom: 4px; }
+.chapter-head p { margin: 0; }
+.chapter-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; }
+.chapter-tools button, .chapter-tools select { font-size: 14px; }
+.inline-field { display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.card-grid > * { grid-column: span 6; }
+.card-grid > .span-7 { grid-column: span 7; }
+.card-grid > .span-5 { grid-column: span 5; }
+.card-grid > .span-12 { grid-column: 1 / -1; }
+.score-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; }
+.global-index { padding-right: 24px; border-right: 1px solid var(--line); }
+.global-index h3 { font-size: 16px; margin-bottom: 4px; }
+.score-value { display: block; font-size: 36px; line-height: 1.15; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; margin: 4px 0 12px; }
+.score-value.unknown { font-size: 24px; white-space: normal; }
+.global-index p { font-size: 13px; margin-bottom: 8px; }
+.score-row { padding: 0 0 14px; margin: 0 0 14px; border-bottom: 1px solid var(--line); }
+.score-row:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+.score-row-head { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.score-number { white-space: nowrap; }
+.score-track { height: 8px; background: var(--wash); border-radius: 999px; overflow: hidden; }
+.score-fill { background: var(--accent); height: 100%; border-radius: 999px; }
+.score-caption { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.pillar-scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+.pillar-scores .score-row, .pillar-scores .score-row:last-child { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.critical-card { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 8px 24px; align-items: start; }
+.critical-card h3 { margin: 0; }
+.critical-card .priority-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 24px; }
+.critical-card .priority-list li, .critical-card .priority-list li:first-child { padding: 12px 0; border-top: 1px solid var(--line); }
+.critical-card .empty { padding: 10px 16px; }
+.coverage-note { padding-top: 14px; margin-top: 16px; border-top: 1px solid var(--line); }
+.coverage-note p { margin: 0 0 6px; font-size: 14px; }
+.coverage-number { font-size: 20px; font-weight: 600; color: var(--heading); }
+.assessment-chart { margin: 0; }
+.chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 16px; flex-wrap: wrap; }
+.chart-head h3 { margin-bottom: 4px; }
+.chart-total-line { margin: 0; color: var(--muted); font-size: 14px; }
+.chart-total { font-size: 28px; font-weight: 600; letter-spacing: -.02em; color: var(--ink); margin-right: 4px; }
+.status-bar { display: block; width: 100%; height: 14px; margin: 12px 0 16px; border-radius: 999px; overflow: hidden; background: var(--wash); }
+.assessment-chart table { font-size: 14px; }
+.assessment-chart th, .assessment-chart td { padding: 8px 10px; }
+.assessment-chart tbody th { font-weight: 600; background: transparent; }
+.assessment-chart figcaption { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+.status-swatch { display: inline-block; width: 11px; height: 11px; margin-right: 8px; border-radius: 3px; vertical-align: -.05em; }
+.status-swatch.passed { background: var(--accent); }
+.status-swatch.failed { background: var(--high-bar); }
+.status-swatch.not_evaluated { background: var(--field-line); }
+.status-swatch.not_applicable { background: var(--surface); box-shadow: inset 0 0 0 1px var(--field-line); }
+.severity { display: inline-flex; align-items: center; gap: 6px; padding: 1px 10px 1px 8px; border-radius: 999px; font-size: 12.5px; font-weight: 600; line-height: 1.6; white-space: nowrap; }
+.severity::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
 .severity.critical { color: var(--critical); background: var(--critical-wash); }
 .severity.high { color: var(--high); background: var(--high-wash); }
 .severity.medium { color: var(--medium); background: var(--medium-wash); }
 .severity.low { color: var(--low); background: var(--low-wash); }
-.priority-list { margin: 0; padding-left: 24px; }
-.priority-list li { padding: 12px 0; }
+.priority-list, .next-actions { margin: 0; padding: 0; list-style: none; }
+.priority-list li, .next-actions li { padding: 12px 0; border-top: 1px solid var(--line); }
+.priority-list li:first-child, .next-actions li:first-child { border-top: 0; padding-top: 0; }
 .priority-list strong { display: block; font-weight: 600; margin-bottom: 4px; }
 .priority-list p { margin: 4px 0 0; font-size: 14px; }
-.executive-messages { padding: 0; margin: 28px 0 0; list-style: none; counter-reset: message; }
-.executive-messages li { padding: 16px 0; border-top: 1px solid var(--line); max-width: 75ch; }
-.filter-section { padding: 28px 0; margin-top: 40px; border-top: 1px solid var(--line); }
-.filter-section h2 { font-size: 20px; margin-bottom: 8px; }
-.filters { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+.next-actions li { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 4px 12px; align-items: start; }
+.next-actions .severity { margin-top: 1px; justify-self: start; }
+.next-actions strong { font-weight: 600; }
+.next-actions .cell-note { grid-column: 2; margin-top: 0; }
+.card-link { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 600; }
+.executive-messages { padding: 0; margin: 0; list-style: none; }
+.executive-messages li { padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; max-width: 75ch; }
+.executive-messages li:first-child { border-top: 0; padding-top: 0; }
+.cluster-overview h2, .cluster-error h2 { font-size: 20px; }
+.cluster-picker { max-width: 540px; margin: 16px 0; }
+.cluster-error { padding: 20px 24px; border: 1px solid var(--critical); border-radius: var(--radius-card); background: var(--critical-wash); }
+.cluster-error h2 { color: var(--critical); }
+.filter-section { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); padding: 20px 24px; }
+.filter-section h2 { font-size: 20px; margin-bottom: 4px; }
+.filters { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field label { font-size: 14px; font-weight: 600; }
 .field input, .field select { width: 100%; min-width: 0; font-size: 14px; }
-.extra-filters { margin: 16px 0; }
-.extra-filters .filter-extra-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
-.filter-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
+.extra-filters { margin: 12px 0; }
+.extra-filters .filter-extra-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 8px; }
+.filter-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 12px; }
 .filter-actions button { font-size: 14px; }
-.scope-path { margin: 20px 0 12px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 14px; }
+.scope-path { margin: 16px 0 8px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 14px; }
 .scope-path button { border: 0; padding: 6px 8px; color: var(--accent); background: transparent; min-height: 40px; font-size: 14px; }
 .scope-path button:hover { background: var(--accent-wash); }
 .scope-path .scope-part { overflow-wrap: anywhere; min-width: 0; max-width: 100%; }
-.filter-count { margin: 0; font-size: 14px; }
-.inventory-counts { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 28px; font-size: 14px; }
-.inventory-counts span { overflow-wrap: anywhere; }
-.inventory-counts b { font-weight: 600; font-variant-numeric: tabular-nums; }
-.inventory-section { margin-top: 32px; min-width: 0; }
-.inventory-section h3 { margin-bottom: 12px; }
-.table-scroll { overflow: auto; max-width: 100%; border: 1px solid var(--line); border-radius: var(--radius); }
+.filter-count { margin: 0; font-size: 14px; font-weight: 600; }
+.inventory-counts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; font-size: 14px; }
+.inventory-counts span { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); overflow-wrap: anywhere; }
+.inventory-counts b { font-weight: 600; }
+.inventory-section { margin-top: 28px; min-width: 0; }
+.inventory-section h3 { margin-bottom: 10px; }
+.table-scroll { overflow: auto; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); scrollbar-color: var(--field-line) transparent; }
+.table-scroll[data-overflow="left"] { box-shadow: inset 14px 0 12px -12px var(--cue), var(--shadow); }
+.table-scroll[data-overflow="right"] { box-shadow: inset -14px 0 12px -12px var(--cue), var(--shadow); }
+.table-scroll[data-overflow="both"] { box-shadow: inset 14px 0 12px -12px var(--cue), inset -14px 0 12px -12px var(--cue), var(--shadow); }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .wide-table { min-width: 680px; }
-th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; overflow-wrap: break-word; }
 th { font-weight: 600; background: var(--subtle); color: var(--ink); }
-tbody tr:last-child td { border-bottom: 0; }
-td { overflow-wrap: anywhere; max-width: 340px; }
+thead th { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+tbody tr:hover > td { background: var(--subtle); }
+td { max-width: 340px; }
 td strong { font-weight: 600; }
 caption { text-align: left; padding: 12px 14px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
-.cell-note { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.cell-note { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.arm-id { font-family: Consolas, ui-monospace, monospace; font-size: 12.5px; overflow-wrap: break-word; }
+.resource-ref { display: block; min-width: 0; }
+.resource-ref .cell-note { margin-top: 2px; }
+.portal-link { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.container-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.container-list .mono { display: block; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
 .text-button { border: 0; padding: 4px 0; border-radius: 0; color: var(--accent); background: transparent; min-height: 32px; text-align: left; font-size: inherit; overflow-wrap: anywhere; }
 .text-button:hover:not(:disabled) { background: transparent; text-decoration: underline; }
-.table-footer { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.table-footer { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 10px 2px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
 .table-footer button { font-size: 13px; min-height: 40px; }
-.empty { padding: 20px; border: 1px solid var(--line); background: var(--subtle); font-size: 14px; margin: 0; }
+.empty { padding: 16px 20px; border: 1px dashed var(--field-line); border-radius: var(--radius); background: var(--subtle); font-size: 14px; margin: 0; }
 details { min-width: 0; }
 summary { cursor: pointer; font-weight: 600; min-height: 44px; padding: 10px 0; overflow-wrap: anywhere; }
 summary:hover { color: var(--accent); }
-.receipt { margin-top: 8px; }
+summary::marker { color: var(--muted); }
+.receipt { margin-top: 6px; }
 .receipt summary { font-size: 13px; min-height: 32px; padding: 6px 0; }
-.receipt-content { margin-top: 10px; }
-.facts { display: grid; grid-template-columns: minmax(110px, .35fr) minmax(0, 1fr); gap: 10px 20px; margin: 16px 0; font-size: 14px; }
+.receipt-content { margin-top: 8px; }
+.facts { display: grid; grid-template-columns: minmax(110px, .35fr) minmax(0, 1fr); gap: 8px 20px; margin: 16px 0; font-size: 14px; }
 .facts dt { font-size: 13px; margin: 0; }
 .facts dd { min-width: 0; }
-.json, .command { margin: 12px 0 0; padding: 12px; font: 12px/1.5 Consolas, ui-monospace, monospace; background: var(--subtle); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow: auto; }
-.technical-inventory { margin-top: 28px; border-top: 1px solid var(--line); }
-.findings-group { margin-top: 28px; }
+.json, .command { margin: 12px 0 0; padding: 12px; font: 12.5px/1.5 Consolas, ui-monospace, monospace; background: var(--subtle); border: 1px solid var(--line); border-radius: var(--radius); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow: auto; }
+.technical-inventory { margin-top: 24px; border-top: 1px solid var(--line); }
+.technical-inventory > summary { font-size: 15px; }
+.findings-group { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); overflow: hidden; }
+.findings-group > h3 { margin: 0; padding: 10px 20px; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); background: var(--subtle); border-bottom: 1px solid var(--line); }
 .finding { border-top: 1px solid var(--line); }
-.finding:last-child { border-bottom: 1px solid var(--line); }
-.finding summary { padding: 18px 0; font-weight: 400; }
-.finding-title { font-weight: 600; font-size: 16px; margin-left: 10px; }
-.finding-reference { display: block; font-size: 13px; color: var(--muted); margin-top: 8px; overflow-wrap: anywhere; }
-.finding-body { padding: 0 0 24px; }
-.finding-body h4 { margin-top: 24px; }
-.evidence-list { margin: 0; padding-left: 24px; }
-.evidence-list li { padding: 12px 0; }
+.findings-group > h3 + .finding { border-top: 0; }
+.finding > summary { position: relative; display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 12px; align-items: start; list-style: none; padding: 14px 20px 14px 44px; font-weight: 400; }
+.finding > summary::-webkit-details-marker { display: none; }
+.finding > summary::before { content: ""; position: absolute; left: 21px; top: 21px; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s ease; }
+.finding[open] > summary::before { transform: rotate(45deg); top: 19px; }
+.finding > summary:hover { color: inherit; background: var(--subtle); }
+.finding > summary .severity { margin-top: 1px; justify-self: start; }
+.finding-main { display: grid; gap: 2px; min-width: 0; }
+.finding-title { font-weight: 600; font-size: 15px; }
+.finding-reference { display: block; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.finding-body { padding: 0 20px 20px 44px; }
+.finding-body h4 { margin-top: 20px; }
+.evidence-list { margin: 0; padding-left: 20px; }
+.evidence-list li { padding: 10px 0; }
 .evidence-list .facts { margin-top: 0; }
 .evidence-list pre { margin-top: 8px; }
-.checks-disclosure { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--line); }
-.checks-disclosure > summary { font-size: 18px; }
-.finops-baseline { margin: 24px 0; border: 1px solid var(--line); }
+.checks-disclosure { margin-top: 24px; padding: 4px 24px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); }
+.checks-disclosure > summary { font-size: 16px; }
+.finops-baseline { margin: 0 0 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); overflow: hidden; }
 .finops-values { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
-.finops-value { padding: 24px; background: var(--subtle); min-width: 0; }
+.finops-value { padding: 24px; min-width: 0; }
 .finops-value.savings { background: var(--accent-wash); border-left: 1px solid var(--line); }
-.finops-value h3 { font-size: 18px; }
-.financial-amount { display: block; font-size: 38px; font-weight: 600; line-height: 1.25; color: var(--cover-ink); font-variant-numeric: tabular-nums; margin: 12px 0; }
-.financial-amount.unknown { font-size: 32px; color: var(--muted); }
+.finops-value h3 { font-size: 16px; margin-bottom: 4px; }
+.financial-amount { display: block; font-size: 38px; font-weight: 600; line-height: 1.2; letter-spacing: -.02em; color: var(--heading); margin: 8px 0 12px; }
+.financial-amount.unknown { font-size: 30px; color: var(--muted); }
 .finops-value p:last-child { margin-bottom: 0; }
 .finops-baseline > .facts { margin: 0; padding: 20px 24px; border-top: 1px solid var(--line); }
-.finops-baseline > .qualification { margin: 0; padding: 16px 24px; border-top: 1px solid var(--line); }
-.finops-notes { padding-left: 24px; margin: 16px 0 24px; max-width: 75ch; }
-.finops-notes li { padding: 6px 0; }
-.architecture-tabs { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
-.architecture-tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.architecture-note { padding: 16px 20px; background: var(--subtle); border: 1px solid var(--line); margin: 0 0 24px; }
+.finops-baseline > .qualification { margin: 0; padding: 14px 24px; border-top: 1px solid var(--line); max-width: none; }
+.finops-notes { padding-left: 20px; margin: 12px 0 24px; max-width: 75ch; font-size: 14px; }
+.finops-notes li { padding: 4px 0; }
+.architecture-tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 0 0 16px; padding: 4px; background: var(--wash); border-radius: 10px; }
+.architecture-tabs button { border-color: transparent; background: transparent; min-height: 40px; font-size: 14px; }
+.architecture-tabs button:hover:not(:disabled) { background: var(--surface); }
+.architecture-tabs button[aria-selected="true"] { background: var(--surface); color: var(--heading); border-color: var(--line); box-shadow: var(--shadow); }
+.architecture-note { padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); margin: 0 0 16px; }
+.architecture-note h3 { margin-bottom: 6px; }
 .architecture-note p:last-child { margin-bottom: 0; }
-.architecture-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 24px; align-items: start; }
-.architecture-map { margin: 0; border: 1px solid var(--line); background: var(--subtle); padding: 16px; min-width: 0; }
+.architecture-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
+.architecture-map { margin: 0; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); padding: 16px; min-width: 0; box-shadow: var(--shadow); }
 .architecture-map > svg { display: block; width: 100%; height: auto; }
 .architecture-map figcaption { padding-top: 12px; font-size: 13px; color: var(--muted); }
 .graph-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
@@ -263,124 +362,136 @@ summary:hover { color: var(--accent); }
 .graph-node { cursor: pointer; }
 .graph-node:focus-visible { outline: none; }
 .graph-node:focus-visible .graph-box { stroke-width: 3; stroke: var(--accent); }
-.architecture-tree { border: 1px solid var(--line); padding: 16px; min-width: 0; max-height: 34rem; overflow: auto; }
-.architecture-tree h3 { font-size: 18px; }
+.architecture-tree { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow); padding: 16px; min-width: 0; max-height: 34rem; overflow: auto; }
+.architecture-tree h3 { font-size: 16px; }
 .architecture-tree summary { font-size: 14px; }
 .architecture-tree ul { list-style: none; padding: 0; margin: 0 0 12px; }
 .architecture-tree button { display: block; width: 100%; padding: 8px; min-height: 40px; text-align: left; font-size: 13px; font-weight: 400; border: 0; background: transparent; overflow-wrap: anywhere; }
 .architecture-tree button[aria-pressed="true"] { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
 .architecture-tree button:hover { background: var(--wash); }
-.architecture-controls { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 16px; margin: 20px 0; }
-.architecture-properties { margin-top: 24px; }
-.architecture-properties > h3 { color: var(--cover-ink); }
-.architecture-properties .facts { border-top: 1px solid var(--line); padding-top: 16px; }
+.architecture-controls { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 16px; margin: 0 0 16px; }
+.architecture-properties { margin-top: 16px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); }
+.architecture-properties:empty { display: none; }
+.architecture-properties > h3 { margin-bottom: 0; }
+.architecture-properties .facts { border-top: 1px solid var(--line); padding-top: 12px; }
 .architecture-product { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .architecture-product img { width: 40px; height: 40px; flex: 0 0 40px; object-fit: contain; }
 .architecture-product strong { font-size: 15px; }
 .architecture-product .cell-note { font-size: 13px; }
-.reference-diagram { margin: 24px 0; }
-.reference-entry { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 20px; border: 1px dashed var(--field-line); }
+.reference-diagram { margin: 16px 0; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow); }
+.reference-entry { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 20px; border: 1px dashed var(--field-line); border-radius: var(--radius); }
 .reference-entry > div + div { border-left: 1px solid var(--line); padding-left: 24px; }
 .reference-link { margin: 0; padding: 12px; text-align: center; font-size: 14px; color: var(--accent); }
-.reference-network { padding: 24px; border: 1px dashed var(--accent); background: var(--accent-wash); }
-.reference-network > h3 { margin-bottom: 20px; }
-.reference-lanes { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 24px; }
-.reference-lane { background: var(--surface); border: 1px solid var(--line); padding: 20px; min-width: 0; }
-.reference-lane h4 { margin-bottom: 16px; }
-.reference-workloads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.reference-network { padding: 24px; border: 1px dashed var(--accent); border-radius: var(--radius); background: var(--accent-wash); }
+.reference-network > h3 { margin-bottom: 16px; }
+.reference-lanes { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 20px; }
+.reference-lane { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; min-width: 0; }
+.reference-lane h4 { margin-bottom: 14px; }
+.reference-workloads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .reference-workloads p { border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; margin: 0; }
-.reference-platform { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--line); }
-.reference-diagram figcaption { font-size: 14px; margin-top: 16px; }
-.reference-decisions { margin-top: 32px; }
-.action-bucket { margin-top: 32px; }
-.action-bucket h3 { margin-bottom: 8px; }
+.reference-platform { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 20px 0 4px; }
+.reference-diagram figcaption { font-size: 14px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.reference-decisions { margin-top: 24px; }
+.action-bucket { margin-top: 28px; }
+.action-bucket h3 { margin-bottom: 4px; }
 .action-bucket > p { font-size: 14px; }
 .source-errors { margin: 8px 0 0; padding-left: 20px; font-size: 13px; }
-.method-block { margin-top: 32px; }
+.method-block { margin-top: 20px; }
 .method-block .qualification { margin-top: 12px; }
-.query { padding: 16px 0; border-top: 1px solid var(--line); }
+details.method-block > summary { font-size: 16px; color: var(--heading); }
+.query { padding: 14px 0; border-top: 1px solid var(--line); }
 .query h4 { overflow-wrap: anywhere; }
 .source-url { overflow-wrap: anywhere; font-size: 13px; }
-.report-footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
-.report-footer p { margin-bottom: 8px; }
+.report-footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.report-footer p { margin-bottom: 6px; max-width: 110ch; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .print-only { display: none; }
-@media (max-width: 1180px) {
-  .shell { grid-template-columns: 182px minmax(0, 1fr); }
-  .contents { padding-left: 20px; padding-right: 16px; }
-  .document { padding: 36px 32px; }
-  .cover-head { grid-template-columns: minmax(0, 1fr) 180px; gap: 24px; }
-  .brand-plaque { width: 180px; }
-  h1 { font-size: 32px; }
+@media screen and (max-width: 1359px) {
+  .toolbar-nav { display: none; }
+  .toolbar-subtitle { display: inline; }
+  .jump-field { display: flex; }
+  .jump-field select { max-width: 220px; }
+}
+@media screen and (max-width: 1100px) {
+  .toolbar-inner { padding-left: 24px; padding-right: 24px; }
+  .toolbar-subtitle { display: none; }
+  .jump-field .field-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .jump-field select { max-width: 190px; }
+  .hero-inner { grid-template-columns: minmax(0, 1fr); }
+  .hero-side { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .card-grid > *, .card-grid > .span-7, .card-grid > .span-5 { grid-column: 1 / -1; }
+  .pillar-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cover-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .architecture-layout { grid-template-columns: minmax(0, 1fr); }
   .architecture-tree { max-height: 20rem; }
   .reference-platform { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 900px) {
-  .shell { display: block; }
-  .contents { display: none; }
-  .mobile-contents { display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--line); }
-  .mobile-contents label { font-size: 14px; font-weight: 600; }
-  .mobile-contents select { min-width: 0; flex: 1; font-size: 14px; }
-  .document { border-left: 0; padding: 36px 32px; }
+@media screen and (min-width: 761px) and (max-width: 900px) {
+  .readonly-chip { display: none; }
 }
-@media (max-width: 600px) {
-  .toolbar-inner { padding: 16px; display: block; }
-  .toolbar-title { margin-bottom: 12px; display: block; }
-  .toolbar-controls { gap: 8px; }
-  .theme-field { width: 100%; display: grid; grid-template-columns: 56px minmax(0, 1fr); }
-  .toolbar button { flex: 1; min-width: 0; }
-  .theme-note { padding: 0 16px 12px; }
-  .mobile-contents { padding: 12px 16px; }
-  .document { padding: 28px 16px 24px; }
-  .opening-state { margin: 20px 16px; padding: 20px; }
-  .cover-head { grid-template-columns: 1fr; gap: 24px; padding: 16px; }
-  h1 { font-size: 28px; line-height: 1.3; max-width: 23ch; margin-bottom: 16px; }
-  h2 { font-size: 24px; }
-  h3 { font-size: 18px; }
-  .cover-head .introduction { font-size: 16px; }
-  .brand { grid-template-columns: minmax(0, 150px) minmax(0, 1fr); align-items: center; gap: 16px; }
+@media screen and (max-width: 760px) {
+  .toolbar { position: static; }
+  .toolbar-inner { padding: 10px 16px 12px; flex-wrap: wrap; gap: 8px; }
+  .toolbar-brand { flex: 1; }
+  .toolbar-subtitle { display: none; }
+  .toolbar-controls { display: contents; }
+  .readonly-chip { order: 1; }
+  .jump-field { order: 2; flex: 1 1 60%; }
+  .jump-field .field-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .jump-field select { flex: 1; max-width: none; min-width: 0; }
+  .theme-field { order: 3; flex: 1 1 30%; }
+  .theme-field select { flex: 1; min-width: 0; }
+  .toolbar-controls button { order: 4; flex: 1 1 40%; }
+  .theme-note { padding: 0 16px 10px; }
+  html { scroll-padding-top: 16px; }
+  .page { padding: 0 16px; }
+  .hero { padding: 28px 16px 84px; }
+  .hero-side { grid-template-columns: minmax(0, 1fr); }
+  h1 { font-size: 28px; line-height: 1.2; max-width: 23ch; }
+  h2 { font-size: 21px; }
+  h3 { font-size: 17px; }
+  .hero .introduction { font-size: 16px; }
+  .chip { white-space: normal; }
   .brand-plaque { width: 150px; min-height: 64px; padding: 12px; }
   .brand-plaque img { max-height: 40px; }
   .brand-placeholder { font-size: 16px; }
-  .client-name { font-size: 16px; }
-  .provenance { margin-top: 24px; }
-  .cover-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; padding: 24px 0; }
+  .verdict-value { font-size: 22px; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: -56px; }
+  .kpis .kpi:first-child { grid-column: 1 / -1; }
+  .kpi { padding: 14px 16px; }
+  .kpi-value { font-size: 26px; white-space: normal; }
+  .kpi-value.unknown { font-size: 18px; }
+  .card, .filter-section { padding: 16px; }
+  .cover-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
   .cover-facts dd { font-size: 14px; }
   .cover-facts .reference-fact { grid-column: 1 / -1; }
-  .snapshot-note { padding: 16px; }
-  .chapter { padding-top: 32px; margin-top: 32px; }
-  .chapter-head { margin-bottom: 16px; gap: 12px; }
-  .chapter-head button { width: 100%; }
-  .score-layout { grid-template-columns: 1fr; gap: 24px; margin: 24px 0; }
-  .global-index { padding: 0 0 20px; border-right: 0; border-bottom: 1px solid var(--line); }
-  .score-value { font-size: 36px; margin: 12px 0; }
-  .score-value.unknown { font-size: 24px; }
-  .pillar-scores { grid-template-columns: 1fr; }
-  .score-row-head { font-size: 14px; }
+  .chapter, .filter-section, .cluster-overview, .cluster-error { margin-top: 32px; }
+  .chapter-head { gap: 12px; }
+  .chapter-tools, .chapter-tools button, .chapter-tools .inline-field, .chapter-head > button { width: 100%; }
+  .chapter-tools .inline-field select { flex: 1; min-width: 0; }
+  .score-layout { grid-template-columns: 1fr; gap: 20px; }
+  .global-index { padding: 0 0 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .score-value { font-size: 32px; }
+  .pillar-scores, .critical-card { grid-template-columns: 1fr; }
   .filters, .extra-filters .filter-extra-grid { grid-template-columns: 1fr; gap: 12px; }
   .filter-actions button { width: 100%; }
-  .filter-section { padding: 24px 0; margin-top: 28px; }
-  .facts { grid-template-columns: 1fr; gap: 4px; }
+  .facts { grid-template-columns: 1fr; gap: 2px; }
   .facts dd { margin-bottom: 10px; }
-  .inventory-section { margin-top: 24px; }
-  .table-footer { gap: 10px; }
-  .finding-title { display: block; margin: 10px 0 0; }
-  .evidence-list { padding-left: 20px; }
-  .distribution-legend { gap: 10px 16px; }
-  .assessment-chart { grid-template-columns: 1fr; gap: 20px; padding: 16px; margin: 24px 0; }
-  .assessment-chart svg { width: 180px; }
-  .assessment-chart figcaption { grid-column: auto; }
-  .cluster-overview, .cluster-error { padding: 16px; }
+  .finding > summary { flex-wrap: wrap; padding: 12px 16px 12px 36px; }
+  .finding > summary::before { left: 16px; }
+  .finding-body { padding: 0 16px 16px; }
+  .findings-group > h3 { padding: 10px 16px; }
+  .evidence-list { padding-left: 18px; }
+  .checks-disclosure { padding: 4px 16px 12px; }
   .finops-values, .reference-entry, .reference-lanes, .reference-platform, .architecture-controls { grid-template-columns: 1fr; }
-  .finops-value { padding: 20px; }
+  .finops-value { padding: 18px; }
   .finops-value.savings { border-left: 0; border-top: 1px solid var(--line); }
-  .finops-baseline > .facts { padding: 16px 20px; }
-  .financial-amount { font-size: 32px; }
-  .financial-amount.unknown { font-size: 28px; }
-  .architecture-tabs button { width: 100%; }
-  .architecture-note, .reference-network, .reference-lane, .reference-entry { padding: 16px; }
+  .finops-baseline > .facts { padding: 16px 18px; }
+  .financial-amount { font-size: 30px; }
+  .financial-amount.unknown { font-size: 26px; }
+  .architecture-tabs { display: grid; width: 100%; }
+  .architecture-note, .reference-network, .reference-lane, .reference-entry, .reference-diagram { padding: 16px; }
   .reference-entry > div + div { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 20px; }
   .reference-workloads { grid-template-columns: 1fr; }
   .architecture-tree { max-height: 24rem; }
@@ -392,83 +503,114 @@ summary:hover { color: var(--accent); }
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
 @media (forced-colors: active) {
-  .score-fill, .distribution-segment { forced-color-adjust: none; background: CanvasText !important; }
-  .score-track, .distribution-track, .severity { border: 1px solid CanvasText; }
-  .assessment-chart circle { stroke: CanvasText; }
+  .score-fill, .distribution-segment, .legend-swatch, .status-swatch { forced-color-adjust: none; background: CanvasText !important; }
+  .score-track, .distribution-track, .severity, .status-bar, .kpi, .card, .verdict { border: 1px solid CanvasText; }
+  .status-bar rect { stroke: CanvasText; }
   .graph-box { fill: Canvas; stroke: CanvasText; }
   .graph-label, .graph-kind { fill: CanvasText; }
   .graph-line { stroke: CanvasText; }
   :focus-visible { outline-color: Highlight; }
 }
-@page { size: A4; margin: 16mm 14mm; }
+@page {
+  size: A4; margin: 14mm 12mm 16mm;
+  @bottom-left { content: var(--print-footer, "Revisión de arquitectura y configuración AKS"); font: 8pt "Segoe UI", system-ui, sans-serif; color: #505050; }
+  @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 8pt "Segoe UI", system-ui, sans-serif; color: #505050; }
+}
 @media print {
   :root, :root[data-theme="dark"] {
     color-scheme: light;
-    --canvas: #ffffff; --surface: #ffffff; --subtle: #fafafa; --wash: #f0f0f0;
-    --ink: #242424; --muted: #505050; --line: #b3b3b3; --accent: #0f6cbd;
-    --critical: #a4262c; --critical-wash: #fde7e9; --high: #8a3700; --high-wash: #fff1e5;
-    --medium: #795b00; --medium-wash: #fff8d6; --low: #505050; --low-wash: #f0f0f0;
-    --cover: #eff6fc; --cover-ink: #074b83; --cover-muted: #39576e;
+    --canvas: #ffffff; --surface: #ffffff; --subtle: #f7f8fa; --wash: #eceef1;
+    --ink: #1f1f1f; --muted: #505050; --line: #c8cbd0; --field-line: #8a8a8a; --heading: #0c3b5e; --accent: #0f6cbd; --accent-wash: #ebf3fc;
+    --critical: #b42318; --critical-wash: #fee4e2; --critical-bar: #d92d20; --high: #b93815; --high-wash: #ffead5; --high-bar: #ef6820;
+    --medium: #93370d; --medium-wash: #fef0c7; --medium-bar: #f79009; --low: #175cd3; --low-wash: #d1e9ff; --low-bar: #2e90fa;
+    --cover: #0c3b5e; --cover-ink: #ffffff; --cover-muted: #c7def2; --cover-line: #3f6b90;
+    --nav: #114b77; --nav-ink: #ffffff; --nav-muted: #d0e4f6;
+    --shadow: none; --shadow-raised: none;
   }
-  body { background: #ffffff; font-size: 10pt; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .no-print, .toolbar, .contents, .mobile-contents, .skip, button, input, select, .table-footer { display: none !important; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  body { background: #ffffff; font-size: 10pt; }
+  .no-print, .toolbar, .skip, button, input, select, .table-footer { display: none !important; }
   .print-only { display: block; }
-  .shell { display: block; max-width: none; }
-  .document { border: 0; padding: 0; }
-  h1 { font-size: 26pt; }
-  h2 { font-size: 20pt; }
-  h3 { font-size: 14pt; }
-  h4 { font-size: 11pt; }
+  .page { max-width: none; padding: 0; }
+  .document { padding: 0; }
+  .hero { padding: 18px 20px 64px; border-radius: 10px; }
+  .hero-inner { grid-template-columns: minmax(0, 1fr) 200px; gap: 16px 24px; }
+  h1 { font-size: 24pt; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 12pt; }
+  h4 { font-size: 10.5pt; }
   h1, h2, h3, h4, summary { break-after: avoid; }
-  .cover-head { grid-template-columns: minmax(0, 1fr) 170px; }
-  .brand-plaque { width: 170px; }
-  .brand { display: grid; grid-template-columns: 1fr; }
-  .cover-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-  .cover-facts dd, .cover-head .introduction { font-size: 11pt; }
-  .chapter { break-before: page; padding-top: 12px; margin-top: 0; }
-  .filter-section { padding: 20px 0 0; margin-top: 24px; }
+  .hero .introduction { font-size: 11pt; }
+  .hero-summary, .chip, .verdict-detail, .verdict-note, .distribution-legend, .client-line { font-size: 8.5pt; }
+  .brand { display: grid; gap: 8px; }
+  .brand-plaque { width: 170px; min-height: 60px; padding: 10px; }
+  .verdict { padding: 12px 14px; }
+  .verdict-value { font-size: 15pt; }
+  .kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: -48px; padding: 0 14px; }
+  .kpi { padding: 10px 12px; }
+  .kpi-value { font-size: 18pt; white-space: normal; }
+  .kpi-value.unknown { font-size: 12pt; }
+  .kpi-unit { font-size: 9pt; }
+  .kpi-label, .kpi-note { font-size: 8pt; }
+  dt { font-size: 7.5pt; }
+  .scope-card h2 { font-size: 13pt; }
+  .card, .filter-section, .kpi, .verdict, .table-scroll, .findings-group, .finops-baseline, .checks-disclosure, .architecture-map, .architecture-tree, .reference-diagram { box-shadow: none; }
+  .card-grid > .card, .kpi, .verdict, .score-row, .query, .priority-list li, .next-actions li, .executive-messages li, .assessment-chart, .finops-values, .reference-entry, .reference-lane { break-inside: avoid; }
+  .cover-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 16px; margin: 10px 0; }
+  .cover-facts dd { font-size: 9pt; }
+  .cover-id, .snapshot-note { font-size: 8pt; }
+  .chapter { break-before: page; margin-top: 0; padding-top: 4px; }
+  .cluster-overview, .cluster-error { margin-top: 20px; }
+  .filter-section { padding: 12px 0 0; margin-top: 20px; border: 0; }
   .filter-section > h2, .filter-section > .qualification, .extra-filters, .scope-path { display: none; }
-  .score-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 24px; }
-  .global-index { border-right: 1px solid var(--line); border-bottom: 0; padding-right: 20px; }
-  .score-value { font-size: 30pt; }
-  .score-value.unknown { font-size: 20pt; }
-  .pillar-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .score-row-head, .score-caption, .qualification, .facts, table, .snapshot-note { font-size: 9pt; }
+  .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .card-grid > *, .card-grid > .span-7, .card-grid > .span-5 { grid-column: auto; }
+  .card-grid > .span-12 { grid-column: 1 / -1; }
+  .card { padding: 12px 14px; }
+  .score-layout { grid-template-columns: 150px minmax(0, 1fr); gap: 16px; }
+  .global-index { border-right: 1px solid var(--line); border-bottom: 0; padding-right: 14px; }
+  .score-value { font-size: 20pt; }
+  .score-value.unknown { font-size: 14pt; }
+  .pillar-scores { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .critical-card { grid-template-columns: 150px minmax(0, 1fr); }
+  .score-row-head, .score-caption, .qualification, .facts, table, .snapshot-note, .coverage-note p { font-size: 8.5pt; }
   .table-scroll { overflow: visible; border-radius: 0; }
   .wide-table { min-width: 0; table-layout: fixed; }
-  th, td { padding: 7px 8px; max-width: none; font-size: 8pt; }
+  th, td { padding: 5px 6px; max-width: none; font-size: 7.5pt; }
   thead { display: table-header-group; }
   tr { break-inside: avoid; }
-  caption { font-size: 8pt; }
-  .text-button { display: inline !important; color: var(--ink); font-weight: 600; }
+  caption { font-size: 7.5pt; padding: 6px; }
+  .text-button { display: inline !important; color: var(--ink); font-weight: 600; min-height: 0; }
   details { break-inside: auto; }
-  details > summary { list-style: none; }
+  details > summary { list-style: none; min-height: 0; padding: 4px 0; }
   details > summary::-webkit-details-marker { display: none; }
   details:not([open]) > :not(summary) { display: block !important; }
-  .finding summary { padding: 12px 0; }
-  .finding-title { display: inline; margin-left: 8px; font-size: 11pt; }
-  .finding-body { padding-bottom: 16px; }
-  .facts { grid-template-columns: 120px minmax(0, 1fr); gap: 6px 12px; }
+  .finding > summary { padding: 8px 10px; }
+  .finding > summary::before { display: none; }
+  .finding-title { font-size: 10pt; }
+  .finding-body { padding: 0 10px 10px; }
+  .facts { grid-template-columns: 110px minmax(0, 1fr); gap: 3px 10px; }
   .facts dd { margin-bottom: 0; }
-  .json, .command { max-height: none; overflow: visible; font-size: 8pt; padding: 8px; }
-  .priority-list li, .executive-messages li, .score-row, .query { break-inside: avoid; }
-  .report-footer { margin-top: 24px; font-size: 8pt; }
-  .assessment-chart { grid-template-columns: 150px minmax(0, 1fr); gap: 20px; padding: 16px; break-inside: avoid; }
-  .assessment-chart svg { width: 140px; }
+  .json, .command { max-height: none; overflow: visible; font-size: 6.5pt; line-height: 1.3; padding: 5px 6px; margin-top: 4px; white-space: pre-wrap; word-break: break-all; }
+  .receipt { margin-top: 2px; }
+  .receipt summary { font-size: 7.5pt; }
+  .print-receipts { margin-top: 6px; }
+  .print-receipts .receipt { margin: 0; padding-top: 3px; border-top: 1px solid var(--line); }
+  .report-footer { margin-top: 20px; font-size: 8pt; }
   .assessment-chart table, .assessment-chart figcaption { font-size: 8pt; }
   .finops-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .financial-amount { font-size: 24pt; }
-  .financial-amount.unknown { font-size: 20pt; }
+  .finops-value { padding: 12px 14px; }
+  .financial-amount { font-size: 20pt; }
+  .financial-amount.unknown { font-size: 16pt; }
   .architecture-tabs, .architecture-controls, .architecture-tree { display: none !important; }
   .architecture-layout { display: block; }
-  .architecture-panel[hidden] { display: block !important; margin-top: 24px; }
+  .architecture-panel[hidden] { display: block !important; margin-top: 20px; }
   .architecture-map { break-inside: avoid; }
   .architecture-map > svg { min-width: 0; }
   .reference-entry, .reference-lanes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .reference-platform { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-  .architecture-product img { width: 30px; height: 30px; flex-basis: 30px; }
-  .reference-network, .reference-lane, .reference-entry { padding: 16px; }
-  .reference-diagram, .finops-baseline { break-inside: avoid; }
+  .reference-platform { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .architecture-product img { width: 28px; height: 28px; flex-basis: 28px; }
+  .reference-network, .reference-lane, .reference-entry, .reference-diagram { padding: 12px; }
 }
 </style>
 </head>
@@ -476,10 +618,22 @@ summary:hover { color: var(--accent); }
 <a class="skip" href="#main">Saltar al informe</a>
 <header class="toolbar no-print">
   <div class="toolbar-inner">
-    <span class="toolbar-title">Revisión AKS</span>
+    <div class="toolbar-brand"><span class="toolbar-title">Azure SRE Agent</span><span class="toolbar-subtitle">Revisión AKS</span></div>
+    <nav class="toolbar-nav" aria-label="Secciones del informe">
+      <a href="#executive">Resumen</a><a href="#inventory">Inventario</a><a href="#architecture">Arquitectura</a><a href="#findings">Hallazgos</a><a href="#finops">FinOps</a><a href="#actions">Plan de acción</a><a href="#methodology">Método</a>
+    </nav>
     <div class="toolbar-controls">
-      <label class="theme-field" for="theme-mode">Tema
-        <select id="theme-mode"><option value="auto">Sistema</option><option value="light">Claro</option><option value="dark">Oscuro</option></select>
+      <span class="readonly-chip">Solo lectura</span>
+      <label class="jump-field" for="jump-section"><span class="field-text">Sección</span>
+        <select id="jump-section">
+          <option value="cover">Portada y alcance</option><option value="executive">Resumen ejecutivo</option>
+          <option value="inventory">Inventario observado</option><option value="architecture">Arquitectura</option>
+          <option value="findings">Hallazgos y cobertura</option><option value="finops">FinOps</option>
+          <option value="actions">Plan de acción</option><option value="methodology">Método y fuentes</option>
+        </select>
+      </label>
+      <label class="theme-field" for="theme-mode"><span class="sr-only">Tema de color</span>
+        <select id="theme-mode"><option value="auto">Tema: sistema</option><option value="light">Tema: claro</option><option value="dark">Tema: oscuro</option></select>
       </label>
       <button id="export-json" disabled>JSON completo</button>
       <button id="print-report" class="primary" disabled>Imprimir / PDF</button>
@@ -495,76 +649,76 @@ summary:hover { color: var(--accent); }
 </div>
 <noscript><div class="opening-state">Este informe necesita JavaScript local para validar y presentar la instantánea. No realiza llamadas de red. Abra el archivo con JavaScript habilitado.</div></noscript>
 <div id="report-shell" class="shell" hidden>
-  <aside class="contents no-print">
-    <h2>Contenido</h2>
-    <nav aria-label="Secciones del informe">
-      <ol>
-        <li><a href="#cover">Portada y alcance</a></li>
-        <li><a href="#executive">Resumen ejecutivo</a></li>
-        <li><a href="#inventory">Inventario observado</a></li>
-        <li><a href="#architecture">Arquitectura</a></li>
-        <li><a href="#findings">Hallazgos y cobertura</a></li>
-        <li><a href="#finops">FinOps</a></li>
-        <li><a href="#actions">Plan de acción</a></li>
-        <li><a href="#methodology">Método y fuentes</a></li>
-      </ol>
-    </nav>
-    <p class="contents-note">Documento de consulta.<br>Las actuaciones requieren revisión y aprobación humanas.</p>
-  </aside>
   <main id="main" class="document" tabindex="-1">
-    <nav class="mobile-contents no-print" aria-label="Navegación del informe">
-      <label for="jump-section">Contenido</label>
-      <select id="jump-section">
-        <option value="cover">Portada y alcance</option><option value="executive">Resumen ejecutivo</option>
-        <option value="inventory">Inventario observado</option><option value="findings">Hallazgos y cobertura</option>
-        <option value="architecture">Arquitectura</option>
-        <option value="finops">FinOps</option><option value="actions">Plan de acción</option><option value="methodology">Método y fuentes</option>
-      </select>
-    </nav>
-    <section id="cluster-overview" class="cluster-overview" aria-labelledby="cluster-overview-title" hidden>
+    <section id="cover" class="cover" aria-labelledby="report-title">
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="hero-main">
+            <h1 id="report-title">Revisión de arquitectura y configuración AKS</h1>
+            <p class="introduction">Buenas prácticas, seguridad, FinOps y optimización del clúster, sus cargas de trabajo y los recursos asociados.</p>
+            <p id="hero-summary" class="hero-summary"></p>
+            <div id="provenance" class="provenance" aria-label="Procedencia, entorno y referencia"></div>
+          </div>
+          <div class="hero-side">
+            <div class="brand">
+              <div id="brand-plaque" class="brand-plaque"></div>
+              <p class="client-line">Preparado para <span id="client-name" class="client-name"></span></p>
+            </div>
+            <div id="verdict" class="verdict" role="group" aria-labelledby="verdict-label"></div>
+          </div>
+          <div id="severity-distribution" class="hero-distribution"></div>
+        </div>
+      </div>
+      <div class="page">
+        <div id="kpis" class="kpis"></div>
+        <p id="simulation-note" class="sim-note" hidden></p>
+        <div class="card scope-card">
+          <h2 id="scope-title">Alcance de la instantánea</h2>
+          <p class="qualification">Identidad del clúster, versión y estado tal como los devolvió la fuente en la fecha de referencia.</p>
+          <dl id="cover-facts" class="cover-facts"></dl>
+          <div id="cover-id" class="cover-id"></div>
+          <div class="snapshot-note">
+            <p><strong>Instantánea de consulta, no supervisión en tiempo real.</strong>
+            La ausencia de datos se indica como <strong>No evaluado</strong>; no demuestra que una configuración sea correcta.
+            Los índices son locales y no constituyen una evaluación oficial de Azure, WARA o Polaris.</p>
+            <p>Documento de consulta: las actuaciones requieren revisión y aprobación humanas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="page">
+    <section id="cluster-error" class="cluster-error" role="alert" hidden></section>
+    <section id="cluster-overview" class="cluster-overview card" aria-labelledby="cluster-overview-title" hidden>
       <h2 id="cluster-overview-title">Clústeres incluidos en esta instantánea</h2>
       <p class="qualification">La selección cambia la lectura local; no autentica, recopila ni despliega otro clúster. Una ejecución fallida conserva su error y no hereda datos de otro clúster.</p>
       <div id="cluster-aggregate"></div>
       <div class="field cluster-picker no-print"><label for="cluster-selector">Clúster de la lectura detallada</label><select id="cluster-selector"></select></div>
       <div id="cluster-runs-table"></div>
     </section>
-    <section id="cluster-error" class="cluster-error" role="alert" hidden></section>
-    <section id="cover" aria-labelledby="report-title">
-      <div class="cover-head">
-        <div>
-          <h1 id="report-title">Revisión de arquitectura y configuración AKS</h1>
-          <p class="introduction">Buenas prácticas, seguridad, FinOps y optimización del clúster, sus cargas de trabajo y los recursos asociados.</p>
-        </div>
-        <div class="brand">
-          <div id="brand-plaque" class="brand-plaque"></div>
-          <p id="client-name" class="client-name"></p>
-        </div>
-      </div>
-      <div id="provenance" class="provenance" aria-label="Procedencia y entorno"></div>
-      <dl id="cover-facts" class="cover-facts"></dl>
-      <div id="cover-id" class="cover-id"></div>
-      <div class="snapshot-note">
-        <strong>Instantánea de consulta, no supervisión en tiempo real.</strong>
-        La ausencia de datos se indica como <strong>No evaluado</strong>; no demuestra que una configuración sea correcta.
-        Los índices son locales y no constituyen una evaluación oficial de Azure, WARA o Polaris.
-      </div>
-    </section>
     <section id="executive" class="chapter" aria-labelledby="executive-title">
       <div class="chapter-head">
         <div><h2 id="executive-title">Resumen ejecutivo</h2><p class="qualification">La conclusión se interpreta junto a la cobertura y los límites de las fuentes.</p></div>
       </div>
-      <div class="score-layout">
-        <div id="global-index" class="global-index"></div>
-        <div><h3>Índice local por área</h3><div id="area-scores"></div></div>
+      <div class="card-grid">
+        <div class="card span-7">
+          <div class="score-layout">
+            <div id="global-index" class="global-index"></div>
+            <div><h3>Índice local por área</h3><div id="area-scores"></div></div>
+          </div>
+        </div>
+        <div class="card span-5">
+          <figure id="assessment-chart" class="assessment-chart" aria-labelledby="assessment-chart-title"></figure>
+          <div id="global-coverage" class="coverage-note"></div>
+        </div>
+        <div class="card span-12 critical-card"><h3 id="critical-title">Prioridades críticas</h3><div id="critical-findings"></div></div>
+        <div class="card span-7">
+          <h3 id="next-actions-title">Qué hacer a continuación</h3>
+          <p class="card-sub">Primeras acciones del plan aportado por el motor, por horizonte y severidad. Requieren revisión y aprobación humanas.</p>
+          <div id="next-actions"></div>
+        </div>
+        <div class="card span-5"><h3>Lectura del motor</h3><ul id="executive-messages" class="executive-messages"></ul></div>
+        <div class="card span-12"><h3>Lectura por pilar Well-Architected</h3><div id="pillar-scores" class="pillar-scores"></div></div>
       </div>
-      <figure id="assessment-chart" class="assessment-chart" aria-labelledby="assessment-chart-title"></figure>
-      <h3>Lectura por pilar Well-Architected</h3>
-      <div id="pillar-scores" class="pillar-scores"></div>
-      <div id="global-coverage" class="coverage-note"></div>
-      <div id="severity-distribution" class="severity-distribution"></div>
-      <h3 id="critical-title">Prioridades críticas</h3>
-      <div id="critical-findings"></div>
-      <ul id="executive-messages" class="executive-messages"></ul>
     </section>
     <section id="scope-filters" class="filter-section" aria-labelledby="filter-title">
       <h2 id="filter-title">Explorar el alcance</h2>
@@ -629,9 +783,14 @@ summary:hover { color: var(--accent); }
     <section id="findings" class="chapter" aria-labelledby="findings-title">
       <div class="chapter-head">
         <div><h2 id="findings-title">Hallazgos y cobertura</h2><p id="findings-count" class="qualification"></p></div>
-        <button id="export-findings" class="no-print">Exportar hallazgos CSV</button>
+        <div class="chapter-tools no-print">
+          <label class="inline-field" for="findings-order">Ordenar
+            <select id="findings-order"><option value="severity">Severidad (mayor primero)</option><option value="model">Orden del motor</option></select>
+          </label>
+          <button id="export-findings">Exportar hallazgos CSV</button>
+        </div>
       </div>
-      <p class="qualification">Cada hallazgo procede de una comprobación fallida del modelo. Su severidad no se atribuye a una fuente ausente ni demuestra por sí sola una causa raíz o un incumplimiento certificado.</p>
+      <p class="qualification">Cada hallazgo procede de una comprobación fallida del modelo. Su severidad no se atribuye a una fuente ausente ni demuestra por sí sola una causa raíz o un incumplimiento certificado. <a class="no-print" href="#scope-filters">Ajustar filtros</a></p>
       <div id="findings-list"></div>
       <div id="findings-pagination"></div>
       <details class="checks-disclosure" data-detail-key="checks-disclosure">
@@ -661,8 +820,10 @@ summary:hover { color: var(--accent); }
       <div id="action-plan"></div>
     </section>
     <section id="methodology" class="chapter" aria-labelledby="methodology-title">
-      <h2 id="methodology-title">Método, fuentes y límites de lectura</h2>
-      <div class="method-block">
+      <div class="chapter-head">
+        <div><h2 id="methodology-title">Método, fuentes y límites de lectura</h2><p class="qualification">Cómo se calcula el índice local, qué fuentes se leyeron y con qué límites.</p></div>
+      </div>
+      <div class="method-block card">
         <h3>Cómo interpretar el índice local</h3>
         <p class="prose">Índice local = 100 × comprobaciones superadas / comprobaciones evaluadas. La cobertura compara las evaluadas con las evaluadas más las no evaluadas. Las no aplicables quedan excluidas de ambos denominadores.</p>
         <p class="prose">El motor identifica cada comprobación por un <code>check_id</code> único y no duplica su contribución al índice global al navegar por namespaces. Esta interfaz presenta los índices recibidos, sin volver a evaluar controles ni generar recomendaciones.</p>
@@ -675,15 +836,16 @@ summary:hover { color: var(--accent); }
         <p class="qualification">Recibos adicionales del modelo completo. No se convierten en nuevas comprobaciones ni se presentan como configuraciones conformes.</p>
         <div id="source-data-receipts"></div>
       </details>
-      <div class="method-block"><h3>Catálogo y referencias fijadas</h3><div id="catalog-pins"></div></div>
-      <div class="method-block"><h3>Consultas y límites incorporados</h3><div id="queries"></div></div>
-      <div class="method-block"><h3>Limitaciones declaradas</h3><div id="limitations"></div></div>
+      <div class="method-block card"><h3>Catálogo y referencias fijadas</h3><div id="catalog-pins"></div></div>
+      <details class="method-block card" data-detail-key="method-queries"><summary id="queries-title">Consultas y límites incorporados</summary><div id="queries"></div></details>
+      <div class="method-block card"><h3>Limitaciones declaradas</h3><div id="limitations"></div></div>
     </section>
     <footer class="report-footer">
       <p id="footer-reference"></p>
       <p>Archivo autocontenido y de solo lectura. Los datos y las exportaciones permanecen locales; compartir el archivo requiere revisar las identidades y la evidencia que contiene.</p>
       <p>Las capturas de pruebas de interfaz utilizan datos expresamente simulados, no observaciones de un cliente.</p>
     </footer>
+    </div>
   </main>
 </div>
 <script type="application/json" id="report-data">__REPORT_DATA_JSON__</script>
@@ -1109,7 +1271,7 @@ summary:hover { color: var(--accent); }
     return [...workloadMap.values()].filter(row => row.resource_id === target.resource_id && row.namespace === target.namespace && row.name === target.name).length <= 1;
   };
   const state = {pages: new Map(), print: false, openDetails: new Map(), graphNode: "", graphKind: "", activeCluster: clusterRuns[0].cluster_name,
-    filters: {search: "", area: "", namespace: "", workload: "", level: "", status: "", severity: ""}};
+    findingsOrder: "severity", filters: {search: "", area: "", namespace: "", workload: "", level: "", status: "", severity: ""}};
   const detail = (label, key, content) => {
     const result = node("details", undefined, "receipt");
     result.dataset.detailKey = key; add(result, node("summary", label), add(node("div", undefined, "receipt-content"), content));
@@ -1120,8 +1282,76 @@ summary:hover { color: var(--accent); }
     for (const [label, value] of entries) add(result, node("dt", label), value instanceof Node ? add(node("dd"), value) : node("dd", text(value)));
     return result;
   };
-  const rawReceipt = (row, key) => detail("Evidencia e identificación completas", key, node("pre", JSON.stringify(row, null, 2), "json"));
+  const jsonText = value => JSON.stringify(value, null, state.print ? 0 : 2);
+  const rawReceipt = (row, key) => detail("Evidencia e identificación completas", key, node("pre", jsonText(row), "json"));
   const severity = value => node("span", SEVERITY.get(value), `severity ${value}`);
+  const SEVERITY_ORDER = [...SEVERITY.keys()];
+  const SEVERITY_WORDS = new Map([["critical", ["crítica", "críticas"]], ["high", ["alta", "altas"]], ["medium", ["media", "medias"]], ["low", ["baja", "bajas"]]]);
+  const severityRank = value => { const rank = SEVERITY_ORDER.indexOf(value); return rank < 0 ? SEVERITY_ORDER.length : rank; };
+  const severityCounts = findings => new Map(SEVERITY_ORDER.map(key => [key, findings.filter(finding => finding.severity === key).length]));
+  const plural = (number, one, many) => `${number.toLocaleString("es-ES")} ${number === 1 ? one : many}`;
+  const percentText = value => value === null || value === undefined ? "No evaluado" : `${value.toLocaleString("es-ES", {maximumFractionDigits: 1})} %`;
+  const countText = rows => rows === null || rows === undefined ? "No evaluado" : rows.length.toLocaleString("es-ES");
+  const listText = items => items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items[items.length - 1]}`;
+  const listValue = value => Array.isArray(value) ? (value.length ? value.map(text).join(", ") : "Ninguna") : text(value);
+  const rich = (target, parts) => { for (const part of parts) target.append(Array.isArray(part) ? node("b", part[0]) : document.createTextNode(part)); return target; };
+  const ARM_RESOURCE = /^\/subscriptions\/[0-9a-f-]{36}\/resourcegroups\/[^/?#\s]+(?:\/providers\/[^?#\s]+)?$/i;
+  const armId = value => {
+    const wrapper = node("span", undefined, "arm-id");
+    text(value).split("/").forEach((part, index) => {
+      if (index) wrapper.append("/", document.createElement("wbr"));
+      if (part) wrapper.append(part);
+    });
+    return wrapper;
+  };
+  const portalLink = value => {
+    if (typeof value !== "string" || !ARM_RESOURCE.test(value)) return null;
+    const link = permittedLink(`https://portal.azure.com/#@/resource${encodeURI(value)}`, "Azure Portal");
+    link.classList.add("portal-link");
+    return add(node("span", undefined, "no-print"), document.createTextNode(" · "), link);
+  };
+  const idWithPortal = value => {
+    const wrapper = add(node("span"), armId(value));
+    const link = portalLink(value); if (link) wrapper.append(link);
+    return wrapper;
+  };
+  const resourceRef = value => {
+    if (typeof value !== "string" || !ARM_RESOURCE.test(value)) return armId(value);
+    const segments = value.split("/").filter(Boolean);
+    const meta = node("span", `Grupo ${segments[3]}`, "cell-note");
+    const link = portalLink(value); if (link) meta.append(link);
+    return add(node("span", undefined, "resource-ref"), node("strong", segments[segments.length - 1]), meta);
+  };
+  const subjectLabel = record => {
+    if (record.workload_name) return `${text(record.namespace)} / ${record.workload_name}`;
+    if (record.namespace) return `namespace ${record.namespace}`;
+    return typeof record.resource_id === "string" && record.resource_id ? record.resource_id.split("/").filter(Boolean).pop() : text(record.resource_id);
+  };
+  const containerSummary = containers => {
+    if (!Array.isArray(containers)) return text(containers);
+    if (!containers.length) return "0 contenedores incorporados";
+    const list = node("ul", undefined, "container-list");
+    for (const item of containers) {
+      if (!isObject(item)) { list.append(node("li", text(item))); continue; }
+      const entry = add(node("li"), node("strong", item.name), node("span", item.image, "mono"));
+      const declared = [];
+      for (const [group, label] of [["requests", "requests"], ["limits", "límites"]]) {
+        if (!isObject(item[group])) continue;
+        const values = [["cpu", "CPU"], ["memory", "memoria"]].filter(([key]) => item[group][key] !== null && item[group][key] !== undefined && item[group][key] !== "")
+          .map(([key, name]) => `${name} ${text(item[group][key])}`);
+        if (values.length) declared.push(`${label}: ${values.join(", ")}`);
+      }
+      const probeKeys = [["readiness_probe", "readiness"], ["liveness_probe", "liveness"], ["startup_probe", "startup"]];
+      if (probeKeys.some(([key]) => typeof item[key] === "boolean")) {
+        const probes = probeKeys.filter(([key]) => item[key] === true).map(([, label]) => label);
+        declared.push(probes.length ? `probes: ${probes.join(", ")}` : "probes: ninguna declarada");
+      }
+      if (isObject(item.security) && item.security.privileged === true) declared.push("privilegiado");
+      if (declared.length) entry.append(node("span", declared.join(" · "), "cell-note"));
+      list.append(entry);
+    }
+    return list;
+  };
   const permittedLink = (value, label) => {
     if (!value) return node("span", "No evaluado");
     let url;
@@ -1169,17 +1399,75 @@ summary:hover { color: var(--accent); }
     return wrapper;
   };
   const money = value => value === null || value === undefined ? "No evaluado" : `${value.toLocaleString("es-ES", {maximumFractionDigits: 2})} ${model.finops.currency || "(divisa no informada)"}`;
+  const cssString = value => `"${String(value).replace(/[\\"]/g, "\\$&").replace(/[\u0000-\u001f\u007f]/g, " ")}"`;
+  const kpi = (value, unit, label, note, unknown = false) => {
+    const valueNode = node("p", value, `kpi-value${unknown ? " unknown" : ""}`);
+    if (unit && !unknown) valueNode.append(node("span", unit, "kpi-unit"));
+    return add(node("div", undefined, "kpi"), valueNode, node("p", label, "kpi-label"), node("p", note, "kpi-note"));
+  };
   const renderCover = () => {
-    for (const id of ["brand-plaque", "provenance", "cover-facts", "cover-id"]) byId(id).replaceChildren();
+    for (const id of ["brand-plaque", "provenance", "cover-facts", "cover-id", "hero-summary", "verdict", "severity-distribution", "kpis", "simulation-note"]) byId(id).replaceChildren();
     byId("client-name").textContent = model.client.name;
     const plaque = byId("brand-plaque");
     if (model.client.logo_data_uri) {
       const image = node("img"); image.src = model.client.logo_data_uri; image.alt = model.client.logo_alt || `Logo de ${model.client.name}`;
       plaque.append(image);
     } else plaque.append(node("span", "CLIENTE", "brand-placeholder"));
+    const score = model.scores.global, coverage = model.scores.coverage, counts = severityCounts(model.findings);
+    const breakdown = SEVERITY_ORDER.filter(key => counts.get(key)).map((key, index) => `${counts.get(key)}${index ? "" : " de severidad"} ${SEVERITY_WORDS.get(key)[0]}`);
+    rich(byId("hero-summary"), score.evaluated ? [
+      [plural(model.findings.length, "hallazgo", "hallazgos")], " en ", [model.cluster.name], breakdown.length ? ` (${listText(breakdown)})` : "", " sobre ",
+      [plural(score.evaluated, "comprobación evaluada", "comprobaciones evaluadas")], "; cobertura del ", [percentText(coverage.coverage_percent)],
+      `, con ${plural(coverage.not_evaluated, "comprobación", "comprobaciones")} sin evaluar.`,
+      model.findings.length ? "" : " La ausencia de hallazgos no demuestra ausencia de riesgo."
+    ] : [["Ninguna comprobación evaluada"], " en ", [model.cluster.name], `: el índice local queda No evaluado y ${plural(coverage.not_evaluated, "comprobación sigue", "comprobaciones siguen")} sin evaluar.`]);
     const provenance = model.provenance === "LIVE" ? "Datos observados / instantánea" : "SIMULADO / prueba de interfaz, no datos en vivo";
     const environment = {LAB: "LAB / entorno de pruebas", PRODUCTION: "Entorno de producción declarado", UNSPECIFIED: "Entorno no especificado"}[model.environment];
-    add(byId("provenance"), node("span", provenance, "label"), node("span", environment, "label"));
+    add(byId("provenance"), node("span", `Referencia ${utc(model.reference_utc)}`, "chip"), node("span", provenance, `chip${model.provenance === "LIVE" ? "" : " strong"}`),
+      node("span", environment, "chip"), node("span", `${text(model.cluster.name)} · ${text(model.cluster.resource_group)}`, "chip"));
+    if (clusterRuns.length > 1) {
+      const position = clusterRuns.findIndex(run => run.cluster_name === state.activeCluster) + 1;
+      const link = node("a", `Clúster ${position} de ${clusterRuns.length} · cambiar`, "chip no-print"); link.href = "#cluster-overview";
+      byId("provenance").append(link);
+    }
+    const [tone, verdictText] = counts.get("critical") ? ["critical", "Acción prioritaria"] : counts.get("high") ? ["high", "Requiere atención"] :
+      model.findings.length ? ["medium", "Revisión recomendada"] : score.evaluated ? ["none", "Sin hallazgos registrados"] : ["unknown", "No evaluado"];
+    const verdict = byId("verdict"); verdict.className = `verdict tone-${tone}`;
+    const verdictLabel = node("p", "Veredicto", "verdict-label"); verdictLabel.id = "verdict-label";
+    add(verdict, verdictLabel, node("p", verdictText, "verdict-value"),
+      node("p", SEVERITY_ORDER.map(key => `${counts.get(key)} ${SEVERITY_WORDS.get(key)[counts.get(key) === 1 ? 0 : 1]}`).join(" · "), "verdict-detail"),
+      node("p", !score.evaluated ? "Sin comprobaciones evaluadas: revise las fuentes antes de concluir." : model.findings.length ?
+        `Según ${plural(score.evaluated, "comprobación evaluada", "comprobaciones evaluadas")} (cobertura ${percentText(coverage.coverage_percent)}). No es una calificación oficial.` :
+        `No equivale a ausencia de riesgo: cobertura ${percentText(coverage.coverage_percent)}.`, "verdict-note"));
+    const distribution = byId("severity-distribution");
+    const track = node("div", undefined, "distribution-track"); track.setAttribute("aria-hidden", "true");
+    const legend = node("div", undefined, "distribution-legend");
+    for (const key of SEVERITY_ORDER) {
+      const number = counts.get(key);
+      if (number) { const segment = node("div", undefined, `distribution-segment ${key}`); segment.style.width = `${number / model.findings.length * 100}%`; track.append(segment); }
+      const swatch = node("span", undefined, `legend-swatch ${key}`); swatch.setAttribute("aria-hidden", "true");
+      add(legend, add(node("span", undefined, "legend-item"), swatch, document.createTextNode(`${SEVERITY.get(key)} `), node("b", number)));
+    }
+    add(distribution, add(node("p", undefined, "distribution-head"), rich(node("span"), ["Distribución de severidad · ", [plural(model.findings.length, "hallazgo aportado", "hallazgos aportados")]]),
+      node("span", "Los no evaluados no se representan como hallazgos ni como resultados sanos.")), track, legend);
+    const inventory = model.inventory;
+    const counted = (rows, label) => rows === null || rows === undefined ? `${label}: No evaluado` : `${countText(rows)} ${label}`;
+    add(byId("kpis"),
+      score.evaluated ? kpi(model.findings.length.toLocaleString("es-ES"), "", "Hallazgos registrados", SEVERITY_ORDER.slice(0, 2).map(key => `${SEVERITY.get(key)} ${counts.get(key)}`).join(" · ")) :
+        kpi("No evaluado", "", "Hallazgos registrados", `${model.findings.length} aportados: ninguna comprobación evaluada`, true),
+      score.score === null ? kpi("No evaluado", "", "Índice local global", "Sin comprobaciones evaluadas", true) :
+        kpi(score.score.toLocaleString("es-ES", {maximumFractionDigits: 1}), "/ 100", "Índice local global", `${score.passed} de ${score.evaluated} evaluadas superadas · no oficial`),
+      coverage.coverage_percent === null ? kpi("No evaluado", "", "Cobertura de la evaluación", "Sin comprobaciones aplicables evaluables", true) :
+        kpi(coverage.coverage_percent.toLocaleString("es-ES", {maximumFractionDigits: 1}), "%", "Cobertura de la evaluación", `${coverage.not_evaluated} no evaluadas · ${coverage.not_applicable} no aplicables`),
+      model.finops.actual_cost === null || model.finops.actual_cost === undefined ?
+        kpi("No evaluado", "", "Coste observado", "Sin importe observado completo; consulte FinOps", true) :
+        kpi(model.finops.actual_cost.toLocaleString("es-ES", {maximumFractionDigits: 2}), model.finops.currency || "(divisa no informada)", "Coste observado",
+          model.finops.estimated_savings === null ? "Ahorro estimado: por estimar" : `Ahorro estimado aportado: ${money(model.finops.estimated_savings)}`),
+      inventory.workloads === null || inventory.workloads === undefined ?
+        kpi("No evaluado", "", "Cargas de trabajo observadas", `${counted(inventory.namespaces, "namespaces")} · ${counted(inventory.node_pools, "pools")}`, true) :
+        kpi(countText(inventory.workloads), "", "Cargas de trabajo observadas", `${counted(inventory.namespaces, "namespaces")} · ${counted(inventory.node_pools, "pools")} · ${counted(inventory.related_resources, "recursos asociados")}`));
+    const simulation = byId("simulation-note"); simulation.hidden = model.provenance === "LIVE";
+    add(simulation, node("strong", "Datos simulados."), document.createTextNode(" Prueba de interfaz sin lectura de Azure: las cifras no son observaciones de un cliente ni de un clúster real."));
     const entries = [
       ["Clúster", model.cluster.name], ["Suscripción", model.cluster.subscription_name || model.cluster.subscription_id],
       ["Grupo de recursos", model.cluster.resource_group], ["Región", model.cluster.region], ["Versión de AKS", model.cluster.version],
@@ -1189,14 +1477,17 @@ summary:hover { color: var(--accent); }
     for (const [label, value] of entries) {
       const wrapper = add(node("div"), node("dt", label), node("dd", value));
       if (label === "Referencia UTC") wrapper.className = "reference-fact";
+      if (label === "Suscripción") wrapper.className = "wide-fact";
       byId("cover-facts").append(wrapper);
     }
-    add(byId("cover-id"), node("p", `ID del clúster: ${model.cluster.id}`), node("p", `ID de suscripción: ${text(model.cluster.subscription_id)}`));
-    byId("cover-id").append(detail("Alcance e identidad completos del clúster", "cluster-identity", node("pre", JSON.stringify(model.cluster, null, 2), "json")));
+    add(byId("cover-id"), add(node("p"), document.createTextNode("ID del clúster: "), idWithPortal(model.cluster.id)),
+      add(node("p"), document.createTextNode("ID de suscripción: "), armId(model.cluster.subscription_id)));
+    byId("cover-id").append(detail("Alcance e identidad completos del clúster", "cluster-identity", node("pre", jsonText(model.cluster), "json")));
     byId("footer-reference").textContent = `${model.client.name} / ${model.cluster.name} / ${environment} / ${provenance} / ${utc(model.reference_utc)} / esquema ${model.schema_version}.`;
+    document.documentElement.style.setProperty("--print-footer", cssString(`Revisión de arquitectura y configuración AKS · ${model.cluster.name} · ${utc(model.reference_utc)}`));
   };
   const renderExecutive = () => {
-    for (const id of ["global-index", "area-scores", "pillar-scores", "global-coverage", "severity-distribution", "critical-findings", "executive-messages", "assessment-chart"]) byId(id).replaceChildren();
+    for (const id of ["global-index", "area-scores", "pillar-scores", "global-coverage", "critical-findings", "next-actions", "executive-messages", "assessment-chart"]) byId(id).replaceChildren();
     const score = model.scores.global;
     add(byId("global-index"), node("h3", "Índice local global"), node("span", percentage(score.score), `score-value${score.score === null ? " unknown" : ""}`),
       node("p", scoreCaption(score)), node("p", `${score.passed} superadas / ${score.failed} con hallazgo.`, "muted"),
@@ -1209,27 +1500,24 @@ summary:hover { color: var(--accent); }
       document.createTextNode(`. ${scoreCaption(coverage)}`)),
       node("p", `${coverage.total} comprobaciones únicas incorporadas. ${model.sources.length} fuentes registradas; consulte sus estados y límites.`, "muted"));
     const chart = byId("assessment-chart");
-    const drawing = svgNode("svg", {viewBox: "0 0 220 220", role: "img", "aria-labelledby": "assessment-svg-title assessment-svg-description"});
-    add(drawing, svgNode("title", {id: "assessment-svg-title"}, "Recuento de comprobaciones por estado; no es un gráfico de salud"),
-      svgNode("desc", {id: "assessment-svg-description"}, `${score.passed} superadas; ${score.failed} con hallazgo; ${score.not_evaluated} no evaluadas; ${score.not_applicable} no aplicables. ${score.total} en total.`),
-      svgNode("circle", {cx: 110, cy: 110, r: 84, fill: "none", stroke: "var(--line)", "stroke-width": 20}));
-    let offset = 0;
     const segments = [["passed", "Superadas", score.passed, "var(--accent)", "Evaluadas sin hallazgo local"],
-      ["failed", "Con hallazgo", score.failed, "var(--high)", "Evaluadas con evidencia de fallo"],
+      ["failed", "Con hallazgo", score.failed, "var(--high-bar)", "Evaluadas con evidencia de fallo"],
       ["not_evaluated", "No evaluadas", score.not_evaluated, "var(--field-line)", "Configuración o intención desconocida"],
       ["not_applicable", "No aplicables", score.not_applicable, "var(--surface)", "Fuera de los denominadores"]];
-    for (const [, , number, color] of segments) {
-      if (score.total && number) {
-        const length = number / score.total * 100;
-        drawing.append(svgNode("circle", {cx: 110, cy: 110, r: 84, fill: "none", stroke: color, "stroke-width": 20,
-          pathLength: 100, "stroke-dasharray": `${length} ${100 - length}`, "stroke-dashoffset": -offset, transform: "rotate(-90 110 110)"}));
-        offset += length;
-      }
+    const heading = node("h3", "Qué se ha podido evaluar"); heading.id = "assessment-chart-title";
+    const head = add(node("div", undefined, "chart-head"), heading,
+      add(node("p", undefined, "chart-total-line"), node("span", score.total, "chart-total"), node("span", "comprobaciones", "chart-unit")));
+    const drawing = svgNode("svg", {viewBox: "0 0 1000 14", preserveAspectRatio: "none", role: "img", class: "status-bar", "aria-labelledby": "assessment-svg-title assessment-svg-description"});
+    add(drawing, svgNode("title", {id: "assessment-svg-title"}, "Recuento de comprobaciones por estado; no es un gráfico de salud"),
+      svgNode("desc", {id: "assessment-svg-description"}, `${score.passed} superadas; ${score.failed} con hallazgo; ${score.not_evaluated} no evaluadas; ${score.not_applicable} no aplicables. ${score.total} en total.`));
+    let offset = 0;
+    for (const [key, , number, color] of segments) {
+      if (!score.total || !number) continue;
+      const width = number / score.total * 1000;
+      drawing.append(svgNode("rect", {x: offset, y: 0, width, height: 14, fill: color, class: key,
+        ...(key === "not_applicable" ? {stroke: "var(--field-line)", "vector-effect": "non-scaling-stroke"} : {})}));
+      offset += width;
     }
-    add(drawing, svgNode("text", {x: 110, y: 108, "text-anchor": "middle", class: "chart-total"}, score.total),
-      svgNode("text", {x: 110, y: 132, "text-anchor": "middle", class: "chart-unit"}, "comprobaciones"));
-    const chartReading = add(node("div"), node("h3", "Qué se ha podido evaluar", undefined));
-    chartReading.firstChild.id = "assessment-chart-title";
     const table = node("table"); table.append(node("caption", "Datos del gráfico: alcance completo de este clúster"));
     const header = node("tr");
     for (const label of ["Estado", "Cantidad", "Lectura"]) { const cell = node("th", label); cell.scope = "col"; header.append(cell); }
@@ -1239,19 +1527,9 @@ summary:hover { color: var(--accent); }
       const status = add(node("th"), swatch, document.createTextNode(label)); status.scope = "row";
       body.append(add(node("tr"), status, node("td", number), node("td", meaning)));
     }
-    add(table, add(node("thead"), header), body); chartReading.append(table);
-    add(chart, drawing, chartReading, node("figcaption", "El índice local describe solo las evaluadas; la cobertura muestra cuánto queda por conocer. No evaluado no es un resultado superado, y No aplicable no mejora la cobertura."));
+    add(table, add(node("thead"), header), body);
+    add(chart, head, drawing, table, node("figcaption", "El índice local describe solo las evaluadas; la cobertura muestra cuánto queda por conocer. No evaluado no es un resultado superado, y No aplicable no mejora la cobertura."));
     const sourceLink = node("a", "Consultar el registro de fuentes"); sourceLink.href = "#sources-title"; byId("global-coverage").append(sourceLink);
-    const distribution = byId("severity-distribution");
-    distribution.append(node("h3", "Distribución de severidad de los hallazgos"));
-    const track = node("div", undefined, "distribution-track"); track.setAttribute("aria-hidden", "true");
-    const legend = node("div", undefined, "distribution-legend");
-    for (const [key, label] of SEVERITY) {
-      const number = model.findings.filter(finding => finding.severity === key).length;
-      if (number > 0) { const segment = node("div", undefined, `distribution-segment ${key}`); segment.style.width = `${number / model.findings.length * 100}%`; track.append(segment); }
-      add(legend, add(node("span"), severity(key), document.createTextNode(` ${number}`)));
-    }
-    add(distribution, track, legend, node("p", `${model.findings.length} hallazgos aportados. Los no evaluados no se representan como hallazgos ni como resultados sanos.`, "score-caption"));
     const critical = model.findings.filter(finding => finding.severity === "critical");
     byId("critical-title").textContent = `Prioridades críticas / ${critical.length} registradas`;
     if (!critical.length) byId("critical-findings").append(empty("0 hallazgos críticos registrados. No equivale a ausencia de riesgo; revise la cobertura y las fuentes no evaluadas."));
@@ -1259,11 +1537,25 @@ summary:hover { color: var(--accent); }
       const list = node("ol", undefined, "priority-list");
       for (const finding of critical.slice(0, 5)) {
         const item = node("li");
-        add(item, node("strong", `${finding.check_id} / ${finding.title}`), node("p", `${LEVEL.get(finding.level)} / ${text(finding.namespace)} / ${finding.resource_id}`, "muted"),
+        add(item, node("strong", `${finding.check_id} / ${finding.title}`), node("p", `${LEVEL.get(finding.level)} · ${subjectLabel(finding)}`, "muted"),
           node("p", finding.business_impact), node("p", finding.recommendation));
         list.append(item);
       }
       add(byId("critical-findings"), list, node("p", `Se muestran ${Math.min(5, critical.length)} de ${critical.length}. La relación completa está en Hallazgos.`, "qualification"));
+    }
+    const buckets = [...BUCKET.keys()];
+    const planned = [...model.actions].sort((left, right) => ((buckets.indexOf(left.planning_bucket) + 4) % 4 - (buckets.indexOf(right.planning_bucket) + 4) % 4) ||
+      (severityRank(left.severity) - severityRank(right.severity)));
+    if (!planned.length) byId("next-actions").append(empty("El motor no ha aportado acciones para revisión. No equivale a ausencia de riesgo."));
+    else {
+      const list = node("ol", undefined, "next-actions");
+      for (const action of planned.slice(0, 5)) {
+        const horizon = (BUCKET.get(action.planning_bucket) || [text(action.planning_bucket)])[0].split(" / ")[0];
+        add(list, add(node("li"), severity(action.severity), node("strong", action.title),
+          node("span", `${horizon} · ${subjectLabel(action)} · esfuerzo ${(EFFORT.get(action.effort) || "no evaluado").toLocaleLowerCase("es-ES")}`, "cell-note")));
+      }
+      const link = node("a", `Ver el plan completo (${plural(model.actions.length, "acción", "acciones")})`, "card-link"); link.href = "#actions";
+      add(byId("next-actions"), list, link);
     }
     if (!model.executive_messages.length) byId("executive-messages").append(node("li", "No evaluado: el motor no ha incorporado mensajes ejecutivos."));
     for (const message of model.executive_messages) byId("executive-messages").append(node("li", message));
@@ -1325,8 +1617,22 @@ summary:hover { color: var(--accent); }
     });
     add(footer, button); container.append(footer);
   };
+  const updateCue = element => {
+    const hidden = element.scrollLeft > 1, remaining = element.scrollWidth - element.clientWidth - element.scrollLeft > 1;
+    if (hidden || remaining) element.dataset.overflow = hidden && remaining ? "both" : hidden ? "left" : "right";
+    else delete element.dataset.overflow;
+  };
+  let cueFrame = 0;
+  const refreshCues = () => {
+    cancelAnimationFrame(cueFrame);
+    cueFrame = requestAnimationFrame(() => { for (const element of document.querySelectorAll(".table-scroll")) updateCue(element); });
+  };
+  document.addEventListener("scroll", event => { if (event.target instanceof Element && event.target.classList.contains("table-scroll")) updateCue(event.target); }, true);
+  document.addEventListener("toggle", refreshCues, true);
+  window.addEventListener("resize", refreshCues);
   const renderTable = (container, key, label, columns, rows, rerender) => {
     container.replaceChildren();
+    refreshCues();
     if (rows === null) { container.append(empty(`No evaluado: no se ha incorporado la colección ${label.toLocaleLowerCase("es-ES")}. Consulte el registro de fuentes.`)); return; }
     if (!rows.length) { container.append(empty(`0 registros coincidentes en ${label.toLocaleLowerCase("es-ES")}. Un inventario sin registros incorporados no demuestra ausencia de recursos o de riesgo.`)); return; }
     const wrapper = node("div", undefined, "table-scroll"); wrapper.tabIndex = 0; wrapper.setAttribute("role", "region"); wrapper.setAttribute("aria-label", `${label}: tabla desplazable`);
@@ -1345,7 +1651,21 @@ summary:hover { color: var(--accent); }
       }
       body.append(tr);
     }
-    add(table, body); add(wrapper, table); container.append(wrapper); pagination(container, key, rows.length, visible.length, rerender);
+    add(table, body); add(wrapper, table); container.append(wrapper);
+    if (state.print) {
+      // Print full-width receipts after the table instead of squeezing them into a narrow column.
+      const appendix = node("div", undefined, "print-receipts");
+      for (const tr of body.rows) {
+        const label = (tr.cells[0]?.querySelector("strong, button") || tr.cells[0])?.textContent.trim() || "";
+        for (const receipt of tr.querySelectorAll("details.receipt")) {
+          const summary = receipt.querySelector(":scope > summary");
+          if (summary && label) summary.textContent = `${summary.textContent} · ${label}`;
+          appendix.append(receipt);
+        }
+      }
+      if (appendix.childElementCount) container.append(appendix);
+    }
+    pagination(container, key, rows.length, visible.length, rerender);
   };
   const renderInventory = scope => {
     byId("inventory-counts").replaceChildren();
@@ -1356,47 +1676,48 @@ summary:hover { color: var(--accent); }
     renderTable(byId("node-pools"), "node_pools", "Pools de nodos", [
       ["Pool / evidencia", row => namedRecord(row, "node_pools")], ["Modo / tamaño", row => `${text(row.mode)} / ${text(row.vm_size)}`],
       ["Nodos / autoescalado", row => `${text(row.count)} / ${row.enable_auto_scaling === true ? "Activado" : row.enable_auto_scaling === false ? "Desactivado" : "No evaluado"} (${text(row.min_count)} - ${text(row.max_count)})`],
-      ["Zonas / versión", row => `${text(row.availability_zones)} / ${text(row.version)}`], ["Aprovisionamiento del pool", row => row.provisioning_state]
+      ["Zonas / versión", row => `${listValue(row.availability_zones)} / ${text(row.version)}`], ["Aprovisionamiento del pool", row => row.provisioning_state]
     ], scope.inventory.node_pools, renderFiltered);
     renderTable(byId("namespaces"), "namespaces", "Namespaces", [
       ["Namespace / explorar", row => namedRecord(row, "namespaces")], ["Estado observado", row => row.phase ?? row.status],
-      ["ID de recurso", row => row.resource_id]
+      ["Recurso ARM", row => resourceRef(row.resource_id)]
     ], scope.inventory.namespaces, renderFiltered);
     renderTable(byId("workloads"), "workloads", "Cargas de trabajo", [
       ["Carga / explorar", row => namedRecord(row, "workloads")], ["Namespace / tipo", row => `${text(row.namespace)} / ${text(row.kind)}`],
       ["Réplicas listas / deseadas", row => `${text(row.ready_replicas)} / ${text(row.desired_replicas)}`],
-      ["Contenedores observados", row => row.containers === null || row.containers === undefined ? "No evaluado" : text(row.containers)]
+      ["Contenedores observados", row => row.containers === null || row.containers === undefined ? "No evaluado" : containerSummary(row.containers)]
     ], scope.inventory.workloads, renderFiltered);
     renderTable(byId("related-resources"), "related_resources", "Recursos asociados", [
       ["Recurso / evidencia", row => namedRecord(row, "related_resources")], ["Tipo", row => row.type ?? row.resource_type ?? row.kind],
-      ["Grupo / región", row => `${text(row.resource_group)} / ${text(row.region)}`], ["ID de recurso", row => row.resource_id]
+      ["Grupo / región", row => `${text(row.resource_group)} / ${text(row.region)}`], ["ID de recurso", row => idWithPortal(row.resource_id)]
     ], scope.inventory.related_resources, renderFiltered);
     const additional = byId("technical-collections"); additional.replaceChildren();
     for (const [key, rows] of Object.entries(scope.inventory)) {
       if (["node_pools", "namespaces", "workloads", "related_resources"].includes(key)) continue;
       const section = node("div", undefined, "inventory-section"); const label = COLLECTION.get(key) || key;
       const content = node("div"); add(section, node("h3", label), content); additional.append(section);
-      renderTable(content, `technical:${key}`, label, [["Registro / evidencia completa", row => namedRecord(row, key)], ["Namespace", row => row.namespace], ["ID de recurso", row => row.resource_id]], rows, renderFiltered);
+      renderTable(content, `technical:${key}`, label, [["Registro / evidencia completa", row => namedRecord(row, key)], ["Namespace", row => row.namespace], ["Recurso ARM", row => resourceRef(row.resource_id)]], rows, renderFiltered);
     }
     if (!additional.childElementCount) additional.append(empty("No evaluado: no se han incorporado colecciones técnicas adicionales."));
   };
   const renderEvidence = (evidence, key) => {
     const item = node("li");
     add(item, facts([["Fuente", `${evidence.source_id} / ${sourceMap.has(evidence.source_id) ? SOURCE_STATUS.get(sourceMap.get(evidence.source_id).status) : "No evaluado"}`],
-      ["Fecha de observación", utc(evidence.observed_at)], ["Recurso observado", evidence.resource_id]]),
-      node("pre", JSON.stringify(evidence.value, null, 2), "json"));
+      ["Fecha de observación", utc(evidence.observed_at)], ["Recurso observado", armId(evidence.resource_id)]]),
+      node("pre", jsonText(evidence.value), "json"));
     item.dataset.evidenceKey = key;
     return item;
   };
   const findingDisclosure = finding => {
     const wrapper = node("details", undefined, "finding"); wrapper.dataset.detailKey = `finding:${finding.check_id}`;
     const summary = node("summary");
-    add(summary, severity(finding.severity), node("span", finding.title, "finding-title"), node("span", `${finding.check_id} / ${LEVEL.get(finding.level)} / ${finding.resource_id}`, "finding-reference"));
+    add(summary, severity(finding.severity), add(node("span", undefined, "finding-main"), node("span", finding.title, "finding-title"),
+      node("span", `${finding.check_id} · ${LEVEL.get(finding.level)} · ${subjectLabel(finding)}`, "finding-reference")));
     const body = node("div", undefined, "finding-body");
     add(body, facts([["ID / regla", `${finding.check_id} / ${text(finding.rule_id)}`], ["Nivel", LEVEL.get(finding.level)], ["Área", AREA.get(finding.area)],
       ["Pilar Well-Architected", PILLAR.get(finding.pillar)], ["Severidad", SEVERITY.get(finding.severity)], ["Esfuerzo orientativo", EFFORT.get(finding.effort)],
       ["Namespace / carga", `${text(finding.namespace)} / ${text(finding.workload_name)}`], ["Nombre del recurso", finding.resource_name],
-      ["ID del recurso", finding.resource_id], ["ID del checklist", finding.checklist_id], ["GUID del checklist", finding.checklist_guid],
+      ["ID del recurso", idWithPortal(finding.resource_id)], ["ID del checklist", finding.checklist_id], ["GUID del checklist", finding.checklist_guid],
       ["Microsoft Learn", permittedLink(finding.learn_url, "Abrir recomendación en Microsoft Learn")],
       ["Referencia del checklist", finding.checklist_url], ["Referencia Kubernetes", finding.kubernetes_url]]));
     add(body, node("h4", "Impacto en el negocio"), node("p", finding.business_impact, "prose"), node("h4", "Recomendación concreta"), node("p", finding.recommendation, "prose"));
@@ -1409,7 +1730,8 @@ summary:hover { color: var(--accent); }
   const renderFindings = scope => {
     byId("findings-count").textContent = `${scope.findings.length} hallazgos coincidentes de ${model.findings.length} incorporados. ${scope.checks.filter(check => check.status === "not_evaluated").length} comprobaciones no evaluadas en este alcance.`;
     const list = byId("findings-list"); list.replaceChildren(); byId("findings-pagination").replaceChildren();
-    const visible = scope.findings.slice(0, showLimit("findings"));
+    const ordered = state.findingsOrder === "model" ? scope.findings : [...scope.findings].sort((left, right) => severityRank(left.severity) - severityRank(right.severity));
+    const visible = ordered.slice(0, showLimit("findings"));
     for (const [level, label] of LEVEL) {
       const group = visible.filter(finding => finding.level === level);
       if (!group.length) continue;
@@ -1422,7 +1744,7 @@ summary:hover { color: var(--accent); }
     renderTable(byId("checks-table"), "checks", "Comprobaciones y cobertura", [
       ["Comprobación / evidencia", check => add(node("div"), node("strong", `${check.check_id} / ${check.title}`), rawReceipt(check, `check:${check.check_id}`))],
       ["Estado / motivo", check => add(node("div"), node("strong", STATUS.get(check.status)), node("span", check.reason, "cell-note"))],
-      ["Área / pilar", check => `${AREA.get(check.area)} / ${PILLAR.get(check.pillar)}`], ["Recurso", check => check.resource_id]
+      ["Área / pilar", check => `${AREA.get(check.area)} / ${PILLAR.get(check.pillar)}`], ["Recurso", check => resourceRef(check.resource_id)]
     ], scope.checks, renderFiltered);
   };
   const renderFinops = scope => {
@@ -1438,7 +1760,8 @@ summary:hover { color: var(--accent); }
         "Estimación aportada por el motor, no ahorro realizado. Revise la ventana, los supuestos y la elegibilidad antes de decidir.", "qualification"));
     byId("finops-baseline").replaceChildren(add(node("div", undefined, "finops-values"), observed, savings),
       facts([["Periodo de facturación", windowText(model.finops.window)], ["Divisa observada", model.finops.currency],
-        ["Ámbito exacto de lectura de coste", costSource?.scope], ["Asociación de facturación / no propiedad", costSource?.association],
+        ["Ámbito exacto de lectura de coste", costSource?.scope ? armId(costSource.scope) : null],
+        ["Asociación de facturación / no propiedad", isObject(costSource?.association) ? Object.entries(costSource.association).map(([key, value]) => `${key}: ${text(value)}`).join(" · ") : costSource?.association],
         ["Fuente de coste / estado", costSource ? `${costSource.id} / ${SOURCE_STATUS.get(costSource.status)}` : "No evaluado"],
         ["Lectura completa de facturación", model.finops.cost_source_complete === true ? "Completa según el recibo" : model.finops.cost_source_complete === false ? "No completa" : "No evaluado"],
         ["Fuentes declaradas", model.finops.sources.length ? model.finops.sources.map(id => `${id} / ${sourceMap.has(id) ? SOURCE_STATUS.get(sourceMap.get(id).status) : "No evaluado"}`).join("; ") : "No evaluado"],
@@ -1448,7 +1771,7 @@ summary:hover { color: var(--accent); }
     for (const note of model.finops.notes) byId("finops-notes").append(node("li", note));
     if (!model.finops.notes.length) byId("finops-notes").append(node("li", "No evaluado: no se han incorporado notas de cualificación financiera."));
     renderTable(byId("finops-candidates"), "finops-candidates", "Candidatos FinOps", [
-      ["Candidato / fuente", row => add(node("div"), node("strong", row.title), node("span", `${text(row.id)} / ${text(row.resource_id)} / ${text(row.source_id)}`, "cell-note"), rawReceipt(row, `candidate:${text(row.id)}`))],
+      ["Candidato / fuente", row => add(node("div"), node("strong", row.title), node("span", `${text(row.id)} · ${text(row.source_id)}`, "cell-note"), resourceRef(row.resource_id), rawReceipt(row, `candidate:${text(row.id)}`))],
       ["Base / muestra", row => `${text(row.basis)} / ${text(row.value)} ${text(row.unit)} / ${text(row.sample_count)} muestras / ${windowText(row.window)}`],
       ["Recomendación aportada", row => row.recommendation], ["Ahorro estimado", row => row.estimated_savings === null ? "Por estimar / No calculado" : money(row.estimated_savings)]
     ], scope.candidates, renderFiltered);
@@ -1647,13 +1970,13 @@ summary:hover { color: var(--accent); }
       }
       add(map, drawing, node("figcaption", `Vecindad confirmada: ${visible.length} nodos visibles de ${neighborIds.length + 1}; ${connections.length} relaciones directas. En pantallas pequeñas, desplace horizontalmente el diagrama. Las etiquetas abreviadas conservan nombre, ID y evidencia completos en el selector y los recibos. No hay enlaces inferidos desde un nombre o icono.`));
       const properties = byId("architecture-properties");
-      add(properties, node("h3", chosen.label), facts([["Tipo", graphKindLabel(chosen.kind)], ["ID observado", chosen.resource_id], ["Clave del grafo", chosen.id],
+      add(properties, node("h3", chosen.label), facts([["Tipo", graphKindLabel(chosen.kind)], ["ID observado", armId(chosen.resource_id)], ["Clave del grafo", chosen.id],
         ["Clúster", chosen.cluster_name], ["Fuente", `${chosen.source_id} / ${SOURCE_STATUS.get(sourceMap.get(chosen.source_id).status)}`],
         ["Observado en UTC", utc(chosen.observed_at)], ["Procedencia", chosen.provenance]]), rawReceipt(chosen, `graph-node:${chosen.id}`));
     }
     const scopedIds = new Set(scoped.map(row => row.id));
     renderTable(byId("architecture-nodes"), "architecture-nodes", "Nodos observados",
-      [["Recurso / objeto", row => row.label], ["Tipo", row => graphKindLabel(row.kind)], ["Identidad", row => row.resource_id],
+      [["Recurso / objeto", row => row.label], ["Tipo", row => graphKindLabel(row.kind)], ["Identidad", row => armId(row.resource_id)],
         ["Fuente / fecha", row => `${row.source_id} / ${utc(row.observed_at)}`], ["Evidencia completa", row => rawReceipt(row, `graph-node-record:${row.id}`)]],
       scoped, renderFiltered);
     renderTable(byId("architecture-edges"), "architecture-edges", "Relaciones confirmadas",
@@ -1672,7 +1995,7 @@ summary:hover { color: var(--accent); }
       add(section, node("h3", label), node("p", note, "qualification"), content); plan.append(section);
       const rows = scope.actions.filter(action => action.planning_bucket === key);
       renderTable(content, `actions:${key}`, label, [
-        ["Acción / comprobación", action => add(node("div"), node("strong", action.title), node("span", `${action.action_id} / ${action.check_id} / ${text(action.resource_id)}`, "cell-note"), rawReceipt(action, `action:${action.action_id}`))],
+        ["Acción / comprobación", action => add(node("div"), node("strong", action.title), node("span", `${action.action_id} · ${action.check_id}`, "cell-note"), resourceRef(action.resource_id), rawReceipt(action, `action:${action.action_id}`))],
         ["Prioridad / esfuerzo", action => add(node("div"), severity(action.severity), node("span", `Esfuerzo ${EFFORT.get(action.effort).toLocaleLowerCase("es-ES")}`, "cell-note"))],
         ["Impacto / recomendación", action => add(node("div"), node("p", checkMap.get(action.check_id).business_impact), node("p", action.recommendation), permittedLink(action.learn_url, "Microsoft Learn"))],
         ["Responsable", action => action.owner === null || action.owner === undefined || action.owner === "" ? "Sin asignar" : text(action.owner)]
@@ -1726,7 +2049,7 @@ summary:hover { color: var(--accent); }
     const opened = new Map([...document.querySelectorAll("#methodology details")].map(item => [item.dataset.detailKey, item.open]));
     byId("method-scope").replaceChildren();
     add(byId("method-scope"), facts([["Solo lectura", "Declarado por el motor"], ["Tipo de índice", model.methodology.score_kind]]),
-      detail("Alcance declarado de la evaluación", "method-scope", node("pre", JSON.stringify(model.methodology.scope ?? null, null, 2), "json")));
+      detail("Alcance declarado de la evaluación", "method-scope", node("pre", jsonText(model.methodology.scope ?? null), "json")));
     renderTable(byId("sources-table"), "sources", "Fuentes de la instantánea completa", [
       ["Fuente / recibo", source => add(node("div"), node("strong", source.id), rawReceipt(source, `source:${source.id}`))],
       ["Estado", source => SOURCE_STATUS.get(source.status)], ["Referencia UTC", source => utc(source.time)],
@@ -1741,16 +2064,17 @@ summary:hover { color: var(--accent); }
     ], model.sources, () => { renderMethod(); if (state.print) for (const item of document.querySelectorAll("details")) item.open = true; });
     const sourceData = byId("source-data-receipts"); sourceData.replaceChildren();
     if (model.source_data === undefined || model.source_data === null) sourceData.append(empty("No evaluado: el modelo no incorpora observaciones adicionales."));
-    else sourceData.append(node("pre", JSON.stringify(model.source_data, null, 2), "json"));
+    else sourceData.append(node("pre", jsonText(model.source_data), "json"));
     const pins = byId("catalog-pins"); pins.replaceChildren();
     const coverage = model.methodology.catalog_coverage;
     pins.append(facts([["Elementos del catálogo", coverage?.total_items], ["Elementos mapeados", coverage?.mapped_items], ["Elementos sin automatizar", coverage?.unmapped_items]]));
     add(pins, node("p", "La cobertura de catálogo no es la cobertura de evaluación. Las preguntas de arquitectura o intención no automatizadas requieren revisión humana.", "qualification"),
-      detail("Snapshot y versiones del catálogo", "catalog-snapshot", node("pre", JSON.stringify(model.methodology.catalogSnapshot ?? null, null, 2), "json")));
+      detail("Snapshot y versiones del catálogo", "catalog-snapshot", node("pre", jsonText(model.methodology.catalogSnapshot ?? null), "json")));
     const references = model.methodology.source_pins;
     if (!references || !references.length) pins.append(empty("No evaluado: no se han incorporado referencias fijadas."));
-    else for (const [index, pin] of references.entries()) pins.append(rawReceipt(pin, `pin:${index}`));
+    else for (const [index, pin] of references.entries()) pins.append(detail(`Referencia fijada: ${text(pin?.name)}${pin?.version ? ` / ${pin.version}` : ""}`, `pin:${index}`, node("pre", jsonText(pin), "json")));
     const queries = byId("queries"); queries.replaceChildren();
+    byId("queries-title").textContent = `Consultas y límites incorporados (${(model.methodology.queries || []).length})`;
     if (!model.methodology.queries || !model.methodology.queries.length) queries.append(empty("No evaluado: el modelo no incorpora firmas de consulta ni límites de lectura."));
     else for (const [index, query] of model.methodology.queries.entries()) {
       const section = node("div", undefined, "query");
@@ -1821,12 +2145,12 @@ summary:hover { color: var(--accent); }
   const preparePrint = () => {
     if (state.print || !model) return;
     state.openDetails = new Map([...document.querySelectorAll("details")].map(item => [item.dataset.detailKey, item.open]));
-    renderReference(); state.print = true; renderFiltered(); renderMethod();
+    renderReference(); state.print = true; renderClusterOverview(); renderCover(); renderFiltered(); renderMethod();
     for (const item of document.querySelectorAll("details")) item.open = true;
   };
   const restorePrint = () => {
     if (!state.print) return;
-    state.print = false; renderFiltered(); renderMethod();
+    state.print = false; renderClusterOverview(); renderCover(); renderFiltered(); renderMethod();
     for (const item of document.querySelectorAll("details")) item.open = state.openDetails.get(item.dataset.detailKey) || false;
     state.openDetails.clear();
   };
@@ -1856,6 +2180,7 @@ summary:hover { color: var(--accent); }
   }
   byId("architecture-kind").addEventListener("change", () => { state.graphKind = byId("architecture-kind").value; state.graphNode = ""; renderArchitecture(currentScope()); });
   byId("architecture-node").addEventListener("change", () => { state.graphNode = byId("architecture-node").value; renderArchitecture(currentScope()); });
+  byId("findings-order").addEventListener("change", () => { state.findingsOrder = byId("findings-order").value; state.pages.delete("findings"); renderFiltered(); });
   const renderClusterOverview = () => {
     const multi = documentModel.schema_version !== "1.0", roster = documentModel.available_clusters || [];
     byId("cluster-overview").hidden = !multi && roster.length <= 1;
@@ -1874,12 +2199,13 @@ summary:hover { color: var(--accent); }
         ["Ejecuciones recopiladas / parciales / fallidas", `${supplied.cluster_status_counts.ok ?? 0} / ${supplied.cluster_status_counts.partial ?? 0} / ${supplied.cluster_status_counts.error ?? 0}`],
         ["Referencia conjunta UTC", utc(documentModel.reference_utc)]]),
         node("p", "El agregado es el recibido del motor; un clúster con error primario no tiene configuración evaluada. No se suman monedas, periodos de facturación ni ámbitos de node resource groups.", "qualification"),
-        detail("Agregado e inventarios por clúster completos", "multi-aggregate", node("pre", JSON.stringify(supplied, null, 2), "json")));
+        detail("Agregado e inventarios por clúster completos", "multi-aggregate", node("pre", jsonText(supplied), "json")));
     } else aggregate.append(node("p", "El catálogo adicional es configuración fija autorizada, no evidencia de presencia ni salud. Este archivo contiene una sola instantánea.", "qualification"));
     renderTable(byId("cluster-runs-table"), "cluster-runs", "Resultados incluidos por clúster",
       [["Clúster", run => run.cluster_name], ["Estado de recopilación", run => RUN_STATUS.get(run.status)], ["Referencia UTC", run => utc(run.reference_utc)],
         ["Error / identidad", run => rawReceipt({cluster_id: run.cluster_id, status: run.status, error: run.error}, `cluster-run:${run.cluster_name}`)]], clusterRuns, renderClusterOverview);
-    byId("export-json").textContent = multi ? "JSON completo (todos los clústeres)" : "JSON completo";
+    byId("export-json").textContent = "JSON completo";
+    byId("export-json").title = multi ? "Descarga el documento original completo con todos los clústeres" : "Descarga la instantánea original completa";
   };
   const initializeCluster = name => {
     const run = clusterRuns.find(item => item.cluster_name === name);
@@ -1888,7 +2214,7 @@ summary:hover { color: var(--accent); }
     for (const key of Object.keys(state.filters)) state.filters[key] = "";
     for (const item of document.querySelectorAll("details")) item.open = false;
     for (const id of ["cover", "executive", "scope-filters", "inventory", "architecture", "findings", "finops", "actions", "methodology"]) byId(id).hidden = !model;
-    byId("jump-section").disabled = !model; document.querySelector(".contents nav").hidden = !model;
+    byId("jump-section").disabled = !model; document.querySelector(".toolbar-nav").hidden = !model;
     document.querySelector(".report-footer").hidden = !model;
     byId("cluster-error").hidden = Boolean(model);
     for (const id of ["export-filtered-json", "export-inventory", "export-findings", "export-checks", "export-finops", "export-actions", "print-report"]) byId(id).disabled = !model;
