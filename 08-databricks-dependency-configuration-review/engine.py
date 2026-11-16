@@ -36,11 +36,11 @@ KEYVAULT_OAUTH_SECRET_URI = ""
 # use the federated identity credential.
 CROSS_TENANT_CERT_KEYVAULT_URL = ""
 CROSS_TENANT_CERT_NAME = ""
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 APPROVED_WORKSPACES = {
     "<APPROVED_DATABRICKS_WORKSPACE_NAME>": {
         "resource_group": "<APPROVED_DATABRICKS_RESOURCE_GROUP>",
@@ -2878,12 +2878,12 @@ def expected(raw, key):
 
 def conditional(value, requirement, reason, observed, sources=None):
     if requirement is False:
-        return outcome("not_applicable", "El requisito confirmado no aplica. " + reason, observed, sources)
+        return outcome("not_applicable", "The confirmed requirement doesn't apply. " + reason, observed, sources)
     if value is True:
-        return decision(True, reason + " Configuración observada; no prueba eficacia en tiempo de ejecución.", observed, sources)
+        return decision(True, reason + " Observed configuration; it doesn't prove runtime effectiveness.", observed, sources)
     if requirement is not True:
-        return outcome("not_evaluated", "Falta requisito confirmado del propietario o control compensatorio. " + reason, observed, sources)
-    return decision(value, reason + " Requisito confirmado por el propietario.", observed, sources)
+        return outcome("not_evaluated", "No owner-confirmed requirement or compensating control. " + reason, observed, sources)
+    return decision(value, reason + " Requirement confirmed by the owner.", observed, sources)
 
 
 def evaluate_workspace_rule(rule, raw, dep_graph):
@@ -2892,14 +2892,14 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         sku = (ws.get("sku_name") or ws.get("sku_tier") or "").lower()
         val = True if sku == "premium" else False if sku in ("standard", "trial") else None
         return conditional(val, expected(raw, "premium_required") if expected(raw, "premium_required") is not None else True,
-                           "SKU ARM observada del workspace.", {"sku_name": ws.get("sku_name"), "sku_tier": ws.get("sku_tier")}, ["arm_workspace"])
+                           "Observed ARM SKU of the workspace.", {"sku_name": ws.get("sku_name"), "sku_tier": ws.get("sku_tier")}, ["arm_workspace"])
     if test == "secure_cluster_connectivity":
-        return decision(ws.get("enable_no_public_ip"), "Parámetro enableNoPublicIp observado en ARM.", {"enable_no_public_ip": ws.get("enable_no_public_ip")}, ["arm_workspace"])
+        return decision(ws.get("enable_no_public_ip"), "enableNoPublicIp parameter observed in ARM.", {"enable_no_public_ip": ws.get("enable_no_public_ip")}, ["arm_workspace"])
     if test == "vnet_injection":
         vnet = ws.get("custom_virtual_network_id")
         vnet_val = True if vnet else (False if source_complete(raw, "arm_workspace") else None)
         return conditional(vnet_val, expected(raw, "vnet_injection_required") if expected(raw, "vnet_injection_required") is not None else True,
-                           "Parámetro customVirtualNetworkId e inyección de subredes host/container.", {
+                           "customVirtualNetworkId parameter and host/container subnet injection.", {
                                "custom_virtual_network_id": vnet,
                                "custom_public_subnet_name": ws.get("custom_public_subnet_name"),
                                "custom_private_subnet_name": ws.get("custom_private_subnet_name"),
@@ -2909,81 +2909,81 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         pes = ws.get("private_endpoint_connections", [])
         approved_pe = any(p.get("status") == "Approved" for p in pes)
         val = True if pna == "Disabled" or approved_pe else (False if pna == "Enabled" and not pes else None)
-        return conditional(val, expected(raw, "private_link_required"), "Configuración publicNetworkAccess, requiredNsgRules y Private Endpoints.", {
+        return conditional(val, expected(raw, "private_link_required"), "publicNetworkAccess, requiredNsgRules and private endpoint configuration.", {
             "public_network_access": pna, "required_nsg_rules": ws.get("required_nsg_rules"), "private_endpoint_connections": pes,
         }, ["arm_workspace"])
     if test == "access_connector_and_storage_firewall":
         ac = ws.get("access_connector", {})
         has_ac = bool(ac.get("id")) and ac.get("identity_type") in ("SystemAssigned", "UserAssigned", "SystemAssigned,UserAssigned")
         return decision(True if has_ac else False if source_complete(raw, "arm_workspace") else None,
-                        "Access Connector vinculado al workspace para identidad administrada.", {
+                        "Access connector linked to the workspace for managed identity.", {
                             "access_connector": ac, "default_storage_firewall": ws.get("default_storage_firewall"),
                         }, ["arm_workspace"])
     if test == "customer_managed_keys":
         cmk = ws.get("cmk", {})
         has_cmk = cmk.get("managed_services_key_source") == "Microsoft.Keyvault" and cmk.get("managed_disk_key_source") == "Microsoft.Keyvault"
-        return conditional(has_cmk, expected(raw, "cmk_required"), "Cifrado CMK de managedServices y managedDisk.", cmk, ["arm_workspace"])
+        return conditional(has_cmk, expected(raw, "cmk_required"), "CMK encryption of managedServices and managedDisk.", cmk, ["arm_workspace"])
     if test == "enhanced_security_compliance":
         esc = ws.get("enhanced_security_compliance", {})
         enabled = esc.get("enhanced_security_monitoring") == "Enabled" or esc.get("compliance_security_profile") == "Enabled"
-        return conditional(enabled, expected(raw, "enhanced_security_required"), "Perfil enhancedSecurityCompliance observado.", esc, ["arm_workspace"])
+        return conditional(enabled, expected(raw, "enhanced_security_required"), "Observed enhancedSecurityCompliance profile.", esc, ["arm_workspace"])
     if test == "diagnostics":
         rows = raw.get("arm_diagnostics", [])
         enabled = any(log.get("enabled") is True for r in rows for log in r.get("logs", []))
         val = True if enabled else False if source_complete(raw, "arm_diagnostics") else None
-        return decision(val, "Diagnostic settings habilitados en ARM; la ingesta efectiva requiere verificación separada.", {"diagnostic_settings": rows}, ["arm_diagnostics"])
+        return decision(val, "Diagnostic settings enabled in ARM; actual ingestion needs separate verification.", {"diagnostic_settings": rows}, ["arm_diagnostics"])
     if test == "pat_token_governance":
         if not source_complete(raw, "dbx_workspace_conf") or not isinstance(raw.get("workspace_conf"), dict):
-            return outcome("not_evaluated", "workspace-conf no disponible para revisar políticas de tokens PAT.", source_ids=["dbx_workspace_conf"])
+            return outcome("not_evaluated", "workspace-conf isn't available to review PAT token policies.", source_ids=["dbx_workspace_conf"])
         conf = raw["workspace_conf"]
         max_days = conf.get("maxTokenLifetimeDays")
         tokens_enabled = conf.get("enableTokensConfig")
         bounded = tokens_enabled == "false" or (max_days is not None and str(max_days).isdigit() and 0 < int(max_days) <= 90)
-        return decision(bounded, "Gobernanza de tokens PAT (enableTokensConfig y maxTokenLifetimeDays <= 90 días).", conf, ["dbx_workspace_conf"])
+        return decision(bounded, "PAT token governance (enableTokensConfig and maxTokenLifetimeDays <= 90 days).", conf, ["dbx_workspace_conf"])
     if test == "default_catalog_unity":
         dtype = ws.get("default_catalog_type")
         has_uc = bool(inv.get("uc_metastore"))
         val = True if dtype == "UnityCatalog" or has_uc else (False if dtype == "HiveMetastore" else None)
-        return decision(val, "Catálogo predeterminado UnityCatalog o metastore adjunto observado.", {
+        return decision(val, "Observed UnityCatalog default catalog or attached metastore.", {
             "default_catalog_type": dtype, "default_catalog_name": ws.get("default_catalog_name"),
             "uc_metastore_id": pick(inv.get("uc_metastore"), "id"),
         }, ["arm_workspace", "uc_metastore_summary"])
     if test == "global_init_scripts":
         if not source_complete(raw, "dbx_init_scripts"):
-            return outcome("not_evaluated", "Lista de global init scripts no disponible.", source_ids=["dbx_init_scripts"])
+            return outcome("not_evaluated", "The global init script list isn't available.", source_ids=["dbx_init_scripts"])
         enabled = [s for s in inv.get("global_init_scripts", []) if s.get("enabled") is True]
-        return decision(len(enabled) == 0, "Los global init scripts activos deben minimizarse y migrarse a políticas o volúmenes gobernados.", {
+        return decision(len(enabled) == 0, "Enabled global init scripts should be minimized and moved to policies or governed volumes.", {
             "total_scripts": len(inv.get("global_init_scripts", [])), "enabled_scripts": [s["name"] for s in enabled],
         }, ["dbx_init_scripts"])
     if test == "advisor":
         return decision(True if source_complete(raw, "arm_advisor") else None,
-                        "Recomendaciones cacheadas de Azure Advisor leídas para el workspace.", {"recommendations_count": len(raw.get("advisor", []))}, ["arm_advisor"])
+                        "Cached Azure Advisor recommendations read for the workspace.", {"recommendations_count": len(raw.get("advisor", []))}, ["arm_advisor"])
     if test == "uc_metastore_attached":
         if not source_complete(raw, "uc_metastore_summary"):
-            return outcome("not_evaluated", "Metastore summary de Unity Catalog no disponible.", source_ids=["uc_metastore_summary"])
+            return outcome("not_evaluated", "The Unity Catalog metastore summary isn't available.", source_ids=["uc_metastore_summary"])
         ms = inv.get("uc_metastore")
-        return decision(bool(ms and ms.get("metastore_id")), "Asignación de Metastore de Unity Catalog confirmada.", {"metastore": ms}, ["uc_metastore_summary"])
+        return decision(bool(ms and ms.get("metastore_id")), "Unity Catalog metastore assignment confirmed.", {"metastore": ms}, ["uc_metastore_summary"])
     if test == "uc_storage_credential_mi":
         if not source_complete(raw, "uc_storage_credentials"):
-            return outcome("not_evaluated", "Storage credentials de Unity Catalog no disponibles.", source_ids=["uc_storage_credentials"])
+            return outcome("not_evaluated", "Unity Catalog storage credentials aren't available.", source_ids=["uc_storage_credentials"])
         creds = inv.get("uc_storage_credentials", [])
         if not creds:
-            return outcome("not_evaluated", "No se observaron storage credentials registradas en Unity Catalog.", source_ids=["uc_storage_credentials"])
+            return outcome("not_evaluated", "No storage credentials registered in Unity Catalog were observed.", source_ids=["uc_storage_credentials"])
         sp_creds = [c["name"] for c in creds if c.get("uses_service_principal") or not c.get("uses_managed_identity")]
-        return decision(len(sp_creds) == 0, "Todas las storage credentials usan Azure Managed Identity vía Access Connector.", {
+        return decision(len(sp_creds) == 0, "All storage credentials use an Azure managed identity through an access connector.", {
             "total_credentials": len(creds), "non_managed_identity_credentials": sp_creds,
         }, ["uc_storage_credentials"])
     if test == "uc_external_locations_governed":
         if not source_complete(raw, "uc_external_locations", "uc_storage_credentials"):
-            return outcome("not_evaluated", "External locations o storage credentials incompletas.", source_ids=["uc_external_locations", "uc_storage_credentials"])
+            return outcome("not_evaluated", "External locations or storage credentials are incomplete.", source_ids=["uc_external_locations", "uc_storage_credentials"])
         locs = inv.get("uc_external_locations", [])
         if not locs:
-            return outcome("not_evaluated", "No se observaron external locations registradas.", source_ids=["uc_external_locations"])
+            return outcome("not_evaluated", "No registered external locations were observed.", source_ids=["uc_external_locations"])
         known_creds = {c["name"] for c in inv.get("uc_storage_credentials", [])}
         if all(str(l.get("url") or "").lower().startswith("abfss://") for l in locs) and any(not l.get("credential_name") for l in locs) and not known_creds:
             return outcome(
                 "not_evaluated",
-                "External locations observadas vía permiso mínimo BROWSE con URI abfss://, pero credential_name y uc_storage_credentials están filtrados por ACL de Unity Catalog.",
+                "External locations observed through the minimal BROWSE permission with abfss:// URIs, but credential_name and uc_storage_credentials are filtered by Unity Catalog ACLs.",
                 {"total_external_locations": len(locs), "browse_only_projection": True},
                 ["uc_external_locations", "uc_storage_credentials"],
             )
@@ -2992,17 +2992,17 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
             if not l.get("credential_name") or l["credential_name"] not in known_creds
             or not str(l.get("url") or "").lower().startswith("abfss://")
         ]
-        return decision(len(ungoverned) == 0, "External locations vinculadas a Storage Credential existente y URI abfss://.", {
+        return decision(len(ungoverned) == 0, "External locations linked to an existing storage credential with an abfss:// URI.", {
             "total_external_locations": len(locs), "non_compliant_locations": ungoverned,
         }, ["uc_external_locations", "uc_storage_credentials"])
     if test == "secret_scopes_keyvault":
         if not source_complete(raw, "dbx_secret_scopes"):
-            return outcome("not_evaluated", "Secret scopes no disponibles.", source_ids=["dbx_secret_scopes"])
+            return outcome("not_evaluated", "Secret scopes aren't available.", source_ids=["dbx_secret_scopes"])
         scopes = inv.get("secret_scopes", [])
         if not scopes:
-            return outcome("not_evaluated", "No se observaron secret scopes en el workspace.", source_ids=["dbx_secret_scopes"])
+            return outcome("not_evaluated", "No secret scopes were observed in the workspace.", source_ids=["dbx_secret_scopes"])
         dbx_backed = [s["name"] for s in scopes if s.get("backend_type") != "AZURE_KEYVAULT"]
-        return decision(len(dbx_backed) == 0, "Secret scopes respaldados por Azure Key Vault (AZURE_KEYVAULT).", {
+        return decision(len(dbx_backed) == 0, "Secret scopes backed by Azure Key Vault (AZURE_KEYVAULT).", {
             "total_scopes": len(scopes), "databricks_backed_scopes": dbx_backed,
         }, ["dbx_secret_scopes"])
     if test == "dependency_integrity":
@@ -3023,7 +3023,7 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         if broken:
             return decision(
                 False,
-                "Se detectaron referencias internas rotas confirmadas dentro de definiciones completas de Jobs (job_cluster_key o depends_on inexistentes).",
+                "Confirmed broken internal references were found in complete job definitions (job_cluster_key or depends_on values that don't exist).",
                 {
                     "broken_references_count": len(broken),
                     "broken_references": broken,
@@ -3034,7 +3034,7 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         if not source_complete(raw, *dep_sources) or incomplete_jobs or incomplete_pipes or unverified:
             return outcome(
                 "not_evaluated",
-                "Existen fuentes de dependencias incompletas, detalles de jobs/pipelines truncados o referencias entre objetos no verificadas (las APIs list de Databricks filtran por ACL, por lo que la ausencia de un ID externo se mantiene UNKNOWN en lugar de declararse rota).",
+                "Some dependency sources are incomplete, job or pipeline details are truncated, or references between objects are unverified (Databricks list APIs filter by ACL, so a missing external ID stays UNKNOWN instead of being declared broken).",
                 {
                     "broken_references_count": 0,
                     "unverified_references_count": len(unverified),
@@ -3046,7 +3046,7 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
             )
         return decision(
             True,
-            "Todas las fuentes de dependencia están completas y todas las referencias entre tareas de Jobs, clústeres, pools, políticas, pipelines, warehouses y credenciales resuelven en el mapa de dependencias.",
+            "All dependency sources are complete, and every reference between job tasks, clusters, pools, policies, pipelines, warehouses and credentials resolves in the dependency map.",
             {
                 "broken_references_count": 0,
                 "unverified_references_count": 0,
@@ -3056,24 +3056,24 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
     if test == "runtime_table_lineage":
         return outcome(
             "not_evaluated",
-            "El linaje dinámico de tablas y columnas (system.access.table_lineage / column_lineage) requiere ejecutar consultas en un SQL Warehouse activo y no se ejecuta ni simula desde este colector de plano de control.",
+            "Runtime table and column lineage (system.access.table_lineage / column_lineage) needs queries on a running SQL warehouse; this control-plane collector neither runs nor simulates them.",
             {"system_tables_queried": False},
             ["uc_system_lineage"],
         )
     if test == "lakehouse_federation_connections":
         if not source_complete(raw, "uc_connections"):
-            return outcome("not_evaluated", "Conexiones de Lakehouse Federation no disponibles.", source_ids=["uc_connections"])
+            return outcome("not_evaluated", "Lakehouse Federation connections aren't available.", source_ids=["uc_connections"])
         conns = inv.get("uc_connections", [])
         if not conns:
-            return outcome("not_applicable", "No existen conexiones externas de Lakehouse Federation registradas en el metastore.", {"connections_count": 0}, ["uc_connections"])
-        return decision(True, "Conexiones externas de Lakehouse Federation inventariadas en el mapa de dependencias.", {
+            return outcome("not_applicable", "No external Lakehouse Federation connections are registered in the metastore.", {"connections_count": 0}, ["uc_connections"])
+        return decision(True, "External Lakehouse Federation connections inventoried in the dependency map.", {
             "connections": [{"name": c["name"], "type": c.get("connection_type"), "host": c.get("host")} for c in conns],
         }, ["uc_connections"])
     if test == "outbound_control_plane_endpoints":
         if not source_complete(raw, "arm_outbound_endpoints"):
-            return outcome("not_evaluated", "Lista oficial outboundNetworkDependenciesEndpoints no disponible.", source_ids=["arm_outbound_endpoints"])
+            return outcome("not_evaluated", "The official outboundNetworkDependenciesEndpoints list isn't available.", source_ids=["arm_outbound_endpoints"])
         eps = inv.get("outbound_endpoints", [])
-        return decision(bool(eps), "Dependencias de red saliente hacia el plano de control inventariadas desde ARM.", {
+        return decision(bool(eps), "Outbound network dependencies to the control plane inventoried from ARM.", {
             "categories": [e["category"] for e in eps], "count": len(eps),
         }, ["arm_outbound_endpoints"])
     if test == "cost_attribution":
@@ -3082,13 +3082,13 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         if gap is not None and first and first.get("tagged_share") is not None:
             return decision(
                 gap <= 10 and first["tagged_share"] >= 80,
-                "Atribución del coste de Databricks por etiquetas en Cost Management: como mucho un 10 % sin etiqueta de cómputo y al menos un 80 % con la etiqueta de imputación principal.",
+                "Databricks cost attribution by tags in Cost Management: at most 10% without a compute tag and at least 80% with the main allocation tag.",
                 {"month": head.get("review_month"), "unattributed_share": gap, "allocation_tag": first["tag"], "tagged_share": first["tagged_share"]},
                 ["azure_cost_databricks"],
             )
         return outcome(
             "not_evaluated",
-            "Sin datos de Cost Management para Databricks (análisis de costes desactivado, lectura denegada o sin consumo): no se puede medir qué parte del coste explican las etiquetas.",
+            "No Cost Management data for Databricks (cost analysis off, read denied or no usage): the share of cost that tags explain can't be measured.",
             {"cost_status": (raw.get("databricks_cost_model") or {}).get("status")},
             ["azure_cost_databricks"],
         )
@@ -3103,26 +3103,26 @@ def evaluate_workload_rule(rule, row, raw):
             return None
         if test == "cluster_autotermination":
             if kind == "JobCluster":
-                return outcome("not_applicable", "Clúster efímero de Job: finaliza automáticamente al terminar la tarea.", {"cluster_source": row.get("cluster_source")}, [row["source_id"]])
+                return outcome("not_applicable", "Ephemeral job cluster: it ends automatically when the task finishes.", {"cluster_source": row.get("cluster_source")}, [row["source_id"]])
             mins = row.get("autotermination_minutes")
             val = True if isinstance(mins, (int, float)) and 0 < mins <= 60 else False
-            return decision(val, "Autoterminación configurada <= 60 minutos en clúster All-Purpose.", {"autotermination_minutes": mins}, [row["source_id"]])
+            return decision(val, "Auto-termination of 60 minutes or less on the all-purpose cluster.", {"autotermination_minutes": mins}, [row["source_id"]])
         if test == "cluster_policy_bound":
-            return decision(bool(row.get("policy_id")), "Asociación de policy_id observada en el clúster.", {"policy_id": row.get("policy_id")}, [row["source_id"]])
+            return decision(bool(row.get("policy_id")), "policy_id association observed on the cluster.", {"policy_id": row.get("policy_id")}, [row["source_id"]])
         if test == "cluster_access_mode":
             mode = (row.get("data_security_mode") or "").upper()
             val = True if mode in ("USER_ISOLATION", "SINGLE_USER", "SHARED") else False if mode in ("NONE", "LEGACY_PASSTHROUGH", "LEGACY_TABLE_ACL", "LEGACY_SINGLE_USER", "") else None
-            return decision(val, "Modo de acceso data_security_mode compatible con Unity Catalog y aislamiento.", {"data_security_mode": row.get("data_security_mode")}, [row["source_id"]])
+            return decision(val, "data_security_mode access mode compatible with Unity Catalog and isolation.", {"data_security_mode": row.get("data_security_mode")}, [row["source_id"]])
         if test == "cluster_runtime_lts":
             sv = row.get("spark_version") or ""
             match = re.match(r"^(\d+)\.(\d+)", sv)
             major = int(match.group(1)) if match else None
             is_lts = "lts" in sv.lower()
             val = True if major is not None and major >= 13 and is_lts else False if major is not None else None
-            return decision(val, "Versión de Databricks Runtime LTS >= 13.x observada.", {"spark_version": sv}, [row["source_id"]])
+            return decision(val, "Databricks Runtime LTS >= 13.x observed.", {"spark_version": sv}, [row["source_id"]])
         if test == "cluster_autoscaling_or_pool":
             has_auto = bool(row.get("autoscale")) or bool(row.get("instance_pool_id"))
-            return decision(has_auto, "Autoscale o vinculación a Instance Pool observada en el clúster.", {
+            return decision(has_auto, "Autoscale or instance pool binding observed on the cluster.", {
                 "autoscale": row.get("autoscale"), "instance_pool_id": row.get("instance_pool_id"), "num_workers": row.get("num_workers"),
             }, [row["source_id"]])
 
@@ -3132,20 +3132,20 @@ def evaluate_workload_rule(rule, row, raw):
         tasks = row.get("tasks", [])
         if test == "job_uses_job_compute":
             all_purpose_tasks = [t["task_key"] for t in tasks if t.get("existing_cluster_id")]
-            return decision(len(all_purpose_tasks) == 0, "Las tareas del Job usan Job Compute, Serverless, SQL Warehouse o Pipeline en lugar de existing_cluster_id All-Purpose.", {
+            return decision(len(all_purpose_tasks) == 0, "Job tasks use job compute, serverless, a SQL warehouse or a pipeline instead of an all-purpose existing_cluster_id.", {
                 "tasks_total": len(tasks), "tasks_on_all_purpose_cluster": all_purpose_tasks,
             }, [row["source_id"]])
         if test == "job_resilience_settings":
             has_timeout = bool(row.get("timeout_seconds")) or (bool(tasks) and all(bool(t.get("timeout_seconds")) for t in tasks))
             has_notif = row.get("has_notifications") is True
-            return decision(has_timeout and has_notif, "Job configurado con timeout_seconds y notificaciones de fallo/alerta.", {
+            return decision(has_timeout and has_notif, "Job configured with timeout_seconds and failure/alert notifications.", {
                 "job_timeout_seconds": row.get("timeout_seconds"), "has_notifications": has_notif,
             }, [row["source_id"]])
         if test == "job_service_principal_run_as":
             sp = row.get("run_as_service_principal")
             user = row.get("run_as_user_name")
             val = True if sp else False if user else None
-            return decision(val, "Identidad de ejecución run_as del Job asignada a un Service Principal.", {
+            return decision(val, "Job run_as identity assigned to a service principal.", {
                 "run_as_service_principal": sp, "run_as_user_name": user,
             }, [row["source_id"]])
 
@@ -3155,7 +3155,7 @@ def evaluate_workload_rule(rule, row, raw):
         mins = row.get("auto_stop_mins")
         serverless = row.get("enable_serverless_compute") is True or (row.get("warehouse_type") or "").upper() == "PRO"
         val = True if isinstance(mins, (int, float)) and 0 < mins <= 30 and serverless else False
-        return decision(val, "SQL Warehouse con auto_stop_mins <= 30 minutos y modo Serverless/Pro.", {
+        return decision(val, "SQL warehouse with auto_stop_mins <= 30 minutes and serverless/pro mode.", {
             "auto_stop_mins": mins, "enable_serverless_compute": row.get("enable_serverless_compute"), "warehouse_type": row.get("warehouse_type"),
         }, [row["source_id"]])
 
@@ -3165,13 +3165,13 @@ def evaluate_workload_rule(rule, row, raw):
         if row.get("detail_collected") is False:
             return outcome(
                 "not_evaluated",
-                "El detalle spec del pipeline (/api/2.0/pipelines/{id}) no estuvo disponible; el listado resumen no incluye catalog/schema.",
+                "The pipeline spec detail (/api/2.0/pipelines/{id}) wasn't available; the summary list doesn't include catalog/schema.",
                 {"pipeline_id": row.get("id"), "detail_collected": False},
                 [row.get("detail_source_id") or row["source_id"]],
             )
         cat = row.get("catalog")
         val = True if cat and cat.lower() not in ("hive_metastore", "") else False
-        return decision(val, "Pipeline declarativo configurado con catálogo destino en Unity Catalog.", {
+        return decision(val, "Declarative pipeline configured with a target catalog in Unity Catalog.", {
             "catalog": cat, "schema": row.get("schema") or row.get("target"), "target": row.get("target"), "serverless": row.get("serverless"),
         }, [row.get("detail_source_id") or row["source_id"]])
     return None
@@ -3190,24 +3190,24 @@ def evaluate_resource_rule(rule, row, raw):
         val = False if (https is False or tls in ("TLS1_0", "TLS1_1") or pub_blob is True) else (
             True if https is True and tls in ("TLS1_2", "TLS1_3") and pub_blob is False else None
         )
-        return decision(val, "HTTPS obligatorio, TLS >= 1.2 y allowBlobPublicAccess=false en cuenta de almacenamiento asociada.", cfg, [row["source_id"]])
+        return decision(val, "HTTPS required, TLS >= 1.2 and allowBlobPublicAccess=false on the associated storage account.", cfg, [row["source_id"]])
     if test == "storage_shared_key_and_network":
         if rkind != "microsoft.storage/storageaccounts":
             return None
         shared = cfg.get("allowSharedKeyAccess")
         pna = cfg.get("publicNetworkAccess")
         if row.get("name", "").lower() == (raw["workspace"].get("dbfs_storage_account_name") or "").lower():
-            return outcome("not_applicable", "Cuenta DBFS root administrada por la plataforma Azure Databricks.", cfg, [row["source_id"]])
+            return outcome("not_applicable", "DBFS root account managed by the Azure Databricks platform.", cfg, [row["source_id"]])
         val = True if shared is False and pna == "Disabled" else False if shared is True or pna == "Enabled" else None
         return conditional(val, expected(raw, "shared_key_disabled_required") if expected(raw, "shared_key_disabled_required") is not None else True,
-                           "Shared Key y acceso público en cuenta ADLS Gen2 asociada.", cfg, [row["source_id"]])
+                           "Shared key and public access on the associated ADLS Gen2 account.", cfg, [row["source_id"]])
     if test == "keyvault_rbac_and_purge":
         if rkind != "microsoft.keyvault/vaults":
             return None
         rbac = cfg.get("enableRbacAuthorization")
         purge = cfg.get("enablePurgeProtection")
         val = True if rbac is True and purge is True else False if rbac is False or purge is False else None
-        return decision(val, "Key Vault asociado con Azure RBAC y Purge Protection habilitados.", cfg, [row["source_id"]])
+        return decision(val, "Associated key vault with Azure RBAC and purge protection enabled.", cfg, [row["source_id"]])
     if test == "nsg_exposure":
         if rkind != "microsoft.network/networksecuritygroups":
             return None
@@ -3220,7 +3220,7 @@ def evaluate_resource_rule(rule, row, raw):
             ports = ([srule.get("destinationPortRange")] if srule.get("destinationPortRange") else []) + (srule.get("destinationPortRanges") or [])
             if any(s in ("*", "0.0.0.0/0", "::/0", "Internet") for s in srcs) and any(p in ("*", "22", "3389", "0-65535") for p in ports):
                 exposed.append(srule)
-        return decision(len(exposed) == 0, "Reglas Inbound Allow desde Internet hacia puertos administrativos en NSG asociado.", {
+        return decision(len(exposed) == 0, "Inbound Allow rules from the internet to administrative ports on the associated NSG.", {
             "exposed_rules": exposed, "total_rules": len(rules),
         }, [row["source_id"]])
     if test == "private_endpoint_approved":
@@ -3228,14 +3228,14 @@ def evaluate_resource_rule(rule, row, raw):
             return None
         conns = row.get("connections", [])
         val = True if conns and all(c.get("status") == "Approved" for c in conns) else False if conns else None
-        return decision(val, "Estado de aprobación de las conexiones Private Endpoint asociadas.", {"connections": conns}, [row["source_id"]])
+        return decision(val, "Approval state of the associated private endpoint connections.", {"connections": conns}, [row["source_id"]])
     return None
 
 
 def make_check(rule, target_id, target_name, workload_name, evaluation, reference, ws):
     status = evaluation["status"]
     cid = rule["rule_id"] + "-" + hashlib.sha256((ws["id"].lower() + "|" + rule["rule_id"] + "|" + str(target_id)).encode("utf-8")).hexdigest()[:10]
-    sev_labels = {"critical": "Crítica", "high": "Alta", "medium": "Media", "low": "Baja"}
+    sev_labels = {"critical": "Critical", "high": "High", "medium": "Medium", "low": "Low"}
     eff_labels = {"low": "L", "medium": "M", "high": "H"}
     return {
         "check_id": cid,
@@ -3295,7 +3295,7 @@ def evaluate(raw, reference, dep_graph):
             if not matched_any:
                 checks.append(make_check(rule, ws["id"], ws["name"], "", outcome(
                     "not_evaluated",
-                    "No se observaron objetos de carga aplicables o la fuente REST del workspace no estuvo disponible; ausencia no equivale a cumplimiento.",
+                    "No applicable workload objects were observed, or the workspace REST source wasn't available; absence isn't compliance.",
                     {}, ["dbx_clusters", "dbx_jobs", "dbx_pipelines", "dbx_sql_warehouses"],
                 ), reference, ws))
         elif rule["level"] == "resource":
@@ -3308,7 +3308,7 @@ def evaluate(raw, reference, dep_graph):
             if not matched_res:
                 checks.append(make_check(rule, ws["id"], ws["name"], "", outcome(
                     "not_evaluated",
-                    "No se recolectaron recursos ARM asociados de este tipo en el alcance aprobado; no se asume ausencia de riesgo.",
+                    "No associated ARM resources of this type were collected in the approved scope; no absence of risk is assumed.",
                     {}, ["arm_workspace"],
                 ), reference, ws))
     return checks
@@ -3371,16 +3371,16 @@ def finops_for(raw):
             if not isinstance(mins, (int, float)) or mins <= 0 or mins > 60:
                 candidates.append({
                     "id": "FINOPS-CL-" + hashlib.sha256(cl["id"].encode("utf-8")).hexdigest()[:10],
-                    "title": "Revisar autoterminación en clúster interactivo All-Purpose",
+                    "title": "Review auto-termination on the interactive all-purpose cluster",
                     "resource_id": ws["id"] + "/clusters/" + cl["id"],
                     "workload_name": cl["name"],
                     "source_id": cl["source_id"],
-                    "basis": "Configuración observada de autotermination_minutes en /api/2.0/clusters/list; sin estimar ahorro DBU.",
+                    "basis": "autotermination_minutes configuration observed in /api/2.0/clusters/list; DBU savings not estimated.",
                     "value": mins if mins is not None else "disabled",
                     "unit": "minutes",
                     "sample_count": 1,
                     "window": None,
-                    "recommendation": "Ajustar autotermination_minutes (<= 60 min) y aplicar Cluster Policy para contener consumo en inactividad.",
+                    "recommendation": "Set autotermination_minutes (<= 60 min) and apply a cluster policy to limit idle consumption.",
                     "estimated_savings": None,
                 })
     for job in inv.get("jobs", []):
@@ -3388,16 +3388,16 @@ def finops_for(raw):
         if ap_tasks:
             candidates.append({
                 "id": "FINOPS-JOB-" + hashlib.sha256(job["id"].encode("utf-8")).hexdigest()[:10],
-                "title": "Revisar tareas de Job ejecutando sobre clúster All-Purpose",
+                "title": "Review job tasks running on an all-purpose cluster",
                 "resource_id": ws["id"] + "/jobs/" + job["id"],
                 "workload_name": job["name"],
                 "source_id": job["source_id"],
-                "basis": "Tareas con existing_cluster_id observadas en /api/2.1/jobs/list; la tarifa DBU de Jobs Compute/Serverless es inferior a All-Purpose.",
+                "basis": "Tasks with existing_cluster_id observed in /api/2.1/jobs/list; the job compute/serverless DBU rate is lower than all-purpose.",
                 "value": len(ap_tasks),
                 "unit": "tasks_on_all_purpose",
                 "sample_count": 1,
                 "window": None,
-                "recommendation": "Evaluar migración de tareas a job_cluster_key o Jobs Serverless tras validar dependencias de librerías e init scripts.",
+                "recommendation": "Evaluate moving the tasks to job_cluster_key or serverless jobs after validating library and init script dependencies.",
                 "estimated_savings": None,
             })
     for wh in inv.get("sql_warehouses", []):
@@ -3405,16 +3405,16 @@ def finops_for(raw):
         if not isinstance(mins, (int, float)) or mins <= 0 or mins > 30:
             candidates.append({
                 "id": "FINOPS-WH-" + hashlib.sha256(wh["id"].encode("utf-8")).hexdigest()[:10],
-                "title": "Revisar auto_stop_mins en SQL Warehouse",
+                "title": "Review auto_stop_mins on the SQL warehouse",
                 "resource_id": ws["id"] + "/warehouses/" + wh["id"],
                 "workload_name": wh["name"],
                 "source_id": wh["source_id"],
-                "basis": "Configuración auto_stop_mins observada en /api/2.0/sql/warehouses; sin proyectar ahorro monetario.",
+                "basis": "auto_stop_mins configuration observed in /api/2.0/sql/warehouses; no monetary savings projected.",
                 "value": mins if mins is not None else "disabled",
                 "unit": "minutes",
                 "sample_count": 1,
                 "window": None,
-                "recommendation": "Redefinir auto_stop_mins <= 30 min o evaluar Serverless SQL Warehouse.",
+                "recommendation": "Set auto_stop_mins <= 30 min or evaluate a serverless SQL warehouse.",
                 "estimated_savings": None,
             })
     cost_rows = raw.get("cost_rows", [])
@@ -3739,17 +3739,16 @@ def _money(value):
     return round(value, 2) if isinstance(value, (int, float)) else None
 
 
-def es_amount(value, decimals=0):
+def en_amount(value, decimals=0):
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         return "—"
-    formatted = format(round(value, decimals), "," + "." + str(decimals) + "f")
-    return formatted.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+    return format(round(value, decimals), "," + "." + str(decimals) + "f")
 
 
-def es_month(label):
-    names = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+def en_month(label):
+    names = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
     match = re.fullmatch(r"(\d{4})-(\d{2})", str(label or ""))
-    return names[int(match.group(2)) - 1] + " de " + match.group(1) if match and 1 <= int(match.group(2)) <= 12 else str(label)
+    return names[int(match.group(2)) - 1] + " " + match.group(1) if match and 1 <= int(match.group(2)) <= 12 else str(label)
 
 
 def _pct(part, whole):
@@ -3863,9 +3862,9 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
     def workers_label(spec):
         auto = spec.get("autoscale") if isinstance(spec.get("autoscale"), dict) else None
         if auto and auto.get("max_workers"):
-            return str(auto.get("min_workers") or 0) + "–" + str(auto["max_workers"]) + " (autoescalado)"
+            return str(auto.get("min_workers") or 0) + "–" + str(auto["max_workers"]) + " (autoscaling)"
         if spec.get("autoscale_max_workers") and not spec.get("num_workers"):
-            return "hasta " + str(spec["autoscale_max_workers"]) + " (autoescalado)"
+            return "up to " + str(spec["autoscale_max_workers"]) + " (autoscaling)"
         return spec.get("num_workers")
 
     def missing_tags(tags):
@@ -3883,20 +3882,20 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
             profile = daily_profile(daily.get("daily_cluster", {}).get(c["name"]), labels, periods["review_start"])
             saving = profile["weekend_cost"] if off and profile and profile["weekend_cost"] > 0 else None
             add("AUTOTERM_OFF" if off else "AUTOTERM_LONG", "high" if off else "medium",
-                "Clúster interactivo sin autoterminación" if off else "Autoterminación larga en clúster interactivo",
+                "Interactive cluster without auto-termination" if off else "Long auto-termination on an interactive cluster",
                 "AllPurposeCluster", c["id"], c["name"],
                 {"autotermination_minutes": 0 if off else mins, "state": c.get("state"), "uptime_hours": uptime,
                  "active_days": profile and profile["active_days"], "weekend_cost": profile and profile["weekend_cost"]},
                 total(slot), saving, "lower_bound", "weekend_cost",
-                "Configurar autotermination_minutes en " + str(min(30, COST_AUTOTERMINATION_MAX_MINUTES)) + " minutos o menos y fijarlo con una política de cómputo.",
+                "Set autotermination_minutes to " + str(min(30, COST_AUTOTERMINATION_MAX_MINUTES)) + " minutes or less and enforce it with a compute policy.",
                 "autotermination")
         w = workers(c)
         if w and not c.get("instance_pool_id") and not str(c.get("azure_availability") or "ON_DEMAND_AZURE").upper().startswith("SPOT"):
             saving = slot["vm"] * w / (w + 1.0) * COST_SPOT_DISCOUNT if slot and slot["vm"] else None
-            add("NO_SPOT", "low", "Workers sin instancias spot en clúster interactivo", "AllPurposeCluster", c["id"], c["name"],
+            add("NO_SPOT", "low", "Workers without spot instances on an interactive cluster", "AllPurposeCluster", c["id"], c["name"],
                 {"availability": c.get("azure_availability") or "ON_DEMAND_AZURE", "workers": workers_label(c), "vm_cost": slot and _money(slot["vm"])},
                 total(slot), saving, "estimate", "spot_discount",
-                "Usar SPOT_WITH_FALLBACK_AZURE en los workers (first_on_demand=1 mantiene el driver bajo demanda) si la carga tolera reintentos.",
+                "Use SPOT_WITH_FALLBACK_AZURE on the workers (first_on_demand=1 keeps the driver on demand) if the workload tolerates retries.",
                 "spot")
     by_cluster = {}
     for job in inventory.get("jobs", []):
@@ -3910,11 +3909,11 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
         name = cluster["name"] if cluster else cid
         slot = clusters_cost.get(name)
         saving = slot["dbu"] * (1 - COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO) if slot and slot["dbu"] else None
-        add("JOBS_ON_ALL_PURPOSE", "high", "Jobs programados en cómputo interactivo (all-purpose)", "AllPurposeCluster", cid, name,
+        add("JOBS_ON_ALL_PURPOSE", "high", "Scheduled jobs on interactive (all-purpose) compute", "AllPurposeCluster", cid, name,
             {"jobs": sorted(names)[:6], "jobs_count": len(names), "dbu_cost": slot and _money(slot["dbu"])},
             total(slot), saving, "upper_bound", "jobs_dbu_ratio",
-            "Mover las tareas a cómputo de jobs (job_cluster_key) o serverless: la DBU de jobs cuesta en torno a un "
-            + str(round(100 * (1 - COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO))) + " % menos que la all-purpose.",
+            "Move the tasks to job compute (job_cluster_key) or serverless: a jobs DBU costs about "
+            + str(round(100 * (1 - COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO))) + "% less than an all-purpose DBU.",
             "jobs_compute", "M")
     for job in inventory.get("jobs", []):
         slot = jobs_cost.get(job["id"])
@@ -3924,32 +3923,32 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
             top = max(on_demand, key=workers)
             w = workers(top)
             saving = slot["vm"] * w / (w + 1.0) * COST_SPOT_DISCOUNT if slot and slot["vm"] else None
-            add("NO_SPOT", "medium", "Clúster de job sin instancias spot", "Job", job["id"], job["name"],
+            add("NO_SPOT", "medium", "Job cluster without spot instances", "Job", job["id"], job["name"],
                 {"availability": "ON_DEMAND_AZURE", "workers": workers_label(top), "vm_cost": slot and _money(slot["vm"]), "continuous": job.get("continuous")},
                 total(slot), saving, "estimate", "spot_discount",
-                "Usar SPOT_WITH_FALLBACK_AZURE en los workers del job cluster; mantener el driver bajo demanda.", "spot")
+                "Use SPOT_WITH_FALLBACK_AZURE on the job cluster workers; keep the driver on demand.", "spot")
         if job.get("continuous"):
-            add("CONTINUOUS_JOB", "medium", "Job continuo: cómputo encendido todo el mes", "Job", job["id"], job["name"],
+            add("CONTINUOUS_JOB", "medium", "Continuous job: compute on all month", "Job", job["id"], job["name"],
                 {"continuous": True}, total(slot), None, None, None,
-                "Confirmar que necesita latencia continua; si no, usar disparadores programados o por llegada de ficheros.", "streaming", "M")
+                "Confirm that it needs continuous latency; if not, use scheduled or file arrival triggers.", "streaming", "M")
         big = [jc for jc in job.get("job_clusters", []) if (jc.get("autoscale_max_workers") or jc.get("num_workers") or 0) >= 8
                and str(jc.get("runtime_engine") or "").upper() != "PHOTON"]
         if big:
-            add("PHOTON_CANDIDATE", "low", "Job grande sin Photon: evaluar", "Job", job["id"], job["name"],
+            add("PHOTON_CANDIDATE", "low", "Large job without Photon: evaluate", "Job", job["id"], job["name"],
                 {"max_workers": max(jc.get("autoscale_max_workers") or jc.get("num_workers") or 0 for jc in big)},
                 total(slot), None, None, None,
-                "Probar Photon en una ejecución: cuesta más DBU por hora pero suele terminar antes en SQL y ETL.", "photon", "M")
+                "Try Photon on one run: it costs more DBUs per hour but usually finishes sooner on SQL and ETL.", "photon", "M")
     for pool in inventory.get("instance_pools", []):
         slot = pools_cost.get(pool["id"])
         idle_min = pool.get("min_idle_instances") or 0
         if idle_min > 0:
             profile = daily_profile(daily.get("daily_pool", {}).get(pool["id"]), labels, periods["review_start"])
             saving = profile["floor"] * labels["review_days"] if profile and profile["floor"] > 0 else None
-            add("POOL_IDLE", "medium", "Pool con instancias inactivas siempre encendidas", "InstancePool", pool["id"], pool["name"],
+            add("POOL_IDLE", "medium", "Pool with idle instances always on", "InstancePool", pool["id"], pool["name"],
                 {"min_idle_instances": idle_min, "idle_now": (pool.get("stats") or {}).get("idle_count"),
                  "idle_autotermination_minutes": pool.get("idle_instance_autotermination_minutes"), "daily_floor": profile and profile["floor"]},
                 total(slot), saving, "estimate", "daily_floor",
-                "Bajar min_idle_instances a 0 (o al mínimo justificado) y la autoterminación de inactivas a 10-15 minutos.", "pools")
+                "Lower min_idle_instances to 0 (or the minimum you can justify) and set idle instance auto-termination between 10 and 15 minutes.", "pools")
     for wh in inventory.get("sql_warehouses", []):
         slot = warehouses_cost.get(wh["id"])
         mins = wh.get("auto_stop_mins")
@@ -3957,31 +3956,31 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
             never = not isinstance(mins, (int, float)) or mins <= 0
             saving = slot["review"] * weekend_share if never and slot and slot["review"] else None
             add("WAREHOUSE_AUTOSTOP", "high" if never else "medium",
-                "SQL warehouse sin auto-stop" if never else "Auto-stop largo en SQL warehouse", "SqlWarehouse", wh["id"], wh["name"],
+                "SQL warehouse without auto-stop" if never else "Long auto-stop on a SQL warehouse", "SqlWarehouse", wh["id"], wh["name"],
                 {"auto_stop_mins": mins or 0, "state": wh.get("state"), "serverless": wh.get("enable_serverless_compute")},
                 total(slot), saving, "estimate", "always_on_weekends",
-                "Configurar auto-stop en 10-" + str(COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES) + " minutos (serverless arranca en segundos).", "warehouse")
+                "Set auto-stop between 10 and " + str(COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES) + " minutes (serverless starts in seconds).", "warehouse")
         if wh.get("enable_serverless_compute") is not True:
-            add("WAREHOUSE_SERVERLESS", "low", "SQL warehouse clásico o pro: evaluar serverless", "SqlWarehouse", wh["id"], wh["name"],
+            add("WAREHOUSE_SERVERLESS", "low", "Classic or pro SQL warehouse: evaluate serverless", "SqlWarehouse", wh["id"], wh["name"],
                 {"warehouse_type": wh.get("warehouse_type"), "cluster_size": wh.get("cluster_size")}, total(slot), None, None, None,
-                "Evaluar serverless: arranque en segundos, auto-stop corto y sin VM en vuestra suscripción.", "warehouse")
+                "Evaluate serverless: it starts in seconds, has a short auto-stop and runs no VMs in your subscription.", "warehouse")
     no_policy = [c for c in ap if not c.get("policy_id")]
     if no_policy:
         cost = sum(clusters_cost[c["name"]]["review"] for c in no_policy if c["name"] in clusters_cost)
-        add("NO_POLICY", "low", "Clústeres interactivos sin política de cómputo", "AllPurposeCluster", "no-policy",
-            str(len(no_policy)) + (" clúster" if len(no_policy) == 1 else " clústeres"),
+        add("NO_POLICY", "low", "Interactive clusters without a compute policy", "AllPurposeCluster", "no-policy",
+            str(len(no_policy)) + (" cluster" if len(no_policy) == 1 else " clusters"),
             {"objects": [c["name"] for c in no_policy][:8]}, cost, None, None, None,
-            "Asignar una política que fije autoterminación, tamaños, spot y etiquetas de imputación.", "policies")
+            "Assign a policy that sets auto-termination, sizes, spot and allocation tags.", "policies")
     if tags_wanted:
         weak = [p for p in inventory.get("cluster_policies", []) if p.get("enforced_tag_keys") is not None
                 and [t for t in tags_wanted if t not in {k.lower() for k in p["enforced_tag_keys"]}]]
         if weak:
-            add("POLICY_TAGS", "medium", "Políticas que no obligan las etiquetas de imputación", "ClusterPolicy", "policy-tags",
-                str(len(weak)) + (" política" if len(weak) == 1 else " políticas"),
+            add("POLICY_TAGS", "medium", "Policies that don't enforce the allocation tags", "ClusterPolicy", "policy-tags",
+                str(len(weak)) + (" policy" if len(weak) == 1 else " policies"),
                 {"objects": [p["name"] for p in weak][:8], "allocation_tags": COST_ALLOCATION_TAGS}, None, None, None, None,
-                "Añadir custom_tags." + COST_ALLOCATION_TAGS[0] + " (y las demás) como etiquetas fijas u obligatorias en cada política.", "policies")
+                "Add custom_tags." + COST_ALLOCATION_TAGS[0] + " (and the others) as fixed or required tags in each policy.", "policies")
         groups = (
-            ("AllPurposeCluster", ("clúster interactivo", "clústeres interactivos"), [(c["name"], c.get("custom_tags"), total(clusters_cost.get(c["name"]))) for c in ap]),
+            ("AllPurposeCluster", ("interactive cluster", "interactive clusters"), [(c["name"], c.get("custom_tags"), total(clusters_cost.get(c["name"]))) for c in ap]),
             ("Job", ("job", "jobs"), [(j["name"], job_effective_tags(j), total(jobs_cost.get(j["id"])))
                                        for j in inventory.get("jobs", []) if j.get("job_clusters")]),
             ("InstancePool", ("pool", "pools"), [(p["name"], p.get("custom_tags"), total(pools_cost.get(p["id"]))) for p in inventory.get("instance_pools", [])]),
@@ -3993,16 +3992,16 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
                 cost = sum(c for _, c, _ in missing if c)
                 untagged = sum(1 for _, _, m in missing if len(m) == len(COST_ALLOCATION_TAGS))
                 add("MISSING_ALLOCATION_TAGS", "medium" if cost else "low",
-                    ("Sin etiquetas de imputación en " if untagged == len(missing) else "Etiquetas de imputación incompletas en ") + labels[1],
+                    ("No allocation tags on " if untagged == len(missing) else "Incomplete allocation tags on ") + labels[1],
                     kind, "tags-" + kind, str(len(missing)) + " " + labels[len(missing) != 1],
-                    {"objects": [n + " (falta " + ", ".join(m) + ")" for n, _, m in missing][:8], "allocation_tags": COST_ALLOCATION_TAGS},
+                    {"objects": [n + " (missing " + ", ".join(m) + ")" for n, _, m in missing][:8], "allocation_tags": COST_ALLOCATION_TAGS},
                     cost or None, None, None, None,
                     {
-                        "AllPurposeCluster": "Añadir las etiquetas que faltan en custom_tags de cada clúster y hacerlas obligatorias con una política de cómputo.",
-                        "Job": "Añadir las etiquetas que faltan como etiquetas del job (se propagan a sus job clusters) o en custom_tags del job cluster.",
-                        "InstancePool": "Añadir las etiquetas que faltan en custom_tags del pool: sus VM solo heredan las etiquetas del pool, no las del clúster.",
-                        "SqlWarehouse": "Añadir las etiquetas que faltan en las etiquetas del SQL warehouse.",
-                    }[kind] + " Etiquetas: " + ", ".join(COST_ALLOCATION_TAGS) + ".",
+                        "AllPurposeCluster": "Add the missing tags to each cluster's custom_tags and make them required with a compute policy.",
+                        "Job": "Add the missing tags as job tags (they propagate to its job clusters) or in the job cluster's custom_tags.",
+                        "InstancePool": "Add the missing tags to the pool's custom_tags: its VMs inherit only the pool tags, not the cluster tags.",
+                        "SqlWarehouse": "Add the missing tags to the SQL warehouse tags.",
+                    }[kind] + " Tags: " + ", ".join(COST_ALLOCATION_TAGS) + ".",
                     "tags")
     versions = set((catalog or {}).get("spark_versions") or [])
     by_version, by_node = {}, {}
@@ -4017,17 +4016,17 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
         if node and (info.get("is_deprecated") or OLD_NODE_RE.match(node)):
             by_node.setdefault(node, set()).add(name)
     for version, names in sorted(by_version.items()):
-        add("RUNTIME_EOS", "medium", "Runtime fuera de soporte" if versions else "Runtime antiguo", "Runtime", version, version,
+        add("RUNTIME_EOS", "medium", "Unsupported runtime" if versions else "Old runtime", "Runtime", version, version,
             {"objects": sorted(names)[:8], "supported_list_checked": bool(versions)}, None, None, None, None,
-            "Actualizar a una versión LTS soportada (más rendimiento por DBU y parches de seguridad).", "runtime", "M")
+            "Upgrade to a supported LTS version (more performance per DBU and security patches).", "runtime", "M")
     vm_sizes = tables["vm_sizes"] if tables else {}
     for node, names in sorted(by_node.items()):
         size = _vm_meter(node)
         cost = sum(v for meter, v in vm_sizes.items() if (meter or "").lower().startswith(size)) if vm_sizes else None
-        add("OLD_NODE_FAMILY", "low", "Familia de VM antigua o retirada", "NodeType", node, node,
+        add("OLD_NODE_FAMILY", "low", "Old or retired VM family", "NodeType", node, node,
             {"objects": sorted(names)[:8], "deprecated": bool(((catalog or {}).get("node_types") or {}).get(node, {}).get("is_deprecated"))},
             cost or None, None, None, None,
-            "Comparar con la generación actual (por ejemplo Dds_v5 o Eds_v5): suele dar más rendimiento por euro.", "node_types", "M")
+            "Compare with the current generation (for example Dds_v5 or Eds_v5): it usually gives better price-performance.", "node_types", "M")
     best = {}
     for s in signals:
         if s["estimated_monthly_saving"]:
@@ -4097,9 +4096,9 @@ def attribution_rows(dimension, slots, inventory, review_total):
     rows = []
     for row in grouped.values():
         if row["kind"] == "job_runs":
-            row["name"] = "Clústeres efímeros de jobs (" + str(row["count"]) + (" ejecución)" if row["count"] == 1 else " ejecuciones)")
+            row["name"] = "Ephemeral job clusters (" + str(row["count"]) + (" run)" if row["count"] == 1 else " runs)")
         elif row["kind"] == "pipeline_runs":
-            row["name"] = "Clústeres de pipelines (DLT)"
+            row["name"] = "Pipeline clusters (DLT)"
         row["change"] = round(row["total"] - row["previous_total"], 2)
         row["change_pct"] = _pct(row["total"] - row["previous_total"], row["previous_total"])
         row["share"] = _pct(row["total"], review_total)
@@ -4308,36 +4307,36 @@ def demo_cost_data(reference, inventory):
     wh = lambda wid: {"Vendor": "Databricks", "SqlEndpointId": wid}
     pool = lambda pid: {"Vendor": "Databricks", "DatabricksInstancePoolId": pid}
     items = [
-        (ap("bi-ventas-compartido"), {"team": "ventas", "project": "cuadros-mando"}, db, "Premium All-purpose Compute DBU", 3360, 2640, "always"),
-        (ap("bi-ventas-compartido"), {"team": "ventas", "project": "cuadros-mando"}, vm, "DS4 v2", 2050, 1610, "always"),
-        (ap("bi-ventas-compartido"), {"team": "ventas", "project": "cuadros-mando"}, st, "P10 LRS Disk", 140, 130, "always"),
-        (ap("ds-prevision-demanda"), {"team": "data-science", "project": "prevision-demanda", "cc": "CC-410"}, db, "Premium All-purpose Photon DBU", 820, 760, "weekdays"),
-        (ap("ds-prevision-demanda"), {"team": "data-science", "project": "prevision-demanda", "cc": "CC-410"}, vm, "E8ds v5 Spot", 310, 290, "weekdays"),
-        (ap("ds-prevision-demanda"), {"team": "data-science", "project": "prevision-demanda", "cc": "CC-410"}, st, "P10 LRS Disk", 45, 40, "weekdays"),
-        (ap("ingenieria-adhoc"), {"team": "ingenieria"}, db, "Premium All-purpose Compute DBU", 410, 450, "light"),
-        (ap("ingenieria-adhoc"), {"team": "ingenieria"}, vm, "D8ds v5", 260, 280, "light"),
-        (ap("ingenieria-adhoc"), {"team": "ingenieria"}, st, "P10 LRS Disk", 25, 25, "light"),
-        (ap("legado-informes"), {}, db, "Premium All-purpose Compute DBU", 190, 260, "sparse"),
-        (ap("legado-informes"), {}, vm, "DS3 v2", 120, 150, "sparse"),
-        (ap("legado-informes"), {}, st, "P10 LRS Disk", 15, 15, "sparse"),
-        (ap("finanzas-cierre"), {"team": "finanzas", "project": "cierre-mensual", "cc": "CC-200"}, db, "Premium All-purpose Compute DBU", 260, 180, "month_end"),
+        (ap("bi-sales-shared"), {"team": "sales", "project": "dashboards"}, db, "Premium All-purpose Compute DBU", 3360, 2640, "always"),
+        (ap("bi-sales-shared"), {"team": "sales", "project": "dashboards"}, vm, "DS4 v2", 2050, 1610, "always"),
+        (ap("bi-sales-shared"), {"team": "sales", "project": "dashboards"}, st, "P10 LRS Disk", 140, 130, "always"),
+        (ap("ds-demand-forecast"), {"team": "data-science", "project": "demand-forecast", "cc": "CC-410"}, db, "Premium All-purpose Photon DBU", 820, 760, "weekdays"),
+        (ap("ds-demand-forecast"), {"team": "data-science", "project": "demand-forecast", "cc": "CC-410"}, vm, "E8ds v5 Spot", 310, 290, "weekdays"),
+        (ap("ds-demand-forecast"), {"team": "data-science", "project": "demand-forecast", "cc": "CC-410"}, st, "P10 LRS Disk", 45, 40, "weekdays"),
+        (ap("engineering-adhoc"), {"team": "engineering"}, db, "Premium All-purpose Compute DBU", 410, 450, "light"),
+        (ap("engineering-adhoc"), {"team": "engineering"}, vm, "D8ds v5", 260, 280, "light"),
+        (ap("engineering-adhoc"), {"team": "engineering"}, st, "P10 LRS Disk", 25, 25, "light"),
+        (ap("legacy-reports"), {}, db, "Premium All-purpose Compute DBU", 190, 260, "sparse"),
+        (ap("legacy-reports"), {}, vm, "DS3 v2", 120, 150, "sparse"),
+        (ap("legacy-reports"), {}, st, "P10 LRS Disk", 15, 15, "sparse"),
+        (ap("finance-close"), {"team": "finance", "project": "month-end-close", "cc": "CC-200"}, db, "Premium All-purpose Compute DBU", 260, 180, "month_end"),
         (pool("1015-090000-pool-general"), {}, vm, "D4ds v5", 1180, 1120, "pool"),
         (pool("1015-090000-pool-general"), {}, st, "P10 LRS Disk", 60, 58, "pool"),
-        (pool("1015-091500-pool-etlnoche"), {"team": "ingenieria"}, vm, "E8ds v5 Spot", 220, 240, "nightly"),
-        (job("1001", "318842"), {"team": "ventas", "project": "etl-ventas", "cc": "CC-100"}, db, "Premium Jobs Compute DBU", 1640, 1480, "nightly"),
-        (job("1001", "318842"), {"team": "ventas", "project": "etl-ventas", "cc": "CC-100"}, vm, "D8ds v5", 1020, 930, "nightly"),
-        (job("1001", "318842"), {"team": "ventas", "project": "etl-ventas", "cc": "CC-100"}, st, "P10 LRS Disk", 70, 65, "nightly"),
-        (job("1004", "551220"), {"team": "data-science", "project": "prevision-demanda"}, db, "Premium Jobs Compute DBU", 690, 640, "nightly"),
-        (job("1004", "551220"), {"team": "data-science", "project": "prevision-demanda"}, vm, "E8ds v5 Spot", 160, 150, "nightly"),
+        (pool("1015-091500-pool-etlnight"), {"team": "engineering"}, vm, "E8ds v5 Spot", 220, 240, "nightly"),
+        (job("1001", "318842"), {"team": "sales", "project": "etl-sales", "cc": "CC-100"}, db, "Premium Jobs Compute DBU", 1640, 1480, "nightly"),
+        (job("1001", "318842"), {"team": "sales", "project": "etl-sales", "cc": "CC-100"}, vm, "D8ds v5", 1020, 930, "nightly"),
+        (job("1001", "318842"), {"team": "sales", "project": "etl-sales", "cc": "CC-100"}, st, "P10 LRS Disk", 70, 65, "nightly"),
+        (job("1004", "551220"), {"team": "data-science", "project": "demand-forecast"}, db, "Premium Jobs Compute DBU", 690, 640, "nightly"),
+        (job("1004", "551220"), {"team": "data-science", "project": "demand-forecast"}, vm, "E8ds v5 Spot", 160, 150, "nightly"),
         (job("1005", "77310"), {}, db, "Premium Jobs Compute DBU", 380, 300, "nightly"),
         (job("1005", "77310"), {}, vm, "DS3 v2", 240, 190, "nightly"),
-        (job("1006", "1"), {"team": "ingenieria", "project": "ingesta-erp", "cc": "CC-300"}, db, "Premium Jobs Compute DBU", 520, 505, "always"),
-        (job("1006", "1"), {"team": "ingenieria", "project": "ingesta-erp", "cc": "CC-300"}, vm, "D4ds v5", 300, 290, "always"),
-        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-pedidos"}, {"team": "ingenieria", "project": "ingesta-erp"}, db, "Premium DLT Core Compute DBU", 430, 380, "nightly"),
-        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-pedidos"}, {"team": "ingenieria", "project": "ingesta-erp"}, vm, "D4ds v5", 140, 120, "nightly"),
-        (wh("a1b2c3d4e5f60718"), {"team": "ventas"}, db, "Premium SQL Compute Pro DBU", 1920, 1700, "always"),
-        (wh("a1b2c3d4e5f60718"), {"team": "ventas"}, vm, "E8ds v5", 640, 560, "always"),
-        (wh("b2c3d4e5f6071829"), {"team": "finanzas", "project": "cierre-mensual", "cc": "CC-200"}, db, "Premium Serverless SQL DBU", 640, 590, "weekdays"),
+        (job("1006", "1"), {"team": "engineering", "project": "erp-ingest", "cc": "CC-300"}, db, "Premium Jobs Compute DBU", 520, 505, "always"),
+        (job("1006", "1"), {"team": "engineering", "project": "erp-ingest", "cc": "CC-300"}, vm, "D4ds v5", 300, 290, "always"),
+        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-orders"}, {"team": "engineering", "project": "erp-ingest"}, db, "Premium DLT Core Compute DBU", 430, 380, "nightly"),
+        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-orders"}, {"team": "engineering", "project": "erp-ingest"}, vm, "D4ds v5", 140, 120, "nightly"),
+        (wh("a1b2c3d4e5f60718"), {"team": "sales"}, db, "Premium SQL Compute Pro DBU", 1920, 1700, "always"),
+        (wh("a1b2c3d4e5f60718"), {"team": "sales"}, vm, "E8ds v5", 640, 560, "always"),
+        (wh("b2c3d4e5f6071829"), {"team": "finance", "project": "month-end-close", "cc": "CC-200"}, db, "Premium Serverless SQL DBU", 640, 590, "weekdays"),
         ({}, {}, db, "Premium Serverless Compute DBU", 520, 260, "weekdays"),
         ({}, {}, st, "Hot LRS Data Stored", 420, 400, "always"),
         ({}, {}, "Bandwidth", "Standard Data Transfer Out", 180, 170, "always"),
@@ -4384,7 +4383,7 @@ def demo_cost_data(reference, inventory):
                         "pages": 1, "seconds": 1.4, "error": None}
     return {
         "metric": COST_METRIC, "periods": labels, "queries": queries,
-        "scope": {"subscription_id": DEMO_SUBSCRIPTION, "resource_ids": [], "managed_resource_group": "databricks-rg-dbx-analitica-prod"},
+        "scope": {"subscription_id": DEMO_SUBSCRIPTION, "resource_ids": [], "managed_resource_group": "databricks-rg-dbx-analytics-prod"},
     }
 
 
@@ -4392,9 +4391,9 @@ def demo_system_billing(reference):
     periods = cost_periods(reference)
     rows = []
     for job_id, name, runs, cost, sku, user in (
-        ("1001", "etl-ventas-diario", 31, 52.9, "PREMIUM_JOBS_COMPUTE", "sp-etl-produccion"),
-        ("1004", "prevision-demanda-semanal", 4, 172.5, "PREMIUM_JOBS_COMPUTE", "luis.martin@example.com"),
-        ("1005", "calidad-datos-silver", 31, 12.3, "PREMIUM_JOBS_COMPUTE", "jorge.lopez@example.com"),
+        ("1001", "etl-sales-daily", 31, 52.9, "PREMIUM_JOBS_COMPUTE", "sp-etl-production"),
+        ("1004", "demand-forecast-weekly", 4, 172.5, "PREMIUM_JOBS_COMPUTE", "luis.martin@example.com"),
+        ("1005", "data-quality-silver", 31, 12.3, "PREMIUM_JOBS_COMPUTE", "jorge.lopez@example.com"),
     ):
         for n in range(min(runs, 6)):
             rows.append({"row_type": "run", "product": "JOBS", "sku": sku, "cluster_id": None, "job_id": job_id, "job_run_id": str(700000 + int(job_id) * 10 + n),
@@ -4405,7 +4404,7 @@ def demo_system_billing(reference):
     rows.append({"row_type": "run", "product": "SQL", "sku": "PREMIUM_SQL_PRO_COMPUTE", "cluster_id": None, "job_id": None, "job_run_id": None,
                  "warehouse_id": "a1b2c3d4e5f60718", "pipeline_id": None, "run_as": None, "dbus": 3740.0, "list_cost": 2057.0, "currency": "USD"})
     rows.sort(key=lambda r: -r["list_cost"])
-    for user, dbus, cost in (("ana.garcia@example.com", 6545.5, 3600.0), ("sp-etl-produccion", 5880.0, 1764.0), ("luis.martin@example.com", 3790.0, 1595.0),
+    for user, dbus, cost in (("ana.garcia@example.com", 6545.5, 3600.0), ("sp-etl-production", 5880.0, 1764.0), ("luis.martin@example.com", 3790.0, 1595.0),
                              ("marta.ruiz@example.com", 800.0, 440.0), ("jorge.lopez@example.com", 1615.0, 650.0)):
         rows.append({"row_type": "user", "product": None, "sku": None, "cluster_id": None, "job_id": None, "job_run_id": None, "warehouse_id": None,
                      "pipeline_id": None, "run_as": user, "dbus": dbus, "list_cost": cost, "currency": "USD"})
@@ -4420,7 +4419,7 @@ def demo_system_billing(reference):
 
 def demo_raw(reference):
     """Complete SIMULATED workspace (operation=self_test): no network, no configuration, clearly labelled everywhere."""
-    sub, rg, name, host = DEMO_SUBSCRIPTION, "rg-datos-prod", "dbx-analitica-prod", "adb-1234567890123456.7.azuredatabricks.net"
+    sub, rg, name, host = DEMO_SUBSCRIPTION, "rg-data-prod", "dbx-analytics-prod", "adb-1234567890123456.7.azuredatabricks.net"
     base = "/subscriptions/" + sub + "/resourceGroups/" + rg + "/providers/"
     config = {
         "name": name, "resource_group": rg, "workspace_host": host, "environment": "PRODUCTION", "auth_mode": "same_tenant_uami",
@@ -4431,8 +4430,8 @@ def demo_raw(reference):
         "sre_tenant_id": DEMO_TENANT, "target_tenant_id": DEMO_TENANT, "cross_tenant": False, "subscription_id": sub,
         "id": base + "Microsoft.Databricks/workspaces/" + name,
     }
-    vnet, ac = base + "Microsoft.Network/virtualNetworks/vnet-datos-prod", base + "Microsoft.Databricks/accessConnectors/ac-datos-prod"
-    nsg, st, kv = base + "Microsoft.Network/networkSecurityGroups/nsg-dbx-prod", base + "Microsoft.Storage/storageAccounts/stlagodatosprod", base + "Microsoft.KeyVault/vaults/kv-datos-prod"
+    vnet, ac = base + "Microsoft.Network/virtualNetworks/vnet-data-prod", base + "Microsoft.Databricks/accessConnectors/ac-data-prod"
+    nsg, st, kv = base + "Microsoft.Network/networkSecurityGroups/nsg-dbx-prod", base + "Microsoft.Storage/storageAccounts/stdatalakeprod", base + "Microsoft.KeyVault/vaults/kv-data-prod"
     ws = normalize_workspace({
         "id": config["id"], "name": name, "location": "westeurope", "sku": {"name": "premium"},
         "properties": {
@@ -4447,42 +4446,42 @@ def demo_raw(reference):
     }, "arm_workspace", reference, config)
     related = [normalize_resource(item, "arm_resource_" + str(i + 1), reference, config, {"type": "direct_reference", "source_id": "arm_workspace", "field": field})
                for i, (item, field) in enumerate((
-                   ({"id": vnet, "name": "vnet-datos-prod", "location": "westeurope", "properties": {"addressSpace": {"addressPrefixes": ["10.20.0.0/16"]},
+                   ({"id": vnet, "name": "vnet-data-prod", "location": "westeurope", "properties": {"addressSpace": {"addressPrefixes": ["10.20.0.0/16"]},
                      "subnets": [{"id": vnet + "/subnets/snet-dbx-host"}, {"id": vnet + "/subnets/snet-dbx-container"}]}}, "parameters.customVirtualNetworkId"),
                    ({"id": vnet + "/subnets/snet-dbx-host", "name": "snet-dbx-host", "properties": {"addressPrefix": "10.20.1.0/24", "networkSecurityGroup": {"id": nsg},
                      "delegations": [{"name": "dbx", "properties": {"serviceName": "Microsoft.Databricks/workspaces"}}]}}, "parameters.customPublicSubnetName"),
                    ({"id": vnet + "/subnets/snet-dbx-container", "name": "snet-dbx-container", "properties": {"addressPrefix": "10.20.2.0/24", "networkSecurityGroup": {"id": nsg},
                      "delegations": [{"name": "dbx", "properties": {"serviceName": "Microsoft.Databricks/workspaces"}}]}}, "parameters.customPrivateSubnetName"),
                    ({"id": nsg, "name": "nsg-dbx-prod", "properties": {"securityRules": []}}, "nsg_id"),
-                   ({"id": ac, "name": "ac-datos-prod", "identity": {"type": "SystemAssigned"}, "properties": {"provisioningState": "Succeeded"}}, "accessConnector.id"),
-                   ({"id": st, "name": "stlagodatosprod", "sku": {"name": "Standard_ZRS"}, "properties": {"supportsHttpsTrafficOnly": True, "minimumTlsVersion": "TLS1_2",
+                   ({"id": ac, "name": "ac-data-prod", "identity": {"type": "SystemAssigned"}, "properties": {"provisioningState": "Succeeded"}}, "accessConnector.id"),
+                   ({"id": st, "name": "stdatalakeprod", "sku": {"name": "Standard_ZRS"}, "properties": {"supportsHttpsTrafficOnly": True, "minimumTlsVersion": "TLS1_2",
                      "allowBlobPublicAccess": False, "allowSharedKeyAccess": True, "publicNetworkAccess": "Enabled", "isHnsEnabled": True,
-                     "primaryEndpoints": {"dfs": "https://stlagodatosprod.dfs.core.windows.net/"}}}, "approved_related_resource_ids"),
-                   ({"id": kv, "name": "kv-datos-prod", "properties": {"enableRbacAuthorization": True, "enablePurgeProtection": True, "enableSoftDelete": True,
-                     "publicNetworkAccess": "Disabled", "vaultUri": "https://kv-datos-prod.vault.azure.net/"}}, "keyvault_metadata.resource_id"),
+                     "primaryEndpoints": {"dfs": "https://stdatalakeprod.dfs.core.windows.net/"}}}, "approved_related_resource_ids"),
+                   ({"id": kv, "name": "kv-data-prod", "properties": {"enableRbacAuthorization": True, "enablePurgeProtection": True, "enableSoftDelete": True,
+                     "publicNetworkAccess": "Disabled", "vaultUri": "https://kv-data-prod.vault.azure.net/"}}, "keyvault_metadata.resource_id"),
                ))]
     day_ms = 86400000
     now_ms = int(datetime.fromisoformat(reference.replace("Z", "+00:00")).timestamp() * 1000)
     tags = lambda **kw: {COST_ALLOCATION_TAGS[i]: kw[r] for i, r in enumerate(("team", "project", "cc")) if len(COST_ALLOCATION_TAGS) > i and r in kw}
     cluster_specs = [
-        {"cluster_id": "0915-081203-bivts01", "cluster_name": "bi-ventas-compartido", "cluster_source": "UI", "state": "RUNNING", "spark_version": "13.3.x-scala2.12",
+        {"cluster_id": "0915-081203-bivts01", "cluster_name": "bi-sales-shared", "cluster_source": "UI", "state": "RUNNING", "spark_version": "13.3.x-scala2.12",
          "node_type_id": "Standard_DS4_v2", "autoscale": {"min_workers": 2, "max_workers": 8}, "autotermination_minutes": 0, "data_security_mode": "USER_ISOLATION",
-         "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="ventas", project="cuadros-mando"),
+         "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="sales", project="dashboards"),
          "creator_user_name": "ana.garcia@example.com", "start_time": now_ms - 40 * day_ms, "last_restarted_time": now_ms - 9 * day_ms},
-        {"cluster_id": "0915-091530-dsprv02", "cluster_name": "ds-prevision-demanda", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "15.4.x-cpu-ml-scala2.12",
-         "node_type_id": "Standard_E8ds_v5", "num_workers": 4, "autotermination_minutes": 120, "data_security_mode": "SINGLE_USER", "policy_id": "POL-CIENCIA-DATOS",
+        {"cluster_id": "0915-091530-dsprv02", "cluster_name": "ds-demand-forecast", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "15.4.x-cpu-ml-scala2.12",
+         "node_type_id": "Standard_E8ds_v5", "num_workers": 4, "autotermination_minutes": 120, "data_security_mode": "SINGLE_USER", "policy_id": "POL-DATA-SCIENCE",
          "runtime_engine": "PHOTON", "azure_attributes": {"availability": "SPOT_WITH_FALLBACK_AZURE", "first_on_demand": 1},
-         "custom_tags": tags(team="data-science", project="prevision-demanda", cc="CC-410"), "creator_user_name": "luis.martin@example.com"},
-        {"cluster_id": "0915-102244-ingad03", "cluster_name": "ingenieria-adhoc", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "14.3.x-scala2.12",
+         "custom_tags": tags(team="data-science", project="demand-forecast", cc="CC-410"), "creator_user_name": "luis.martin@example.com"},
+        {"cluster_id": "0915-102244-ingad03", "cluster_name": "engineering-adhoc", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "14.3.x-scala2.12",
          "node_type_id": "Standard_D8ds_v5", "autoscale": {"min_workers": 1, "max_workers": 4}, "autotermination_minutes": 30, "data_security_mode": "USER_ISOLATION",
-         "policy_id": "POL-USO-PERSONAL", "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="ingenieria"),
+         "policy_id": "POL-PERSONAL-USE", "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="engineering"),
          "creator_user_name": "marta.ruiz@example.com"},
-        {"cluster_id": "0915-110001-legin04", "cluster_name": "legado-informes", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "10.4.x-scala2.12",
+        {"cluster_id": "0915-110001-legin04", "cluster_name": "legacy-reports", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "10.4.x-scala2.12",
          "node_type_id": "Standard_DS3_v2", "num_workers": 2, "autotermination_minutes": 60, "data_security_mode": "NONE",
          "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "creator_user_name": "jorge.lopez@example.com"},
-        {"cluster_id": "0915-120000-fincr05", "cluster_name": "finanzas-cierre", "cluster_source": "API", "state": "TERMINATED", "spark_version": "15.4.x-scala2.12",
-         "node_type_id": "Standard_D4ds_v5", "num_workers": 2, "autotermination_minutes": 20, "data_security_mode": "USER_ISOLATION", "policy_id": "POL-USO-PERSONAL",
-         "instance_pool_id": "1015-090000-pool-general", "custom_tags": tags(team="finanzas", project="cierre-mensual", cc="CC-200"),
+        {"cluster_id": "0915-120000-fincr05", "cluster_name": "finance-close", "cluster_source": "API", "state": "TERMINATED", "spark_version": "15.4.x-scala2.12",
+         "node_type_id": "Standard_D4ds_v5", "num_workers": 2, "autotermination_minutes": 20, "data_security_mode": "USER_ISOLATION", "policy_id": "POL-PERSONAL-USE",
+         "instance_pool_id": "1015-090000-pool-general", "custom_tags": tags(team="finance", project="month-end-close", cc="CC-200"),
          "creator_user_name": "elena.sanz@example.com"},
         {"cluster_id": "1103-020000-job1004", "cluster_name": "job-1004-run-551220", "cluster_source": "JOB", "state": "TERMINATED", "spark_version": "15.4.x-cpu-ml-scala2.12",
          "node_type_id": "Standard_E8ds_v5", "num_workers": 6, "data_security_mode": "SINGLE_USER"},
@@ -4492,61 +4491,61 @@ def demo_raw(reference):
         {"instance_pool_id": "1015-090000-pool-general", "instance_pool_name": "pool-general", "node_type_id": "Standard_D4ds_v5", "min_idle_instances": 4,
          "max_capacity": 20, "idle_instance_autotermination_minutes": 60, "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "state": "ACTIVE",
          "stats": {"used_count": 1, "idle_count": 4}},
-        {"instance_pool_id": "1015-091500-pool-etlnoche", "instance_pool_name": "pool-etl-noche", "node_type_id": "Standard_E8ds_v5", "min_idle_instances": 0,
+        {"instance_pool_id": "1015-091500-pool-etlnight", "instance_pool_name": "pool-etl-night", "node_type_id": "Standard_E8ds_v5", "min_idle_instances": 0,
          "max_capacity": 30, "idle_instance_autotermination_minutes": 15, "azure_attributes": {"availability": "SPOT_WITH_FALLBACK_AZURE"}, "state": "ACTIVE",
-         "custom_tags": tags(team="ingenieria"), "stats": {"used_count": 0, "idle_count": 0}},
+         "custom_tags": tags(team="engineering"), "stats": {"used_count": 0, "idle_count": 0}},
     )]
     tag_rules = lambda *keys: {"custom_tags." + COST_ALLOCATION_TAGS[i]: {"type": "unlimited", "isOptional": False} for i in keys if len(COST_ALLOCATION_TAGS) > i}
     policies = [normalize_policy(p, "dbx_cluster_policies", reference, config) for p in (
-        {"policy_id": "POL-USO-PERSONAL", "name": "pol-uso-personal", "policy_family_id": "personal-vm",
+        {"policy_id": "POL-PERSONAL-USE", "name": "pol-personal-use", "policy_family_id": "personal-vm",
          "definition": json.dumps({**tag_rules(0), "autotermination_minutes": {"type": "fixed", "value": 30}})},
-        {"policy_id": "POL-CIENCIA-DATOS", "name": "pol-ciencia-datos", "definition": json.dumps({**tag_rules(0, 1), "autotermination_minutes": {"type": "range", "maxValue": 120}})},
-        {"policy_id": "POL-JOBS-PRODUCCION", "name": "pol-jobs-produccion", "definition": json.dumps(tag_rules(0, 1, 2))},
+        {"policy_id": "POL-DATA-SCIENCE", "name": "pol-data-science", "definition": json.dumps({**tag_rules(0, 1), "autotermination_minutes": {"type": "range", "maxValue": 120}})},
+        {"policy_id": "POL-JOBS-PRODUCTION", "name": "pol-jobs-production", "definition": json.dumps(tag_rules(0, 1, 2))},
     )]
     job_cluster = lambda key, node, pol, avail, extra, **kw: {"job_cluster_key": key, "new_cluster": {
         "spark_version": kw.pop("version", "15.4.x-scala2.12"), "node_type_id": node, "policy_id": pol, "azure_attributes": {"availability": avail},
         "custom_tags": tags(**kw), "data_security_mode": "SINGLE_USER", **extra}}
     job_specs = [
-        (1001, "etl-ventas-diario", {"quartz_cron_expression": "0 0 2 * * ?"}, [job_cluster("jc-etl", "Standard_D8ds_v5", "POL-JOBS-PRODUCCION", "ON_DEMAND_AZURE",
-          {"autoscale": {"min_workers": 2, "max_workers": 10}}, team="ventas", project="etl-ventas", cc="CC-100")], [("bronce", "jc-etl", None), ("plata", "jc-etl", None)]),
-        (1002, "refresco-cuadros-mando", {"quartz_cron_expression": "0 30 6 * * ?"}, [], [("refresco", None, "0915-081203-bivts01")]),
-        (1003, "export-pedidos-distribuidores", {"quartz_cron_expression": "0 0 7 * * ?"}, [], [("export", None, "0915-081203-bivts01")]),
-        (1004, "prevision-demanda-semanal", {"quartz_cron_expression": "0 0 4 ? * MON"}, [job_cluster("jc-ml", "Standard_E8ds_v5", "POL-CIENCIA-DATOS",
-          "SPOT_WITH_FALLBACK_AZURE", {"num_workers": 6}, version="15.4.x-cpu-ml-scala2.12", team="data-science", project="prevision-demanda")], [("entrenar", "jc-ml", None)]),
-        (1005, "calidad-datos-silver", {"quartz_cron_expression": "0 0 3 * * ?"}, [job_cluster("jc-calidad", "Standard_DS3_v2", None, "ON_DEMAND_AZURE",
-          {"num_workers": 4}, version="12.2.x-scala2.12")], [("validar", "jc-calidad", None)]),
-        (1006, "ingesta-erp-continua", None, [job_cluster("jc-stream", "Standard_D4ds_v5", "POL-JOBS-PRODUCCION", "ON_DEMAND_AZURE", {"num_workers": 2},
-          team="ingenieria", project="ingesta-erp", cc="CC-300")], [("stream", "jc-stream", None)]),
+        (1001, "etl-sales-daily", {"quartz_cron_expression": "0 0 2 * * ?"}, [job_cluster("jc-etl", "Standard_D8ds_v5", "POL-JOBS-PRODUCTION", "ON_DEMAND_AZURE",
+          {"autoscale": {"min_workers": 2, "max_workers": 10}}, team="sales", project="etl-sales", cc="CC-100")], [("bronze", "jc-etl", None), ("silver", "jc-etl", None)]),
+        (1002, "dashboard-refresh", {"quartz_cron_expression": "0 30 6 * * ?"}, [], [("refresh", None, "0915-081203-bivts01")]),
+        (1003, "distributor-orders-export", {"quartz_cron_expression": "0 0 7 * * ?"}, [], [("export", None, "0915-081203-bivts01")]),
+        (1004, "demand-forecast-weekly", {"quartz_cron_expression": "0 0 4 ? * MON"}, [job_cluster("jc-ml", "Standard_E8ds_v5", "POL-DATA-SCIENCE",
+          "SPOT_WITH_FALLBACK_AZURE", {"num_workers": 6}, version="15.4.x-cpu-ml-scala2.12", team="data-science", project="demand-forecast")], [("train", "jc-ml", None)]),
+        (1005, "data-quality-silver", {"quartz_cron_expression": "0 0 3 * * ?"}, [job_cluster("jc-quality", "Standard_DS3_v2", None, "ON_DEMAND_AZURE",
+          {"num_workers": 4}, version="12.2.x-scala2.12")], [("validate", "jc-quality", None)]),
+        (1006, "erp-ingest-continuous", None, [job_cluster("jc-stream", "Standard_D4ds_v5", "POL-JOBS-PRODUCTION", "ON_DEMAND_AZURE", {"num_workers": 2},
+          team="engineering", project="erp-ingest", cc="CC-300")], [("stream", "jc-stream", None)]),
     ]
     jobs = []
     for jid, jname, schedule, clusters_spec, tasks in job_specs:
-        settings = {"name": jname, "job_clusters": clusters_spec, "timeout_seconds": 7200, "email_notifications": {"on_failure": ["datos@example.com"]},
+        settings = {"name": jname, "job_clusters": clusters_spec, "timeout_seconds": 7200, "email_notifications": {"on_failure": ["data@example.com"]},
                     "run_as": {"service_principal_name": "00000000-0000-4000-8000-0000000000c3"} if jid in (1001, 1006) else {"user_name": "ana.garcia@example.com"},
-                    "tasks": [{"task_key": key, "job_cluster_key": jck, "existing_cluster_id": ecid, "notebook_task": {"notebook_path": "/Repos/datos/" + jname + "/" + key}}
+                    "tasks": [{"task_key": key, "job_cluster_key": jck, "existing_cluster_id": ecid, "notebook_task": {"notebook_path": "/Repos/data/" + jname + "/" + key}}
                               for key, jck, ecid in tasks]}
         settings.update({"schedule": schedule} if schedule else {"continuous": {"pause_status": "UNPAUSED"}})
         jobs.append(normalize_job({"job_id": jid, "creator_user_name": "ana.garcia@example.com", "settings": settings}, "dbx_jobs", reference, config))
-    pipelines = [normalize_pipeline({"pipeline_id": "0c1d2e3f-pedidos", "name": "dlt-pedidos", "state": "IDLE", "catalog": "main", "target": "plata_pedidos",
+    pipelines = [normalize_pipeline({"pipeline_id": "0c1d2e3f-orders", "name": "dlt-orders", "state": "IDLE", "catalog": "main", "target": "silver_orders",
                                      "serverless": False, "continuous": False}, "dbx_pipelines", reference, config)]
     warehouses = [normalize_warehouse(w, "dbx_sql_warehouses", reference, config) for w in (
-        {"id": "a1b2c3d4e5f60718", "name": "wh-bi-ventas", "state": "RUNNING", "cluster_size": "Medium", "warehouse_type": "PRO", "enable_serverless_compute": False,
+        {"id": "a1b2c3d4e5f60718", "name": "wh-bi-sales", "state": "RUNNING", "cluster_size": "Medium", "warehouse_type": "PRO", "enable_serverless_compute": False,
          "auto_stop_mins": 0, "min_num_clusters": 1, "max_num_clusters": 2, "num_clusters": 1, "num_active_sessions": 0, "creator_name": "ana.garcia@example.com",
-         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="ventas").items()]}},
-        {"id": "b2c3d4e5f6071829", "name": "wh-finanzas-serverless", "state": "STOPPED", "cluster_size": "Small", "warehouse_type": "PRO",
+         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="sales").items()]}},
+        {"id": "b2c3d4e5f6071829", "name": "wh-finance-serverless", "state": "STOPPED", "cluster_size": "Small", "warehouse_type": "PRO",
          "enable_serverless_compute": True, "auto_stop_mins": 10, "min_num_clusters": 1, "max_num_clusters": 1, "creator_name": "elena.sanz@example.com",
-         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="finanzas", project="cierre-mensual", cc="CC-200").items()]}},
+         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="finance", project="month-end-close", cc="CC-200").items()]}},
     )]
-    scopes = [normalize_secret_scope({"name": "kv-datos-prod", "backend_type": "AZURE_KEYVAULT",
-                                      "keyvault_metadata": {"resource_id": kv, "dns_name": "https://kv-datos-prod.vault.azure.net/"}}, "dbx_secret_scopes", reference, config)]
+    scopes = [normalize_secret_scope({"name": "kv-data-prod", "backend_type": "AZURE_KEYVAULT",
+                                      "keyvault_metadata": {"resource_id": kv, "dns_name": "https://kv-data-prod.vault.azure.net/"}}, "dbx_secret_scopes", reference, config)]
     metastore = normalize_metastore({"metastore_id": "ms-weu-demo", "name": "metastore-westeurope", "region": "westeurope",
-                                     "storage_root": "abfss://metastore@stlagodatosprod.dfs.core.windows.net/root"}, "uc_metastore_summary", reference, config)
-    catalogs = [normalize_catalog({"name": n, "catalog_type": "MANAGED_CATALOG", "storage_root": "abfss://" + n + "@stlagodatosprod.dfs.core.windows.net/" + n,
-                                   "isolation_mode": "ISOLATED", "metastore_id": "ms-weu-demo"}, "uc_catalogs", reference, config) for n in ("main", "ventas", "ciencia_datos")]
+                                     "storage_root": "abfss://metastore@stdatalakeprod.dfs.core.windows.net/root"}, "uc_metastore_summary", reference, config)
+    catalogs = [normalize_catalog({"name": n, "catalog_type": "MANAGED_CATALOG", "storage_root": "abfss://" + n + "@stdatalakeprod.dfs.core.windows.net/" + n,
+                                   "isolation_mode": "ISOLATED", "metastore_id": "ms-weu-demo"}, "uc_catalogs", reference, config) for n in ("main", "sales", "data_science")]
     schemas = [normalize_schema({"full_name": "main." + n, "name": n, "catalog_name": "main", "metastore_id": "ms-weu-demo"}, "uc_schemas", reference, config)
-               for n in ("bronce_pedidos", "plata_pedidos")]
-    creds = [normalize_storage_credential({"id": "sc-demo-01", "name": "cred-lago-datos", "read_only": False,
+               for n in ("bronze_orders", "silver_orders")]
+    creds = [normalize_storage_credential({"id": "sc-demo-01", "name": "cred-data-lake", "read_only": False,
                                            "azure_managed_identity": {"access_connector_id": ac}}, "uc_storage_credentials", reference, config)]
-    locations = [normalize_external_location({"name": "ext-lago-curado", "url": "abfss://curado@stlagodatosprod.dfs.core.windows.net/", "credential_name": "cred-lago-datos",
+    locations = [normalize_external_location({"name": "ext-lake-curated", "url": "abfss://curated@stdatalakeprod.dfs.core.windows.net/", "credential_name": "cred-data-lake",
                                                "read_only": False, "metastore_id": "ms-weu-demo"}, "uc_external_locations", reference, config)]
     outbound = [normalize_outbound_endpoint({"category": "Webapp", "endpoints": [{"domainName": "westeurope.azuredatabricks.net", "endpointDetails": [{"port": 443}]}]},
                                             "arm_outbound_endpoints", reference, config)]
@@ -4630,14 +4629,14 @@ def finish_snapshot(raw, reference, provenance="LIVE", environment="UNSPECIFIED"
     dep_counts = dep_graph["summary_counts"]
     head = cost_model.get("headline") or {}
     cost_message = (
-        "Databricks costó " + es_amount(head["review_total"]) + " " + (cost_model.get("currency") or "") + " en " + es_month(head["review_month"])
-        + " (" + es_amount(head.get("dbu_share"), 1) + " % DBU, " + es_amount(100 - (head.get("dbu_share") or 0), 1) + " % infraestructura)"
-        + ("; " + es_amount(head["unattributed_share"], 1) + " % sin etiqueta de cómputo" if head.get("unattributed_share") is not None else "")
-        + ("; ahorro estimado " + es_amount(head["estimated_monthly_savings"]) + " " + (cost_model.get("currency") or "") + "/mes con reglas documentadas."
+        "Databricks cost " + en_amount(head["review_total"]) + " " + (cost_model.get("currency") or "") + " in " + en_month(head["review_month"])
+        + " (" + en_amount(head.get("dbu_share"), 1) + "% DBU, " + en_amount(100 - (head.get("dbu_share") or 0), 1) + "% infrastructure)"
+        + ("; " + en_amount(head["unattributed_share"], 1) + "% without a compute tag" if head.get("unattributed_share") is not None else "")
+        + ("; estimated savings " + en_amount(head["estimated_monthly_savings"]) + " " + (cost_model.get("currency") or "") + "/month with documented rules."
            if head.get("estimated_monthly_savings") else ".")
     ) if head.get("review_total") is not None else (
-        str(head.get("signals") or 0) + " señales de optimización de costes observadas en la configuración; sin datos de coste ("
-        + str(cost_model.get("status")) + "), así que no se estima ahorro."
+        str(head.get("signals") or 0) + " cost optimization signals observed in the configuration; no cost data ("
+        + str(cost_model.get("status")) + "), so no savings are estimated."
     )
     return {
         "schema_version": "1.0",
@@ -4664,11 +4663,11 @@ def finish_snapshot(raw, reference, provenance="LIVE", environment="UNSPECIFIED"
         "actions": actions_for(findings),
         "executive_messages": [
             cost_message,
-            str(dep_counts["nodes_total"]) + " nodos en el mapa de dependencias (" + str(dep_counts["edges_observed"]) + " relaciones OBSERVED, " + str(dep_counts["edges_inferred"]) + " INFERRED explícitas y " + str(dep_counts["unknowns_total"]) + " puntos ciegos UNKNOWN).",
-            str(len(findings)) + " hallazgos de configuración y dependencias observados (" + str(critical) + " críticos reales, sin rellenar un Top 5 ficticio).",
-            str(global_score["evaluated"]) + " de " + str(global_score["evaluated"] + global_score["not_evaluated"]) + " comprobaciones aplicables evaluadas; la cobertura se muestra junto al índice local.",
-            str(dep_counts["broken_references_total"]) + " referencias rotas detectadas entre tareas de Jobs, clústeres, pools, políticas, pipelines, warehouses y credenciales.",
-            str(len(blind_spots)) + " fuentes con estado parcial, denegado o no configurado; ningún clúster se inició para esta revisión.",
+            str(dep_counts["nodes_total"]) + " nodes in the dependency map (" + str(dep_counts["edges_observed"]) + " OBSERVED relationships, " + str(dep_counts["edges_inferred"]) + " explicit INFERRED relationships and " + str(dep_counts["unknowns_total"]) + " UNKNOWN blind spots).",
+            str(len(findings)) + " observed configuration and dependency findings (" + str(critical) + " critical; the list is never padded to a top 5).",
+            str(global_score["evaluated"]) + " of " + str(global_score["evaluated"] + global_score["not_evaluated"]) + " applicable checks evaluated; coverage is shown beside the local index.",
+            str(dep_counts["broken_references_total"]) + " broken references found between job tasks, clusters, pools, policies, pipelines, warehouses and credentials.",
+            str(len(blind_spots)) + " sources partial, denied or not configured; no cluster was started for this review.",
         ],
         "methodology": {
             "score_kind": "local_assessment_indicator",

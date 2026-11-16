@@ -615,7 +615,7 @@
         },
         {
           "number": 2,
-          "meaning": "Cross-tenant source coverage (14 complete Plane 2 sources, 6 denied 403 sources, 4 not_configured) and local score beside 31 No evaluado checks",
+          "meaning": "Cross-tenant source coverage (14 complete Plane 2 sources, 6 denied 403 sources, 4 not_configured) and local score beside 31 checks not evaluated",
           "box": [
             53,
             322,
@@ -652,16 +652,16 @@
     },
     {
       "filename": "13-report-overview-and-pillars.png",
-      "bytes": 264358,
-      "sha256": "53c65a1a62d6af3452cd4e17f389af7f20fcaaef4a40d002ce7ec0a0cde2b850",
+      "bytes": 259830,
+      "sha256": "e1c507003813191f91347bdb48521cff8f9525a46ec11dd0b5497b4ce9465a48",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
-      "caption": "Redesigned Spanish HTML dossier top (customer-neutral CLIENTE plaque, sanitized synthetic fixture rendered as SIMULATED / LAB): verdict-first navy hero with the key numbers, provenance chips, verdict card and severity distribution, then KPI cards (findings, local index beside coverage, relationships, UNKNOWN blind spots, observed cost).",
+      "caption": "English HTML report top (sample run from the sanitized synthetic fixture with Contoso names, SIMULATED / LAB): verdict-first navy hero with the key numbers, provenance chips, Contoso plaque, verdict card and severity distribution, then KPI cards (findings, local index beside coverage, relationships, UNKNOWN blind spots, observed cost).",
       "callouts": [
         {
           "number": 1,
-          "meaning": "Slim top bar: Azure SRE Agent mark, section navigation, Solo lectura chip, dark-mode toggle, Exportar menu (snapshot JSON, dependencies CSV, checks CSV) and Imprimir / PDF",
+          "meaning": "Slim top bar: Azure SRE Agent mark, section navigation, Read-only chip, dark-mode toggle, Export menu (snapshot JSON and the dependencies, checks, cost and signals CSVs) and Print / PDF",
           "box": [
             6,
             3,
@@ -677,12 +677,12 @@
         },
         {
           "number": 2,
-          "meaning": "Verdict-first hero: one sentence with the key numbers, provenance chips (UTC, workspace, cross_tenant_multitenant_fic, LAB, DATOS SIMULADOS), CLIENTE plaque, verdict card and severity distribution bar",
+          "meaning": "Verdict-first hero: one sentence with the key numbers, provenance chips (UTC, workspace, cross_tenant_multitenant_fic, LAB, SIMULATED DATA), Contoso plaque, verdict card and severity distribution bar",
           "box": [
             50,
             107,
             1390,
-            466
+            505
           ],
           "badge": [
             54,
@@ -693,34 +693,34 @@
         },
         {
           "number": 3,
-          "meaning": "KPI cards: findings by severity, local index beside evaluated coverage (32 of 42 applicable checks), relationships (OBSERVED / INFERRED), UNKNOWN blind spots and observed cost (No evaluado when ARM billing is denied)",
+          "meaning": "KPI cards: findings by severity, local index beside evaluated coverage (32 of 42 applicable checks), relationships (OBSERVED / INFERRED), UNKNOWN blind spots and observed cost (Not evaluated when ARM billing is denied)",
           "box": [
             52,
-            490,
+            529,
             1388,
-            654
+            672
           ],
           "badge": [
             19,
-            492,
+            531,
             47,
-            516
+            555
           ]
         }
       ],
       "privacy_and_annotation_pixel_proof": true,
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
-      "regenerated_at_utc": "2026-11-12"
+      "regenerated_at_utc": "2026-11-16"
     },
     {
       "filename": "14-report-dependency-graph.png",
-      "bytes": 155868,
-      "sha256": "c3907d69efb8a5d45843dbf78669c645fee026fc53ec5861a17309e470b20e21",
+      "bytes": 155145,
+      "sha256": "08d7112e3b66d19c2913520fedb9ea7fc8949b5e657c4f7d031354b62accfc92",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
-      "caption": "Section 3 Deep Dependency Map (sanitized synthetic fixture): OBSERVED / INFERRED / UNKNOWN counts, observed vs. undeployed reference tabs and filters, a layered neighbourhood graph where dashed amber INFERRED references (ADLS Gen2 and Key Vault hosts outside the ARM inventory) are kept apart from solid OBSERVED native joins, and the complete edges table.",
+      "caption": "Section 3 dependency map (English sample run, sanitized synthetic fixture): OBSERVED / INFERRED / UNKNOWN counts, observed vs. undeployed reference tabs and filters, a layered neighborhood graph where dashed amber INFERRED references (ADLS Gen2 and Key Vault hosts outside the ARM inventory) are kept apart from solid OBSERVED native joins, and the complete relationships table.",
       "callouts": [
         {
           "number": 1,
@@ -729,7 +729,7 @@
             54,
             64,
             1386,
-            316
+            315
           ],
           "badge": [
             21,
@@ -740,65 +740,65 @@
         },
         {
           "number": 2,
-          "meaning": "Layered neighbourhood graph (columns per layer) with solid OBSERVED joins, dashed amber INFERRED references and a legend",
+          "meaning": "Layered neighborhood graph (one column per layer) with solid OBSERVED joins, dashed amber INFERRED references and a legend",
           "box": [
             63,
-            312,
+            311,
             1377,
-            799
+            798
           ],
           "badge": [
             30,
-            326,
+            325,
             58,
-            350
+            349
           ]
         },
         {
           "number": 3,
-          "meaning": "Dependency edges table with exact join fields and source IDs (sortable, paged, CSV export from the Exportar menu)",
+          "meaning": "Dependency relationships table with exact join fields and source IDs (sortable, paged, CSV export from the Export menu)",
           "box": [
             57,
-            869,
+            868,
             1383,
             1000
           ],
           "badge": [
             24,
-            871,
+            870,
             52,
-            895
+            894
           ]
         }
       ],
       "privacy_and_annotation_pixel_proof": true,
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
-      "regenerated_at_utc": "2026-11-12"
+      "regenerated_at_utc": "2026-11-16"
     },
     {
       "filename": "15-report-controls-and-reference.png",
-      "bytes": 142006,
-      "sha256": "1a5158887d71026281e22f1313380e955747bfec6b66724440b413d4ae4ac288",
+      "bytes": 139173,
+      "sha256": "32ff6cffe414ec0282090e088ab3606e21779efb6d5351a23face5a7e653a653",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
-      "caption": "Undeployed Azure Databricks Well-Architected Lakehouse reference tab ('Propuesta de referencia - NO desplegada'), kept visually separate from observed inventory (sanitized synthetic fixture).",
+      "caption": "Undeployed Azure Databricks Well-Architected Lakehouse reference tab ('Reference proposal - NOT deployed'), kept visually separate from the observed inventory (English sample run, sanitized synthetic fixture).",
       "callouts": [
         {
           "number": 1,
-          "meaning": "Explicitly labeled 'Propuesta de referencia - NO desplegada' tab so reference components are never mistaken for deployed assets",
+          "meaning": "Explicitly labeled 'Reference proposal - NOT deployed' tab so reference components are never mistaken for deployed assets",
           "box": [
-            378,
-            252,
-            684,
-            304
+            351,
+            230,
+            622,
+            282
           ],
           "badge": [
-            691,
-            266,
-            719,
-            290
+            629,
+            244,
+            657,
+            268
           ]
         },
         {
@@ -806,35 +806,35 @@
           "meaning": "Well-Architected Lakehouse reference diagram flagged as NOT deployed and the component / trade-off table",
           "box": [
             54,
-            313,
+            291,
             1386,
             1014
           ],
           "badge": [
             21,
-            315,
+            293,
             49,
-            339
+            317
           ]
         }
       ],
       "privacy_and_annotation_pixel_proof": true,
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
-      "regenerated_at_utc": "2026-11-12"
+      "regenerated_at_utc": "2026-11-16"
     },
     {
       "filename": "16-report-source-coverage-ledger.png",
-      "bytes": 124473,
-      "sha256": "01d010763219d314cf67bf821c9da608de8708b60a92021f77354c4429661edc",
+      "bytes": 122870,
+      "sha256": "52ac390093f8d6cebc981b98b2ad11841dbc953cff6e09415c4e3d63f4d632c8",
       "width": 1440,
       "height": 1020,
       "evidence_kind": "sanitized_synthetic_fixture_render",
-      "caption": "Section 8 Source Coverage & HTTP Receipts Ledger (sanitized synthetic fixture with Plane 1 ARM reads returning HTTP 403): status summary bars, Plane 1 ARM receipts recorded as Denegada (HTTP 403) and Plane 2 Databricks REST / Unity Catalog receipts recorded as Completa.",
+      "caption": "Section 8 source ledger and HTTP receipts (English sample run, sanitized synthetic fixture with Plane 1 ARM reads returning HTTP 403): status summary bars, Plane 1 ARM receipts recorded as Denied (HTTP 403) and Plane 2 Databricks REST / Unity Catalog receipts recorded as Complete.",
       "callouts": [
         {
           "number": 1,
-          "meaning": "Plane 1 ARM receipts honestly recorded as Denegada (HTTP 403, access_denied) when resource-group Reader is pending",
+          "meaning": "Plane 1 ARM receipts honestly recorded as Denied (HTTP 403, access_denied) when resource-group Reader is pending",
           "box": [
             59,
             378,
@@ -850,7 +850,7 @@
         },
         {
           "number": 2,
-          "meaning": "Plane 2 Databricks Workspace and Unity Catalog REST sources recorded as Completa with pages and records",
+          "meaning": "Plane 2 Databricks Workspace and Unity Catalog REST sources recorded as Complete with pages and records",
           "box": [
             59,
             620,
@@ -868,14 +868,14 @@
       "privacy_and_annotation_pixel_proof": true,
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
-      "regenerated_at_utc": "2026-11-12"
+      "regenerated_at_utc": "2026-11-16"
     },
     {
       "filename": "17-report-databricks-costs.png",
-      "caption": "Report section 6 'Costes de Databricks: de dónde vienen y cómo optimizarlos' rendered from operation=self_test (built-in SIMULATED workspace, no customer data): month cost and change, DBU vs infrastructure, cost without a compute tag, estimated savings and the three-month trend, DBU by compute type, infrastructure by service and who consumes it.",
+      "caption": "Report section 6 'Databricks costs: where they come from and how to optimize them' rendered in English from operation=self_test (built-in SIMULATED workspace, no customer data): month cost and change, DBU vs infrastructure, cost without a compute tag, estimated savings and the three-month trend, DBU by compute type, infrastructure by service and who consumes it.",
       "evidence_kind": "simulated_self_test_render",
-      "bytes": 198925,
-      "sha256": "3a12ea198bc5054e4da35379a5d43a232c48a13217966a5b024da2a7185456cc",
+      "bytes": 195120,
+      "sha256": "bd33eb745618e0cd354c987a305b0b3c0d61561468eaf22b67ca4516d1499b68",
       "width": 1440,
       "height": 1400,
       "callouts": [
@@ -931,14 +931,14 @@
       "privacy_and_annotation_pixel_proof": true,
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
-      "regenerated_at_utc": "2026-11-12"
+      "regenerated_at_utc": "2026-11-16"
     },
     {
       "filename": "18-report-databricks-cost-signals.png",
-      "caption": "Report section 6 optimisation signals rendered from operation=self_test (SIMULATED): count and counted savings, filters and CSV, then each signal with evidence, object, month cost, estimated saving with its basis, the action and a Microsoft Learn link.",
+      "caption": "Report section 6 optimization signals rendered in English from operation=self_test (SIMULATED): count and counted savings, filters and CSV, then each signal with evidence, object, month cost, estimated saving with its basis, the action and a Microsoft Learn link.",
       "evidence_kind": "simulated_self_test_render",
-      "bytes": 188091,
-      "sha256": "c28d468ff78bd471342a7c6ee4c340b99ff02062bcdbeba0ca164e25813bbd89",
+      "bytes": 177001,
+      "sha256": "1f208393ff7535a807145e2a80d6f2c933081290c18c447e5ddaba97c71bb060",
       "width": 1440,
       "height": 1020,
       "callouts": [
@@ -965,7 +965,7 @@
             61,
             269,
             1379,
-            552
+            568
           ],
           "badge": [
             28,
@@ -978,7 +978,7 @@
       "privacy_and_annotation_pixel_proof": true,
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
-      "regenerated_at_utc": "2026-11-12"
+      "regenerated_at_utc": "2026-11-16"
     },
     {
       "filename": "newui-menu.png",

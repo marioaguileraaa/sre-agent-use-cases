@@ -29,6 +29,7 @@ For a report request or the monthly scheduled task (0 8 1 * *), make EXACTLY ONE
 For sharing_mode="native_ui", render report_url, snapshot_url, machines_csv_url and patches_csv_url unchanged as native Markdown links/file widgets in your response. Never invent or reuse a thread UUID or prepend a hostname. For local_files_only, report the four guarded *_path values and note that cwd is outside the native ThreadFiles root.
 For targeted questions, use operation="query" with view in summary, machines, failures, cycles, patches, extensions, coverage or actions, plus hosting, failure_category, machine_name, limit and offset, and disclose exact pagination fields.
 Never trigger installPatches, assessPatches, VM start/restart/deallocate, guest runCommand, or extension changes.
+Answer in the user's language (English by default).
 ```
 
 ## Monthly scheduled automation task (`0 8 1 * *`)
@@ -47,7 +48,7 @@ Never trigger installPatches, assessPatches, VM start/restart/deallocate, guest 
 Use ONLY patching-investigation-report.
 Execute EXACTLY ONE tool call with operation="report" and period="last_30d" (keep all other parameters at defaults).
 If status="error", report the sanitized error.code and error.source_id and stop without inventing files.
-Otherwise, immediately render all four native artifact links unchanged (report_url, snapshot_url, machines_csv_url, patches_csv_url) as Markdown links, followed by a concise Spanish executive summary covering:
+Otherwise, immediately render all four native artifact links unchanged (report_url, snapshot_url, machines_csv_url, patches_csv_url) as Markdown links, followed by a concise English executive summary covering:
 1. Total machines (Azure VMs vs Azure Arc) and assessment coverage.
 2. Maintenance cycle executions in the 30-day window (UpdateSuccessfullyApplied vs ShutdownOrUnresponsive) and installation runs.
 3. Per-machine root-cause breakdown across maintenance_window_unresponsive, arc_agent_expired_or_disconnected, assessment_stuck_or_readiness_undetermined, hotpatch_or_patch_extension_error, pending_security_patches_unscheduled, and unassessed_no_update_manager_telemetry, naming the affected machines, KBs, correlation IDs, and guest log paths.
@@ -56,9 +57,13 @@ Do not run a second tool call or modify any Azure resource.
 
 ## Copy-ready on-demand chat prompts (Spanish & English)
 
-Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **Agent: patching-investigation-live**), then paste a prompt without its leading `@patching-investigation-live` mention: typing `@` no longer opens a picker.
+Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **Agent: patching-investigation-live**), then paste a prompt without its leading `@patching-investigation-live` mention: typing `@` no longer opens a picker. Each prompt comes in English and in Spanish; the agent answers in the language of the prompt.
 
-### 1. Full 30-day post-patching & failure investigation report (Spanish)
+### 1. Full 30-day post-patching & failure investigation report
+
+```text
+@patching-investigation-live Run the complete Azure Update Manager post-patching report and automated failure investigation for the last 30 days with operation=report and period=last_30d. Deliver the four files right away (HTML, full JSON, per-machine diagnostic CSV and cycles/patches CSV) and summarize why each machine failed or was not patched, without signing in to each host.
+```
 
 ```text
 @patching-investigation-live Ejecuta el informe completo post-parcheo y la investigación automática de fallos de Azure Update Manager para los últimos 30 días con operation=report y period=last_30d. Entrega inmediatamente los cuatro archivos (HTML, JSON completo, CSV de diagnóstico por máquina y CSV de ciclos/parches) y resume por qué falló o no se parcheó cada máquina sin necesidad de entrar host por host.
@@ -71,6 +76,10 @@ Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **A
 ### 2. Query only machines with root-cause failures (`view="failures"`)
 
 ```text
+@patching-investigation-live Use operation=query with view=failures to list every patching blocker and failure detected per machine, with the root-cause evidence, the log path or correlationId and the recommended action.
+```
+
+```text
 @patching-investigation-live Usa operation=query con view=failures para listar todos los bloqueos y fallos de parcheo detectados por máquina, incluyendo la evidencia de causa raíz, ruta de log o correlationId y la acción recomendada.
 ```
 
@@ -79,6 +88,10 @@ Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **A
 ```
 
 ### 3. Inspect unresponsive maintenance windows (`failure_category="maintenance_window_unresponsive"`)
+
+```text
+@patching-investigation-live Use operation=query with view=cycles and machine_name="vm-arc-host-weu" to compare the UpdateSuccessfullyApplied cycles with the ShutdownOrUnresponsive cycles in the maintenance windows.
+```
 
 ```text
 @patching-investigation-live Usa operation=query con view=cycles y machine_name="vm-arc-host-weu" para contrastar los ciclos UpdateSuccessfullyApplied frente a los ciclos ShutdownOrUnresponsive en las ventanas de mantenimiento.
@@ -91,6 +104,10 @@ Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **A
 ### 4. Inspect stuck Linux Arc assessments (`failure_category="assessment_stuck_or_readiness_undetermined"`)
 
 ```text
+@patching-investigation-live Use operation=query with view=machines, hosting=arc and failure_category=assessment_stuck_or_readiness_undetermined to see which Linux Arc servers have an assessment stuck in InProgress or vmGuestPatchReadiness=UnableToDetermine.
+```
+
+```text
 @patching-investigation-live Usa operation=query con view=machines, hosting=arc y failure_category=assessment_stuck_or_readiness_undetermined para ver qué servidores Linux Arc tienen la evaluación atascada en InProgress o vmGuestPatchReadiness=UnableToDetermine.
 ```
 
@@ -99,6 +116,10 @@ Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **A
 ```
 
 ### 5. Inspect unscheduled pending security patches (`failure_category="pending_security_patches_unscheduled"`)
+
+```text
+@patching-investigation-live Use operation=query with view=patches and hosting=arc to see the pending Security and UpdateRollUp KBs on the hybrid Windows/SQL servers.
+```
 
 ```text
 @patching-investigation-live Usa operation=query con view=patches y hosting=arc para ver los KBs de seguridad y UpdateRollUp pendientes en los servidores Windows/SQL híbridos.

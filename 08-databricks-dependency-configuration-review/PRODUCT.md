@@ -29,5 +29,5 @@ An offline, single-file HTML consulting dossier suitable for executive review, t
 ## Brand Commitments
 
 - Combines the corporate industrial navy/steel palette (`#003865`, `#0066a1`) and Databricks lakehouse lava/teal accents (`#ff3621`, `#00875a`) in chrome, cover framing and the four-color brand ribbon.
-- Committed repository files, templates and documentation never include a customer name, customer logo or private customer identifiers; the cover plaque displays `CLIENTE` until an authorized operator privately configures a bounded PNG/JPEG raster outside Git.
-- Spanish business language (`es-ES`) in the generated HTML report; English implementation and cross-tenant onboarding guide in `README.md`.
+- Committed repository files, templates and documentation never include a customer name, customer logo or private customer identifiers; the cover plaque displays `Customer` (the tool default) until an authorized operator privately configures a client name or a bounded PNG/JPEG raster outside Git.
+- English (`en`) in the generated HTML report, its CSV files and its JSON snapshot, and in the implementation and cross-tenant onboarding guide (`README.md`).

@@ -9,7 +9,7 @@
   - Use it ONLY in pre-production, and warn the application teams first.
   - Azure allows 1 manual failover every 15 minutes per instance.
   - After the drill, ask the SRE Agent: "Generate the report with period=last_7d"
-    and review the applications table: any app that is not "Resiliente" needs retry logic.
+    and review the applications table: any app that is not "Resilient" needs retry logic.
   Requires SQL Managed Instance Contributor (or Contributor) on the instance.
 
 .EXAMPLE

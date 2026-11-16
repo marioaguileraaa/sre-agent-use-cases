@@ -40,7 +40,7 @@ phone and in a matching dark theme. It is not a live monitoring application.
   Filtering, drilldown and exports use all records, not just the current page.
 - A local index covers evaluated checks only. Exclude non-applicable checks,
   show unevaluated counts and coverage, and display an unknown score as
-  "No evaluado". This is not an official Azure, WARA or Polaris grade.
+  "Not evaluated". This is not an official Azure, WARA or Polaris grade.
 - Only supplied critical findings enter the critical shortlist. Absence of
   critical findings does not establish absence of risk.
 - Cost, utilization and estimated savings need a qualified source and window.
@@ -66,7 +66,8 @@ brand colors are not health grades. No gradients, glass, decorative icons,
 emoji or generic identical-card dashboard. Semantic Microsoft icons retain
 their original licensed SVGs and are not the report's product logo.
 
-Spanish business language for Spain. The public default client is CLIENTE.
+Plain US English in Microsoft style. The tool's default customer name is
+Customer; the public sample run uses the fictitious Contoso.
 Optional authorized client branding is supplied privately as a bounded inline
 PNG or JPEG; it is never downloaded by the report. Lab and synthetic provenance
 remain explicit and do not imply a production customer cluster.
@@ -78,8 +79,8 @@ copied as a scoring engine, or represented as the issuer of the local index.
 The 2026-11 direction aligns this report with the Azure SRE Agent report
 family (slim top bar with section links, verdict band, KPI cards, white cards,
 shared severity colours, A4 print with a running footer). Microsoft-blue
-chrome, the ribbon, Segoe UI, the client plaque and Spanish copy remain this
-case's brand.
+chrome, the ribbon, Segoe UI and the client plaque remain this case's brand;
+the copy is in English.
 
 ## Evidence on Hand
 

@@ -37,8 +37,8 @@ class BrandingTests(unittest.TestCase):
             self.e.validate_logo("")
 
     def test_complete_png_jpeg_mime_and_alt(self):
-        self.e.validate_logo(uri(raster()), "CLIENTE")
-        self.e.validate_logo(uri(raster("JPEG"), "jpeg"), "CLIENTE")
+        self.e.validate_logo(uri(raster()), "Customer")
+        self.e.validate_logo(uri(raster("JPEG"), "jpeg"), "Customer")
         for value in ("", None, "x" * 121, "bad\nalt", "\x7f"):
             with self.subTest(value=value), self.assertRaises(self.e.EvidenceError):
                 self.e.validate_logo(uri(raster()), value)
@@ -46,10 +46,10 @@ class BrandingTests(unittest.TestCase):
             self.e.validate_logo(uri(raster("JPEG"), "png"))
 
     def test_100kb_2048_dimension_bounds_and_single_frame(self):
-        self.e.validate_logo(uri(raster(size=(2048, 8))), "CLIENTE")
+        self.e.validate_logo(uri(raster(size=(2048, 8))), "Customer")
         for data in (raster(size=(2049, 8)), raster() + b"x" * 100001):
             with self.assertRaises(self.e.EvidenceError):
-                self.e.validate_logo(uri(data), "CLIENTE")
+                self.e.validate_logo(uri(data), "Customer")
         animated = io.BytesIO()
         Image.new("RGB", (16, 16), (0, 0, 0)).save(
             animated,
@@ -60,7 +60,7 @@ class BrandingTests(unittest.TestCase):
             loop=0,
         )
         with self.assertRaises(self.e.EvidenceError):
-            self.e.validate_logo(uri(animated.getvalue()), "CLIENTE")
+            self.e.validate_logo(uri(animated.getvalue()), "Customer")
 
     def test_corrupt_idat_with_valid_crc_is_rejected_by_actual_decode(self):
         data = raster()
@@ -75,7 +75,7 @@ class BrandingTests(unittest.TestCase):
             position += 12 + length
         invalid = b"".join(chunks)
         with self.assertRaises(self.e.EvidenceError) as raised:
-            self.e.validate_logo(uri(invalid), "CLIENTE")
+            self.e.validate_logo(uri(invalid), "Customer")
         self.assertEqual(raised.exception.code, "invalid_logo")
 
     def test_truncated_jpeg_and_permissive_decoder_settings_fail_closed(self):
@@ -84,9 +84,9 @@ class BrandingTests(unittest.TestCase):
         header_end = marker + 2 + int.from_bytes(data[marker + 2:marker + 4], "big")
         invalid = data[:header_end + 2]
         with self.assertRaises(self.e.EvidenceError):
-            self.e.validate_logo(uri(invalid, "jpeg"), "CLIENTE")
+            self.e.validate_logo(uri(invalid, "jpeg"), "Customer")
         with patch.object(ImageFile, "LOAD_TRUNCATED_IMAGES", True), self.assertRaises(self.e.EvidenceError) as raised:
-            self.e.validate_logo(uri(data, "jpeg"), "CLIENTE")
+            self.e.validate_logo(uri(data, "jpeg"), "Customer")
         self.assertEqual(raised.exception.code, "unsafe_decoder_settings")
 
     def test_invalid_logo_stops_before_identity_or_collection(self):
@@ -97,12 +97,12 @@ class BrandingTests(unittest.TestCase):
         identity.assert_not_called()
 
     def test_public_files_have_generic_client_branding_invariants(self):
-        self.assertEqual(load_engine().CLIENT_NAME, "CLIENTE")
+        self.assertEqual(load_engine().CLIENT_NAME, "Customer")
         self.assertEqual(load_engine().CLIENT_LOGO_DATA_URI, "")
-        self.assertEqual(load_engine().CLIENT_LOGO_ALT, "Logotipo autorizado del cliente")
+        self.assertEqual(load_engine().CLIENT_LOGO_ALT, "Authorized customer logo")
         for rel in ("engine.py", "generate-patching-investigation-report.py"):
             content = (ROOT / rel).read_text(encoding="utf-8")
-            self.assertIn('CLIENT_NAME = "CLIENTE"', content)
+            self.assertIn('CLIENT_NAME = "Customer"', content)
             self.assertIn('CLIENT_LOGO_DATA_URI = ""', content)
             self.assertNotIn("data:image/png;base64,", content)
             self.assertNotIn("data:image/jpeg;base64,", content)

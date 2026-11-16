@@ -33,11 +33,11 @@ APPROVED_LOG_WORKSPACES = [
         "resource_group": "<RESOURCE_GROUP>",
     }
 ]
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 OUTPUT_DIRECTORY = "operations-digest-reports"
 
 ARM_ORIGIN = "https://management.azure.com"
@@ -115,28 +115,28 @@ CRITICAL_EXTENSION_TOKENS = (
 
 SEVERITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 SEVERITY_LABELS = {
-    "critical": "Crítica",
-    "high": "Alta",
-    "medium": "Media",
-    "low": "Baja",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
 }
 CATEGORY_LABELS = {
-    "native_alert": "Alerta nativa Azure Monitor",
-    "service_health": "Comunicación Azure Service Health",
-    "extension_failure": "Fallo de extensión VM / Azure Arc",
-    "connectivity_posture": "Anomalía de plano de control / conectividad",
-    "telemetry_anomaly": "Anomalía estadística / umbral de telemetría",
-    "advisor_recommendation": "Recomendación correlacionada Azure Advisor",
+    "native_alert": "Azure Monitor native alert",
+    "service_health": "Azure Service Health communication",
+    "extension_failure": "VM / Azure Arc extension failure",
+    "connectivity_posture": "Control plane / connectivity anomaly",
+    "telemetry_anomaly": "Telemetry statistical / threshold anomaly",
+    "advisor_recommendation": "Correlated Azure Advisor recommendation",
 }
 HORIZON_LABELS = {
-    "immediate_24h": "Inmediato <24h",
-    "short_term_7d": "Corto plazo 1-7 días",
-    "monthly_cycle": "Ciclo mensual",
+    "immediate_24h": "Immediate <24h",
+    "short_term_7d": "Short term 1-7 days",
+    "monthly_cycle": "Monthly cycle",
 }
 EFFORT_LABELS = {
-    "low": "Bajo",
-    "medium": "Medio",
-    "high": "Alto",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
 }
 
 # BEGIN BUILD-TIME ASSETS
@@ -238,6 +238,10 @@ def number(value, source="normalization"):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         raise EvidenceError("invalid_field", "Source numeric value must be a finite number.", source)
     return float(value)
+
+
+def grouped(value):
+    return format(value, ",") if isinstance(value, (int, float)) and not isinstance(value, bool) else str(value)
 
 
 def boolean(value, source="normalization"):
@@ -361,26 +365,26 @@ def compute_window(period, reference_str):
     if period == "previous_month":
         end_dt = ref_dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_dt = (end_dt - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        label = "Mes natural anterior (" + start_dt.strftime("%Y-%m") + ")"
-        cadence = "Ejecución mensual programada (30 8 1 * * UTC) / mes cerrado"
+        label = "Previous calendar month (" + start_dt.strftime("%Y-%m") + ")"
+        cadence = "Scheduled monthly run (30 8 1 * * UTC) / closed month"
         grain = "PT1H"
     elif period == "last_30d":
         end_dt = ref_dt.replace(microsecond=0)
         start_dt = end_dt - timedelta(days=30)
-        label = "Últimos 30 días móviles"
-        cadence = "Bajo demanda (ventana móvil de 30 días)"
+        label = "Last 30 days (rolling)"
+        cadence = "On demand (rolling 30-day window)"
         grain = "PT1H"
     elif period == "last_7d":
         end_dt = ref_dt.replace(microsecond=0)
         start_dt = end_dt - timedelta(days=7)
-        label = "Últimos 7 días móviles"
-        cadence = "Bajo demanda (ventana semanal móvil de 7 días)"
+        label = "Last 7 days (rolling)"
+        cadence = "On demand (rolling 7-day weekly window)"
         grain = "PT1H"
     elif period == "last_24h":
         end_dt = ref_dt.replace(microsecond=0)
         start_dt = end_dt - timedelta(hours=24)
-        label = "Últimas 24 horas"
-        cadence = "Bajo demanda (guardia operativa 24h)"
+        label = "Last 24 hours"
+        cadence = "On demand (24-hour on-call shift)"
         grain = "PT5M"
     else:
         raise EvidenceError("invalid_parameter", "period must use its declared enum.", "parameters")
@@ -961,7 +965,7 @@ def normalize_alert_row(raw, subscription_id, window, reference):
     if not in_window:
         return None
     desc = text(raw.get("description"), source_id, 2048) or (
-        "Alerta nativa " + native_sev + " (" + monitor_cond + " / " + alert_state + ") en " + target_name + "."
+        "Native alert " + native_sev + " (" + monitor_cond + " / " + alert_state + ") on " + target_name + "."
     )
     short_hash = hashlib.sha256(alert_id.lower().encode("utf-8")).hexdigest()[:10]
     return {
@@ -975,7 +979,7 @@ def normalize_alert_row(raw, subscription_id, window, reference):
         "native_severity": native_sev,
         "state": alert_state,
         "monitor_condition": monitor_cond,
-        "title": "Alerta " + native_sev + " (" + monitor_service + "): " + target_name,
+        "title": "Alert " + native_sev + " (" + monitor_service + "): " + target_name,
         "signal_type": signal_type,
         "monitor_service": monitor_service,
         "resource_id": target_res or ("/subscriptions/" + subscription_id),
@@ -1003,7 +1007,7 @@ def normalize_service_health_row(raw, subscription_id, window, reference):
     if event_type not in ("ServiceIssue", "PlannedMaintenance"):
         return None
     status = text(props.get("status"), source_id, 64) or "Active"
-    title = text(props.get("title"), source_id, 512) or ("Evento " + event_type + " (" + tracking_id + ")")
+    title = text(props.get("title"), source_id, 512) or ("Event " + event_type + " (" + tracking_id + ")")
     level = (text(props.get("level"), source_id, 64) or "").lower()
     if event_type == "ServiceIssue":
         sev = "critical" if level == "critical" else "high"
@@ -1036,7 +1040,7 @@ def normalize_service_health_row(raw, subscription_id, window, reference):
     service_label = ", ".join(services) if services else "Azure Platform"
     region_label = ", ".join(regions) if regions else "Global"
     summary_text = text(props.get("summary"), source_id, 2048) or (
-        event_type + " " + tracking_id + " (" + status + ") en " + service_label + " [" + region_label + "]."
+        event_type + " " + tracking_id + " (" + status + ") affecting " + service_label + " [" + region_label + "]."
     )
     return {
         "id": "INC-SH-" + tracking_id,
@@ -1170,7 +1174,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
             "anomaly_kind": "guest_extension_provisioning_failed",
             "severity": sev,
             "severity_label": SEVERITY_LABELS[sev],
-            "title": "Extensión " + ext["extension_name"] + " en estado " + state + " (" + ext["resource_name"] + ")",
+            "title": "Extension " + ext["extension_name"] + " in state " + state + " (" + ext["resource_name"] + ")",
             "resource_id": ext["resource_id"],
             "resource_name": ext["resource_name"],
             "resource_group": ext["resource_group"],
@@ -1188,9 +1192,9 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
             "extension_name": ext["extension_name"],
             "extension_version": ext["version"],
             "summary": (
-                "La extensión " + ext["extension_name"] + " (" + ext["publisher"] + "/" + ext["extension_type"]
-                + ", versión " + ext["version"] + ") en " + ext["resource_name"]
-                + " presenta provisioningState=" + state + "."
+                "Extension " + ext["extension_name"] + " (" + ext["publisher"] + "/" + ext["extension_type"]
+                + ", version " + ext["version"] + ") on " + ext["resource_name"]
+                + " reports provisioningState=" + state + "."
             ),
             "learn_url": "https://learn.microsoft.com/azure/azure-arc/servers/manage-vm-extensions",
         })
@@ -1213,7 +1217,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "anomaly_kind": "arc_agent_" + arc_st.lower(),
                     "severity": sev,
                     "severity_label": SEVERITY_LABELS[sev],
-                    "title": "Agente Azure Arc en estado " + arc_st + " (" + rname + ")",
+                    "title": "Azure Arc agent in state " + arc_st + " (" + rname + ")",
                     "resource_id": res["resource_id"],
                     "resource_name": rname,
                     "resource_group": res["resource_group"],
@@ -1229,8 +1233,8 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "source_id": "arg_posture_anomalies",
                     "workspace_name": "",
                     "summary": (
-                        "El recurso híbrido " + rname + " (" + (res.get("os_sku") or res.get("os_name") or rtype)
-                        + ") reporta status=" + arc_st + " (último cambio: " + changed + ", agente " + ver + ")."
+                        "Hybrid resource " + rname + " (" + (res.get("os_sku") or res.get("os_name") or rtype)
+                        + ") reports status=" + arc_st + " (last change: " + changed + ", agent " + ver + ")."
                     ),
                     "learn_url": "https://learn.microsoft.com/azure/azure-arc/servers/troubleshoot-agent-onboard",
                 })
@@ -1248,7 +1252,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "anomaly_kind": "aks_cluster_non_running",
                     "severity": sev,
                     "severity_label": SEVERITY_LABELS[sev],
-                    "title": "Clúster AKS " + rname + " en estado " + observed_st,
+                    "title": "AKS cluster " + rname + " in state " + observed_st,
                     "resource_id": res["resource_id"],
                     "resource_name": rname,
                     "resource_group": res["resource_group"],
@@ -1264,8 +1268,8 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "source_id": "arg_posture_anomalies",
                     "workspace_name": "",
                     "summary": (
-                        "El clúster AKS " + rname + " (k8s " + (res.get("kubernetes_version") or "n/a")
-                        + ") se encuentra en estado " + observed_st + " (provisioningState=" + prov + ")."
+                        "AKS cluster " + rname + " (k8s " + (res.get("kubernetes_version") or "n/a")
+                        + ") is in state " + observed_st + " (provisioningState=" + prov + ")."
                     ),
                     "learn_url": "https://learn.microsoft.com/azure/aks/start-stop-cluster",
                 })
@@ -1278,7 +1282,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                 "anomaly_kind": "resource_provisioning_failed",
                 "severity": "high",
                 "severity_label": SEVERITY_LABELS["high"],
-                "title": "Recurso " + rname + " con provisioningState=Failed",
+                "title": "Resource " + rname + " with provisioningState=Failed",
                 "resource_id": res["resource_id"],
                 "resource_name": rname,
                 "resource_group": res["resource_group"],
@@ -1293,7 +1297,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                 "observed_at_utc": reference,
                 "source_id": "arg_posture_anomalies",
                 "workspace_name": "",
-                "summary": "El recurso " + rname + " (" + rtype + ") presenta provisioningState=Failed en Azure Resource Manager.",
+                "summary": "Resource " + rname + " (" + rtype + ") reports provisioningState=Failed in Azure Resource Manager.",
                 "learn_url": "https://learn.microsoft.com/azure/azure-resource-manager/troubleshooting/troubleshooting-deployment-errors",
             })
         elif rtype == "microsoft.compute/virtualmachines":
@@ -1307,7 +1311,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "anomaly_kind": "vm_stopped_or_deallocated",
                     "severity": "low",
                     "severity_label": SEVERITY_LABELS["low"],
-                    "title": "Máquina virtual " + rname + " en estado " + (res.get("power_state") or "Stopped"),
+                    "title": "Virtual machine " + rname + " in state " + (res.get("power_state") or "Stopped"),
                     "resource_id": res["resource_id"],
                     "resource_name": rname,
                     "resource_group": res["resource_group"],
@@ -1323,8 +1327,8 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "source_id": "arg_posture_anomalies",
                     "workspace_name": "",
                     "summary": (
-                        "La máquina virtual " + rname + " (" + (res.get("vm_size") or "VM")
-                        + ") está detenida o desasignada (" + (res.get("power_state") or "Stopped") + ")."
+                        "Virtual machine " + rname + " (" + (res.get("vm_size") or "VM")
+                        + ") is stopped or deallocated (" + (res.get("power_state") or "Stopped") + ")."
                     ),
                     "learn_url": "https://learn.microsoft.com/azure/virtual-machines/states-billing",
                 })
@@ -1431,7 +1435,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": kind,
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Anomalía de CPU en " + rname + " (pico " + str(max_val) + "%, mediana " + str(median_val) + "%)",
+                "title": "CPU anomaly on " + rname + " (peak " + grouped(max_val) + "%, median " + grouped(median_val) + "%)",
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -1451,10 +1455,10 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "Telemetría en " + workspace_name + " para " + rname + ": pico CPU=" + str(max_val)
-                    + "%, promedio=" + str(avg_val) + "%, mediana=" + str(median_val) + "% (Δ+" + str(delta)
-                    + " pp, " + str(high_bins) + "/" + str(bins_total) + " intervalos >=85%, "
-                    + str(sample_count) + " muestras)."
+                    "Telemetry in " + workspace_name + " for " + rname + ": CPU peak=" + grouped(max_val)
+                    + "%, average=" + grouped(avg_val) + "%, median=" + grouped(median_val) + "% (Δ+" + grouped(delta)
+                    + " pp, " + grouped(high_bins) + "/" + grouped(bins_total) + " intervals >=85%, "
+                    + grouped(sample_count) + " samples)."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-performance",
             }
@@ -1470,7 +1474,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": "low_available_memory",
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Presión de memoria física en " + rname + " (mínimo " + str(min_val) + " MB disponibles)",
+                "title": "Physical memory pressure on " + rname + " (minimum " + grouped(min_val) + " MB available)",
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -1490,9 +1494,9 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "Memoria disponible en " + rname + " cayó hasta " + str(min_val) + " MB (mediana "
-                    + str(median_val) + " MB, " + str(low_mem_bins) + "/" + str(bins_total)
-                    + " intervalos <=512 MB en " + workspace_name + ")."
+                    "Available memory on " + rname + " fell to " + grouped(min_val) + " MB (median "
+                    + grouped(median_val) + " MB, " + grouped(low_mem_bins) + "/" + grouped(bins_total)
+                    + " intervals <=512 MB in " + workspace_name + ")."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-performance",
             }
@@ -1508,7 +1512,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": "low_disk_free_space",
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Espacio libre en disco bajo en " + rname + " (" + str(min_val) + "% libre)",
+                "title": "Low free disk space on " + rname + " (" + grouped(min_val) + "% free)",
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -1528,9 +1532,9 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "Volumen lógico en " + rname + " registró " + str(min_val)
-                    + "% de espacio libre (umbral mínimo 15%, " + str(sample_count)
-                    + " muestras en " + workspace_name + ")."
+                    "Logical volume on " + rname + " recorded " + grouped(min_val)
+                    + "% free space (minimum threshold 15%, " + grouped(sample_count)
+                    + " samples in " + workspace_name + ")."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-performance",
             }
@@ -1546,7 +1550,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": "heartbeat_silence_gap",
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Silencio de Heartbeat (" + str(int(round(max_val))) + " min sin latido) en " + rname,
+                "title": "Heartbeat silence (" + grouped(int(round(max_val))) + " min without a heartbeat) on " + rname,
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -1566,9 +1570,9 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "El recurso " + rname + " lleva " + str(round(max_val, 1))
-                    + " minutos sin emitir latidos en la tabla Heartbeat de " + workspace_name
-                    + " (último latido: " + last_seen_iso + ")."
+                    "Resource " + rname + " has sent no heartbeat for " + grouped(round(max_val, 1))
+                    + " minutes in the Heartbeat table of " + workspace_name
+                    + " (last heartbeat: " + last_seen_iso + ")."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/agents/azure-monitor-agent-troubleshoot",
             }
@@ -1660,7 +1664,7 @@ def collect_logs_telemetry(logs_reader, config, window, reference):
         window=window,
         workspaces_queried=ws_receipts,
         read_signature="POST https://api.loganalytics.io/v1/workspaces/{workspace_id}/query",
-        note="Consultas KQL acotadas sobre InsightsMetrics, Perf y Heartbeat en los espacios Log Analytics aprobados.",
+        note="Bounded KQL queries over InsightsMetrics, Perf, and Heartbeat in the approved Log Analytics workspaces.",
     )
     sorted_anomalies = sorted(
         anomalies_by_key.values(),
@@ -1681,7 +1685,7 @@ def normalize_advisor_row(raw, subscription_id, reference):
     sev_map = {"high": "high", "medium": "medium", "low": "low"}
     sev = sev_map.get(impact.lower(), "medium")
     short_desc = obj(props.get("shortDescription", {}), source_id) if props.get("shortDescription") else {}
-    problem = text(short_desc.get("problem"), source_id, 1024) or ("Recomendación de Azure Advisor (" + adv_cat + ")")
+    problem = text(short_desc.get("problem"), source_id, 1024) or ("Azure Advisor recommendation (" + adv_cat + ")")
     solution = text(short_desc.get("solution"), source_id, 1024) or problem
     res_meta = obj(props.get("resourceMetadata", {}), source_id) if props.get("resourceMetadata") else {}
     target_id = text(res_meta.get("resourceId"), source_id, 2048) or rec_id.split("/providers/Microsoft.Advisor/")[0]
@@ -1713,7 +1717,7 @@ def normalize_advisor_row(raw, subscription_id, reference):
         "last_updated_utc": updated_iso,
         "observed_at_utc": reference,
         "source_id": source_id,
-        "summary": "[" + adv_cat + " / Impacto " + impact + "] " + problem + " — " + solution,
+        "summary": "[" + adv_cat + " / Impact " + impact + "] " + problem + " — " + solution,
         "learn_url": "https://learn.microsoft.com/azure/advisor/advisor-overview",
     }
 
@@ -1726,19 +1730,19 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
         if inc["category"] == "native_alert":
             horizon = "immediate_24h" if (is_active and inc["severity"] in ("critical", "high")) else "short_term_7d"
             effort = "low" if inc["severity"] in ("medium", "low") else "medium"
-            owner = "Ingeniería de Fiabilidad / Operaciones Monitorización"
+            owner = "Reliability engineering / Monitoring operations"
             rec_text = (
-                "Verificar la condición de disparo (" + inc["monitor_condition"] + " / " + inc["state"]
-                + ") en Azure Monitor para " + inc["resource_name"] + ", validar correlación con cambios recientes y documentar el cierre operativo."
+                "Check the firing condition (" + inc["monitor_condition"] + " / " + inc["state"]
+                + ") in Azure Monitor for " + inc["resource_name"] + ", correlate it with recent changes, and document the operational closure."
             )
         else:
             horizon = "immediate_24h" if (is_active and inc["signal_type"] == "ServiceIssue") else "short_term_7d"
             effort = "low"
-            owner = "Gobierno Cloud / Gestión de Incidentes Plataforma"
+            owner = "Cloud governance / Platform incident management"
             rec_text = (
-                "Revisar el trackingId oficial " + (inc.get("tracking_id") or inc["id"])
-                + " en Azure Service Health (" + inc["monitor_service"]
-                + "), evaluar ventana de mantenimiento o mitigación y confirmar impacto real sobre cargas dependientes."
+                "Review the official tracking ID " + (inc.get("tracking_id") or inc["id"])
+                + " in Azure Service Health (" + inc["monitor_service"]
+                + "), assess the maintenance window or mitigation, and confirm the actual impact on dependent workloads."
             )
         actions.append({
             "_sort_key": (
@@ -1755,7 +1759,7 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             "horizon_label": HORIZON_LABELS[horizon],
             "effort": effort,
             "effort_label": EFFORT_LABELS[effort],
-            "title": "Atender " + ("alerta activa " if is_active else "incidencia registrada ") + "en " + inc["resource_name"],
+            "title": "Address " + ("active alert " if is_active else "recorded incident ") + "on " + inc["resource_name"],
             "resource_id": inc["resource_id"],
             "resource_name": inc["resource_name"],
             "resource_group": inc["resource_group"],
@@ -1777,28 +1781,28 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             is_aks = "managedclusters" in anom["resource_type"]
             horizon = "short_term_7d" if anom["severity"] in ("critical", "high", "medium") else "monthly_cycle"
             owner = (
-                "Operaciones Híbridas / Administración Azure Arc"
+                "Hybrid operations / Azure Arc administration"
                 if is_arc
-                else "Plataforma de Contenedores / Operaciones AKS"
+                else "Container platform / AKS operations"
                 if is_aks
-                else "Operaciones de Infraestructura Cloud"
+                else "Cloud infrastructure operations"
             )
             if is_arc:
                 rec_text = (
-                    "Inspeccionar el servicio himds y la conectividad saliente TLS del agente Azure Connected Machine en "
-                    + anom["resource_name"] + " (estado actual: " + str(anom["observed_value"])
-                    + "); renovar credenciales o reconectar el nodo si el certificado de identidad ha expirado."
+                    "Inspect the himds service and the outbound TLS connectivity of the Azure Connected Machine agent on "
+                    + anom["resource_name"] + " (current state: " + str(anom["observed_value"])
+                    + "); renew the credentials or reconnect the machine if its identity certificate has expired."
                 )
             elif is_aks:
                 rec_text = (
-                    "Confirmar si la parada/estado (" + str(anom["observed_value"]) + ") del clúster AKS "
-                    + anom["resource_name"] + " responde a planificación de ahorro o a un fallo de plano de control; "
-                    + "evitar mantener clústeres detenidos más de 12 meses para preservar compatibilidad de versión."
+                    "Confirm whether the stop/state (" + str(anom["observed_value"]) + ") of AKS cluster "
+                    + anom["resource_name"] + " is a planned cost-saving measure or a control plane failure; "
+                    + "avoid keeping clusters stopped for more than 12 months so that the Kubernetes version stays supported."
                 )
             else:
                 rec_text = (
-                    "Revisar el estado operativo (" + str(anom["observed_value"]) + ") de "
-                    + anom["resource_name"] + " y confirmar su alineación con el catálogo de servicios activos."
+                    "Review the operational state (" + str(anom["observed_value"]) + ") of "
+                    + anom["resource_name"] + " and confirm that it matches the catalog of active services."
                 )
             actions.append({
                 "_sort_key": (
@@ -1815,7 +1819,7 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
                 "horizon_label": HORIZON_LABELS[horizon],
                 "effort": "medium" if is_arc or is_aks else "low",
                 "effort_label": EFFORT_LABELS["medium" if is_arc or is_aks else "low"],
-                "title": "Normalizar estado operativo de " + anom["resource_name"] + " (" + str(anom["observed_value"]) + ")",
+                "title": "Review and fix the operational state of " + anom["resource_name"] + " (" + str(anom["observed_value"]) + ")",
                 "resource_id": anom["resource_id"],
                 "resource_name": anom["resource_name"],
                 "resource_group": anom["resource_group"],
@@ -1844,19 +1848,19 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
                 "horizon_label": HORIZON_LABELS[horizon],
                 "effort": "medium",
                 "effort_label": EFFORT_LABELS["medium"],
-                "title": "Investigar anomalía de telemetría en " + anom["resource_name"] + " (" + anom["metric_or_field"] + ")",
+                "title": "Investigate telemetry anomaly on " + anom["resource_name"] + " (" + anom["metric_or_field"] + ")",
                 "resource_id": anom["resource_id"],
                 "resource_name": anom["resource_name"],
                 "resource_group": anom["resource_group"],
                 "resource_type": anom["resource_type"],
-                "owner_scope": "Ingeniería de Capacidad & Observabilidad",
+                "owner_scope": "Capacity and observability engineering",
                 "linked_evidence_ids": [anom["id"]],
                 "source_ids": [anom["source_id"]],
                 "evidence_summary": anom["summary"],
                 "recommendation": (
-                    "Analizar los procesos e intervalos de presión en " + anom["resource_name"]
-                    + " reportados en Log Analytics (" + (anom.get("workspace_name") or "workspace")
-                    + "), verificar dimensionamiento de SKU o fugas de recursos y ajustar umbrales de alerta preventiva."
+                    "Analyze the processes and pressure intervals on " + anom["resource_name"]
+                    + " reported in Log Analytics (" + (anom.get("workspace_name") or "workspace")
+                    + "), check the SKU sizing and possible resource leaks, and tune the preventive alert thresholds."
                 ),
                 "learn_url": anom["learn_url"],
             })
@@ -1881,19 +1885,19 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             "horizon_label": HORIZON_LABELS[horizon],
             "effort": "medium",
             "effort_label": EFFORT_LABELS["medium"],
-            "title": "Remediar extensiones fallidas (" + ext_names + ") en " + highest["resource_name"],
+            "title": "Remediate failed extensions (" + ext_names + ") on " + highest["resource_name"],
             "resource_id": res_id,
             "resource_name": highest["resource_name"],
             "resource_group": highest["resource_group"],
             "resource_type": highest["resource_type"],
-            "owner_scope": "Seguridad de Endpoint & Operaciones Híbridas (MDE / Entra ID / AMA)",
+            "owner_scope": "Endpoint security and hybrid operations (MDE / Entra ID / AMA)",
             "linked_evidence_ids": ev_ids,
             "source_ids": ["arg_posture_anomalies"],
             "evidence_summary": "; ".join(x["summary"] for x in ext_anoms),
             "recommendation": (
-                "Verificar primero la conectividad del agente base en " + highest["resource_name"]
-                + ", revisar registros locales de instalación de " + ext_names
-                + " y reprovisionar las extensiones en ventana de cambio controlada."
+                "First verify the base agent connectivity on " + highest["resource_name"]
+                + ", review the local installation logs of " + ext_names
+                + ", and reprovision the extensions in a controlled change window."
             ),
             "learn_url": "https://learn.microsoft.com/azure/azure-arc/servers/troubleshoot-vm-extensions",
         })
@@ -1915,12 +1919,12 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             "horizon_label": HORIZON_LABELS[horizon],
             "effort": "medium" if adv["severity"] == "high" else "low",
             "effort_label": EFFORT_LABELS["medium" if adv["severity"] == "high" else "low"],
-            "title": "Evaluar recomendación Azure Advisor (" + adv["advisor_category"] + ") en " + adv["resource_name"],
+            "title": "Evaluate Azure Advisor recommendation (" + adv["advisor_category"] + ") on " + adv["resource_name"],
             "resource_id": adv["resource_id"],
             "resource_name": adv["resource_name"],
             "resource_group": adv["resource_group"],
             "resource_type": adv["resource_type"],
-            "owner_scope": "Arquitectura Cloud & Mejora Continua WAF",
+            "owner_scope": "Cloud architecture and WAF continuous improvement",
             "linked_evidence_ids": [adv["id"]],
             "source_ids": ["arm_advisor_recommendations"],
             "evidence_summary": adv["summary"],
@@ -2032,7 +2036,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_alert_row(raw, sub_id, window, reference),
         )
-        alerts_receipt["note"] = "Alertas nativas Azure Monitor (alertsmanagementresources) activas o actualizadas en la ventana."
+        alerts_receipt["note"] = "Azure Monitor native alerts (alertsmanagementresources) active or updated in the window."
 
         sh_query = urlencode({
             "api-version": RESOURCE_HEALTH_API_VERSION,
@@ -2047,7 +2051,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_service_health_row(raw, sub_id, window, reference),
         )
-        sh_receipt["note"] = "Comunicaciones oficiales Microsoft.ResourceHealth/events (ServiceIssue y PlannedMaintenance)."
+        sh_receipt["note"] = "Official Azure Service Health communications from Microsoft.ResourceHealth (ServiceIssue and PlannedMaintenance)."
 
         estate_resources, posture_receipt = read_arg_query(
             arm_reader,
@@ -2058,7 +2062,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_estate_resource(raw, sub_id, reference),
         )
-        posture_receipt["note"] = "Inventario operativo Azure Resource Graph (VMs, Azure Arc, AKS, Container Apps, Web Apps, Storage, Key Vault, DBs)."
+        posture_receipt["note"] = "Azure Resource Graph operational inventory (VMs, Azure Arc, AKS, Container Apps, Web Apps, Storage, Key Vault, DBs)."
 
         extensions, ext_receipt = read_arg_query(
             arm_reader,
@@ -2069,7 +2073,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_extension_row(raw, sub_id, reference),
         )
-        ext_receipt["note"] = "Metadatos de extensiones de VM y servidores Azure Arc (sin leer settings ni protectedSettings)."
+        ext_receipt["note"] = "Extension metadata of VMs and Azure Arc servers (settings and protectedSettings are never read)."
 
         telemetry_anomalies, telemetry_summaries, logs_receipt = collect_logs_telemetry(
             logs_reader, config, window, reference
@@ -2087,7 +2091,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_advisor_row(raw, sub_id, reference),
         )
-        advisor_receipt["note"] = "Recomendaciones en caché de Microsoft.Advisor/recommendations en la suscripción."
+        advisor_receipt["note"] = "Cached Azure Advisor recommendations for the subscription (Microsoft.Advisor)."
 
         sources = [
             alerts_receipt,
@@ -2189,31 +2193,31 @@ def finish_snapshot(raw, window, reference, provenance="LIVE"):
 
     executive_messages = [
         (
-            "Ventana evaluada: " + window["label"] + " (" + window["start_utc"] + " → " + window["end_utc"]
-            + ") sobre " + str(counts["resources_total"]) + " recursos inventariados ("
-            + str(counts["resources_attention"]) + " requieren atención operativa)."
+            "Evaluation window: " + window["label"] + " (" + window["start_utc"] + " → " + window["end_utc"]
+            + ") over " + grouped(counts["resources_total"]) + " inventoried resources ("
+            + grouped(counts["resources_attention"]) + " need operational attention)."
         ),
         (
-            "Incidencias consolidadas: " + str(counts["incidents_total"]) + " registradas ("
-            + str(native_alert_count) + " alertas nativas Azure Monitor y "
-            + str(sh_count) + " comunicaciones oficiales Azure Service Health)."
+            "Consolidated incidents: " + grouped(counts["incidents_total"]) + " recorded ("
+            + grouped(native_alert_count) + " Azure Monitor native alerts and "
+            + grouped(sh_count) + " official Azure Service Health communications)."
         ),
         (
-            "Anomalías técnicas detectadas: " + str(counts["anomalies_total"]) + " en total ("
-            + str(ext_fail_count) + " fallos de extensión VM/Arc, "
-            + str(posture_count) + " anomalías de conectividad/plano de control y "
-            + str(tel_anom_count) + " anomalías estadísticas/umbrales de telemetría)."
+            "Technical anomalies detected: " + grouped(counts["anomalies_total"]) + " in total ("
+            + grouped(ext_fail_count) + " VM/Arc extension failures, "
+            + grouped(posture_count) + " connectivity/control plane anomalies, and "
+            + grouped(tel_anom_count) + " telemetry statistical/threshold anomalies)."
         ),
         (
-            "Plan de acciones recomendadas: " + str(counts["actions_total"]) + " acciones priorizadas ("
-            + str(imm_actions) + " en horizonte Inmediato <24h, "
-            + str(short_actions) + " a Corto plazo 1-7 días y "
-            + str(month_actions) + " en Ciclo mensual), correlacionadas con "
-            + str(counts["advisor_recommendations_total"]) + " recomendaciones de Azure Advisor."
+            "Recommended action plan: " + grouped(counts["actions_total"]) + " prioritized actions ("
+            + grouped(imm_actions) + " Immediate <24h, "
+            + grouped(short_actions) + " Short term 1-7 days, and "
+            + grouped(month_actions) + " Monthly cycle), correlated with "
+            + grouped(counts["advisor_recommendations_total"]) + " Azure Advisor recommendations."
         ),
         (
-            "Cobertura de fuentes: " + str(len(sources) - len(degraded_sources)) + " de " + str(len(sources))
-            + " flujos de evidencia completados en modo solo lectura sin alterar recursos ni agentes."
+            "Source coverage: " + grouped(len(sources) - len(degraded_sources)) + " of " + grouped(len(sources))
+            + " evidence streams completed in read-only mode, without changing resources or agents."
         ),
     ]
 
@@ -2251,10 +2255,10 @@ def finish_snapshot(raw, window, reference, provenance="LIVE"):
                 "arm_advisor_recommendations (Microsoft.Advisor/recommendations)",
             ],
             "limitations": [
-                "Las alertas nativas y eventos de Service Health reflejan el estado y marcas temporales registradas por Azure Monitor y Resource Health en el momento de la consulta.",
-                "El estado de extensiones y agentes Azure Arc en Azure Resource Graph es una observación de plano de control; no lee settings protegidos ni ejecuta comandos dentro del sistema operativo huésped.",
-                "Las anomalías de telemetría se calculan sobre los espacios Log Analytics aprobados para los recursos que emiten InsightsMetrics, Perf o Heartbeat en la ventana.",
-                "Las acciones recomendadas constituyen una guía operativa priorizada para revisión humana; el agente opera estrictamente en modo solo lectura.",
+                "Native alerts and Service Health events reflect the state and timestamps that Azure Monitor and Resource Health recorded at query time.",
+                "Extension and Azure Arc agent state in Azure Resource Graph is a control plane observation; the tool doesn't read protected settings or run commands inside the guest operating system.",
+                "Telemetry anomalies are calculated over the approved Log Analytics workspaces, for the resources that emit InsightsMetrics, Perf, or Heartbeat data in the window.",
+                "Recommended actions are prioritized operational guidance for human review; the agent operates strictly in read-only mode.",
             ],
         },
     }

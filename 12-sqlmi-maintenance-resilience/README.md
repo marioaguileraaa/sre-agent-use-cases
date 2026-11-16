@@ -8,9 +8,9 @@ The agent **never changes anything**. It hands the commands to a person.
 
 ![Report header: short answer and KPIs of the period](images/report-01-header-kpis.png)
 
-*Header of the sample report (demo mode, 30 days): **10 reconfigurations**, average **11.4 s**, maximum **28 s**, **2,248 user-facing errors**, and **95 %** of them came from **3 applications without retries**.*
+*Header of the [sample report](sample-run/sqlmi-maintenance-20261030T094210Z.html) (demo mode, 30 days): **10 reconfigurations**, average **11.4 s**, maximum **28 s**, **2,248 user-facing errors**, and **95%** of them came from **3 applications without retries**.*
 
-> The screenshots in this guide use **demo mode** (deterministic simulated data) in a Microsoft lab environment. Instance and application names are fictitious. The generated report is written in Spanish (same convention as [case 11](../11-fabric-finops-chargeback/)); this guide gives the English meaning of each section.
+> The screenshots in this guide use **demo mode** (deterministic simulated data) in a Microsoft lab environment. Instance and application names are fictitious.
 
 **Time to deploy:** about **10 minutes in demo mode** and **30-45 minutes with real data** (plus up to 10 minutes of role propagation).
 
@@ -89,7 +89,14 @@ This case adds a **specialist advisor** to Azure SRE Agent (`sqlmi-maintenance-a
 | **Operations / NOC** | Maintenance arrives by surprise | Next planned maintenance with affected instances and applications at risk, plus a 24 h alert |
 | **Architecture / CIO** | Recurring escalations with Microsoft about "Azure instability" | A measurable plan (window + alert + retries) and a weekly report to track progress |
 
-**Sample result** (demo mode, 30 days): **10 reconfigurations** (7 planned, 2 unplanned and 1 user-initiated), average **11.4 s** and maximum **28 s**, and **2,248 user errors**. **95 %** came from **3 applications without retries** (`customer-portal-web`, `pricing-api`, `crm-contactcenter`). The applications with retries went through the same reconfigurations with **0 user errors**. The 2 unplanned events would not have been avoided by any window.
+**Sample result** (demo mode, 30 days): **10 reconfigurations** (7 planned, 2 unplanned and 1 user-initiated), average **11.4 s** and maximum **28 s**, and **2,248 user errors**. **95%** came from **3 applications without retries** (`customer-portal-web`, `pricing-api`, `crm-contactcenter`). The applications with retries went through the same reconfigurations with **0 user errors**. The 2 unplanned events would not have been avoided by any window.
+
+The complete output of that run is in [`sample-run/`](sample-run/):
+- the [HTML report](sample-run/sqlmi-maintenance-20261030T094210Z.html) (download it and open it in a browser);
+- the [JSON](sample-run/sqlmi-maintenance-20261030T094210Z.json) with the full result;
+- the [instances CSV](sample-run/sqlmi-maintenance-20261030T094210Z-instances.csv) and the [impact CSV](sample-run/sqlmi-maintenance-20261030T094210Z-impact.csv).
+
+It uses simulated data (demo mode, `data_source=demo`): the instances, applications, subscription ID and planned maintenance event are fictitious.
 
 | Business indicator | Before | With this case |
 |---|---|---|
@@ -149,7 +156,7 @@ All the settings in one place: [`subagent-instructions-and-prompts.md`](subagent
 | [`create-sqlmi-maintenance-alert.ps1`](create-sqlmi-maintenance-alert.ps1) | Creates the Service Health alert for planned SQL MI maintenance (step 8). |
 | [`simulate-maintenance-failover.ps1`](simulate-maintenance-failover.ps1) | Controlled drill: manual failover of a **pre-production** instance (step 8). |
 | [`retry-samples/`](retry-samples/) | Retry logic ready to copy: .NET SqlClient, EF Core, Java JDBC and Python pyodbc. |
-| [`sample-run/`](sample-run/) | The 4 files the tool writes in demo mode. Download the [HTML report](sample-run/sqlmi-mantenimiento-20261030T094210Z.html) and open it in a browser. |
+| [`sample-run/`](sample-run/) | The 4 files the tool writes in demo mode (simulated data). Download the [HTML report](sample-run/sqlmi-maintenance-20261030T094210Z.html) and open it in a browser. |
 | [`deploy/deploy-sre-agent-components.py`](deploy/deploy-sre-agent-components.py) | Automated deployment (alternative to the portal) of tool, skill, subagent and scheduled task. |
 | [`deploy/sre-agent-components.json`](deploy/sre-agent-components.json) | Names, descriptions, parameters and scheduled task. |
 | [`images/`](images/) | Step-by-step screenshots of this guide. |
@@ -185,7 +192,7 @@ No write role is granted.
 - [ ] The agent has a **user-assigned managed identity** (the default configuration).
 - [ ] **Python tools** available: **Build + configure → Agent Canvas → Create ▾ → Tool ›** shows **Python tool** (step 1 also checks it).
 - [ ] Sandbox egress allowed to `login.microsoftonline.com`, `management.azure.com` and `api.loganalytics.io` (unrestricted by default).
-- [ ] To measure impact per application: applications instrumented with **workspace-based Application Insights** with SQL dependency tracking on (the default for the .NET, Java and OpenTelemetry SDKs). Without it the report is still generated, but applications show as "Sin telemetría" (no telemetry).
+- [ ] To measure impact per application: applications instrumented with **workspace-based Application Insights** with SQL dependency tracking on (the default for the .NET, Java and OpenTelemetry SDKs). Without it the report is still generated, but applications show as **No telemetry**.
 - [ ] **Azure Cloud Shell (PowerShell)** - recommended, it already has Azure CLI and Python - or a machine with Azure CLI 2.50+, PowerShell 7 and Python 3.9+.
 
 ---
@@ -196,7 +203,7 @@ Want to see the result before granting any permission? The tool works **with no 
 
 1. Do [step 2](#step-2---download-the-package) (download).
 2. Do [step 5](#step-5---create-the-tool-the-skill-and-the-subagent) **without editing the code** (in option B use `--demo`).
-3. Send the prompt from [step 6](#step-6---first-run-in-the-chat). The answer starts with **"MODO DEMO (datos simulados)"** (demo mode, simulated data).
+3. Send the prompt from [step 6](#step-6---first-run-in-the-chat). The answer starts with **"DEMO MODE (simulated data)"**.
 
 To switch to real data later: do steps 1, 3 and 4, then paste the code into the tool again (or rerun option B without `--demo`). The skill and the subagent do not change.
 
@@ -402,7 +409,7 @@ There is no *Requirements* field and no parameter editor: the portal reads the 3
 
 ![Test result and Create tool](images/b06-python-tool-test-result.png)
 
-*Test result from an earlier run; today's portal labels may differ.*
+*Test result from an earlier run, when the tool still answered in Spanish; today's portal labels may differ.*
 
 #### 5.A.2 Skill
 
@@ -497,29 +504,29 @@ For the demo add `Use demo data.` at the end.
 
 ![Answer with the 4 download links](images/b13-chat-answer-links.png)
 
-*Answer from an earlier run; today's portal labels may differ.*
+*Answer from an earlier run, when the tool still answered in Spanish; today's portal labels may differ.*
 
 **⑭ At the end of the answer** you get the **prioritized actions with their command** and the confirmation that the agent **has not changed anything**: the team validates and runs them.
 
 ![Prioritized actions and read-only confirmation](images/b14-chat-answer-actions.png)
 
-*Answer from an earlier run; today's portal labels may differ.*
+*Answer from an earlier run, when the tool still answered in Spanish; today's portal labels may differ.*
 
 ### What the HTML report contains
 
-Click **Abrir informe HTML** (open HTML report). The report is self-contained (works offline), readable on a phone and prints to A4 with **Imprimir / PDF**. It opens with the verdict (*Requiere atención* - needs attention) and the actions by priority; every table has search, filters, sorting and CSV export, and every command has a **Copiar** (copy) button.
+Click **Open HTML report**. The report is self-contained (works offline), readable on a phone and prints to A4 with **Print / PDF**. It opens with the verdict (*Needs attention* or *No significant issues*) and the actions by priority; every table has search, filters, sorting and CSV export, and every command has a **Copy** button.
 
-| Section (Spanish title - meaning) | Screenshot |
+| Section | Screenshot |
 |---|---|
 | Header: verdict, short answer, actions by priority and KPIs of the period | ![KPIs](images/report-01-header-kpis.png) |
-| *Próximo mantenimiento* - next maintenance, affected instances and applications at risk | ![Next maintenance](images/report-02-next-maintenance.png) |
-| *Acciones priorizadas* - prioritized actions with their command | ![Actions](images/report-03-actions.png) |
-| *Instancias y ventanas* - current window, connection type, failover group and recommended window per instance | ![Instances](images/report-04-instances-windows.png) |
-| *Reconfiguraciones y errores de usuario* - timeline of planned, unplanned and user-initiated reconfigurations with user errors | ![Timeline](images/report-05-timeline.png) |
-| *Aplicaciones: ¿absorben la reconfiguración?* - SQL errors versus user errors per application: *Sin reintentos* (no retries), *Parcial* (partial), *Resiliente* (resilient) | ![Applications](images/report-06-applications.png) |
-| *Carga real vs. ventanas de mantenimiento* - load heat maps by hour and day with the 3 windows overlaid | ![Heat maps](images/report-07-heatmaps.png) |
-| *Qué permite Azure, qué no y qué hacer* - what Azure allows, what it does not and what to do | ![What Azure allows](images/report-08-what-azure-allows.png) |
-| *Fuentes y cobertura* - data sources queried and their status | ![Sources](images/report-09-sources.png) |
+| **Next maintenance** — affected instances and applications at risk | ![Next maintenance](images/report-02-next-maintenance.png) |
+| **Prioritized actions** — each finding with its priority, scope, detail and exact command | ![Actions](images/report-03-actions.png) |
+| **Instances and windows** — current window, connection type, failover group and recommended window per instance | ![Instances](images/report-04-instances-windows.png) |
+| **Reconfigurations and user errors** — timeline of planned, unplanned and user-initiated reconfigurations with the user errors each one caused | ![Timeline](images/report-05-timeline.png) |
+| **Applications: do they absorb the reconfiguration?** — transient SQL failures versus user errors per application, with the verdict *No retries*, *Partial*, *Resilient* or *No impact observed* | ![Applications](images/report-06-applications.png) |
+| **Real load vs. maintenance windows** — load heat maps by day and hour, with the current and recommended windows overlaid | ![Heat maps](images/report-07-heatmaps.png) |
+| **What Azure allows, what it does not and what to do** | ![What Azure allows](images/report-08-what-azure-allows.png) |
+| **Sources and coverage** — data sources queried and their status | ![Sources](images/report-09-sources.png) |
 | Mobile view | ![Mobile](images/report-10-mobile.png) |
 
 A complete example is in [`sample-run/`](sample-run/).
@@ -592,7 +599,7 @@ See the current window:
 az sql mi show -g "<RG>" -n "<INSTANCE>" --query "{window:maintenanceConfigurationId, connection:proxyOverride, region:location}" -o json
 ```
 
-Apply the window recommended by the report (copy the command from the **Acciones priorizadas** section). Format:
+Apply the window recommended by the report (copy the command from the **Prioritized actions** section). Format:
 
 ```powershell
 # MI_1 = weekday (Mon-Thu 22:00-06:00) · MI_2 = weekend (Fri-Sun 22:00-06:00)
@@ -622,7 +629,7 @@ az sql mi update -g "<RG>" -n "<INSTANCE>" --proxy-override Redirect
 
 ### 8.4 Add retries to the applications (the root fix)
 
-Start with the applications the report marks as **"Sin reintentos"** (no retries), ordered by user errors. [`retry-samples/`](retry-samples/) has code ready to copy:
+Start with the applications the report marks as **No retries**, ordered by user errors. [`retry-samples/`](retry-samples/) has code ready to copy:
 
 | Technology | File |
 |---|---|
@@ -664,8 +671,8 @@ A manual failover reproduces what happens during maintenance. It requires **SQL 
 - [ ] The Test playground with `operation=upcoming` returns `status: ok`.
 - [ ] **Build + configure → Agent Canvas → Table view** shows the tool (card **Tools & skills → Python tools**), the skill `sqlmi-maintenance-resilience` (**Skills**) and the subagent `sqlmi-maintenance-advisor` (card **Agents → Custom agents**).
 - [ ] The step 6 prompt returns the 4 links and the HTML report opens.
-- [ ] With real data, the answer does **not** start with "MODO DEMO" and the report lists your instances.
-- [ ] The **Fuentes y cobertura** (sources) section of the HTML shows every source as `ok` (or explains why not).
+- [ ] With real data, the answer does **not** start with "DEMO MODE" and the report lists your instances.
+- [ ] The **Sources and coverage** section of the HTML shows every source as `ok` (or explains why not).
 - [ ] The weekly task appears in **Automation** with the right subagent.
 - [ ] The Service Health alert appears in **Portal → Service Health → Health alerts** (step 8.1).
 
@@ -676,13 +683,13 @@ A manual failover reproduces what happens during maintenance. It requires **SQL 
 | Symptom | Cause | Fix |
 |---|---|---|
 | The Test playground shows `null` with "Function test succeeded" | The output of `report` and `summary` is larger than the playground can display. | Test with `operation=upcoming`. In the chat every operation works. |
-| The answer starts with "MODO DEMO" and you expected real data | `MANAGED_IDENTITY_CLIENT_ID` still holds `<...>` and `data_source=auto` falls back to demo. | Step 4, then paste the code into the tool again (or rerun option B with `--config`). |
+| The answer starts with "DEMO MODE" and you expected real data | `MANAGED_IDENTITY_CLIENT_ID` still holds `<...>` and `data_source=auto` falls back to demo. | Step 4, then paste the code into the tool again (or rerun option B with `--config`). |
 | `status: error` asking to configure `MANAGED_IDENTITY_CLIENT_ID` | You asked for `data_source=live` without configuring the tool. | Step 4. |
-| `status: no_data`: the identity does not see any SQL Managed Instance | Reader is missing, not yet propagated, or `SUBSCRIPTION_IDS` does not include the right subscription. | Review step 3, wait 10 minutes and check line 35. |
+| `status: no_data`: the identity cannot see any SQL Managed Instance | Reader is missing, not yet propagated, or `SUBSCRIPTION_IDS` does not include the right subscription. | Review step 3, wait 10 minutes and check line 35. |
 | `status: error` with 401/403 while collecting data | The Client ID does not belong to an identity assigned to the agent. | Use the `clientId` from step 1 (not the Principal ID). |
-| Every application shows "Sin telemetría" (no telemetry) | The workspace is missing on line 38, Log Analytics Reader is missing, or the apps use classic Application Insights. | Steps 3.1 and 3.2; migrate Application Insights to a workspace. |
-| An application shows "Sin reintentos" although it retries | Retries are not visible in telemetry or do not cover opening the connection. | Log every retry (step 8.4, rule 4) and validate with the drill in step 8.5. |
-| No recommended window | There are no CPU metrics for the instance, or it is in an instance pool (no window support). | Check Monitoring Reader in step 3 and the "Azure Monitor" row of **Fuentes y cobertura**. |
+| Every application shows **No telemetry** | The workspace is missing on line 38, Log Analytics Reader is missing, or the apps use classic Application Insights. | Steps 3.1 and 3.2; migrate Application Insights to a workspace. |
+| An application shows **No retries** although it retries | Retries are not visible in telemetry or do not cover opening the connection. | Log every retry (step 8.4, rule 4) and validate with the drill in step 8.5. |
+| No recommended window | There are no CPU metrics for the instance, or it is in an instance pool (no window support). | Check Monitoring Reader in step 3 and the "Azure Monitor" row of **Sources and coverage**. |
 | The subagent does not appear when typing `/agent sqlmi` | Not created yet, or the portal has not refreshed. | Reload the page and check in **Build + configure → Agent Canvas → Table view → Custom agents** that it exists. |
 | You cannot find **Builder** or **Build + setup** in the portal | The portal navigation was renamed. | Use **Build + configure** in the left menu, then **Agent Canvas** (its first item). |
 | **Create tool** or **Save** stays grey | The dialog has not run a test yet. | Run the **Test** of ⑤ first; it is not a role problem. |
@@ -701,7 +708,7 @@ A manual failover reproduces what happens during maintenance. It requires **SQL 
 - **Aggregated application telemetry.** The tool counts errors per application and per reconfiguration. It does not read SQL query text, parameters or customer data.
 - **Remediation commands are always run by a person**, after validating them in pre-production.
 - **Limits:** the tool has a 105 s data-collection budget per run (180 s timeout). With many subscriptions or workspaces, restrict line 35 to the subscriptions with SQL MI. It analyzes up to 30 days of history.
-- **Demo mode:** simulated data is always labelled "MODO DEMO (datos simulados)" in the chat and in the report.
+- **Demo mode:** simulated data is always labeled. The chat answer starts with "DEMO MODE (simulated data)", and the report shows a **SIMULATED DATA (demo)** chip and a **DEMO MODE** banner.
 
 ---
 

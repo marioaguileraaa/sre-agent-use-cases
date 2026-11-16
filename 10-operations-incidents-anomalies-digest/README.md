@@ -2,13 +2,20 @@
 
 > **Azure SRE Agent** · Read-only Python tool · Runtime skill · Restricted specialist · Monthly (`30 8 1 * *`) & on-demand (`previous_month`, `last_30d`, `last_7d`, `last_24h`) · Offline HTML, full JSON and two CSVs
 
-Consolidate **incidents, technical anomalies, and prioritized recommended actions** (`Informe periódico de operaciones con incidencias, anomalías y acciones recomendadas`) across five live Azure evidence streams into one self-contained Spanish HTML workpaper, complete normalized JSON snapshot, and two UTF-8 BOM CSV exports (`incidents.csv` and `actions.csv`). Even when stakeholders initially request a weekly operations report, the scheduled automation task runs **monthly (`30 8 1 * *` UTC)** by default (`period="previous_month"`), while supporting rolling 30-day (`last_30d`), 7-day weekly (`last_7d`), and 24-hour (`last_24h`) windows on demand.
+Consolidate **incidents, technical anomalies, and prioritized recommended actions** across five live Azure evidence streams into one self-contained HTML workpaper, complete normalized JSON snapshot, and two UTF-8 BOM CSV exports (`incidents.csv` and `actions.csv`). Even when stakeholders initially request a weekly operations report, the scheduled automation task runs **monthly (`30 8 1 * *` UTC)** by default (`period="previous_month"`), while supporting rolling 30-day (`last_30d`), 7-day weekly (`last_7d`), and 24-hour (`last_24h`) windows on demand.
 
 | What you get | What it does not claim |
 |---|---|
 | Five correlated read-only streams: Azure Monitor alerts (`arg_alerts_incidents`), Service Health events (`arm_service_health`), ARG posture & guest extension failures (`arg_posture_anomalies` / `arg_guest_extensions`), Log Analytics statistical/threshold anomalies (`logs_telemetry_anomalies`), and Azure Advisor (`arm_advisor_recommendations`) | Official SLA availability certification, fabricated root causes, or dollar/DBU savings estimates |
-| Evidence-linked **Recommended Actions (`acciones recomendadas`)** matrix prioritized by operational horizon (`Inmediato <24h`, `Corto plazo 1-7 días`, `Ciclo mensual`) citing exact signal IDs and target resources | Unattended remediation, guest command execution, alert state modification, or ITSM ticket creation |
-| Monthly scheduled automation (`30 8 1 * *`) plus bounded `query` views (`summary`, `incidents`, `anomalies`, `actions`, `resources`, `advisor`, `coverage`) under the 3,500-byte JSON transport budget | Customer branding in public Git source (`CLIENT_NAME = "CLIENTE"` and `CLIENT_LOGO_DATA_URI = ""` by default) |
+| Evidence-linked **Recommended Actions** matrix prioritized by operational horizon (`Immediate <24h`, `Short term 1-7 days`, `Monthly cycle`) citing exact signal IDs and target resources | Unattended remediation, guest command execution, alert state modification, or ITSM ticket creation |
+| Monthly scheduled automation (`30 8 1 * *`) plus bounded `query` views (`summary`, `incidents`, `anomalies`, `actions`, `resources`, `advisor`, `coverage`) under the 3,500-byte JSON transport budget | Customer branding in public Git source (`CLIENT_NAME = "Customer"` and `CLIENT_LOGO_DATA_URI = ""` by default) |
+
+A sample run with simulated data is in [`sample-run/`](sample-run/):
+- the [HTML report](sample-run/ops-digest-20261101T083000Z-e61ef24b7c7b.html) (download it and open it in a browser);
+- the [JSON snapshot](sample-run/ops-digest-20261101T083000Z-e61ef24b7c7b-snapshot.json);
+- the [incidents and anomalies CSV](sample-run/ops-digest-20261101T083000Z-e61ef24b7c7b-incidents.csv) and the [recommended actions CSV](sample-run/ops-digest-20261101T083000Z-e61ef24b7c7b-actions.csv).
+
+The tool wrote these four files offline from a synthetic dataset, with no Azure call: the customer is `Contoso` and every resource name and GUID is fictitious (`contoso-arc-srv-01`, `00000000-0000-0000-0000-000000000001`). The report labels this data `SIMULATED`. The report is in English; the agent answers in the user's language (English by default).
 
 > [!NOTE]
 > **Update 16 November 2026 — today's portal.** The portal screenshots of Steps 2 to 7 were recaptured in today's portal: **Build + configure → Agent Canvas**, **Create ▾**, a Python tool dialog with **Code / Test playground / Identity** tabs and no parameter editor, **Custom agents**, `/agent` in chat and **Automation → Create ▾ → Scheduled task**. The Step 5 evidence card comes from an earlier run.
@@ -42,7 +49,7 @@ flowchart LR
 | `arm_service_health` | ARM `Microsoft.ResourceHealth/events?api-version=2022-10-01` | Official Azure Service Health `ServiceIssue` and `PlannedMaintenance` communications overlapping the evaluation window. |
 | `arg_posture_anomalies` & `arg_guest_extensions` | Azure Resource Graph (`resources`) | Cross-estate operational posture across Azure VMs, Azure Arc machines (`Expired`/`Disconnected` agents), failed VM/Arc guest extensions (`provisioningState == "Failed"`, e.g. `MDE.Windows`, `AADLoginForWindows`), stopped/degraded AKS clusters, Container Apps, App Services, Storage accounts, and Key Vaults. |
 | `logs_telemetry_anomalies` | Log Analytics REST (`https://api.loganalytics.io/v1/workspaces/{id}/query`) | KQL aggregation over `InsightsMetrics`, `Perf`, and `Heartbeat` detecting sustained CPU load, statistical spikes above median/MAD, low available memory, low disk free space (excluding `/snap/` loop mounts), and heartbeat silence gaps. |
-| `arm_advisor_recommendations` | ARM `Microsoft.Advisor/recommendations?api-version=2023-01-01` | Cached Azure Advisor recommendations correlated with live incidents and anomalies to synthesize the prioritized **Recommended Actions (`acciones recomendadas`)** matrix across `Inmediato <24h`, `Corto plazo 1-7 días`, and `Ciclo mensual`. |
+| `arm_advisor_recommendations` | ARM `Microsoft.Advisor/recommendations?api-version=2023-01-01` | Cached Azure Advisor recommendations correlated with live incidents and anomalies to synthesize the prioritized **Recommended Actions** matrix across `Immediate <24h`, `Short term 1-7 days`, and `Monthly cycle`. |
 
 ## Prerequisites & Files to Download
 
@@ -56,7 +63,7 @@ flowchart LR
 
 ## Step 1 - Configure the private standalone file
 
-In your private deployment copy outside Git, set `SUBSCRIPTION_ID`, `MANAGED_IDENTITY_CLIENT_ID`, and `APPROVED_LOG_WORKSPACES` at the top of `generate-operations-digest-report.py`. Keep `CLIENT_NAME = "CLIENTE"` and `CLIENT_LOGO_DATA_URI = ""` in committed repository files.
+In your private deployment copy outside Git, set `SUBSCRIPTION_ID`, `MANAGED_IDENTITY_CLIENT_ID`, and `APPROVED_LOG_WORKSPACES` at the top of `generate-operations-digest-report.py`. Keep `CLIENT_NAME = "Customer"` and `CLIENT_LOGO_DATA_URI = ""` in committed repository files.
 
 ## Step 2 - Create the Python tool and verify its 8 typed parameters
 
@@ -143,21 +150,21 @@ Open **New chat**, type `/agent` followed by the specialist name and pick **oper
 
 ![Live chat delivering all four operations digest files](images/03-live-chat-four-downloads.png)
 
-*Live report turn (`03-live-chat-four-downloads.png`, evidence card rendered from an earlier run, not a portal screenshot; today's portal labels may differ): **(1)** single-call report prompt; **(2)** all four native files delivered in the thread; **(3)** Spanish executive summary of incidents, technical anomalies, and recommended actions.*
+*Live report turn (`03-live-chat-four-downloads.png`, evidence card rendered from an earlier run, not a portal screenshot; today's portal labels may differ): **(1)** single-call report prompt; **(2)** all four native files delivered in the thread; **(3)** executive summary of incidents, technical anomalies, and recommended actions. That run used the Spanish prompt, so the agent answered in Spanish: it answers in the user's language (English by default).*
 
 ## Step 6 - Explore the HTML operations digest dossier
 
 ![HTML report cover and executive synthesis](images/04-report-cover-and-executive-synthesis.png)
 
-*HTML dossier cover (`04-report-cover-and-executive-synthesis.png`, anonymized `CLIENTE` view rendered from sanitized demo data, labelled `SIMULATED`): **(1)** slim top bar with the client plaque, section navigation with live counts, `Solo lectura` chip, dark mode and `Imprimir / PDF`; **(2)** verdict-first header: evaluation window, one-sentence summary, generation/window/subscription/data-provenance/coverage chips, verdict card and severity distribution; **(3)** KPI cards for alerts, Service Health, control-plane and telemetry anomalies, recommended actions and resources, followed by the simulated-data and partial-coverage notices. Below them, the period summary opens with `Qué hacer ahora` (horizon counts and the top five prioritized actions) next to the executive synthesis and provenance.*
+*HTML dossier cover (`04-report-cover-and-executive-synthesis.png`, from the [sample run](sample-run/ops-digest-20261101T083000Z-e61ef24b7c7b.html): simulated `Contoso` data, labeled `SIMULATED`): **(1)** slim top bar with the client plaque, section navigation with live counts, `Read-only` chip, `Dark mode` and `Print / PDF`; **(2)** verdict-first header: evaluation window, one-sentence summary, generation/window/subscription/data-provenance/coverage chips, verdict card and severity distribution; **(3)** KPI cards for alerts, Service Health, control-plane and telemetry anomalies, recommended actions and resources, followed by the simulated-data and partial-coverage notices. Below them, the period summary opens with `What to do now` (horizon counts and the top five prioritized actions) next to the executive summary and provenance.*
 
 ![Unified incidents and technical anomalies ledger](images/05-report-incidents-and-anomalies-ledger.png)
 
-*Filters and registers (`05-report-incidents-and-anomalies-ledger.png`, filtered to one hybrid server): **(1)** a single filter card (search, evidence stream `category`, `severity`, action `horizon`, reset) that narrows every register at once with a live status line, plus the local downloads (full JSON, incidents/anomalies CSV, recommended-actions CSV); **(2)** sortable registers that separate native Azure Monitor alerts and Service Health communications from control-plane, extension and Log Analytics telemetry anomalies, each resource shown as name, resource group, type and Portal link.*
+*Filters and registers (`05-report-incidents-and-anomalies-ledger.png`, filtered to one hybrid server, `contoso-arc-srv-01`): **(1)** a single filter card (`Search`, `Evidence stream`, `Severity`, `Action horizon`, `Reset`) that narrows every register at once with a live status line, plus the local downloads (`Full JSON`, `Incidents and anomalies CSV`, `Recommended actions CSV`); **(2)** sortable registers that separate native Azure Monitor alerts and Service Health communications from control-plane, extension and Log Analytics telemetry anomalies, each resource shown as name, resource group, type and Portal link.*
 
 ![Prioritized recommended actions matrix and source coverage ledger](images/06-report-recommended-actions-and-sources.png)
 
-*Prioritized actions and source coverage (`06-report-recommended-actions-and-sources.png`, two excerpts of the same report): **(1)** recommended actions ordered by horizon (`Inmediato <24h`, `Corto plazo 1-7 días`, `Ciclo mensual`) and severity, each linked to the evidence IDs that justify it (a click jumps to the cited row) and to Microsoft Learn; **(2)** per-source collection receipts (status, records, pages, HTTP read signature and errors) that close the report together with the method notes.*
+*Prioritized actions and source coverage (`06-report-recommended-actions-and-sources.png`, two excerpts of the same report): **(1)** recommended actions ordered by horizon (`Immediate <24h`, `Short term 1-7 days`, `Monthly cycle`) and severity, each linked to the evidence IDs that justify it (a click jumps to the cited row) and to Microsoft Learn; **(2)** per-source collection receipts (status, records, pages, HTTP read signature and errors) that close the report together with the method notes.*
 
 ## Step 7 - Configure the monthly scheduled task (`30 8 1 * *`)
 

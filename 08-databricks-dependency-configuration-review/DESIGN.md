@@ -114,15 +114,15 @@ spacing:
 
 **Creative North Star: "The Lakehouse Dependency Dossier"**
 
-An offline Azure SRE Agent report in the family house style: a slim sticky top bar (product mark, section navigation, `Solo lectura` chip, dark mode, an export menu and Print / PDF), a verdict-first navy band (title, one sentence with the key numbers, provenance chips, `CLIENTE` plaque, verdict card, severity distribution), KPI cards overlapping the band, then white cards on a light neutral ground. Corporate deep navy and industrial steel (`#003865`, `#0066a1`) carry the chrome and the hero; the Databricks lava and teal accents (`#ff3621`, `#00875a`) live in the four-colour brand ribbon.
+An offline Azure SRE Agent report in the family house style: a slim sticky top bar (product mark, section navigation, `Read-only` chip, dark mode, an export menu and Print / PDF), a verdict-first navy band (title, one sentence with the key numbers, provenance chips, `Customer` plaque, verdict card, severity distribution), KPI cards overlapping the band, then white cards on a light neutral ground. Corporate deep navy and industrial steel (`#003865`, `#0066a1`) carry the chrome and the hero; the Databricks lava and teal accents (`#ff3621`, `#00875a`) live in the four-colour brand ribbon.
 
 ## Components
 
-- **Severity pills** use the shared family colours (critical, high, medium, low, info); check status uses a coloured dot with a Spanish label (`Cumple`, `No cumple`, `No evaluado`, `No aplica`).
-- **Dependency classification** has its own vocabulary: `OBSERVED` (solid teal-green), `INFERRED` (dashed amber), `UNKNOWN` (hollow grey). The graph places nodes in one column per layer, draws OBSERVED edges solid and INFERRED edges dashed, and shows a legend; tables always hold 100 % of nodes, edges and blind spots.
+- **Severity pills** use the shared family colours (critical, high, medium, low, info); check status uses a coloured dot with an English label (`Passed`, `Failed`, `Not evaluated`, `Not applicable`).
+- **Dependency classification** has its own vocabulary: `OBSERVED` (solid teal-green), `INFERRED` (dashed amber), `UNKNOWN` (hollow grey). The graph places nodes in one column per layer, draws OBSERVED edges solid and INFERRED edges dashed, and shows a legend; tables always hold 100% of nodes, edges and blind spots.
 - **Charts** are labelled horizontal bars with values (check status, areas, pillars, source status); no decorative charts. Cost bars in section 6 share one track width per card (CSS subgrid), use `chart` for DBU and `chart-2` (`#8fb3d3`) for infrastructure, and hatch the partial current month.
-- **Cost section (6)**: stat block (`cstat`), monthly stacked DBU/infrastructure rows, cost tables with right-aligned `es-ES` amounts (`19.575 EUR`), change in `up-ink` (cost up, red family) or `down-ink` (cost down, green family), and an estimated-saving cell that states its basis and whether it counts towards the total.
-- **Tables** scroll inside their card with edge-shadow cues, sort by column, page long lists, and show long ARM IDs as name, resource group and a Portal link; raw JSON evidence stays behind a `JSON completo` disclosure.
+- **Cost section (6)**: stat block (`cstat`), monthly stacked DBU/infrastructure rows, cost tables with right-aligned `en-US` amounts (`19,575 EUR`), change in `up-ink` (cost up, red family) or `down-ink` (cost down, green family), and an estimated-saving cell that states its basis and whether it counts towards the total.
+- **Tables** scroll inside their card with edge-shadow cues, sort by column, page long lists, and show long ARM IDs as name, resource group and a Portal link; raw JSON evidence stays behind a `Full JSON` disclosure.
 - **Print / PDF**: A4 with `@page` margins, colours kept, controls hidden, cards not split, and a running footer with the report title, workspace, UTC reference and page numbers. Dark mode is reset while printing.
 
 ## Customer editions (presentation hooks)
@@ -132,7 +132,7 @@ A private customer copy may set `BRAND_THEME` (only the documented CSS variables
 ## Branding and Privacy Boundaries
 
 - The generic committed code, documentation, tests and templates contain **no customer logo** and **no customer identifiers**.
-- `CLIENT_NAME` defaults to `"CLIENTE"` and `CLIENT_LOGO_DATA_URI` defaults to `""`.
-- When `CLIENT_LOGO_DATA_URI` is empty, the cover renders a sober `CLIENTE` plaque placeholder.
+- `CLIENT_NAME` defaults to `"Customer"` and `CLIENT_LOGO_DATA_URI` defaults to `""`.
+- When `CLIENT_LOGO_DATA_URI` is empty, the cover renders a sober plaque with the client name (`Customer` by default; the sample run uses `Contoso`).
 - An authorized operator may privately configure a Pillow-validated single-frame PNG/JPEG data URI (`<= 100,000` bytes, `<= 2048 x 2048` px) in a private deployment copy outside Git.
 - Brand colors frame the dossier chrome and ribbon; they never represent health or fabricate missing source coverage.

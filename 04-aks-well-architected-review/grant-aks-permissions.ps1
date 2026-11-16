@@ -179,8 +179,8 @@ if (-not $AksRolesAtScope) {
 Write-Host "`n== 5. Authentication mode of the clusters ==" -ForegroundColor Cyan
 $summary = foreach ($aks in $found) {
     $mode = if ($aks.Managed -and $aks.AzureRbac) { "OK: Entra ID + Azure RBAC" }
-            elseif ($aks.Managed) { "WARNING: Entra ID with Kubernetes RBAC -> workloads 'No evaluado'" }
-            else { "WARNING: no Entra ID -> ARM part only; workloads 'No evaluado'" }
+            elseif ($aks.Managed) { "WARNING: Entra ID with Kubernetes RBAC -> workloads 'Not evaluated'" }
+            else { "WARNING: no Entra ID -> ARM part only; workloads 'Not evaluated'" }
     [pscustomobject]@{ Subscription = $aks.Subscription; ResourceGroup = $aks.ResourceGroup; Cluster = $aks.Name; KubernetesRead = $mode }
 }
 $summary | Format-Table -AutoSize -Wrap

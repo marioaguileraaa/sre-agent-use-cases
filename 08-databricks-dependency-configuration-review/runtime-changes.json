@@ -37,6 +37,16 @@
       },
       "reason": "Tool name only. Today's portal limits Tool Name to 36 characters and cuts the previous name generate-databricks-dependency-report (37 characters), so the tool is now named databricks-dependency-report. The skill, the specialist instructions and the parameter schema title use the new name. The Python file keeps its name and its code is unchanged; the 2026-10-16 receipt and the screenshots keep the name that was saved through the API.",
       "validated": "Offline test suite (python -m unittest discover) on 2026-11-16. The new name was not saved or run in a lab agent as part of this change."
+    },
+    {
+      "date_utc": "2026-11-16",
+      "files_sha256": {
+        "generate-databricks-dependency-report.py": "163f6c79d6ee1fbe1d0c9627270765ce891f7861b518667d1af2c18d9ec161ed",
+        "skills/databricks-dependency-live/SKILL.md": "6800b43dd20f5f8cc293c45c2ee1a7d85f8cabdb084f7fe25dfceab6a5d3e943",
+        "subagent-instructions-and-prompts.md": "bb58aefe4f2128b4a6fb59d5386e948a7ea7fe687188b5de7c039c46419b8794"
+      },
+      "reason": "English report. The HTML report (template text, labels, chips, tooltips, empty states, print footer, <html lang=\"en\">, in-report CSV download names), the rule catalog (titles, recommendations and business impacts; rule IDs unchanged), the engine's check reasons, FinOps candidates, cost signals, executive messages and severity labels, and the data names of the built-in SIMULATED self_test workspace are now English. Amounts and months use English formats (19,575; 60.2%; October 2026) and the CLIENT_NAME / CLIENT_LOGO_ALT defaults are Customer / Authorized customer logo. Collection, scopes, parameters, the tool-result JSON, the four output file names and the findings logic are unchanged: only string constants changed, plus the two formatting helpers (es_amount / es_month renamed en_amount / en_month, without the Spanish separator swap). The skill and the specialist instructions quote the English labels.",
+      "validated": "Offline test suite (python -m pytest -q, 52 tests) on 2026-11-16; an AST comparison with the previous files (only string constants and the two formatting helpers differ); a second byte-identical rebuild with build_tool.py; Edge renders of the English sample run and of operation=self_test at 1440, 1024 and 390 px, in dark mode and in A4 print. The change was not saved or run in a lab agent."
     }
   ]
 }

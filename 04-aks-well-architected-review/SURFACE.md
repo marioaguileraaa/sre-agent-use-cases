@@ -20,14 +20,14 @@ table and the separate supplied score/coverage stay alongside it. Unknowns are
 neutral, never green.
 
 FinOps separates a prominent observed amount/currency from estimated savings.
-Missing savings say **Por estimar / No calculado**, never zero. Scope,
+Missing savings say **To be estimated / Not calculated**, never zero. Scope,
 association, dates and completeness come from the actual cost receipt, not
 from namespace filters or a guessed allocation. Measurement windows retain
 their original sample shape separately from billing periods.
 
-Architecture has two keyboard-operable tabs: **Arquitectura observada** uses
+Architecture has two keyboard-operable tabs: **Observed architecture** uses
 only the engine's exact node/edge/source identities and full field receipts;
-**Propuesta de referencia - NO desplegada** is a static, conditional Microsoft
+**Reference proposal - NOT deployed** is a static, conditional Microsoft
 baseline with cited assumptions and tradeoffs. Azure public Load Balancer
 (ELB) and private frontend (ILB) are labelled explicitly, not inferred from
 names. No database, ingress, connection or resource is fabricated.
@@ -48,7 +48,7 @@ selected snapshot and explicitly retains all other run snapshots/errors and
 the original aggregate.
 
 The pinned direction is a consulting document in the Azure SRE Agent report
-family: slim Microsoft-blue top bar with section links, a "Solo lectura" chip
+family: slim Microsoft-blue top bar with section links, a "Read-only" chip
 and Print / PDF; a deep-blue verdict band with KPI cards on its lower edge;
 white cards on a neutral page, left-aligned Segoe UI and ruled tables. The
 four-color brand ribbon stays. The palette frames the document, not its

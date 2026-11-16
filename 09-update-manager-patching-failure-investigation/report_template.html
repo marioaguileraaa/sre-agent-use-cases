@@ -3,13 +3,13 @@
 THESIS: An offline Swiss Architectural Industrial Operations Ledger correlates Azure Update Manager post-patching cycles, assessments, software packages, and guest extensions into per-machine root-cause diagnostics without logging into individual hosts.
 OWN-WORLD: Deep anthracite slate (#141B24) chrome and verdict band, warm architectural stone (#F6F5F2) ground, 1px structural rules (#D8DCE3), industrial vivid orange structural rule (#FF4E00), accessible burnt orange (#C23800) and the shared Azure SRE Agent severity scale.
 -->
-<html lang="es-ES">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="color-scheme" content="light dark">
-<title>Informe post-parcheo e investigación de fallos · Azure Update Manager</title>
+<title>Post-patching report and failure investigation · Azure Update Manager</title>
 <style>
 :root {
   color-scheme: light;
@@ -337,11 +337,11 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
   .drawer { grid-template-columns: minmax(0, 1fr); }
   .crow { grid-template-columns: minmax(0, 1fr) 76px; }
   .crow .ct { grid-column: 1 / -1; grid-row: 2; }
-  .plan-ref code, .drawer code, .facts code { overflow-wrap: anywhere; }
+  .plan-ref code, .drawer code, .facts code, .issues span { overflow-wrap: anywhere; }
   .plan-ref .seg, .drawer .seg { white-space: normal; }
   .foot { padding: 20px 16px 32px; }
 }
-@page { size: A4; margin: 12mm 11mm 14mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 9px/1.2 'Outfit', 'Segoe UI', system-ui, sans-serif; color: #475569; } }
+@page { size: A4; margin: 12mm 11mm 14mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 9px/1.2 'Outfit', 'Segoe UI', system-ui, sans-serif; color: #475569; } }
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html { scroll-padding-top: 0; }
@@ -418,7 +418,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
 </style>
 </head>
 <body>
-<a class="skip" href="#main-ledger">Saltar al contenido principal</a>
+<a class="skip" href="#main-ledger">Skip to main content</a>
 <header class="bar">
   <div class="bar-in">
     <div class="brand">
@@ -429,17 +429,17 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
       <span class="client" id="client-name-label"></span>
     </div>
     <div class="acts">
-      <span class="ro">Solo lectura · Azure Resource Graph</span>
-      <button type="button" class="btn" id="theme-toggle"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg><span class="lbl" id="theme-label">Modo oscuro</span></button>
+      <span class="ro">Read-only · Azure Resource Graph</span>
+      <button type="button" class="btn" id="theme-toggle"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg><span class="lbl" id="theme-label">Dark mode</span></button>
       <div class="menu-wrap">
-        <button type="button" class="btn" id="export-menu-btn" aria-expanded="false" aria-controls="export-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg><span class="lbl">Exportar</span></button>
+        <button type="button" class="btn" id="export-menu-btn" aria-expanded="false" aria-controls="export-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg><span class="lbl">Export</span></button>
         <div class="menu" id="export-menu" hidden>
-          <button type="button" id="export-json-btn">Exportar JSON<span>Snapshot completo normalizado</span></button>
-          <button type="button" id="export-machines-csv-btn">Exportar Diagnóstico Máquinas CSV<span>Una fila por máquina con causa raíz y acción</span></button>
-          <button type="button" id="export-patches-csv-btn">Exportar Ciclos y Parches CSV<span>Ciclos de mantenimiento y softwarePatches</span></button>
+          <button type="button" id="export-json-btn">Export JSON<span>Full normalized snapshot</span></button>
+          <button type="button" id="export-machines-csv-btn">Export machine diagnostics CSV<span>One row per machine with root cause and action</span></button>
+          <button type="button" id="export-patches-csv-btn">Export cycles and patches CSV<span>Maintenance cycles and softwarePatches</span></button>
         </div>
       </div>
-      <button type="button" class="btn primary" id="print-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg><span class="lbl">Imprimir / PDF</span></button>
+      <button type="button" class="btn primary" id="print-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg><span class="lbl">Print / PDF</span></button>
     </div>
   </div>
 </header>
@@ -450,18 +450,18 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     <section class="hero" id="sec-cover" aria-labelledby="cover-title">
       <div class="hero-in">
         <div>
-          <h1 id="cover-title">Informe post-parcheo e investigación automática de fallos</h1>
+          <h1 id="cover-title">Post-patching report and automated failure investigation</h1>
           <p class="lead" id="cover-subtitle"></p>
-          <ul class="meta" id="cover-tags" aria-label="Alcance y procedencia"></ul>
+          <ul class="meta" id="cover-tags" aria-label="Scope and provenance"></ul>
         </div>
         <div class="verdict" id="verdict-card">
-          <p class="v-k">Veredicto del ciclo de parcheo</p>
+          <p class="v-k">Patching cycle verdict</p>
           <p class="v-word" id="verdict-label"></p>
           <p class="v-detail" id="verdict-detail"></p>
           <p class="v-next" id="verdict-next" hidden></p>
         </div>
         <div class="dist">
-          <div class="dist-head"><span>Máquinas por severidad de diagnóstico</span><span id="dist-total"></span></div>
+          <div class="dist-head"><span>Machines by diagnostic severity</span><span id="dist-total"></span></div>
           <div class="track" id="severity-track" role="img"></div>
           <ul class="legend" id="severity-legend"></ul>
         </div>
@@ -475,34 +475,34 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
 
     <div class="layout">
       <nav class="toc" aria-labelledby="toc-h">
-        <p class="toc-h" id="toc-h">Secciones del informe</p>
+        <p class="toc-h" id="toc-h">Report sections</p>
         <ol>
-          <li><a href="#sec-cover">Portada y alcance</a></li>
-          <li><a href="#sec-executive">Resumen ejecutivo</a></li>
-          <li><a href="#sec-actions">Plan de acción <span class="toc-n" id="toc-n-actions"></span></a></li>
-          <li><a href="#sec-investigation">Investigación por máquina <span class="toc-n" id="toc-n-machines"></span></a></li>
-          <li><a href="#sec-cycles">Ciclos e instalaciones <span class="toc-n" id="toc-n-cycles"></span></a></li>
-          <li><a href="#sec-patches">Parches <span class="toc-n" id="toc-n-patches"></span></a></li>
-          <li><a href="#sec-extensions">Extensiones y Hotpatch <span class="toc-n" id="toc-n-extensions"></span></a></li>
-          <li><a href="#sec-sources">Fuentes y método <span class="toc-n" id="toc-n-sources"></span></a></li>
+          <li><a href="#sec-cover">Cover and scope</a></li>
+          <li><a href="#sec-executive">Executive summary</a></li>
+          <li><a href="#sec-actions">Action plan <span class="toc-n" id="toc-n-actions"></span></a></li>
+          <li><a href="#sec-investigation">Per-machine investigation <span class="toc-n" id="toc-n-machines"></span></a></li>
+          <li><a href="#sec-cycles">Cycles and installations <span class="toc-n" id="toc-n-cycles"></span></a></li>
+          <li><a href="#sec-patches">Patches <span class="toc-n" id="toc-n-patches"></span></a></li>
+          <li><a href="#sec-extensions">Extensions and Hotpatch <span class="toc-n" id="toc-n-extensions"></span></a></li>
+          <li><a href="#sec-sources">Sources and method <span class="toc-n" id="toc-n-sources"></span></a></li>
         </ol>
       </nav>
 
       <div class="sections">
         <section class="section" id="sec-executive" aria-labelledby="h-executive">
           <div class="sh">
-            <h2 id="h-executive">Resumen ejecutivo del ciclo de parcheo</h2>
-            <p>Dónde se concentran los bloqueos y qué ha confirmado la correlación automática, sin iniciar sesión en ningún host.</p>
+            <h2 id="h-executive">Patching cycle executive summary</h2>
+            <p>Where the blockers are and what the automated correlation confirmed, without signing in to any host.</p>
           </div>
           <div class="grid2">
             <div class="card">
-              <h3>Máquinas por categoría de diagnóstico</h3>
-              <p class="sub">Categoría principal de cada máquina. Seleccione una para filtrar la investigación.</p>
+              <h3>Machines by diagnostic category</h3>
+              <p class="sub">Primary category of each machine. Select one to filter the investigation.</p>
               <div class="cats" id="category-breakdown"></div>
             </div>
             <div class="card">
-              <h3>Conclusiones operativas verificadas</h3>
-              <p class="sub">Correlación read-only sobre <code>Microsoft.Compute/<wbr>virtualMachines</code> y <code>Microsoft.HybridCompute/<wbr>machines</code>.</p>
+              <h3>Verified operational conclusions</h3>
+              <p class="sub">Read-only correlation across <code>Microsoft.Compute/<wbr>virtualMachines</code> and <code>Microsoft.HybridCompute/<wbr>machines</code>.</p>
               <ul class="facts" id="executive-messages"></ul>
             </div>
           </div>
@@ -510,58 +510,58 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
 
         <section class="section" id="sec-actions" aria-labelledby="h-actions">
           <div class="sh">
-            <h2 id="h-actions">Plan de acción priorizado</h2>
-            <p>Qué hacer primero: una acción por tipo de bloqueo, ordenada por severidad y por número de máquinas afectadas.</p>
+            <h2 id="h-actions">Prioritized action plan</h2>
+            <p>What to do first: one action per blocker type, ordered by severity and by the number of affected machines.</p>
           </div>
           <ol class="plan card flat" id="actions-table"></ol>
         </section>
 
         <section class="section" id="sec-investigation" aria-labelledby="h-investigation">
           <div class="sh">
-            <h2 id="h-investigation">Investigación automática de causa raíz por máquina</h2>
-            <p>Por qué no se ha parcheado cada máquina: estado de evaluación, parches pendientes, ciclos de ventana y la evidencia exacta del bloqueo.</p>
+            <h2 id="h-investigation">Automated per-machine root-cause investigation</h2>
+            <p>Why each machine was not patched: assessment state, pending patches, window cycles and the exact evidence of the blocker.</p>
           </div>
           <div class="card flat">
             <div class="tools">
-              <label class="fld"><span>Categoría de fallo</span>
+              <label class="fld"><span>Failure category</span>
                 <select id="filter-category">
-                  <option value="all">Todas las categorías</option>
-                  <option value="maintenance_window_unresponsive">Ventana sin respuesta (ShutdownOrUnresponsive / fallo)</option>
-                  <option value="arc_agent_expired_or_disconnected">Agente Azure Arc expirado o desconectado</option>
-                  <option value="assessment_stuck_or_readiness_undetermined">Evaluación en curso (InProgress) / UnableToDetermine</option>
-                  <option value="hotpatch_or_patch_extension_error">Error en Hotpatch o extensión de huésped</option>
-                  <option value="pending_security_patches_unscheduled">Parches de seguridad pendientes sin ventana asignada</option>
-                  <option value="unassessed_no_update_manager_telemetry">Sin telemetría en Update Manager (apagadas / no evaluadas)</option>
-                  <option value="healthy">Sin bloqueos activos (healthy)</option>
+                  <option value="all">All categories</option>
+                  <option value="maintenance_window_unresponsive">Window unresponsive (ShutdownOrUnresponsive / failure)</option>
+                  <option value="arc_agent_expired_or_disconnected">Azure Arc agent expired or disconnected</option>
+                  <option value="assessment_stuck_or_readiness_undetermined">Assessment in progress (InProgress) / UnableToDetermine</option>
+                  <option value="hotpatch_or_patch_extension_error">Hotpatch or guest extension error</option>
+                  <option value="pending_security_patches_unscheduled">Pending security patches with no assigned window</option>
+                  <option value="unassessed_no_update_manager_telemetry">No Update Manager telemetry (stopped / not assessed)</option>
+                  <option value="healthy">No active blockers (healthy)</option>
                 </select>
               </label>
-              <label class="fld"><span>Alojamiento</span>
+              <label class="fld"><span>Hosting</span>
                 <select id="filter-hosting">
-                  <option value="all">Todos (Azure VM + Azure Arc)</option>
+                  <option value="all">All (Azure VM + Azure Arc)</option>
                   <option value="azure">Azure VM (microsoft.compute)</option>
                   <option value="arc">Azure Arc (microsoft.hybridcompute)</option>
                 </select>
               </label>
-              <label class="fld"><span>Severidad</span>
+              <label class="fld"><span>Severity</span>
                 <select id="filter-severity">
-                  <option value="all">Todas las severidades</option>
-                  <option value="critical">Crítica</option>
-                  <option value="high">Alta</option>
-                  <option value="medium">Media</option>
-                  <option value="low">Baja</option>
-                  <option value="info">Correcto</option>
+                  <option value="all">All severities</option>
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                  <option value="info">Passed</option>
                 </select>
               </label>
-              <label class="fld grow"><span>Buscar</span>
-                <input type="search" id="filter-search" placeholder="Máquina, KB, grupo de recursos o error" autocomplete="off">
+              <label class="fld grow"><span>Search</span>
+                <input type="search" id="filter-search" placeholder="Machine, KB, resource group or error" autocomplete="off">
               </label>
             </div>
             <div class="status-row">
               <span id="machines-count-label" aria-live="polite"></span>
               <div class="tool-btns no-print">
-                <button type="button" class="btn sm" id="filter-reset-btn">Restablecer filtros</button>
-                <button type="button" class="btn sm" id="machines-view-csv-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>CSV de la vista</button>
-                <button type="button" class="btn sm" id="toggle-all-drawers-btn">Contraer todos los detalles</button>
+                <button type="button" class="btn sm" id="filter-reset-btn">Reset filters</button>
+                <button type="button" class="btn sm" id="machines-view-csv-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>CSV of this view</button>
+                <button type="button" class="btn sm" id="toggle-all-drawers-btn">Collapse all details</button>
               </div>
             </div>
             <div class="table-wrap"><table id="machines-table" class="reg"></table></div>
@@ -570,48 +570,48 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
 
         <section class="section" id="sec-cycles" aria-labelledby="h-cycles">
           <div class="sh">
-            <h2 id="h-cycles">Ciclos de mantenimiento y ejecuciones de instalación</h2>
-            <p>Ejecuciones programadas en <code>maintenanceresources</code> (UpdateSuccessfullyApplied frente a ShutdownOrUnresponsive) contrastadas con los resultados de <code>patchinstallationresources</code>.</p>
+            <h2 id="h-cycles">Maintenance cycles and installation runs</h2>
+            <p>Scheduled runs in <code>maintenanceresources</code> (UpdateSuccessfullyApplied versus ShutdownOrUnresponsive) compared with the results in <code>patchinstallationresources</code>.</p>
           </div>
           <div class="card flat">
             <div class="tools">
-              <label class="fld"><span>Estado de ciclo o ejecución</span>
+              <label class="fld"><span>Cycle or run status</span>
                 <select id="cycle-status-filter">
-                  <option value="all">Todos los estados</option>
+                  <option value="all">All statuses</option>
                   <option value="ShutdownOrUnresponsive">ShutdownOrUnresponsive</option>
                   <option value="UpdateSuccessfullyApplied">UpdateSuccessfullyApplied</option>
-                  <option value="Succeeded">Succeeded (Instalación / Configuración)</option>
-                  <option value="Assigned">Assigned (Asignación activa)</option>
+                  <option value="Succeeded">Succeeded (installation / configuration)</option>
+                  <option value="Assigned">Assigned (active assignment)</option>
                 </select>
               </label>
-              <label class="fld grow"><span>Buscar</span>
-                <input type="search" id="cycle-search-filter" placeholder="Máquina, configuración o correlationId" autocomplete="off">
+              <label class="fld grow"><span>Search</span>
+                <input type="search" id="cycle-search-filter" placeholder="Machine, configuration or correlationId" autocomplete="off">
               </label>
             </div>
             <div class="status-row"><span id="cycles-count-label" aria-live="polite"></span></div>
             <div class="table-wrap"><table id="cycles-table"></table></div>
-            <div class="more-row" id="cycles-more-row" hidden><button type="button" class="btn" id="cycles-more-btn">Mostrar 80 registros más</button></div>
+            <div class="more-row" id="cycles-more-row" hidden><button type="button" class="btn" id="cycles-more-btn">Show 80 more records</button></div>
           </div>
         </section>
 
         <section class="section" id="sec-patches" aria-labelledby="h-patches">
           <div class="sh">
-            <h2 id="h-patches">Parches de software pendientes e instalados</h2>
-            <p>Paquetes pendientes según <code>patchassessmentresources/<wbr>softwarepatches</code> y registros de <code>patchinstallationresources/<wbr>softwarepatches</code> (instalados o no seleccionados en la ventana).</p>
+            <h2 id="h-patches">Pending and installed software patches</h2>
+            <p>Pending packages from <code>patchassessmentresources/<wbr>softwarepatches</code> and records from <code>patchinstallationresources/<wbr>softwarepatches</code> (installed or not selected in the window).</p>
           </div>
           <div class="card flat">
             <div class="tools">
-              <label class="fld"><span>Origen o estado del parche</span>
+              <label class="fld"><span>Patch source or state</span>
                 <select id="patch-state-filter">
-                  <option value="all">Todos (Pendientes + Ejecuciones)</option>
-                  <option value="PendingAssessment">Pendientes de instalar (PendingAssessment)</option>
-                  <option value="Installed">Instalados en ventana (Installed)</option>
-                  <option value="NotSelected">No seleccionados en ventana (NotSelected)</option>
+                  <option value="all">All (pending + runs)</option>
+                  <option value="PendingAssessment">Pending installation (PendingAssessment)</option>
+                  <option value="Installed">Installed in the window (Installed)</option>
+                  <option value="NotSelected">Not selected in the window (NotSelected)</option>
                 </select>
               </label>
-              <label class="fld"><span>Clasificación</span>
+              <label class="fld"><span>Classification</span>
                 <select id="patch-class-filter">
-                  <option value="all">Todas las clasificaciones</option>
+                  <option value="all">All classifications</option>
                   <option value="Security">Security / Critical</option>
                   <option value="UpdateRollUp">UpdateRollUp</option>
                   <option value="Definition">Definition</option>
@@ -619,37 +619,37 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
                   <option value="Other">Other</option>
                 </select>
               </label>
-              <label class="fld grow"><span>Buscar</span>
-                <input type="search" id="patch-search-filter" placeholder="KB, paquete o máquina" autocomplete="off">
+              <label class="fld grow"><span>Search</span>
+                <input type="search" id="patch-search-filter" placeholder="KB, package or machine" autocomplete="off">
               </label>
             </div>
             <div class="status-row"><span id="patches-count-label" aria-live="polite"></span></div>
             <div class="table-wrap"><table id="patches-table"></table></div>
-            <div class="more-row" id="patches-more-row" hidden><button type="button" class="btn" id="patches-more-btn">Mostrar 80 registros más</button></div>
+            <div class="more-row" id="patches-more-row" hidden><button type="button" class="btn" id="patches-more-btn">Show 80 more records</button></div>
           </div>
         </section>
 
         <section class="section" id="sec-extensions" aria-labelledby="h-extensions">
           <div class="sh">
-            <h2 id="h-extensions">Extensiones de huésped y preparación Hotpatch</h2>
-            <p>Inventario read-only de <code>virtualMachines/<wbr>extensions</code> y <code>HybridCompute/<wbr>machines/<wbr>extensions</code>; nunca se leen <code>settings</code> ni <code>protectedSettings</code>.</p>
+            <h2 id="h-extensions">Guest extensions and Hotpatch readiness</h2>
+            <p>Read-only inventory of <code>virtualMachines/<wbr>extensions</code> and <code>HybridCompute/<wbr>machines/<wbr>extensions</code>; <code>settings</code> and <code>protectedSettings</code> are never read.</p>
           </div>
           <div class="card flat"><div class="table-wrap"><table id="extensions-table"></table></div></div>
         </section>
 
         <section class="section" id="sec-sources" aria-labelledby="h-sources">
           <div class="sh">
-            <h2 id="h-sources">Recibos de Azure Resource Graph y metodología</h2>
-            <p>Qué se consultó, con qué resultado y qué límites tiene este informe.</p>
+            <h2 id="h-sources">Azure Resource Graph receipts and method</h2>
+            <p>What was queried, with what result, and the limits of this report.</p>
           </div>
           <div class="card flat"><div class="table-wrap"><table id="sources-table"></table></div></div>
           <div class="grid2">
             <div class="card">
-              <h3>Límites metodológicos y garantías de seguridad</h3>
+              <h3>Method limits and safety guarantees</h3>
               <ul class="facts" id="methodology-list" style="margin-top:12px"></ul>
             </div>
             <div class="card">
-              <h3>Tablas consultadas y cadencia</h3>
+              <h3>Queried tables and cadence</h3>
               <ul class="facts" id="method-tables" style="margin-top:12px"></ul>
             </div>
           </div>
@@ -688,7 +688,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     }
     return node;
   }
-  var NF = window.Intl && Intl.NumberFormat ? new Intl.NumberFormat("es-ES") : null;
+  var NF = window.Intl && Intl.NumberFormat ? new Intl.NumberFormat("en-US") : null;
   function num(v) { var n = Number(v) || 0; return NF ? NF.format(n) : String(n); }
   function pl(n, one, many) { return num(n) + " " + (Number(n) === 1 ? one : many); }
   function utc(v) {
@@ -736,11 +736,11 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
   }
 
   var SEV = {
-    critical: ["crit", "Crítica", "crítica", "críticas"],
-    high: ["high", "Alta", "alta", "altas"],
-    medium: ["med", "Media", "media", "medias"],
-    low: ["low", "Baja", "baja", "bajas"],
-    info: ["ok", "Correcto", "correcta", "correctas"]
+    critical: ["crit", "Critical", "critical", "critical"],
+    high: ["high", "High", "high", "high"],
+    medium: ["med", "Medium", "medium", "medium"],
+    low: ["low", "Low", "low", "low"],
+    info: ["ok", "Passed", "passed", "passed"]
   };
   var SEV_RANK = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
   var TONE = {
@@ -749,20 +749,20 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     Succeeded: "ok", UpdateSuccessfullyApplied: "ok", Installed: "ok", Connected: "ok", Ready: "ok", Supported: "ok", complete: "ok", running: "ok"
   };
   var KIND = {
-    "microsoft.maintenance/applyupdates": "Ejecución de ventana",
-    "microsoft.maintenance/configurationassignments": "Asignación de configuración",
-    "microsoft.maintenance/maintenanceconfigurations/applyupdates": "Ejecución de configuración",
-    "patchinstallationresources": "Instalación de parches"
+    "microsoft.maintenance/applyupdates": "Window run",
+    "microsoft.maintenance/configurationassignments": "Configuration assignment",
+    "microsoft.maintenance/maintenanceconfigurations/applyupdates": "Configuration run",
+    "patchinstallationresources": "Patch installation"
   };
-  var SOURCE_STATUS = { complete: "Completa", partial: "Parcial", denied: "Denegada", error: "Error" };
+  var SOURCE_STATUS = { complete: "Complete", partial: "Partial", denied: "Denied", error: "Error" };
   var CATS = [
-    ["maintenance_window_unresponsive", "Ventana de mantenimiento sin respuesta (ShutdownOrUnresponsive)", "critical"],
-    ["arc_agent_expired_or_disconnected", "Agente Azure Arc expirado o desconectado", "critical"],
-    ["assessment_stuck_or_readiness_undetermined", "Evaluación en curso (InProgress) / soporte UnableToDetermine", "high"],
-    ["hotpatch_or_patch_extension_error", "Error en Hotpatch o extensión de huésped", "high"],
-    ["pending_security_patches_unscheduled", "Parches de seguridad/rollup pendientes sin ventana asignada", "medium"],
-    ["unassessed_no_update_manager_telemetry", "Sin telemetría de evaluación en Update Manager (VMs apagadas)", "low"],
-    ["healthy", "Parcheo verificado y sin bloqueos activos", "info"]
+    ["maintenance_window_unresponsive", "Maintenance window unresponsive (ShutdownOrUnresponsive)", "critical"],
+    ["arc_agent_expired_or_disconnected", "Azure Arc agent expired or disconnected", "critical"],
+    ["assessment_stuck_or_readiness_undetermined", "Assessment in progress (InProgress) / support UnableToDetermine", "high"],
+    ["hotpatch_or_patch_extension_error", "Hotpatch or guest extension error", "high"],
+    ["pending_security_patches_unscheduled", "Pending security/rollup patches with no assigned window", "medium"],
+    ["unassessed_no_update_manager_telemetry", "No Update Manager assessment telemetry (stopped VMs)", "low"],
+    ["healthy", "Patching verified, no active blockers", "info"]
   ];
   function sevPill(sev, label) {
     var s = SEV[sev] || ["neutral", sev || "—"];
@@ -777,10 +777,10 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var tone = c === "Critical" ? "crit" : c === "Security" ? "high" : c === "UpdateRollUp" ? "med" : "neutral";
     return el("span", { className: "pill " + tone, text: c || "—" });
   }
-  function yesNo(v) { return v === true ? "Sí" : v === false ? "No" : "—"; }
+  function yesNo(v) { return v === true ? "Yes" : v === false ? "No" : "—"; }
   function portal(id) { return "https://portal.azure.com/#resource" + id; }
   function portalLink(id, text) {
-    return el("a", { className: "dlink", text: text || "Azure Portal", attrs: { href: portal(id), target: "_blank", rel: "noopener noreferrer" } });
+    return el("a", { className: "dlink", text: text || "Azure portal", attrs: { href: portal(id), target: "_blank", rel: "noopener noreferrer" } });
   }
   function armCell(id) {
     var s = String(id || "");
@@ -793,7 +793,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var main = el("span", { className: "mono", title: s });
     main.appendChild(breakable(shown));
     box.appendChild(main);
-    box.appendChild(el("span", { className: "sm", kids: [m[2] || ("suscripción " + m[1]), el("span", { className: "dlink", kids: [" · ", portalLink(top, "Portal")] })] }));
+    box.appendChild(el("span", { className: "sm", kids: [m[2] || ("subscription " + m[1]), el("span", { className: "dlink", kids: [" · ", portalLink(top, "Portal")] })] }));
     return box;
   }
   function refBlock(text) {
@@ -812,7 +812,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
   } catch (err) {
     var errBox = $("error-box");
     errBox.hidden = false;
-    errBox.textContent = "Error al decodificar el snapshot JSON incrustado: " + String(err);
+    errBox.textContent = "Could not decode the embedded JSON snapshot: " + String(err);
     return;
   }
   var S = snap.summary || {};
@@ -854,7 +854,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
   $("theme-toggle").addEventListener("click", function () {
     var dark = root.getAttribute("data-theme") !== "dark";
     if (dark) { root.setAttribute("data-theme", "dark"); } else { root.removeAttribute("data-theme"); }
-    $("theme-label").textContent = dark ? "Modo claro" : "Modo oscuro";
+    $("theme-label").textContent = dark ? "Light mode" : "Dark mode";
   });
   var menuBtn = $("export-menu-btn");
   var menu = $("export-menu");
@@ -898,7 +898,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
 
   function renderCover() {
     var client = snap.client || {};
-    var name = client.name || "CLIENTE";
+    var name = client.name || "Customer";
     var plaque = $("brand-plaque");
     var label = $("client-name-label");
     clear(plaque);
@@ -916,18 +916,18 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var med = S.medium_machines_total || 0;
     var low = S.low_machines_total || 0;
     var ok = S.healthy_machines_total || 0;
-    var parts = ["De ", { b: pl(total, "máquina", "máquinas") }, " (" + num(S.azure_vms_total || 0) + " Azure VM y " + num(S.arc_machines_total || 0) + " Azure Arc), "];
+    var parts = ["Of ", { b: pl(total, "machine", "machines") }, " (" + pl(S.azure_vms_total || 0, "Azure VM", "Azure VMs") + " and " + pl(S.arc_machines_total || 0, "Azure Arc server", "Azure Arc servers") + "), "];
     if (!blockers) {
-      parts.push("ninguna tiene bloqueos de parcheo activos.");
+      parts.push("none have active patching blockers.");
     } else {
       var sevBits = [];
-      if (crit) { sevBits.push(pl(crit, "crítica", "críticas")); }
-      if (high) { sevBits.push(pl(high, "alta", "altas")); }
+      if (crit) { sevBits.push(pl(crit, "critical", "critical")); }
+      if (high) { sevBits.push(pl(high, "high", "high")); }
       if (blockers === 1) {
-        parts.push({ b: "1" }, " tiene un bloqueo de parcheo" + (crit ? " de severidad crítica" : high ? " de severidad alta" : "") + ".");
+        parts.push({ b: "1" }, " has a patching blocker" + (crit ? " of critical severity" : high ? " of high severity" : "") + ".");
       } else {
-        parts.push({ b: num(blockers) }, " tienen bloqueos de parcheo");
-        if (sevBits.length) { parts.push(", de ellas ", { b: sevBits.join(" y ") }); }
+        parts.push({ b: num(blockers) }, " have patching blockers");
+        if (sevBits.length) { parts.push(", including ", { b: sevBits.join(" and ") }); }
         parts.push(".");
       }
     }
@@ -935,16 +935,16 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var unresp = S.maintenance_cycles_unresponsive || 0;
     var sec = S.pending_security_or_critical_patches || 0;
     if (!cycles) {
-      parts.push(" No hubo ejecuciones de ventana de mantenimiento en el periodo");
+      parts.push(" There were no maintenance window runs in the period");
     } else if (!unresp) {
-      parts.push(" " + (cycles === 1 ? "La ejecución de ventana se aplicó" : "Las " + num(cycles) + " ejecuciones de ventana se aplicaron") + " sin ShutdownOrUnresponsive");
+      parts.push(" " + (cycles === 1 ? "The window run was applied" : "All " + num(cycles) + " window runs were applied") + " without ShutdownOrUnresponsive");
     } else {
-      parts.push(" ", { b: num(unresp) + " de " + pl(cycles, "ejecución de ventana", "ejecuciones de ventana") }, (unresp === 1 ? " terminó" : " terminaron") + " en ShutdownOrUnresponsive");
+      parts.push(" ", { b: num(unresp) + " of " + num(cycles) + " window runs" }, " ended in ShutdownOrUnresponsive");
     }
     if (sec) {
-      parts.push(sec === 1 ? " y queda " : " y quedan ", { b: pl(sec, "parche de seguridad o crítico", "parches de seguridad o críticos") }, sec === 1 ? " pendiente." : " pendientes.");
+      parts.push(", and ", { b: pl(sec, "security or critical patch", "security or critical patches") }, sec === 1 ? " is pending." : " are pending.");
     } else {
-      parts.push(" y no quedan parches de seguridad o críticos pendientes.");
+      parts.push(", and no security or critical patches are pending.");
     }
     rich($("cover-subtitle"), parts);
 
@@ -954,31 +954,31 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var tags = $("cover-tags");
     clear(tags);
     [
-      ["Generado " + utc(snap.reference_utc) + " UTC"],
-      ["Ventana " + (win.period || "—") + ": " + day(win.start_utc) + " a " + day(win.end_utc) + " (" + num(win.hours || 0) + " h)"],
-      ["Procedencia " + prov + " · entorno " + (snap.environment || "—"), "on"],
-      ["Suscripción " + (snap.subscription_id || "—")],
-      ["Azure Resource Graph 2022-10-01 · " + complete + "/" + sources.length + " fuentes completas"],
-      ["Programación mensual " + ((snap.methodology && snap.methodology.scheduled_cadence_cron) || "0 8 1 * *")]
+      ["Generated " + utc(snap.reference_utc) + " UTC"],
+      ["Window " + (win.period || "—") + ": " + day(win.start_utc) + " to " + day(win.end_utc) + " (" + num(win.hours || 0) + " h)"],
+      ["Provenance " + prov + " · environment " + (snap.environment || "—"), "on"],
+      ["Subscription " + (snap.subscription_id || "—")],
+      ["Azure Resource Graph 2022-10-01 · " + complete + "/" + sources.length + " sources complete"],
+      ["Monthly schedule " + ((snap.methodology && snap.methodology.scheduled_cadence_cron) || "0 8 1 * *")]
     ].forEach(function (t) { tags.appendChild(el("li", { className: t[1] || "", text: t[0] })); });
 
-    var v = crit ? ["crit", "Acción requerida"] : high ? ["high", "Requiere atención"] : (med || low) ? ["med", "Revisar"] : ["ok", "Sin bloqueos"];
+    var v = crit ? ["crit", "Action required"] : high ? ["high", "Needs attention"] : (med || low) ? ["med", "Review"] : ["ok", "No blockers"];
     $("verdict-card").className = "verdict v-" + v[0];
     $("verdict-label").textContent = v[1];
     var counts = [["critical", crit], ["high", high], ["medium", med], ["low", low], ["info", ok]];
     var detail = counts.filter(function (c) { return c[1]; }).map(function (c) { return num(c[1]) + " " + (c[1] === 1 ? SEV[c[0]][2] : SEV[c[0]][3]); }).join(" · ");
-    if (complete < sources.length) { detail += (detail ? ". " : "") + "Cobertura parcial: " + complete + " de " + sources.length + " fuentes completas."; }
-    $("verdict-detail").textContent = detail || "Sin máquinas en el inventario.";
+    if (complete < sources.length) { detail += (detail ? ". " : "") + "Partial coverage: " + complete + " of " + sources.length + " sources complete."; }
+    $("verdict-detail").textContent = detail || "No machines in the inventory.";
     var first = (snap.actions || [])[0];
     if (first) {
       var next = $("verdict-next");
       next.hidden = false;
-      next.appendChild(D.createTextNode("Empiece por: "));
+      next.appendChild(D.createTextNode("Start with: "));
       next.appendChild(el("a", { text: first.failure_category_label || first.failure_category, attrs: { href: "#sec-actions" } }));
-      next.appendChild(D.createTextNode(" · " + pl(first.affected_machines_count || 0, "máquina", "máquinas") + "."));
+      next.appendChild(D.createTextNode(" · " + pl(first.affected_machines_count || 0, "machine", "machines") + "."));
     }
 
-    $("dist-total").textContent = pl(total, "máquina", "máquinas");
+    $("dist-total").textContent = pl(total, "machine", "machines");
     var track = $("severity-track");
     var legend = $("severity-legend");
     clear(track);
@@ -993,16 +993,16 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
       legend.appendChild(el("li", { kids: [el("span", { className: "dot s-" + s[0] }), s[1] + " ", el("b", { text: num(c[1]) })] }));
       aria.push(num(c[1]) + " " + (c[1] === 1 ? s[2] : s[3]));
     });
-    track.setAttribute("aria-label", "Máquinas por severidad: " + (aria.join(", ") || "ninguna"));
+    track.setAttribute("aria-label", "Machines by severity: " + (aria.join(", ") || "none"));
 
     var prv = snap.provenance === "SIMULATED";
     $("sim-note").hidden = !prv;
-    $("sim-text").textContent = "Datos simulados (" + prov + " · " + (snap.environment || "—") + "): cifras de demostración que no proceden de un tenant real.";
+    $("sim-text").textContent = "Simulated data (" + prov + " · " + (snap.environment || "—") + "): demonstration figures, not read from a real tenant.";
 
     var cName = name;
-    $("foot-left").textContent = "Azure SRE Agent · Informe post-parcheo e investigación de fallos · " + cName;
-    $("foot-right").textContent = "Generado " + utc(snap.reference_utc) + " UTC · herramienta de solo lectura";
-    var pageTitle = "Informe post-parcheo · Azure Update Manager · " + cName + " · " + utc(snap.reference_utc) + " UTC";
+    $("foot-left").textContent = "Azure SRE Agent · Post-patching report and failure investigation · " + cName;
+    $("foot-right").textContent = "Generated " + utc(snap.reference_utc) + " UTC · read-only tool";
+    var pageTitle = "Post-patching report · Azure Update Manager · " + cName + " · " + utc(snap.reference_utc) + " UTC";
     var pageStyle = D.createElement("style");
     pageStyle.textContent = '@page { @bottom-left { content: "' + pageTitle.replace(/[\\"]/g, "\\$&").replace(/[\r\n\f]/g, " ") + '"; font: 9px/1.2 \'Outfit\', \'Segoe UI\', system-ui, sans-serif; color: #475569; } }';
     D.head.appendChild(pageStyle);
@@ -1016,12 +1016,12 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var failedRuns = S.installation_runs_failed || 0;
     var blockTone = S.critical_machines_total ? "crit" : S.high_machines_total ? "high" : blockers ? "med" : "ok";
     var kpis = [
-      [num(S.machines_total || 0), "Máquinas evaluadas", num(S.azure_vms_total || 0) + " Azure VM · " + num(S.arc_machines_total || 0) + " Azure Arc", ""],
-      [num(blockers), "Máquinas con bloqueos", pl(S.critical_machines_total || 0, "crítica", "críticas") + " · " + pl(S.high_machines_total || 0, "alta", "altas"), blockTone],
-      [num(S.maintenance_cycles_succeeded || 0) + " / " + num(S.maintenance_cycles_in_window || 0), "Ciclos de ventana aplicados", num(unresp) + " ShutdownOrUnresponsive", unresp ? "crit" : ""],
-      [num(S.installation_runs_in_window || 0), "Ejecuciones de instalación", pl(S.installed_patches_in_window || 0, "parche instalado", "parches instalados") + (failedRuns ? " · " + num(failedRuns) + " con fallos" : ""), failedRuns ? "high" : ""],
-      [num(sec), "Parches de seguridad o críticos pendientes", num(S.pending_rollup_patches || 0) + " UpdateRollUp · " + num(S.pending_total_patches || 0) + " en total", sec ? "med" : ""],
-      [num(failedExt), "Extensiones en estado Failed", "de " + pl(S.guest_extensions_total || 0, "extensión", "extensiones") + " de huésped", failedExt ? "high" : ""]
+      [num(S.machines_total || 0), "Machines evaluated", pl(S.azure_vms_total || 0, "Azure VM", "Azure VMs") + " · " + pl(S.arc_machines_total || 0, "Arc server", "Arc servers"), ""],
+      [num(blockers), "Machines with blockers", num(S.critical_machines_total || 0) + " critical · " + num(S.high_machines_total || 0) + " high", blockTone],
+      [num(S.maintenance_cycles_succeeded || 0) + " / " + num(S.maintenance_cycles_in_window || 0), "Window cycles applied", num(unresp) + " ShutdownOrUnresponsive", unresp ? "crit" : ""],
+      [num(S.installation_runs_in_window || 0), "Installation runs", pl(S.installed_patches_in_window || 0, "patch installed", "patches installed") + (failedRuns ? " · " + num(failedRuns) + " with failures" : ""), failedRuns ? "high" : ""],
+      [num(sec), "Pending security or critical patches", num(S.pending_rollup_patches || 0) + " UpdateRollUp · " + num(S.pending_total_patches || 0) + " in total", sec ? "med" : ""],
+      [num(failedExt), "Extensions in Failed state", "of " + pl(S.guest_extensions_total || 0, "guest extension", "guest extensions"), failedExt ? "high" : ""]
     ];
     var strip = $("kpi-strip");
     clear(strip);
@@ -1052,8 +1052,8 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
       fill.style.width = (count ? Math.max(pct, 2) : 0) + "%";
       track.appendChild(fill);
       row.appendChild(track);
-      row.appendChild(el("span", { className: "cv", kids: [el("b", { text: num(count) }), " · " + pct + "\u00a0%"] }));
-      row.setAttribute("aria-label", info[1] + ": " + pl(count, "máquina", "máquinas") + ". Filtrar la investigación");
+      row.appendChild(el("span", { className: "cv", kids: [el("b", { text: num(count) }), " · " + pct + "%"] }));
+      row.setAttribute("aria-label", info[1] + ": " + pl(count, "machine", "machines") + ". Filter the investigation");
       if (!count) { row.disabled = true; }
       box.appendChild(row);
     });
@@ -1072,28 +1072,28 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     clear(list);
     var acts = snap.actions || [];
     if (!acts.length) {
-      list.appendChild(el("li", { className: "empty-state", text: "Sin acciones pendientes: ninguna máquina presenta bloqueos de parcheo en esta ventana." }));
+      list.appendChild(el("li", { className: "empty-state", text: "No pending actions: no machine has patching blockers in this window." }));
       return;
     }
     acts.forEach(function (a, i) {
-      var ms = el("div", { className: "plan-ms", kids: [el("span", { className: "lab", text: "Máquinas" })] });
+      var ms = el("div", { className: "plan-ms", kids: [el("span", { className: "lab", text: "Machines" })] });
       (a.affected_machines || []).forEach(function (name) {
-        ms.appendChild(el("button", { className: "mchip", text: name, attrs: { type: "button", "data-machine": name, "aria-label": "Ver " + name + " en la investigación por máquina" } }));
+        ms.appendChild(el("button", { className: "mchip", text: name, attrs: { type: "button", "data-machine": name, "aria-label": "Show " + name + " in the per-machine investigation" } }));
       });
       var body = el("div", { className: "plan-body", kids: [
         el("div", { className: "plan-head", kids: [
           sevPill(a.severity, a.severity_label),
           el("h3", { text: a.failure_category_label || a.failure_category }),
-          el("span", { className: "plan-c", text: pl(a.affected_machines_count || 0, "máquina afectada", "máquinas afectadas") })
+          el("span", { className: "plan-c", text: pl(a.affected_machines_count || 0, "affected machine", "affected machines") })
         ] }),
         el("div", { kids: [
           el("p", { className: "plan-act", text: a.recommended_human_action }),
-          el("p", { className: "plan-dx", kids: [el("span", { className: "lab", text: "Diagnóstico" }), a.investigation_summary] })
+          el("p", { className: "plan-dx", kids: [el("span", { className: "lab", text: "Diagnosis" }), a.investigation_summary] })
         ] }),
         el("div", { kids: [
           ms,
-          el("div", { className: "plan-ref", kids: [el("span", { className: "lab", text: "Referencia técnica" }), refBlock(a.sample_source_reference)] }),
-          el("p", { className: "plan-ref", kids: [el("span", { className: "lab", text: "Categoría" }), el("code", { text: a.failure_category })] })
+          el("div", { className: "plan-ref", kids: [el("span", { className: "lab", text: "Technical reference" }), refBlock(a.sample_source_reference)] }),
+          el("p", { className: "plan-ref", kids: [el("span", { className: "lab", text: "Category" }), el("code", { text: a.failure_category })] })
         ] })
       ] });
       list.appendChild(el("li", { className: "plan-item", kids: [el("span", { className: "plan-n", text: String(i + 1), attrs: { "aria-hidden": "true" } }), body] }));
@@ -1129,8 +1129,8 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
   }
   function setToggle(btn, open) {
     clear(btn);
-    btn.appendChild(D.createTextNode(open ? "Ocultar causa" : "Ver causa"));
-    btn.appendChild(el("span", { className: "sr-only", text: " de " + btn.getAttribute("data-name") }));
+    btn.appendChild(D.createTextNode(open ? "Hide root cause" : "Show root cause"));
+    btn.appendChild(el("span", { className: "sr-only", text: " for " + btn.getAttribute("data-name") }));
     btn.setAttribute("aria-expanded", open ? "true" : "false");
   }
   function resetMachineFilters() {
@@ -1156,30 +1156,30 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     filtered = filtered.map(function (m, i) { return [m, i]; }).sort(function (a, b) {
       var x = sortValue(a[0], sortKey);
       var y = sortValue(b[0], sortKey);
-      var d = typeof x === "number" ? x - y : x.localeCompare(y, "es", { numeric: true });
+      var d = typeof x === "number" ? x - y : x.localeCompare(y, "en", { numeric: true });
       return (sortAsc ? d : -d) || a[1] - b[1];
     }).map(function (pair) { return pair[0]; });
     currentMachines = filtered;
 
-    $("machines-count-label").textContent = "Mostrando " + filtered.length + " de " + allMachines.length + " máquinas.";
+    $("machines-count-label").textContent = "Showing " + filtered.length + " of " + allMachines.length + " machines.";
 
     var table = $("machines-table");
     clear(table);
     var thead = el("thead");
     var trH = el("tr");
-    trH.appendChild(sortHead("Severidad", "severity", "nw"));
-    trH.appendChild(sortHead("Máquina", "name"));
-    trH.appendChild(el("th", { text: "Diagnóstico automático de causa raíz", attrs: { scope: "col" } }));
-    trH.appendChild(el("th", { text: "Host y evaluación", attrs: { scope: "col" } }));
-    trH.appendChild(sortHead("Pendientes", "pending", "n"));
-    trH.appendChild(sortHead("Ciclos", "cycles", "n"));
+    trH.appendChild(sortHead("Severity", "severity", "nw"));
+    trH.appendChild(sortHead("Machine", "name"));
+    trH.appendChild(el("th", { text: "Automated root-cause diagnosis", attrs: { scope: "col" } }));
+    trH.appendChild(el("th", { text: "Host and assessment", attrs: { scope: "col" } }));
+    trH.appendChild(sortHead("Pending", "pending", "n"));
+    trH.appendChild(sortHead("Cycles", "cycles", "n"));
     thead.appendChild(trH);
     table.appendChild(thead);
 
     var tbody = el("tbody");
     if (!filtered.length) {
       var emptyTr = el("tr");
-      emptyTr.appendChild(el("td", { colspan: 6, className: "empty", text: "Ninguna máquina coincide con los filtros seleccionados. Use «Restablecer filtros» para ver todas." }));
+      emptyTr.appendChild(el("td", { colspan: 6, className: "empty", text: "No machines match the selected filters. Select Reset filters to show all machines." }));
       tbody.appendChild(emptyTr);
       table.appendChild(tbody);
       return;
@@ -1200,57 +1200,57 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
       tr.appendChild(el("td", { className: "dx", kids: [
         el("span", { className: "dx-t", text: m.failure_category_label || m.failure_category }),
         el("span", { className: "dx-h", text: m.investigation_headline }),
-        extra > 0 ? el("span", { className: "sm", text: "+ " + pl(extra, "bloqueo adicional", "bloqueos adicionales") + " en el detalle" }) : null,
+        extra > 0 ? el("span", { className: "sm", text: "+ " + pl(extra, "additional blocker", "additional blockers") + " in the details" }) : null,
         btn
       ] }));
       tr.appendChild(el("td", { className: "host", kids: [
         statusPill(m.power_or_arc_state),
-        el("span", { className: "sm", text: (m.os_name || m.os_type || "—") + (m.agent_version ? " · agente " + m.agent_version : "") }),
-        el("span", { className: "sm nw", text: "Evaluación: " + (m.assessment_status || "—") }),
+        el("span", { className: "sm", text: (m.os_name || m.os_type || "—") + (m.agent_version ? " · agent " + m.agent_version : "") }),
+        el("span", { className: "sm nw", text: "Assessment: " + (m.assessment_status || "—") }),
         el("span", { className: "sm nw", text: "Readiness: " + (m.vm_guest_patch_readiness || "—") })
       ] }));
       var pc = m.pending_counts || {};
       tr.appendChild(el("td", { className: "n", kids: [
         el("span", { className: "big", text: num(pc.security_or_critical || 0) }),
-        el("span", { className: "sm nw", text: "seg./crít." }),
+        el("span", { className: "sm nw", text: "sec./crit." }),
         el("span", { className: "sm nw", text: num(pc.update_rollup || 0) + " RollUp · " + num(pc.total || 0) + " total" })
       ] }));
       var mc = m.maintenance_cycles_summary || {};
       var ic = m.installations_summary || {};
       tr.appendChild(el("td", { className: "n", kids: [
-        el("span", { className: "nw", text: num(mc.succeeded || 0) + " OK · " + num(mc.unresponsive || 0) + " sin resp." }),
-        el("span", { className: "sm nw", text: pl(ic.runs_in_window || 0, "instalación", "instalaciones") })
+        el("span", { className: "nw", text: num(mc.succeeded || 0) + " OK · " + num(mc.unresponsive || 0) + " unresponsive" }),
+        el("span", { className: "sm nw", text: pl(ic.runs_in_window || 0, "installation", "installations") })
       ] }));
       tbody.appendChild(tr);
 
       var dTr = el("tr", { className: "drawer-row", id: drawerId });
       dTr.hidden = !drawersExpanded;
       var c1 = el("div", { kids: [
-        el("p", { className: "dk", text: "Evidencia técnica correlacionada (sin login al host)" }),
+        el("p", { className: "dk", text: "Correlated technical evidence (no host sign-in)" }),
         el("p", { text: m.root_cause_evidence })
       ] });
       var issues = m.all_detected_issues || [];
       if (issues.length > 1) {
-        c1.appendChild(el("p", { className: "dk", text: "Bloqueos detectados en esta máquina (" + issues.length + ")" }));
+        c1.appendChild(el("p", { className: "dk", text: "Blockers detected on this machine (" + issues.length + ")" }));
         var ul = el("ul", { className: "issues" });
         issues.forEach(function (iss) { ul.appendChild(el("li", { kids: [sevPill(iss.severity), el("span", { text: iss.investigation_headline })] })); });
         c1.appendChild(ul);
       }
       var c2 = el("div", { kids: [
-        el("p", { className: "dk", text: "Acción recomendada" }),
+        el("p", { className: "dk", text: "Recommended action" }),
         el("p", { className: "act", text: m.recommended_human_action }),
-        el("p", { className: "dk", text: "Referencia de fuente ARG o ruta de log" }),
+        el("p", { className: "dk", text: "ARG source reference or log path" }),
         el("div", { kids: [refBlock(m.log_or_source_reference || m.resource_id)] })
       ] });
       if ((m.pending_security_patches || []).length) {
-        c2.appendChild(el("p", { className: "dk", text: "Parches Security/RollUp pendientes" }));
+        c2.appendChild(el("p", { className: "dk", text: "Pending Security/RollUp patches" }));
         var kbs = el("ul", { className: "kbs" });
         m.pending_security_patches.forEach(function (p) {
           kbs.appendChild(el("li", { kids: [p.kb_id ? el("code", { text: "KB" + p.kb_id }) : null, p.kb_id ? " " : null, p.patch_name] }));
         });
         c2.appendChild(kbs);
       }
-      c2.appendChild(el("p", { className: "sm", kids: ["Categoría ", el("code", { text: m.failure_category }), m.resource_id ? el("span", { className: "dlink", kids: [" · ", portalLink(m.resource_id, "Abrir en Azure Portal")] }) : null] }));
+      c2.appendChild(el("p", { className: "sm", kids: ["Category ", el("code", { text: m.failure_category }), m.resource_id ? el("span", { className: "dlink", kids: [" · ", portalLink(m.resource_id, "Open in Azure portal")] }) : null] }));
       var dTd = el("td", { colspan: 6 });
       dTd.appendChild(el("div", { className: "drawer", kids: [c1, c2] }));
       dTr.appendChild(dTd);
@@ -1286,7 +1286,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var tbody = el("tbody");
     if (!rows.length) {
       var emptyRow = el("tr");
-      emptyRow.appendChild(el("td", { colspan: cols.length, className: "empty", text: emptyText || "Sin registros que coincidan con los criterios actuales." }));
+      emptyRow.appendChild(el("td", { colspan: cols.length, className: "empty", text: emptyText || "No records match the current criteria." }));
       tbody.appendChild(emptyRow);
     }
     rows.forEach(function (r) {
@@ -1316,7 +1316,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     ((snap.cycles && snap.cycles.maintenance_cycles) || []).forEach(function (c) {
       combined.push({
         kind: c.type,
-        machine: c.machine_name || "Configuración global",
+        machine: c.machine_name || "Global configuration",
         status: c.status,
         start: c.start_utc || "",
         end: c.end_utc || "",
@@ -1332,7 +1332,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
         status: i.status,
         start: i.start_utc || "",
         end: i.last_modified_utc || "",
-        detail: "Instalados " + i.installed_patch_count + " · fallidos " + i.failed_patch_count + " · no seleccionados " + i.not_selected_patch_count + " · reinicio " + i.reboot_status,
+        detail: "Installed " + i.installed_patch_count + " · failed " + i.failed_patch_count + " · not selected " + i.not_selected_patch_count + " · reboot " + i.reboot_status,
         ref: i.maintenance_run_id || i.resource_id
       });
     });
@@ -1343,19 +1343,19 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
       return true;
     });
     var shown = filtered.slice(0, cycleLimit);
-    $("cycles-count-label").textContent = "Mostrando " + shown.length + " de " + filtered.length + " registros de ciclos e instalaciones (total combinado: " + combined.length + ").";
+    $("cycles-count-label").textContent = "Showing " + shown.length + " of " + filtered.length + " cycle and installation records (combined total: " + combined.length + ").";
     $("cycles-more-row").hidden = filtered.length <= cycleLimit;
     $("toc-n-cycles").textContent = num(combined.length);
     renderTable(
       $("cycles-table"),
-      [["Registro"], ["Máquina o ámbito", "nw"], ["Estado", "nw"], ["Inicio y fin (UTC)", "nw"], ["Detalle de ejecución"], ["Referencia (correlación o recurso)"]],
+      [["Record"], ["Machine or scope", "nw"], ["Status", "nw"], ["Start and end (UTC)", "nw"], ["Run details"], ["Reference (correlation or resource)"]],
       shown.map(function (r) {
         return [
           el("span", { className: "kind", title: r.kind, kids: [el("b", { text: KIND[r.kind] || r.kind }), el("span", { className: "sm", text: r.kind === "patchinstallationresources" ? "patchinstallationresources" : "maintenanceresources" })] }),
           r.machine,
           statusPill(r.status),
-          el("span", { kids: [utc(r.start), el("span", { className: "sm", text: r.end ? "a " + utc(r.end) : "" })] }),
-          r.config ? el("span", { kids: ["Configuración ", el("span", { className: "seg", text: r.config }), r.recur ? " (" + r.recur + ")" : null] }) : r.detail,
+          el("span", { kids: [utc(r.start), el("span", { className: "sm", text: r.end ? "to " + utc(r.end) : "" })] }),
+          r.config ? el("span", { kids: ["Configuration ", el("span", { className: "seg", text: r.config }), r.recur ? " (" + r.recur + ")" : null] }) : r.detail,
           armCell(r.ref)
         ];
       })
@@ -1381,13 +1381,13 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
       return true;
     });
     var shown = filtered.slice(0, patchLimit);
-    $("patches-count-label").textContent = "Mostrando " + shown.length + " de " + filtered.length + " registros de softwarePatches (total recolectado: " + allPatches.length + ").";
+    $("patches-count-label").textContent = "Showing " + shown.length + " of " + filtered.length + " softwarePatches records (total collected: " + allPatches.length + ").";
     $("patches-more-row").hidden = filtered.length <= patchLimit;
     renderTable(
       $("patches-table"),
-      [["Máquina", "nw"], ["Estado y clasificación", "nw"], ["KB / ID"], ["Paquete o actualización", "wide"], ["Fecha (UTC)", "nw"]],
+      [["Machine", "nw"], ["State and classification", "nw"], ["KB / ID"], ["Package or update", "wide"], ["Date (UTC)", "nw"]],
       shown.map(function (p) {
-        var sub = [p.version ? "versión " + p.version : "", p.reboot_behavior ? "reinicio " + p.reboot_behavior : ""].filter(Boolean).join(" · ");
+        var sub = [p.version ? "version " + p.version : "", p.reboot_behavior ? "reboot " + p.reboot_behavior : ""].filter(Boolean).join(" · ");
         return [
           p.machine_name,
           el("span", { className: "stack", kids: [statusPill(p.installation_state), classPill(p.primary_classification)] }),
@@ -1403,7 +1403,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     var exts = snap.extensions || [];
     renderTable(
       $("extensions-table"),
-      [["Máquina", "nw"], ["Alojamiento", "nw"], ["Extensión"], ["Publisher / tipo"], ["Versión", "nw"], ["Estado", "nw"], ["AutoUpgrade minor / auto", "nw"]],
+      [["Machine", "nw"], ["Hosting", "nw"], ["Extension"], ["Publisher / type"], ["Version", "nw"], ["State", "nw"], ["AutoUpgrade minor / auto", "nw"]],
       exts.map(function (e) {
         return [
           e.machine_name,
@@ -1415,13 +1415,13 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
           yesNo(e.auto_upgrade_minor_version) + " / " + yesNo(e.enable_automatic_upgrade)
         ];
       }),
-      "No se encontraron extensiones de huésped en las máquinas inventariadas."
+      "No guest extensions were found on the inventoried machines."
     );
 
     var sources = snap.sources || [];
     renderTable(
       $("sources-table"),
-      [["Fuente"], ["Estado", "nw"], ["Páginas", "n"], ["Registros", "n"], ["Observado (UTC)", "nw"], ["Endpoint o nota"]],
+      [["Source"], ["Status", "nw"], ["Pages", "n"], ["Records", "n"], ["Observed (UTC)", "nw"], ["Endpoint or note"]],
       sources.map(function (s) {
         return [
           el("code", { text: s.id }),
@@ -1429,7 +1429,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
           num(s.pages),
           num(s.records),
           utc(s.observed_at),
-          (s.note || "") + (s.errors && s.errors.length ? " Errores: " + JSON.stringify(s.errors) : "")
+          (s.note || "") + (s.errors && s.errors.length ? " Errors: " + JSON.stringify(s.errors) : "")
         ];
       })
     );
@@ -1448,7 +1448,7 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     clear(tList);
     (method.arg_tables || []).forEach(function (item) { tList.appendChild(el("li", { text: item })); });
     if (method.scheduled_cadence_description) {
-      tList.appendChild(el("li", { kids: ["Cadencia: " + method.scheduled_cadence_description + " Cron ", el("code", { text: method.scheduled_cadence_cron || "0 8 1 * *" }), "."] }));
+      tList.appendChild(el("li", { kids: ["Cadence: " + method.scheduled_cadence_description + " Cron ", el("code", { text: method.scheduled_cadence_cron || "0 8 1 * *" }), "."] }));
     }
   }
 
@@ -1462,11 +1462,11 @@ code.ref { display: inline; color: var(--ink); overflow-wrap: break-word; }
     applyMachineFilters();
   });
   $("machines-view-csv-btn").addEventListener("click", function () {
-    downloadBlob("patching-investigation-machines-vista.csv", "text/csv;charset=utf-8", machinesCsv(currentMachines));
+    downloadBlob("patching-investigation-machines-view.csv", "text/csv;charset=utf-8", machinesCsv(currentMachines));
   });
   $("toggle-all-drawers-btn").addEventListener("click", function () {
     drawersExpanded = !drawersExpanded;
-    this.textContent = drawersExpanded ? "Contraer todos los detalles" : "Expandir todos los detalles";
+    this.textContent = drawersExpanded ? "Collapse all details" : "Expand all details";
     applyMachineFilters();
   });
   ["cycle-status-filter", "cycle-search-filter"].forEach(function (id) {

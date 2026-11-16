@@ -26,9 +26,9 @@ from uuid import UUID, uuid4
 SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
 TENANT_ID = "<YOUR_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 # Multi-subscription fleet: every APPROVED_CLUSTERS entry inherits CLUSTER_DEFAULTS, so an entry only needs
 # "resource_group" plus "subscription_id" when the cluster is outside SUBSCRIPTION_ID. Use "aks_name" when the
 # allowlist key is an alias (for example two clusters with the same name in different subscriptions).
@@ -1967,12 +1967,12 @@ def expected(raw, key, row=None):
 
 def conditional(value, requirement, reason, observed, sources=None):
     if requirement is False:
-        return outcome("not_applicable", "El requisito confirmado no aplica. " + reason, observed, sources)
+        return outcome("not_applicable", "The confirmed requirement does not apply. " + reason, observed, sources)
     if value is True:
-        return decision(True, reason + " Configuracion observada; no prueba eficacia.", observed, sources)
+        return decision(True, reason + " Configuration observed; this does not prove effectiveness.", observed, sources)
     if requirement is not True:
-        return outcome("not_evaluated", "Falta requisito o control alternativo confirmado. " + reason, observed, sources)
-    return decision(value, reason + " Requisito confirmado; ausencia desconocida no se convierte en fallo.", observed, sources)
+        return outcome("not_evaluated", "No confirmed requirement or alternative control. " + reason, observed, sources)
+    return decision(value, reason + " Requirement confirmed; an unknown absence does not become a failure.", observed, sources)
 
 
 def serving_workload(raw, row):
@@ -1994,70 +1994,70 @@ def evaluate_cluster(rule, row, raw):
     if test == "managed_identity":
         value = cluster.get("identity_type")
         return decision(None if value is None else any(kind in value.split(", ") for kind in ("SystemAssigned", "UserAssigned")),
-                        "Tipo de identidad ARM observado; no se exportan credenciales.", {"identity_type": value})
+                        "ARM identity type observed; no credentials are exported.", {"identity_type": value})
     if test == "managed_entra":
-        return decision(cluster.get("managed_entra"), "aadProfile.managed observado; no acredita permisos efectivos.",
+        return decision(cluster.get("managed_entra"), "aadProfile.managed observed; this does not prove effective permissions.",
                         {"managed_entra": cluster.get("managed_entra")})
     if test == "rbac":
-        return decision(cluster.get("enable_rbac"), "enableRBAC observado; Azure RBAC y minimo privilegio son controles distintos.",
+        return decision(cluster.get("enable_rbac"), "enableRBAC observed; Azure RBAC and least privilege are separate controls.",
                         {key: cluster.get(key) for key in ("enable_rbac", "azure_rbac")})
     if test == "local_accounts":
         return conditional(cluster.get("disable_local_accounts"), cluster.get("managed_entra"),
-                           "disableLocalAccounts observado.", {"disable_local_accounts": cluster.get("disable_local_accounts")})
+                           "disableLocalAccounts observed.", {"disable_local_accounts": cluster.get("disable_local_accounts")})
     if test == "api_access":
         private, ranges = cluster.get("private_cluster"), cluster.get("authorized_ip_ranges")
         value = True if private is True or (ranges and not any(v in ("0.0.0.0/0", "::/0") for v in ranges)) else (
             False if private is False and ranges is not None else None)
-        return decision(value, "Endpoint privado o rangos publicos limitados; no prueba conectividad, autenticacion ni seguridad total.",
+        return decision(value, "Private endpoint or limited public ranges; this does not prove connectivity, authentication or complete security.",
                         {"private_cluster": private, "authorized_ip_ranges": ranges})
     if test == "workload_identity":
         wi, oidc = cluster.get("workload_identity_enabled"), cluster.get("oidc_enabled")
         value = True if wi is True and oidc is True else False if wi is False or oidc is False else None
-        return conditional(value, expected(raw, "workload_identity_required"), "Workload ID/OIDC del cluster, no uso por pod.",
+        return conditional(value, expected(raw, "workload_identity_required"), "Cluster Workload ID/OIDC, not per-pod use.",
                            {"workload_identity_enabled": wi, "oidc_enabled": oidc})
     if test == "network_policy_engine":
         network = cluster.get("network", {})
         value = True if network.get("dataplane") == "cilium" or network.get("policy") in ("azure", "calico", "cilium") else (
             False if network.get("policy") == "none" else None)
-        return conditional(value, expected(raw, "network_policy_required"), "Motor observado; Cilium se admite sin exigir Calico.",
+        return conditional(value, expected(raw, "network_policy_required"), "Engine observed; Cilium is accepted without requiring Calico.",
                            {"dataplane": network.get("dataplane"), "policy": network.get("policy")})
     if test == "cni":
         network = cluster.get("network", {})
         value = True if network.get("plugin") == "azure" and network.get("plugin_mode") == "overlay" else (
             False if network.get("plugin") is not None else None)
-        return conditional(value, expected(raw, "overlay_required"), "Overlay es recomendacion actual, no obligacion universal.",
+        return conditional(value, expected(raw, "overlay_required"), "Overlay is the current recommendation, not a universal requirement.",
                            network)
     if test in ("policy", "defender"):
         value = pick(cluster, "addons", "azurepolicy", "enabled") if test == "policy" else cluster.get("defender_enabled")
-        return conditional(value, expected(raw, test + "_required"), "Solo opcion habilitada; cumplimiento, salud y licencia no se han verificado.",
+        return conditional(value, expected(raw, test + "_required"), "Enabled option only; compliance, health and licensing were not verified.",
                            {test + "_enabled": value})
     if test == "sla_tier":
         if expected(raw, "sla_required") is not True:
             return outcome("not_applicable" if expected(raw, "sla_required") is False else "not_evaluated",
-                           "No se conoce un requisito de SLA de produccion; LAB no se trata como produccion.", {"sku_tier": cluster.get("sku_tier")})
+                           "No production SLA requirement is known; LAB is not treated as production.", {"sku_tier": cluster.get("sku_tier")})
         tier = cluster.get("sku_tier")
         return decision(True if tier in ("Standard", "Premium") else False if tier == "Free" else None,
-                        "Tier actual Standard/Premium; valores legacy o desconocidos requieren revision.", {"sku_tier": tier})
+                        "Current Standard/Premium tier; legacy or unknown values need review.", {"sku_tier": tier})
     if test == "zones":
         zones = row.get("availability_zones")
         value = len(set(zones)) >= 2 if zones is not None else None
-        return conditional(value, expected(raw, "availability_zones_required"), "Zonas configuradas del pool; disponibilidad regional y excepciones requieren requisito confirmado.",
+        return conditional(value, expected(raw, "availability_zones_required"), "Pool zones configured; regional availability and exceptions need a confirmed requirement.",
                            {"name": row.get("name"), "availability_zones": zones})
     if test == "pool_state":
         value = row.get("provisioning_state")
         return decision(True if value == "Succeeded" else False if value in ("Failed", "Canceled") else None,
-                        "Estado de aprovisionamiento del pool, distinto de Running del cluster y salud del workload.",
+                        "Pool provisioning state, separate from the cluster's Running state and workload health.",
                         {"name": row.get("name"), "provisioning_state": value, "cluster_power_state": cluster.get("power_state")})
     if test == "system_taint":
         if row.get("mode") != "System":
-            return outcome("not_applicable", "No es un pool System.", {"mode": row.get("mode")})
+            return outcome("not_applicable", "Not a System pool.", {"mode": row.get("mode")})
         taints = row.get("node_taints")
         return decision(None if taints is None else any(v.startswith("CriticalAddonsOnly=") or v.startswith("CriticalAddonsOnly:") for v in taints),
-                        "Taint de proteccion observado; controles de aislamiento equivalentes requieren revision.",
+                        "Protection taint observed; equivalent isolation controls need review.",
                         {"name": row.get("name"), "node_taints": taints})
     if test == "system_isolation":
         if not source_complete(raw, "kube_nodes", "kube_pods", "arm_node_pools"):
-            return outcome("not_evaluated", "El join pool-node-pod exige inventarios completos; solo tener pools System no prueba colocacion de aplicaciones.",
+            return outcome("not_evaluated", "The pool-node-pod join needs complete inventories; having System pools does not prove where applications run.",
                            source_ids=["kube_nodes", "kube_pods", "arm_node_pools"])
         system_pools = {pool["name"] for pool in inventory.get("node_pools", []) if pool.get("mode") == "System"}
         nodes = {node["name"]: node.get("pool_name") for node in inventory.get("nodes", [])}
@@ -2065,12 +2065,12 @@ def evaluate_cluster(rule, row, raw):
                 and pod.get("phase") not in ("Succeeded", "Failed")]
         placed = [pod for pod in apps if pod.get("node_name") in nodes]
         if not apps:
-            return outcome("not_applicable", "No se observaron pods de aplicacion activos en la coleccion completa.")
+            return outcome("not_applicable", "No active application pods were observed in the complete collection.")
         if len(placed) != len(apps) or any(nodes.get(pod["node_name"]) is None for pod in placed):
-            return outcome("not_evaluated", "No todos los pods de aplicacion tienen un join node/pool verificable.")
+            return outcome("not_evaluated", "Not every application pod has a verifiable node/pool join.")
         affected = [{"namespace": pod["namespace"], "pod": pod["name"], "node": pod["node_name"], "pool": nodes[pod["node_name"]]}
                     for pod in placed if nodes[pod["node_name"]] in system_pools]
-        return decision(not affected, "Solo joins exactos observados; nombres de nodos no se interpretan como prueba de pool.",
+        return decision(not affected, "Exact observed joins only; node names are not taken as proof of a pool.",
                         {"application_pods": len(apps), "pods_on_system_pools": affected}, ["kube_nodes", "kube_pods", "arm_node_pools"])
     if test == "autoscaling":
         nap = cluster.get("node_provisioning_mode") == "Auto" or cluster.get("mode") == "Automatic"
@@ -2079,53 +2079,53 @@ def evaluate_cluster(rule, row, raw):
                     "pool_auto_scaling": [{"name": p["name"], "enabled": p.get("enable_auto_scaling")} for p in pools]}
         value = True if nap or any(p.get("enable_auto_scaling") is True for p in pools) else (
             False if pools and source_complete(raw, "arm_node_pools") and all(p.get("enable_auto_scaling") is False for p in pools) else None)
-        return conditional(value, expected(raw, "autoscaling_required"), "NAP/Automatic o autoscaler configurado; no eficacia ni ahorro medidos.",
+        return conditional(value, expected(raw, "autoscaling_required"), "NAP/Automatic or autoscaler configured; effectiveness and savings were not measured.",
                            observed, ["arm_cluster", "arm_node_pools"])
     if test in ("upgrade_policy", "node_image_policy"):
         key = "channel" if test == "upgrade_policy" else "node_os_channel"
         value = pick(cluster, "auto_upgrade", key)
         enabled = None if value is None else value.lower() != "none"
         requirement = "automatic_upgrades_required" if test == "upgrade_policy" else "node_image_upgrades_required"
-        return conditional(enabled, expected(raw, requirement), "Canal observado; un proceso manual desconocido no se etiqueta como inexistente.",
+        return conditional(enabled, expected(raw, requirement), "Channel observed; an unknown manual process is not labeled as missing.",
                            {"auto_upgrade": cluster.get("auto_upgrade")})
     if test == "version_support":
         versions, profile, current = raw.get("regional_versions", []), raw.get("upgrade_profile"), cluster.get("version")
         observed = {"current_version": current, "support_plan": cluster.get("support_plan"), "upgrade_profile": profile,
                     "regional_version_count": len(versions)}
         if not source_complete(raw, "arm_regional_versions", "arm_upgrade_profile") or not current:
-            return outcome("not_evaluated", "Faltan catalogo regional actual o upgrade profile; no se usa version latest fija.", observed,
+            return outcome("not_evaluated", "The current regional catalog or upgrade profile is missing; no fixed latest version is used.", observed,
                            ["arm_regional_versions", "arm_upgrade_profile", "arm_cluster"])
         known = any(current in (v.get("patch_versions") or {}) or current == v.get("version") for v in versions)
         return decision(True if known else None,
-                        "Version presente en catalogo regional actual." if known else
-                        "Ausente del catalogo de oferta; esto no acredita fin de soporte (LTS/politica regional requieren validacion).",
+                        "Version present in the current regional catalog." if known else
+                        "Not in the offered catalog; this does not prove end of support (LTS and regional policy need validation).",
                         observed, ["arm_regional_versions", "arm_upgrade_profile", "arm_cluster"])
     if test == "diagnostics":
         rows = raw.get("arm_diagnostics", [])
         enabled = any(log.get("enabled") is True for r in rows for log in r.get("logs", []))
         value = True if enabled else False if source_complete(raw, "arm_diagnostics") else None
-        return conditional(value, expected(raw, "diagnostics_required"), "Diagnostic settings/logs configurados; entrega e ingesta no se han medido.",
+        return conditional(value, expected(raw, "diagnostics_required"), "Diagnostic settings/logs configured; delivery and ingestion were not measured.",
                            {"settings": rows}, ["arm_diagnostics"])
     if test == "maintenance":
         rows = raw.get("arm_maintenance", [])
         value = True if any(r.get("configured") is True for r in rows) else False if source_complete(raw, "arm_maintenance") else None
-        return conditional(value, expected(raw, "maintenance_required"), "Ventana configurada observada, no ejecucion validada.",
+        return conditional(value, expected(raw, "maintenance_required"), "Configured window observed, not a validated run.",
                            {"maintenance_configurations": rows}, ["arm_maintenance"])
     if test == "telemetry":
         rows = inventory.get("node_metrics", []) + inventory.get("pod_metrics", [])
         measured = [row for row in rows if row.get("fresh_for_reference") is True]
-        return decision(True if measured else None, "Muestras metrics.k8s.io actuales; sin historial, logs ni garantia de cobertura mensual.",
+        return decision(True if measured else None, "Current metrics.k8s.io samples; no history, logs or guarantee of monthly coverage.",
                         {"observed_samples": len(measured)}, ["kube_node_metrics", "kube_pod_metrics"])
     if test == "advisor":
         return decision(True if source_complete(raw, "arm_advisor") else None,
-                        "Lectura de recomendaciones cacheadas del ResourceId exacto; vacio no prueba oportunidades inexistentes.",
+                        "Cached recommendations read for the exact ResourceId; an empty list does not prove that there are no opportunities.",
                         {"recommendations": raw.get("advisor", [])}, ["arm_advisor"])
     if test in ("dns", "cost_allocation", "rightsizing", "spot"):
         reasons = {
-            "dns": "Inventario de DNS/IPAM no mide resolucion, latencia, failover ni requisitos de capacidad.",
-            "cost_allocation": "ActualCost de ResourceIds no acredita asignacion de factura a namespace/workload.",
-            "rightsizing": "La muestra de uso actual no es una ventana historica representativa ni un ahorro calculado.",
-            "spot": "No se han recogido elegibilidad comercial, historial estable ni tolerancia confirmada a eviction.",
+            "dns": "DNS/IPAM inventory does not measure resolution, latency, failover or capacity requirements.",
+            "cost_allocation": "ActualCost by ResourceId does not prove invoice allocation to a namespace or workload.",
+            "rightsizing": "The current usage sample is neither a representative historical window nor a calculated saving.",
+            "spot": "Commercial eligibility, stable history and confirmed eviction tolerance were not collected.",
         }
         return outcome("not_evaluated", reasons[test], {"source_data_available": bool(raw.get("cost_rows"))},
                        ["azure_cost", "kube_node_metrics", "kube_pod_metrics"] if test != "dns" else ["arm_cluster"])
@@ -2135,72 +2135,72 @@ def evaluate_cluster(rule, row, raw):
 def evaluate_workload(rule, row, raw):
     test = rule["test"]
     if row.get("namespace") in SYSTEM_NAMESPACES:
-        return outcome("not_applicable", "Componente de namespace de sistema: requiere baseline del proveedor, no reglas generales de aplicaciones.")
+        return outcome("not_applicable", "System namespace component: it needs the provider's baseline, not general application rules.")
     is_batch = row.get("kind") in ("Job", "CronJob")
     if test in ("probes", "pdb", "hpa", "replicas", "network_policies") and (is_batch or row.get("desired_replicas") == 0):
-        return outcome("not_applicable", "Batch o replicas deseadas cero: no se declara una caida ni se impone disponibilidad continua.",
+        return outcome("not_applicable", "Batch or zero desired replicas: no outage is declared and continuous availability is not required.",
                        {"kind": row.get("kind"), "desired_replicas": row.get("desired_replicas")})
     containers = row.get("containers")
     if not containers:
-        return outcome("not_evaluated", "No se dispone de especificacion de contenedores; inventario/telemetria no sustituye manifiestos.")
+        return outcome("not_evaluated", "No container specification is available; inventory or telemetry does not replace manifests.")
     if test == "resources":
         required = ["request_cpu_cores", "request_memory_bytes", "limit_memory_bytes"]
         if expected(raw, "cpu_limits_required") is True:
             required.append("limit_cpu_cores")
         combined = containers + (row.get("init_containers") or [])
         missing = [{"container": c["name"], "missing_or_zero": [key for key in required if c.get(key) is None or c[key] <= 0]} for c in combined]
-        return decision(all(not item["missing_or_zero"] for item in missing), "Se comprueban reservas positivas y limite de memoria; CPU limits solo si requeridos. No son medidas de uso.",
+        return decision(all(not item["missing_or_zero"] for item in missing), "Checks positive requests and a memory limit; CPU limits only when required. These are not usage measurements.",
                         {"containers": combined, "missing": missing})
     if test == "probes":
         applies = serving_workload(raw, row)
         if applies is not True:
             return outcome("not_applicable" if applies is False else "not_evaluated",
-                           "Falta prueba de servicio o requisito de probes; no se presupone que todos los contenedores sirven trafico.")
+                           "No evidence of a service or a probe requirement; not every container is assumed to serve traffic.")
         serving = [c for c in containers if c.get("ports")]
         if not serving and expected(raw, "probes_required", row) is True:
             serving = containers
         if not serving:
-            return outcome("not_evaluated", "Service selecciona el workload, pero no se identifica el contenedor de servicio.")
+            return outcome("not_evaluated", "A Service selects the workload, but the serving container cannot be identified.")
         return decision(all(c.get("readiness_probe") and c.get("liveness_probe") for c in serving),
-                        "Solo contenedores de servicio identificados; presencia no prueba que la sonda sea adecuada.",
+                        "Identified serving containers only; presence does not prove that the probe is adequate.",
                         {"serving_containers": serving}, [row["source_id"], "kube_services"])
     if test == "pdb":
         replicas = row.get("desired_replicas")
         applies = replicas is not None and replicas >= 2 and serving_workload(raw, row) is True
         if not applies and expected(raw, "availability_required", row) is not True:
-            return outcome("not_evaluated", "PDB requiere servicio replicado o requisito de disponibilidad confirmado.",
+            return outcome("not_evaluated", "A PDB needs a replicated service or a confirmed availability requirement.",
                            {"desired_replicas": replicas})
         if not source_complete(raw, "kube_pdbs"):
-            return outcome("not_evaluated", "Inventario de PDB incompleto/no autorizado; ausencia no es un fallo.", source_ids=["kube_pdbs"])
+            return outcome("not_evaluated", "PDB inventory incomplete or not authorized; absence is not a failure.", source_ids=["kube_pdbs"])
         matched = [p for p in raw["inventory"].get("pdbs", []) if p.get("namespace") == row.get("namespace")
                    and selector_matches(p.get("selector"), row.get("template_labels")) is True]
         if row.get("template_labels") is None:
-            return outcome("not_evaluated", "Faltan labels de plantilla para el join PDB.")
+            return outcome("not_evaluated", "Template labels for the PDB join are missing.")
         unprotected = [p for p in matched if p.get("min_available") in (0, "0%")
                        or p.get("max_unavailable") == "100%"
                        or isinstance(p.get("max_unavailable"), int) and replicas is not None and p["max_unavailable"] >= replicas]
         valid = [p for p in matched if p.get("min_available") is not None or p.get("max_unavailable") is not None]
         if matched and len(valid) != len(matched):
-            return outcome("not_evaluated", "PDB seleccionado sin minAvailable/maxUnavailable observado.", {"matched_pdbs": matched}, ["kube_pdbs"])
+            return outcome("not_evaluated", "Selected PDB without an observed minAvailable/maxUnavailable.", {"matched_pdbs": matched}, ["kube_pdbs"])
         if unprotected:
-            return decision(False, "PDB seleccionado permite retirar todas las replicas; no ofrece la proteccion requerida frente a interrupcion voluntaria.",
+            return decision(False, "The selected PDB allows every replica to be evicted; it does not give the required protection against voluntary disruption.",
                             {"desired_replicas": replicas, "matched_pdbs": matched}, [row["source_id"], "kube_pdbs"])
-        return decision(bool(matched), "Selector policy/v1 evaluado por namespace y labels; un PDB no protege interrupciones involuntarias.",
+        return decision(bool(matched), "policy/v1 selector evaluated by namespace and labels; a PDB does not protect against involuntary disruption.",
                         {"desired_replicas": replicas, "matched_pdbs": matched}, [row["source_id"], "kube_pdbs"])
     if test == "hpa":
         if not source_complete(raw, "kube_hpas"):
-            return outcome("not_evaluated", "HPA no recogido completamente; no se infiere ausencia.", source_ids=["kube_hpas"])
+            return outcome("not_evaluated", "HPAs not fully collected; absence is not inferred.", source_ids=["kube_hpas"])
         matched = [h for h in raw["inventory"].get("hpas", []) if h.get("namespace") == row.get("namespace")
                    and pick(h, "target", "name") == row["name"] and pick(h, "target", "kind") == row["kind"]]
-        return conditional(bool(matched), expected(raw, "autoscaling_required", row), "Target de HPA exacto; metricas y eficacia requieren validacion.",
+        return conditional(bool(matched), expected(raw, "autoscaling_required", row), "Exact HPA target; metrics and effectiveness need validation.",
                            {"matched_hpas": matched}, [row["source_id"], "kube_hpas"])
     if test == "replicas":
         requirement, replicas = expected(raw, "availability_required", row), row.get("desired_replicas")
-        return conditional(None if replicas is None else replicas >= 2, requirement, "Replicas deseadas, no disponibilidad medida.",
+        return conditional(None if replicas is None else replicas >= 2, requirement, "Desired replicas, not measured availability.",
                            {"desired_replicas": replicas, "ready_replicas": row.get("ready_replicas")})
     if test == "container_security":
         if row.get("os_name") == "windows" or pick(row, "node_selector", "kubernetes.io/os") == "windows":
-            return outcome("not_applicable", "Contenedor Windows: controles Linux no se aplican por analogia.")
+            return outcome("not_applicable", "Windows container: Linux controls are not applied by analogy.")
         combined = containers + (row.get("init_containers") or [])
         def effective_uid(container):
             return container["run_as_user"] if container.get("run_as_user") is not None else row.get("run_as_user")
@@ -2213,41 +2213,41 @@ def evaluate_workload(rule, row, raw):
                    and (effective_nonroot(c) is True or isinstance(effective_uid(c), (int, float))
                         and effective_uid(c) > 0) for c in combined)
         return decision(False if dangerous else True if safe else None,
-                        "Privilegios explicitos; sin UID/securityContext no se infiere que la imagen ejecute como root.",
+                        "Explicit privileges; without a UID or securityContext the image is not assumed to run as root.",
                         {"containers": combined, "explicitly_elevated": dangerous, "pod_security": row.get("pod_security")})
     if test == "images":
         images = [c.get("image") for c in containers + (row.get("init_containers") or [])]
         if any(image is None for image in images):
-            return outcome("not_evaluated", "Falta una referencia de imagen.")
+            return outcome("not_evaluated", "An image reference is missing.")
         mutable = [image for image in images if "@sha256:" not in image
                    and (":" not in image.rsplit("/", 1)[-1] or image.rsplit(":", 1)[-1] == "latest")]
-        return decision(not mutable, "latest o tag omitido observado; tag especifico no demuestra inmutabilidad ni escaneo.",
+        return decision(not mutable, "latest or a missing tag observed; a specific tag does not prove immutability or scanning.",
                         {"images": images, "mutable_default_references": mutable})
     if test == "network_policies":
         if not source_complete(raw, "kube_network_policies"):
-            return outcome("not_evaluated", "NetworkPolicies incompletas/no autorizadas.", source_ids=["kube_network_policies"])
+            return outcome("not_evaluated", "NetworkPolicies incomplete or not authorized.", source_ids=["kube_network_policies"])
         matched = [p for p in raw["inventory"].get("network_policies", []) if p.get("namespace") == row.get("namespace")
                    and selector_matches(p.get("selector"), row.get("template_labels")) is True]
         if row.get("template_labels") is None:
-            return outcome("not_evaluated", "Faltan labels para seleccionar politicas.")
+            return outcome("not_evaluated", "Labels to select policies are missing.")
         return conditional(bool(matched), expected(raw, "network_policy_required", row),
-                           "Selector observado; tipos/reglas/motor deben validarse para acreditar aislamiento.",
+                           "Selector observed; types, rules and engine must be validated to prove isolation.",
                            {"matched_policies": matched}, [row["source_id"], "kube_network_policies"])
     raise EvidenceError("unknown_rule", "Workload rule has no evaluator.", "rule_catalog")
 
 
 def evaluate_namespace(rule, row, raw):
     if row.get("name") in SYSTEM_NAMESPACES:
-        return outcome("not_applicable", "Namespace de sistema, sujeto a baseline del proveedor.")
+        return outcome("not_applicable", "System namespace, subject to the provider's baseline.")
     if rule["test"] == "quota":
         if not source_complete(raw, "kube_resource_quotas"):
-            return outcome("not_evaluated", "ResourceQuota no disponible completamente.", source_ids=["kube_resource_quotas"])
+            return outcome("not_evaluated", "ResourceQuotas not fully available.", source_ids=["kube_resource_quotas"])
         matched = [quota for quota in raw["inventory"].get("resource_quotas", []) if quota.get("namespace") == row["name"]]
-        return conditional(bool(matched), expected(raw, "quota_required"), "Solo existencia/configuracion de cuota, no consumo facturado.",
+        return conditional(bool(matched), expected(raw, "quota_required"), "Quota existence/configuration only, not billed consumption.",
                            {"quotas": matched}, ["kube_resource_quotas", "kube_namespaces"])
     value = pick(row, "labels", "pod-security.kubernetes.io/enforce")
     active = True if value in ("baseline", "restricted") else False if value in ("privileged", None) else None
-    return conditional(active, expected(raw, "pod_security_required"), "Etiqueta enforce observada; audit/warn o addon Policy no son equivalentes a cumplimiento.",
+    return conditional(active, expected(raw, "pod_security_required"), "enforce label observed; audit/warn or the Policy add-on are not equivalent to compliance.",
                                {"enforce": value}, ["kube_namespaces"])
 
 
@@ -2256,33 +2256,33 @@ def evaluate_resource(rule, row, raw):
     if test == "pvc_binding":
         phase = row.get("phase")
         if phase == "Bound":
-            return decision(True, "PVC Bound observado; no prueba rendimiento ni recuperabilidad.", {"phase": phase, "volume_name": row.get("volume_name")})
+            return decision(True, "PVC Bound observed; this does not prove performance or recoverability.", {"phase": phase, "volume_name": row.get("volume_name")})
         if phase == "Lost":
-            return decision(False, "PVC Lost observado.", {"phase": phase})
+            return decision(False, "PVC Lost observed.", {"phase": phase})
         classes = raw["inventory"].get("storage_classes", [])
         sc = next((c for c in classes if c["name"] == row.get("storage_class")), None)
         consumers = [pod for pod in raw["inventory"].get("pods", []) if pod.get("namespace") == row.get("namespace")
                      and row["name"] in pod.get("pvc_names", []) and pod.get("phase") not in ("Succeeded", "Failed")]
         if phase == "Pending" and pick(sc, "volume_binding_mode") == "WaitForFirstConsumer" and not consumers:
             if source_complete(raw, "kube_pods", "kube_storage_classes"):
-                return outcome("not_applicable", "WaitForFirstConsumer sin consumidor activo: binding diferido puede ser intencional.",
+                return outcome("not_applicable", "WaitForFirstConsumer without an active consumer: deferred binding can be intentional.",
                                {"phase": phase, "storage_class": sc["name"]}, ["kube_pods", "kube_storage_classes", "kube_pvcs"])
         return decision(False if phase == "Pending" and consumers else None,
-                        "Pending con consumidor observado requiere revision; ausencia de consumidor no autorizado no se presupone.",
+                        "Pending with an observed consumer needs review; a missing consumer is not assumed without authorized evidence.",
                         {"phase": phase, "active_consumers": [{"namespace": p["namespace"], "pod": p["name"]} for p in consumers]},
                         ["kube_pvcs", "kube_pods", "kube_storage_classes"])
     config = row.get("configuration", {})
     if test == "load_balancer":
         sku = row.get("sku_name")
         return decision(True if sku == "Standard" else False if sku == "Basic" else None,
-                        "SKU Azure observada; frontends publicos/privados no se deducen del nombre.", {"sku_name": sku, "frontends": row.get("frontends")})
+                        "Azure SKU observed; public or private frontends are not inferred from the name.", {"sku_name": sku, "frontends": row.get("frontends")})
     if test == "storage_tls":
         https, tls = config.get("supportsHttpsTrafficOnly"), config.get("minimumTlsVersion")
         value = False if https is False or tls in ("TLS1_0", "TLS1_1") else True if https is True and tls in ("TLS1_2", "TLS1_3") else None
-        return decision(value, "Valores ARM de HTTPS y TLS minimo; no se han leido keys ni datos de Storage.", config)
+        return decision(value, "ARM HTTPS and minimum TLS values; no Storage keys or data were read.", config)
     if test == "keyvault_rbac":
         return decision(True if config.get("enableRbacAuthorization") is True else None,
-                        "RBAC habilitado no prueba minimo privilegio; access policies pueden requerir una excepcion justificada.", config)
+                        "RBAC enabled does not prove least privilege; access policies can need a justified exception.", config)
     if test == "nsg_exposure":
         exposure = []
         for item in row.get("security_rules", []):
@@ -2292,7 +2292,7 @@ def evaluate_resource(rule, row, raw):
             admin = any(value in ("*", "22", "3389", "0-65535") for value in ports)
             if item.get("direction") == "Inbound" and item.get("access") == "Allow" and broad and admin:
                 exposure.append(item)
-        return decision(False if exposure else None, "Regla explicita amplia; asociacion, precedencia y escucha efectiva requieren revision.",
+        return decision(False if exposure else None, "Broad explicit rule; association, priority and an actual listener need review.",
                         {"broad_administrative_rules": exposure})
     raise EvidenceError("unknown_rule", "Resource rule has no evaluator.", "rule_catalog")
 
@@ -2320,7 +2320,7 @@ def assessment_check(rule, row, result, raw, reference):
                 "checklist_guid": item["guid"], "title": rule["title"], "status": result["status"],
                 "level": "cluster" if rule["level"] in ("cluster", "node_pool") else "workload" if rule["level"] in ("workload", "namespace") else "resource",
                 "area": rule["area"], "pillar": rule["pillar"], "severity": rule["severity"],
-                "severity_label": {"critical": "Critica", "high": "Alta", "medium": "Media", "low": "Baja"}[rule["severity"]],
+                "severity_label": {"critical": "Critical", "high": "High", "medium": "Medium", "low": "Low"}[rule["severity"]],
                 "resource_id": resource_id, "resource_name": row.get("name") or cluster["name"],
                 "namespace": namespace, "workload_name": workload_name, "cluster_name": cluster["name"], "cluster_id": cluster["id"],
                 "kubernetes_ref": {"kind": row.get("kind"), "namespace": namespace, "name": row.get("name"), "uid": row.get("uid")} if row.get("uid") else None,
@@ -2359,8 +2359,8 @@ def evaluate(raw, reference):
                 ("kube_pvcs",) if target == "pvc" else tuple("kube_" + key for key in ("deployments", "statefulsets", "daemonsets", "jobs", "cronjobs"))
                 if target == "workload" else ("arm_related_inventory",))
             result = outcome("not_applicable" if source_complete(raw, *sources) else "not_evaluated",
-                             "No hay objetos aplicables en inventario completo." if source_complete(raw, *sources)
-                             else "Inventario no disponible/completo; no se inventan objetos, hallazgos o salud.", source_ids=list(sources))
+                             "No applicable objects in the complete inventory." if source_complete(raw, *sources)
+                             else "Inventory unavailable or incomplete; no objects, findings or health are invented.", source_ids=list(sources))
             checks.append(assessment_check(rule, {}, result, raw, reference))
             continue
         for row in records:
@@ -2376,10 +2376,10 @@ def evaluate(raw, reference):
         rule = {"rule_id": "M" + item["id"], "checklist_id": item["id"], "level": "cluster",
                 "area": {"security": "security", "cost": "finops", "performance": "optimization"}.get(pillar, "best_practices"),
                 "pillar": pillar, "severity": str(item["severity"]).lower() if str(item["severity"]).lower() in SEVERITIES else "low",
-                "effort": "medium", "title": "Revision de arquitectura: " + item["text"],
-                "recommendation": "Validar aplicabilidad y evidencia documental con el propietario y la guia actual; no ejecutar snippets legacy.",
-                "business_impact": "El riesgo depende de requisitos y evidencia aun no recogidos; no se presume incumplimiento."}
-        result = outcome("not_evaluated", "Item de checklist no automatizado por este lector: requisitos/IaC/DR/pruebas u otra fuente faltan.",
+                "effort": "medium", "title": "Architecture review: " + item["text"],
+                "recommendation": "Validate applicability and documented evidence with the owner and the current guidance; do not run legacy snippets.",
+                "business_impact": "The risk depends on requirements and evidence not yet collected; noncompliance is not assumed."}
+        result = outcome("not_evaluated", "Checklist item not automated by this reader: requirements, IaC, DR, tests or another source are missing.",
                          {"checklist_id": item["id"], "upstream_text": item["text"]}, ["reference_catalog"])
         checks.append(assessment_check(rule, raw["cluster"], result, raw, reference))
     if len({check["check_id"] for check in checks}) != len(checks):
@@ -2411,7 +2411,7 @@ def actions_for(findings):
                  "area": check["area"], "pillar": check["pillar"], "severity": check["severity"], "status": "failed",
                  "level": check["level"], "resource_name": check["resource_name"],
                  "effort": check["effort"], "planning_bucket": {"low": "quick_win", "medium": "short_term", "high": "medium_term"}[check["effort"]],
-                 "planning_note": "Bucket orientativo: <1 semana / 1-3 meses / medio plazo; no es una medicion ni compromiso de entrega.",
+                 "planning_note": "Indicative bucket: <1 week / 1-3 months / medium term; not a measurement or a delivery commitment.",
                  "recommendation": check["recommendation"], "learn_url": check["learn_url"], "owner": None}
                 for check in sorted(findings, key=lambda row: (SEVERITIES.index(row["severity"]), row["check_id"]))
     ]
@@ -2430,12 +2430,12 @@ def finops_for(raw):
             ratio = usage / capacity
             if ratio < .2:
                 candidates.append({
-                    "id": "CURRENT-NODE-" + metric["name"], "title": "Revisar capacidad con una muestra actual, no infrautilizacion mensual",
+                    "id": "CURRENT-NODE-" + metric["name"], "title": "Review capacity with a current sample, not monthly underutilization",
                     "resource_id": metric["resource_id"], "source_id": metric["source_id"], "basis": "Local review threshold <20% current CPU/allocatable, no sustained-use claim",
                     "value": round(100 * ratio, 6), "unit": "percent", "numerator": usage, "numerator_unit": "cores",
                     "denominator": capacity, "denominator_unit": "allocatable_cores", "sample_count": 1,
                     "window": {"timestamp": metric["timestamp"], "duration": metric["window"]},
-                    "recommendation": "Obtener historial, picos, memoria y requisitos antes de right-sizing; no cambiar capacidad.",
+                    "recommendation": "Get history, peaks, memory and requirements before right-sizing; do not change capacity.",
                     "estimated_savings": None,
                 })
     owners = {row["uid"]: row for row in inventory.get("workloads", []) + inventory.get("replicasets", [])}
@@ -2476,12 +2476,12 @@ def finops_for(raw):
         requests, usage, workload = sum(group["requests"]), sum(group["usage"]), group["workload"]
         if requests > 0 and usage / requests < .5:
             candidates.append({
-                "id": "CURRENT-WORKLOAD-" + workload["uid"], "title": "Revisar requests con muestras actuales de contenedores unidos por owner UID",
+                "id": "CURRENT-WORKLOAD-" + workload["uid"], "title": "Review requests with current samples from containers joined by owner UID",
                 "resource_id": workload["resource_id"], "namespace": workload.get("namespace"), "workload_name": workload["name"],
                 "source_id": "kube_pod_metrics", "basis": "Current measured containers / same containers' configured requests; not historical or billing allocation",
                 "value": round(100 * usage / requests, 6), "unit": "percent", "numerator": usage, "numerator_unit": "cores",
                 "denominator": requests, "denominator_unit": "requested_cores", "sample_count": group["samples"], "window": group["windows"],
-                "recommendation": "Revisar cobertura y datos historicos antes de cambiar requests; no garantiza right-sizing ni ahorro.",
+                "recommendation": "Review coverage and historical data before you change requests; this guarantees neither right-sizing nor savings.",
                 "estimated_savings": None,
             })
     complete_refs = source_complete(raw, "arm_related_inventory", "kube_pvs", "kube_services")
@@ -2503,11 +2503,11 @@ def finops_for(raw):
                        and resource["resource_id"].lower() not in public_refs)
         if unattached:
             candidates.append({"id": "UNATTACHED-" + hashlib.sha256(resource["resource_id"].encode()).hexdigest()[:12],
-                               "title": "Revisar activo aprobado sin attachment confirmado",
+                               "title": "Review an approved asset with no confirmed attachment",
                                "resource_id": resource["resource_id"], "source_id": resource["source_id"],
                                "basis": "Explicit attachment fields + complete collected PV/LB/NIC scope; not cluster ownership by nodeRG name",
                                "value": "unattached", "unit": "attachment_state", "sample_count": 1, "window": None,
-                               "recommendation": "Confirmar retencion, propietario y coste antes de decidir; no borrar ni prometer ahorro.",
+                               "recommendation": "Confirm retention, owner and cost before you decide; do not delete or promise savings.",
                                "estimated_savings": None})
     cost_rows = raw.get("cost_rows", [])
     currencies = {row["currency"] for row in cost_rows}
@@ -2526,7 +2526,7 @@ def finops_for(raw):
                     "ActualCost uses observed approved ResourceIds and actual currency; it is not namespace/workload billing.",
                     "Billing latency, current partial day and allocation visibility remain limitations even with complete query paging.",
                     "No computed reservations, savings-plan/Spot savings, rightsizing promise or deletion recommendation.",
-                    "Incomplete/denied/unconfigured sources remain No evaluado; different currencies are never added together.",
+                    "Incomplete/denied/unconfigured sources remain Not evaluated; different currencies are never added together.",
                 ],
     }
 
@@ -2870,12 +2870,12 @@ def finish_snapshot(raw, reference, provenance="LIVE", environment="UNSPECIFIED"
                 "source_data": {key: raw.get(key) for key in ("regional_versions", "upgrade_profile", "arm_maintenance", "arm_diagnostics", "advisor", "cost_rows", "registry_role_assignments")},
                 "checks": checks, "findings": findings, "scores": scores, "finops": finops_for(raw), "actions": actions_for(findings),
                 "executive_messages": [
-                    str(len(findings)) + " hallazgos de configuracion observados; " + str(critical) + " criticos reales, sin completar un Top 5 ficticio.",
-                    str(global_score["evaluated"]) + " de " + str(global_score["evaluated"] + global_score["not_evaluated"]) + " indicadores aplicables evaluados; cobertura separada de puntuacion.",
-                    str(global_score["not_evaluated"]) + " indicadores No evaluado y " + str(global_score["not_applicable"]) + " No aplica; no equivalen a salud.",
-                    str(len(blind_spots)) + " fuentes con acceso, configuracion o cobertura incompletos; revisar las limitaciones antes de priorizar.",
-                    "Ahorro estimado no calculado; " + str(len(raw.get("cost_rows", []))) + " filas de coste real y "
-                    + str(len(raw["inventory"].get("node_metrics", [])) + len(raw["inventory"].get("pod_metrics", []))) + " muestras actuales conservadas.",
+                    str(len(findings)) + " of the configuration checks failed; " + str(critical) + " critical among them. No invented risks fill a Top 5.",
+                    str(global_score["evaluated"]) + " of " + str(global_score["evaluated"] + global_score["not_evaluated"]) + " applicable indicators were evaluated; coverage is reported separately from the score.",
+                    str(global_score["not_evaluated"]) + " Not evaluated and " + str(global_score["not_applicable"]) + " Not applicable indicators; neither status means healthy.",
+                    str(len(blind_spots)) + " of the sources had incomplete access, configuration or coverage; review the limitations before you prioritize.",
+                    "Estimated savings not calculated; actual cost rows: " + str(len(raw.get("cost_rows", []))) + "; current samples kept: "
+                    + str(len(raw["inventory"].get("node_metrics", [])) + len(raw["inventory"].get("pod_metrics", []))) + ".",
                 ],
                 "methodology": {
                     "score_kind": "local_assessment_indicator", "official_waf_score": False, "read_only": True,

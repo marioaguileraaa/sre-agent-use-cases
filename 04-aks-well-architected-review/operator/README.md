@@ -92,7 +92,7 @@ credential, license or paid Defender/monitoring plan is added.
 
 Optional audit grants are separately gated: Cluster User and AKS RBAC Reader
 on **only the new cluster**. Reader still does not prove access to nodes,
-PVs or StorageClasses; retain actual 403/502 as No evaluado. An optional
+PVs or StorageClasses; retain actual 403/502 as Not evaluated. An optional
 separate human demo role permits only namespace/Deployment/Service writes
 and associated reads on the new cluster, without secrets, exec, role
 bindings or admin. It is never given to the audit/scheduler identity.
@@ -346,7 +346,7 @@ different from current live Kubernetes evidence.
 | Native schedule `nextRun` absent or wrong | Enabled state, `Europe/Madrid`, native definitions and both job links | Treat readback as failed. Calculated instants are not native receipts. |
 | Job/ARM POST accepted, cluster not yet stopped/running | Actual native job result and repeated fixed-target state under the one-hour bound | Keep pending/failed explicit; do not call request acceptance recovery or bypass polling/timeouts. |
 | Pod is not ready / human apply denied | New-cluster context, bounded human role, Arm64 manifest and actual rollout | Stop; never use `--admin`, exec or an existing cluster as a substitute. Manifest validation is not workload execution. |
-| Kubernetes 403/502 in audit | Separate source/data-role/network boundary | Preserve **No evaluado**; do not start an existing stopped cluster, create a paid cluster or add Cluster Admin to improve coverage. |
+| Kubernetes 403/502 in audit | Separate source/data-role/network boundary | Preserve **Not evaluated**; do not start an existing stopped cluster, create a paid cluster or add Cluster Admin to improve coverage. |
 | Deployment partially fails | Actual created IDs, native deployment/job receipts and continuing charges | Record the failure and obtain explicit cleanup/recovery approval. No automatic RG deletion or rollback is implemented. |
 
 ## Official references

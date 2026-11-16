@@ -33,11 +33,11 @@ APPROVED_LOG_WORKSPACES = [
         "resource_group": "<RESOURCE_GROUP>",
     }
 ]
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 OUTPUT_DIRECTORY = "operations-digest-reports"
 
 ARM_ORIGIN = "https://management.azure.com"
@@ -115,973 +115,968 @@ CRITICAL_EXTENSION_TOKENS = (
 
 SEVERITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 SEVERITY_LABELS = {
-    "critical": "Crítica",
-    "high": "Alta",
-    "medium": "Media",
-    "low": "Baja",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
 }
 CATEGORY_LABELS = {
-    "native_alert": "Alerta nativa Azure Monitor",
-    "service_health": "Comunicación Azure Service Health",
-    "extension_failure": "Fallo de extensión VM / Azure Arc",
-    "connectivity_posture": "Anomalía de plano de control / conectividad",
-    "telemetry_anomaly": "Anomalía estadística / umbral de telemetría",
-    "advisor_recommendation": "Recomendación correlacionada Azure Advisor",
+    "native_alert": "Azure Monitor native alert",
+    "service_health": "Azure Service Health communication",
+    "extension_failure": "VM / Azure Arc extension failure",
+    "connectivity_posture": "Control plane / connectivity anomaly",
+    "telemetry_anomaly": "Telemetry statistical / threshold anomaly",
+    "advisor_recommendation": "Correlated Azure Advisor recommendation",
 }
 HORIZON_LABELS = {
-    "immediate_24h": "Inmediato <24h",
-    "short_term_7d": "Corto plazo 1-7 días",
-    "monthly_cycle": "Ciclo mensual",
+    "immediate_24h": "Immediate <24h",
+    "short_term_7d": "Short term 1-7 days",
+    "monthly_cycle": "Monthly cycle",
 }
 EFFORT_LABELS = {
-    "low": "Bajo",
-    "medium": "Medio",
-    "high": "Alto",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
 }
 
 # BEGIN BUILD-TIME ASSETS
 HTML_TEMPLATE = (
-    '<!DOCTYPE html>\n<html lang="es" data-theme="light">\n<head>\n<meta charset="utf-8">\n<meta name="viewpo'
+    '<!DOCTYPE html>\n<html lang="en" data-theme="light">\n<head>\n<meta charset="utf-8">\n<meta name="viewpo'
     'rt" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" conten'
     't="default-src \'none\'; img-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; base-ur'
-    'i \'none\'; form-action \'none\'; connect-src \'none\'">\n<title>Informe de Operaciones, Incidencias, Anoma'
-    'lías y Acciones Recomendadas</title>\n<style>\n:root {\n  --brand-orange: #FF4E00;\n  --brand-orange-alt'
-    ': #FC4C00;\n  --brand-orange-text: #C23800;\n  --brand-orange-wash: #FFF2EC;\n  --brand-orange-line: #F'
-    'FC9AE;\n  --slate-topbar: #141B24;\n  --slate-header: #1C2532;\n  --bg-page: #F6F5F2;\n  --bg-panel: #FF'
-    'FFFF;\n  --bg-subtle: #F1EEE8;\n  --bg-row-hover: #FAF8F4;\n  --ink-primary: #141B24;\n  --ink-secondary'
-    ': #3E4C5E;\n  --ink-muted: #5A687A;\n  --border-hairline: #DEDCD6;\n  --border-strong: #9AA5B5;\n  --her'
-    'o-bg: #1C2532;\n  --hero-deep: #141B24;\n  --hero-ink: #E6EBF1;\n  --hero-muted: #C3CCD8;\n  --hero-line'
-    ': rgba(255, 255, 255, 0.18);\n  --sev-critical: #B42318;\n  --sev-critical-bg: #FEE4E2;\n  --sev-critic'
-    'al-bar: #D92D20;\n  --sev-high: #B93815;\n  --sev-high-bg: #FFEAD5;\n  --sev-high-bar: #EF6820;\n  --sev'
-    '-medium: #93370D;\n  --sev-medium-bg: #FEF0C7;\n  --sev-medium-bar: #F79009;\n  --sev-low: #175CD3;\n  -'
-    '-sev-low-bg: #D1E9FF;\n  --sev-low-bar: #2E90FA;\n  --sev-info: #344054;\n  --sev-info-bg: #EAECF0;\n  -'
-    '-sev-info-bar: #98A2B3;\n  --ok: #067647;\n  --ok-bg: #DCFAE6;\n  --note-bg: #FFFAEB;\n  --note-line: #F'
-    'EDF89;\n  --note-ink: #7A2E0E;\n  --chart: #3E4C5E;\n  --edge: rgba(20, 27, 36, 0.18);\n  --shadow-card:'
-    " 0 1px 2px rgba(20, 27, 36, 0.04), 0 6px 20px rgba(20, 27, 36, 0.06);\n  --font-sans: 'Outfit', 'Sego"
-    "e UI', system-ui, -apple-system, sans-serif;\n  --font-mono: 'Consolas', ui-monospace, 'Cascadia Mono"
-    '\', monospace;\n  color-scheme: light;\n}\n\nhtml[data-theme="dark"] {\n  --brand-orange: #FF5C14;\n  --bra'
-    'nd-orange-alt: #FF6B2B;\n  --brand-orange-text: #FF8854;\n  --brand-orange-wash: #2B1A12;\n  --brand-or'
-    'ange-line: #6E3417;\n  --slate-topbar: #0B0F15;\n  --slate-header: #121923;\n  --bg-page: #0F141B;\n  --'
-    'bg-panel: #161E29;\n  --bg-subtle: #1D2736;\n  --bg-row-hover: #1B2431;\n  --ink-primary: #F3F5F8;\n  --'
-    'ink-secondary: #CBD5E1;\n  --ink-muted: #9AA8BA;\n  --border-hairline: #2A3647;\n  --border-strong: #47'
-    '5569;\n  --hero-bg: #121923;\n  --hero-deep: #0B0F15;\n  --hero-muted: #B8C3D1;\n  --hero-line: rgba(255'
-    ', 255, 255, 0.14);\n  --sev-critical: #FDA29B;\n  --sev-critical-bg: rgba(217, 45, 32, 0.22);\n  --sev-'
-    'high: #F9B87F;\n  --sev-high-bg: rgba(239, 104, 32, 0.22);\n  --sev-medium: #FEC84B;\n  --sev-medium-bg'
-    ': rgba(247, 144, 9, 0.18);\n  --sev-low: #84CAFF;\n  --sev-low-bg: rgba(46, 144, 250, 0.2);\n  --sev-in'
-    'fo: #D0D5DD;\n  --sev-info-bg: rgba(152, 162, 179, 0.2);\n  --ok: #75E0A7;\n  --ok-bg: rgba(23, 178, 10'
-    '6, 0.18);\n  --note-bg: #2A2212;\n  --note-line: #6B571E;\n  --note-ink: #FDE68A;\n  --chart: #9AA8BA;\n '
-    ' --edge: rgba(0, 0, 0, 0.55);\n  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0'
-    ', 0.25);\n  color-scheme: dark;\n}\n\n*, *::before, *::after { box-sizing: border-box; }\nhtml { scroll-b'
-    'ehavior: smooth; scrollbar-color: var(--border-strong) var(--bg-page); -webkit-text-size-adjust: 100'
-    '%; }\nbody { margin: 0; background: var(--bg-page); color: var(--ink-primary); font: 15px/1.55 var(--'
-    'font-sans); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }\n::selection {'
-    ' background: #FFD9C7; color: #141B24; }\na { color: var(--brand-orange-text); text-decoration-thickne'
-    'ss: 1px; text-underline-offset: 3px; }\na:hover { text-decoration-thickness: 2px; }\n:focus-visible { '
-    'outline: 2px solid var(--brand-orange); outline-offset: 2px; }\nbutton, input, select { font: inherit'
-    '; color: inherit; }\ncode { font-family: var(--font-mono); font-size: 0.86em; }\np, li { text-wrap: pr'
-    'etty; }\nh2, h3 { text-wrap: balance; }\nsvg { flex: none; }\n.sr-only { position: absolute; width: 1px'
-    '; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;'
-    ' border: 0; }\n.skip-link { position: absolute; left: 16px; top: -60px; z-index: 60; padding: 8px 14p'
-    'x; border-radius: 8px; background: var(--bg-panel); color: var(--ink-primary); font-weight: 600; box'
-    '-shadow: var(--shadow-card); }\n.skip-link:focus { top: 12px; }\n.print-only { display: none; }\n.print'
-    '-only:empty { display: none !important; }\n\n/* Top bar */\n.topbar { position: sticky; top: 0; z-index'
-    ': 40; background-color: var(--slate-topbar); color: #FFFFFF; border-bottom: 2px solid var(--brand-or'
-    'ange); }\n.topbar-inner { max-width: 1400px; min-height: 58px; margin: 0 auto; padding: 8px 40px; dis'
-    'play: flex; align-items: center; gap: 16px; }\n.brand { display: flex; align-items: center; gap: 12px'
-    '; min-width: 0; color: #FFFFFF; text-decoration: none; }\n.client-plaque { flex-shrink: 0; display: i'
-    'nline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 4px 10px; border-radius: 6px; '
-    'background: #FFFFFF; color: #141B24; }\n.client-plaque img { display: block; max-height: 24px; width:'
-    ' auto; }\n.client-name-label { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }\n.brand-te'
-    'xt { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }\n.brand-text b { font-s'
-    'ize: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n.bran'
-    'd-text span { font-size: 12.5px; color: #C3CCD8; white-space: nowrap; overflow: hidden; text-overflo'
-    'w: ellipsis; }\n.section-nav { display: flex; gap: 2px; margin-left: 12px; }\n.section-nav a { padding'
-    ': 7px 10px; border-radius: 6px; color: #D5DCE5; font-size: 13.5px; font-weight: 600; text-decoration'
-    ': none; white-space: nowrap; }\n.section-nav a:hover { background: rgba(255, 255, 255, 0.08); color: '
-    '#FFFFFF; }\n.section-nav a[aria-current="true"] { color: #FFFFFF; box-shadow: inset 0 -2px 0 var(--br'
-    'and-orange); border-radius: 6px 6px 0 0; }\n.section-nav .n { margin-left: 5px; color: #9FB0C3; font-'
-    'weight: 500; }\n.toolbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; f'
-    'lex-shrink: 0; }\n.chip-ro { padding: 4px 11px; border: 1px solid rgba(255, 255, 255, 0.24); border-r'
-    'adius: 999px; color: #D5DCE5; font-size: 12.5px; font-weight: 600; white-space: nowrap; }\n.btn { dis'
-    'play: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; padding'
-    ': 0 14px; border: 1px solid transparent; border-radius: 8px; font-size: 13.5px; font-weight: 600; li'
-    'ne-height: 1.2; white-space: nowrap; cursor: pointer; text-decoration: none; transition: background-'
-    'color 150ms ease, border-color 150ms ease, filter 150ms ease; }\n.btn svg { width: 16px; height: 16px'
-    '; }\n.btn-bar { background: transparent; color: #F3F5F8; border-color: rgba(255, 255, 255, 0.26); }\n.'
-    'btn-bar:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.45); }\n.b'
-    'tn-primary { background: var(--brand-orange); border-color: var(--brand-orange); color: #141B24; }\n.'
-    'btn-primary:hover { filter: brightness(1.07); }\n.btn-ghost { background: var(--bg-panel); color: var'
-    '(--ink-primary); border-color: var(--border-strong); }\n.btn-ghost:hover { background: var(--bg-subtl'
-    'e); border-color: var(--ink-secondary); }\n.btn-bar:focus-visible, .btn-primary:focus-visible { outli'
-    'ne-color: #FFFFFF; }\n\n/* Hero */\n.hero { background: linear-gradient(160deg, var(--hero-bg) 0%, var('
-    '--hero-deep) 100%); color: var(--hero-ink); padding: 44px 40px 100px; }\n.hero-in { max-width: 1320px'
-    '; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px 48px; align-'
-    'items: start; }\n.hero h1 { margin: 0; max-width: 24ch; color: #FFFFFF; font-size: 42px; line-height:'
-    ' 1.1; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }\n.hero-scope { margin: 10px 0 '
-    '0; color: var(--hero-muted); font-size: 15px; }\n.hero-lead { margin: 16px 0 0; max-width: 68ch; font'
-    '-size: 17px; line-height: 1.55; }\n.hero-lead b { color: #FFFFFF; font-weight: 700; }\n.meta { display'
-    ': flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }\n.meta li { max-'
-    'width: 100%; padding: 4px 11px; border: 1px solid var(--hero-line); border-radius: 999px; color: var'
-    '(--hero-muted); font-size: 12.5px; overflow-wrap: anywhere; }\n.meta li.on { color: #FFFFFF; font-wei'
-    'ght: 600; border-color: rgba(255, 255, 255, 0.42); }\n.meta li.warn { color: #FEDF89; font-weight: 60'
-    '0; border-color: rgba(254, 223, 137, 0.5); }\n.verdict { padding: 20px 22px; border: 1px solid var(--'
-    'verdict-line, var(--hero-line)); border-radius: 14px; background: rgba(255, 255, 255, 0.05); }\n.verd'
-    'ict .k { color: var(--hero-muted); font-size: 13px; font-weight: 600; }\n.verdict b { display: block;'
-    ' margin-top: 6px; color: var(--verdict-ink, #FFFFFF); font-size: 28px; line-height: 1.15; font-weigh'
-    't: 700; }\n.verdict p { margin: 8px 0 0; color: var(--hero-muted); font-size: 14px; }\n.verdict p + p '
-    '{ margin-top: 4px; }\n.verdict.crit { --verdict-ink: #FFB4AB; --verdict-line: rgba(255, 180, 171, 0.5'
-    '); }\n.verdict.warn { --verdict-ink: #FEDF89; --verdict-line: rgba(254, 223, 137, 0.5); }\n.verdict.ok'
-    ' { --verdict-ink: #A6F4C5; --verdict-line: rgba(166, 244, 197, 0.45); }\n.dist { grid-column: 1 / -1;'
-    ' margin-top: 4px; }\n.dist-head { display: flex; justify-content: space-between; gap: 12px; margin-bo'
-    'ttom: 8px; color: var(--hero-muted); font-size: 13px; }\n.track { display: flex; height: 12px; overfl'
-    'ow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.12); }\n.track i { display: block'
-    '; height: 100%; }\n.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; color: '
-    'var(--hero-muted); font-size: 13px; }\n.legend span { display: inline-flex; align-items: center; gap:'
-    ' 7px; }\n.legend i { width: 10px; height: 10px; border-radius: 3px; }\n.legend b { color: #FFFFFF; }\n\n'
-    '/* Page body */\n.page { max-width: 1320px; margin: 0 auto; padding: 0 40px 56px; }\n.kpis { position:'
-    ' relative; z-index: 2; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; m'
-    'argin-top: -60px; }\n.kpi { min-width: 0; padding: 16px 18px 18px; border: 1px solid var(--border-hai'
-    'rline); border-radius: 12px; background: var(--bg-panel); box-shadow: var(--shadow-card); }\n.kpi .v '
-    '{ font-size: 36px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; }\n.kpi .l { margin-top'
-    ': 10px; font-size: 14px; line-height: 1.35; font-weight: 600; }\n.kpi .d { margin-top: 4px; color: va'
-    'r(--ink-muted); font-size: 12.5px; line-height: 1.4; }\n.notes { display: grid; gap: 10px; margin-top'
-    ': 16px; }\n.notes:empty { display: none; }\n.note { display: flex; align-items: flex-start; gap: 10px;'
-    ' padding: 11px 16px; border: 1px solid var(--note-line); border-radius: 10px; background: var(--note'
-    '-bg); color: var(--note-ink); font-size: 14px; font-weight: 500; }\n.note svg { width: 18px; height: '
-    '18px; margin-top: 1px; }\n.note a { color: inherit; font-weight: 700; }\n.note.sim { background: repea'
-    'ting-linear-gradient(135deg, var(--note-bg) 0 12px, rgba(254, 223, 137, 0.07) 12px 24px), var(--note'
-    '-bg); }\nhtml:not([data-theme="dark"]) .note.sim { background: repeating-linear-gradient(135deg, #FFF'
-    'AEB 0 12px, #FEF0C7 12px 24px); }\n.sec { margin-top: 48px; scroll-margin-top: 80px; }\n.sh { display:'
-    ' flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 24px; margin'
-    '-bottom: 14px; }\n.sh h2 { margin: 0; font-size: 22px; line-height: 1.3; font-weight: 700; letter-spa'
-    'cing: -0.01em; }\n.sh h3 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 700; }\n.sub-sh '
-    '{ margin-top: 32px; }\n.why { margin: 4px 0 0; max-width: 75ch; color: var(--ink-muted); font-size: 1'
-    '4px; }\n.count { margin: 0; color: var(--ink-secondary); font-size: 13.5px; white-space: nowrap; }\n.c'
-    'ount strong { color: var(--ink-primary); }\n.card { min-width: 0; padding: 20px 22px; border: 1px sol'
-    'id var(--border-hairline); border-radius: 12px; background: var(--bg-panel); box-shadow: var(--shado'
-    'w-card); }\n.card h3 { margin: 0; font-size: 16.5px; line-height: 1.3; font-weight: 700; }\n.card .sub'
-    ' { margin: 4px 0 14px; color: var(--ink-muted); font-size: 13.5px; }\n.grid2 { display: grid; grid-te'
-    'mplate-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }\n.mt { margin-top: 16px; }\n\n/* Overview */\n.t'
-    'iles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 6p'
-    'x; }\n.tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px'
-    ' 14px; border: 1px solid transparent; border-radius: 10px; background: var(--bg-subtle); text-align:'
-    ' left; cursor: pointer; transition: border-color 150ms ease; }\n.tile:hover { border-color: var(--bor'
-    'der-strong); }\n.tile b { font-size: 28px; line-height: 1; font-weight: 700; }\n.tile span { color: va'
-    'r(--ink-secondary); font-size: 12.5px; line-height: 1.35; }\n.tile.imm { border-color: var(--brand-or'
-    'ange-line); background: var(--brand-orange-wash); }\n.tile.imm b { color: var(--brand-orange-text); }'
-    '\n.todo { margin: 0; padding: 0; list-style: none; }\n.todo li { display: grid; grid-template-columns:'
-    ' 28px minmax(0, 1fr); gap: 10px; padding: 11px 0; border-top: 1px solid var(--border-hairline); }\n.t'
-    'odo li > div { min-width: 0; overflow-wrap: anywhere; }\n.todo .rk { color: var(--ink-muted); font-si'
-    'ze: 15px; font-weight: 700; }\n.todo .t { font-size: 14px; line-height: 1.4; font-weight: 600; }\n.tod'
-    'o .m { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 5px; color: v'
-    'ar(--ink-muted); font-size: 12.5px; }\n.todo .m > span:last-child { min-width: 0; }\n.more-link { disp'
-    'lay: inline-block; margin-top: 4px; font-size: 14px; font-weight: 600; }\n.exec-list { margin: 0; pad'
-    'ding-left: 18px; max-width: 75ch; }\n.exec-list li { margin: 0 0 8px; font-size: 14.5px; line-height:'
-    ' 1.55; }\n.exec-list li::marker { color: var(--ink-muted); }\n.exec-list b { font-weight: 700; }\n.prov'
-    ' { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 16px 0 0'
-    '; padding-top: 14px; border-top: 1px solid var(--border-hairline); font-size: 13.5px; }\n.prov dt { c'
-    'olor: var(--ink-muted); }\n.prov dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }\n.bars {'
-    ' display: grid; gap: 2px; }\n.brow { display: grid; grid-template-columns: minmax(110px, 42%) minmax('
-    '0, 1fr) 40px; gap: 12px; align-items: center; width: calc(100% + 16px); margin: 0 -8px; padding: 7px'
-    ' 8px; border: 0; border-radius: 8px; background: none; font-size: 14px; text-align: left; cursor: po'
-    'inter; }\n.brow:hover { background: var(--bg-subtle); }\n.brow .bl { overflow: hidden; text-overflow: '
-    'ellipsis; white-space: nowrap; }\n.brow .bl small { margin-left: 6px; color: var(--ink-muted); font-s'
-    'ize: 12.5px; }\n.brow .bt { height: 10px; overflow: hidden; border-radius: 999px; background: var(--b'
-    'g-subtle); }\n.brow:hover .bt { background: var(--bg-panel); }\n.brow .bt i { display: block; height: '
-    '100%; min-width: 3px; border-radius: 999px; background: var(--chart); }\n.brow b { text-align: right;'
-    ' font-weight: 700; }\n.dot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; borde'
-    'r-radius: 50%; vertical-align: 0; }\n.empty-note { margin: 0; color: var(--ink-muted); font-size: 14p'
-    'x; }\n\n/* Filters */\n.filters { display: grid; grid-template-columns: minmax(220px, 1.5fr) repeat(3, '
-    'minmax(170px, 1fr)) auto; gap: 12px; align-items: end; }\n.field { display: flex; flex-direction: col'
-    'umn; gap: 6px; min-width: 0; }\n.field label { color: var(--ink-secondary); font-size: 13px; font-wei'
-    'ght: 600; }\n.field label code { margin-left: 4px; color: var(--ink-muted); font-weight: 500; }\n.cont'
-    'rol { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid var(--border-strong); border'
-    '-radius: 8px; background: var(--bg-panel); color: var(--ink-primary); font-size: 14px; }\n.control::p'
-    'laceholder { color: var(--ink-muted); opacity: 1; }\n.control:focus { outline: none; border-color: va'
-    'r(--brand-orange-text); box-shadow: 0 0 0 3px rgba(255, 78, 0, 0.22); }\n.filter-foot { display: flex'
-    '; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; margin-top: '
-    '16px; padding-top: 14px; border-top: 1px solid var(--border-hairline); }\n.status-line { margin: 0; c'
-    'olor: var(--ink-secondary); font-size: 13.5px; }\n.status-line b { color: var(--ink-primary); }\n.down'
-    'loads { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }\n.downloads > span { margin-'
-    'right: 2px; color: var(--ink-muted); font-size: 13px; }\n\n/* Tables */\n.table-card { padding: 0; over'
-    'flow: hidden; }\n.table-scroll { overflow-x: auto; background: linear-gradient(90deg, var(--bg-panel)'
-    ' 30%, transparent) left / 36px 100% no-repeat local, linear-gradient(270deg, var(--bg-panel) 30%, tr'
-    'ansparent) right / 36px 100% no-repeat local, radial-gradient(farthest-side at 0 50%, var(--edge), t'
-    'ransparent) left / 14px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, var(--edge'
-    '), transparent) right / 14px 100% no-repeat scroll; }\n.ledger-table { width: 100%; border-collapse: '
-    'collapse; font-size: 13.5px; }\n.ledger-table th { padding: 10px 12px; border-bottom: 1px solid var(-'
-    '-border-hairline); background: var(--bg-subtle); color: var(--ink-secondary); font-size: 11.5px; fon'
-    't-weight: 700; letter-spacing: 0.04em; line-height: 1.35; text-align: left; text-transform: uppercas'
-    'e; vertical-align: bottom; }\n.ledger-table th .hg { white-space: nowrap; }\n.ledger-table td { paddin'
-    'g: 12px; border-bottom: 1px solid var(--border-hairline); vertical-align: top; }\n.ledger-table tbody'
-    ' tr:last-child td { border-bottom: 0; }\n.ledger-table tbody tr:hover td { background: var(--bg-row-h'
-    'over); }\n.ledger-table .n { text-align: right; white-space: nowrap; }\n.ledger-table tr.flash td { ba'
-    'ckground: var(--brand-orange-wash); }\n.ledger-table tr[id] { scroll-margin-top: 90px; }\n.ledger-tabl'
-    'e tr.pg { display: none; }\n.more-row { display: flex; flex-wrap: wrap; justify-content: center; alig'
-    'n-items: center; gap: 8px 16px; padding: 14px 16px; border-top: 1px solid var(--border-hairline); co'
-    'lor: var(--ink-muted); font-size: 13px; }\n.more-row[hidden] { display: none; }\n.sort { position: rel'
-    'ative; display: inline-block; margin: -4px -16px -4px -6px; padding: 4px 16px 4px 6px; border: 0; bo'
-    'rder-radius: 4px; background: none; color: inherit; font: inherit; letter-spacing: inherit; line-hei'
-    'ght: inherit; text-align: left; text-transform: inherit; cursor: pointer; }\n.th-print { display: non'
-    'e; }\n.sort:hover { color: var(--ink-primary); }\n.sort::after { content: ""; position: absolute; righ'
-    't: 4px; bottom: 10px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px sol'
-    'id transparent; border-top: 5px solid currentColor; opacity: 0; }\n.sort:hover::after { opacity: 0.35'
-    '; }\nth[aria-sort="ascending"] .sort::after { opacity: 1; border-top: 0; border-bottom: 5px solid cur'
-    'rentColor; }\nth[aria-sort="descending"] .sort::after { opacity: 1; }\nth[aria-sort] { color: var(--in'
-    'k-primary); }\n.empty-row td { padding: 22px 16px; color: var(--ink-muted); }\n.pill { display: inline'
-    '-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font'
-    '-weight: 700; line-height: 1.3; white-space: nowrap; }\n.pill::before { content: ""; width: 7px; heig'
-    'ht: 7px; border-radius: 50%; background: currentColor; }\n.pill.critical { color: var(--sev-critical)'
-    '; background: var(--sev-critical-bg); }\n.pill.high { color: var(--sev-high); background: var(--sev-h'
-    'igh-bg); }\n.pill.medium { color: var(--sev-medium); background: var(--sev-medium-bg); }\n.pill.low { '
-    'color: var(--sev-low); background: var(--sev-low-bg); }\n.pill.info { color: var(--sev-info); backgro'
-    'und: var(--sev-info-bg); }\n.pill.ok { color: var(--ok); background: var(--ok-bg); }\n.tag { display: '
-    'inline-block; padding: 2px 9px; border: 1px solid var(--border-hairline); border-radius: 6px; backgr'
-    'ound: var(--bg-subtle); color: var(--ink-secondary); font-size: 12px; font-weight: 600; white-space:'
-    ' nowrap; }\n.tag.immediate_24h { border-color: var(--brand-orange-line); background: var(--brand-oran'
-    'ge-wash); color: var(--brand-orange-text); }\n.id { color: var(--ink-secondary); font-family: var(--f'
-    'ont-mono); font-size: 12.5px; white-space: nowrap; }\n.sm { display: block; margin-top: 3px; color: v'
-    'ar(--ink-muted); font-size: 12.5px; line-height: 1.45; }\n.stack > * + * { margin-top: 6px; }\n.res b '
-    '{ display: block; font-weight: 600; overflow-wrap: anywhere; }\n.code { color: var(--ink-secondary); '
-    'font-family: var(--font-mono); font-size: 12px; }\n.ext { display: inline-flex; align-items: center; '
-    'gap: 4px; margin-top: 4px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }\n.ext svg { wi'
-    'dth: 12px; height: 12px; }\n.ids { display: flex; flex-wrap: wrap; gap: 4px; }\n.chip-id { padding: 2p'
-    'x 7px; border: 1px solid var(--border-hairline); border-radius: 6px; background: var(--bg-subtle); c'
-    'olor: var(--ink-secondary); font-family: var(--font-mono); font-size: 12px; text-decoration: none; w'
-    'hite-space: nowrap; }\na.chip-id:hover { border-color: var(--brand-orange-text); color: var(--brand-o'
-    'range-text); }\n.state { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white'
-    '-space: nowrap; }\n.state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; backgro'
-    'und: var(--sev-info-bar); }\n.state.on::before { background: var(--sev-high-bar); }\n.rank { font-size'
-    ': 16px; font-weight: 700; }\n.wide { min-width: 280px; overflow-wrap: anywhere; }\n.w3 { min-width: 25'
-    '0px; overflow-wrap: anywhere; }\n.w2 { min-width: 170px; overflow-wrap: anywhere; }\n.w1 { min-width: '
-    '150px; }\n.nw { white-space: nowrap; }\n.errbox { margin-top: 8px; padding: 8px 10px; border-radius: 8'
-    'px; background: var(--sev-critical-bg); color: var(--sev-critical); font-size: 12.5px; line-height: '
-    '1.45; }\n.wslist { margin: 6px 0 0; padding: 0; list-style: none; color: var(--ink-muted); font-size:'
-    ' 12.5px; }\n.plain-list { margin: 14px 0 0; padding-left: 18px; color: var(--ink-secondary); font-siz'
-    'e: 14px; }\n.plain-list li { margin-bottom: 6px; }\n.report-error { margin-top: 24px; }\n\n/* Footer */\n'
-    '.foot { max-width: 1320px; margin: 0 auto; padding: 20px 40px 40px; display: flex; flex-wrap: wrap; '
-    'justify-content: space-between; gap: 8px 16px; color: var(--ink-muted); font-size: 13px; }\n.foot-in '
-    '{ border-top: 1px solid var(--border-hairline); }\n\n.topbar:has(#client-logo-img) .brand-text span { '
-    'display: none; }\n@media (max-width: 1300px) {\n  .topbar:has(#client-logo-img) .section-nav { display'
-    ': none; }\n}\n@media (max-width: 760px) {\n  .topbar:has(#client-logo-img) .client-name-label { display'
-    ': none; }\n}\n@media (max-width: 1360px) {\n  #theme-toggle { min-width: 40px; padding: 0 10px; }\n  #th'
-    'eme-toggle .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)'
-    '; white-space: nowrap; }\n}\n@media (max-width: 1220px) {\n  .section-nav { display: none; }\n}\n@media ('
-    'max-width: 1100px) {\n  .hero-in { grid-template-columns: minmax(0, 1fr); }\n  .kpis { grid-template-c'
-    'olumns: repeat(3, minmax(0, 1fr)); }\n  .grid2 { grid-template-columns: minmax(0, 1fr); }\n  .filters '
-    '{ grid-template-columns: repeat(2, minmax(0, 1fr)); }\n}\n@media (max-width: 760px) {\n  .topbar-inner '
-    '{ gap: 10px; padding: 8px 16px; }\n  .chip-ro { display: none; }\n  .brand-text span, .btn .lbl { posi'
-    'tion: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;'
-    ' }\n  .btn-bar, .btn-primary { min-width: 40px; padding: 0 10px; }\n  .hero { padding: 28px 16px 84px;'
-    ' }\n  .hero h1 { font-size: 30px; }\n  .hero-lead { font-size: 15.5px; }\n  .verdict b { font-size: 24p'
-    'x; }\n  .page { padding: 0 16px 40px; }\n  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); g'
-    'ap: 10px; margin-top: -56px; }\n  .kpi { padding: 14px; }\n  .kpi .v { font-size: 30px; }\n  .sec { mar'
-    'gin-top: 36px; }\n  .sh h2 { font-size: 20px; }\n  .card { padding: 16px; }\n  .tiles { gap: 8px; }\n  .'
-    'tile { padding: 10px; }\n  .tile b { font-size: 24px; }\n  .filters { grid-template-columns: minmax(0,'
-    ' 1fr); }\n  .brow { grid-template-columns: minmax(0, 1fr) 36px; row-gap: 6px; }\n  .brow .bt { grid-co'
-    'lumn: 1 / -1; grid-row: 2; }\n  .foot { padding: 16px 16px 32px; }\n}\n@media (max-width: 360px) {\n  .t'
-    'opbar-inner { gap: 8px; padding: 8px 12px; }\n  .brand { gap: 8px; }\n  .client-plaque { padding: 4px '
-    '7px; }\n  .client-name-label { font-size: 12px; }\n  .brand-text b { font-size: 13px; }\n}\n@media (max-'
-    'width: 340px) {\n  .brand-text { display: none; }\n}\n@media (prefers-reduced-motion: reduce) {\n  html '
-    '{ scroll-behavior: auto; }\n  *, *::before, *::after { transition: none !important; animation: none !'
-    'important; }\n}\n\n@page { size: A4 landscape; margin: 10mm 10mm 14mm; @bottom-right { content: "Página'
-    ' " counter(page) " de " counter(pages); font: 8.5pt \'Segoe UI\', sans-serif; color: #5A687A; } }\n@med'
-    'ia print {\n  html, html[data-theme="dark"] {\n    --bg-page: #FFFFFF; --bg-panel: #FFFFFF; --bg-subtl'
-    'e: #F1EEE8; --bg-row-hover: #FFFFFF;\n    --ink-primary: #141B24; --ink-secondary: #3E4C5E; --ink-mut'
-    'ed: #5A687A;\n    --border-hairline: #DEDCD6; --border-strong: #9AA5B5;\n    --brand-orange-text: #C23'
-    '800; --brand-orange-wash: #FFF2EC; --brand-orange-line: #FFC9AE;\n    --hero-bg: #1C2532; --hero-deep'
-    ': #141B24; --hero-muted: #C3CCD8;\n    --sev-critical: #B42318; --sev-critical-bg: #FEE4E2; --sev-hig'
-    'h: #B93815; --sev-high-bg: #FFEAD5;\n    --sev-medium: #93370D; --sev-medium-bg: #FEF0C7; --sev-low: '
-    '#175CD3; --sev-low-bg: #D1E9FF;\n    --sev-info: #344054; --sev-info-bg: #EAECF0; --ok: #067647; --ok'
-    '-bg: #DCFAE6;\n    --note-bg: #FFFAEB; --note-line: #FEDF89; --note-ink: #7A2E0E; --chart: #3E4C5E;\n '
-    '   color-scheme: light;\n  }\n  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }\n  '
-    'body { background: #FFFFFF; font-size: 11.5px; }\n  .topbar { position: static; background-color: #FF'
-    'FFFF; color: #141B24; border-bottom: 0; }\n  .topbar-inner { min-height: 0; padding: 0 0 8px; }\n  .br'
-    'and { color: #141B24; }\n  .client-plaque { border: 1px solid #DEDCD6; }\n  .brand-text span { color: '
-    '#5A687A; }\n  .chip-ro { display: inline-block; color: #3E4C5E; border-color: #DEDCD6; }\n  .section-n'
-    'av, #theme-toggle, #btn-print, .skip-link, #sec-filters, .downloads, .more-link, .more-row { display'
-    ': none !important; }\n  .ledger-table tr.pg { display: table-row; }\n  .print-only { display: block; }'
-    '\n  .hero { padding: 22px 24px 70px; border-radius: 12px; }\n  .hero h1 { font-size: 30px; max-width: '
-    'none; }\n  .hero-lead { font-size: 13.5px; }\n  .hero-in { grid-template-columns: minmax(0, 1fr) 260px'
-    '; gap: 14px 28px; }\n  .verdict b { font-size: 21px; }\n  .page { padding: 0; max-width: none; }\n  .kp'
-    'is { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-top: -50px; }\n  .kpi .v { font-size: 2'
-    '6px; }\n  .kpi, .card, .note, .brow, .verdict, .todo li, .tile, .ledger-table tr { break-inside: avoi'
-    'd; }\n  .card.table-card { break-inside: auto; }\n  .card, .kpi { box-shadow: none; }\n  .grid2 { grid-'
-    'template-columns: repeat(2, minmax(0, 1fr)); }\n  .sec { margin-top: 20px; }\n  .sh { break-after: avo'
-    'id; }\n  .table-card { overflow: visible; }\n  .table-scroll { overflow: visible; background: none; }\n'
-    '  .ledger-table { font-size: 10.5px; }\n  .ledger-table th { font-size: 9.5px; padding: 6px 8px; }\n  '
-    '.ledger-table td { padding: 6px 8px; overflow-wrap: break-word; }\n  .ledger-table td.wide, .ledger-t'
-    'able td.w2, .ledger-table td.w3 { overflow-wrap: anywhere; }\n  .ledger-table thead { display: table-'
-    'header-group; }\n  .ledger-table .sm, .ledger-table .ext, .ledger-table .pill, .ledger-table .tag, .l'
-    'edger-table .state { font-size: 9.5px; }\n  .ledger-table .id, .ledger-table .code, .ledger-table .ch'
-    'ip-id { font-size: 9.5px; }\n  .ledger-table .rank { font-size: 12px; }\n  .brow .bl { white-space: no'
-    'rmal; }\n  .brow .bl small { display: block; margin: 1px 0 0 17px; }\n  .wide, .w1, .w2, .w3 { min-wid'
-    'th: 0; }\n  .sort { display: none !important; }\n  .th-print { display: inline; }\n  .ext svg { display'
-    ': none; }\n  a { text-decoration: none; }\n  .foot { padding: 12px 0 0; max-width: none; }\n}\n</style>\n'
-    '</head>\n<body>\n<a class="skip-link" href="#report-body">Saltar al contenido</a>\n<header class="topba'
-    'r" id="topbar">\n  <div class="topbar-inner">\n    <a class="brand" href="#top" aria-label="Inicio del'
-    ' informe">\n      <span class="client-plaque" id="client-plaque">\n        <span id="client-logo-slot"'
-    '></span>\n        <span class="client-name-label" id="client-name-label">CLIENTE</span>\n      </span>'
-    '\n      <span class="brand-text"><b>Azure SRE Agent</b><span id="topbar-subtitle">Dossier de operacio'
-    'nes</span></span>\n    </a>\n    <nav class="section-nav" id="section-nav" aria-label="Secciones del i'
-    'nforme">\n      <a href="#sec-executive">Resumen</a>\n      <a href="#sec-incidents">Incidencias<span '
-    'class="n" id="nav-incidents-count">0</span></a>\n      <a href="#sec-anomalies">Anomalías<span class='
-    '"n" id="nav-anomalies-count">0</span></a>\n      <a href="#sec-actions">Acciones<span class="n" id="n'
-    'av-actions-count">0</span></a>\n      <a href="#sec-resources">Recursos<span class="n" id="nav-resour'
-    'ces-count">0</span></a>\n      <a href="#sec-coverage">Cobertura<span class="n" id="nav-sources-count'
-    '">0</span></a>\n    </nav>\n    <div class="toolbar-actions">\n      <span class="chip-ro">Solo lectura'
-    '</span>\n      <button type="button" class="btn btn-bar" id="theme-toggle" title="Modo oscuro"><svg v'
-    'iewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-'
-    'linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><s'
-    'pan class="lbl">Modo oscuro</span></button>\n      <button type="button" class="btn btn-primary" id="'
-    'btn-print"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-lineca'
-    'p="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 '
-    '2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg><span class="lbl">Imprimir / PD'
-    'F</span></button>\n    </div>\n  </div>\n</header>\n\n<main id="report-body">\n  <section class="hero" id='
-    '"top" aria-labelledby="cover-title">\n    <div class="hero-in">\n      <div>\n        <h1 id="cover-tit'
-    'le">Incidencias, anomalías y acciones recomendadas</h1>\n        <p class="hero-scope" id="hero-scope'
-    '">Informe periódico de operaciones Azure</p>\n        <p class="hero-lead" id="hero-lead"></p>\n      '
-    '  <ul class="meta" id="hero-meta" aria-label="Contexto del informe"></ul>\n      </div>\n      <aside '
-    'class="verdict" id="verdict-card" aria-label="Veredicto">\n        <div class="k">Veredicto</div>\n   '
-    '     <b id="verdict-title">—</b>\n        <p id="verdict-detail"></p>\n        <p id="verdict-sub"></p'
-    '>\n      </aside>\n      <div class="dist" id="evidence-distribution-bar">\n        <div class="dist-he'
-    'ad"><span>Severidad de incidencias y anomalías</span><span id="dist-total-label">0 señales</span></d'
-    'iv>\n        <div class="track" id="dist-track" role="img" aria-label="Distribución por severidad"></'
-    'div>\n        <div class="legend" id="dist-legend"></div>\n      </div>\n    </div>\n  </section>\n\n  <di'
-    'v class="page">\n    <div class="kpis" id="ledger-summary-grid">\n      <div class="kpi"><div class="v'
-    '" id="kpi-native-alerts">0</div><div class="l">Alertas de Azure Monitor</div><div class="d" id="kpi-'
-    'native-alerts-sub">alertsmanagementresources</div></div>\n      <div class="kpi"><div class="v" id="k'
-    'pi-service-health">0</div><div class="l">Comunicaciones de Service Health</div><div class="d" id="kp'
-    'i-service-health-sub">ServiceIssue y PlannedMaintenance</div></div>\n      <div class="kpi"><div clas'
-    's="v" id="kpi-posture-anomalies">0</div><div class="l">Anomalías de plano de control y Arc</div><div'
-    ' class="d" id="kpi-posture-anomalies-sub">Extensiones fallidas y conectividad</div></div>\n      <div'
-    ' class="kpi"><div class="v" id="kpi-telemetry-anomalies">0</div><div class="l">Anomalías de telemetr'
-    'ía</div><div class="d" id="kpi-telemetry-anomalies-sub">InsightsMetrics, Perf y Heartbeat</div></div'
-    '>\n      <div class="kpi"><div class="v" id="kpi-actions-total">0</div><div class="l">Acciones recome'
-    'ndadas</div><div class="d" id="kpi-actions-sub">Priorizadas por horizonte</div></div>\n      <div cla'
-    'ss="kpi"><div class="v" id="kpi-resources-total">0</div><div class="l">Recursos en alcance</div><div'
-    ' class="d" id="kpi-resources-sub">0 con hallazgos activos</div></div>\n    </div>\n    <div class="not'
-    'es" id="status-notes"></div>\n\n    <section class="sec" id="sec-executive" aria-labelledby="h-executi'
-    've">\n      <div class="sh"><div><h2 id="h-executive">Resumen del periodo</h2><p class="why">Qué exig'
-    'e atención primero y de dónde salen las señales de la ventana evaluada.</p></div></div>\n      <div c'
-    'lass="grid2">\n        <div class="card">\n          <h3>Qué hacer ahora</h3>\n          <p class="sub"'
-    '>Acciones priorizadas para revisión humana; cada una cita la evidencia que la justifica.</p>\n       '
-    '   <div class="tiles" id="horizon-tiles"></div>\n          <ol class="todo" id="top-actions"></ol>\n  '
-    '        <a class="more-link" href="#sec-actions" id="all-actions-link">Ver todas las acciones</a>\n  '
-    '      </div>\n        <div class="card">\n          <h3>Síntesis ejecutiva</h3>\n          <p class="su'
-    'b">Lo esencial del periodo, calculado sobre las fuentes leídas.</p>\n          <ul class="exec-list" '
-    'id="executive-messages-list"></ul>\n          <dl class="prov" id="provenance-strip">\n            <dt'
-    '>Suscripción Azure</dt><dd class="code" id="prov-subscription">—</dd>\n            <dt>Ventana evalua'
-    'da</dt><dd id="prov-window-label">—</dd>\n            <dt>Intervalo UTC exacto</dt><dd id="prov-windo'
-    'w-range">—</dd>\n            <dt>Cadencia</dt><dd id="prov-cadence">—</dd>\n            <dt>Origen de '
-    'evidencia</dt><dd id="prov-provenance">—</dd>\n            <dt>Referencia UTC</dt><dd id="reference-u'
-    'tc-label">—</dd>\n          </dl>\n        </div>\n        <div class="card">\n          <h3>Señales por'
-    ' flujo de evidencia</h3>\n          <p class="sub">Cada barra filtra los registros por ese flujo.</p>'
-    '\n          <div class="bars" id="stream-bars"></div>\n        </div>\n        <div class="card">\n     '
-    '     <h3>Recursos con más señales</h3>\n          <p class="sub">Incidencias más anomalías por recurs'
-    'o: el punto de partida de la revisión.</p>\n          <div class="bars" id="resource-bars"></div>\n   '
+    'i \'none\'; form-action \'none\'; connect-src \'none\'">\n<title>Operations, incidents, anomalies, and reco'
+    'mmended actions report</title>\n<style>\n:root {\n  --brand-orange: #FF4E00;\n  --brand-orange-alt: #FC4'
+    'C00;\n  --brand-orange-text: #C23800;\n  --brand-orange-wash: #FFF2EC;\n  --brand-orange-line: #FFC9AE;'
+    '\n  --slate-topbar: #141B24;\n  --slate-header: #1C2532;\n  --bg-page: #F6F5F2;\n  --bg-panel: #FFFFFF;\n'
+    '  --bg-subtle: #F1EEE8;\n  --bg-row-hover: #FAF8F4;\n  --ink-primary: #141B24;\n  --ink-secondary: #3E4'
+    'C5E;\n  --ink-muted: #5A687A;\n  --border-hairline: #DEDCD6;\n  --border-strong: #9AA5B5;\n  --hero-bg: '
+    '#1C2532;\n  --hero-deep: #141B24;\n  --hero-ink: #E6EBF1;\n  --hero-muted: #C3CCD8;\n  --hero-line: rgba'
+    '(255, 255, 255, 0.18);\n  --sev-critical: #B42318;\n  --sev-critical-bg: #FEE4E2;\n  --sev-critical-bar'
+    ': #D92D20;\n  --sev-high: #B93815;\n  --sev-high-bg: #FFEAD5;\n  --sev-high-bar: #EF6820;\n  --sev-mediu'
+    'm: #93370D;\n  --sev-medium-bg: #FEF0C7;\n  --sev-medium-bar: #F79009;\n  --sev-low: #175CD3;\n  --sev-l'
+    'ow-bg: #D1E9FF;\n  --sev-low-bar: #2E90FA;\n  --sev-info: #344054;\n  --sev-info-bg: #EAECF0;\n  --sev-i'
+    'nfo-bar: #98A2B3;\n  --ok: #067647;\n  --ok-bg: #DCFAE6;\n  --note-bg: #FFFAEB;\n  --note-line: #FEDF89;'
+    '\n  --note-ink: #7A2E0E;\n  --chart: #3E4C5E;\n  --edge: rgba(20, 27, 36, 0.18);\n  --shadow-card: 0 1px'
+    " 2px rgba(20, 27, 36, 0.04), 0 6px 20px rgba(20, 27, 36, 0.06);\n  --font-sans: 'Outfit', 'Segoe UI',"
+    " system-ui, -apple-system, sans-serif;\n  --font-mono: 'Consolas', ui-monospace, 'Cascadia Mono', mon"
+    'ospace;\n  color-scheme: light;\n}\n\nhtml[data-theme="dark"] {\n  --brand-orange: #FF5C14;\n  --brand-ora'
+    'nge-alt: #FF6B2B;\n  --brand-orange-text: #FF8854;\n  --brand-orange-wash: #2B1A12;\n  --brand-orange-l'
+    'ine: #6E3417;\n  --slate-topbar: #0B0F15;\n  --slate-header: #121923;\n  --bg-page: #0F141B;\n  --bg-pan'
+    'el: #161E29;\n  --bg-subtle: #1D2736;\n  --bg-row-hover: #1B2431;\n  --ink-primary: #F3F5F8;\n  --ink-se'
+    'condary: #CBD5E1;\n  --ink-muted: #9AA8BA;\n  --border-hairline: #2A3647;\n  --border-strong: #475569;\n'
+    '  --hero-bg: #121923;\n  --hero-deep: #0B0F15;\n  --hero-muted: #B8C3D1;\n  --hero-line: rgba(255, 255,'
+    ' 255, 0.14);\n  --sev-critical: #FDA29B;\n  --sev-critical-bg: rgba(217, 45, 32, 0.22);\n  --sev-high: '
+    '#F9B87F;\n  --sev-high-bg: rgba(239, 104, 32, 0.22);\n  --sev-medium: #FEC84B;\n  --sev-medium-bg: rgba'
+    '(247, 144, 9, 0.18);\n  --sev-low: #84CAFF;\n  --sev-low-bg: rgba(46, 144, 250, 0.2);\n  --sev-info: #D'
+    '0D5DD;\n  --sev-info-bg: rgba(152, 162, 179, 0.2);\n  --ok: #75E0A7;\n  --ok-bg: rgba(23, 178, 106, 0.1'
+    '8);\n  --note-bg: #2A2212;\n  --note-line: #6B571E;\n  --note-ink: #FDE68A;\n  --chart: #9AA8BA;\n  --edg'
+    'e: rgba(0, 0, 0, 0.55);\n  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25'
+    ');\n  color-scheme: dark;\n}\n\n*, *::before, *::after { box-sizing: border-box; }\nhtml { scroll-behavio'
+    'r: smooth; scrollbar-color: var(--border-strong) var(--bg-page); -webkit-text-size-adjust: 100%; }\nb'
+    'ody { margin: 0; background: var(--bg-page); color: var(--ink-primary); font: 15px/1.55 var(--font-s'
+    'ans); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }\n::selection { backg'
+    'round: #FFD9C7; color: #141B24; }\na { color: var(--brand-orange-text); text-decoration-thickness: 1p'
+    'x; text-underline-offset: 3px; }\na:hover { text-decoration-thickness: 2px; }\n:focus-visible { outlin'
+    'e: 2px solid var(--brand-orange); outline-offset: 2px; }\nbutton, input, select { font: inherit; colo'
+    'r: inherit; }\ncode { font-family: var(--font-mono); font-size: 0.86em; }\np, li { text-wrap: pretty; '
+    '}\nh2, h3 { text-wrap: balance; }\nsvg { flex: none; }\n.sr-only { position: absolute; width: 1px; heig'
+    'ht: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; borde'
+    'r: 0; }\n.skip-link { position: absolute; left: 16px; top: -60px; z-index: 60; padding: 8px 14px; bor'
+    'der-radius: 8px; background: var(--bg-panel); color: var(--ink-primary); font-weight: 600; box-shado'
+    'w: var(--shadow-card); }\n.skip-link:focus { top: 12px; }\n.print-only { display: none; }\n.print-only:'
+    'empty { display: none !important; }\n\n/* Top bar */\n.topbar { position: sticky; top: 0; z-index: 40; '
+    'background-color: var(--slate-topbar); color: #FFFFFF; border-bottom: 2px solid var(--brand-orange);'
+    ' }\n.topbar-inner { max-width: 1400px; min-height: 58px; margin: 0 auto; padding: 8px 40px; display: '
+    'flex; align-items: center; gap: 16px; }\n.brand { display: flex; align-items: center; gap: 12px; min-'
+    'width: 0; color: #FFFFFF; text-decoration: none; }\n.client-plaque { flex-shrink: 0; display: inline-'
+    'flex; align-items: center; gap: 8px; min-height: 32px; padding: 4px 10px; border-radius: 6px; backgr'
+    'ound: #FFFFFF; color: #141B24; }\n.client-plaque img { display: block; max-height: 24px; width: auto;'
+    ' }\n.client-name-label { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }\n.brand-text { d'
+    'isplay: flex; flex-direction: column; min-width: 0; line-height: 1.2; }\n.brand-text b { font-size: 1'
+    '5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n.brand-text'
+    ' span { font-size: 12.5px; color: #C3CCD8; white-space: nowrap; overflow: hidden; text-overflow: ell'
+    'ipsis; }\n.section-nav { display: flex; gap: 2px; margin-left: 12px; }\n.section-nav a { padding: 7px '
+    '10px; border-radius: 6px; color: #D5DCE5; font-size: 13.5px; font-weight: 600; text-decoration: none'
+    '; white-space: nowrap; }\n.section-nav a:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFF'
+    'F; }\n.section-nav a[aria-current="true"] { color: #FFFFFF; box-shadow: inset 0 -2px 0 var(--brand-or'
+    'ange); border-radius: 6px 6px 0 0; }\n.section-nav .n { margin-left: 5px; color: #9FB0C3; font-weight'
+    ': 500; }\n.toolbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-sh'
+    'rink: 0; }\n.chip-ro { padding: 4px 11px; border: 1px solid rgba(255, 255, 255, 0.24); border-radius:'
+    ' 999px; color: #D5DCE5; font-size: 12.5px; font-weight: 600; white-space: nowrap; }\n.btn { display: '
+    'inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; padding: 0 14'
+    'px; border: 1px solid transparent; border-radius: 8px; font-size: 13.5px; font-weight: 600; line-hei'
+    'ght: 1.2; white-space: nowrap; cursor: pointer; text-decoration: none; transition: background-color '
+    '150ms ease, border-color 150ms ease, filter 150ms ease; }\n.btn svg { width: 16px; height: 16px; }\n.b'
+    'tn-bar { background: transparent; color: #F3F5F8; border-color: rgba(255, 255, 255, 0.26); }\n.btn-ba'
+    'r:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.45); }\n.btn-pri'
+    'mary { background: var(--brand-orange); border-color: var(--brand-orange); color: #141B24; }\n.btn-pr'
+    'imary:hover { filter: brightness(1.07); }\n.btn-ghost { background: var(--bg-panel); color: var(--ink'
+    '-primary); border-color: var(--border-strong); }\n.btn-ghost:hover { background: var(--bg-subtle); bo'
+    'rder-color: var(--ink-secondary); }\n.btn-bar:focus-visible, .btn-primary:focus-visible { outline-col'
+    'or: #FFFFFF; }\n\n/* Hero */\n.hero { background: linear-gradient(160deg, var(--hero-bg) 0%, var(--hero'
+    '-deep) 100%); color: var(--hero-ink); padding: 44px 40px 100px; }\n.hero-in { max-width: 1320px; marg'
+    'in: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px 48px; align-items:'
+    ' start; }\n.hero h1 { margin: 0; max-width: 24ch; color: #FFFFFF; font-size: 42px; line-height: 1.1; '
+    'font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }\n.hero-scope { margin: 10px 0 0; col'
+    'or: var(--hero-muted); font-size: 15px; }\n.hero-lead { margin: 16px 0 0; max-width: 68ch; font-size:'
+    ' 17px; line-height: 1.55; }\n.hero-lead b { color: #FFFFFF; font-weight: 700; }\n.meta { display: flex'
+    '; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }\n.meta li { max-width:'
+    ' 100%; padding: 4px 11px; border: 1px solid var(--hero-line); border-radius: 999px; color: var(--her'
+    'o-muted); font-size: 12.5px; overflow-wrap: anywhere; }\n.meta li.on { color: #FFFFFF; font-weight: 6'
+    '00; border-color: rgba(255, 255, 255, 0.42); }\n.meta li.warn { color: #FEDF89; font-weight: 600; bor'
+    'der-color: rgba(254, 223, 137, 0.5); }\n.verdict { padding: 20px 22px; border: 1px solid var(--verdic'
+    't-line, var(--hero-line)); border-radius: 14px; background: rgba(255, 255, 255, 0.05); }\n.verdict .k'
+    ' { color: var(--hero-muted); font-size: 13px; font-weight: 600; }\n.verdict b { display: block; margi'
+    'n-top: 6px; color: var(--verdict-ink, #FFFFFF); font-size: 28px; line-height: 1.15; font-weight: 700'
+    '; }\n.verdict p { margin: 8px 0 0; color: var(--hero-muted); font-size: 14px; }\n.verdict p + p { marg'
+    'in-top: 4px; }\n.verdict.crit { --verdict-ink: #FFB4AB; --verdict-line: rgba(255, 180, 171, 0.5); }\n.'
+    'verdict.warn { --verdict-ink: #FEDF89; --verdict-line: rgba(254, 223, 137, 0.5); }\n.verdict.ok { --v'
+    'erdict-ink: #A6F4C5; --verdict-line: rgba(166, 244, 197, 0.45); }\n.dist { grid-column: 1 / -1; margi'
+    'n-top: 4px; }\n.dist-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: '
+    '8px; color: var(--hero-muted); font-size: 13px; }\n.track { display: flex; height: 12px; overflow: hi'
+    'dden; border-radius: 999px; background: rgba(255, 255, 255, 0.12); }\n.track i { display: block; heig'
+    'ht: 100%; }\n.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; color: var(--'
+    'hero-muted); font-size: 13px; }\n.legend span { display: inline-flex; align-items: center; gap: 7px; '
+    '}\n.legend i { width: 10px; height: 10px; border-radius: 3px; }\n.legend b { color: #FFFFFF; }\n\n/* Pag'
+    'e body */\n.page { max-width: 1320px; margin: 0 auto; padding: 0 40px 56px; }\n.kpis { position: relat'
+    'ive; z-index: 2; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-'
+    'top: -60px; }\n.kpi { min-width: 0; padding: 16px 18px 18px; border: 1px solid var(--border-hairline)'
+    '; border-radius: 12px; background: var(--bg-panel); box-shadow: var(--shadow-card); }\n.kpi .v { font'
+    '-size: 36px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; }\n.kpi .l { margin-top: 10px'
+    '; font-size: 14px; line-height: 1.35; font-weight: 600; }\n.kpi .d { margin-top: 4px; color: var(--in'
+    'k-muted); font-size: 12.5px; line-height: 1.4; }\n.notes { display: grid; gap: 10px; margin-top: 16px'
+    '; }\n.notes:empty { display: none; }\n.note { display: flex; align-items: flex-start; gap: 10px; paddi'
+    'ng: 11px 16px; border: 1px solid var(--note-line); border-radius: 10px; background: var(--note-bg); '
+    'color: var(--note-ink); font-size: 14px; font-weight: 500; }\n.note svg { width: 18px; height: 18px; '
+    'margin-top: 1px; }\n.note a { color: inherit; font-weight: 700; }\n.note.sim { background: repeating-l'
+    'inear-gradient(135deg, var(--note-bg) 0 12px, rgba(254, 223, 137, 0.07) 12px 24px), var(--note-bg); '
+    '}\nhtml:not([data-theme="dark"]) .note.sim { background: repeating-linear-gradient(135deg, #FFFAEB 0 '
+    '12px, #FEF0C7 12px 24px); }\n.sec { margin-top: 48px; scroll-margin-top: 80px; }\n.sh { display: flex;'
+    ' flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 24px; margin-botto'
+    'm: 14px; }\n.sh h2 { margin: 0; font-size: 22px; line-height: 1.3; font-weight: 700; letter-spacing: '
+    '-0.01em; }\n.sh h3 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 700; }\n.sub-sh { marg'
+    'in-top: 32px; }\n.why { margin: 4px 0 0; max-width: 75ch; color: var(--ink-muted); font-size: 14px; }'
+    '\n.count { margin: 0; color: var(--ink-secondary); font-size: 13.5px; white-space: nowrap; }\n.count s'
+    'trong { color: var(--ink-primary); }\n.card { min-width: 0; padding: 20px 22px; border: 1px solid var'
+    '(--border-hairline); border-radius: 12px; background: var(--bg-panel); box-shadow: var(--shadow-card'
+    '); }\n.card h3 { margin: 0; font-size: 16.5px; line-height: 1.3; font-weight: 700; }\n.card .sub { mar'
+    'gin: 4px 0 14px; color: var(--ink-muted); font-size: 13.5px; }\n.grid2 { display: grid; grid-template'
+    '-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }\n.mt { margin-top: 16px; }\n\n/* Overview */\n.tiles {'
+    ' display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 6px; }\n.'
+    'tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;'
+    ' border: 1px solid transparent; border-radius: 10px; background: var(--bg-subtle); text-align: left;'
+    ' cursor: pointer; transition: border-color 150ms ease; }\n.tile:hover { border-color: var(--border-st'
+    'rong); }\n.tile b { font-size: 28px; line-height: 1; font-weight: 700; }\n.tile span { color: var(--in'
+    'k-secondary); font-size: 12.5px; line-height: 1.35; }\n.tile.imm { border-color: var(--brand-orange-l'
+    'ine); background: var(--brand-orange-wash); }\n.tile.imm b { color: var(--brand-orange-text); }\n.todo'
+    ' { margin: 0; padding: 0; list-style: none; }\n.todo li { display: grid; grid-template-columns: 28px '
+    'minmax(0, 1fr); gap: 10px; padding: 11px 0; border-top: 1px solid var(--border-hairline); }\n.todo li'
+    ' > div { min-width: 0; overflow-wrap: anywhere; }\n.todo .rk { color: var(--ink-muted); font-size: 15'
+    'px; font-weight: 700; }\n.todo .t { font-size: 14px; line-height: 1.4; font-weight: 600; }\n.todo .m {'
+    ' display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 5px; color: var(--i'
+    'nk-muted); font-size: 12.5px; }\n.todo .m > span:last-child { min-width: 0; }\n.more-link { display: i'
+    'nline-block; margin-top: 4px; font-size: 14px; font-weight: 600; }\n.exec-list { margin: 0; padding-l'
+    'eft: 18px; max-width: 75ch; }\n.exec-list li { margin: 0 0 8px; font-size: 14.5px; line-height: 1.55;'
+    ' }\n.exec-list li::marker { color: var(--ink-muted); }\n.exec-list b { font-weight: 700; }\n.prov { dis'
+    'play: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 16px 0 0; padd'
+    'ing-top: 14px; border-top: 1px solid var(--border-hairline); font-size: 13.5px; }\n.prov dt { color: '
+    'var(--ink-muted); }\n.prov dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }\n.bars { displ'
+    'ay: grid; gap: 2px; }\n.brow { display: grid; grid-template-columns: minmax(110px, 42%) minmax(0, 1fr'
+    ') 40px; gap: 12px; align-items: center; width: calc(100% + 16px); margin: 0 -8px; padding: 7px 8px; '
+    'border: 0; border-radius: 8px; background: none; font-size: 14px; text-align: left; cursor: pointer;'
+    ' }\n.brow:hover { background: var(--bg-subtle); }\n.brow .bl { overflow: hidden; text-overflow: ellips'
+    'is; white-space: nowrap; }\n.brow .bl small { margin-left: 6px; color: var(--ink-muted); font-size: 1'
+    '2.5px; }\n.brow .bt { height: 10px; overflow: hidden; border-radius: 999px; background: var(--bg-subt'
+    'le); }\n.brow:hover .bt { background: var(--bg-panel); }\n.brow .bt i { display: block; height: 100%; '
+    'min-width: 3px; border-radius: 999px; background: var(--chart); }\n.brow b { text-align: right; font-'
+    'weight: 700; }\n.dot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radi'
+    'us: 50%; vertical-align: 0; }\n.empty-note { margin: 0; color: var(--ink-muted); font-size: 14px; }\n\n'
+    '/* Filters */\n.filters { display: grid; grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax'
+    '(170px, 1fr)) auto; gap: 12px; align-items: end; }\n.field { display: flex; flex-direction: column; g'
+    'ap: 6px; min-width: 0; }\n.field label { color: var(--ink-secondary); font-size: 13px; font-weight: 6'
+    '00; }\n.field label code { margin-left: 4px; color: var(--ink-muted); font-weight: 500; }\n.control { '
+    'width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid var(--border-strong); border-radiu'
+    's: 8px; background: var(--bg-panel); color: var(--ink-primary); font-size: 14px; }\n.control::placeho'
+    'lder { color: var(--ink-muted); opacity: 1; }\n.control:focus { outline: none; border-color: var(--br'
+    'and-orange-text); box-shadow: 0 0 0 3px rgba(255, 78, 0, 0.22); }\n.filter-foot { display: flex; flex'
+    '-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; margin-top: 16px; '
+    'padding-top: 14px; border-top: 1px solid var(--border-hairline); }\n.status-line { margin: 0; color: '
+    'var(--ink-secondary); font-size: 13.5px; }\n.status-line b { color: var(--ink-primary); }\n.downloads '
+    '{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }\n.downloads > span { margin-right:'
+    ' 2px; color: var(--ink-muted); font-size: 13px; }\n\n/* Tables */\n.table-card { padding: 0; overflow: '
+    'hidden; }\n.table-scroll { overflow-x: auto; background: linear-gradient(90deg, var(--bg-panel) 30%, '
+    'transparent) left / 36px 100% no-repeat local, linear-gradient(270deg, var(--bg-panel) 30%, transpar'
+    'ent) right / 36px 100% no-repeat local, radial-gradient(farthest-side at 0 50%, var(--edge), transpa'
+    'rent) left / 14px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, var(--edge), tra'
+    'nsparent) right / 14px 100% no-repeat scroll; }\n.ledger-table { width: 100%; border-collapse: collap'
+    'se; font-size: 13.5px; }\n.ledger-table th { padding: 10px 12px; border-bottom: 1px solid var(--borde'
+    'r-hairline); background: var(--bg-subtle); color: var(--ink-secondary); font-size: 11.5px; font-weig'
+    'ht: 700; letter-spacing: 0.04em; line-height: 1.35; text-align: left; text-transform: uppercase; ver'
+    'tical-align: bottom; }\n.ledger-table th .hg { white-space: nowrap; }\n.ledger-table td { padding: 12p'
+    'x; border-bottom: 1px solid var(--border-hairline); vertical-align: top; }\n.ledger-table tbody tr:la'
+    'st-child td { border-bottom: 0; }\n.ledger-table tbody tr:hover td { background: var(--bg-row-hover);'
+    ' }\n.ledger-table .n { text-align: right; white-space: nowrap; }\n.ledger-table tr.flash td { backgrou'
+    'nd: var(--brand-orange-wash); }\n.ledger-table tr[id] { scroll-margin-top: 90px; }\n.ledger-table tr.p'
+    'g { display: none; }\n.more-row { display: flex; flex-wrap: wrap; justify-content: center; align-item'
+    's: center; gap: 8px 16px; padding: 14px 16px; border-top: 1px solid var(--border-hairline); color: v'
+    'ar(--ink-muted); font-size: 13px; }\n.more-row[hidden] { display: none; }\n.sort { position: relative;'
+    ' display: inline-block; margin: -4px -16px -4px -6px; padding: 4px 16px 4px 6px; border: 0; border-r'
+    'adius: 4px; background: none; color: inherit; font: inherit; letter-spacing: inherit; line-height: i'
+    'nherit; text-align: left; text-transform: inherit; cursor: pointer; }\n.th-print { display: none; }\n.'
+    'sort:hover { color: var(--ink-primary); }\n.sort::after { content: ""; position: absolute; right: 4px'
+    '; bottom: 10px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid tra'
+    'nsparent; border-top: 5px solid currentColor; opacity: 0; }\n.sort:hover::after { opacity: 0.35; }\nth'
+    '[aria-sort="ascending"] .sort::after { opacity: 1; border-top: 0; border-bottom: 5px solid currentCo'
+    'lor; }\nth[aria-sort="descending"] .sort::after { opacity: 1; }\nth[aria-sort] { color: var(--ink-prim'
+    'ary); }\n.empty-row td { padding: 22px 16px; color: var(--ink-muted); }\n.pill { display: inline-flex;'
+    ' align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weigh'
+    't: 700; line-height: 1.3; white-space: nowrap; }\n.pill::before { content: ""; width: 7px; height: 7p'
+    'x; border-radius: 50%; background: currentColor; }\n.pill.critical { color: var(--sev-critical); back'
+    'ground: var(--sev-critical-bg); }\n.pill.high { color: var(--sev-high); background: var(--sev-high-bg'
+    '); }\n.pill.medium { color: var(--sev-medium); background: var(--sev-medium-bg); }\n.pill.low { color:'
+    ' var(--sev-low); background: var(--sev-low-bg); }\n.pill.info { color: var(--sev-info); background: v'
+    'ar(--sev-info-bg); }\n.pill.ok { color: var(--ok); background: var(--ok-bg); }\n.tag { display: inline'
+    '-block; padding: 2px 9px; border: 1px solid var(--border-hairline); border-radius: 6px; background: '
+    'var(--bg-subtle); color: var(--ink-secondary); font-size: 12px; font-weight: 600; white-space: nowra'
+    'p; }\n.tag.immediate_24h { border-color: var(--brand-orange-line); background: var(--brand-orange-was'
+    'h); color: var(--brand-orange-text); }\n.id { color: var(--ink-secondary); font-family: var(--font-mo'
+    'no); font-size: 12.5px; white-space: nowrap; }\n.sm { display: block; margin-top: 3px; color: var(--i'
+    'nk-muted); font-size: 12.5px; line-height: 1.45; }\n.stack > * + * { margin-top: 6px; }\n.res b { disp'
+    'lay: block; font-weight: 600; overflow-wrap: anywhere; }\n.code { color: var(--ink-secondary); font-f'
+    'amily: var(--font-mono); font-size: 12px; }\n.ext { display: inline-flex; align-items: center; gap: 4'
+    'px; margin-top: 4px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }\n.ext svg { width: 1'
+    '2px; height: 12px; }\n.ids { display: flex; flex-wrap: wrap; gap: 4px; }\n.chip-id { padding: 2px 7px;'
+    ' border: 1px solid var(--border-hairline); border-radius: 6px; background: var(--bg-subtle); color: '
+    'var(--ink-secondary); font-family: var(--font-mono); font-size: 12px; text-decoration: none; white-s'
+    'pace: nowrap; }\na.chip-id:hover { border-color: var(--brand-orange-text); color: var(--brand-orange-'
+    'text); }\n.state { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space'
+    ': nowrap; }\n.state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: v'
+    'ar(--sev-info-bar); }\n.state.on::before { background: var(--sev-high-bar); }\n.rank { font-size: 16px'
+    '; font-weight: 700; }\n.wide { min-width: 280px; overflow-wrap: anywhere; }\n.w3 { min-width: 250px; o'
+    'verflow-wrap: anywhere; }\n.w2 { min-width: 170px; overflow-wrap: anywhere; }\n.w1 { min-width: 150px;'
+    ' }\n.nw { white-space: nowrap; }\n.errbox { margin-top: 8px; padding: 8px 10px; border-radius: 8px; ba'
+    'ckground: var(--sev-critical-bg); color: var(--sev-critical); font-size: 12.5px; line-height: 1.45; '
+    '}\n.wslist { margin: 6px 0 0; padding: 0; list-style: none; color: var(--ink-muted); font-size: 12.5p'
+    'x; }\n.plain-list { margin: 14px 0 0; padding-left: 18px; color: var(--ink-secondary); font-size: 14p'
+    'x; }\n.plain-list li { margin-bottom: 6px; }\n.report-error { margin-top: 24px; }\n\n/* Footer */\n.foot '
+    '{ max-width: 1320px; margin: 0 auto; padding: 20px 40px 40px; display: flex; flex-wrap: wrap; justif'
+    'y-content: space-between; gap: 8px 16px; color: var(--ink-muted); font-size: 13px; }\n.foot-in { bord'
+    'er-top: 1px solid var(--border-hairline); }\n\n.topbar:has(#client-logo-img) .brand-text span { displa'
+    'y: none; }\n@media (max-width: 1300px) {\n  .topbar:has(#client-logo-img) .section-nav { display: none'
+    '; }\n}\n@media (max-width: 760px) {\n  .topbar:has(#client-logo-img) .client-name-label { display: none'
+    '; }\n}\n@media (max-width: 1360px) {\n  #theme-toggle { min-width: 40px; padding: 0 10px; }\n  #theme-to'
+    'ggle .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); whit'
+    'e-space: nowrap; }\n}\n@media (max-width: 1220px) {\n  .section-nav { display: none; }\n}\n@media (max-wi'
+    'dth: 1100px) {\n  .hero-in { grid-template-columns: minmax(0, 1fr); }\n  .kpis { grid-template-columns'
+    ': repeat(3, minmax(0, 1fr)); }\n  .grid2 { grid-template-columns: minmax(0, 1fr); }\n  .filters { grid'
+    '-template-columns: repeat(2, minmax(0, 1fr)); }\n}\n@media (max-width: 760px) {\n  .topbar-inner { gap:'
+    ' 10px; padding: 8px 16px; }\n  .chip-ro { display: none; }\n  .brand-text span, .btn .lbl { position: '
+    'absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }\n  .'
+    'btn-bar, .btn-primary { min-width: 40px; padding: 0 10px; }\n  .hero { padding: 28px 16px 84px; }\n  .'
+    'hero h1 { font-size: 30px; }\n  .hero-lead { font-size: 15.5px; }\n  .verdict b { font-size: 24px; }\n '
+    ' .page { padding: 0 16px 40px; }\n  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10'
+    'px; margin-top: -56px; }\n  .kpi { padding: 14px; }\n  .kpi .v { font-size: 30px; }\n  .sec { margin-to'
+    'p: 36px; }\n  .sh h2 { font-size: 20px; }\n  .card { padding: 16px; }\n  .tiles { gap: 8px; }\n  .tile {'
+    ' padding: 10px; }\n  .tile b { font-size: 24px; }\n  .filters { grid-template-columns: minmax(0, 1fr);'
+    ' }\n  .brow { grid-template-columns: minmax(0, 1fr) 36px; row-gap: 6px; }\n  .brow .bt { grid-column: '
+    '1 / -1; grid-row: 2; }\n  .foot { padding: 16px 16px 32px; }\n}\n@media (max-width: 360px) {\n  .topbar-'
+    'inner { gap: 8px; padding: 8px 12px; }\n  .brand { gap: 8px; }\n  .client-plaque { padding: 4px 7px; }'
+    '\n  .client-name-label { font-size: 12px; }\n  .brand-text b { font-size: 13px; }\n}\n@media (max-width:'
+    ' 340px) {\n  .brand-text { display: none; }\n}\n@media (prefers-reduced-motion: reduce) {\n  html { scro'
+    'll-behavior: auto; }\n  *, *::before, *::after { transition: none !important; animation: none !import'
+    'ant; }\n}\n\n@page { size: A4 landscape; margin: 10mm 10mm 14mm; @bottom-right { content: "Page " count'
+    'er(page) " of " counter(pages); font: 8.5pt \'Segoe UI\', sans-serif; color: #5A687A; } }\n@media print'
+    ' {\n  html, html[data-theme="dark"] {\n    --bg-page: #FFFFFF; --bg-panel: #FFFFFF; --bg-subtle: #F1EE'
+    'E8; --bg-row-hover: #FFFFFF;\n    --ink-primary: #141B24; --ink-secondary: #3E4C5E; --ink-muted: #5A6'
+    '87A;\n    --border-hairline: #DEDCD6; --border-strong: #9AA5B5;\n    --brand-orange-text: #C23800; --b'
+    'rand-orange-wash: #FFF2EC; --brand-orange-line: #FFC9AE;\n    --hero-bg: #1C2532; --hero-deep: #141B2'
+    '4; --hero-muted: #C3CCD8;\n    --sev-critical: #B42318; --sev-critical-bg: #FEE4E2; --sev-high: #B938'
+    '15; --sev-high-bg: #FFEAD5;\n    --sev-medium: #93370D; --sev-medium-bg: #FEF0C7; --sev-low: #175CD3;'
+    ' --sev-low-bg: #D1E9FF;\n    --sev-info: #344054; --sev-info-bg: #EAECF0; --ok: #067647; --ok-bg: #DC'
+    'FAE6;\n    --note-bg: #FFFAEB; --note-line: #FEDF89; --note-ink: #7A2E0E; --chart: #3E4C5E;\n    color'
+    '-scheme: light;\n  }\n  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }\n  body { b'
+    'ackground: #FFFFFF; font-size: 11.5px; }\n  .topbar { position: static; background-color: #FFFFFF; co'
+    'lor: #141B24; border-bottom: 0; }\n  .topbar-inner { min-height: 0; padding: 0 0 8px; }\n  .brand { co'
+    'lor: #141B24; }\n  .client-plaque { border: 1px solid #DEDCD6; }\n  .brand-text span { color: #5A687A;'
+    ' }\n  .chip-ro { display: inline-block; color: #3E4C5E; border-color: #DEDCD6; }\n  .section-nav, #the'
+    'me-toggle, #btn-print, .skip-link, #sec-filters, .downloads, .more-link, .more-row { display: none !'
+    'important; }\n  .ledger-table tr.pg { display: table-row; }\n  .print-only { display: block; }\n  .hero'
+    ' { padding: 22px 24px 70px; border-radius: 12px; }\n  .hero h1 { font-size: 30px; max-width: none; }\n'
+    '  .hero-lead { font-size: 13.5px; }\n  .hero-in { grid-template-columns: minmax(0, 1fr) 260px; gap: 1'
+    '4px 28px; }\n  .verdict b { font-size: 21px; }\n  .page { padding: 0; max-width: none; }\n  .kpis { gri'
+    'd-template-columns: repeat(6, minmax(0, 1fr)); margin-top: -50px; }\n  .kpi .v { font-size: 26px; }\n '
+    ' .kpi, .card, .note, .brow, .verdict, .todo li, .tile, .ledger-table tr { break-inside: avoid; }\n  .'
+    'card.table-card { break-inside: auto; }\n  .card, .kpi { box-shadow: none; }\n  .grid2 { grid-template'
+    '-columns: repeat(2, minmax(0, 1fr)); }\n  .sec { margin-top: 20px; }\n  .sh { break-after: avoid; }\n  '
+    '.table-card { overflow: visible; }\n  .table-scroll { overflow: visible; background: none; }\n  .ledge'
+    'r-table { font-size: 10.5px; }\n  .ledger-table th { font-size: 9.5px; padding: 6px 8px; }\n  .ledger-'
+    'table td { padding: 6px 8px; overflow-wrap: break-word; }\n  .ledger-table td.wide, .ledger-table td.'
+    'w2, .ledger-table td.w3 { overflow-wrap: anywhere; }\n  .ledger-table thead { display: table-header-g'
+    'roup; }\n  .ledger-table .sm, .ledger-table .ext, .ledger-table .pill, .ledger-table .tag, .ledger-ta'
+    'ble .state { font-size: 9.5px; }\n  .ledger-table .id, .ledger-table .code, .ledger-table .chip-id { '
+    'font-size: 9.5px; }\n  .ledger-table .rank { font-size: 12px; }\n  .brow .bl { white-space: normal; }\n'
+    '  .brow .bl small { display: block; margin: 1px 0 0 17px; }\n  .wide, .w1, .w2, .w3 { min-width: 0; }'
+    '\n  .sort { display: none !important; }\n  .th-print { display: inline; }\n  .ext svg { display: none; '
+    '}\n  a { text-decoration: none; }\n  .foot { padding: 12px 0 0; max-width: none; }\n}\n</style>\n</head>\n'
+    '<body>\n<a class="skip-link" href="#report-body">Skip to content</a>\n<header class="topbar" id="topba'
+    'r">\n  <div class="topbar-inner">\n    <a class="brand" href="#top" aria-label="Top of the report">\n  '
+    '    <span class="client-plaque" id="client-plaque">\n        <span id="client-logo-slot"></span>\n    '
+    '    <span class="client-name-label" id="client-name-label">Customer</span>\n      </span>\n      <span'
+    ' class="brand-text"><b>Azure SRE Agent</b><span id="topbar-subtitle">Operations digest</span></span>'
+    '\n    </a>\n    <nav class="section-nav" id="section-nav" aria-label="Report sections">\n      <a href='
+    '"#sec-executive">Summary</a>\n      <a href="#sec-incidents">Incidents<span class="n" id="nav-inciden'
+    'ts-count">0</span></a>\n      <a href="#sec-anomalies">Anomalies<span class="n" id="nav-anomalies-cou'
+    'nt">0</span></a>\n      <a href="#sec-actions">Actions<span class="n" id="nav-actions-count">0</span>'
+    '</a>\n      <a href="#sec-resources">Resources<span class="n" id="nav-resources-count">0</span></a>\n '
+    '     <a href="#sec-coverage">Coverage<span class="n" id="nav-sources-count">0</span></a>\n    </nav>\n'
+    '    <div class="toolbar-actions">\n      <span class="chip-ro">Read-only</span>\n      <button type="b'
+    'utton" class="btn btn-bar" id="theme-toggle" title="Dark mode"><svg viewBox="0 0 24 24" fill="none" '
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="t'
+    'rue"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><span class="lbl">Dark mode</span'
+    '></button>\n      <button type="button" class="btn btn-primary" id="btn-print"><svg viewBox="0 0 24 2'
+    '4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+    ' aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 '
+    '2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg><span class="lbl">Print / PDF</span></button>\n    </div>\n  </div'
+    '>\n</header>\n\n<main id="report-body">\n  <section class="hero" id="top" aria-labelledby="cover-title">'
+    '\n    <div class="hero-in">\n      <div>\n        <h1 id="cover-title">Incidents, anomalies, and recomm'
+    'ended actions</h1>\n        <p class="hero-scope" id="hero-scope">Periodic Azure operations report</p'
+    '>\n        <p class="hero-lead" id="hero-lead"></p>\n        <ul class="meta" id="hero-meta" aria-labe'
+    'l="Report context"></ul>\n      </div>\n      <aside class="verdict" id="verdict-card" aria-label="Ver'
+    'dict">\n        <div class="k">Verdict</div>\n        <b id="verdict-title">—</b>\n        <p id="verdi'
+    'ct-detail"></p>\n        <p id="verdict-sub"></p>\n      </aside>\n      <div class="dist" id="evidence'
+    '-distribution-bar">\n        <div class="dist-head"><span>Severity of incidents and anomalies</span><'
+    'span id="dist-total-label">0 signals</span></div>\n        <div class="track" id="dist-track" role="i'
+    'mg" aria-label="Distribution by severity"></div>\n        <div class="legend" id="dist-legend"></div>'
+    '\n      </div>\n    </div>\n  </section>\n\n  <div class="page">\n    <div class="kpis" id="ledger-summary'
+    '-grid">\n      <div class="kpi"><div class="v" id="kpi-native-alerts">0</div><div class="l">Azure Mon'
+    'itor alerts</div><div class="d" id="kpi-native-alerts-sub">alertsmanagementresources</div></div>\n   '
+    '   <div class="kpi"><div class="v" id="kpi-service-health">0</div><div class="l">Service Health comm'
+    'unications</div><div class="d" id="kpi-service-health-sub">ServiceIssue and PlannedMaintenance</div>'
+    '</div>\n      <div class="kpi"><div class="v" id="kpi-posture-anomalies">0</div><div class="l">Contro'
+    'l plane and Arc anomalies</div><div class="d" id="kpi-posture-anomalies-sub">Failed extensions and c'
+    'onnectivity</div></div>\n      <div class="kpi"><div class="v" id="kpi-telemetry-anomalies">0</div><d'
+    'iv class="l">Telemetry anomalies</div><div class="d" id="kpi-telemetry-anomalies-sub">InsightsMetric'
+    's, Perf, and Heartbeat</div></div>\n      <div class="kpi"><div class="v" id="kpi-actions-total">0</d'
+    'iv><div class="l">Recommended actions</div><div class="d" id="kpi-actions-sub">Prioritized by horizo'
+    'n</div></div>\n      <div class="kpi"><div class="v" id="kpi-resources-total">0</div><div class="l">R'
+    'esources in scope</div><div class="d" id="kpi-resources-sub">0 with active findings</div></div>\n    '
+    '</div>\n    <div class="notes" id="status-notes"></div>\n\n    <section class="sec" id="sec-executive" '
+    'aria-labelledby="h-executive">\n      <div class="sh"><div><h2 id="h-executive">Period summary</h2><p'
+    ' class="why">What needs attention first, and where the signals of the evaluated window come from.</p'
+    '></div></div>\n      <div class="grid2">\n        <div class="card">\n          <h3>What to do now</h3>'
+    '\n          <p class="sub">Prioritized actions for human review; each one cites the evidence behind i'
+    't.</p>\n          <div class="tiles" id="horizon-tiles"></div>\n          <ol class="todo" id="top-act'
+    'ions"></ol>\n          <a class="more-link" href="#sec-actions" id="all-actions-link">See all actions'
+    '</a>\n        </div>\n        <div class="card">\n          <h3>Executive summary</h3>\n          <p cla'
+    'ss="sub">The essentials of the period, calculated from the sources read.</p>\n          <ul class="ex'
+    'ec-list" id="executive-messages-list"></ul>\n          <dl class="prov" id="provenance-strip">\n      '
+    '      <dt>Azure subscription</dt><dd class="code" id="prov-subscription">—</dd>\n            <dt>Eval'
+    'uation window</dt><dd id="prov-window-label">—</dd>\n            <dt>Exact UTC interval</dt><dd id="p'
+    'rov-window-range">—</dd>\n            <dt>Cadence</dt><dd id="prov-cadence">—</dd>\n            <dt>Da'
+    'ta provenance</dt><dd id="prov-provenance">—</dd>\n            <dt>Reference time (UTC)</dt><dd id="r'
+    'eference-utc-label">—</dd>\n          </dl>\n        </div>\n        <div class="card">\n          <h3>S'
+    'ignals by evidence stream</h3>\n          <p class="sub">Each bar filters the records by that stream.'
+    '</p>\n          <div class="bars" id="stream-bars"></div>\n        </div>\n        <div class="card">\n '
+    '         <h3>Resources with the most signals</h3>\n          <p class="sub">Incidents plus anomalies '
+    'per resource: where the review starts.</p>\n          <div class="bars" id="resource-bars"></div>\n   '
     '     </div>\n      </div>\n    </section>\n\n    <section class="sec" id="sec-filters" aria-labelledby="'
-    'h-filters">\n      <div class="sh"><div><h2 id="h-filters">Filtrar registros</h2><p class="why">Los f'
-    'iltros acotan a la vez incidencias, anomalías, acciones, recursos y Advisor. Las descargas incluyen '
-    'siempre todos los registros.</p></div></div>\n      <div class="card">\n        <div class="filters">\n'
-    '          <div class="field">\n            <label for="filter-search">Buscar</label>\n            <inp'
-    'ut type="search" class="control" id="filter-search" placeholder="Recurso, ID, extensión o métrica" a'
-    'utocomplete="off">\n          </div>\n          <div class="field">\n            <label for="filter-cat'
-    'egory">Flujo de evidencia <code>category</code></label>\n            <select class="control" id="filt'
-    'er-category">\n              <option value="all">Todas las categorías</option>\n              <option '
-    'value="native_alert">Alertas nativas Azure Monitor</option>\n              <option value="service_hea'
-    'lth">Comunicaciones Azure Service Health</option>\n              <option value="extension_failure">Fa'
-    'llos de extensión VM / Azure Arc</option>\n              <option value="connectivity_posture">Anomalí'
-    'as de conectividad / plano de control</option>\n              <option value="telemetry_anomaly">Anoma'
-    'lías de telemetría (CPU / Memoria / Disco / Heartbeat)</option>\n              <option value="advisor'
-    '_recommendation">Recomendaciones Azure Advisor</option>\n            </select>\n          </div>\n     '
-    '     <div class="field">\n            <label for="filter-severity">Severidad <code>severity</code></l'
-    'abel>\n            <select class="control" id="filter-severity">\n              <option value="all">To'
-    'das las severidades</option>\n              <option value="critical">Crítica</option>\n              <'
-    'option value="high">Alta</option>\n              <option value="medium">Media</option>\n              '
-    '<option value="low">Baja</option>\n            </select>\n          </div>\n          <div class="field'
-    '">\n            <label for="filter-horizon">Horizonte de acción <code>horizon</code></label>\n        '
-    '    <select class="control" id="filter-horizon">\n              <option value="all">Todos los horizon'
-    'tes</option>\n              <option value="immediate_24h">Inmediato &lt;24h</option>\n              <o'
-    'ption value="short_term_7d">Corto plazo 1-7 días</option>\n              <option value="monthly_cycle'
-    '">Ciclo mensual</option>\n            </select>\n          </div>\n          <button type="button" clas'
-    's="btn btn-ghost" id="filter-reset">Restablecer</button>\n        </div>\n        <div class="filter-f'
-    'oot">\n          <p class="status-line" id="filter-status-summary" aria-live="polite">Mostrando la to'
-    'talidad de registros recolectados</p>\n          <div class="downloads">\n            <span>Descargas '
-    'locales:</span>\n            <button type="button" class="btn btn-ghost" id="btn-export-json"><svg vi'
-    'ewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-l'
-    'inejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"/></svg>JSON completo<'
-    '/button>\n            <button type="button" class="btn btn-ghost" id="btn-export-incidents-csv"><svg '
-    'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke'
-    '-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"/></svg>CSV incidenc'
-    'ias y anomalías</button>\n            <button type="button" class="btn btn-ghost" id="btn-export-acti'
-    'ons-csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap='
-    '"round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"/></sv'
-    'g>CSV acciones recomendadas</button>\n          </div>\n        </div>\n      </div>\n    </section>\n   '
-    ' <p class="print-only status-line" id="print-filter-note"></p>\n\n    <section class="sec" id="sec-inc'
-    'idents" aria-labelledby="h-incidents">\n      <div class="sh"><div><h2 id="h-incidents">Incidencias y'
-    ' comunicaciones de plataforma</h2><p class="why">Alertas nativas de Azure Monitor y comunicaciones o'
-    'ficiales de Service Health de la ventana: lo que ya ocurrió o sigue activo.</p></div><p class="count'
-    '"><strong id="incidents-count">0</strong> de <span id="incidents-total">0</span> incidencias</p></di'
-    'v>\n      <div class="card table-card"><div class="table-scroll" tabindex="0" role="region" aria-labe'
-    'lledby="h-incidents">\n        <table class="ledger-table" id="incidents-table"><caption class="sr-on'
-    'ly">Incidencias y comunicaciones de plataforma</caption><thead></thead><tbody id="incidents-tbody"><'
-    '/tbody></table>\n      </div></div>\n    </section>\n\n    <section class="sec" id="sec-anomalies" aria-'
-    'labelledby="h-anomalies">\n      <div class="sh"><div><h2 id="h-anomalies">Anomalías técnicas</h2><p '
-    'class="why">Desviaciones detectadas por el agente: extensiones fallidas, postura de plano de control'
-    ' y telemetría fuera de rango.</p></div><p class="count"><strong id="anomalies-count">0</strong> de <'
-    'span id="anomalies-total">0</span> anomalías</p></div>\n      <div class="card table-card"><div class'
-    '="table-scroll" tabindex="0" role="region" aria-labelledby="h-anomalies">\n        <table class="ledg'
-    'er-table" id="anomalies-table"><caption class="sr-only">Anomalías técnicas</caption><thead></thead><'
-    'tbody id="anomalies-tbody"></tbody></table>\n      </div></div>\n    </section>\n\n    <section class="s'
-    'ec" id="sec-actions" aria-labelledby="h-actions">\n      <div class="sh"><div><h2 id="h-actions">Acci'
-    'ones recomendadas priorizadas</h2><p class="why">Plan ordenado por urgencia para revisión humana. Ca'
-    'da acción enlaza las evidencias que la justifican; el agente no ejecuta cambios.</p></div><p class="'
-    'count"><strong id="actions-count">0</strong> de <span id="actions-total">0</span> acciones</p></div>'
-    '\n      <div class="card table-card"><div class="table-scroll" tabindex="0" role="region" aria-labell'
-    'edby="h-actions">\n        <table class="ledger-table" id="actions-table"><caption class="sr-only">Ac'
-    'ciones recomendadas priorizadas</caption><thead></thead><tbody id="actions-tbody"></tbody></table>\n '
-    '     </div></div>\n    </section>\n\n    <section class="sec" id="sec-resources" aria-labelledby="h-res'
-    'ources">\n      <div class="sh"><div><h2 id="h-resources">Estado por recurso</h2><p class="why">Cada '
-    'recurso inventariado con sus incidencias, anomalías, extensiones y acciones; primero los que tienen '
-    'hallazgos activos.</p></div><p class="count"><strong id="resources-count">0</strong> de <span id="re'
-    'sources-total">0</span> recursos</p></div>\n      <div class="card table-card"><div class="table-scro'
-    'll" tabindex="0" role="region" aria-labelledby="h-resources">\n        <table class="ledger-table" id'
-    '="resources-table"><caption class="sr-only">Estado operativo por recurso</caption><thead></thead><tb'
-    'ody id="resources-tbody"></tbody></table>\n      </div></div>\n      <div class="sh sub-sh"><div><h3 i'
-    'd="h-advisor">Recomendaciones de Azure Advisor</h3><p class="why">Recomendaciones en caché de <code>'
-    'arm_advisor_recommendations</code> correlacionadas con el plan de acciones.</p></div><p class="count'
-    '"><strong id="advisor-count">0</strong> de <span id="advisor-total">0</span> recomendaciones</p></di'
-    'v>\n      <div class="card table-card"><div class="table-scroll" tabindex="0" role="region" aria-labe'
-    'lledby="h-advisor">\n        <table class="ledger-table" id="advisor-table"><caption class="sr-only">'
-    'Recomendaciones de Azure Advisor</caption><thead></thead><tbody id="advisor-tbody"></tbody></table>\n'
-    '      </div></div>\n    </section>\n\n    <section class="sec" id="sec-coverage" aria-labelledby="h-cov'
-    'erage">\n      <div class="sh"><div><h2 id="h-coverage">Cobertura de fuentes y método</h2><p class="w'
-    'hy">Qué se leyó y con qué resultado. Una fuente parcial es un punto ciego, no un resultado limpio.</'
-    'p></div><p class="count"><strong id="sources-count">0</strong> fuentes</p></div>\n      <div class="c'
-    'ard table-card"><div class="table-scroll" tabindex="0" role="region" aria-labelledby="h-coverage">\n '
-    '       <table class="ledger-table" id="sources-table"><caption class="sr-only">Recibos de cobertura '
-    'por fuente</caption><thead></thead><tbody id="sources-tbody"></tbody></table>\n      </div></div>\n   '
-    '   <div class="grid2 mt">\n        <div class="card">\n          <h3>Garantías operativas y limitacion'
-    'es</h3>\n          <p class="sub">Lo que este informe no afirma.</p>\n          <ul class="exec-list" '
-    'id="methodology-list"></ul>\n        </div>\n        <div class="card">\n          <h3>Método</h3>\n    '
-    '      <p class="sub">Parámetros de ejecución y flujos de evidencia consultados en modo solo lectura.'
-    '</p>\n          <dl class="prov" id="method-facts" style="margin-top:0;padding-top:0;border-top:0"></'
-    'dl>\n          <ul class="plain-list mt" id="method-streams"></ul>\n        </div>\n      </div>\n    </'
-    'section>\n  </div>\n</main>\n\n<footer class="foot-in"><div class="foot" id="report-footer"><span id="fo'
-    'oter-left">Generado por Azure SRE Agent · Solo lectura</span><span id="footer-right"></span></div></'
-    'footer>\n\n<script type="application/json" id="report-data">__REPORT_DATA_JSON__</script>\n<script>\n(fu'
-    'nction () {\n  "use strict";\n\n  var SEV_RANK = { critical: 0, high: 1, medium: 2, low: 3 };\n  var SEV'
-    '_LABEL = { critical: "Crítica", high: "Alta", medium: "Media", low: "Baja" };\n  var SEV_WORDS = { cr'
-    'itical: ["crítica", "críticas"], high: ["alta", "altas"], medium: ["media", "medias"], low: ["baja",'
-    ' "bajas"] };\n  var SEV_BAR = { critical: "--sev-critical-bar", high: "--sev-high-bar", medium: "--se'
-    'v-medium-bar", low: "--sev-low-bar" };\n  var HORIZON_RANK = { immediate_24h: 0, short_term_7d: 1, mo'
-    'nthly_cycle: 2 };\n  var STATUS = { complete: ["Completa", "ok"], partial: ["Parcial", "medium"], den'
-    'ied: ["Denegada", "critical"], error: ["Error", "critical"], not_configured: ["No configurada", "inf'
-    'o"] };\n  var SHORT_CAT = {\n    native_alert: "Alerta Azure Monitor",\n    service_health: "Service He'
-    'alth",\n    extension_failure: "Extensión fallida",\n    connectivity_posture: "Plano de control",\n   '
-    ' telemetry_anomaly: "Telemetría",\n    advisor_recommendation: "Azure Advisor"\n  };\n  var UNIT = { Pe'
-    'rcent: "%", Minutes: "min", MB: "MB", State: "" };\n  var TYPE_LABEL = {\n    "microsoft.compute/virtu'
-    'almachines": "Máquina virtual",\n    "microsoft.compute/virtualmachinescalesets": "Conjunto de escala'
-    'do de VM",\n    "microsoft.hybridcompute/machines": "Servidor Azure Arc",\n    "microsoft.kubernetes/c'
-    'onnectedclusters": "Kubernetes con Azure Arc",\n    "microsoft.containerservice/managedclusters": "Cl'
-    'úster AKS",\n    "microsoft.app/containerapps": "Container App",\n    "microsoft.web/sites": "App Serv'
-    'ice",\n    "microsoft.web/serverfarms": "Plan de App Service",\n    "microsoft.storage/storageaccounts'
-    '": "Cuenta de almacenamiento",\n    "microsoft.keyvault/vaults": "Key Vault",\n    "microsoft.sql/serv'
-    'ers/databases": "Base de datos SQL",\n    "microsoft.dbforpostgresql/flexibleservers": "PostgreSQL fl'
-    'exible",\n    "microsoft.cache/redis": "Azure Cache for Redis",\n    "microsoft.operationalinsights/wo'
-    'rkspaces": "Área de trabajo de Log Analytics",\n    "microsoft.resourcehealth/events": "Service Healt'
-    'h"\n  };\n  var PATHS = {\n    ext: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 '
-    '0 1 1-1h5",\n    alert: "M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a'
-    '2 2 0 0 0-3.4 0Z",\n    moon: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z",\n    sun: "M12 3v2M12 19'
-    'v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M12 8a4 4 0 1 0'
-    ' 0 8 4 4 0 0 0 0-8Z"\n  };\n  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-m'
-    'otion: reduce)").matches;\n\n  function el(tag, attrs, children) {\n    var node = document.createEleme'
-    'nt(tag);\n    if (attrs) {\n      Object.keys(attrs).forEach(function (k) {\n        if (k === "classNa'
-    'me") {\n          node.className = attrs[k];\n        } else if (k === "textContent") {\n          node'
-    '.textContent = attrs[k];\n        } else if (attrs[k] !== null && attrs[k] !== undefined) {\n         '
-    ' node.setAttribute(k, String(attrs[k]));\n        }\n      });\n    }\n    (children || []).forEach(func'
-    'tion (ch) {\n      if (ch === null || ch === undefined || ch === false) {\n        return;\n      }\n   '
-    '   node.appendChild(typeof ch === "string" || typeof ch === "number" ? document.createTextNode(Strin'
-    'g(ch)) : ch);\n    });\n    return node;\n  }\n\n  function clear(node) {\n    while (node.firstChild) {\n '
-    '     node.removeChild(node.firstChild);\n    }\n  }\n\n  function icon(name) {\n    var ns = "http://www.'
-    'w3.org/2000/svg";\n    var svg = document.createElementNS(ns, "svg");\n    var attrs = { viewBox: "0 0'
-    ' 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stro'
-    'ke-linejoin": "round", "aria-hidden": "true" };\n    Object.keys(attrs).forEach(function (k) { svg.se'
-    'tAttribute(k, attrs[k]); });\n    var path = document.createElementNS(ns, "path");\n    path.setAttrib'
-    'ute("d", PATHS[name]);\n    svg.appendChild(path);\n    return svg;\n  }\n\n  var dataNode = document.get'
-    'ElementById("report-data");\n  var DATA;\n  try {\n    DATA = JSON.parse(dataNode.textContent);\n  } cat'
-    'ch (err) {\n    var holder = document.querySelector(".page");\n    clear(holder);\n    holder.appendChi'
-    'ld(el("div", { className: "note report-error", role: "alert" }, [icon("alert"), el("span", null, ["N'
-    'o se pudo leer el modelo de datos embebido. Genere el informe con la herramienta (operation=\\"report'
-    '\\") en lugar de abrir la plantilla directamente."])]));\n    return;\n  }\n  var COUNTS = DATA.counts |'
-    '| {};\n\n  function n(value) {\n    var v = Number(value) || 0;\n    return Math.round(v) === v ? String'
-    '(v).replace(/\\B(?=(\\d{3})+(?!\\d))/g, "\\u202f") : String(v);\n  }\n\n  function plural(count, one, many)'
-    ' {\n    return Number(count) === 1 ? one : many;\n  }\n\n  function b(value) {\n    return el("b", { text'
-    'Content: n(value) });\n  }\n\n  function utc(value) {\n    if (!value) {\n      return "—";\n    }\n    ret'
-    'urn String(value).replace("T", " ").replace(/:\\d{2}(\\.\\d+)?Z$/, "").replace(/Z$/, "");\n  }\n\n  functi'
-    'on plain(value) {\n    if (value === null || value === undefined) {\n      return "";\n    }\n    var s '
-    '= String(value);\n    if (!/[<&]/.test(s)) {\n      return s;\n    }\n    var doc = new DOMParser().pars'
-    'eFromString(s.replace(/<\\/(p|div|li|h[1-6]|tr|ul|ol)>|<br\\s*\\/?>/gi, " $& "), "text/html");\n    retu'
-    'rn (doc.body.textContent || "").replace(/\\s+/g, " ").trim();\n  }\n\n  function breakable(value, cls) {'
-    '\n    var span = el("span", { className: cls === undefined ? "code" : cls || null });\n    var buf = "'
-    '";\n    String(value === null || value === undefined ? "" : value).split("").forEach(function (ch) {\n'
-    '      buf += ch;\n      if ("/.?&=_".indexOf(ch) >= 0) {\n        span.appendChild(document.createText'
-    'Node(buf));\n        span.appendChild(document.createElement("wbr"));\n        buf = "";\n      }\n    }'
-    ');\n    if (buf) {\n      span.appendChild(document.createTextNode(buf));\n    }\n    return span;\n  }\n\n'
-    '  function prose(value) {\n    var text = plain(value);\n    var span = el("span");\n    var last = 0;\n'
-    '    text.replace(/[A-Za-z)][\\/.](?=[A-Za-z(])/g, function (match, offset) {\n      var cut = offset +'
-    ' match.length;\n      span.appendChild(document.createTextNode(text.slice(last, cut)));\n      span.ap'
-    'pendChild(document.createElement("wbr"));\n      last = cut;\n      return match;\n    });\n    span.app'
-    'endChild(document.createTextNode(text.slice(last)));\n    return span;\n  }\n\n  function withName(text,'
-    ' name) {\n    var s = String(text || "");\n    var at = name && name.length <= 32 ? s.indexOf(name) : '
-    '-1;\n    if (at < 0) {\n      return [s];\n    }\n    return [s.slice(0, at), el("span", { className: "n'
-    'w", textContent: name }), s.slice(at + name.length)];\n  }\n\n  function sevKey(row) {\n    return SEV_R'
-    'ANK.hasOwnProperty(row.severity) ? SEV_RANK[row.severity] : 9;\n  }\n\n  function pill(sev, label, titl'
-    'e) {\n    var tone = SEV_RANK.hasOwnProperty(sev) || sev === "ok" || sev === "info" ? sev : "info";\n '
-    '   return el("span", { className: "pill " + tone, textContent: label || SEV_LABEL[sev] || String(sev'
-    ' || "—"), title: title || null });\n  }\n\n  function extLink(href, label) {\n    if (typeof href !== "s'
-    'tring" || !/^https:\\/\\//.test(href)) {\n      return null;\n    }\n    return el("a", { className: "ext'
-    '", href: href, target: "_blank", rel: "noopener noreferrer" }, [label, icon("ext")]);\n  }\n\n  functio'
-    'n portalUrl(id) {\n    return typeof id === "string" && /^\\/subscriptions\\/[^/]+\\/(resourcegroups|pro'
-    'viders)\\/[^?#]+$/i.test(id)\n      ? "https://portal.azure.com/#@/resource" + id\n      : null;\n  }\n\n '
-    ' function typeLabel(type) {\n    var t = String(type || "").toLowerCase();\n    return TYPE_LABEL[t] |'
-    '| t.split("/").pop() || "";\n  }\n\n  function rgLabel(rg) {\n    return rg === "subscription-scope" ? "'
-    'Ámbito de suscripción" : (rg || "");\n  }\n\n  function resourceCell(name, rg, type, id, extra) {\n    v'
-    'ar meta = [rgLabel(rg), type ? typeLabel(type) : "", extra || ""].filter(Boolean).join(" · ");\n    r'
-    'eturn el("div", { className: "res", title: id || null }, [\n      el("b", { textContent: name || "—" '
-    '}),\n      meta ? el("span", { className: "sm", textContent: meta, title: type || null }) : null,\n   '
-    '   portalUrl(id) ? extLink(portalUrl(id), "Portal") : null\n    ]);\n  }\n\n  function idCell(row) {\n   '
-    ' return [el("span", { className: "id", textContent: row.id }), el("span", { className: "sm", textCon'
-    'tent: SHORT_CAT[row.category] || row.category_label || "", title: row.category_label || null })];\n  '
-    '}\n\n  function withUnit(value, unit) {\n    var u = UNIT.hasOwnProperty(unit) ? UNIT[unit] : (unit || '
-    '"");\n    var text = typeof value === "number" ? n(value) : String(value === null || value === undefi'
-    'ned ? "—" : value);\n    return u ? text + "\\u00a0" + u : text;\n  }\n\n  /* ---------- Header, hero and'
-    ' KPIs ---------- */\n\n  function renderBranding() {\n    var client = DATA.client || {};\n    var nameL'
-    'abel = document.getElementById("client-name-label");\n    var logoSlot = document.getElementById("cli'
-    'ent-logo-slot");\n    clear(logoSlot);\n    nameLabel.textContent = client.name || "CLIENTE";\n    if ('
-    'client.logo_data_uri && /^data:image\\/(png|jpeg);base64,/.test(client.logo_data_uri)) {\n      logoSl'
-    'ot.appendChild(el("img", { id: "client-logo-img", src: client.logo_data_uri, alt: client.logo_alt ||'
-    ' "Logotipo autorizado del cliente" }));\n    }\n  }\n\n  function verdict() {\n    var sb = COUNTS.severi'
-    'ty_breakdown || {};\n    var imm = COUNTS.actions_immediate_24h || 0;\n    var parts = ["critical", "h'
-    'igh", "medium", "low"].filter(function (k) { return sb[k]; }).map(function (k) {\n      return n(sb[k'
-    ']) + " " + SEV_WORDS[k][sb[k] === 1 ? 0 : 1];\n    });\n    var tone = imm > 0 || sb.critical ? "crit"'
-    ' : (sb.high || sb.medium) ? "warn" : "ok";\n    var card = document.getElementById("verdict-card");\n '
-    '   card.className = "verdict " + tone;\n    document.getElementById("verdict-title").textContent = to'
-    'ne === "crit" ? "Acción requerida" : tone === "warn" ? "Requiere atención" : parts.length ? "Sin hal'
-    'lazgos prioritarios" : "Sin hallazgos";\n    document.getElementById("verdict-detail").textContent = '
-    'parts.length ? parts.join(" · ") : "Sin incidencias ni anomalías en la ventana";\n    document.getEle'
-    'mentById("verdict-sub").textContent =\n      (imm ? n(imm) + " " + plural(imm, "acción inmediata", "a'
-    'cciones inmediatas") + " (<24 h)" : "Ninguna acción en horizonte inmediato")\n      + " · " + n(COUNT'
-    'S.resources_attention || 0) + " " + plural(COUNTS.resources_attention, "recurso", "recursos") + " co'
-    'n hallazgos activos";\n  }\n\n  function renderHero() {\n    var win = DATA.window || {};\n    var source'
-    's = DATA.sources || [];\n    var degraded = sources.filter(function (s) { return s.status !== "comple'
-    'te" && s.status !== "not_configured"; });\n    document.getElementById("hero-scope").textContent = "I'
-    'nforme periódico de operaciones Azure · " + (win.label || win.period || "ventana no indicada");\n    '
-    'document.title = "Dossier de operaciones, incidencias, anomalías y acciones recomendadas · " + (win.'
-    'label || "") + " · " + ((DATA.client || {}).name || "CLIENTE");\n\n    var lead = document.getElementB'
-    'yId("hero-lead");\n    clear(lead);\n    [\n      "La ventana registra ", b(COUNTS.incidents_total), " '
-    '" + plural(COUNTS.incidents_total, "incidencia", "incidencias") + " y ",\n      b(COUNTS.anomalies_to'
-    'tal), " " + plural(COUNTS.anomalies_total, "anomalía técnica", "anomalías técnicas") + " sobre ",\n  '
-    '    b(COUNTS.resources_total), " " + plural(COUNTS.resources_total, "recurso evaluado", "recursos ev'
-    'aluados") + " (",\n      b(COUNTS.resources_attention), " con hallazgos activos); el plan propone ",\n'
-    '      b(COUNTS.actions_total), " " + plural(COUNTS.actions_total, "acción priorizada", "acciones pri'
-    'orizadas") + ": ",\n      b(COUNTS.actions_immediate_24h), " " + plural(COUNTS.actions_immediate_24h,'
-    ' "inmediata", "inmediatas") + ", ",\n      b(COUNTS.actions_short_term_7d), " a corto plazo y ", b(CO'
-    'UNTS.actions_monthly_cycle), " de ciclo mensual."\n    ].forEach(function (part) {\n      lead.appendC'
-    'hild(typeof part === "string" ? document.createTextNode(part) : part);\n    });\n\n    var sub = DATA.s'
-    'ubscription_id || "";\n    var meta = document.getElementById("hero-meta");\n    clear(meta);\n    var '
-    'live = DATA.provenance === "LIVE";\n    [\n      ["Generado " + utc(DATA.reference_utc) + " UTC", ""],'
-    '\n      ["Ventana " + utc(win.start_utc).slice(0, 10) + " → " + utc(win.end_utc).slice(0, 10) + " (UT'
-    'C)", ""],\n      [sub ? "Suscripción " + (sub.length > 16 ? sub.slice(0, 8) + "…" + sub.slice(-4) : s'
-    'ub) : "", ""],\n      [live ? "Lectura en vivo (LIVE)" : "Datos simulados (" + (DATA.provenance || "S'
-    'IMULATED") + ")", "on"],\n      [degraded.length ? "Cobertura parcial · " + (sources.length - degrade'
-    'd.length) + " de " + sources.length + " fuentes" : "Cobertura completa · " + sources.length + " fuen'
-    'tes", degraded.length ? "warn" : ""]\n    ].forEach(function (item) {\n      if (item[0]) {\n        me'
-    'ta.appendChild(el("li", { className: item[1] || null, textContent: item[0], title: item[0].indexOf("'
-    'Suscripción") === 0 ? sub : null }));\n      }\n    });\n\n    verdict();\n\n    var sb = COUNTS.severity_'
-    'breakdown || {};\n    var total = ["critical", "high", "medium", "low"].reduce(function (acc, k) { re'
-    'turn acc + (sb[k] || 0); }, 0);\n    document.getElementById("dist-total-label").textContent = n(tota'
-    'l) + " " + plural(total, "señal", "señales");\n    var track = document.getElementById("dist-track");'
-    '\n    var legend = document.getElementById("dist-legend");\n    clear(track);\n    clear(legend);\n    v'
-    'ar described = [];\n    ["critical", "high", "medium", "low"].forEach(function (k) {\n      var count '
-    '= sb[k] || 0;\n      var color = "var(" + SEV_BAR[k] + ")";\n      if (total > 0 && count > 0) {\n     '
-    '   var seg = el("i", { title: SEV_LABEL[k] + ": " + count });\n        seg.style.width = (count * 100'
-    ' / total).toFixed(2) + "%";\n        seg.style.background = color;\n        track.appendChild(seg);\n  '
-    '    }\n      var sw = el("i");\n      sw.style.background = color;\n      legend.appendChild(el("span",'
-    ' null, [sw, SEV_LABEL[k] + " ", el("b", { textContent: n(count) })]));\n      described.push(SEV_LABE'
-    'L[k] + " " + count);\n    });\n    track.setAttribute("aria-label", "Distribución por severidad: " + d'
-    'escribed.join(", "));\n\n    var notes = document.getElementById("status-notes");\n    clear(notes);\n  '
-    '  if (!live) {\n      notes.appendChild(el("div", { className: "note sim" }, [icon("alert"), el("span'
-    '", null, ["Datos simulados (" + (DATA.provenance || "SIMULATED") + "): figuras de demostración gener'
-    'adas sin leer Azure; no describen un entorno real."])]));\n    }\n    if (degraded.length) {\n      not'
-    'es.appendChild(el("div", { className: "note" }, [icon("alert"), el("span", null, [\n        "Cobertur'
-    'a parcial: " + degraded.map(function (s) { return s.id + " (" + (STATUS[s.status] || [s.status])[0].'
-    'toLowerCase() + ")"; }).join(", ")\n        + ". Lo que no se leyó es un punto ciego, no un resultado'
-    ' limpio. ",\n        el("a", { href: "#sec-coverage", textContent: "Ver cobertura de fuentes" })\n    '
-    '  ])]));\n    }\n  }\n\n  function renderKpis() {\n    var incidents = DATA.incidents || [];\n    var nati'
-    've = incidents.filter(function (r) { return r.category === "native_alert"; });\n    var fired = nativ'
-    'e.filter(function (r) { return String(r.monitor_condition || "").toLowerCase() === "fired"; }).lengt'
-    'h;\n    var sh = incidents.filter(function (r) { return r.category === "service_health"; });\n    var '
-    'issues = sh.filter(function (r) { return r.signal_type === "ServiceIssue"; }).length;\n    var set = '
-    'function (id, value) { document.getElementById(id).textContent = value; };\n    set("kpi-native-alert'
-    's", n(COUNTS.native_alerts_total));\n    set("kpi-native-alerts-sub", n(fired) + " " + plural(fired, '
-    '"activa", "activas") + " (Fired) · " + n(native.length - fired) + " " + plural(native.length - fired'
-    ', "resuelta", "resueltas"));\n    set("kpi-service-health", n(COUNTS.service_health_total));\n    set('
-    '"kpi-service-health-sub", n(issues) + " " + plural(issues, "incidencia de servicio", "incidencias de'
-    ' servicio") + " · " + n(sh.length - issues) + " " + plural(sh.length - issues, "mantenimiento", "man'
-    'tenimientos"));\n    set("kpi-posture-anomalies", n((COUNTS.extension_failures_total || 0) + (COUNTS.'
-    'connectivity_posture_total || 0)));\n    set("kpi-posture-anomalies-sub", n(COUNTS.extension_failures'
-    '_total) + " ext. fallidas · " + n(COUNTS.connectivity_posture_total) + " conectividad/postura");\n   '
-    ' set("kpi-telemetry-anomalies", n(COUNTS.telemetry_anomalies_total));\n    var kinds = { cpu: 0, mem:'
-    ' 0, disk: 0, hb: 0 };\n    (DATA.anomalies || []).forEach(function (a) {\n      if (a.category === "te'
-    'lemetry_anomaly") {\n        var k = String(a.anomaly_kind || "");\n        kinds[/cpu/.test(k) ? "cpu'
-    '" : /memory/.test(k) ? "mem" : /disk/.test(k) ? "disk" : "hb"] += 1;\n      }\n    });\n    var kindTex'
-    't = [["cpu", "CPU"], ["mem", "memoria"], ["disk", "disco"], ["hb", "heartbeat"]].filter(function (k)'
-    ' { return kinds[k[0]]; }).map(function (k) { return n(kinds[k[0]]) + " " + k[1]; }).join(" · ");\n   '
-    ' set("kpi-telemetry-anomalies-sub", kindText || "InsightsMetrics, Perf y Heartbeat");\n    set("kpi-a'
-    'ctions-total", n(COUNTS.actions_total));\n    set("kpi-actions-sub", n(COUNTS.actions_immediate_24h) '
-    '+ " <24h · " + n(COUNTS.actions_short_term_7d) + " 1-7 días · " + n(COUNTS.actions_monthly_cycle) + '
-    '" mensual");\n    set("kpi-resources-total", n(COUNTS.resources_total));\n    set("kpi-resources-sub",'
-    ' n(COUNTS.resources_attention) + " con hallazgos activos");\n  }\n\n  /* ---------- Overview ----------'
-    ' */\n\n  function jumpTo(id) {\n    var target = document.getElementById(id);\n    if (target) {\n      t'
-    'arget.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });\n    }\n  }\n\n  functi'
-    'on renderOverview() {\n    var win = DATA.window || {};\n    var messages = document.getElementById("e'
-    'xecutive-messages-list");\n    clear(messages);\n    (DATA.executive_messages || []).forEach(function '
-    '(msg) {\n      var li = el("li");\n      var text = String(msg);\n      text.split(/(\\d+)/).forEach(fun'
-    'ction (part, i, all) {\n        if (!part) {\n          return;\n        }\n        var prev = i > 0 ? a'
-    'll[i - 1].slice(-1) : "";\n        var next = i + 1 < all.length ? all[i + 1].charAt(0) : "";\n       '
-    ' var standalone = i % 2 === 1 && !/[-:T<\\w]/.test(prev) && !/[-:\\w]/.test(next);\n        li.appendCh'
-    'ild(standalone ? el("b", { textContent: part }) : document.createTextNode(part));\n      });\n      me'
-    'ssages.appendChild(li);\n    });\n    document.getElementById("prov-subscription").textContent = DATA.'
-    'subscription_id || "—";\n    document.getElementById("prov-window-label").textContent = win.label || '
-    'win.period || "—";\n    document.getElementById("prov-window-range").textContent = (win.start_utc || '
-    '"—") + " → " + (win.end_utc || "—");\n    document.getElementById("prov-cadence").textContent = win.c'
-    'adence || "Mensual programado (30 8 1 * * UTC)";\n    document.getElementById("prov-provenance").text'
-    'Content = (DATA.provenance || "LIVE") + " · solo lectura";\n    document.getElementById("reference-ut'
-    'c-label").textContent = DATA.reference_utc || "—";\n\n    var tiles = document.getElementById("horizon'
-    '-tiles");\n    clear(tiles);\n    [["immediate_24h", "Inmediato <24h", COUNTS.actions_immediate_24h], '
-    '["short_term_7d", "Corto plazo 1-7 días", COUNTS.actions_short_term_7d], ["monthly_cycle", "Ciclo me'
-    'nsual", COUNTS.actions_monthly_cycle]].forEach(function (t) {\n      var tile = el("button", { type: '
-    '"button", className: "tile" + (t[0] === "immediate_24h" && t[2] ? " imm" : ""), "aria-label": t[1] +'
-    ' ": " + (t[2] || 0) + " acciones. Filtrar el plan por este horizonte" }, [el("b", { textContent: n(t'
-    '[2]) }), el("span", { textContent: t[1] })]);\n      tile.addEventListener("click", function () {\n   '
-    '     resetFilters(true);\n        document.getElementById("filter-horizon").value = t[0];\n        ren'
-    'derTables();\n        jumpTo("sec-actions");\n      });\n      tiles.appendChild(tile);\n    });\n\n    va'
-    'r list = document.getElementById("top-actions");\n    clear(list);\n    var actions = (DATA.actions ||'
-    ' []).slice(0, 5);\n    if (!actions.length) {\n      list.appendChild(el("li", null, [el("span", { cla'
-    'ssName: "rk", textContent: "—" }), el("div", { className: "t", textContent: "Sin acciones recomendad'
-    'as en esta ventana." })]));\n    }\n    actions.forEach(function (act) {\n      list.appendChild(el("li'
-    '", null, [\n        el("span", { className: "rk", textContent: String(act.priority_rank) }),\n        '
-    'el("div", null, [\n          el("div", { className: "t" }, withName(act.title, act.resource_name)),\n '
-    '         el("div", { className: "m" }, [pill(act.severity, act.severity_label), el("span", { classNa'
-    'me: "tag " + (act.horizon || ""), textContent: act.horizon_label }), el("span", { textContent: act.r'
-    'esource_name + (act.resource_group ? " · " + rgLabel(act.resource_group) : "") })])\n        ])\n     '
-    ' ]));\n    });\n    document.getElementById("all-actions-link").textContent = "Ver las " + n(COUNTS.ac'
-    'tions_total) + " acciones del plan";\n\n    var streams = [\n      ["native_alert", "Alertas nativas Az'
-    'ure Monitor", COUNTS.native_alerts_total, "sec-incidents"],\n      ["service_health", "Comunicaciones'
-    ' Service Health", COUNTS.service_health_total, "sec-incidents"],\n      ["extension_failure", "Extens'
-    'iones VM / Arc fallidas", COUNTS.extension_failures_total, "sec-anomalies"],\n      ["connectivity_po'
-    'sture", "Plano de control y conectividad", COUNTS.connectivity_posture_total, "sec-anomalies"],\n    '
-    '  ["telemetry_anomaly", "Telemetría fuera de rango", COUNTS.telemetry_anomalies_total, "sec-anomalie'
-    's"],\n      ["advisor_recommendation", "Recomendaciones Azure Advisor", COUNTS.advisor_recommendation'
-    's_total, "sec-resources"]\n    ];\n    var maxStream = Math.max.apply(null, streams.map(function (s) {'
-    ' return s[2] || 0; }).concat([1]));\n    var streamBox = document.getElementById("stream-bars");\n    '
-    'clear(streamBox);\n    streams.forEach(function (s) {\n      var bar = el("i");\n      bar.style.width '
-    '= ((s[2] || 0) * 100 / maxStream).toFixed(1) + "%";\n      if (!s[2]) {\n        bar.style.minWidth = '
-    '"0";\n      }\n      var row = el("button", { type: "button", className: "brow", "aria-label": s[1] + '
-    '": " + (s[2] || 0) + ". Filtrar los registros por este flujo" }, [el("span", { className: "bl", text'
-    'Content: s[1] }), el("span", { className: "bt" }, [bar]), el("b", { textContent: n(s[2]) })]);\n     '
-    ' row.addEventListener("click", function () {\n        resetFilters(true);\n        document.getElement'
-    'ById("filter-category").value = s[0];\n        renderTables();\n        jumpTo(s[3]);\n      });\n      '
-    'streamBox.appendChild(row);\n    });\n\n    var hot = (DATA.resources || []).map(function (r) {\n      r'
-    'eturn { r: r, v: (r.incident_count || 0) + (r.anomaly_count || 0) };\n    }).filter(function (x) { re'
-    'turn x.v > 0; }).sort(function (x, y) {\n      return y.v - x.v || sevKey(x.r) - sevKey(y.r) || Strin'
-    'g(x.r.resource_name).localeCompare(String(y.r.resource_name));\n    }).slice(0, 6);\n    var resBox = '
-    'document.getElementById("resource-bars");\n    clear(resBox);\n    if (!hot.length) {\n      resBox.app'
-    'endChild(el("p", { className: "empty-note", textContent: "Ningún recurso inventariado acumula incide'
-    'ncias ni anomalías en la ventana." }));\n    }\n    var maxHot = hot.length ? hot[0].v : 1;\n    hot.fo'
-    'rEach(function (x) {\n      var color = "var(" + (SEV_BAR[x.r.severity] || "--sev-info-bar") + ")";\n '
-    '     var bar = el("i");\n      bar.style.width = (x.v * 100 / maxHot).toFixed(1) + "%";\n      bar.sty'
-    'le.background = color;\n      var dot = el("span", { className: "dot" });\n      dot.style.background '
-    '= color;\n      var row = el("button", { type: "button", className: "brow", title: x.r.resource_id, "'
-    'aria-label": x.r.resource_name + ": " + x.v + " señales, severidad máxima " + (x.r.severity_label ||'
-    ' "") + ". Buscar este recurso en los registros" }, [\n        el("span", { className: "bl" }, [dot, x'
-    '.r.resource_name, el("small", { textContent: x.r.resource_group || "" })]),\n        el("span", { cla'
-    'ssName: "bt" }, [bar]),\n        el("b", { textContent: n(x.v) })\n      ]);\n      row.addEventListene'
-    'r("click", function () {\n        resetFilters(true);\n        document.getElementById("filter-search"'
-    ').value = x.r.resource_name;\n        renderTables();\n        jumpTo(x.r.incident_count ? "sec-incide'
-    'nts" : "sec-anomalies");\n      });\n      resBox.appendChild(row);\n    });\n  }\n\n  /* ---------- Regis'
-    'ters ---------- */\n\n  var TABLES = {};\n  var PAGE = 50;\n  var lastFilterKey = "";\n\n  function headLa'
-    'bel(text) {\n    var parts = String(text).split(" · ");\n    var out = [];\n    parts.forEach(function '
-    '(part, i) {\n      if (i) {\n        out.push(" ");\n      }\n      out.push(el("span", { className: "hg'
-    '", textContent: part + (i < parts.length - 1 ? " ·" : "") }));\n    });\n    return out;\n  }\n\n  functi'
-    'on setupTable(tableId, cols, rowId) {\n    var table = document.getElementById(tableId);\n    var tr ='
-    ' el("tr");\n    cols.forEach(function (c, i) {\n      var th = el("th", { scope: "col", className: c.n'
-    'um ? "n" : null });\n      if (c.sort) {\n        var btn = el("button", { type: "button", className: '
-    '"sort" }, headLabel(c.head));\n        btn.addEventListener("click", function () {\n          var st ='
-    ' TABLES[tableId].sort;\n          TABLES[tableId].sort = { i: i, dir: st.i === i && st.dir === "ascen'
-    'ding" ? "descending" : "ascending" };\n          renderTables();\n        });\n        th.appendChild(b'
-    'tn);\n        th.appendChild(el("span", { className: "th-print", "aria-hidden": "true" }, headLabel(c'
-    '.head)));\n      } else {\n        headLabel(c.head).forEach(function (part) { th.appendChild(typeof p'
-    'art === "string" ? document.createTextNode(part) : part); });\n      }\n      tr.appendChild(th);\n    '
-    '});\n    var thead = table.querySelector("thead");\n    clear(thead);\n    thead.appendChild(tr);\n    v'
-    'ar more = el("div", { className: "more-row", id: tableId + "-more", hidden: "hidden" }, [el("span"),'
-    ' el("button", { type: "button", className: "btn btn-ghost" })]);\n    more.querySelector("button").ad'
-    'dEventListener("click", function () {\n      TABLES[tableId].limit += PAGE;\n      renderTables();\n   '
-    ' });\n    table.closest(".table-card").appendChild(more);\n    TABLES[tableId] = { cols: cols, sort: {'
-    ' i: -1, dir: "" }, rowId: rowId, limit: PAGE };\n  }\n\n  function fillTable(tableId, rows, emptyText) '
-    '{\n    var t = TABLES[tableId];\n    var table = document.getElementById(tableId);\n    var tbody = tab'
-    'le.querySelector("tbody");\n    var more = document.getElementById(tableId + "-more");\n    var st = t'
-    '.sort;\n    var ths = table.querySelectorAll("thead th");\n    for (var k = 0; k < ths.length; k++) {\n'
-    '      if (k === st.i) {\n        ths[k].setAttribute("aria-sort", st.dir);\n      } else {\n        ths'
-    '[k].removeAttribute("aria-sort");\n      }\n    }\n    if (st.i >= 0) {\n      var acc = t.cols[st.i].so'
-    'rt;\n      var dir = st.dir === "ascending" ? 1 : -1;\n      rows = rows.map(function (r, idx) { retur'
-    'n [r, idx]; }).sort(function (x, y) {\n        var a = acc(x[0]);\n        var c = acc(y[0]);\n        '
-    'var d = typeof a === "number" && typeof c === "number" ? a - c : String(a).localeCompare(String(c), '
-    '"es", { numeric: true, sensitivity: "base" });\n        return d ? d * dir : x[1] - y[1];\n      }).ma'
-    'p(function (p) { return p[0]; });\n    }\n    clear(tbody);\n    var hidden = Math.max(0, rows.length -'
-    ' t.limit);\n    more.hidden = hidden === 0;\n    if (hidden) {\n      more.querySelector("span").textCo'
-    'ntent = "Se muestran " + n(t.limit) + " de " + n(rows.length) + ". La impresión incluye todos.";\n   '
-    '   more.querySelector("button").textContent = "Mostrar " + n(Math.min(PAGE, hidden)) + " más";\n    }'
-    '\n    if (!rows.length) {\n      tbody.appendChild(el("tr", { className: "empty-row" }, [el("td", { co'
-    'lspan: String(t.cols.length), textContent: emptyText })]));\n      return;\n    }\n    var frag = docum'
-    'ent.createDocumentFragment();\n    rows.forEach(function (row, idx) {\n      var attrs = t.rowId ? { i'
-    'd: t.rowId(row) } : {};\n      if (idx >= t.limit) {\n        attrs.className = "pg";\n      }\n      va'
-    'r tr = el("tr", attrs);\n      t.cols.forEach(function (c) {\n        var value = c.cell(row);\n       '
-    ' tr.appendChild(el("td", { className: c.cls || (c.num ? "n" : null) }, Array.isArray(value) ? value '
-    ': [value]));\n      });\n      frag.appendChild(tr);\n    });\n    tbody.appendChild(frag);\n  }\n\n  funct'
-    'ion stateCell(row) {\n    var cond = row.monitor_condition || "—";\n    var active = /^(fired|active)$'
-    '/i.test(cond);\n    return [el("span", { className: "state" + (active ? " on" : ""), textContent: con'
-    'd }), el("span", { className: "sm", textContent: row.state || "" })];\n  }\n\n  function evidenceLinks('
-    'ids) {\n    return el("div", { className: "ids" }, (ids || []).map(function (id) {\n      var a = el("'
-    'a", { className: "chip-id", href: "#ev-" + id, textContent: id, title: "Ir a la evidencia " + id });'
-    '\n      a.addEventListener("click", function (ev) {\n        ev.preventDefault();\n        gotoEvidence'
-    '(id);\n      });\n      return a;\n    }));\n  }\n\n  function gotoEvidence(id) {\n    var row = document.g'
-    'etElementById("ev-" + id);\n    if (!row) {\n      resetFilters();\n      row = document.getElementById'
-    '("ev-" + id);\n    }\n    if (row && row.classList.contains("pg")) {\n      TABLES[row.closest("table")'
-    '.id].limit = Infinity;\n      renderTables();\n      row = document.getElementById("ev-" + id);\n    }\n'
-    '    if (!row) {\n      return;\n    }\n    row.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", '
-    'block: "center" });\n    row.classList.add("flash");\n    setTimeout(function () { row.classList.remov'
-    'e("flash"); }, 1800);\n  }\n\n  function evId(row) {\n    return "ev-" + row.id;\n  }\n\n  function telemet'
-    'ryText(metrics) {\n    var tm = metrics || {};\n    var parts = [];\n    if (tm.cpu_percent) {\n      pa'
-    'rts.push("CPU máx " + tm.cpu_percent.max + " % (mediana " + tm.cpu_percent.median + " %)");\n    }\n  '
-    '  if (tm.memory_available_mb) {\n      parts.push("Memoria mín " + n(tm.memory_available_mb.min) + " '
-    'MB");\n    }\n    if (tm.disk_free_percent) {\n      parts.push("Disco libre mín " + tm.disk_free_perce'
-    'nt.min + " %");\n    }\n    if (tm.heartbeat_silence_minutes) {\n      parts.push("Silencio de Heartbea'
-    't " + n(tm.heartbeat_silence_minutes.max) + " min");\n    }\n    return parts.length ? parts.join(" · '
-    '") : "Sin telemetría de huésped en la ventana";\n  }\n\n  function setupTables() {\n    var byName = fun'
-    'ction (r) { return String(r.resource_name || "").toLowerCase(); };\n    setupTable("incidents-table",'
-    ' [\n      { head: "Severidad", sort: sevKey, cls: "nw", cell: function (r) { return [pill(r.severity,'
-    ' r.severity_label), el("span", { className: "sm", textContent: r.native_severity || "" })]; } },\n   '
-    '   { head: "ID · flujo", sort: function (r) { return r.id; }, cls: "nw", cell: idCell },\n      { hea'
-    'd: "Recurso / servicio", sort: byName, cls: "w2", cell: function (r) {\n        if (r.category === "s'
-    'ervice_health") {\n          return resourceCell(r.resource_name, "subscription-scope", null, null, ('
-    'r.regions || []).join(", "));\n        }\n        return resourceCell(r.resource_name, r.resource_grou'
-    'p, r.resource_type, r.resource_id);\n      } },\n      { head: "Estado", sort: function (r) { return ('
-    'r.monitor_condition || "") + " " + (r.state || ""); }, cls: "nw", cell: stateCell },\n      { head: "'
-    'Señal", sort: function (r) { return r.signal_type || ""; }, cell: function (r) { return [el("div", {'
-    ' textContent: r.signal_type || "—" }), el("span", { className: "sm", textContent: r.monitor_service '
-    '|| "" })]; } },\n      { head: "Inicio · act. (UTC)", sort: function (r) { return r.start_time_utc ||'
-    ' ""; }, cls: "nw", cell: function (r) {\n        return [el("div", { textContent: utc(r.start_time_ut'
-    'c), title: r.start_time_utc }), el("span", { className: "sm", textContent: "act. " + utc(r.last_upda'
-    'ted_utc), title: r.last_updated_utc })];\n      } },\n      { head: "Descripción", cls: "wide", cell: '
-    'function (r) { return [el("div", null, [prose(r.summary)]), extLink(r.learn_url, "Microsoft Learn")]'
-    '; } }\n    ], evId);\n\n    setupTable("anomalies-table", [\n      { head: "Severidad", sort: sevKey, cl'
-    's: "nw", cell: function (r) { return pill(r.severity, r.severity_label); } },\n      { head: "ID · fl'
-    'ujo", sort: function (r) { return r.id; }, cls: "nw", cell: idCell },\n      { head: "Recurso", sort:'
-    ' byName, cls: "w2", cell: function (r) { return resourceCell(r.resource_name, r.resource_group, r.re'
-    'source_type, r.resource_id); } },\n      { head: "Métrica o propiedad", sort: function (r) { return r'
-    '.metric_or_field || ""; }, cell: function (r) { return breakable(r.metric_or_field, "code"); } },\n  '
-    '    { head: "Observado · referencia", cell: function (r) {\n        return [el("div", null, [el("b", '
-    '{ textContent: withUnit(r.observed_value, r.unit) })]), el("span", { className: "sm", textContent: "'
-    'ref. " + withUnit(r.baseline_or_expected, r.unit) })];\n      } },\n      { head: "Muestras · ventana"'
-    ', sort: function (r) { return Number(r.sample_count) || 0; }, cell: function (r) {\n        var count'
-    ' = Number(r.sample_count) || 1;\n        return [el("div", { className: "nw", textContent: n(count) +'
-    ' " " + plural(count, "muestra", "muestras") }), el("span", { className: "sm", textContent: (r.window'
-    '_grain || "PointInTime") + (r.workspace_name ? " · " + r.workspace_name : "") })];\n      } },\n      '
-    '{ head: "Evidencia técnica", cls: "wide", cell: function (r) { return [el("div", null, [prose(r.summ'
-    'ary)]), extLink(r.learn_url, "Guía en Microsoft Learn")]; } }\n    ], evId);\n\n    setupTable("actions'
-    '-table", [\n      { head: "Prioridad", sort: function (r) { return Number(r.priority_rank) || 0; }, c'
-    'ls: "nw", cell: function (r) { return [el("span", { className: "rank", textContent: "#" + r.priority'
-    '_rank }), el("span", { className: "sm id", textContent: r.id })]; } },\n      { head: "Horizonte · se'
-    'veridad", sort: function (r) { return (HORIZON_RANK.hasOwnProperty(r.horizon) ? HORIZON_RANK[r.horiz'
-    'on] : 9) * 10 + sevKey(r); }, cls: "nw stack", cell: function (r) {\n        return [el("div", null, '
-    '[el("span", { className: "tag " + (r.horizon || ""), textContent: r.horizon_label })]), el("div", nu'
-    'll, [pill(r.severity, r.severity_label)])];\n      } },\n      { head: "Acción recomendada", sort: fun'
-    'ction (r) { return r.title || ""; }, cls: "w3", cell: function (r) {\n        return el("div", { clas'
-    'sName: "res", title: r.resource_id || null }, [el("b", null, withName(r.title, r.resource_name)), el'
-    '("span", { className: "sm", textContent: (r.resource_name || "") + (r.resource_group ? " · " + rgLab'
-    'el(r.resource_group) : "") }), portalUrl(r.resource_id) ? extLink(portalUrl(r.resource_id), "Portal"'
-    ') : null]);\n      } },\n      { head: "Responsable · esfuerzo", sort: function (r) { return r.owner_s'
-    'cope || ""; }, cls: "w1", cell: function (r) { return [el("div", { textContent: r.owner_scope || "—"'
-    ' }), el("span", { className: "sm", textContent: "Esfuerzo: " + (r.effort_label || "—") })]; } },\n   '
-    '   { head: "Evidencias", cell: function (r) { return evidenceLinks(r.linked_evidence_ids); } },\n    '
-    '  { head: "Guía para revisión humana", cls: "wide", cell: function (r) {\n        return [el("div", n'
-    'ull, [prose(r.recommendation)]), el("span", { className: "sm" }, ["Evidencia: ", prose(r.evidence_su'
-    'mmary)]), extLink(r.learn_url, "Referencia en Microsoft Learn")];\n      } }\n    ]);\n\n    setupTable('
-    '"resources-table", [\n      { head: "Recurso", sort: byName, cls: "w2", cell: function (r) { return r'
-    'esourceCell(r.resource_name, r.resource_group, null, r.resource_id, r.location); } },\n      { head: '
-    '"Tipo · hosting", sort: function (r) { return typeLabel(r.resource_type); }, cell: function (r) { re'
-    'turn [el("div", { textContent: typeLabel(r.resource_type) }), el("span", { className: "sm" }, [break'
-    'able(r.resource_type, "code"), " · " + String(r.hosting || "").toUpperCase()])]; } },\n      { head: '
-    '"Estado operativo", sort: function (r) { return (r.status === "attention" ? 0 : r.status === "review'
-    '" ? 1 : 2) * 10 + sevKey(r); }, cls: "nw", cell: function (r) {\n        return [r.status === "health'
-    'y" ? pill("ok", "Normal") : pill(r.severity, r.severity_label), el("span", { className: "sm", textCo'
-    'ntent: r.operational_state || "" })];\n      } },\n      { head: "Incidencias", num: true, sort: funct'
-    'ion (r) { return r.incident_count || 0; }, cell: function (r) { return n(r.incident_count); } },\n   '
-    '   { head: "Anomalías", num: true, sort: function (r) { return r.anomaly_count || 0; }, cell: functi'
-    'on (r) { return n(r.anomaly_count); } },\n      { head: "Ext. fallidas", num: true, sort: function (r'
-    ') { return r.failed_extension_count || 0; }, cell: function (r) { return n(r.failed_extension_count)'
-    ' + " / " + n(r.extensions_total); } },\n      { head: "Acciones", num: true, sort: function (r) { ret'
-    'urn r.action_count || 0; }, cell: function (r) { return n(r.action_count); } },\n      { head: "Resum'
-    'en de telemetría", cls: "w2", cell: function (r) { return telemetryText(r.telemetry_metrics); } }\n  '
-    '  ]);\n\n    setupTable("advisor-table", [\n      { head: "Impacto", sort: sevKey, cls: "nw", cell: fun'
-    'ction (r) { return [pill(r.severity, r.severity_label, "Impacto " + (r.impact || "")), el("span", { '
-    'className: "sm", textContent: r.advisor_category || "" })]; } },\n      { head: "ID", sort: function '
-    '(r) { return r.id; }, cls: "nw", cell: function (r) { return el("span", { className: "id", textConte'
-    'nt: r.id }); } },\n      { head: "Recurso", sort: byName, cls: "w2", cell: function (r) { return reso'
-    'urceCell(r.resource_name, r.resource_group, r.resource_type, r.resource_id); } },\n      { head: "Pro'
-    'blema detectado", cls: "w2", cell: function (r) { return prose(r.problem); } },\n      { head: "Soluc'
-    'ión recomendada", cls: "wide", cell: function (r) { return [el("div", null, [prose(r.solution)]), ex'
-    'tLink(r.learn_url, "Azure Advisor en Microsoft Learn")]; } },\n      { head: "Actualizado (UTC)", sor'
-    't: function (r) { return r.last_updated_utc || ""; }, cls: "nw", cell: function (r) { return el("spa'
-    'n", { textContent: utc(r.last_updated_utc), title: r.last_updated_utc }); } }\n    ], evId);\n\n    set'
-    'upTable("sources-table", [\n      { head: "Fuente", cls: "nw", cell: function (r) { return el("span",'
-    ' { className: "id", textContent: r.id }); } },\n      { head: "Estado", cls: "nw", cell: function (r)'
-    ' { var s = STATUS[r.status] || [r.status, "critical"]; return pill(s[1], s[0], r.status); } },\n     '
-    ' { head: "Registros", num: true, cell: function (r) { return n(r.records); } },\n      { head: "Págin'
-    'as", num: true, cell: function (r) { return n(r.pages); } },\n      { head: "Paginación completa", cl'
-    's: "nw", cell: function (r) { return r.pagination_complete ? "Sí" : "No"; } },\n      { head: "Firma '
-    'de lectura y detalle", cls: "wide", cell: function (r) {\n        var kids = [breakable(r.read_signat'
-    'ure || "—", "code")];\n        if (Array.isArray(r.workspaces_queried) && r.workspaces_queried.length'
-    ') {\n          kids.push(el("ul", { className: "wslist" }, r.workspaces_queried.map(function (w) {\n  '
-    '          return el("li", { textContent: w.workspace_name + " · " + ((STATUS[w.status] || [w.status]'
-    ')[0]) + " · " + n(w.records) + " " + plural(w.records, "fila", "filas") });\n          })));\n        '
-    '}\n        (r.errors || []).forEach(function (e) {\n          kids.push(el("div", { className: "errbox'
-    '" }, [el("b", { textContent: e.code || "error" }), " · " + (e.message || "") + (e.http_status ? " (H'
-    'TTP " + e.http_status + ")" : "")]));\n        });\n        return kids;\n      } },\n      { head: "Not'
-    'as y alcance", cls: "w2", cell: function (r) { return r.note || "—"; } }\n    ]);\n  }\n\n  function mat'
-    'chesCommonFilter(row, cat, sev, query) {\n    if (cat !== "all" && row.category !== cat) {\n      retu'
-    'rn false;\n    }\n    if (sev !== "all" && row.severity !== sev) {\n      return false;\n    }\n    if (q'
-    'uery) {\n      var hay = [row.id, row.title, row.resource_name, row.resource_id, row.resource_group, '
-    'row.summary, row.metric_or_field, row.signal_type, row.owner_scope, row.recommendation].join(" ").to'
-    'LowerCase();\n      if (hay.indexOf(query) < 0) {\n        return false;\n      }\n    }\n    return true'
-    ';\n  }\n\n  function renderTables() {\n    var cat = document.getElementById("filter-category").value;\n '
-    '   var sev = document.getElementById("filter-severity").value;\n    var hor = document.getElementById'
-    '("filter-horizon").value;\n    var rawQuery = (document.getElementById("filter-search").value || "").'
-    'trim();\n    var query = rawQuery.toLowerCase();\n    var filterKey = [cat, sev, hor, query].join("\\u0'
-    '001");\n    if (filterKey !== lastFilterKey) {\n      lastFilterKey = filterKey;\n      Object.keys(TAB'
-    'LES).forEach(function (id) { TABLES[id].limit = PAGE; });\n    }\n\n    var incidents = (DATA.incidents'
-    ' || []).filter(function (row) { return matchesCommonFilter(row, cat, sev, query); });\n    var anomal'
-    'ies = (DATA.anomalies || []).filter(function (row) { return matchesCommonFilter(row, cat, sev, query'
-    '); });\n    var actions = (DATA.actions || []).filter(function (row) {\n      return (hor === "all" ||'
-    ' row.horizon === hor) && matchesCommonFilter(row, cat, sev, query);\n    });\n    var resources = (DAT'
-    'A.resources || []).filter(function (row) {\n      if (sev !== "all" && row.severity !== sev) {\n      '
-    '  return false;\n      }\n      if (query) {\n        var hay = [row.resource_name, row.resource_id, ro'
-    'w.resource_group, row.resource_type, row.operational_state].join(" ").toLowerCase();\n        if (hay'
-    '.indexOf(query) < 0) {\n          return false;\n        }\n      }\n      return true;\n    });\n    var '
-    'advisor = (DATA.advisor || []).filter(function (row) { return matchesCommonFilter(row, cat, sev, que'
-    'ry); });\n\n    var counts = { incidents: incidents.length, anomalies: anomalies.length, actions: acti'
-    'ons.length, resources: resources.length, advisor: advisor.length };\n    Object.keys(counts).forEach('
-    'function (key) {\n      document.getElementById(key + "-count").textContent = String(counts[key]);\n  '
-    '    document.getElementById(key + "-total").textContent = String((DATA[key] || []).length);\n      va'
-    'r nav = document.getElementById("nav-" + key + "-count");\n      if (nav) {\n        nav.textContent ='
-    ' String(counts[key]);\n      }\n    });\n\n    var active = cat !== "all" || sev !== "all" || hor !== "a'
-    'll" || query;\n    var status = document.getElementById("filter-status-summary");\n    clear(status);\n'
-    '    [b(incidents.length), " " + plural(incidents.length, "incidencia", "incidencias") + " · ", b(ano'
-    'malies.length), " " + plural(anomalies.length, "anomalía", "anomalías") + " · ", b(actions.length), '
-    '" " + plural(actions.length, "acción", "acciones") + " · ", b(resources.length), " " + plural(resour'
-    'ces.length, "recurso", "recursos"), active ? " (filtro activo)" : " (sin filtros)"].forEach(function'
-    ' (part) {\n      status.appendChild(typeof part === "string" ? document.createTextNode(part) : part);'
-    '\n    });\n    var labelOf = function (id) { var s = document.getElementById(id); return s.options[s.s'
-    'electedIndex].text; };\n    document.getElementById("print-filter-note").textContent = active\n      ?'
-    ' "Filtros aplicados al imprimir: " + [cat !== "all" ? labelOf("filter-category") : "", sev !== "all"'
-    ' ? "severidad " + labelOf("filter-severity") : "", hor !== "all" ? "horizonte " + labelOf("filter-ho'
-    'rizon") : "", query ? "búsqueda «" + rawQuery + "»" : ""].filter(Boolean).join(" · ")\n      : "";\n\n '
-    '   var none = function (key, filtered, empty) { return (DATA[key] || []).length ? filtered : empty; '
-    '};\n    fillTable("incidents-table", incidents, none("incidents", "Sin incidencias ni alertas que coi'
-    'ncidan con los filtros actuales.", "Sin incidencias ni alertas en la ventana evaluada."));\n    fillT'
-    'able("anomalies-table", anomalies, none("anomalies", "Sin anomalías técnicas que coincidan con los f'
-    'iltros actuales.", "Sin anomalías técnicas en la ventana evaluada."));\n    fillTable("actions-table"'
-    ', actions, none("actions", "Sin acciones recomendadas que coincidan con los filtros actuales.", "Sin'
-    ' acciones recomendadas para esta ventana."));\n    fillTable("resources-table", resources, none("reso'
-    'urces", "Sin recursos inventariados para el filtro actual.", "Sin recursos inventariados en el alcan'
-    'ce."));\n    fillTable("advisor-table", advisor, none("advisor", "Sin recomendaciones de Azure Adviso'
-    'r en caché para el filtro actual.", "Sin recomendaciones de Azure Advisor en caché para la suscripci'
-    'ón."));\n  }\n\n  function resetFilters(silent) {\n    document.getElementById("filter-category").value '
-    '= "all";\n    document.getElementById("filter-severity").value = "all";\n    document.getElementById("'
-    'filter-horizon").value = "all";\n    document.getElementById("filter-search").value = "";\n    if (!si'
-    'lent) {\n      renderTables();\n    }\n  }\n\n  function renderCoverage() {\n    var sources = DATA.source'
-    's || [];\n    document.getElementById("sources-count").textContent = String(sources.length);\n    docu'
-    'ment.getElementById("nav-sources-count").textContent = String(sources.length);\n    fillTable("source'
-    's-table", sources, "No hay recibos de fuentes en el modelo.");\n\n    var meth = DATA.methodology || {'
-    '};\n    var methList = document.getElementById("methodology-list");\n    clear(methList);\n    (meth.li'
-    'mitations || []).forEach(function (lim) {\n      methList.appendChild(el("li", { textContent: lim }))'
-    ';\n    });\n    var facts = document.getElementById("method-facts");\n    clear(facts);\n    [\n      ["M'
-    'odo", meth.read_only === false ? "Escritura" : "Solo lectura"],\n      ["Cálculo SLA oficial", meth.o'
-    'fficial_sla_calculation ? "Sí" : "No"],\n      ["Programación", (meth.scheduled_cadence_cron || "30 8'
-    ' 1 * *") + " (UTC)"],\n      ["Periodo por defecto", meth.scheduled_default_period || "previous_month'
-    '"],\n      ["Periodos admitidos", (meth.supported_periods || []).join(", ") || "—"]\n    ].forEach(fun'
-    'ction (f) {\n      facts.appendChild(el("dt", { textContent: f[0] }));\n      facts.appendChild(el("dd'
-    '", { textContent: f[1] }));\n    });\n    var streams = document.getElementById("method-streams");\n   '
-    ' clear(streams);\n    (meth.evidence_streams || []).forEach(function (s) {\n      streams.appendChild('
-    'el("li", { textContent: s }));\n    });\n\n    var client = (DATA.client || {}).name || "CLIENTE";\n    '
-    'document.getElementById("footer-left").textContent = "Generado por Azure SRE Agent · Solo lectura · '
-    'Referencia " + utc(DATA.reference_utc) + " UTC · " + (DATA.schema_version || "");\n    document.getEl'
-    'ementById("footer-right").textContent = client;\n    var page = el("style", { textContent: "@page{@bo'
-    'ttom-left{content:\\"" + ("Informe de operaciones · " + client + " · " + ((DATA.window || {}).label |'
-    '| "") + " · " + utc(DATA.reference_utc) + " UTC").replace(/["\\\\\\r\\n]/g, " ") + "\\";font:8.5pt \'Segoe'
-    ' UI\',sans-serif;color:#5A687A}}" });\n    document.head.appendChild(page);\n  }\n\n  function watchSecti'
-    'ons() {\n    if (!("IntersectionObserver" in window)) {\n      return;\n    }\n    var links = {};\n    A'
-    'rray.prototype.forEach.call(document.querySelectorAll("#section-nav a"), function (a) {\n      links['
-    'a.getAttribute("href").slice(1)] = a;\n    });\n    var observer = new IntersectionObserver(function ('
-    'entries) {\n      entries.forEach(function (entry) {\n        if (entry.isIntersecting) {\n          Ob'
-    'ject.keys(links).forEach(function (k) { links[k].removeAttribute("aria-current"); });\n          if ('
-    'links[entry.target.id]) {\n            links[entry.target.id].setAttribute("aria-current", "true");\n '
-    '         }\n        }\n      });\n    }, { rootMargin: "-35% 0px -60% 0px" });\n    Array.prototype.forE'
-    'ach.call(document.querySelectorAll("#top, .sec"), function (section) {\n      observer.observe(sectio'
-    'n);\n    });\n  }\n\n  /* ---------- Exports ---------- */\n\n  function downloadBlob(filename, content, m'
-    'ime) {\n    var blob = new Blob([content], { type: mime });\n    var url = URL.createObjectURL(blob);\n'
-    '    var link = document.createElement("a");\n    link.href = url;\n    link.download = filename;\n    d'
-    'ocument.body.appendChild(link);\n    link.click();\n    document.body.removeChild(link);\n    setTimeou'
-    't(function () { URL.revokeObjectURL(url); }, 500);\n  }\n\n  function csvEscape(val) {\n    if (val === '
-    'null || val === undefined) {\n      return \'""\';\n    }\n    var str = typeof val === "object" ? JSON.s'
-    'tringify(val) : String(val);\n    if (/^[=+\\-@\\t\\r\\n]/.test(str.trimLeft())) {\n      str = "\'" + str;'
-    '\n    }\n    return \'"\' + str.replace(/"/g, \'""\') + \'"\';\n  }\n\n  function exportIncidentsCsv() {\n    va'
-    'r headers = ["record_kind", "id", "category", "severity", "title", "resource_name", "resource_group"'
-    ', "metric_or_signal", "observed_value", "observed_at_utc", "summary"];\n    var lines = [headers.join'
-    '(",")];\n    (DATA.incidents || []).forEach(function (inc) {\n      lines.push([\n        "incident", i'
-    'nc.id, inc.category, inc.severity, inc.title, inc.resource_name,\n        inc.resource_group, inc.sig'
-    'nal_type, inc.native_severity, inc.last_updated_utc, inc.summary\n      ].map(csvEscape).join(","));\n'
-    '    });\n    (DATA.anomalies || []).forEach(function (anom) {\n      lines.push([\n        "anomaly", a'
-    'nom.id, anom.category, anom.severity, anom.title, anom.resource_name,\n        anom.resource_group, a'
-    'nom.metric_or_field, anom.observed_value, anom.observed_at_utc, anom.summary\n      ].map(csvEscape).'
-    'join(","));\n    });\n    downloadBlob("ops-digest-incidents-anomalies.csv", "\\uFEFF" + lines.join("\\r'
-    '\\n"), "text/csv;charset=utf-8");\n  }\n\n  function exportActionsCsv() {\n    var headers = ["priority_r'
-    'ank", "id", "horizon_label", "severity", "category", "title", "resource_name", "resource_group", "ow'
-    'ner_scope", "effort_label", "linked_evidence_ids", "recommendation"];\n    var lines = [headers.join('
-    '",")];\n    (DATA.actions || []).forEach(function (act) {\n      lines.push([\n        act.priority_ran'
-    'k, act.id, act.horizon_label, act.severity, act.category, act.title,\n        act.resource_name, act.'
-    'resource_group, act.owner_scope, act.effort_label,\n        (act.linked_evidence_ids || []).join(";")'
-    ', act.recommendation\n      ].map(csvEscape).join(","));\n    });\n    downloadBlob("ops-digest-recomme'
-    'nded-actions.csv", "\\uFEFF" + lines.join("\\r\\n"), "text/csv;charset=utf-8");\n  }\n\n  /* ---------- Wi'
-    'ring ---------- */\n\n  ["filter-category", "filter-severity", "filter-horizon"].forEach(function (id)'
-    ' {\n    document.getElementById(id).addEventListener("change", renderTables);\n  });\n  document.getEle'
-    'mentById("filter-search").addEventListener("input", renderTables);\n  document.getElementById("filter'
-    '-reset").addEventListener("click", function () { resetFilters(); });\n\n  document.getElementById("the'
-    'me-toggle").addEventListener("click", function () {\n    var root = document.documentElement;\n    var'
-    ' next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";\n    root.setAttribute("data-t'
-    'heme", next);\n    this.querySelector(".lbl").textContent = next === "dark" ? "Modo claro" : "Modo os'
-    'curo";\n    this.title = this.querySelector(".lbl").textContent;\n    this.querySelector("path").setAt'
-    'tribute("d", next === "dark" ? PATHS.sun : PATHS.moon);\n  });\n\n  document.getElementById("btn-export'
-    '-json").addEventListener("click", function () {\n    downloadBlob("ops-digest-snapshot.json", JSON.st'
-    'ringify(DATA, null, 2), "application/json;charset=utf-8");\n  });\n  document.getElementById("btn-expo'
-    'rt-incidents-csv").addEventListener("click", exportIncidentsCsv);\n  document.getElementById("btn-exp'
-    'ort-actions-csv").addEventListener("click", exportActionsCsv);\n  document.getElementById("btn-print"'
-    ').addEventListener("click", function () {\n    window.print();\n  });\n\n  renderBranding();\n  renderHer'
-    'o();\n  renderKpis();\n  setupTables();\n  renderOverview();\n  renderTables();\n  renderCoverage();\n  wa'
-    'tchSections();\n})();\n</script>\n</body>\n</html>\n'
+    'h-filters">\n      <div class="sh"><div><h2 id="h-filters">Filter records</h2><p class="why">The filt'
+    'ers narrow incidents, anomalies, actions, resources, and Advisor at the same time. Downloads always '
+    'include every record.</p></div></div>\n      <div class="card">\n        <div class="filters">\n       '
+    '   <div class="field">\n            <label for="filter-search">Search</label>\n            <input type'
+    '="search" class="control" id="filter-search" placeholder="Resource, ID, extension, or metric" autoco'
+    'mplete="off">\n          </div>\n          <div class="field">\n            <label for="filter-category'
+    '">Evidence stream <code>category</code></label>\n            <select class="control" id="filter-categ'
+    'ory">\n              <option value="all">All categories</option>\n              <option value="native_'
+    'alert">Azure Monitor native alerts</option>\n              <option value="service_health">Azure Servi'
+    'ce Health communications</option>\n              <option value="extension_failure">VM / Azure Arc ext'
+    'ension failures</option>\n              <option value="connectivity_posture">Connectivity / control p'
+    'lane anomalies</option>\n              <option value="telemetry_anomaly">Telemetry anomalies (CPU / M'
+    'emory / Disk / Heartbeat)</option>\n              <option value="advisor_recommendation">Azure Adviso'
+    'r recommendations</option>\n            </select>\n          </div>\n          <div class="field">\n    '
+    '        <label for="filter-severity">Severity <code>severity</code></label>\n            <select clas'
+    's="control" id="filter-severity">\n              <option value="all">All severities</option>\n        '
+    '      <option value="critical">Critical</option>\n              <option value="high">High</option>\n  '
+    '            <option value="medium">Medium</option>\n              <option value="low">Low</option>\n  '
+    '          </select>\n          </div>\n          <div class="field">\n            <label for="filter-ho'
+    'rizon">Action horizon <code>horizon</code></label>\n            <select class="control" id="filter-ho'
+    'rizon">\n              <option value="all">All horizons</option>\n              <option value="immedia'
+    'te_24h">Immediate &lt;24h</option>\n              <option value="short_term_7d">Short term 1-7 days</'
+    'option>\n              <option value="monthly_cycle">Monthly cycle</option>\n            </select>\n   '
+    '       </div>\n          <button type="button" class="btn btn-ghost" id="filter-reset">Reset</button>'
+    '\n        </div>\n        <div class="filter-foot">\n          <p class="status-line" id="filter-status'
+    '-summary" aria-live="polite">Showing every collected record</p>\n          <div class="downloads">\n  '
+    '          <span>Local downloads:</span>\n            <button type="button" class="btn btn-ghost" id="'
+    'btn-export-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-'
+    'linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h1'
+    '6"/></svg>Full JSON</button>\n            <button type="button" class="btn btn-ghost" id="btn-export-'
+    'incidents-csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-li'
+    'necap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"'
+    '/></svg>Incidents and anomalies CSV</button>\n            <button type="button" class="btn btn-ghost"'
+    ' id="btn-export-actions-csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width'
+    '="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 '
+    '5-5-5M4 21h16"/></svg>Recommended actions CSV</button>\n          </div>\n        </div>\n      </div>\n'
+    '    </section>\n    <p class="print-only status-line" id="print-filter-note"></p>\n\n    <section class'
+    '="sec" id="sec-incidents" aria-labelledby="h-incidents">\n      <div class="sh"><div><h2 id="h-incide'
+    'nts">Incidents and platform communications</h2><p class="why">Azure Monitor native alerts and offici'
+    'al Service Health communications in the window: what already happened or is still active.</p></div><'
+    'p class="count"><strong id="incidents-count">0</strong> of <span id="incidents-total">0</span> incid'
+    'ents</p></div>\n      <div class="card table-card"><div class="table-scroll" tabindex="0" role="regio'
+    'n" aria-labelledby="h-incidents">\n        <table class="ledger-table" id="incidents-table"><caption '
+    'class="sr-only">Incidents and platform communications</caption><thead></thead><tbody id="incidents-t'
+    'body"></tbody></table>\n      </div></div>\n    </section>\n\n    <section class="sec" id="sec-anomalies'
+    '" aria-labelledby="h-anomalies">\n      <div class="sh"><div><h2 id="h-anomalies">Technical anomalies'
+    '</h2><p class="why">Deviations detected by the agent: failed extensions, control plane posture, and '
+    'out-of-range telemetry.</p></div><p class="count"><strong id="anomalies-count">0</strong> of <span i'
+    'd="anomalies-total">0</span> anomalies</p></div>\n      <div class="card table-card"><div class="tabl'
+    'e-scroll" tabindex="0" role="region" aria-labelledby="h-anomalies">\n        <table class="ledger-tab'
+    'le" id="anomalies-table"><caption class="sr-only">Technical anomalies</caption><thead></thead><tbody'
+    ' id="anomalies-tbody"></tbody></table>\n      </div></div>\n    </section>\n\n    <section class="sec" i'
+    'd="sec-actions" aria-labelledby="h-actions">\n      <div class="sh"><div><h2 id="h-actions">Prioritiz'
+    'ed recommended actions</h2><p class="why">Plan ordered by urgency for human review. Each action link'
+    's the evidence behind it; the agent doesn\'t make any changes.</p></div><p class="count"><strong id="'
+    'actions-count">0</strong> of <span id="actions-total">0</span> actions</p></div>\n      <div class="c'
+    'ard table-card"><div class="table-scroll" tabindex="0" role="region" aria-labelledby="h-actions">\n  '
+    '      <table class="ledger-table" id="actions-table"><caption class="sr-only">Prioritized recommende'
+    'd actions</caption><thead></thead><tbody id="actions-tbody"></tbody></table>\n      </div></div>\n    '
+    '</section>\n\n    <section class="sec" id="sec-resources" aria-labelledby="h-resources">\n      <div cl'
+    'ass="sh"><div><h2 id="h-resources">Status by resource</h2><p class="why">Every inventoried resource '
+    'with its incidents, anomalies, extensions, and actions; resources with active findings first.</p></d'
+    'iv><p class="count"><strong id="resources-count">0</strong> of <span id="resources-total">0</span> r'
+    'esources</p></div>\n      <div class="card table-card"><div class="table-scroll" tabindex="0" role="r'
+    'egion" aria-labelledby="h-resources">\n        <table class="ledger-table" id="resources-table"><capt'
+    'ion class="sr-only">Operational status by resource</caption><thead></thead><tbody id="resources-tbod'
+    'y"></tbody></table>\n      </div></div>\n      <div class="sh sub-sh"><div><h3 id="h-advisor">Azure Ad'
+    'visor recommendations</h3><p class="why">Cached recommendations from <code>arm_advisor_recommendatio'
+    'ns</code>, correlated with the action plan.</p></div><p class="count"><strong id="advisor-count">0</'
+    'strong> of <span id="advisor-total">0</span> recommendations</p></div>\n      <div class="card table-'
+    'card"><div class="table-scroll" tabindex="0" role="region" aria-labelledby="h-advisor">\n        <tab'
+    'le class="ledger-table" id="advisor-table"><caption class="sr-only">Azure Advisor recommendations</c'
+    'aption><thead></thead><tbody id="advisor-tbody"></tbody></table>\n      </div></div>\n    </section>\n\n'
+    '    <section class="sec" id="sec-coverage" aria-labelledby="h-coverage">\n      <div class="sh"><div>'
+    '<h2 id="h-coverage">Source coverage and method</h2><p class="why">What was read and with what result'
+    '. A partial source is a blind spot, not a clean result.</p></div><p class="count"><strong id="source'
+    's-count">0</strong> sources</p></div>\n      <div class="card table-card"><div class="table-scroll" t'
+    'abindex="0" role="region" aria-labelledby="h-coverage">\n        <table class="ledger-table" id="sour'
+    'ces-table"><caption class="sr-only">Coverage receipts by source</caption><thead></thead><tbody id="s'
+    'ources-tbody"></tbody></table>\n      </div></div>\n      <div class="grid2 mt">\n        <div class="c'
+    'ard">\n          <h3>Operational guarantees and limitations</h3>\n          <p class="sub">What this r'
+    'eport doesn\'t claim.</p>\n          <ul class="exec-list" id="methodology-list"></ul>\n        </div>\n'
+    '        <div class="card">\n          <h3>Method</h3>\n          <p class="sub">Run parameters and the'
+    ' evidence streams queried in read-only mode.</p>\n          <dl class="prov" id="method-facts" style='
+    '"margin-top:0;padding-top:0;border-top:0"></dl>\n          <ul class="plain-list mt" id="method-strea'
+    'ms"></ul>\n        </div>\n      </div>\n    </section>\n  </div>\n</main>\n\n<footer class="foot-in"><div '
+    'class="foot" id="report-footer"><span id="footer-left">Generated by Azure SRE Agent · Read-only</spa'
+    'n><span id="footer-right"></span></div></footer>\n\n<script type="application/json" id="report-data">_'
+    '_REPORT_DATA_JSON__</script>\n<script>\n(function () {\n  "use strict";\n\n  var SEV_RANK = { critical: 0'
+    ', high: 1, medium: 2, low: 3 };\n  var SEV_LABEL = { critical: "Critical", high: "High", medium: "Med'
+    'ium", low: "Low" };\n  var SEV_WORDS = { critical: ["critical", "critical"], high: ["high", "high"], '
+    'medium: ["medium", "medium"], low: ["low", "low"] };\n  var SEV_BAR = { critical: "--sev-critical-bar'
+    '", high: "--sev-high-bar", medium: "--sev-medium-bar", low: "--sev-low-bar" };\n  var HORIZON_RANK = '
+    '{ immediate_24h: 0, short_term_7d: 1, monthly_cycle: 2 };\n  var STATUS = { complete: ["Complete", "o'
+    'k"], partial: ["Partial", "medium"], denied: ["Denied", "critical"], error: ["Error", "critical"], n'
+    'ot_configured: ["Not configured", "info"] };\n  var SHORT_CAT = {\n    native_alert: "Azure Monitor al'
+    'ert",\n    service_health: "Service Health",\n    extension_failure: "Failed extension",\n    connectiv'
+    'ity_posture: "Control plane",\n    telemetry_anomaly: "Telemetry",\n    advisor_recommendation: "Azure'
+    ' Advisor"\n  };\n  var UNIT = { Percent: "%", Minutes: "min", MB: "MB", State: "" };\n  var TYPE_LABEL '
+    '= {\n    "microsoft.compute/virtualmachines": "Virtual machine",\n    "microsoft.compute/virtualmachin'
+    'escalesets": "Virtual machine scale set",\n    "microsoft.hybridcompute/machines": "Azure Arc server"'
+    ',\n    "microsoft.kubernetes/connectedclusters": "Azure Arc-enabled Kubernetes",\n    "microsoft.conta'
+    'inerservice/managedclusters": "AKS cluster",\n    "microsoft.app/containerapps": "Container App",\n   '
+    ' "microsoft.web/sites": "App Service",\n    "microsoft.web/serverfarms": "App Service plan",\n    "mic'
+    'rosoft.storage/storageaccounts": "Storage account",\n    "microsoft.keyvault/vaults": "Key Vault",\n  '
+    '  "microsoft.sql/servers/databases": "SQL database",\n    "microsoft.dbforpostgresql/flexibleservers"'
+    ': "PostgreSQL flexible server",\n    "microsoft.cache/redis": "Azure Cache for Redis",\n    "microsoft'
+    '.operationalinsights/workspaces": "Log Analytics workspace",\n    "microsoft.resourcehealth/events": '
+    '"Service Health"\n  };\n  var PATHS = {\n    ext: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 '
+    '1-1-1V7a1 1 0 0 1 1-1h5",\n    alert: "M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1'
+    '.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",\n    moon: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z",\n    sun: '
+    '"M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M'
+    '12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"\n  };\n  var REDUCED = window.matchMedia && window.matchMedia("(pre'
+    'fers-reduced-motion: reduce)").matches;\n\n  function el(tag, attrs, children) {\n    var node = docume'
+    'nt.createElement(tag);\n    if (attrs) {\n      Object.keys(attrs).forEach(function (k) {\n        if ('
+    'k === "className") {\n          node.className = attrs[k];\n        } else if (k === "textContent") {\n'
+    '          node.textContent = attrs[k];\n        } else if (attrs[k] !== null && attrs[k] !== undefine'
+    'd) {\n          node.setAttribute(k, String(attrs[k]));\n        }\n      });\n    }\n    (children || []'
+    ').forEach(function (ch) {\n      if (ch === null || ch === undefined || ch === false) {\n        retur'
+    'n;\n      }\n      node.appendChild(typeof ch === "string" || typeof ch === "number" ? document.create'
+    'TextNode(String(ch)) : ch);\n    });\n    return node;\n  }\n\n  function clear(node) {\n    while (node.f'
+    'irstChild) {\n      node.removeChild(node.firstChild);\n    }\n  }\n\n  function icon(name) {\n    var ns '
+    '= "http://www.w3.org/2000/svg";\n    var svg = document.createElementNS(ns, "svg");\n    var attrs = {'
+    ' viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": '
+    '"round", "stroke-linejoin": "round", "aria-hidden": "true" };\n    Object.keys(attrs).forEach(functio'
+    'n (k) { svg.setAttribute(k, attrs[k]); });\n    var path = document.createElementNS(ns, "path");\n    '
+    'path.setAttribute("d", PATHS[name]);\n    svg.appendChild(path);\n    return svg;\n  }\n\n  var dataNode '
+    '= document.getElementById("report-data");\n  var DATA;\n  try {\n    DATA = JSON.parse(dataNode.textCon'
+    'tent);\n  } catch (err) {\n    var holder = document.querySelector(".page");\n    clear(holder);\n    ho'
+    'lder.appendChild(el("div", { className: "note report-error", role: "alert" }, [icon("alert"), el("sp'
+    'an", null, ["Couldn\'t read the embedded data model. Generate the report with the tool (operation=\\"r'
+    'eport\\") instead of opening the template directly."])]));\n    return;\n  }\n  var COUNTS = DATA.counts'
+    ' || {};\n\n  function n(value) {\n    var v = Number(value) || 0;\n    return Math.round(v) === v ? Stri'
+    'ng(v).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",") : String(v);\n  }\n\n  function plural(count, one, many) {\n'
+    '    return Number(count) === 1 ? one : many;\n  }\n\n  function b(value) {\n    return el("b", { textCon'
+    'tent: n(value) });\n  }\n\n  function utc(value) {\n    if (!value) {\n      return "—";\n    }\n    return'
+    ' String(value).replace("T", " ").replace(/:\\d{2}(\\.\\d+)?Z$/, "").replace(/Z$/, "");\n  }\n\n  function '
+    'plain(value) {\n    if (value === null || value === undefined) {\n      return "";\n    }\n    var s = S'
+    'tring(value);\n    if (!/[<&]/.test(s)) {\n      return s;\n    }\n    var doc = new DOMParser().parseFr'
+    'omString(s.replace(/<\\/(p|div|li|h[1-6]|tr|ul|ol)>|<br\\s*\\/?>/gi, " $& "), "text/html");\n    return '
+    '(doc.body.textContent || "").replace(/\\s+/g, " ").trim();\n  }\n\n  function breakable(value, cls) {\n  '
+    '  var span = el("span", { className: cls === undefined ? "code" : cls || null });\n    var buf = "";\n'
+    '    String(value === null || value === undefined ? "" : value).split("").forEach(function (ch) {\n   '
+    '   buf += ch;\n      if ("/.?&=_".indexOf(ch) >= 0) {\n        span.appendChild(document.createTextNod'
+    'e(buf));\n        span.appendChild(document.createElement("wbr"));\n        buf = "";\n      }\n    });\n'
+    '    if (buf) {\n      span.appendChild(document.createTextNode(buf));\n    }\n    return span;\n  }\n\n  f'
+    'unction prose(value) {\n    var text = plain(value);\n    var span = el("span");\n    var last = 0;\n   '
+    ' text.replace(/[A-Za-z)][\\/.](?=[A-Za-z(])/g, function (match, offset) {\n      var cut = offset + ma'
+    'tch.length;\n      span.appendChild(document.createTextNode(text.slice(last, cut)));\n      span.appen'
+    'dChild(document.createElement("wbr"));\n      last = cut;\n      return match;\n    });\n    span.append'
+    'Child(document.createTextNode(text.slice(last)));\n    return span;\n  }\n\n  function withName(text, na'
+    'me) {\n    var s = String(text || "");\n    var at = name && name.length <= 32 ? s.indexOf(name) : -1;'
+    '\n    if (at < 0) {\n      return [s];\n    }\n    return [s.slice(0, at), el("span", { className: "nw",'
+    ' textContent: name }), s.slice(at + name.length)];\n  }\n\n  function sevKey(row) {\n    return SEV_RANK'
+    '.hasOwnProperty(row.severity) ? SEV_RANK[row.severity] : 9;\n  }\n\n  function pill(sev, label, title) '
+    '{\n    var tone = SEV_RANK.hasOwnProperty(sev) || sev === "ok" || sev === "info" ? sev : "info";\n    '
+    'return el("span", { className: "pill " + tone, textContent: label || SEV_LABEL[sev] || String(sev ||'
+    ' "—"), title: title || null });\n  }\n\n  function extLink(href, label) {\n    if (typeof href !== "stri'
+    'ng" || !/^https:\\/\\//.test(href)) {\n      return null;\n    }\n    return el("a", { className: "ext", '
+    'href: href, target: "_blank", rel: "noopener noreferrer" }, [label, icon("ext")]);\n  }\n\n  function p'
+    'ortalUrl(id) {\n    return typeof id === "string" && /^\\/subscriptions\\/[^/]+\\/(resourcegroups|provid'
+    'ers)\\/[^?#]+$/i.test(id)\n      ? "https://portal.azure.com/#@/resource" + id\n      : null;\n  }\n\n  fu'
+    'nction typeLabel(type) {\n    var t = String(type || "").toLowerCase();\n    return TYPE_LABEL[t] || t'
+    '.split("/").pop() || "";\n  }\n\n  function rgLabel(rg) {\n    return rg === "subscription-scope" ? "Sub'
+    'scription scope" : (rg || "");\n  }\n\n  function resourceCell(name, rg, type, id, extra) {\n    var met'
+    'a = [rgLabel(rg), type ? typeLabel(type) : "", extra || ""].filter(Boolean).join(" · ");\n    return '
+    'el("div", { className: "res", title: id || null }, [\n      el("b", { textContent: name || "—" }),\n  '
+    '    meta ? el("span", { className: "sm", textContent: meta, title: type || null }) : null,\n      por'
+    'talUrl(id) ? extLink(portalUrl(id), "Portal") : null\n    ]);\n  }\n\n  function idCell(row) {\n    retur'
+    'n [el("span", { className: "id", textContent: row.id }), el("span", { className: "sm", textContent: '
+    'SHORT_CAT[row.category] || row.category_label || "", title: row.category_label || null })];\n  }\n\n  f'
+    'unction withUnit(value, unit) {\n    var u = UNIT.hasOwnProperty(unit) ? UNIT[unit] : (unit || "");\n '
+    '   var text = typeof value === "number" ? n(value) : String(value === null || value === undefined ? '
+    '"—" : value);\n    return u ? text + (u === "%" ? "" : "\\u00a0") + u : text;\n  }\n\n  /* ---------- Hea'
+    'der, hero and KPIs ---------- */\n\n  function renderBranding() {\n    var client = DATA.client || {};\n'
+    '    var nameLabel = document.getElementById("client-name-label");\n    var logoSlot = document.getEle'
+    'mentById("client-logo-slot");\n    clear(logoSlot);\n    nameLabel.textContent = client.name || "Custo'
+    'mer";\n    if (client.logo_data_uri && /^data:image\\/(png|jpeg);base64,/.test(client.logo_data_uri)) '
+    '{\n      logoSlot.appendChild(el("img", { id: "client-logo-img", src: client.logo_data_uri, alt: clie'
+    'nt.logo_alt || "Authorized customer logo" }));\n    }\n  }\n\n  function verdict() {\n    var sb = COUNTS'
+    '.severity_breakdown || {};\n    var imm = COUNTS.actions_immediate_24h || 0;\n    var parts = ["critic'
+    'al", "high", "medium", "low"].filter(function (k) { return sb[k]; }).map(function (k) {\n      return'
+    ' n(sb[k]) + " " + SEV_WORDS[k][sb[k] === 1 ? 0 : 1];\n    });\n    var tone = imm > 0 || sb.critical ?'
+    ' "crit" : (sb.high || sb.medium) ? "warn" : "ok";\n    var card = document.getElementById("verdict-ca'
+    'rd");\n    card.className = "verdict " + tone;\n    document.getElementById("verdict-title").textConte'
+    'nt = tone === "crit" ? "Action required" : tone === "warn" ? "Needs attention" : parts.length ? "No '
+    'priority findings" : "No findings";\n    document.getElementById("verdict-detail").textContent = part'
+    's.length ? parts.join(" · ") : "No incidents or anomalies in the window";\n    document.getElementByI'
+    'd("verdict-sub").textContent =\n      (imm ? n(imm) + " " + plural(imm, "immediate action", "immediat'
+    'e actions") + " (<24 h)" : "No actions in the immediate horizon")\n      + " · " + n(COUNTS.resources'
+    '_attention || 0) + " " + plural(COUNTS.resources_attention, "resource", "resources") + " with active'
+    ' findings";\n  }\n\n  function renderHero() {\n    var win = DATA.window || {};\n    var sources = DATA.s'
+    'ources || [];\n    var degraded = sources.filter(function (s) { return s.status !== "complete" && s.s'
+    'tatus !== "not_configured"; });\n    document.getElementById("hero-scope").textContent = "Periodic Az'
+    'ure operations report · " + (win.label || win.period || "window not specified");\n    document.title '
+    '= "Operations digest: incidents, anomalies, and recommended actions · " + (win.label || "") + " · " '
+    '+ ((DATA.client || {}).name || "Customer");\n\n    var lead = document.getElementById("hero-lead");\n  '
+    '  clear(lead);\n    [\n      "The window recorded ", b(COUNTS.incidents_total), " " + plural(COUNTS.in'
+    'cidents_total, "incident", "incidents") + " and ",\n      b(COUNTS.anomalies_total), " " + plural(COU'
+    'NTS.anomalies_total, "technical anomaly", "technical anomalies") + " across ",\n      b(COUNTS.resour'
+    'ces_total), " " + plural(COUNTS.resources_total, "evaluated resource", "evaluated resources") + " ("'
+    ',\n      b(COUNTS.resources_attention), " with active findings); the plan proposes ",\n      b(COUNTS.'
+    'actions_total), " " + plural(COUNTS.actions_total, "prioritized action", "prioritized actions") + ":'
+    ' ",\n      b(COUNTS.actions_immediate_24h), " " + plural(COUNTS.actions_immediate_24h, "immediate", "'
+    'immediate") + ", ",\n      b(COUNTS.actions_short_term_7d), " short-term, and ", b(COUNTS.actions_mon'
+    'thly_cycle), " for the monthly cycle."\n    ].forEach(function (part) {\n      lead.appendChild(typeof'
+    ' part === "string" ? document.createTextNode(part) : part);\n    });\n\n    var sub = DATA.subscription'
+    '_id || "";\n    var meta = document.getElementById("hero-meta");\n    clear(meta);\n    var live = DATA'
+    '.provenance === "LIVE";\n    [\n      ["Generated " + utc(DATA.reference_utc) + " UTC", ""],\n      ["W'
+    'indow " + utc(win.start_utc).slice(0, 10) + " → " + utc(win.end_utc).slice(0, 10) + " (UTC)", ""],\n '
+    '     [sub ? "Subscription " + (sub.length > 16 ? sub.slice(0, 8) + "…" + sub.slice(-4) : sub) : "", '
+    '""],\n      [live ? "Live read (LIVE)" : "Simulated data (" + (DATA.provenance || "SIMULATED") + ")",'
+    ' "on"],\n      [degraded.length ? "Partial coverage · " + (sources.length - degraded.length) + " of "'
+    ' + sources.length + " sources" : "Complete coverage · " + sources.length + " sources", degraded.leng'
+    'th ? "warn" : ""]\n    ].forEach(function (item) {\n      if (item[0]) {\n        meta.appendChild(el("'
+    'li", { className: item[1] || null, textContent: item[0], title: item[0].indexOf("Subscription") === '
+    '0 ? sub : null }));\n      }\n    });\n\n    verdict();\n\n    var sb = COUNTS.severity_breakdown || {};\n '
+    '   var total = ["critical", "high", "medium", "low"].reduce(function (acc, k) { return acc + (sb[k] '
+    '|| 0); }, 0);\n    document.getElementById("dist-total-label").textContent = n(total) + " " + plural('
+    'total, "signal", "signals");\n    var track = document.getElementById("dist-track");\n    var legend ='
+    ' document.getElementById("dist-legend");\n    clear(track);\n    clear(legend);\n    var described = []'
+    ';\n    ["critical", "high", "medium", "low"].forEach(function (k) {\n      var count = sb[k] || 0;\n   '
+    '   var color = "var(" + SEV_BAR[k] + ")";\n      if (total > 0 && count > 0) {\n        var seg = el("'
+    'i", { title: SEV_LABEL[k] + ": " + count });\n        seg.style.width = (count * 100 / total).toFixed'
+    '(2) + "%";\n        seg.style.background = color;\n        track.appendChild(seg);\n      }\n      var s'
+    'w = el("i");\n      sw.style.background = color;\n      legend.appendChild(el("span", null, [sw, SEV_L'
+    'ABEL[k] + " ", el("b", { textContent: n(count) })]));\n      described.push(SEV_LABEL[k] + " " + coun'
+    't);\n    });\n    track.setAttribute("aria-label", "Distribution by severity: " + described.join(", ")'
+    ');\n\n    var notes = document.getElementById("status-notes");\n    clear(notes);\n    if (!live) {\n    '
+    '  notes.appendChild(el("div", { className: "note sim" }, [icon("alert"), el("span", null, ["Simulate'
+    'd data (" + (DATA.provenance || "SIMULATED") + "): demonstration figures generated without reading A'
+    'zure; they don\'t describe a real environment."])]));\n    }\n    if (degraded.length) {\n      notes.ap'
+    'pendChild(el("div", { className: "note" }, [icon("alert"), el("span", null, [\n        "Partial cover'
+    'age: " + degraded.map(function (s) { return s.id + " (" + (STATUS[s.status] || [s.status])[0].toLowe'
+    'rCase() + ")"; }).join(", ")\n        + ". What wasn\'t read is a blind spot, not a clean result. ",\n '
+    '       el("a", { href: "#sec-coverage", textContent: "See source coverage" })\n      ])]));\n    }\n  }'
+    '\n\n  function renderKpis() {\n    var incidents = DATA.incidents || [];\n    var native = incidents.fil'
+    'ter(function (r) { return r.category === "native_alert"; });\n    var fired = native.filter(function '
+    '(r) { return String(r.monitor_condition || "").toLowerCase() === "fired"; }).length;\n    var sh = in'
+    'cidents.filter(function (r) { return r.category === "service_health"; });\n    var issues = sh.filter'
+    '(function (r) { return r.signal_type === "ServiceIssue"; }).length;\n    var set = function (id, valu'
+    'e) { document.getElementById(id).textContent = value; };\n    set("kpi-native-alerts", n(COUNTS.nativ'
+    'e_alerts_total));\n    set("kpi-native-alerts-sub", n(fired) + " " + plural(fired, "active", "active"'
+    ') + " (Fired) · " + n(native.length - fired) + " " + plural(native.length - fired, "resolved", "reso'
+    'lved"));\n    set("kpi-service-health", n(COUNTS.service_health_total));\n    set("kpi-service-health-'
+    'sub", n(issues) + " " + plural(issues, "service issue", "service issues") + " · " + n(sh.length - is'
+    'sues) + " " + plural(sh.length - issues, "maintenance event", "maintenance events"));\n    set("kpi-p'
+    'osture-anomalies", n((COUNTS.extension_failures_total || 0) + (COUNTS.connectivity_posture_total || '
+    '0)));\n    set("kpi-posture-anomalies-sub", n(COUNTS.extension_failures_total) + " failed ext. · " + '
+    'n(COUNTS.connectivity_posture_total) + " connectivity/posture");\n    set("kpi-telemetry-anomalies", '
+    'n(COUNTS.telemetry_anomalies_total));\n    var kinds = { cpu: 0, mem: 0, disk: 0, hb: 0 };\n    (DATA.'
+    'anomalies || []).forEach(function (a) {\n      if (a.category === "telemetry_anomaly") {\n        var '
+    'k = String(a.anomaly_kind || "");\n        kinds[/cpu/.test(k) ? "cpu" : /memory/.test(k) ? "mem" : /'
+    'disk/.test(k) ? "disk" : "hb"] += 1;\n      }\n    });\n    var kindText = [["cpu", "CPU"], ["mem", "me'
+    'mory"], ["disk", "disk"], ["hb", "heartbeat"]].filter(function (k) { return kinds[k[0]]; }).map(func'
+    'tion (k) { return n(kinds[k[0]]) + " " + k[1]; }).join(" · ");\n    set("kpi-telemetry-anomalies-sub"'
+    ', kindText || "InsightsMetrics, Perf, and Heartbeat");\n    set("kpi-actions-total", n(COUNTS.actions'
+    '_total));\n    set("kpi-actions-sub", n(COUNTS.actions_immediate_24h) + " immediate · " + n(COUNTS.ac'
+    'tions_short_term_7d) + " short-term · " + n(COUNTS.actions_monthly_cycle) + " monthly");\n    set("kp'
+    'i-resources-total", n(COUNTS.resources_total));\n    set("kpi-resources-sub", n(COUNTS.resources_atte'
+    'ntion) + " with active findings");\n  }\n\n  /* ---------- Overview ---------- */\n\n  function jumpTo(id'
+    ') {\n    var target = document.getElementById(id);\n    if (target) {\n      target.scrollIntoView({ be'
+    'havior: REDUCED ? "auto" : "smooth", block: "start" });\n    }\n  }\n\n  function renderOverview() {\n   '
+    ' var win = DATA.window || {};\n    var messages = document.getElementById("executive-messages-list");'
+    '\n    clear(messages);\n    (DATA.executive_messages || []).forEach(function (msg) {\n      var li = el'
+    '("li");\n      var text = String(msg);\n      text.split(/(\\d+(?:,\\d{3})*)/).forEach(function (part, i'
+    ', all) {\n        if (!part) {\n          return;\n        }\n        var prev = i > 0 ? all[i - 1].slic'
+    'e(-1) : "";\n        var next = i + 1 < all.length ? all[i + 1].charAt(0) : "";\n        var standalon'
+    'e = i % 2 === 1 && !/[-:T<\\w]/.test(prev) && !/[-:\\w]/.test(next);\n        li.appendChild(standalone'
+    ' ? el("b", { textContent: part }) : document.createTextNode(part));\n      });\n      messages.appendC'
+    'hild(li);\n    });\n    document.getElementById("prov-subscription").textContent = DATA.subscription_i'
+    'd || "—";\n    document.getElementById("prov-window-label").textContent = win.label || win.period || '
+    '"—";\n    document.getElementById("prov-window-range").textContent = (win.start_utc || "—") + " → " +'
+    ' (win.end_utc || "—");\n    document.getElementById("prov-cadence").textContent = win.cadence || "Sch'
+    'eduled monthly (30 8 1 * * UTC)";\n    document.getElementById("prov-provenance").textContent = (DATA'
+    '.provenance || "LIVE") + " · read-only";\n    document.getElementById("reference-utc-label").textCont'
+    'ent = DATA.reference_utc || "—";\n\n    var tiles = document.getElementById("horizon-tiles");\n    clea'
+    'r(tiles);\n    [["immediate_24h", "Immediate <24h", COUNTS.actions_immediate_24h], ["short_term_7d", '
+    '"Short term 1-7 days", COUNTS.actions_short_term_7d], ["monthly_cycle", "Monthly cycle", COUNTS.acti'
+    'ons_monthly_cycle]].forEach(function (t) {\n      var tile = el("button", { type: "button", className'
+    ': "tile" + (t[0] === "immediate_24h" && t[2] ? " imm" : ""), "aria-label": t[1] + ": " + (t[2] || 0)'
+    ' + " actions. Filter the plan by this horizon" }, [el("b", { textContent: n(t[2]) }), el("span", { t'
+    'extContent: t[1] })]);\n      tile.addEventListener("click", function () {\n        resetFilters(true)'
+    ';\n        document.getElementById("filter-horizon").value = t[0];\n        renderTables();\n        ju'
+    'mpTo("sec-actions");\n      });\n      tiles.appendChild(tile);\n    });\n\n    var list = document.getEl'
+    'ementById("top-actions");\n    clear(list);\n    var actions = (DATA.actions || []).slice(0, 5);\n    i'
+    'f (!actions.length) {\n      list.appendChild(el("li", null, [el("span", { className: "rk", textConte'
+    'nt: "—" }), el("div", { className: "t", textContent: "No recommended actions in this window." })]));'
+    '\n    }\n    actions.forEach(function (act) {\n      list.appendChild(el("li", null, [\n        el("span'
+    '", { className: "rk", textContent: String(act.priority_rank) }),\n        el("div", null, [\n         '
+    ' el("div", { className: "t" }, withName(act.title, act.resource_name)),\n          el("div", { classN'
+    'ame: "m" }, [pill(act.severity, act.severity_label), el("span", { className: "tag " + (act.horizon |'
+    '| ""), textContent: act.horizon_label }), el("span", { textContent: act.resource_name + (act.resourc'
+    'e_group ? " · " + rgLabel(act.resource_group) : "") })])\n        ])\n      ]));\n    });\n    document.'
+    'getElementById("all-actions-link").textContent = "See all " + n(COUNTS.actions_total) + " actions in'
+    ' the plan";\n\n    var streams = [\n      ["native_alert", "Azure Monitor native alerts", COUNTS.native'
+    '_alerts_total, "sec-incidents"],\n      ["service_health", "Service Health communications", COUNTS.se'
+    'rvice_health_total, "sec-incidents"],\n      ["extension_failure", "Failed VM / Arc extensions", COUN'
+    'TS.extension_failures_total, "sec-anomalies"],\n      ["connectivity_posture", "Control plane and con'
+    'nectivity", COUNTS.connectivity_posture_total, "sec-anomalies"],\n      ["telemetry_anomaly", "Out-of'
+    '-range telemetry", COUNTS.telemetry_anomalies_total, "sec-anomalies"],\n      ["advisor_recommendatio'
+    'n", "Azure Advisor recommendations", COUNTS.advisor_recommendations_total, "sec-resources"]\n    ];\n '
+    '   var maxStream = Math.max.apply(null, streams.map(function (s) { return s[2] || 0; }).concat([1]))'
+    ';\n    var streamBox = document.getElementById("stream-bars");\n    clear(streamBox);\n    streams.forE'
+    'ach(function (s) {\n      var bar = el("i");\n      bar.style.width = ((s[2] || 0) * 100 / maxStream).'
+    'toFixed(1) + "%";\n      if (!s[2]) {\n        bar.style.minWidth = "0";\n      }\n      var row = el("b'
+    'utton", { type: "button", className: "brow", "aria-label": s[1] + ": " + (s[2] || 0) + ". Filter the'
+    ' records by this stream" }, [el("span", { className: "bl", textContent: s[1] }), el("span", { classN'
+    'ame: "bt" }, [bar]), el("b", { textContent: n(s[2]) })]);\n      row.addEventListener("click", functi'
+    'on () {\n        resetFilters(true);\n        document.getElementById("filter-category").value = s[0];'
+    '\n        renderTables();\n        jumpTo(s[3]);\n      });\n      streamBox.appendChild(row);\n    });\n\n'
+    '    var hot = (DATA.resources || []).map(function (r) {\n      return { r: r, v: (r.incident_count ||'
+    ' 0) + (r.anomaly_count || 0) };\n    }).filter(function (x) { return x.v > 0; }).sort(function (x, y)'
+    ' {\n      return y.v - x.v || sevKey(x.r) - sevKey(y.r) || String(x.r.resource_name).localeCompare(St'
+    'ring(y.r.resource_name));\n    }).slice(0, 6);\n    var resBox = document.getElementById("resource-bar'
+    's");\n    clear(resBox);\n    if (!hot.length) {\n      resBox.appendChild(el("p", { className: "empty-'
+    'note", textContent: "No inventoried resource has incidents or anomalies in the window." }));\n    }\n '
+    '   var maxHot = hot.length ? hot[0].v : 1;\n    hot.forEach(function (x) {\n      var color = "var(" +'
+    ' (SEV_BAR[x.r.severity] || "--sev-info-bar") + ")";\n      var bar = el("i");\n      bar.style.width ='
+    ' (x.v * 100 / maxHot).toFixed(1) + "%";\n      bar.style.background = color;\n      var dot = el("span'
+    '", { className: "dot" });\n      dot.style.background = color;\n      var row = el("button", { type: "'
+    'button", className: "brow", title: x.r.resource_id, "aria-label": x.r.resource_name + ": " + x.v + "'
+    ' signals, highest severity " + (x.r.severity_label || "") + ". Search the records for this resource"'
+    ' }, [\n        el("span", { className: "bl" }, [dot, x.r.resource_name, el("small", { textContent: x.'
+    'r.resource_group || "" })]),\n        el("span", { className: "bt" }, [bar]),\n        el("b", { textC'
+    'ontent: n(x.v) })\n      ]);\n      row.addEventListener("click", function () {\n        resetFilters(t'
+    'rue);\n        document.getElementById("filter-search").value = x.r.resource_name;\n        renderTabl'
+    'es();\n        jumpTo(x.r.incident_count ? "sec-incidents" : "sec-anomalies");\n      });\n      resBox'
+    '.appendChild(row);\n    });\n  }\n\n  /* ---------- Registers ---------- */\n\n  var TABLES = {};\n  var PA'
+    'GE = 50;\n  var lastFilterKey = "";\n\n  function headLabel(text) {\n    var parts = String(text).split('
+    '" · ");\n    var out = [];\n    parts.forEach(function (part, i) {\n      if (i) {\n        out.push(" "'
+    ');\n      }\n      out.push(el("span", { className: "hg", textContent: part + (i < parts.length - 1 ? '
+    '" ·" : "") }));\n    });\n    return out;\n  }\n\n  function setupTable(tableId, cols, rowId) {\n    var t'
+    'able = document.getElementById(tableId);\n    var tr = el("tr");\n    cols.forEach(function (c, i) {\n '
+    '     var th = el("th", { scope: "col", className: c.num ? "n" : null });\n      if (c.sort) {\n       '
+    ' var btn = el("button", { type: "button", className: "sort" }, headLabel(c.head));\n        btn.addEv'
+    'entListener("click", function () {\n          var st = TABLES[tableId].sort;\n          TABLES[tableId'
+    '].sort = { i: i, dir: st.i === i && st.dir === "ascending" ? "descending" : "ascending" };\n         '
+    ' renderTables();\n        });\n        th.appendChild(btn);\n        th.appendChild(el("span", { classN'
+    'ame: "th-print", "aria-hidden": "true" }, headLabel(c.head)));\n      } else {\n        headLabel(c.he'
+    'ad).forEach(function (part) { th.appendChild(typeof part === "string" ? document.createTextNode(part'
+    ') : part); });\n      }\n      tr.appendChild(th);\n    });\n    var thead = table.querySelector("thead"'
+    ');\n    clear(thead);\n    thead.appendChild(tr);\n    var more = el("div", { className: "more-row", id'
+    ': tableId + "-more", hidden: "hidden" }, [el("span"), el("button", { type: "button", className: "btn'
+    ' btn-ghost" })]);\n    more.querySelector("button").addEventListener("click", function () {\n      TAB'
+    'LES[tableId].limit += PAGE;\n      renderTables();\n    });\n    table.closest(".table-card").appendChi'
+    'ld(more);\n    TABLES[tableId] = { cols: cols, sort: { i: -1, dir: "" }, rowId: rowId, limit: PAGE };'
+    '\n  }\n\n  function fillTable(tableId, rows, emptyText) {\n    var t = TABLES[tableId];\n    var table = '
+    'document.getElementById(tableId);\n    var tbody = table.querySelector("tbody");\n    var more = docum'
+    'ent.getElementById(tableId + "-more");\n    var st = t.sort;\n    var ths = table.querySelectorAll("th'
+    'ead th");\n    for (var k = 0; k < ths.length; k++) {\n      if (k === st.i) {\n        ths[k].setAttri'
+    'bute("aria-sort", st.dir);\n      } else {\n        ths[k].removeAttribute("aria-sort");\n      }\n    }'
+    '\n    if (st.i >= 0) {\n      var acc = t.cols[st.i].sort;\n      var dir = st.dir === "ascending" ? 1 '
+    ': -1;\n      rows = rows.map(function (r, idx) { return [r, idx]; }).sort(function (x, y) {\n        v'
+    'ar a = acc(x[0]);\n        var c = acc(y[0]);\n        var d = typeof a === "number" && typeof c === "'
+    'number" ? a - c : String(a).localeCompare(String(c), "en", { numeric: true, sensitivity: "base" });\n'
+    '        return d ? d * dir : x[1] - y[1];\n      }).map(function (p) { return p[0]; });\n    }\n    cle'
+    'ar(tbody);\n    var hidden = Math.max(0, rows.length - t.limit);\n    more.hidden = hidden === 0;\n    '
+    'if (hidden) {\n      more.querySelector("span").textContent = "Showing " + n(t.limit) + " of " + n(ro'
+    'ws.length) + ". Printing includes every row.";\n      more.querySelector("button").textContent = "Sho'
+    'w " + n(Math.min(PAGE, hidden)) + " more";\n    }\n    if (!rows.length) {\n      tbody.appendChild(el('
+    '"tr", { className: "empty-row" }, [el("td", { colspan: String(t.cols.length), textContent: emptyText'
+    ' })]));\n      return;\n    }\n    var frag = document.createDocumentFragment();\n    rows.forEach(funct'
+    'ion (row, idx) {\n      var attrs = t.rowId ? { id: t.rowId(row) } : {};\n      if (idx >= t.limit) {\n'
+    '        attrs.className = "pg";\n      }\n      var tr = el("tr", attrs);\n      t.cols.forEach(functio'
+    'n (c) {\n        var value = c.cell(row);\n        tr.appendChild(el("td", { className: c.cls || (c.nu'
+    'm ? "n" : null) }, Array.isArray(value) ? value : [value]));\n      });\n      frag.appendChild(tr);\n '
+    '   });\n    tbody.appendChild(frag);\n  }\n\n  function stateCell(row) {\n    var cond = row.monitor_cond'
+    'ition || "—";\n    var active = /^(fired|active)$/i.test(cond);\n    return [el("span", { className: "'
+    'state" + (active ? " on" : ""), textContent: cond }), el("span", { className: "sm", textContent: row'
+    '.state || "" })];\n  }\n\n  function evidenceLinks(ids) {\n    return el("div", { className: "ids" }, (i'
+    'ds || []).map(function (id) {\n      var a = el("a", { className: "chip-id", href: "#ev-" + id, textC'
+    'ontent: id, title: "Go to evidence " + id });\n      a.addEventListener("click", function (ev) {\n    '
+    '    ev.preventDefault();\n        gotoEvidence(id);\n      });\n      return a;\n    }));\n  }\n\n  functio'
+    'n gotoEvidence(id) {\n    var row = document.getElementById("ev-" + id);\n    if (!row) {\n      resetF'
+    'ilters();\n      row = document.getElementById("ev-" + id);\n    }\n    if (row && row.classList.contai'
+    'ns("pg")) {\n      TABLES[row.closest("table").id].limit = Infinity;\n      renderTables();\n      row '
+    '= document.getElementById("ev-" + id);\n    }\n    if (!row) {\n      return;\n    }\n    row.scrollIntoV'
+    'iew({ behavior: REDUCED ? "auto" : "smooth", block: "center" });\n    row.classList.add("flash");\n   '
+    ' setTimeout(function () { row.classList.remove("flash"); }, 1800);\n  }\n\n  function evId(row) {\n    r'
+    'eturn "ev-" + row.id;\n  }\n\n  function telemetryText(metrics) {\n    var tm = metrics || {};\n    var p'
+    'arts = [];\n    if (tm.cpu_percent) {\n      parts.push("CPU max " + tm.cpu_percent.max + "% (median "'
+    ' + tm.cpu_percent.median + "%)");\n    }\n    if (tm.memory_available_mb) {\n      parts.push("Memory m'
+    'in " + n(tm.memory_available_mb.min) + " MB");\n    }\n    if (tm.disk_free_percent) {\n      parts.pus'
+    'h("Disk free min " + tm.disk_free_percent.min + "%");\n    }\n    if (tm.heartbeat_silence_minutes) {\n'
+    '      parts.push("Heartbeat silence " + n(tm.heartbeat_silence_minutes.max) + " min");\n    }\n    ret'
+    'urn parts.length ? parts.join(" · ") : "No guest telemetry in the window";\n  }\n\n  function setupTabl'
+    'es() {\n    var byName = function (r) { return String(r.resource_name || "").toLowerCase(); };\n    se'
+    'tupTable("incidents-table", [\n      { head: "Severity", sort: sevKey, cls: "nw", cell: function (r) '
+    '{ return [pill(r.severity, r.severity_label), el("span", { className: "sm", textContent: r.native_se'
+    'verity || "" })]; } },\n      { head: "ID · stream", sort: function (r) { return r.id; }, cls: "nw", '
+    'cell: idCell },\n      { head: "Resource / service", sort: byName, cls: "w2", cell: function (r) {\n  '
+    '      if (r.category === "service_health") {\n          return resourceCell(r.resource_name, "subscri'
+    'ption-scope", null, null, (r.regions || []).join(", "));\n        }\n        return resourceCell(r.res'
+    'ource_name, r.resource_group, r.resource_type, r.resource_id);\n      } },\n      { head: "State", sor'
+    't: function (r) { return (r.monitor_condition || "") + " " + (r.state || ""); }, cls: "nw", cell: st'
+    'ateCell },\n      { head: "Signal", sort: function (r) { return r.signal_type || ""; }, cell: functio'
+    'n (r) { return [el("div", { textContent: r.signal_type || "—" }), el("span", { className: "sm", text'
+    'Content: r.monitor_service || "" })]; } },\n      { head: "Start · updated (UTC)", sort: function (r)'
+    ' { return r.start_time_utc || ""; }, cls: "nw", cell: function (r) {\n        return [el("div", { tex'
+    'tContent: utc(r.start_time_utc), title: r.start_time_utc }), el("span", { className: "sm", textConte'
+    'nt: "updated " + utc(r.last_updated_utc), title: r.last_updated_utc })];\n      } },\n      { head: "D'
+    'escription", cls: "wide", cell: function (r) { return [el("div", null, [prose(r.summary)]), extLink('
+    'r.learn_url, "Microsoft Learn")]; } }\n    ], evId);\n\n    setupTable("anomalies-table", [\n      { hea'
+    'd: "Severity", sort: sevKey, cls: "nw", cell: function (r) { return pill(r.severity, r.severity_labe'
+    'l); } },\n      { head: "ID · stream", sort: function (r) { return r.id; }, cls: "nw", cell: idCell }'
+    ',\n      { head: "Resource", sort: byName, cls: "w2", cell: function (r) { return resourceCell(r.reso'
+    'urce_name, r.resource_group, r.resource_type, r.resource_id); } },\n      { head: "Metric or property'
+    '", sort: function (r) { return r.metric_or_field || ""; }, cell: function (r) { return breakable(r.m'
+    'etric_or_field, "code"); } },\n      { head: "Observed · reference", cell: function (r) {\n        ret'
+    'urn [el("div", null, [el("b", { textContent: withUnit(r.observed_value, r.unit) })]), el("span", { c'
+    'lassName: "sm", textContent: "ref. " + withUnit(r.baseline_or_expected, r.unit) })];\n      } },\n    '
+    '  { head: "Samples · window", sort: function (r) { return Number(r.sample_count) || 0; }, cell: func'
+    'tion (r) {\n        var count = Number(r.sample_count) || 1;\n        return [el("div", { className: "'
+    'nw", textContent: n(count) + " " + plural(count, "sample", "samples") }), el("span", { className: "s'
+    'm", textContent: (r.window_grain || "PointInTime") + (r.workspace_name ? " · " + r.workspace_name : '
+    '"") })];\n      } },\n      { head: "Technical evidence", cls: "wide", cell: function (r) { return [el'
+    '("div", null, [prose(r.summary)]), extLink(r.learn_url, "Guidance on Microsoft Learn")]; } }\n    ], '
+    'evId);\n\n    setupTable("actions-table", [\n      { head: "Priority", sort: function (r) { return Numb'
+    'er(r.priority_rank) || 0; }, cls: "nw", cell: function (r) { return [el("span", { className: "rank",'
+    ' textContent: "#" + r.priority_rank }), el("span", { className: "sm id", textContent: r.id })]; } },'
+    '\n      { head: "Horizon · severity", sort: function (r) { return (HORIZON_RANK.hasOwnProperty(r.hori'
+    'zon) ? HORIZON_RANK[r.horizon] : 9) * 10 + sevKey(r); }, cls: "nw stack", cell: function (r) {\n     '
+    '   return [el("div", null, [el("span", { className: "tag " + (r.horizon || ""), textContent: r.horiz'
+    'on_label })]), el("div", null, [pill(r.severity, r.severity_label)])];\n      } },\n      { head: "Rec'
+    'ommended action", sort: function (r) { return r.title || ""; }, cls: "w3", cell: function (r) {\n    '
+    '    return el("div", { className: "res", title: r.resource_id || null }, [el("b", null, withName(r.t'
+    'itle, r.resource_name)), el("span", { className: "sm", textContent: (r.resource_name || "") + (r.res'
+    'ource_group ? " · " + rgLabel(r.resource_group) : "") }), portalUrl(r.resource_id) ? extLink(portalU'
+    'rl(r.resource_id), "Portal") : null]);\n      } },\n      { head: "Owner · effort", sort: function (r)'
+    ' { return r.owner_scope || ""; }, cls: "w1", cell: function (r) { return [el("div", { textContent: r'
+    '.owner_scope || "—" }), el("span", { className: "sm", textContent: "Effort: " + (r.effort_label || "'
+    '—") })]; } },\n      { head: "Evidence", cell: function (r) { return evidenceLinks(r.linked_evidence_'
+    'ids); } },\n      { head: "Guidance for human review", cls: "wide", cell: function (r) {\n        retu'
+    'rn [el("div", null, [prose(r.recommendation)]), el("span", { className: "sm" }, ["Evidence: ", prose'
+    '(r.evidence_summary)]), extLink(r.learn_url, "Microsoft Learn reference")];\n      } }\n    ]);\n\n    s'
+    'etupTable("resources-table", [\n      { head: "Resource", sort: byName, cls: "w2", cell: function (r)'
+    ' { return resourceCell(r.resource_name, r.resource_group, null, r.resource_id, r.location); } },\n   '
+    '   { head: "Type · hosting", sort: function (r) { return typeLabel(r.resource_type); }, cell: functi'
+    'on (r) { return [el("div", { textContent: typeLabel(r.resource_type) }), el("span", { className: "sm'
+    '" }, [breakable(r.resource_type, "code"), " · " + String(r.hosting || "").toUpperCase()])]; } },\n   '
+    '   { head: "Operational status", sort: function (r) { return (r.status === "attention" ? 0 : r.statu'
+    's === "review" ? 1 : 2) * 10 + sevKey(r); }, cls: "nw", cell: function (r) {\n        return [r.statu'
+    's === "healthy" ? pill("ok", "Normal") : pill(r.severity, r.severity_label), el("span", { className:'
+    ' "sm", textContent: r.operational_state || "" })];\n      } },\n      { head: "Incidents", num: true, '
+    'sort: function (r) { return r.incident_count || 0; }, cell: function (r) { return n(r.incident_count'
+    '); } },\n      { head: "Anomalies", num: true, sort: function (r) { return r.anomaly_count || 0; }, c'
+    'ell: function (r) { return n(r.anomaly_count); } },\n      { head: "Failed ext.", num: true, sort: fu'
+    'nction (r) { return r.failed_extension_count || 0; }, cell: function (r) { return n(r.failed_extensi'
+    'on_count) + " / " + n(r.extensions_total); } },\n      { head: "Actions", num: true, sort: function ('
+    'r) { return r.action_count || 0; }, cell: function (r) { return n(r.action_count); } },\n      { head'
+    ': "Telemetry summary", cls: "w2", cell: function (r) { return telemetryText(r.telemetry_metrics); } '
+    '}\n    ]);\n\n    setupTable("advisor-table", [\n      { head: "Impact", sort: sevKey, cls: "nw", cell: '
+    'function (r) { return [pill(r.severity, r.severity_label, "Impact " + (r.impact || "")), el("span", '
+    '{ className: "sm", textContent: r.advisor_category || "" })]; } },\n      { head: "ID", sort: functio'
+    'n (r) { return r.id; }, cls: "nw", cell: function (r) { return el("span", { className: "id", textCon'
+    'tent: r.id }); } },\n      { head: "Resource", sort: byName, cls: "w2", cell: function (r) { return r'
+    'esourceCell(r.resource_name, r.resource_group, r.resource_type, r.resource_id); } },\n      { head: "'
+    'Detected problem", cls: "w2", cell: function (r) { return prose(r.problem); } },\n      { head: "Reco'
+    'mmended solution", cls: "wide", cell: function (r) { return [el("div", null, [prose(r.solution)]), e'
+    'xtLink(r.learn_url, "Azure Advisor on Microsoft Learn")]; } },\n      { head: "Updated (UTC)", sort: '
+    'function (r) { return r.last_updated_utc || ""; }, cls: "nw", cell: function (r) { return el("span",'
+    ' { textContent: utc(r.last_updated_utc), title: r.last_updated_utc }); } }\n    ], evId);\n\n    setupT'
+    'able("sources-table", [\n      { head: "Source", cls: "nw", cell: function (r) { return el("span", { '
+    'className: "id", textContent: r.id }); } },\n      { head: "Status", cls: "nw", cell: function (r) { '
+    'var s = STATUS[r.status] || [r.status, "critical"]; return pill(s[1], s[0], r.status); } },\n      { '
+    'head: "Records", num: true, cell: function (r) { return n(r.records); } },\n      { head: "Pages", nu'
+    'm: true, cell: function (r) { return n(r.pages); } },\n      { head: "Pagination complete", cls: "nw"'
+    ', cell: function (r) { return r.pagination_complete ? "Yes" : "No"; } },\n      { head: "Read signatu'
+    're and detail", cls: "wide", cell: function (r) {\n        var kids = [breakable(r.read_signature || '
+    '"—", "code")];\n        if (Array.isArray(r.workspaces_queried) && r.workspaces_queried.length) {\n   '
+    '       kids.push(el("ul", { className: "wslist" }, r.workspaces_queried.map(function (w) {\n         '
+    '   return el("li", { textContent: w.workspace_name + " · " + ((STATUS[w.status] || [w.status])[0]) +'
+    ' " · " + n(w.records) + " " + plural(w.records, "row", "rows") });\n          })));\n        }\n       '
+    ' (r.errors || []).forEach(function (e) {\n          kids.push(el("div", { className: "errbox" }, [el('
+    '"b", { textContent: e.code || "error" }), " · " + (e.message || "") + (e.http_status ? " (HTTP " + e'
+    '.http_status + ")" : "")]));\n        });\n        return kids;\n      } },\n      { head: "Notes and sc'
+    'ope", cls: "w2", cell: function (r) { return r.note || "—"; } }\n    ]);\n  }\n\n  function matchesCommo'
+    'nFilter(row, cat, sev, query) {\n    if (cat !== "all" && row.category !== cat) {\n      return false;'
+    '\n    }\n    if (sev !== "all" && row.severity !== sev) {\n      return false;\n    }\n    if (query) {\n '
+    '     var hay = [row.id, row.title, row.resource_name, row.resource_id, row.resource_group, row.summa'
+    'ry, row.metric_or_field, row.signal_type, row.owner_scope, row.recommendation].join(" ").toLowerCase'
+    '();\n      if (hay.indexOf(query) < 0) {\n        return false;\n      }\n    }\n    return true;\n  }\n\n  '
+    'function renderTables() {\n    var cat = document.getElementById("filter-category").value;\n    var se'
+    'v = document.getElementById("filter-severity").value;\n    var hor = document.getElementById("filter-'
+    'horizon").value;\n    var rawQuery = (document.getElementById("filter-search").value || "").trim();\n '
+    '   var query = rawQuery.toLowerCase();\n    var filterKey = [cat, sev, hor, query].join("\\u0001");\n  '
+    '  if (filterKey !== lastFilterKey) {\n      lastFilterKey = filterKey;\n      Object.keys(TABLES).forE'
+    'ach(function (id) { TABLES[id].limit = PAGE; });\n    }\n\n    var incidents = (DATA.incidents || []).f'
+    'ilter(function (row) { return matchesCommonFilter(row, cat, sev, query); });\n    var anomalies = (DA'
+    'TA.anomalies || []).filter(function (row) { return matchesCommonFilter(row, cat, sev, query); });\n  '
+    '  var actions = (DATA.actions || []).filter(function (row) {\n      return (hor === "all" || row.hori'
+    'zon === hor) && matchesCommonFilter(row, cat, sev, query);\n    });\n    var resources = (DATA.resourc'
+    'es || []).filter(function (row) {\n      if (sev !== "all" && row.severity !== sev) {\n        return '
+    'false;\n      }\n      if (query) {\n        var hay = [row.resource_name, row.resource_id, row.resourc'
+    'e_group, row.resource_type, row.operational_state].join(" ").toLowerCase();\n        if (hay.indexOf('
+    'query) < 0) {\n          return false;\n        }\n      }\n      return true;\n    });\n    var advisor ='
+    ' (DATA.advisor || []).filter(function (row) { return matchesCommonFilter(row, cat, sev, query); });\n'
+    '\n    var counts = { incidents: incidents.length, anomalies: anomalies.length, actions: actions.lengt'
+    'h, resources: resources.length, advisor: advisor.length };\n    Object.keys(counts).forEach(function '
+    '(key) {\n      document.getElementById(key + "-count").textContent = String(counts[key]);\n      docum'
+    'ent.getElementById(key + "-total").textContent = String((DATA[key] || []).length);\n      var nav = d'
+    'ocument.getElementById("nav-" + key + "-count");\n      if (nav) {\n        nav.textContent = String(c'
+    'ounts[key]);\n      }\n    });\n\n    var active = cat !== "all" || sev !== "all" || hor !== "all" || qu'
+    'ery;\n    var status = document.getElementById("filter-status-summary");\n    clear(status);\n    [b(in'
+    'cidents.length), " " + plural(incidents.length, "incident", "incidents") + " · ", b(anomalies.length'
+    '), " " + plural(anomalies.length, "anomaly", "anomalies") + " · ", b(actions.length), " " + plural(a'
+    'ctions.length, "action", "actions") + " · ", b(resources.length), " " + plural(resources.length, "re'
+    'source", "resources"), active ? " (filter active)" : " (no filters)"].forEach(function (part) {\n    '
+    '  status.appendChild(typeof part === "string" ? document.createTextNode(part) : part);\n    });\n    v'
+    'ar labelOf = function (id) { var s = document.getElementById(id); return s.options[s.selectedIndex].'
+    'text; };\n    document.getElementById("print-filter-note").textContent = active\n      ? "Filters appl'
+    'ied when printing: " + [cat !== "all" ? labelOf("filter-category") : "", sev !== "all" ? "severity "'
+    ' + labelOf("filter-severity") : "", hor !== "all" ? "horizon " + labelOf("filter-horizon") : "", que'
+    'ry ? "search “" + rawQuery + "”" : ""].filter(Boolean).join(" · ")\n      : "";\n\n    var none = funct'
+    'ion (key, filtered, empty) { return (DATA[key] || []).length ? filtered : empty; };\n    fillTable("i'
+    'ncidents-table", incidents, none("incidents", "No incidents or alerts match the current filters.", "'
+    'No incidents or alerts in the evaluated window."));\n    fillTable("anomalies-table", anomalies, none'
+    '("anomalies", "No technical anomalies match the current filters.", "No technical anomalies in the ev'
+    'aluated window."));\n    fillTable("actions-table", actions, none("actions", "No recommended actions '
+    'match the current filters.", "No recommended actions for this window."));\n    fillTable("resources-t'
+    'able", resources, none("resources", "No inventoried resources match the current filter.", "No invent'
+    'oried resources in scope."));\n    fillTable("advisor-table", advisor, none("advisor", "No cached Azu'
+    're Advisor recommendations match the current filter.", "No cached Azure Advisor recommendations for '
+    'the subscription."));\n  }\n\n  function resetFilters(silent) {\n    document.getElementById("filter-cat'
+    'egory").value = "all";\n    document.getElementById("filter-severity").value = "all";\n    document.ge'
+    'tElementById("filter-horizon").value = "all";\n    document.getElementById("filter-search").value = "'
+    '";\n    if (!silent) {\n      renderTables();\n    }\n  }\n\n  function renderCoverage() {\n    var sources'
+    ' = DATA.sources || [];\n    document.getElementById("sources-count").textContent = String(sources.len'
+    'gth);\n    document.getElementById("nav-sources-count").textContent = String(sources.length);\n    fil'
+    'lTable("sources-table", sources, "The data model has no source receipts.");\n\n    var meth = DATA.met'
+    'hodology || {};\n    var methList = document.getElementById("methodology-list");\n    clear(methList);'
+    '\n    (meth.limitations || []).forEach(function (lim) {\n      methList.appendChild(el("li", { textCon'
+    'tent: lim }));\n    });\n    var facts = document.getElementById("method-facts");\n    clear(facts);\n  '
+    '  [\n      ["Mode", meth.read_only === false ? "Write" : "Read-only"],\n      ["Official SLA calculati'
+    'on", meth.official_sla_calculation ? "Yes" : "No"],\n      ["Schedule", (meth.scheduled_cadence_cron '
+    '|| "30 8 1 * *") + " (UTC)"],\n      ["Default period", meth.scheduled_default_period || "previous_mo'
+    'nth"],\n      ["Supported periods", (meth.supported_periods || []).join(", ") || "—"]\n    ].forEach(f'
+    'unction (f) {\n      facts.appendChild(el("dt", { textContent: f[0] }));\n      facts.appendChild(el("'
+    'dd", { textContent: f[1] }));\n    });\n    var streams = document.getElementById("method-streams");\n '
+    '   clear(streams);\n    (meth.evidence_streams || []).forEach(function (s) {\n      streams.appendChil'
+    'd(el("li", { textContent: s }));\n    });\n\n    var client = (DATA.client || {}).name || "Customer";\n '
+    '   document.getElementById("footer-left").textContent = "Generated by Azure SRE Agent · Read-only · '
+    'Reference " + utc(DATA.reference_utc) + " UTC · " + (DATA.schema_version || "");\n    document.getEle'
+    'mentById("footer-right").textContent = client;\n    var page = el("style", { textContent: "@page{@bot'
+    'tom-left{content:\\"" + ("Operations report · " + client + " · " + ((DATA.window || {}).label || "") '
+    '+ " · " + utc(DATA.reference_utc) + " UTC").replace(/["\\\\\\r\\n]/g, " ") + "\\";font:8.5pt \'Segoe UI\',s'
+    'ans-serif;color:#5A687A}}" });\n    document.head.appendChild(page);\n  }\n\n  function watchSections() '
+    '{\n    if (!("IntersectionObserver" in window)) {\n      return;\n    }\n    var links = {};\n    Array.p'
+    'rototype.forEach.call(document.querySelectorAll("#section-nav a"), function (a) {\n      links[a.getA'
+    'ttribute("href").slice(1)] = a;\n    });\n    var observer = new IntersectionObserver(function (entrie'
+    's) {\n      entries.forEach(function (entry) {\n        if (entry.isIntersecting) {\n          Object.k'
+    'eys(links).forEach(function (k) { links[k].removeAttribute("aria-current"); });\n          if (links['
+    'entry.target.id]) {\n            links[entry.target.id].setAttribute("aria-current", "true");\n       '
+    '   }\n        }\n      });\n    }, { rootMargin: "-35% 0px -60% 0px" });\n    Array.prototype.forEach.ca'
+    'll(document.querySelectorAll("#top, .sec"), function (section) {\n      observer.observe(section);\n  '
+    '  });\n  }\n\n  /* ---------- Exports ---------- */\n\n  function downloadBlob(filename, content, mime) {'
+    '\n    var blob = new Blob([content], { type: mime });\n    var url = URL.createObjectURL(blob);\n    va'
+    'r link = document.createElement("a");\n    link.href = url;\n    link.download = filename;\n    documen'
+    't.body.appendChild(link);\n    link.click();\n    document.body.removeChild(link);\n    setTimeout(func'
+    'tion () { URL.revokeObjectURL(url); }, 500);\n  }\n\n  function csvEscape(val) {\n    if (val === null |'
+    '| val === undefined) {\n      return \'""\';\n    }\n    var str = typeof val === "object" ? JSON.stringi'
+    'fy(val) : String(val);\n    if (/^[=+\\-@\\t\\r\\n]/.test(str.trimLeft())) {\n      str = "\'" + str;\n    }'
+    '\n    return \'"\' + str.replace(/"/g, \'""\') + \'"\';\n  }\n\n  function exportIncidentsCsv() {\n    var head'
+    'ers = ["record_kind", "id", "category", "severity", "title", "resource_name", "resource_group", "met'
+    'ric_or_signal", "observed_value", "observed_at_utc", "summary"];\n    var lines = [headers.join(",")]'
+    ';\n    (DATA.incidents || []).forEach(function (inc) {\n      lines.push([\n        "incident", inc.id,'
+    ' inc.category, inc.severity, inc.title, inc.resource_name,\n        inc.resource_group, inc.signal_ty'
+    'pe, inc.native_severity, inc.last_updated_utc, inc.summary\n      ].map(csvEscape).join(","));\n    })'
+    ';\n    (DATA.anomalies || []).forEach(function (anom) {\n      lines.push([\n        "anomaly", anom.id'
+    ', anom.category, anom.severity, anom.title, anom.resource_name,\n        anom.resource_group, anom.me'
+    'tric_or_field, anom.observed_value, anom.observed_at_utc, anom.summary\n      ].map(csvEscape).join("'
+    ',"));\n    });\n    downloadBlob("ops-digest-incidents-anomalies.csv", "\\uFEFF" + lines.join("\\r\\n"), '
+    '"text/csv;charset=utf-8");\n  }\n\n  function exportActionsCsv() {\n    var headers = ["priority_rank", '
+    '"id", "horizon_label", "severity", "category", "title", "resource_name", "resource_group", "owner_sc'
+    'ope", "effort_label", "linked_evidence_ids", "recommendation"];\n    var lines = [headers.join(",")];'
+    '\n    (DATA.actions || []).forEach(function (act) {\n      lines.push([\n        act.priority_rank, act'
+    '.id, act.horizon_label, act.severity, act.category, act.title,\n        act.resource_name, act.resour'
+    'ce_group, act.owner_scope, act.effort_label,\n        (act.linked_evidence_ids || []).join(";"), act.'
+    'recommendation\n      ].map(csvEscape).join(","));\n    });\n    downloadBlob("ops-digest-recommended-a'
+    'ctions.csv", "\\uFEFF" + lines.join("\\r\\n"), "text/csv;charset=utf-8");\n  }\n\n  /* ---------- Wiring -'
+    '--------- */\n\n  ["filter-category", "filter-severity", "filter-horizon"].forEach(function (id) {\n   '
+    ' document.getElementById(id).addEventListener("change", renderTables);\n  });\n  document.getElementBy'
+    'Id("filter-search").addEventListener("input", renderTables);\n  document.getElementById("filter-reset'
+    '").addEventListener("click", function () { resetFilters(); });\n\n  document.getElementById("theme-tog'
+    'gle").addEventListener("click", function () {\n    var root = document.documentElement;\n    var next '
+    '= root.getAttribute("data-theme") === "dark" ? "light" : "dark";\n    root.setAttribute("data-theme",'
+    ' next);\n    this.querySelector(".lbl").textContent = next === "dark" ? "Light mode" : "Dark mode";\n '
+    '   this.title = this.querySelector(".lbl").textContent;\n    this.querySelector("path").setAttribute('
+    '"d", next === "dark" ? PATHS.sun : PATHS.moon);\n  });\n\n  document.getElementById("btn-export-json").'
+    'addEventListener("click", function () {\n    downloadBlob("ops-digest-snapshot.json", JSON.stringify('
+    'DATA, null, 2), "application/json;charset=utf-8");\n  });\n  document.getElementById("btn-export-incid'
+    'ents-csv").addEventListener("click", exportIncidentsCsv);\n  document.getElementById("btn-export-acti'
+    'ons-csv").addEventListener("click", exportActionsCsv);\n  document.getElementById("btn-print").addEve'
+    'ntListener("click", function () {\n    window.print();\n  });\n\n  renderBranding();\n  renderHero();\n  r'
+    'enderKpis();\n  setupTables();\n  renderOverview();\n  renderTables();\n  renderCoverage();\n  watchSecti'
+    'ons();\n})();\n</script>\n</body>\n</html>\n'
 )
 # END BUILD-TIME ASSETS
 
@@ -1180,6 +1175,10 @@ def number(value, source="normalization"):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         raise EvidenceError("invalid_field", "Source numeric value must be a finite number.", source)
     return float(value)
+
+
+def grouped(value):
+    return format(value, ",") if isinstance(value, (int, float)) and not isinstance(value, bool) else str(value)
 
 
 def boolean(value, source="normalization"):
@@ -1303,26 +1302,26 @@ def compute_window(period, reference_str):
     if period == "previous_month":
         end_dt = ref_dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_dt = (end_dt - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        label = "Mes natural anterior (" + start_dt.strftime("%Y-%m") + ")"
-        cadence = "Ejecución mensual programada (30 8 1 * * UTC) / mes cerrado"
+        label = "Previous calendar month (" + start_dt.strftime("%Y-%m") + ")"
+        cadence = "Scheduled monthly run (30 8 1 * * UTC) / closed month"
         grain = "PT1H"
     elif period == "last_30d":
         end_dt = ref_dt.replace(microsecond=0)
         start_dt = end_dt - timedelta(days=30)
-        label = "Últimos 30 días móviles"
-        cadence = "Bajo demanda (ventana móvil de 30 días)"
+        label = "Last 30 days (rolling)"
+        cadence = "On demand (rolling 30-day window)"
         grain = "PT1H"
     elif period == "last_7d":
         end_dt = ref_dt.replace(microsecond=0)
         start_dt = end_dt - timedelta(days=7)
-        label = "Últimos 7 días móviles"
-        cadence = "Bajo demanda (ventana semanal móvil de 7 días)"
+        label = "Last 7 days (rolling)"
+        cadence = "On demand (rolling 7-day weekly window)"
         grain = "PT1H"
     elif period == "last_24h":
         end_dt = ref_dt.replace(microsecond=0)
         start_dt = end_dt - timedelta(hours=24)
-        label = "Últimas 24 horas"
-        cadence = "Bajo demanda (guardia operativa 24h)"
+        label = "Last 24 hours"
+        cadence = "On demand (24-hour on-call shift)"
         grain = "PT5M"
     else:
         raise EvidenceError("invalid_parameter", "period must use its declared enum.", "parameters")
@@ -1903,7 +1902,7 @@ def normalize_alert_row(raw, subscription_id, window, reference):
     if not in_window:
         return None
     desc = text(raw.get("description"), source_id, 2048) or (
-        "Alerta nativa " + native_sev + " (" + monitor_cond + " / " + alert_state + ") en " + target_name + "."
+        "Native alert " + native_sev + " (" + monitor_cond + " / " + alert_state + ") on " + target_name + "."
     )
     short_hash = hashlib.sha256(alert_id.lower().encode("utf-8")).hexdigest()[:10]
     return {
@@ -1917,7 +1916,7 @@ def normalize_alert_row(raw, subscription_id, window, reference):
         "native_severity": native_sev,
         "state": alert_state,
         "monitor_condition": monitor_cond,
-        "title": "Alerta " + native_sev + " (" + monitor_service + "): " + target_name,
+        "title": "Alert " + native_sev + " (" + monitor_service + "): " + target_name,
         "signal_type": signal_type,
         "monitor_service": monitor_service,
         "resource_id": target_res or ("/subscriptions/" + subscription_id),
@@ -1945,7 +1944,7 @@ def normalize_service_health_row(raw, subscription_id, window, reference):
     if event_type not in ("ServiceIssue", "PlannedMaintenance"):
         return None
     status = text(props.get("status"), source_id, 64) or "Active"
-    title = text(props.get("title"), source_id, 512) or ("Evento " + event_type + " (" + tracking_id + ")")
+    title = text(props.get("title"), source_id, 512) or ("Event " + event_type + " (" + tracking_id + ")")
     level = (text(props.get("level"), source_id, 64) or "").lower()
     if event_type == "ServiceIssue":
         sev = "critical" if level == "critical" else "high"
@@ -1978,7 +1977,7 @@ def normalize_service_health_row(raw, subscription_id, window, reference):
     service_label = ", ".join(services) if services else "Azure Platform"
     region_label = ", ".join(regions) if regions else "Global"
     summary_text = text(props.get("summary"), source_id, 2048) or (
-        event_type + " " + tracking_id + " (" + status + ") en " + service_label + " [" + region_label + "]."
+        event_type + " " + tracking_id + " (" + status + ") affecting " + service_label + " [" + region_label + "]."
     )
     return {
         "id": "INC-SH-" + tracking_id,
@@ -2112,7 +2111,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
             "anomaly_kind": "guest_extension_provisioning_failed",
             "severity": sev,
             "severity_label": SEVERITY_LABELS[sev],
-            "title": "Extensión " + ext["extension_name"] + " en estado " + state + " (" + ext["resource_name"] + ")",
+            "title": "Extension " + ext["extension_name"] + " in state " + state + " (" + ext["resource_name"] + ")",
             "resource_id": ext["resource_id"],
             "resource_name": ext["resource_name"],
             "resource_group": ext["resource_group"],
@@ -2130,9 +2129,9 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
             "extension_name": ext["extension_name"],
             "extension_version": ext["version"],
             "summary": (
-                "La extensión " + ext["extension_name"] + " (" + ext["publisher"] + "/" + ext["extension_type"]
-                + ", versión " + ext["version"] + ") en " + ext["resource_name"]
-                + " presenta provisioningState=" + state + "."
+                "Extension " + ext["extension_name"] + " (" + ext["publisher"] + "/" + ext["extension_type"]
+                + ", version " + ext["version"] + ") on " + ext["resource_name"]
+                + " reports provisioningState=" + state + "."
             ),
             "learn_url": "https://learn.microsoft.com/azure/azure-arc/servers/manage-vm-extensions",
         })
@@ -2155,7 +2154,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "anomaly_kind": "arc_agent_" + arc_st.lower(),
                     "severity": sev,
                     "severity_label": SEVERITY_LABELS[sev],
-                    "title": "Agente Azure Arc en estado " + arc_st + " (" + rname + ")",
+                    "title": "Azure Arc agent in state " + arc_st + " (" + rname + ")",
                     "resource_id": res["resource_id"],
                     "resource_name": rname,
                     "resource_group": res["resource_group"],
@@ -2171,8 +2170,8 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "source_id": "arg_posture_anomalies",
                     "workspace_name": "",
                     "summary": (
-                        "El recurso híbrido " + rname + " (" + (res.get("os_sku") or res.get("os_name") or rtype)
-                        + ") reporta status=" + arc_st + " (último cambio: " + changed + ", agente " + ver + ")."
+                        "Hybrid resource " + rname + " (" + (res.get("os_sku") or res.get("os_name") or rtype)
+                        + ") reports status=" + arc_st + " (last change: " + changed + ", agent " + ver + ")."
                     ),
                     "learn_url": "https://learn.microsoft.com/azure/azure-arc/servers/troubleshoot-agent-onboard",
                 })
@@ -2190,7 +2189,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "anomaly_kind": "aks_cluster_non_running",
                     "severity": sev,
                     "severity_label": SEVERITY_LABELS[sev],
-                    "title": "Clúster AKS " + rname + " en estado " + observed_st,
+                    "title": "AKS cluster " + rname + " in state " + observed_st,
                     "resource_id": res["resource_id"],
                     "resource_name": rname,
                     "resource_group": res["resource_group"],
@@ -2206,8 +2205,8 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "source_id": "arg_posture_anomalies",
                     "workspace_name": "",
                     "summary": (
-                        "El clúster AKS " + rname + " (k8s " + (res.get("kubernetes_version") or "n/a")
-                        + ") se encuentra en estado " + observed_st + " (provisioningState=" + prov + ")."
+                        "AKS cluster " + rname + " (k8s " + (res.get("kubernetes_version") or "n/a")
+                        + ") is in state " + observed_st + " (provisioningState=" + prov + ")."
                     ),
                     "learn_url": "https://learn.microsoft.com/azure/aks/start-stop-cluster",
                 })
@@ -2220,7 +2219,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                 "anomaly_kind": "resource_provisioning_failed",
                 "severity": "high",
                 "severity_label": SEVERITY_LABELS["high"],
-                "title": "Recurso " + rname + " con provisioningState=Failed",
+                "title": "Resource " + rname + " with provisioningState=Failed",
                 "resource_id": res["resource_id"],
                 "resource_name": rname,
                 "resource_group": res["resource_group"],
@@ -2235,7 +2234,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                 "observed_at_utc": reference,
                 "source_id": "arg_posture_anomalies",
                 "workspace_name": "",
-                "summary": "El recurso " + rname + " (" + rtype + ") presenta provisioningState=Failed en Azure Resource Manager.",
+                "summary": "Resource " + rname + " (" + rtype + ") reports provisioningState=Failed in Azure Resource Manager.",
                 "learn_url": "https://learn.microsoft.com/azure/azure-resource-manager/troubleshooting/troubleshooting-deployment-errors",
             })
         elif rtype == "microsoft.compute/virtualmachines":
@@ -2249,7 +2248,7 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "anomaly_kind": "vm_stopped_or_deallocated",
                     "severity": "low",
                     "severity_label": SEVERITY_LABELS["low"],
-                    "title": "Máquina virtual " + rname + " en estado " + (res.get("power_state") or "Stopped"),
+                    "title": "Virtual machine " + rname + " in state " + (res.get("power_state") or "Stopped"),
                     "resource_id": res["resource_id"],
                     "resource_name": rname,
                     "resource_group": res["resource_group"],
@@ -2265,8 +2264,8 @@ def detect_posture_and_extension_anomalies(resources, extensions, reference):
                     "source_id": "arg_posture_anomalies",
                     "workspace_name": "",
                     "summary": (
-                        "La máquina virtual " + rname + " (" + (res.get("vm_size") or "VM")
-                        + ") está detenida o desasignada (" + (res.get("power_state") or "Stopped") + ")."
+                        "Virtual machine " + rname + " (" + (res.get("vm_size") or "VM")
+                        + ") is stopped or deallocated (" + (res.get("power_state") or "Stopped") + ")."
                     ),
                     "learn_url": "https://learn.microsoft.com/azure/virtual-machines/states-billing",
                 })
@@ -2373,7 +2372,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": kind,
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Anomalía de CPU en " + rname + " (pico " + str(max_val) + "%, mediana " + str(median_val) + "%)",
+                "title": "CPU anomaly on " + rname + " (peak " + grouped(max_val) + "%, median " + grouped(median_val) + "%)",
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -2393,10 +2392,10 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "Telemetría en " + workspace_name + " para " + rname + ": pico CPU=" + str(max_val)
-                    + "%, promedio=" + str(avg_val) + "%, mediana=" + str(median_val) + "% (Δ+" + str(delta)
-                    + " pp, " + str(high_bins) + "/" + str(bins_total) + " intervalos >=85%, "
-                    + str(sample_count) + " muestras)."
+                    "Telemetry in " + workspace_name + " for " + rname + ": CPU peak=" + grouped(max_val)
+                    + "%, average=" + grouped(avg_val) + "%, median=" + grouped(median_val) + "% (Δ+" + grouped(delta)
+                    + " pp, " + grouped(high_bins) + "/" + grouped(bins_total) + " intervals >=85%, "
+                    + grouped(sample_count) + " samples)."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-performance",
             }
@@ -2412,7 +2411,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": "low_available_memory",
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Presión de memoria física en " + rname + " (mínimo " + str(min_val) + " MB disponibles)",
+                "title": "Physical memory pressure on " + rname + " (minimum " + grouped(min_val) + " MB available)",
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -2432,9 +2431,9 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "Memoria disponible en " + rname + " cayó hasta " + str(min_val) + " MB (mediana "
-                    + str(median_val) + " MB, " + str(low_mem_bins) + "/" + str(bins_total)
-                    + " intervalos <=512 MB en " + workspace_name + ")."
+                    "Available memory on " + rname + " fell to " + grouped(min_val) + " MB (median "
+                    + grouped(median_val) + " MB, " + grouped(low_mem_bins) + "/" + grouped(bins_total)
+                    + " intervals <=512 MB in " + workspace_name + ")."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-performance",
             }
@@ -2450,7 +2449,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": "low_disk_free_space",
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Espacio libre en disco bajo en " + rname + " (" + str(min_val) + "% libre)",
+                "title": "Low free disk space on " + rname + " (" + grouped(min_val) + "% free)",
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -2470,9 +2469,9 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "Volumen lógico en " + rname + " registró " + str(min_val)
-                    + "% de espacio libre (umbral mínimo 15%, " + str(sample_count)
-                    + " muestras en " + workspace_name + ")."
+                    "Logical volume on " + rname + " recorded " + grouped(min_val)
+                    + "% free space (minimum threshold 15%, " + grouped(sample_count)
+                    + " samples in " + workspace_name + ")."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-performance",
             }
@@ -2488,7 +2487,7 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "anomaly_kind": "heartbeat_silence_gap",
                 "severity": sev,
                 "severity_label": SEVERITY_LABELS[sev],
-                "title": "Silencio de Heartbeat (" + str(int(round(max_val))) + " min sin latido) en " + rname,
+                "title": "Heartbeat silence (" + grouped(int(round(max_val))) + " min without a heartbeat) on " + rname,
                 "resource_id": res_id,
                 "resource_name": rname,
                 "resource_group": rg,
@@ -2508,9 +2507,9 @@ def evaluate_telemetry_row(raw, workspace_name, subscription_id, window, referen
                 "source_id": source_id,
                 "workspace_name": workspace_name,
                 "summary": (
-                    "El recurso " + rname + " lleva " + str(round(max_val, 1))
-                    + " minutos sin emitir latidos en la tabla Heartbeat de " + workspace_name
-                    + " (último latido: " + last_seen_iso + ")."
+                    "Resource " + rname + " has sent no heartbeat for " + grouped(round(max_val, 1))
+                    + " minutes in the Heartbeat table of " + workspace_name
+                    + " (last heartbeat: " + last_seen_iso + ")."
                 ),
                 "learn_url": "https://learn.microsoft.com/azure/azure-monitor/agents/azure-monitor-agent-troubleshoot",
             }
@@ -2602,7 +2601,7 @@ def collect_logs_telemetry(logs_reader, config, window, reference):
         window=window,
         workspaces_queried=ws_receipts,
         read_signature="POST https://api.loganalytics.io/v1/workspaces/{workspace_id}/query",
-        note="Consultas KQL acotadas sobre InsightsMetrics, Perf y Heartbeat en los espacios Log Analytics aprobados.",
+        note="Bounded KQL queries over InsightsMetrics, Perf, and Heartbeat in the approved Log Analytics workspaces.",
     )
     sorted_anomalies = sorted(
         anomalies_by_key.values(),
@@ -2623,7 +2622,7 @@ def normalize_advisor_row(raw, subscription_id, reference):
     sev_map = {"high": "high", "medium": "medium", "low": "low"}
     sev = sev_map.get(impact.lower(), "medium")
     short_desc = obj(props.get("shortDescription", {}), source_id) if props.get("shortDescription") else {}
-    problem = text(short_desc.get("problem"), source_id, 1024) or ("Recomendación de Azure Advisor (" + adv_cat + ")")
+    problem = text(short_desc.get("problem"), source_id, 1024) or ("Azure Advisor recommendation (" + adv_cat + ")")
     solution = text(short_desc.get("solution"), source_id, 1024) or problem
     res_meta = obj(props.get("resourceMetadata", {}), source_id) if props.get("resourceMetadata") else {}
     target_id = text(res_meta.get("resourceId"), source_id, 2048) or rec_id.split("/providers/Microsoft.Advisor/")[0]
@@ -2655,7 +2654,7 @@ def normalize_advisor_row(raw, subscription_id, reference):
         "last_updated_utc": updated_iso,
         "observed_at_utc": reference,
         "source_id": source_id,
-        "summary": "[" + adv_cat + " / Impacto " + impact + "] " + problem + " — " + solution,
+        "summary": "[" + adv_cat + " / Impact " + impact + "] " + problem + " — " + solution,
         "learn_url": "https://learn.microsoft.com/azure/advisor/advisor-overview",
     }
 
@@ -2668,19 +2667,19 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
         if inc["category"] == "native_alert":
             horizon = "immediate_24h" if (is_active and inc["severity"] in ("critical", "high")) else "short_term_7d"
             effort = "low" if inc["severity"] in ("medium", "low") else "medium"
-            owner = "Ingeniería de Fiabilidad / Operaciones Monitorización"
+            owner = "Reliability engineering / Monitoring operations"
             rec_text = (
-                "Verificar la condición de disparo (" + inc["monitor_condition"] + " / " + inc["state"]
-                + ") en Azure Monitor para " + inc["resource_name"] + ", validar correlación con cambios recientes y documentar el cierre operativo."
+                "Check the firing condition (" + inc["monitor_condition"] + " / " + inc["state"]
+                + ") in Azure Monitor for " + inc["resource_name"] + ", correlate it with recent changes, and document the operational closure."
             )
         else:
             horizon = "immediate_24h" if (is_active and inc["signal_type"] == "ServiceIssue") else "short_term_7d"
             effort = "low"
-            owner = "Gobierno Cloud / Gestión de Incidentes Plataforma"
+            owner = "Cloud governance / Platform incident management"
             rec_text = (
-                "Revisar el trackingId oficial " + (inc.get("tracking_id") or inc["id"])
-                + " en Azure Service Health (" + inc["monitor_service"]
-                + "), evaluar ventana de mantenimiento o mitigación y confirmar impacto real sobre cargas dependientes."
+                "Review the official tracking ID " + (inc.get("tracking_id") or inc["id"])
+                + " in Azure Service Health (" + inc["monitor_service"]
+                + "), assess the maintenance window or mitigation, and confirm the actual impact on dependent workloads."
             )
         actions.append({
             "_sort_key": (
@@ -2697,7 +2696,7 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             "horizon_label": HORIZON_LABELS[horizon],
             "effort": effort,
             "effort_label": EFFORT_LABELS[effort],
-            "title": "Atender " + ("alerta activa " if is_active else "incidencia registrada ") + "en " + inc["resource_name"],
+            "title": "Address " + ("active alert " if is_active else "recorded incident ") + "on " + inc["resource_name"],
             "resource_id": inc["resource_id"],
             "resource_name": inc["resource_name"],
             "resource_group": inc["resource_group"],
@@ -2719,28 +2718,28 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             is_aks = "managedclusters" in anom["resource_type"]
             horizon = "short_term_7d" if anom["severity"] in ("critical", "high", "medium") else "monthly_cycle"
             owner = (
-                "Operaciones Híbridas / Administración Azure Arc"
+                "Hybrid operations / Azure Arc administration"
                 if is_arc
-                else "Plataforma de Contenedores / Operaciones AKS"
+                else "Container platform / AKS operations"
                 if is_aks
-                else "Operaciones de Infraestructura Cloud"
+                else "Cloud infrastructure operations"
             )
             if is_arc:
                 rec_text = (
-                    "Inspeccionar el servicio himds y la conectividad saliente TLS del agente Azure Connected Machine en "
-                    + anom["resource_name"] + " (estado actual: " + str(anom["observed_value"])
-                    + "); renovar credenciales o reconectar el nodo si el certificado de identidad ha expirado."
+                    "Inspect the himds service and the outbound TLS connectivity of the Azure Connected Machine agent on "
+                    + anom["resource_name"] + " (current state: " + str(anom["observed_value"])
+                    + "); renew the credentials or reconnect the machine if its identity certificate has expired."
                 )
             elif is_aks:
                 rec_text = (
-                    "Confirmar si la parada/estado (" + str(anom["observed_value"]) + ") del clúster AKS "
-                    + anom["resource_name"] + " responde a planificación de ahorro o a un fallo de plano de control; "
-                    + "evitar mantener clústeres detenidos más de 12 meses para preservar compatibilidad de versión."
+                    "Confirm whether the stop/state (" + str(anom["observed_value"]) + ") of AKS cluster "
+                    + anom["resource_name"] + " is a planned cost-saving measure or a control plane failure; "
+                    + "avoid keeping clusters stopped for more than 12 months so that the Kubernetes version stays supported."
                 )
             else:
                 rec_text = (
-                    "Revisar el estado operativo (" + str(anom["observed_value"]) + ") de "
-                    + anom["resource_name"] + " y confirmar su alineación con el catálogo de servicios activos."
+                    "Review the operational state (" + str(anom["observed_value"]) + ") of "
+                    + anom["resource_name"] + " and confirm that it matches the catalog of active services."
                 )
             actions.append({
                 "_sort_key": (
@@ -2757,7 +2756,7 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
                 "horizon_label": HORIZON_LABELS[horizon],
                 "effort": "medium" if is_arc or is_aks else "low",
                 "effort_label": EFFORT_LABELS["medium" if is_arc or is_aks else "low"],
-                "title": "Normalizar estado operativo de " + anom["resource_name"] + " (" + str(anom["observed_value"]) + ")",
+                "title": "Review and fix the operational state of " + anom["resource_name"] + " (" + str(anom["observed_value"]) + ")",
                 "resource_id": anom["resource_id"],
                 "resource_name": anom["resource_name"],
                 "resource_group": anom["resource_group"],
@@ -2786,19 +2785,19 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
                 "horizon_label": HORIZON_LABELS[horizon],
                 "effort": "medium",
                 "effort_label": EFFORT_LABELS["medium"],
-                "title": "Investigar anomalía de telemetría en " + anom["resource_name"] + " (" + anom["metric_or_field"] + ")",
+                "title": "Investigate telemetry anomaly on " + anom["resource_name"] + " (" + anom["metric_or_field"] + ")",
                 "resource_id": anom["resource_id"],
                 "resource_name": anom["resource_name"],
                 "resource_group": anom["resource_group"],
                 "resource_type": anom["resource_type"],
-                "owner_scope": "Ingeniería de Capacidad & Observabilidad",
+                "owner_scope": "Capacity and observability engineering",
                 "linked_evidence_ids": [anom["id"]],
                 "source_ids": [anom["source_id"]],
                 "evidence_summary": anom["summary"],
                 "recommendation": (
-                    "Analizar los procesos e intervalos de presión en " + anom["resource_name"]
-                    + " reportados en Log Analytics (" + (anom.get("workspace_name") or "workspace")
-                    + "), verificar dimensionamiento de SKU o fugas de recursos y ajustar umbrales de alerta preventiva."
+                    "Analyze the processes and pressure intervals on " + anom["resource_name"]
+                    + " reported in Log Analytics (" + (anom.get("workspace_name") or "workspace")
+                    + "), check the SKU sizing and possible resource leaks, and tune the preventive alert thresholds."
                 ),
                 "learn_url": anom["learn_url"],
             })
@@ -2823,19 +2822,19 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             "horizon_label": HORIZON_LABELS[horizon],
             "effort": "medium",
             "effort_label": EFFORT_LABELS["medium"],
-            "title": "Remediar extensiones fallidas (" + ext_names + ") en " + highest["resource_name"],
+            "title": "Remediate failed extensions (" + ext_names + ") on " + highest["resource_name"],
             "resource_id": res_id,
             "resource_name": highest["resource_name"],
             "resource_group": highest["resource_group"],
             "resource_type": highest["resource_type"],
-            "owner_scope": "Seguridad de Endpoint & Operaciones Híbridas (MDE / Entra ID / AMA)",
+            "owner_scope": "Endpoint security and hybrid operations (MDE / Entra ID / AMA)",
             "linked_evidence_ids": ev_ids,
             "source_ids": ["arg_posture_anomalies"],
             "evidence_summary": "; ".join(x["summary"] for x in ext_anoms),
             "recommendation": (
-                "Verificar primero la conectividad del agente base en " + highest["resource_name"]
-                + ", revisar registros locales de instalación de " + ext_names
-                + " y reprovisionar las extensiones en ventana de cambio controlada."
+                "First verify the base agent connectivity on " + highest["resource_name"]
+                + ", review the local installation logs of " + ext_names
+                + ", and reprovision the extensions in a controlled change window."
             ),
             "learn_url": "https://learn.microsoft.com/azure/azure-arc/servers/troubleshoot-vm-extensions",
         })
@@ -2857,12 +2856,12 @@ def synthesize_actions(incidents, anomalies, advisor_rows):
             "horizon_label": HORIZON_LABELS[horizon],
             "effort": "medium" if adv["severity"] == "high" else "low",
             "effort_label": EFFORT_LABELS["medium" if adv["severity"] == "high" else "low"],
-            "title": "Evaluar recomendación Azure Advisor (" + adv["advisor_category"] + ") en " + adv["resource_name"],
+            "title": "Evaluate Azure Advisor recommendation (" + adv["advisor_category"] + ") on " + adv["resource_name"],
             "resource_id": adv["resource_id"],
             "resource_name": adv["resource_name"],
             "resource_group": adv["resource_group"],
             "resource_type": adv["resource_type"],
-            "owner_scope": "Arquitectura Cloud & Mejora Continua WAF",
+            "owner_scope": "Cloud architecture and WAF continuous improvement",
             "linked_evidence_ids": [adv["id"]],
             "source_ids": ["arm_advisor_recommendations"],
             "evidence_summary": adv["summary"],
@@ -2974,7 +2973,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_alert_row(raw, sub_id, window, reference),
         )
-        alerts_receipt["note"] = "Alertas nativas Azure Monitor (alertsmanagementresources) activas o actualizadas en la ventana."
+        alerts_receipt["note"] = "Azure Monitor native alerts (alertsmanagementresources) active or updated in the window."
 
         sh_query = urlencode({
             "api-version": RESOURCE_HEALTH_API_VERSION,
@@ -2989,7 +2988,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_service_health_row(raw, sub_id, window, reference),
         )
-        sh_receipt["note"] = "Comunicaciones oficiales Microsoft.ResourceHealth/events (ServiceIssue y PlannedMaintenance)."
+        sh_receipt["note"] = "Official Azure Service Health communications from Microsoft.ResourceHealth (ServiceIssue and PlannedMaintenance)."
 
         estate_resources, posture_receipt = read_arg_query(
             arm_reader,
@@ -3000,7 +2999,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_estate_resource(raw, sub_id, reference),
         )
-        posture_receipt["note"] = "Inventario operativo Azure Resource Graph (VMs, Azure Arc, AKS, Container Apps, Web Apps, Storage, Key Vault, DBs)."
+        posture_receipt["note"] = "Azure Resource Graph operational inventory (VMs, Azure Arc, AKS, Container Apps, Web Apps, Storage, Key Vault, DBs)."
 
         extensions, ext_receipt = read_arg_query(
             arm_reader,
@@ -3011,7 +3010,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_extension_row(raw, sub_id, reference),
         )
-        ext_receipt["note"] = "Metadatos de extensiones de VM y servidores Azure Arc (sin leer settings ni protectedSettings)."
+        ext_receipt["note"] = "Extension metadata of VMs and Azure Arc servers (settings and protectedSettings are never read)."
 
         telemetry_anomalies, telemetry_summaries, logs_receipt = collect_logs_telemetry(
             logs_reader, config, window, reference
@@ -3029,7 +3028,7 @@ def collect_live(config, window, reference):
             window,
             lambda raw: normalize_advisor_row(raw, sub_id, reference),
         )
-        advisor_receipt["note"] = "Recomendaciones en caché de Microsoft.Advisor/recommendations en la suscripción."
+        advisor_receipt["note"] = "Cached Azure Advisor recommendations for the subscription (Microsoft.Advisor)."
 
         sources = [
             alerts_receipt,
@@ -3131,31 +3130,31 @@ def finish_snapshot(raw, window, reference, provenance="LIVE"):
 
     executive_messages = [
         (
-            "Ventana evaluada: " + window["label"] + " (" + window["start_utc"] + " → " + window["end_utc"]
-            + ") sobre " + str(counts["resources_total"]) + " recursos inventariados ("
-            + str(counts["resources_attention"]) + " requieren atención operativa)."
+            "Evaluation window: " + window["label"] + " (" + window["start_utc"] + " → " + window["end_utc"]
+            + ") over " + grouped(counts["resources_total"]) + " inventoried resources ("
+            + grouped(counts["resources_attention"]) + " need operational attention)."
         ),
         (
-            "Incidencias consolidadas: " + str(counts["incidents_total"]) + " registradas ("
-            + str(native_alert_count) + " alertas nativas Azure Monitor y "
-            + str(sh_count) + " comunicaciones oficiales Azure Service Health)."
+            "Consolidated incidents: " + grouped(counts["incidents_total"]) + " recorded ("
+            + grouped(native_alert_count) + " Azure Monitor native alerts and "
+            + grouped(sh_count) + " official Azure Service Health communications)."
         ),
         (
-            "Anomalías técnicas detectadas: " + str(counts["anomalies_total"]) + " en total ("
-            + str(ext_fail_count) + " fallos de extensión VM/Arc, "
-            + str(posture_count) + " anomalías de conectividad/plano de control y "
-            + str(tel_anom_count) + " anomalías estadísticas/umbrales de telemetría)."
+            "Technical anomalies detected: " + grouped(counts["anomalies_total"]) + " in total ("
+            + grouped(ext_fail_count) + " VM/Arc extension failures, "
+            + grouped(posture_count) + " connectivity/control plane anomalies, and "
+            + grouped(tel_anom_count) + " telemetry statistical/threshold anomalies)."
         ),
         (
-            "Plan de acciones recomendadas: " + str(counts["actions_total"]) + " acciones priorizadas ("
-            + str(imm_actions) + " en horizonte Inmediato <24h, "
-            + str(short_actions) + " a Corto plazo 1-7 días y "
-            + str(month_actions) + " en Ciclo mensual), correlacionadas con "
-            + str(counts["advisor_recommendations_total"]) + " recomendaciones de Azure Advisor."
+            "Recommended action plan: " + grouped(counts["actions_total"]) + " prioritized actions ("
+            + grouped(imm_actions) + " Immediate <24h, "
+            + grouped(short_actions) + " Short term 1-7 days, and "
+            + grouped(month_actions) + " Monthly cycle), correlated with "
+            + grouped(counts["advisor_recommendations_total"]) + " Azure Advisor recommendations."
         ),
         (
-            "Cobertura de fuentes: " + str(len(sources) - len(degraded_sources)) + " de " + str(len(sources))
-            + " flujos de evidencia completados en modo solo lectura sin alterar recursos ni agentes."
+            "Source coverage: " + grouped(len(sources) - len(degraded_sources)) + " of " + grouped(len(sources))
+            + " evidence streams completed in read-only mode, without changing resources or agents."
         ),
     ]
 
@@ -3193,10 +3192,10 @@ def finish_snapshot(raw, window, reference, provenance="LIVE"):
                 "arm_advisor_recommendations (Microsoft.Advisor/recommendations)",
             ],
             "limitations": [
-                "Las alertas nativas y eventos de Service Health reflejan el estado y marcas temporales registradas por Azure Monitor y Resource Health en el momento de la consulta.",
-                "El estado de extensiones y agentes Azure Arc en Azure Resource Graph es una observación de plano de control; no lee settings protegidos ni ejecuta comandos dentro del sistema operativo huésped.",
-                "Las anomalías de telemetría se calculan sobre los espacios Log Analytics aprobados para los recursos que emiten InsightsMetrics, Perf o Heartbeat en la ventana.",
-                "Las acciones recomendadas constituyen una guía operativa priorizada para revisión humana; el agente opera estrictamente en modo solo lectura.",
+                "Native alerts and Service Health events reflect the state and timestamps that Azure Monitor and Resource Health recorded at query time.",
+                "Extension and Azure Arc agent state in Azure Resource Graph is a control plane observation; the tool doesn't read protected settings or run commands inside the guest operating system.",
+                "Telemetry anomalies are calculated over the approved Log Analytics workspaces, for the resources that emit InsightsMetrics, Perf, or Heartbeat data in the window.",
+                "Recommended actions are prioritized operational guidance for human review; the agent operates strictly in read-only mode.",
             ],
         },
     }

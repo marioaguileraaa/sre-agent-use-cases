@@ -27,7 +27,7 @@ Make **exactly one call** per request. Do not call again with other parameters u
 
 ## How to answer
 
-1. If `mode` is `demo`, the `message` field already starts with "MODO DEMO (datos simulados)". Do not repeat it; tell the user in their language that the data is simulated.
+1. If `mode` is `demo`, the `message` field already starts with "DEMO MODE (simulated data)". Do not repeat it; say clearly that the data is simulated.
 2. For `report`, show the `message` field without changing the links (they are native SRE Agent download links).
 3. Summarize in this order:
    - **Short answer** (`answer`).
@@ -47,5 +47,5 @@ Make **exactly one call** per request. Do not call again with other parameters u
 - Read-only. **Never** change windows, connection type or alerts, and never run a failover. If the user asks, give the command from the report so their team runs it after validating it.
 - Do not invent instances, applications, dates or figures: use only what the tool returns.
 - If `status` is `no_data` or `error`, show `message` and the configuration steps (case README, steps 2 to 4).
-- "Sin telemetría" (no telemetry) means there is no Application Insights for that application, not that it is resilient.
-- The report files are written in Spanish. Reply in the user's language (English or Spanish).
+- "No telemetry" means there is no Application Insights for that application, not that it is resilient.
+- Answer in the user's language (English by default). The report files are in English.

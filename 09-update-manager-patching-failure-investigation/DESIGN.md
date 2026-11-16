@@ -78,14 +78,14 @@ typography:
 
 ## Creative Direction
 
-This offline engineering workpaper keeps a disciplined Swiss architectural grid for infrastructure operations and post-patching root-cause triage, and follows the shared Azure SRE Agent report family (verdict first, KPI ledger, findings register, prioritised plan, sources last):
+This offline engineering workpaper keeps a disciplined Swiss architectural grid for infrastructure operations and post-patching root-cause triage, and follows the shared Azure SRE Agent report family (verdict first, KPI ledger, findings register, prioritized plan, sources last):
 
 1. **Palette & Surface Hierarchy**:
-   - Sticky top bar in deep anthracite slate (`#141B24`) with a 3px vivid orange (`#FF4E00`) structural rule: product mark, client name or logo plaque, a read-only chip, dark mode, an export menu (JSON and two CSVs) and the primary `Imprimir / PDF` action.
-   - Verdict-first hero band in the same anthracite: title (two lines at most), one sentence with the key numbers, provenance chips (generated UTC, window, LIVE or SIMULATED), a verdict card (`Acción requerida` / `Requiere atención` / `Revisar` / `Sin bloqueos`) with the first action, and a severity distribution bar with legend.
+   - Sticky top bar in deep anthracite slate (`#141B24`) with a 3px vivid orange (`#FF4E00`) structural rule: product mark, client name or logo plaque, a read-only chip, dark mode, an export menu (JSON and two CSVs) and the primary `Print / PDF` action.
+   - Verdict-first hero band in the same anthracite: title (two lines at most), one sentence with the key numbers, provenance chips (generated UTC, window, LIVE or SIMULATED), a verdict card (`Action required` / `Needs attention` / `Review` / `No blockers`) with the first action, and a severity distribution bar with legend.
    - Warm architectural stone background (`#F6F5F2`) with white 1px-bordered (`#D8DCE3`) cards, 10px radius and a soft offset shadow.
    - Interactive links and accent labels in accessible burnt orange (`#C23800`, contrast >= 4.5:1 on white).
-   - Severity uses the shared family scale (text on background, bar colour): critical `#B42318` on `#FEE4E2` (`#D92D20`), high `#B93815` on `#FFEAD5` (`#EF6820`), medium `#93370D` on `#FEF0C7` (`#F79009`), low `#175CD3` on `#D1E9FF` (`#2E90FA`); healthy (`Correcto`) uses ok `#067647` on `#DCFAE6` (`#17B26A`) and neutral states `#344054` on `#EAECF0`.
+   - Severity uses the shared family scale (text on background, bar color): critical `#B42318` on `#FEE4E2` (`#D92D20`), high `#B93815` on `#FFEAD5` (`#EF6820`), medium `#93370D` on `#FEF0C7` (`#F79009`), low `#175CD3` on `#D1E9FF` (`#2E90FA`); healthy (`Passed`) uses ok `#067647` on `#DCFAE6` (`#17B26A`) and neutral states `#344054` on `#EAECF0`.
    - Full dark mode (`[data-theme="dark"]`) switching to `#0F141B` / `#161E29` with translucent severity washes.
 
 2. **Typography & Tabular Discipline**:
@@ -96,8 +96,8 @@ This offline engineering workpaper keeps a disciplined Swiss architectural grid 
 3. **Layout**:
    - KPI ledger strip of six cells joined by 1px rules, overlapping the bottom edge of the hero.
    - Sticky left section index with live counts (collapses to a horizontal strip under 1100px).
-   - Section order: summary, prioritised action plan, per-machine register (filters, search, sort, CSV of the view, expandable evidence drawers), cycles, patches, extensions, sources and method.
-   - A4 print keeps colours, hides controls, expands every drawer and prints a footer with title, client, generation time and page numbers.
+   - Section order: summary, prioritized action plan, per-machine register (filters, search, sort, CSV of the view, expandable evidence drawers), cycles, patches, extensions, sources and method.
+   - A4 print keeps colors, hides controls, expands every drawer and prints a footer with title, client, generation time and page numbers.
 
 4. **Strict Craft Floor & Anti-Slop Rules**:
    - No purple/blue gradients, glass blur, gradient text or emoji icons.

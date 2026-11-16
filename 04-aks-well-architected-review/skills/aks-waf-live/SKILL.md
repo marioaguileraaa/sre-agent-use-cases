@@ -57,7 +57,7 @@ or actual measurements.
 Managed Entra and RBAC are required before clusterUser collection. The tool
 uses only exec-format clusterUser's approved server/public CA, never the
 embedded exec command, local credentials or admin config. An unavailable
-Kubernetes kind stays No evaluado even when other kinds succeed. Do not
+Kubernetes kind stays Not evaluated even when other kinds succeed. Do not
 replace it with ARM or telemetry assumptions about probes/PDB/HPA/security
 contexts/NetworkPolicy. Reader does not authorize clusterUser; RBAC Reader
 does not necessarily read nodes, PVs or StorageClasses.
@@ -97,7 +97,7 @@ are joined to observed Service ingress/ARM frontend values, never guessed
 from an annotation alone. Configured references do not prove traffic,
 reachability, image pull rights, mounted Key Vault secrets or mounted storage.
 Reference/proposed architecture is not deployed or observed architecture.
-The findings query exposes **all check statuses**, including No evaluado;
+The findings query exposes **all check statuses**, including Not evaluated;
 the report's findings array/CSV contains failed checks only. Use exact local
 `namespace`/`workload_name`, area, level, severity and status filters only
 where documented. `limit` is 1..100 and `offset` is 0..500000.
@@ -110,7 +110,7 @@ A new question/page recollects; do not describe it as the same frozen run.
 
 Scores are local rule/resource pass fractions, NOT official Azure WAF
 certification or a Polaris/WARA grade. Always disclose evaluated/unknown/N/A
-counts and coverage next to a score. Zero evaluated => null/No evaluado.
+counts and coverage next to a score. Zero evaluated => null/Not evaluated.
 Unique checks, not repeated findings, determine denominators. Do not turn
 partial coverage into a whole-cluster health statement.
 

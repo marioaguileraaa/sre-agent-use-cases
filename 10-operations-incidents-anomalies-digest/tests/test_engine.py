@@ -189,7 +189,7 @@ class EngineTests(unittest.TestCase):
                             "targetResourceType": "microsoft.hybridcompute/machines",
                             "startDateTime": "2026-09-20T10:00:00Z",
                             "lastModifiedDateTime": "2026-09-20T10:05:00Z",
-                            "description": "Alerta de prueba en vivo.",
+                            "description": "Live test alert.",
                         }
                     ]
                 }

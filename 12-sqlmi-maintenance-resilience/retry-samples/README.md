@@ -14,7 +14,7 @@ During maintenance (or a failover) the instance is **reconfigured**: open connec
 1. **5 tries, starting at 1 s, at most 20 s between tries.** Covers a typical reconfiguration with margin.
 2. **Retry the whole unit of work** (open connection + query or full transaction), never a single command inside an already open transaction.
 3. **Only transient errors.** A syntax or permission error is never retried.
-4. **Log every retry** in Application Insights. The SRE Agent report then moves the application from "Sin reintentos" (no retries) to "Resiliente" (resilient).
+4. **Log every retry** in Application Insights. The SRE Agent report then moves the application from **No retries** to **Resilient**.
 5. **Test in pre-production** with [`../simulate-maintenance-failover.ps1`](../simulate-maintenance-failover.ps1).
 
 References (Microsoft Learn):

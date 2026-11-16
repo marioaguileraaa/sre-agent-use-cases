@@ -224,7 +224,7 @@ components:
 
 A consulting document that leads with its verdict. Since the 2026-11 family
 alignment the report shares the house style of the Azure SRE Agent use-case
-reports: a slim Microsoft-blue top bar with section links, a "Solo lectura"
+reports: a slim Microsoft-blue top bar with section links, a "Read-only"
 chip and the Print / PDF action; a deep-blue verdict band; KPI cards that
 overlap its lower edge; then white cards on a neutral page. The four-colour
 Microsoft ribbon, Segoe UI, ruled evidence tables and the client plaque remain
@@ -268,13 +268,13 @@ content, and `field-line` gives native controls a stronger boundary.
 ### Severity
 
 Severity uses the report family's shared pairs (text on wash, bar colour):
-**Crítica** `critical` on `critical-wash` (`critical-bar`), **Alta** `high` on
-`high-wash` (`high-bar`), **Media** `medium` on `medium-wash` (`medium-bar`),
-**Baja** `low` on `low-wash` (`low-bar`). Pills are rounded, carry a current-
+**Critical** `critical` on `critical-wash` (`critical-bar`), **High** `high` on
+`high-wash` (`high-bar`), **Medium** `medium` on `medium-wash` (`medium-bar`),
+**Low** `low` on `low-wash` (`low-bar`). Pills are rounded, carry a current-
 colour dot and always their name. The hero distribution bar uses the bar
 colours with a labelled count legend. On the verdict card the verdict text uses
 `verdict-critical`, `verdict-high` or `verdict-medium` so it stays legible on
-`nav`; a report without evaluated checks says **No evaluado** in white.
+`nav`; a report without evaluated checks says **Not evaluated** in white.
 
 The thin brand ribbon uses four equal, static red/green/blue/yellow spans. It is
 decorative and hidden from assistive technology, not a status visualization.
@@ -292,7 +292,7 @@ print colors.
 
 **The Evidence Before Color Rule.** Blue frames and operates; the ribbon brands;
 severity names qualify findings. None of them grades an unavailable source.
-Unknowns remain explicit, neutral **No evaluado** text with coverage or source
+Unknowns remain explicit, neutral **Not evaluated** text with coverage or source
 context, never a green success, low-severity substitute or healthy zero.
 
 The assessment count chart is a single labelled horizontal bar: operating blue
@@ -322,9 +322,9 @@ card headings (12pt), tables (7.5pt) and receipts (6.5pt).
 ## Layout
 
 A sticky slim top bar (about 64px) carries the product mark, section links
-(Resumen, Inventario, Arquitectura, Hallazgos, FinOps, Plan de acción, Método),
-the "Solo lectura" chip, the theme selector, **JSON completo** and
-**Imprimir / PDF**. Below 1360px the links become a labelled section selector;
+(Summary, Inventory, Architecture, Findings, FinOps, Action plan, Method),
+the "Read-only" chip, the theme selector, **Full JSON** and
+**Print / PDF**. Below 1360px the links become a labelled section selector;
 at 760px and below the bar stops being sticky and its controls wrap.
 
 The full-bleed verdict band holds the title, introduction, one-sentence summary
@@ -343,7 +343,7 @@ inset edge shadows that show which side has more columns. No page-level
 horizontal overflow at 320px.
 
 Print is A4 (14mm 12mm 16mm margins) with a running footer: report title,
-cluster and UTC reference on the left, "Página n de m" on the right. The band
+cluster and UTC reference on the left, "Page n of m" on the right. The band
 prints in colour; chapters begin on new pages; cards and rows avoid breaking;
 every matching record is materialized and disclosures open. Table receipts are
 moved below their table at full width in print, and JSON receipts print
@@ -399,7 +399,7 @@ matching-record scope; summary indices retain their whole-snapshot label.
 ### Identity and provenance
 
 The client plaque is bounded, square and white, with `plaque-ink` lettering.
-The public placeholder is **CLIENTE**. Optional authorized private branding is
+The public placeholder is **CUSTOMER**. Optional authorized private branding is
 a contained inline PNG/JPEG with alternative text, not an externally fetched
 image or a real customer identity committed to public documentation.
 
@@ -414,20 +414,20 @@ identity and source identity stay readable in the scope card.
 
 ### Verdict band and KPI cards
 
-The verdict card derives only from supplied findings: **Acción prioritaria**
-when a critical finding exists, **Requiere atención** for high,
-**Revisión recomendada** for medium/low, **Sin hallazgos registrados** when
-checks were evaluated without findings (with "no equivale a ausencia de
-riesgo"), and **No evaluado** when nothing was evaluated. It always shows the
+The verdict card derives only from supplied findings: **Action required**
+when a critical finding exists, **Needs attention** for high,
+**Review recommended** for medium/low, **No findings recorded** when
+checks were evaluated without findings (with "this does not mean there is
+no risk"), and **Not evaluated** when nothing was evaluated. It always shows the
 four severity counts and the evaluated-check basis. KPI cards show findings,
-the local index (/100, "no oficial"), coverage (%), observed cost (or
-**No evaluado**) and observed workloads; an unknown is written, never zero.
-SIMULATED data adds an amber "Datos simulados" note under the KPIs.
+the local index (/100, "unofficial"), coverage (%), observed cost (or
+**Not evaluated**) and observed workloads; an unknown is written, never zero.
+SIMULATED data adds an amber "Simulated data" note under the KPIs.
 
 ### Indices, severities and qualifications
 
 Local indices use simple accent-filled, fully rounded tracks (8px high);
-unknown values keep written **No evaluado** and an unfilled track. Known score
+unknown values keep written **Not evaluated** and an unfilled track. Known score
 tracks expose named meter values and coverage text. The severity distribution
 in the verdict band is a separate bar (12px high) with named severity counts;
 its segments do not replace the legend.
@@ -446,7 +446,7 @@ nodes with visible/total counts; it never replaces the full model or a record
 table. On narrow screens the diagram is a labelled, focusable local scrolling
 region; readable labels are not reduced to tiny mobile pixels.
 
-The second tab is a separate, cited **Propuesta de referencia - NO desplegada**.
+The second tab is a separate, cited **Reference proposal - NOT deployed**.
 Its dashed VNet/subnet boundaries and alternative public L4 versus protected
 HTTP(S)/private entry communicate design intent, not deployed connectivity.
 Official Microsoft Azure V24 product icons are nearby named semantic assets,
@@ -463,11 +463,11 @@ outside this artifact are explicitly unavailable for local selection.
 
 ### FinOps emphasis
 
-One split financial reading separates **Coste observado** from **Ahorro
-estimado**. The observed side retains amount, currency, exact cost scope,
+One split financial reading separates **Observed cost** from **Estimated
+savings**. The observed side retains amount, currency, exact cost scope,
 association, source state and billing period. The accent-wash savings side uses
-the `heading` role for a supplied amount, or muted **Por estimar** with
-**No calculado** when absent. The large value is qualified, not a zero fallback
+the `heading` role for a supplied amount, or muted **To be estimated** with
+**Not calculated** when absent. The large value is qualified, not a zero fallback
 or a savings promise. Display values use tabular numerals at 38px (30px mobile);
 unknowns use 30px (26px mobile). Candidates and original measurement windows
 remain separate from this billing reading.
@@ -481,9 +481,9 @@ focusable, named scrolling region with edge-shadow cues. ARM IDs break only at
 `/`; captions and source/date notes preserve context.
 
 Findings use native details/summary rows grouped by level in cards, sorted by
-severity by default (an **Ordenar** selector restores the engine order), with
-named severity pills, the title and a short reference (`check_id · nivel ·
-namespace / carga`) above expandable evidence. Resource cells show the
+severity by default (a **Sort** selector restores the engine order), with
+named severity pills, the title and a short reference (`check_id · level ·
+namespace / workload`) above expandable evidence. Resource cells show the
 resource name, its resource group and an Azure Portal link instead of a raw
 ARM ID; full IDs stay in receipts and exports. Workload containers show name,
 image, requests/limits and probes instead of raw JSON. Receipts and commands use the technical
@@ -510,14 +510,14 @@ affordances, not a WCAG certification or a claim of complete live verification.
 - **Do** show long ARM IDs as name + resource group + Portal link in tables,
   keep receipts complete, keep wide tables locally scrollable and print
   complete matching evidence.
-- **Do** retain fixed-light client branding, the public CLIENTE placeholder,
+- **Do** retain fixed-light client branding, the public CUSTOMER placeholder,
   explicit fixture provenance and native labeled controls.
 
 ### Don't:
 - **Don't** use the ribbon colors as health grades or turn missing observations
   into successful, low-severity or zero-cost results.
 - **Don't** let the verdict or a KPI imply health the coverage does not
-  support; an unknown stays **No evaluado**.
+  support; an unknown stays **Not evaluated**.
 - **Don't** add gradients, glass, decorative icons, emoji, external fonts,
   fetched imagery or network-dependent UI assets.
 - **Don't** treat an official product icon, a configured Service annotation or

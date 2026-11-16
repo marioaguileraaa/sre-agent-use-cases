@@ -31,7 +31,7 @@ fleet per subscription/environment without extrapolating unreported clusters.
 Report all three levels, four areas and five pillars with source/time/value
 evidence, coverage, conditional applicability and concrete linked recommendations.
 Scores are local assessment indicators, never official Azure WAF/Polaris/WARA
-grades or certification. No evaluated checks means null/No evaluado.
+grades or certification. No evaluated checks means null/Not evaluated.
 Keep LAB/PRODUCTION separate from LIVE/SIMULATED. ARM Running and enabled addons
 do not demonstrate application health, enforcement, measurements or license.
 No IaC supplied does not mean portal-created infrastructure or drift.
@@ -46,7 +46,7 @@ manual publication, invent/reuse a thread prefix or call another HTTP tool.
 http_verified=false does not suppress provided links; written is not download
 verification. For local_files_only, expose unchanged actual paths and the
 unsupported native-runtime-root limitation. Show partial source evidence
-explicitly without hiding files. A current Kubernetes 502 is No evaluado,
+explicitly without hiding files. A current Kubernetes 502 is Not evaluated,
 not old workload data, empty-health success or a reason to broaden access.
 For questions use typed local filters and exact paging totals. A new call is a
 fresh collection, not the previous report. No hidden paging just to learn totals.
@@ -62,8 +62,8 @@ start/stop clusters, execute commands, reveal credentials or create issues/tasks
 
 ## Spanish chat prompts
 
-Use the actual approved cluster name privately. The public label remains
-**CLIENTE**. None of these prompts authorizes changing Azure.
+Use the actual approved cluster name privately. The public default customer
+name remains **Customer**. None of these prompts authorizes changing Azure.
 
 List the fixed roster before choosing a scope. It is configuration metadata,
 not observed cluster health. Multi-cluster selection uses exact approved
@@ -102,7 +102,7 @@ puntuacion y cobertura por lote. No extrapoles clusteres no revisados.
 <APPROVED_AKS_NAME> con operation=report. Cubre cluster, workloads y recursos
 asociados: buenas practicas, seguridad, FinOps y optimizacion, con los cinco
 pilares WAF. Entrega HTML, JSON completo, CSV de hallazgos y CSV de inventario.
-Muestra cobertura, fuentes, No evaluado/No aplica y limites. No cambies nada.
+Muestra cobertura, fuentes, Not evaluated/Not applicable y limites. No cambies nada.
 ```
 
 ```json
@@ -132,7 +132,7 @@ impacto cualificado y recomendacion Microsoft. No inventes hallazgos criticos.
 ```text
 @aks-waf-live Usa query/workloads y query/findings para namespace=client-apps
 y workload_name=frontend. Distingue replicas deseadas, probes, requests,
-PDB/HPA/NetworkPolicy seleccionados y datos No evaluado. No infieras la
+PDB/HPA/NetworkPolicy seleccionados y datos en estado Not evaluated. No infieras la
 configuracion de Kubernetes a partir de telemetria o del estado Running de ARM.
 ```
 
@@ -153,7 +153,7 @@ ahorro calculado. No compres planes, cambies SKU o elimines activos.
 
 ```text
 @aks-waf-live Usa query/summary y explica puntuacion y cobertura juntas.
-Cuantos indicadores se evaluaron, cuantos son No evaluado y No aplica?
+Cuantos indicadores se evaluaron, cuantos estan en Not evaluated y Not applicable?
 Explica por que esta puntuacion local no certifica la salud del cluster ni
 constituye el Azure Architecture Review oficial.
 ```
@@ -164,8 +164,8 @@ constituye el Azure Architecture Review oficial.
 
 ## English chat prompts
 
-Use the same private approved cluster names. The public client label remains
-**CLIENTE**, and every prompt below is strictly read-only.
+Use the same private approved cluster names. The public default customer name
+remains **Customer**, and every prompt below is strictly read-only.
 
 ```text
 @aks-waf-live Use operation=list_clusters to list the fixed configured cluster
@@ -182,7 +182,7 @@ metadata rather than observed cluster presence or health.
 <APPROVED_AKS_NAME> with operation=report. Cover cluster, workloads and
 associated resources across best practices, security, FinOps and optimization,
 including all five WAF pillars. Immediately deliver the HTML, complete JSON,
-findings CSV and inventory CSV. Show coverage, sources, No evaluado/No aplica
+findings CSV and inventory CSV. Show coverage, sources, Not evaluated/Not applicable
 and limits; do not change anything.
 ```
 
@@ -227,7 +227,7 @@ critical findings.
 ```text
 @aks-waf-live Use query/workloads and query/findings for namespace=client-apps
 and workload_name=frontend. Distinguish desired replicas, probes, requests,
-matched PDB/HPA/NetworkPolicy and No evaluado items. Do not infer Kubernetes
+matched PDB/HPA/NetworkPolicy and Not evaluated items. Do not infer Kubernetes
 manifests from telemetry or from ARM Running state.
 ```
 
@@ -249,7 +249,7 @@ change SKUs or delete assets.
 
 ```text
 @aks-waf-live Use query/summary and explain score and coverage together.
-How many checks were evaluated, and how many are No evaluado or No aplica?
+How many checks were evaluated, and how many are Not evaluated or Not applicable?
 Explain why this local pass indicator neither certifies cluster health nor
 constitutes the official Azure Architecture Review.
 ```

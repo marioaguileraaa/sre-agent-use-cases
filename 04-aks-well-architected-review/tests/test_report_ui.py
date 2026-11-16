@@ -481,7 +481,7 @@ class TemplateContractTests(unittest.TestCase):
         parsed = ParsedTemplate()
         parsed.feed(content)
         self.assertEqual(content.count(TOKEN), 1)
-        self.assertIn('<html lang="es-ES">', content)
+        self.assertIn('<html lang="en">', content)
         self.assertIn('"Segoe UI", system-ui, sans-serif', content)
         self.assertEqual(len([tag for tag, _ in parsed.tags if tag == "script"]), 2)
         self.assertFalse(any(attrs.get("src") for tag, attrs in parsed.tags if tag == "script"))
@@ -490,7 +490,7 @@ class TemplateContractTests(unittest.TestCase):
         self.assertIn("base-uri 'none'", content)
         self.assertIn("img-src data:", content)
         self.assertEqual("".join(parsed.data).strip(), TOKEN)
-        self.assertIn('node("span", "CLIENTE", "brand-placeholder")', content)
+        self.assertIn('node("span", "CUSTOMER", "brand-placeholder")', content)
         self.assertNotRegex(content, r"(?:\.innerHTML\b|insertAdjacentHTML|document\.write|eval\(|new Function|fetch\(|XMLHttpRequest)")
         self.assertNotRegex(content.lower(), r"(?:linear-gradient|radial-gradient|backdrop-filter)")
         self.assertLess(len(content.encode("utf-8")), MAX_BYTES)
@@ -667,10 +667,10 @@ class ReportBrowserTests(unittest.TestCase):
                          [expected[key] for key in ("passed", "failed", "not_evaluated", "not_applicable")])
         self.assertEqual(self.page.locator("#assessment-chart .chart-total").text_content(),
                          str(expected["total"]))
-        self.assertIn("no es un gráfico de salud", self.page.locator("#assessment-svg-title").text_content())
-        self.assertIn("No evaluado no es un resultado superado", self.page.locator("#assessment-chart").inner_text())
-        self.assertIn("15,1 %", self.page.locator("#global-coverage").inner_text())
-        self.assertIn("42,5 / 100", self.page.locator("#global-index").inner_text())
+        self.assertIn("not a health chart", self.page.locator("#assessment-svg-title").text_content())
+        self.assertIn("Not evaluated is not a passed result", self.page.locator("#assessment-chart").inner_text())
+        self.assertIn("15.1%", self.page.locator("#global-coverage").inner_text())
+        self.assertIn("42.5 / 100", self.page.locator("#global-index").inner_text())
         self.assertEqual(self.download("#export-json"), safe_fixture_json(snapshot).encode("utf-8"))
 
     def test_financial_emphasis_separates_observed_currency_scope_and_uncalculated_savings(self):
@@ -682,29 +682,29 @@ class ReportBrowserTests(unittest.TestCase):
                     association={"type": "node_resource_group_billing_context"})
         self.open_report(snapshot)
         baseline = self.page.locator("#finops-baseline")
-        self.assertIn("295,82 USD", baseline.inner_text())
+        self.assertIn("295.82 USD", baseline.inner_text())
         self.assertIn("node_resource_group_billing_context", baseline.inner_text())
         self.assertIn("synthetic-billing-scope", baseline.inner_text())
-        self.assertIn("Por estimar", baseline.locator(".savings .financial-amount").inner_text())
-        self.assertIn("No calculado", baseline.locator(".savings").inner_text())
+        self.assertIn("To be estimated", baseline.locator(".savings .financial-amount").inner_text())
+        self.assertIn("Not calculated", baseline.locator(".savings").inner_text())
         self.assertNotIn("0 USD", baseline.locator(".savings").inner_text())
         self.page.locator("#filter-namespace").select_option("team-a")
-        self.assertIn("295,82 USD", baseline.inner_text())
+        self.assertIn("295.82 USD", baseline.inner_text())
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
 
     def test_missing_optional_financial_receipts_are_explicit_not_blank(self):
         self.open_report(fixture(8))
         values = self.page.locator("#finops-baseline dd").all_text_contents()
         self.assertTrue(all(value.strip() for value in values))
-        for label in ("Ámbito exacto de lectura de coste", "Asociación de facturación / no propiedad"):
+        for label in ("Exact cost read scope", "Billing association / not ownership"):
             self.assertEqual(self.page.locator("#finops-baseline dt").filter(has_text=label)
-                             .locator("xpath=following-sibling::dd[1]").inner_text(), "No evaluado")
+                             .locator("xpath=following-sibling::dd[1]").inner_text(), "Not evaluated")
 
     def test_observed_graph_has_exact_ids_sources_properties_and_namespace_context(self):
         snapshot = architecture_fixture()
         self.open_report(snapshot)
-        self.assertIn("Arquitectura observada", self.page.locator("#architecture-observed-note").inner_text())
-        self.assertIn("no tráfico verificado", self.page.locator("#architecture-observed-note").inner_text())
+        self.assertIn("Observed architecture", self.page.locator("#architecture-observed-note").inner_text())
+        self.assertIn("not verified traffic", self.page.locator("#architecture-observed-note").inner_text())
         self.assertEqual(self.page.locator("#architecture-node option").count(),
                          len(snapshot["architecture"]["nodes"]))
         self.assertEqual(self.page.locator('table[data-collection="architecture-edges"] tbody tr').count(),
@@ -731,9 +731,9 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertTrue(reference.is_visible())
         self.assertTrue(self.page.locator("#architecture-observed").is_hidden())
         self.assertEqual(self.page.locator("#architecture-reference-tab").get_attribute("aria-selected"), "true")
-        self.assertIn("NO desplegada", reference.inner_text())
-        self.assertIn("Azure Load Balancer público / ELB", reference.inner_text())
-        self.assertIn("Azure Load Balancer privado / ILB", reference.inner_text())
+        self.assertIn("NOT deployed", reference.inner_text())
+        self.assertIn("Public Azure Load Balancer / ELB", reference.inner_text())
+        self.assertIn("Private Azure Load Balancer / ILB", reference.inner_text())
         self.assertNotRegex(reference.inner_text(), r"Cosmos|Redis|Service Bus|AWS")
         self.assertGreaterEqual(reference.locator("img.architecture-product-icon").count(), 6)
         self.assertTrue(all(image.get_attribute("src").startswith("data:image/svg+xml;base64,")
@@ -744,7 +744,7 @@ class ReportBrowserTests(unittest.TestCase):
         self.page.emulate_media(media="print")
         self.assertTrue(self.page.locator("#architecture-observed").is_visible())
         self.assertTrue(reference.is_visible())
-        self.assertIn("NO desplegada", reference.inner_text())
+        self.assertIn("NOT deployed", reference.inner_text())
         self.page.evaluate("window.dispatchEvent(new Event('afterprint'))")
         self.page.emulate_media(media="screen")
 
@@ -766,7 +766,7 @@ class ReportBrowserTests(unittest.TestCase):
         selected = scoped["cluster_runs"][1]["snapshot"]
         self.assertTrue(all(row["namespace"] == "team-a" for row in selected["inventory"]["workloads"]))
         self.assertEqual(selected["architecture"], snapshot["cluster_runs"][1]["snapshot"]["architecture"])
-        self.assertIn("demás resultados", scoped["scope_note"])
+        self.assertIn("All other results", scoped["scope_note"])
         self.assertEqual(scoped["filter_context"]["cluster_name"], "aks-ui-second")
 
     def test_multi_cluster_arm_case_equivalence_preserves_original_ids_and_independent_dates(self):
@@ -818,11 +818,11 @@ class ReportBrowserTests(unittest.TestCase):
         snapshot = copy.deepcopy(baseline)
         snapshot["available_clusters"][1]["cluster_id"] = BASE.upper()
         self.open_report(snapshot, expected="error")
-        self.assertIn("identidad duplicada", self.page.locator("#opening-detail").inner_text())
+        self.assertIn("duplicate identity", self.page.locator("#opening-detail").inner_text())
         snapshot = copy.deepcopy(baseline)
         snapshot["cluster_runs"][0]["snapshot"]["reference_utc"] = "2026-10-13T12:00:01Z"
         self.open_report(snapshot, expected="error")
-        self.assertIn("fecha o identidad incoherente", self.page.locator("#opening-detail").inner_text())
+        self.assertIn("inconsistent snapshot, date or identity", self.page.locator("#opening-detail").inner_text())
 
     def test_multi_primary_failure_has_no_borrowed_snapshot_or_score(self):
         snapshot = multi_fixture(primary_error=True)
@@ -850,7 +850,7 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
         snapshot["aggregate"]["cluster_status_counts"] = {}
         self.open_report(snapshot, expected="error")
-        self.assertIn("recuento de ejecuciones no nulo", self.page.locator("#opening-detail").inner_text())
+        self.assertIn("non-zero run count", self.page.locator("#opening-detail").inner_text())
 
     def test_graph_and_multi_invalid_contracts_fail_before_exposing_results(self):
         cases = []
@@ -878,7 +878,7 @@ class ReportBrowserTests(unittest.TestCase):
     def test_complete_snapshot_equality_counts_paging_and_all_exports(self):
         snapshot = fixture()
         self.open_report(snapshot)
-        self.assertIn("SIMULADO", self.page.locator("#provenance").inner_text())
+        self.assertIn("SIMULATED", self.page.locator("#provenance").inner_text())
         self.assertIn("LAB", self.page.locator("#provenance").inner_text())
         self.assertIn("Running", self.page.locator("#cover-facts").inner_text())
         self.assertIn("Failed", self.page.locator("#node-pools").inner_text())
@@ -1032,7 +1032,8 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertEqual(scoped["scores"], snapshot["scores"])
         self.assertEqual([row["check_id"] for row in self.csv_rows(self.download("#export-findings"))],
                          [check["check_id"] for check in expected])
-        self.assertIn(f"{len(expected)} comprobaciones coincidentes", self.page.locator("#filter-count").inner_text())
+        noun = "check" if len(expected) == 1 else "checks"
+        self.assertIn(f"{len(expected)} matching {noun} of", self.page.locator("#filter-count").inner_text())
         self.page.locator("#reset-filters").click()
         self.assertEqual(json.loads(self.download("#export-filtered-json"))["checks"], snapshot["checks"])
 
@@ -1043,7 +1044,7 @@ class ReportBrowserTests(unittest.TestCase):
         self.page.locator("#filter-status").select_option("not_evaluated")
         expected = [check for check in snapshot["checks"] if check["status"] == "not_evaluated"]
         self.assertEqual(self.page.locator(".finding").count(), 0)
-        self.assertIn(f"{len(expected)} no evaluadas", self.page.locator("#filter-count").inner_text())
+        self.assertIn(f"{len(expected)} not evaluated", self.page.locator("#filter-count").inner_text())
         self.open_checks()
         self.assertIn("Fuente parcial de prueba", self.page.locator("#checks-table").inner_text())
         rows = self.csv_rows(self.download("#export-checks"))
@@ -1058,9 +1059,9 @@ class ReportBrowserTests(unittest.TestCase):
         expected_ids = {check["resource_id"] for check in snapshot["checks"] if check["area"] == "finops"}
         expected = [row for row in snapshot["finops"]["candidates"] if row["resource_id"] in expected_ids]
         self.assertEqual(scoped["finops"]["candidates"], expected)
-        self.assertIn("No evaluado", self.page.locator("#finops-baseline").inner_text())
+        self.assertIn("Not evaluated", self.page.locator("#finops-baseline").inner_text())
         self.assertIn("429", self.page.locator("#sources-table").inner_text())
-        self.assertIn("Por estimar / No calculado", self.page.locator("#finops-candidates").inner_text())
+        self.assertIn("To be estimated / Not calculated", self.page.locator("#finops-candidates").inner_text())
         self.assertEqual([json.loads(row["record_json"]) for row in
                           self.csv_rows(self.download("#export-finops"))], expected)
         action_ids = {check["check_id"] for check in scoped["checks"]}
@@ -1100,12 +1101,12 @@ class ReportBrowserTests(unittest.TestCase):
         ]
         self.open_report(snapshot)
         rows = self.page.locator('table[data-collection="finops-candidates"] tbody tr')
-        self.assertIn("Ventana de muestra:", rows.nth(0).inner_text())
-        self.assertIn("duración observada: 1m4.25s", rows.nth(0).inner_text())
-        self.assertIn("Ventanas de muestra (3)", rows.nth(1).inner_text())
-        self.assertEqual(rows.nth(1).inner_text().count("duración observada: 58.125s"), 2)
-        self.assertIn("duración observada: 1m3s", rows.nth(1).inner_text())
-        self.assertIn("No evaluado", rows.nth(2).inner_text())
+        self.assertIn("Sample window:", rows.nth(0).inner_text())
+        self.assertIn("observed duration: 1m4.25s", rows.nth(0).inner_text())
+        self.assertIn("Sample windows (3)", rows.nth(1).inner_text())
+        self.assertEqual(rows.nth(1).inner_text().count("observed duration: 58.125s"), 2)
+        self.assertIn("observed duration: 1m3s", rows.nth(1).inner_text())
+        self.assertIn("Not evaluated", rows.nth(2).inner_text())
         self.assertEqual(self.download("#export-json"), safe_fixture_json(snapshot).encode("utf-8"))
         scoped = json.loads(self.download("#export-filtered-json"))
         self.assertEqual(scoped["finops"], snapshot["finops"])
@@ -1129,9 +1130,9 @@ class ReportBrowserTests(unittest.TestCase):
         candidates[2]["window"] = {"start": REFERENCE, "end": None, "metadata": "partial"}
         self.open_report(snapshot)
         rows = self.page.locator('table[data-collection="finops-candidates"] tbody tr')
-        self.assertIn("No evaluado: sin ventanas de muestra incorporadas", rows.nth(0).inner_text())
-        self.assertIn("Ventana de muestra: No evaluado / duración observada: No evaluado", rows.nth(1).inner_text())
-        self.assertIn("UTC - No evaluado", rows.nth(2).inner_text())
+        self.assertIn("Not evaluated: no sample windows included", rows.nth(0).inner_text())
+        self.assertIn("Sample window: Not evaluated / observed duration: Not evaluated", rows.nth(1).inner_text())
+        self.assertIn("UTC - Not evaluated", rows.nth(2).inner_text())
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
 
     def test_all_unknown_null_index_null_inventory_and_denied_sources(self):
@@ -1149,11 +1150,11 @@ class ReportBrowserTests(unittest.TestCase):
             source["records"] = None
         refresh_fixture(snapshot)
         self.open_report(snapshot)
-        self.assertIn("No evaluado", self.page.locator("#global-index .score-value").inner_text())
+        self.assertIn("Not evaluated", self.page.locator("#global-index .score-value").inner_text())
         self.assertEqual(self.page.locator("#area-scores [role=meter]").count(), 0)
         self.assertEqual(self.page.locator("#pillar-scores [role=meter]").count(), 0)
-        self.assertIn("No evaluado pools", self.page.locator("#inventory-counts").inner_text())
-        self.assertIn("Acceso denegado", self.page.locator("#sources-table").inner_text())
+        self.assertIn("Not evaluated node pools", self.page.locator("#inventory-counts").inner_text())
+        self.assertIn("Access denied", self.page.locator("#sources-table").inner_text())
         self.assertEqual(self.page.locator(".finding").count(), 0)
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
         scoped = json.loads(self.download("#export-filtered-json"))
@@ -1169,8 +1170,8 @@ class ReportBrowserTests(unittest.TestCase):
         snapshot["scores"]["areas"]["security"]["score"] = 37.25
         self.open_report(snapshot)
         self.assertIn("0 EUR", self.page.locator("#finops-baseline").inner_text())
-        self.assertEqual(self.page.locator("#global-index .score-value").inner_text(), "42,5 / 100")
-        self.assertIn("37,3 / 100", self.page.locator("#area-scores").inner_text())
+        self.assertEqual(self.page.locator("#global-index .score-value").inner_text(), "42.5 / 100")
+        self.assertIn("37.3 / 100", self.page.locator("#area-scores").inner_text())
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
 
     def test_verdict_band_and_kpis_are_qualified_and_never_a_healthy_zero(self):
@@ -1178,21 +1179,21 @@ class ReportBrowserTests(unittest.TestCase):
         self.open_report(snapshot)
         critical = sum(row["severity"] == "critical" for row in snapshot["findings"])
         self.assertGreater(critical, 0)
-        self.assertEqual(self.page.locator("#verdict .verdict-value").inner_text(), "Acción prioritaria")
-        self.assertIn(f"{critical} crític", self.page.locator("#verdict").inner_text())
-        self.assertIn(f"{len(snapshot['findings'])} hallazgos", self.page.locator("#hero-summary").inner_text())
+        self.assertEqual(self.page.locator("#verdict .verdict-value").inner_text(), "Action required")
+        self.assertIn(f"{critical} critical", self.page.locator("#verdict").inner_text())
+        self.assertIn(f"{len(snapshot['findings'])} findings", self.page.locator("#hero-summary").inner_text())
         self.assertEqual(self.page.locator("#kpis .kpi").count(), 5)
-        self.assertIn("No evaluado", self.page.locator("#kpis").inner_text())
+        self.assertIn("Not evaluated", self.page.locator("#kpis").inner_text())
         for check in snapshot["checks"]:
             check.update(status="not_evaluated", evidence=[], reason="Sin acceso autorizado.")
         snapshot["actions"] = []
         refresh_fixture(snapshot)
         self.open_report(snapshot)
-        self.assertEqual(self.page.locator("#verdict .verdict-value").inner_text(), "No evaluado")
+        self.assertEqual(self.page.locator("#verdict .verdict-value").inner_text(), "Not evaluated")
         first_kpi = self.page.locator("#kpis .kpi").first
-        self.assertEqual(first_kpi.locator(".kpi-value").inner_text(), "No evaluado")
-        self.assertIn("ninguna comprobación evaluada", first_kpi.inner_text())
-        self.assertIn("0 hallazgos aportados", self.page.locator("#severity-distribution").inner_text())
+        self.assertEqual(first_kpi.locator(".kpi-value").inner_text(), "Not evaluated")
+        self.assertIn("no checks evaluated", first_kpi.inner_text())
+        self.assertIn("0 findings supplied", self.page.locator("#severity-distribution").inner_text())
 
     def test_findings_default_to_severity_order_and_engine_order_is_selectable(self):
         snapshot = fixture(8)
@@ -1231,9 +1232,9 @@ class ReportBrowserTests(unittest.TestCase):
             action["severity"] = "low"
         refresh_fixture(snapshot)
         self.open_report(snapshot)
-        self.assertIn("0 registradas", self.page.locator("#critical-title").inner_text())
+        self.assertIn("0 recorded", self.page.locator("#critical-title").inner_text())
         self.assertEqual(self.page.locator(".priority-list li").count(), 0)
-        self.assertIn("No equivale a ausencia de riesgo", self.page.locator("#critical-findings").inner_text())
+        self.assertIn("This does not mean there is no risk", self.page.locator("#critical-findings").inner_text())
 
     def test_top_critical_uses_only_supplied_critical_findings(self):
         snapshot = fixture()
@@ -1270,7 +1271,7 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator("img").count(), 0)
         first = hostile_finding
         first.locator(":scope > summary").click()
-        self.assertIn("enlace no habilitado", first.inner_text())
+        self.assertIn("link not enabled", first.inner_text())
         self.assertEqual(first.locator('a[href^="javascript:"]').count(), 0)
         self.assertEqual(first.locator('a[href*="example.invalid"]').count(), 0)
         self.assertEqual(json.loads(self.download("#export-json")), snapshot)
@@ -1325,8 +1326,8 @@ class ReportBrowserTests(unittest.TestCase):
                 self.assertTrue(self.page.locator("#report-shell").is_hidden())
                 self.assertTrue(self.page.locator("#export-json").is_disabled())
                 self.assertEqual(self.page.locator("#opening-state").get_attribute("role"), "alert")
-                self.assertIn("No se presentan resultados parciales", self.page.locator("#opening-message").inner_text())
-                self.assertIn("Solicite al generador", self.page.locator("#opening-detail").inner_text())
+                self.assertIn("No partial results are shown", self.page.locator("#opening-message").inner_text())
+                self.assertIn("Ask the generator", self.page.locator("#opening-detail").inner_text())
 
     def test_optional_inline_raster_brand_is_bounded_and_visible_in_both_themes(self):
         snapshot = fixture(8)
@@ -1373,7 +1374,7 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator("#theme-mode").evaluate("element => getComputedStyle(element).outlineColor"), "rgb(255, 255, 255)")
         self.page.locator("#filter-search").focus()
         self.page.keyboard.type("UI-000")
-        self.assertIn("1 comprobaciones coincidentes", self.page.locator("#filter-count").inner_text())
+        self.assertIn("1 matching check of", self.page.locator("#filter-count").inner_text())
         self.assertEqual(self.page.locator(".finding").count(), 1)
         labels = self.page.evaluate("""() => [...document.querySelectorAll('input,select')].map(element => ({
           id: element.id, labels: element.labels.length,
@@ -1404,7 +1405,7 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertTrue(self.page.locator(".toolbar").is_hidden())
         self.assertTrue(self.page.locator("#filters-form").is_hidden())
         self.assertTrue(self.page.locator("#print-scope").is_visible())
-        self.assertIn("sin límite", self.page.locator("#print-scope").inner_text())
+        self.assertIn("no on-screen page limit", self.page.locator("#print-scope").inner_text())
         self.assertEqual(self.page.locator("#executive").evaluate("element => getComputedStyle(element).breakBefore"), "page")
         pdf = self.page.pdf(format="A4", print_background=True)
         self.assertTrue(pdf.startswith(b"%PDF-"))
@@ -1488,9 +1489,9 @@ class ReportBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator(".finding").count(), min(25, len(snapshot["findings"])))
         critical_count = sum(row["severity"] == "critical" for row in snapshot["findings"])
         self.assertEqual(self.page.locator(".priority-list li").count(), min(5, critical_count))
-        self.assertIn(f"{snapshot['scores']['global']['evaluated']} evaluadas",
+        self.assertIn(f"{snapshot['scores']['global']['evaluated']} evaluated",
                       self.page.locator("#global-index").inner_text())
-        self.assertIn(f"{snapshot['scores']['coverage']['not_evaluated']} no evaluadas",
+        self.assertIn(f"{snapshot['scores']['coverage']['not_evaluated']} not evaluated",
                       self.page.locator("#global-coverage").inner_text())
         full_json = self.download("#export-json")
         self.assertTrue(full_json == safe_fixture_json(snapshot).encode("utf-8"),
@@ -1605,7 +1606,7 @@ class ReportBrowserTests(unittest.TestCase):
                   theme: document.documentElement.dataset.theme,
                   font: getComputedStyle(document.body).fontFamily,
                   plaque: document.querySelector('.brand-plaque').getBoundingClientRect().toJSON(),
-                  reference: [...document.querySelectorAll('.cover-facts dt')].find(node => node.textContent === 'Referencia UTC').parentElement.getBoundingClientRect().toJSON()
+                  reference: [...document.querySelectorAll('.cover-facts dt')].find(node => node.textContent === 'UTC reference').parentElement.getBoundingClientRect().toJSON()
                 })""")
                 if geometry["scrollWidth"] > geometry["width"]:
                     issues.append({"scene": f"{width}-{theme}", "overflow": geometry["scrollWidth"]})

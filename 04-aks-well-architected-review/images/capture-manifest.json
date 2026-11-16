@@ -1,17 +1,17 @@
 {
   "capture_policy": "Real SRE UI or actual dated source; burned-in privacy masks; no private original/config/source data included.",
-  "report_source_note": "Report images (aks04-report-00..05) are rendered from the permanently SIMULATED public test fixture (tests/support.py + tests/multicluster_fixture.py, with documented demo variations) through the real engine and the current report template. They show no customer, tenant or lab data and are not a live collection.",
+  "report_source_note": "Report images (aks04-report-00..05) are rendered from the English sample run in sample-run/ (simulated-20261010T120000Z-4596adfa1b2c.html), which the standalone tool wrote from the permanently SIMULATED public test fixture (tests/support.py + tests/multicluster_fixture.py, with documented demo variations) renamed to fictitious Contoso names and 00000000-0000-0000-0000-0000000000NN GUIDs. The sample sets CLIENT_NAME to Contoso and the optional client logo to a plain CONTOSO wordmark, so the cover plaque matches 'Prepared for Contoso'; the tool default remains Customer with no logo. They show no customer, tenant or lab data and are not a live collection.",
   "captures": [
     {
       "filename": "aks04-report-00-cover.png",
-      "capture_utc": "2026-11-12T11:10:50.220044+00:00",
+      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "ff226949eeca71b15f193ceb2ec68e8b7bd40fa9e21ac28ce62a2395a1087e79",
+      "published_image_sha256": "0e3a34c25233dd138e1c8ba874354cf7d0bef70ba036c69168cba0f390566c2a",
       "pixels": [
         1600,
         1196
       ],
-      "caption": "SIMULATED public fixture render | Reference 2026-10-10 12:00 UTC | LAB | Current report design | Not a live collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -20,14 +20,14 @@
     },
     {
       "filename": "aks04-report-01-assessment.png",
-      "capture_utc": "2026-11-12T11:10:50.220044+00:00",
+      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "24120485d141b7c34c163aa1bad20c9dd017e1564412cdc2d0fd847ec0cd6692",
+      "published_image_sha256": "f4fbb4441ad1b3f7474057adcfe8b5fd7386a81a8f1c3208faefa2dc991f8e7f",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED public fixture render | Reference 2026-10-10 12:00 UTC | LAB | Current report design | Not a live collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -36,14 +36,14 @@
     },
     {
       "filename": "aks04-report-02-drilldown.png",
-      "capture_utc": "2026-11-12T11:10:50.220044+00:00",
+      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "c589211c127cccf39e27a0ea377d20bb291c40be19654e375cf2d9e73e15c2fd",
+      "published_image_sha256": "b00bda48def1b433053840c4812ccf2361f2d20902c5406566bf0763eddf862b",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED public fixture render | Reference 2026-10-10 12:00 UTC | LAB | Current report design | Not a live collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -52,14 +52,14 @@
     },
     {
       "filename": "aks04-report-03-observed-architecture.png",
-      "capture_utc": "2026-11-12T11:10:50.220044+00:00",
+      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "60c06381d9ab32ca7650d4ade554171e3320d99ed34df5e4543e07f8c1d655dd",
+      "published_image_sha256": "378f6fb7e3236a9c17037aa33e711cc9e04a8061e02d7354369fc781685d6156",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED public fixture render | Reference 2026-10-10 12:00 UTC | LAB | Current report design | Not a live collection | Graph from fixture IDs/fields",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Graph from sample IDs and fields",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -68,14 +68,14 @@
     },
     {
       "filename": "aks04-report-04-reference.png",
-      "capture_utc": "2026-11-12T11:10:50.220044+00:00",
+      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "af4c0856c43eaf2af49990551c25d46d51c5fb7311e94cae4192b6c868af8cae",
+      "published_image_sha256": "de979de12e7c1d58a3efe2b445481699d54cc4662e6c80f6157de9116fe3e4fa",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED public fixture render | Reference 2026-10-10 12:00 UTC | LAB | Current report design | Not a live collection | Reference proposal NOT deployed",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Reference proposal NOT deployed",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -84,14 +84,14 @@
     },
     {
       "filename": "aks04-report-05-finops.png",
-      "capture_utc": "2026-11-12T11:10:50.220044+00:00",
+      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "cd6be094df850c6347e8648b8ab9f8d7839f23f4840e9bb2e7f8e8399ac0a413",
+      "published_image_sha256": "98086f55eba594f8101086325d1a2a9aafda745e182f4e12f715896b479407b7",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED public fixture render | Reference 2026-10-10 12:00 UTC | LAB | Current report design | Not a live collection | Observed billing currency; savings uncalculated",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Observed billing currency; savings not calculated",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],

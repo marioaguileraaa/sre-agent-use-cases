@@ -47,9 +47,9 @@ workspace GUIDs, endpoints, KQL queries, or filesystem paths.
    gaps.
 5. **`arm_advisor_recommendations`**: Queries cached
    `Microsoft.Advisor/recommendations` and synthesizes a prioritized
-   **Recommended Actions (`acciones recomendadas`)** ledger linked to exact
-   incident, anomaly, and Advisor IDs across three horizons (`Inmediato <24h`,
-   `Corto plazo 1-7 días`, `Ciclo mensual`).
+   **Recommended Actions** ledger linked to exact
+   incident, anomaly, and Advisor IDs across three horizons (`Immediate <24h`,
+   `Short term 1-7 days`, `Monthly cycle`).
 
 ## Report and four-file native delivery
 
@@ -68,6 +68,9 @@ native Markdown links/file widgets in the same response. Never invent or reuse a
 thread UUID or host prefix. When `sharing_mode="local_files_only"`, expose the
 unchanged actual `*_path` values and note that `cwd` is outside the native
 runtime thread root.
+
+The HTML report, CSVs, and snapshot text are in English. Answer in the user's
+language (English by default).
 
 ## Grounded questions
 

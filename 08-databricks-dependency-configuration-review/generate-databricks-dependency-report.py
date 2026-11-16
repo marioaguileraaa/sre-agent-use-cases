@@ -36,11 +36,11 @@ KEYVAULT_OAUTH_SECRET_URI = ""
 # use the federated identity credential.
 CROSS_TENANT_CERT_KEYVAULT_URL = ""
 CROSS_TENANT_CERT_NAME = ""
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 APPROVED_WORKSPACES = {
     "<APPROVED_DATABRICKS_WORKSPACE_NAME>": {
         "resource_group": "<APPROVED_DATABRICKS_RESOURCE_GROUP>",
@@ -192,251 +192,235 @@ CATALOG = json.loads((
     'nce does not prove effective firewall enforcement, data-plane network reachability, least-privilege '
     'Unity Catalog grants or workload SLA compliance."], "rules": [{"rule_id": "C01", "reference_id": "DB'
     'X-WAF-SEC-01", "test": "sku_premium", "level": "workspace", "area": "security", "pillar": "security"'
-    ', "severity": "high", "effort": "medium", "title": "SKU Premium para gobernanza y controles de segur'
-    'idad", "recommendation": "Validar el uso del tier Premium para cargas de producci\\u00f3n que requier'
-    'en Unity Catalog, control de acceso basado en roles y auditor\\u00eda avanzada.", "business_impact": '
-    '"Un tier inferior a Premium puede limitar controles de identidad, Unity Catalog y aislamiento de acc'
-    'eso.", "learn_url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-d'
-    'atabricks#cost-optimization"}, {"rule_id": "C02", "reference_id": "DBX-WAF-SEC-02", "test": "secure_'
-    'cluster_connectivity", "level": "workspace", "area": "security", "pillar": "security", "severity": "'
-    'high", "effort": "medium", "title": "Secure Cluster Connectivity (No Public IP)", "recommendation": '
-    '"Habilitar enableNoPublicIp en el workspace para que los nodos de c\\u00f3mputo no tengan direcciones'
-    ' IP p\\u00fablicas y conecten al plano de control por rel\\u00e9 saliente.", "business_impact": "Nodos'
-    ' de cl\\u00faster con IP p\\u00fablica incrementan la superficie de exposici\\u00f3n de red del plano d'
-    'e datos.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/security/network/classic'
-    '/secure-cluster-connectivity"}, {"rule_id": "C03", "reference_id": "DBX-WAF-NET-01", "test": "vnet_i'
-    'njection", "level": "workspace", "area": "best_practices", "pillar": "security", "severity": "medium'
-    '", "effort": "high", "title": "Despliegue con VNet Injection en red gestionada por el cliente", "rec'
-    'ommendation": "Cuando la arquitectura de red corporativa lo requiera, desplegar el workspace con cus'
-    'tomVirtualNetworkId y subredes host/container dedicadas.", "business_impact": "La VNet administrada '
-    'por defecto impide aplicar rutas personalizadas, inspecci\\u00f3n de egress o emparejamientos granula'
-    'res.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/security/network/classic/vne'
-    't-inject"}, {"rule_id": "C04", "reference_id": "DBX-WAF-NET-02", "test": "private_link_and_public_ac'
-    'cess", "level": "workspace", "area": "security", "pillar": "security", "severity": "high", "effort":'
-    ' "high", "title": "Restricci\\u00f3n de red p\\u00fablica y Private Link del workspace", "recommendati'
-    'on": "Revisar publicNetworkAccess, requiredNsgRules y conexiones Private Endpoint aprobadas seg\\u00f'
-    'an los requisitos de aislamiento privado.", "business_impact": "El acceso p\\u00fablico abierto sin c'
-    'ontroles compensatorios ampl\\u00eda la superficie de entrada al workspace.", "learn_url": "https://l'
-    'earn.microsoft.com/en-us/azure/databricks/security/network/classic/private-link"}, {"rule_id": "C05"'
-    ', "reference_id": "DBX-WAF-SEC-03", "test": "access_connector_and_storage_firewall", "level": "works'
-    'pace", "area": "security", "pillar": "security", "severity": "medium", "effort": "medium", "title": '
-    '"Access Connector con identidad administrada y firewall de almacenamiento", "recommendation": "Vincu'
-    'lar un Azure Databricks Access Connector con identidad administrada (SystemAssigned o UserAssigned) '
-    'y revisar defaultStorageFirewall.", "business_impact": "La ausencia de Access Connector impide auten'
-    'ticar con identidad administrada hacia almacenamiento gobernado.", "learn_url": "https://learn.micro'
+    ', "severity": "high", "effort": "medium", "title": "Premium SKU for governance and security controls'
+    '", "recommendation": "Confirm the Premium tier for production workloads that need Unity Catalog, rol'
+    'e-based access control and advanced auditing.", "business_impact": "A tier below Premium can limit i'
+    'dentity controls, Unity Catalog and access isolation.", "learn_url": "https://learn.microsoft.com/en'
+    '-us/azure/well-architected/service-guides/azure-databricks#cost-optimization"}, {"rule_id": "C02", "'
+    'reference_id": "DBX-WAF-SEC-02", "test": "secure_cluster_connectivity", "level": "workspace", "area"'
+    ': "security", "pillar": "security", "severity": "high", "effort": "medium", "title": "Secure cluster'
+    ' connectivity (no public IP)", "recommendation": "Enable enableNoPublicIp on the workspace so comput'
+    'e nodes have no public IP addresses and reach the control plane through an outbound relay.", "busine'
+    'ss_impact": "Cluster nodes with public IP addresses increase the network exposure of the data plane.'
+    '", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/security/network/classic/secure-'
+    'cluster-connectivity"}, {"rule_id": "C03", "reference_id": "DBX-WAF-NET-01", "test": "vnet_injection'
+    '", "level": "workspace", "area": "best_practices", "pillar": "security", "severity": "medium", "effo'
+    'rt": "high", "title": "VNet injection into a customer-managed network", "recommendation": "When the '
+    'corporate network architecture requires it, deploy the workspace with customVirtualNetworkId and ded'
+    'icated host and container subnets.", "business_impact": "The default managed VNet prevents custom ro'
+    'utes, egress inspection and granular peering.", "learn_url": "https://learn.microsoft.com/en-us/azur'
+    'e/databricks/security/network/classic/vnet-inject"}, {"rule_id": "C04", "reference_id": "DBX-WAF-NET'
+    '-02", "test": "private_link_and_public_access", "level": "workspace", "area": "security", "pillar": '
+    '"security", "severity": "high", "effort": "high", "title": "Public network restriction and Private L'
+    'ink for the workspace", "recommendation": "Review publicNetworkAccess, requiredNsgRules and the appr'
+    'oved private endpoint connections against your private isolation requirements.", "business_impact": '
+    '"Open public access without compensating controls widens the entry surface of the workspace.", "lear'
+    'n_url": "https://learn.microsoft.com/en-us/azure/databricks/security/network/classic/private-link"},'
+    ' {"rule_id": "C05", "reference_id": "DBX-WAF-SEC-03", "test": "access_connector_and_storage_firewall'
+    '", "level": "workspace", "area": "security", "pillar": "security", "severity": "medium", "effort": "'
+    'medium", "title": "Access connector with managed identity and storage firewall", "recommendation": "'
+    'Link an Azure Databricks access connector with a managed identity (SystemAssigned or UserAssigned) a'
+    'nd review defaultStorageFirewall.", "business_impact": "Without an access connector, the workspace c'
+    'an\'t use a managed identity to authenticate to governed storage.", "learn_url": "https://learn.micro'
     'soft.com/en-us/azure/databricks/connect/unity-catalog/cloud-storage/azure-managed-identities"}, {"ru'
     'le_id": "C06", "reference_id": "DBX-WAF-SEC-04", "test": "customer_managed_keys", "level": "workspac'
-    'e", "area": "security", "pillar": "security", "severity": "medium", "effort": "medium", "title": "Ci'
-    'frado con claves gestionadas por el cliente (CMK) e infraestructura", "recommendation": "Si la pol\\u'
-    '00edtica de cumplimiento exige CMK, configurar claves de Key Vault para managedServices y managedDis'
-    'k con rotaci\\u00f3n autom\\u00e1tica.", "business_impact": "Sin CMK cuando es requerido por normativa'
-    ', el cliente no controla directamente la revocaci\\u00f3n criptogr\\u00e1fica.", "learn_url": "https:/'
-    '/learn.microsoft.com/en-us/azure/databricks/security/keys/"}, {"rule_id": "C07", "reference_id": "DB'
-    'X-WAF-SEC-05", "test": "enhanced_security_compliance", "level": "workspace", "area": "security", "pi'
-    'llar": "operations", "severity": "low", "effort": "medium", "title": "Perfil de seguridad mejorada y'
-    ' actualizaci\\u00f3n autom\\u00e1tica de cl\\u00fasteres", "recommendation": "Evaluar enhancedSecurityM'
-    'onitoring, automaticClusterUpdate y complianceSecurityProfile cuando apliquen normativas espec\\u00ed'
-    'ficas.", "business_impact": "Sin actualizaciones autom\\u00e1ticas o monitorizaci\\u00f3n mejorada req'
-    'uerida, el mantenimiento de agentes depende de procesos manuales.", "learn_url": "https://learn.micr'
-    'osoft.com/en-us/azure/databricks/security/privacy/security-profile"}, {"rule_id": "C08", "reference_'
-    'id": "DBX-WAF-OPS-01", "test": "diagnostics", "level": "workspace", "area": "best_practices", "pilla'
-    'r": "operations", "severity": "medium", "effort": "low", "title": "Configuraci\\u00f3n de Diagnostic '
-    'Settings en el plano de control ARM", "recommendation": "Configurar categor\\u00edas de auditor\\u00ed'
-    'a en Microsoft.Insights/diagnosticSettings hacia Log Analytics, Storage o Event Hub y verificar la i'
-    'ngesta.", "business_impact": "Sin registros diagn\\u00f3sticos habilitados se reduce la trazabilidad '
-    'de eventos de control plane, jobs y accesos.", "learn_url": "https://learn.microsoft.com/en-us/azure'
-    '/databricks/admin/account-settings/audit-logs"}, {"rule_id": "C09", "reference_id": "DBX-WAF-SEC-06"'
-    ', "test": "pat_token_governance", "level": "workspace", "area": "security", "pillar": "security", "s'
-    'everity": "medium", "effort": "low", "title": "Gobernanza de Personal Access Tokens (PAT) en workspa'
-    'ce-conf", "recommendation": "Revisar enableTokensConfig y priorizar autenticaci\\u00f3n OAuth M2M o i'
-    'dentidades administradas de Microsoft Entra frente a PATs duraderos.", "business_impact": "Tokens pe'
-    'rsonales sin control de emisi\\u00f3n o expiraci\\u00f3n incrementan el riesgo de credenciales persist'
-    'entes.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/security/auth/api-access-p'
-    'ermissions"}, {"rule_id": "C10", "reference_id": "DBX-WAF-GOV-01", "test": "default_catalog_unity", '
-    '"level": "workspace", "area": "best_practices", "pillar": "operations", "severity": "medium", "effor'
-    't": "medium", "title": "Cat\\u00e1logo predeterminado en Unity Catalog frente a Hive heredado", "reco'
-    'mmendation": "Configurar UnityCatalog como cat\\u00e1logo predeterminado y evitar almacenar datos de '
-    'negocio en el DBFS root o hive_metastore.", "business_impact": "El uso de hive_metastore y DBFS root'
-    ' dificulta el control de acceso unificado y el linaje de datos.", "learn_url": "https://learn.micros'
-    'oft.com/en-us/azure/databricks/data-governance/unity-catalog/best-practices"}, {"rule_id": "C11", "r'
-    'eference_id": "DBX-WAF-SEC-07", "test": "global_init_scripts", "level": "workspace", "area": "securi'
-    'ty", "pillar": "security", "severity": "low", "effort": "low", "title": "Higiene y revisi\\u00f3n de '
-    'Global Init Scripts", "recommendation": "Minimizar o auditar los global init scripts habilitados y p'
-    'referir pol\\u00edticas de cl\\u00faster o scripts con alcance de unidad en Unity Catalog.", "business'
-    '_impact": "Los global init scripts se ejecutan en todos los cl\\u00fasteres del workspace y pueden in'
-    'troducir dependencias ocultas o superficie de fallo.", "learn_url": "https://learn.microsoft.com/en-'
-    'us/azure/databricks/init-scripts/global"}, {"rule_id": "C12", "reference_id": "DBX-WAF-OPS-02", "tes'
-    't": "advisor", "level": "workspace", "area": "optimization", "pillar": "operations", "severity": "lo'
-    'w", "effort": "low", "title": "Revisi\\u00f3n de recomendaciones cacheadas de Azure Advisor", "recomm'
-    'endation": "Consultar las recomendaciones cacheadas de Azure Advisor para el workspace y recursos as'
-    'ociados como insumo complementario.", "business_impact": "Ignorar alertas de plataforma puede retras'
-    'ar la detecci\\u00f3n de mejoras de fiabilidad o coste.", "learn_url": "https://learn.microsoft.com/e'
-    'n-us/azure/well-architected/service-guides/azure-databricks"}, {"rule_id": "W01", "reference_id": "D'
-    'BX-WAF-COST-01", "test": "cluster_autotermination", "level": "workload", "area": "finops", "pillar":'
-    ' "cost", "severity": "high", "effort": "low", "title": "Autoterminaci\\u00f3n configurada en cl\\u00fa'
-    'steres interactivos All-Purpose", "recommendation": "Definir autotermination_minutes (por ejemplo <='
-    ' 60 minutos) en todos los cl\\u00fasteres All-Purpose para evitar consumo DBU y VM en inactividad.", '
-    '"business_impact": "Un cl\\u00faster interactivo sin autoterminaci\\u00f3n o con umbral excesivo manti'
-    'ene nodos facturando sin carga activa.", "learn_url": "https://learn.microsoft.com/en-us/azure/datab'
-    'ricks/compute/cluster-config-best-practices"}, {"rule_id": "W02", "reference_id": "DBX-WAF-GOV-02", '
-    '"test": "cluster_policy_bound", "level": "workload", "area": "best_practices", "pillar": "cost", "se'
-    'verity": "medium", "effort": "medium", "title": "Cl\\u00fasteres gobernados mediante Cluster Policy",'
-    ' "recommendation": "Asociar policy_id a los cl\\u00fasteres para aplicar l\\u00edmites de tipo de inst'
-    'ancia, autoterminaci\\u00f3n, versi\\u00f3n de runtime y etiquetas FinOps.", "business_impact": "Crear'
-    ' cl\\u00fasteres sin pol\\u00edtica permite configuraciones no estandarizadas y sobrecostes accidental'
-    'es.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/admin/clusters/policies"}, {"'
-    'rule_id": "W03", "reference_id": "DBX-WAF-SEC-08", "test": "cluster_access_mode", "level": "workload'
-    '", "area": "security", "pillar": "security", "severity": "high", "effort": "medium", "title": "Modo '
-    'de acceso de c\\u00f3mputo compatible con aislamiento y Unity Catalog", "recommendation": "Configurar'
-    ' data_security_mode en USER_ISOLATION (Standard/Shared) o SINGLE_USER (Dedicated) y evitar modos sin'
-    ' aislamiento (NONE).", "business_impact": "Modos de acceso heredados o sin aislamiento impiden aplic'
-    'ar controles de Unity Catalog o permiten acceso directo no gobernado.", "learn_url": "https://learn.'
-    'microsoft.com/en-us/azure/databricks/compute/configure#access-mode"}, {"rule_id": "W04", "reference_'
-    'id": "DBX-WAF-OPS-03", "test": "cluster_runtime_lts", "level": "workload", "area": "best_practices",'
-    ' "pillar": "reliability", "severity": "medium", "effort": "medium", "title": "Versi\\u00f3n de Databr'
-    'icks Runtime soportada (LTS / actual)", "recommendation": "Mantener spark_version en una versi\\u00f3'
-    'n Long Term Support (LTS) vigente (por ejemplo 13.3 LTS, 14.3 LTS, 15.4 LTS o superior).", "business'
-    '_impact": "Versiones antiguas de Databricks Runtime pierden soporte, parches de seguridad y optimiza'
-    'ciones de Photon/Delta.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/release-n'
-    'otes/runtime/"}, {"rule_id": "W05", "reference_id": "DBX-WAF-PERF-01", "test": "cluster_autoscaling_'
-    'or_pool", "level": "workload", "area": "optimization", "pillar": "performance", "severity": "low", "'
-    'effort": "low", "title": "Escalado din\\u00e1mico (Autoscale) o uso de Instance Pool en cl\\u00fastere'
-    's", "recommendation": "Evaluar autoscale (min_workers/max_workers) o vinculaci\\u00f3n a instance_poo'
-    'l_id para adaptar capacidad a variaciones de carga.", "business_impact": "Un n\\u00famero fijo de wor'
-    'kers sin pool puede infrautilizar recursos en valles o limitar concurrencia en picos.", "learn_url":'
-    ' "https://learn.microsoft.com/en-us/azure/databricks/compute/cluster-config-best-practices#autoscali'
-    'ng"}, {"rule_id": "W06", "reference_id": "DBX-WAF-COST-02", "test": "job_uses_job_compute", "level":'
-    ' "workload", "area": "finops", "pillar": "cost", "severity": "high", "effort": "medium", "title": "J'
-    'obs programados ejecutando en Job Compute o Serverless en lugar de All-Purpose", "recommendation": "'
-    'Migrar las tareas de Jobs que apuntan a existing_cluster_id hacia job_cluster_key o c\\u00f3mputo Ser'
-    'verless de Jobs.", "business_impact": "Ejecutar jobs automatizados sobre cl\\u00fasteres All-Purpose '
-    'consume tarifas DBU m\\u00e1s altas y acopla fallos entre cargas.", "learn_url": "https://learn.micro'
-    'soft.com/en-us/azure/well-architected/service-guides/azure-databricks#cost-optimization"}, {"rule_id'
-    '": "W07", "reference_id": "DBX-WAF-REL-01", "test": "job_resilience_settings", "level": "workload", '
-    '"area": "best_practices", "pillar": "reliability", "severity": "medium", "effort": "low", "title": "'
-    'Timeouts, reintentos o notificaciones en Jobs de orquestaci\\u00f3n", "recommendation": "Configurar t'
-    'imeout_seconds, pol\\u00edticas de reintento y notificaciones o alertas en los Jobs cr\\u00edticos par'
-    'a detectar ejecuciones colgadas o fallidas.", "business_impact": "Un job sin timeout ni alertas pued'
-    'e quedar bloqueado consumiendo recursos o incumplir ventanas de datos sin aviso.", "learn_url": "htt'
-    'ps://learn.microsoft.com/en-us/azure/databricks/jobs/configure-job"}, {"rule_id": "W08", "reference_'
-    'id": "DBX-WAF-SEC-09", "test": "job_service_principal_run_as", "level": "workload", "area": "securit'
-    'y", "pillar": "operations", "severity": "medium", "effort": "medium", "title": "Ejecuci\\u00f3n de Jo'
-    'bs mediante Service Principal (run_as)", "recommendation": "Configurar run_as con un Service Princip'
-    'al dedicado en lugar de una cuenta de usuario individual para evitar fallos ante bajas o cambios de '
-    'rol.", "business_impact": "Los jobs ejecutados bajo identidad de usuario fallan si el usuario deja l'
-    'a organizaci\\u00f3n o pierde permisos.", "learn_url": "https://learn.microsoft.com/en-us/azure/datab'
-    'ricks/admin/users-groups/service-principals"}, {"rule_id": "W09", "reference_id": "DBX-WAF-COST-03",'
-    ' "test": "sql_warehouse_autostop", "level": "workload", "area": "finops", "pillar": "cost", "severit'
-    'y": "medium", "effort": "low", "title": "Auto-stop y arquitectura Serverless/Pro en SQL Warehouses",'
-    ' "recommendation": "Configurar auto_stop_mins (<= 30 minutos) o usar SQL Warehouses Serverless para '
-    'cargas BI e interactivas con demanda variable.", "business_impact": "Un SQL Warehouse sin auto-stop '
-    'mantiene capacidad facturable activa fuera de las ventanas de consulta.", "learn_url": "https://lear'
-    'n.microsoft.com/en-us/azure/databricks/compute/sql-warehouse/create"}, {"rule_id": "W10", "reference'
-    '_id": "DBX-WAF-GOV-03", "test": "pipeline_unity_catalog", "level": "workload", "area": "best_practic'
-    'es", "pillar": "operations", "severity": "medium", "effort": "medium", "title": "Pipelines declarati'
-    'vos (Lakeflow / DLT) publicados en Unity Catalog", "recommendation": "Definir un cat\\u00e1logo de Un'
-    'ity Catalog en los pipelines declarativos para asegurar linaje nativo y gobernanza de tablas.", "bus'
-    'iness_impact": "Los pipelines publicados en hive_metastore quedan fuera del modelo centralizado de p'
-    'ermisos y linaje.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/ldp/unity-catal'
-    'og"}, {"rule_id": "G01", "reference_id": "DBX-WAF-GOV-04", "test": "uc_metastore_attached", "level":'
-    ' "workspace", "area": "best_practices", "pillar": "security", "severity": "high", "effort": "high", '
-    '"title": "Asignaci\\u00f3n de Metastore de Unity Catalog al workspace", "recommendation": "Vincular e'
-    'l workspace a un Metastore regional de Unity Catalog para centralizar identidades, control de acceso'
-    ', auditor\\u00eda y linaje.", "business_impact": "Sin Metastore adjunto no est\\u00e1n disponibles las'
-    ' capacidades de gobierno unificado, ubicaciones externas ni tablas de sistema.", "learn_url": "https'
-    '://learn.microsoft.com/en-us/azure/databricks/data-governance/unity-catalog/get-started"}, {"rule_id'
-    '": "G02", "reference_id": "DBX-WAF-SEC-10", "test": "uc_storage_credential_mi", "level": "workspace"'
-    ', "area": "security", "pillar": "security", "severity": "high", "effort": "medium", "title": "Storag'
-    'e Credentials de Unity Catalog basadas en Managed Identity", "recommendation": "Usar Azure Managed I'
-    'dentity (v\\u00eda Access Connector) en las Storage Credentials de Unity Catalog en lugar de secretos'
-    ' de Service Principal.", "business_impact": "Las credenciales basadas en secretos requieren rotaci\\u'
-    '00f3n manual y aumentan el riesgo ante filtraciones.", "learn_url": "https://learn.microsoft.com/en-'
-    'us/azure/databricks/connect/unity-catalog/cloud-storage/storage-credentials"}, {"rule_id": "G03", "r'
-    'eference_id": "DBX-WAF-GOV-05", "test": "uc_external_locations_governed", "level": "workspace", "are'
-    'a": "security", "pillar": "security", "severity": "medium", "effort": "medium", "title": "External L'
-    'ocations con Storage Credential v\\u00e1lida y rutas ADLS Gen2 expl\\u00edcitas", "recommendation": "V'
-    'erificar que cada External Location enlace con una Storage Credential existente, utilice abfss:// y '
-    'aplique vinculaci\\u00f3n por workspace cuando proceda.", "business_impact": "Ubicaciones externas hu'
-    '\\u00e9rfanas o sin aislamiento pueden exponer contenedores compartidos entre entornos.", "learn_url"'
-    ': "https://learn.microsoft.com/en-us/azure/databricks/data-governance/unity-catalog/best-practices#e'
-    'xternal-locations"}, {"rule_id": "G04", "reference_id": "DBX-WAF-SEC-11", "test": "secret_scopes_key'
-    'vault", "level": "workspace", "area": "security", "pillar": "security", "severity": "medium", "effor'
-    't": "medium", "title": "Secret Scopes respaldados por Azure Key Vault", "recommendation": "Preferir '
-    'Secret Scopes con backend AZURE_KEYVAULT frente a scopes locales DATABRICKS cuando se requiera gesti'
-    '\\u00f3n centralizada de secretos.", "business_impact": "Los scopes locales de Databricks no se integ'
-    'ran directamente con las pol\\u00edticas de rotaci\\u00f3n y auditor\\u00eda de Azure Key Vault.", "lea'
-    'rn_url": "https://learn.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes"}, {"rul'
-    'e_id": "G05", "reference_id": "DBX-WAF-REL-02", "test": "dependency_integrity", "level": "workspace"'
-    ', "area": "best_practices", "pillar": "reliability", "severity": "high", "effort": "medium", "title"'
-    ': "Integridad referencial del mapa de dependencias de Jobs, C\\u00f3mputo y Gobernanza", "recommendat'
-    'ion": "Corregir referencias rotas en tareas de Jobs (cl\\u00fasteres eliminados, SQL Warehouses inexi'
-    'stentes, pipelines o jobs hijos ausentes y credenciales no resueltas).", "business_impact": "Una dep'
-    'endencia rota observada en la definici\\u00f3n de un Job provocar\\u00e1 fallos inmediatos de ejecuci\\'
-    'u00f3n en producci\\u00f3n.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/jobs/c'
-    'onfigure-job"}, {"rule_id": "G06", "reference_id": "DBX-WAF-GOV-06", "test": "runtime_table_lineage"'
-    ', "level": "workspace", "area": "optimization", "pillar": "operations", "severity": "low", "effort":'
-    ' "medium", "title": "Linaje din\\u00e1mico de tablas y columnas (system.access.table_lineage)", "reco'
-    'mmendation": "Si se requiere linaje en tiempo de ejecuci\\u00f3n a nivel de tabla/columna, habilitar '
-    'y consultar system.access.table_lineage en una sesi\\u00f3n autorizada sin arrancar c\\u00f3mputo auto'
-    'm\\u00e1ticamente desde este colector.", "business_impact": "El an\\u00e1lisis de plano de control map'
-    'ea dependencias declaradas, pero no las lecturas/escrituras SQL din\\u00e1micas dentro de notebooks."'
-    ', "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/lineage"}, {"'
-    'rule_id": "G07", "reference_id": "DBX-WAF-GOV-07", "test": "lakehouse_federation_connections", "leve'
-    'l": "workspace", "area": "best_practices", "pillar": "operations", "severity": "low", "effort": "low'
-    '", "title": "Gobernanza de conexiones externas en Unity Catalog (Lakehouse Federation)", "recommenda'
-    'tion": "Inventariar las conexiones de Lakehouse Federation en Unity Catalog y verificar sus dependen'
-    'cias de red y credenciales.", "business_impact": "Las conexiones federadas externas representan depe'
-    'ndencias cr\\u00edticas hacia motores SQL o plataformas de terceros.", "learn_url": "https://learn.mi'
-    'crosoft.com/en-us/azure/databricks/query-federation/"}, {"rule_id": "G08", "reference_id": "DBX-WAF-'
-    'NET-03", "test": "outbound_control_plane_endpoints", "level": "workspace", "area": "best_practices",'
-    ' "pillar": "reliability", "severity": "medium", "effort": "low", "title": "Visibilidad de dependenci'
-    'as de red saliente (outboundNetworkDependenciesEndpoints)", "recommendation": "Contrastar las reglas'
-    ' de firewall/UDR/NSG con la lista oficial de endpoints salientes requeridos por el workspace hacia e'
-    'l plano de control.", "business_impact": "Bloquear dependencias salientes requeridas (Webapp, Contro'
-    'l Plane NAT, Storage, Metastore, EventHub/ServiceBus) impide el arranque de cl\\u00fasteres.", "learn'
-    '_url": "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations'
-    '/azure/udr"}, {"rule_id": "R01", "reference_id": "DBX-WAF-RES-01", "test": "storage_tls_and_public_b'
-    'lob", "level": "resource", "area": "security", "pillar": "security", "severity": "high", "effort": "'
-    'low", "title": "Cuentas de almacenamiento asociadas con HTTPS, TLS 1.2+ y sin acceso p\\u00fablico a '
-    'blobs", "recommendation": "Exigir supportsHttpsTrafficOnly=true, minimumTlsVersion=TLS1_2 y allowBlo'
-    'bPublicAccess=false en las cuentas ADLS Gen2 asociadas.", "business_impact": "Permitir tr\\u00e1fico '
-    'no cifrado o acceso an\\u00f3nimo a contenedores expone activos del lakehouse.", "learn_url": "https:'
-    '//learn.microsoft.com/en-us/azure/storage/blobs/security-recommendations"}, {"rule_id": "R02", "refe'
-    'rence_id": "DBX-WAF-RES-02", "test": "storage_shared_key_and_network", "level": "resource", "area": '
-    '"security", "pillar": "security", "severity": "medium", "effort": "medium", "title": "Restricci\\u00f'
-    '3n de Shared Key y acceso de red en cuentas de almacenamiento asociadas", "recommendation": "Evaluar'
-    ' la deshabilitaci\\u00f3n de allowSharedKeyAccess y restringir publicNetworkAccess en cuentas ADLS Ge'
-    'n2 gobernadas por Entra ID / Unity Catalog.", "business_impact": "Las claves compartidas de cuenta e'
-    'luden los controles granulares de identidad de Microsoft Entra y Unity Catalog.", "learn_url": "http'
-    's://learn.microsoft.com/en-us/azure/storage/common/shared-key-authorization-prevent"}, {"rule_id": "'
-    'R03", "reference_id": "DBX-WAF-RES-03", "test": "keyvault_rbac_and_purge", "level": "resource", "are'
-    'a": "security", "pillar": "security", "severity": "medium", "effort": "medium", "title": "Autorizaci'
-    '\\u00f3n RBAC y protecci\\u00f3n contra purga en Key Vaults asociados", "recommendation": "Habilitar e'
-    'nableRbacAuthorization y enablePurgeProtection en los Key Vaults vinculados a Secret Scopes o claves'
-    ' CMK del workspace.", "business_impact": "Sin protecci\\u00f3n contra purga, la eliminaci\\u00f3n acci'
-    'dental o maliciosa de una clave CMK o secreto puede ser irreversible.", "learn_url": "https://learn.'
-    'microsoft.com/en-us/azure/key-vault/general/security-features"}, {"rule_id": "R04", "reference_id": '
-    '"DBX-WAF-RES-04", "test": "nsg_exposure", "level": "resource", "area": "security", "pillar": "securi'
-    'ty", "severity": "high", "effort": "medium", "title": "Exposici\\u00f3n de puertos administrativos de'
-    'sde Internet en NSG asociados", "recommendation": "Eliminar o restringir reglas Inbound Allow desde '
-    'Internet (0.0.0.0/0, *, Internet) hacia SSH (22), RDP (3389) o todos los puertos en subredes del wor'
-    'kspace.", "business_impact": "Reglas de entrada abiertas desde Internet hacia las subredes de cl\\u00'
-    'faster violan el aislamiento del plano de datos.", "learn_url": "https://learn.microsoft.com/en-us/a'
-    'zure/databricks/security/network/classic/vnet-inject"}, {"rule_id": "R05", "reference_id": "DBX-WAF-'
-    'RES-05", "test": "private_endpoint_approved", "level": "resource", "area": "best_practices", "pillar'
-    '": "reliability", "severity": "medium", "effort": "low", "title": "Estado aprobado en conexiones Pri'
-    'vate Endpoint asociadas", "recommendation": "Confirmar que todas las conexiones Private Endpoint aso'
-    'ciadas al workspace o recursos vinculados est\\u00e9n en estado Approved.", "business_impact": "Un Pr'
-    'ivate Endpoint en estado Pending, Rejected o Disconnected interrumpe la conectividad privada previst'
-    'a.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/security/network/classic/priva'
-    'te-link"}, {"rule_id": "R06", "reference_id": "DBX-WAF-COST-04", "test": "cost_attribution", "level"'
-    ': "workspace", "area": "finops", "pillar": "cost", "severity": "low", "effort": "medium", "title": "'
-    'Atribuci\\u00f3n de costes reales (ActualCost) y granularidad DBU por carga", "recommendation": "Comb'
-    'inar los costes reales ARM observados con el etiquetado de cl\\u00fasteres/jobs y la tabla system.bil'
-    'ling.usage para atribuir consumo DBU por equipo o pipeline.", "business_impact": "ActualCost a nivel'
-    ' de ResourceId de Azure no desglosa por s\\u00ed solo el consumo interno de cada Job, SQL Warehouse o'
-    ' usuario.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/bil'
-    'ling"}]}'
+    'e", "area": "security", "pillar": "security", "severity": "medium", "effort": "medium", "title": "Cu'
+    'stomer-managed key (CMK) and infrastructure encryption", "recommendation": "If your compliance polic'
+    'y requires CMK, configure Key Vault keys for managedServices and managedDisk with automatic rotation'
+    '.", "business_impact": "Without CMK where regulation requires it, the customer doesn\'t directly cont'
+    'rol cryptographic revocation.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/sec'
+    'urity/keys/"}, {"rule_id": "C07", "reference_id": "DBX-WAF-SEC-05", "test": "enhanced_security_compl'
+    'iance", "level": "workspace", "area": "security", "pillar": "operations", "severity": "low", "effort'
+    '": "medium", "title": "Enhanced security profile and automatic cluster update", "recommendation": "E'
+    'valuate enhancedSecurityMonitoring, automaticClusterUpdate and complianceSecurityProfile when specif'
+    'ic regulations apply.", "business_impact": "Without automatic updates or the required enhanced monit'
+    'oring, agent maintenance depends on manual processes.", "learn_url": "https://learn.microsoft.com/en'
+    '-us/azure/databricks/security/privacy/security-profile"}, {"rule_id": "C08", "reference_id": "DBX-WA'
+    'F-OPS-01", "test": "diagnostics", "level": "workspace", "area": "best_practices", "pillar": "operati'
+    'ons", "severity": "medium", "effort": "low", "title": "Diagnostic settings on the ARM control plane"'
+    ', "recommendation": "Send audit categories through Microsoft.Insights/diagnosticSettings to Log Anal'
+    'ytics, Storage or Event Hubs and verify the ingestion.", "business_impact": "Without diagnostic logs'
+    ', control-plane, job and access events are harder to trace.", "learn_url": "https://learn.microsoft.'
+    'com/en-us/azure/databricks/admin/account-settings/audit-logs"}, {"rule_id": "C09", "reference_id": "'
+    'DBX-WAF-SEC-06", "test": "pat_token_governance", "level": "workspace", "area": "security", "pillar":'
+    ' "security", "severity": "medium", "effort": "low", "title": "Personal access token (PAT) governance'
+    ' in workspace-conf", "recommendation": "Review enableTokensConfig and prefer OAuth M2M authenticatio'
+    'n or Microsoft Entra managed identities over long-lived PATs.", "business_impact": "Personal tokens '
+    'without issuance or expiry control increase the risk of persistent credentials.", "learn_url": "http'
+    's://learn.microsoft.com/en-us/azure/databricks/security/auth/api-access-permissions"}, {"rule_id": "'
+    'C10", "reference_id": "DBX-WAF-GOV-01", "test": "default_catalog_unity", "level": "workspace", "area'
+    '": "best_practices", "pillar": "operations", "severity": "medium", "effort": "medium", "title": "Uni'
+    'ty Catalog as the default catalog instead of legacy Hive", "recommendation": "Set UnityCatalog as th'
+    'e default catalog and avoid storing business data in the DBFS root or hive_metastore.", "business_im'
+    'pact": "Using hive_metastore and the DBFS root makes unified access control and data lineage harder.'
+    '", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/data-governance/unity-catalog/be'
+    'st-practices"}, {"rule_id": "C11", "reference_id": "DBX-WAF-SEC-07", "test": "global_init_scripts", '
+    '"level": "workspace", "area": "security", "pillar": "security", "severity": "low", "effort": "low", '
+    '"title": "Global init script hygiene and review", "recommendation": "Minimize or audit the enabled g'
+    'lobal init scripts and prefer cluster policies or init scripts stored in Unity Catalog volumes.", "b'
+    'usiness_impact": "Global init scripts run on every cluster in the workspace and can introduce hidden'
+    ' dependencies or points of failure.", "learn_url": "https://learn.microsoft.com/en-us/azure/databric'
+    'ks/init-scripts/global"}, {"rule_id": "C12", "reference_id": "DBX-WAF-OPS-02", "test": "advisor", "l'
+    'evel": "workspace", "area": "optimization", "pillar": "operations", "severity": "low", "effort": "lo'
+    'w", "title": "Review of cached Azure Advisor recommendations", "recommendation": "Check the cached A'
+    'zure Advisor recommendations for the workspace and its associated resources as a complementary input'
+    '.", "business_impact": "Ignoring platform alerts can delay finding reliability or cost improvements.'
+    '", "learn_url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-datab'
+    'ricks"}, {"rule_id": "W01", "reference_id": "DBX-WAF-COST-01", "test": "cluster_autotermination", "l'
+    'evel": "workload", "area": "finops", "pillar": "cost", "severity": "high", "effort": "low", "title":'
+    ' "Auto-termination on interactive all-purpose clusters", "recommendation": "Set autotermination_minu'
+    'tes (for example 60 minutes or less) on every all-purpose cluster to avoid idle DBU and VM consumpti'
+    'on.", "business_impact": "An interactive cluster without auto-termination, or with a high threshold,'
+    ' keeps nodes billing with no active workload.", "learn_url": "https://learn.microsoft.com/en-us/azur'
+    'e/databricks/compute/cluster-config-best-practices"}, {"rule_id": "W02", "reference_id": "DBX-WAF-GO'
+    'V-02", "test": "cluster_policy_bound", "level": "workload", "area": "best_practices", "pillar": "cos'
+    't", "severity": "medium", "effort": "medium", "title": "Clusters governed by a cluster policy", "rec'
+    'ommendation": "Attach a policy_id to clusters to enforce limits on instance type, auto-termination, '
+    'runtime version and FinOps tags.", "business_impact": "Creating clusters without a policy allows non'
+    '-standard configurations and accidental overspending.", "learn_url": "https://learn.microsoft.com/en'
+    '-us/azure/databricks/admin/clusters/policies"}, {"rule_id": "W03", "reference_id": "DBX-WAF-SEC-08",'
+    ' "test": "cluster_access_mode", "level": "workload", "area": "security", "pillar": "security", "seve'
+    'rity": "high", "effort": "medium", "title": "Compute access mode compatible with isolation and Unity'
+    ' Catalog", "recommendation": "Set data_security_mode to USER_ISOLATION (Standard/Shared) or SINGLE_U'
+    'SER (Dedicated) and avoid modes without isolation (NONE).", "business_impact": "Legacy or non-isolat'
+    'ed access modes prevent Unity Catalog controls or allow ungoverned direct access.", "learn_url": "ht'
+    'tps://learn.microsoft.com/en-us/azure/databricks/compute/configure#access-mode"}, {"rule_id": "W04",'
+    ' "reference_id": "DBX-WAF-OPS-03", "test": "cluster_runtime_lts", "level": "workload", "area": "best'
+    '_practices", "pillar": "reliability", "severity": "medium", "effort": "medium", "title": "Supported '
+    'Databricks Runtime version (LTS / current)", "recommendation": "Keep spark_version on a current Long'
+    ' Term Support (LTS) version (for example 13.3 LTS, 14.3 LTS, 15.4 LTS or later).", "business_impact"'
+    ': "Old Databricks Runtime versions lose support, security patches and Photon/Delta optimizations.", '
+    '"learn_url": "https://learn.microsoft.com/en-us/azure/databricks/release-notes/runtime/"}, {"rule_id'
+    '": "W05", "reference_id": "DBX-WAF-PERF-01", "test": "cluster_autoscaling_or_pool", "level": "worklo'
+    'ad", "area": "optimization", "pillar": "performance", "severity": "low", "effort": "low", "title": "'
+    'Autoscaling or instance pool on clusters", "recommendation": "Evaluate autoscale (min_workers/max_wo'
+    'rkers) or an instance_pool_id binding to match capacity to workload changes.", "business_impact": "A'
+    ' fixed number of workers without a pool can leave resources idle in quiet periods or limit concurren'
+    'cy at peaks.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/compute/cluster-conf'
+    'ig-best-practices#autoscaling"}, {"rule_id": "W06", "reference_id": "DBX-WAF-COST-02", "test": "job_'
+    'uses_job_compute", "level": "workload", "area": "finops", "pillar": "cost", "severity": "high", "eff'
+    'ort": "medium", "title": "Scheduled jobs on job compute or serverless instead of all-purpose", "reco'
+    'mmendation": "Move job tasks that point to existing_cluster_id to job_cluster_key or serverless job '
+    'compute.", "business_impact": "Running automated jobs on all-purpose clusters costs higher DBU rates'
+    ' and couples failures across workloads.", "learn_url": "https://learn.microsoft.com/en-us/azure/well'
+    '-architected/service-guides/azure-databricks#cost-optimization"}, {"rule_id": "W07", "reference_id":'
+    ' "DBX-WAF-REL-01", "test": "job_resilience_settings", "level": "workload", "area": "best_practices",'
+    ' "pillar": "reliability", "severity": "medium", "effort": "low", "title": "Timeouts, retries or noti'
+    'fications on orchestration jobs", "recommendation": "Configure timeout_seconds, retry policies and n'
+    'otifications or alerts on critical jobs to detect hung or failed runs.", "business_impact": "A job w'
+    'ithout a timeout or alerts can hang while consuming resources, or miss data windows without warning.'
+    '", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/jobs/configure-job"}, {"rule_id"'
+    ': "W08", "reference_id": "DBX-WAF-SEC-09", "test": "job_service_principal_run_as", "level": "workloa'
+    'd", "area": "security", "pillar": "operations", "severity": "medium", "effort": "medium", "title": "'
+    'Jobs run as a service principal (run_as)", "recommendation": "Set run_as to a dedicated service prin'
+    'cipal instead of an individual user account, so jobs don\'t fail when people leave or change roles.",'
+    ' "business_impact": "Jobs that run under a user identity fail if the user leaves the organization or'
+    ' loses permissions.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/admin/users-g'
+    'roups/service-principals"}, {"rule_id": "W09", "reference_id": "DBX-WAF-COST-03", "test": "sql_wareh'
+    'ouse_autostop", "level": "workload", "area": "finops", "pillar": "cost", "severity": "medium", "effo'
+    'rt": "low", "title": "Auto-stop and serverless/pro architecture on SQL warehouses", "recommendation"'
+    ': "Set auto_stop_mins (30 minutes or less) or use serverless SQL warehouses for BI and interactive w'
+    'orkloads with variable demand.", "business_impact": "A SQL warehouse without auto-stop keeps billabl'
+    'e capacity running outside query windows.", "learn_url": "https://learn.microsoft.com/en-us/azure/da'
+    'tabricks/compute/sql-warehouse/create"}, {"rule_id": "W10", "reference_id": "DBX-WAF-GOV-03", "test"'
+    ': "pipeline_unity_catalog", "level": "workload", "area": "best_practices", "pillar": "operations", "'
+    'severity": "medium", "effort": "medium", "title": "Declarative pipelines (Lakeflow / DLT) published '
+    'to Unity Catalog", "recommendation": "Set a Unity Catalog catalog on declarative pipelines to get na'
+    'tive lineage and table governance.", "business_impact": "Pipelines published to hive_metastore fall '
+    'outside the central permission and lineage model.", "learn_url": "https://learn.microsoft.com/en-us/'
+    'azure/databricks/ldp/unity-catalog"}, {"rule_id": "G01", "reference_id": "DBX-WAF-GOV-04", "test": "'
+    'uc_metastore_attached", "level": "workspace", "area": "best_practices", "pillar": "security", "sever'
+    'ity": "high", "effort": "high", "title": "Unity Catalog metastore assigned to the workspace", "recom'
+    'mendation": "Link the workspace to a regional Unity Catalog metastore to centralize identities, acce'
+    'ss control, auditing and lineage.", "business_impact": "Without an attached metastore, unified gover'
+    'nance, external locations and system tables aren\'t available.", "learn_url": "https://learn.microsof'
+    't.com/en-us/azure/databricks/data-governance/unity-catalog/get-started"}, {"rule_id": "G02", "refere'
+    'nce_id": "DBX-WAF-SEC-10", "test": "uc_storage_credential_mi", "level": "workspace", "area": "securi'
+    'ty", "pillar": "security", "severity": "high", "effort": "medium", "title": "Unity Catalog storage c'
+    'redentials based on managed identity", "recommendation": "Use an Azure managed identity (through an '
+    'access connector) in Unity Catalog storage credentials instead of service principal secrets.", "busi'
+    'ness_impact": "Secret-based credentials need manual rotation and raise the risk if they leak.", "lea'
+    'rn_url": "https://learn.microsoft.com/en-us/azure/databricks/connect/unity-catalog/cloud-storage/sto'
+    'rage-credentials"}, {"rule_id": "G03", "reference_id": "DBX-WAF-GOV-05", "test": "uc_external_locati'
+    'ons_governed", "level": "workspace", "area": "security", "pillar": "security", "severity": "medium",'
+    ' "effort": "medium", "title": "External locations with a valid storage credential and explicit ADLS '
+    'Gen2 paths", "recommendation": "Check that each external location links to an existing storage crede'
+    'ntial, uses abfss:// and applies workspace binding where appropriate.", "business_impact": "Orphaned'
+    ' or non-isolated external locations can expose containers shared across environments.", "learn_url":'
+    ' "https://learn.microsoft.com/en-us/azure/databricks/data-governance/unity-catalog/best-practices#ex'
+    'ternal-locations"}, {"rule_id": "G04", "reference_id": "DBX-WAF-SEC-11", "test": "secret_scopes_keyv'
+    'ault", "level": "workspace", "area": "security", "pillar": "security", "severity": "medium", "effort'
+    '": "medium", "title": "Secret scopes backed by Azure Key Vault", "recommendation": "Prefer secret sc'
+    'opes with the AZURE_KEYVAULT backend over local DATABRICKS scopes when you need central secret manag'
+    'ement.", "business_impact": "Local Databricks scopes don\'t integrate directly with Azure Key Vault r'
+    'otation and audit policies.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/secur'
+    'ity/secrets/secret-scopes"}, {"rule_id": "G05", "reference_id": "DBX-WAF-REL-02", "test": "dependenc'
+    'y_integrity", "level": "workspace", "area": "best_practices", "pillar": "reliability", "severity": "'
+    'high", "effort": "medium", "title": "Referential integrity of the job, compute and governance depend'
+    'ency map", "recommendation": "Fix broken references in job tasks (deleted clusters, SQL warehouses t'
+    'hat don\'t exist, missing pipelines or child jobs, and unresolved credentials).", "business_impact": '
+    '"A broken dependency observed in a job definition causes immediate run failures in production.", "le'
+    'arn_url": "https://learn.microsoft.com/en-us/azure/databricks/jobs/configure-job"}, {"rule_id": "G06'
+    '", "reference_id": "DBX-WAF-GOV-06", "test": "runtime_table_lineage", "level": "workspace", "area": '
+    '"optimization", "pillar": "operations", "severity": "low", "effort": "medium", "title": "Runtime tab'
+    'le and column lineage (system.access.table_lineage)", "recommendation": "If you need runtime lineage'
+    ' at table or column level, enable and query system.access.table_lineage in an authorized session; th'
+    'is collector never starts compute to do it.", "business_impact": "Control-plane analysis maps declar'
+    'ed dependencies, not the dynamic SQL reads and writes inside notebooks.", "learn_url": "https://lear'
+    'n.microsoft.com/en-us/azure/databricks/admin/system-tables/lineage"}, {"rule_id": "G07", "reference_'
+    'id": "DBX-WAF-GOV-07", "test": "lakehouse_federation_connections", "level": "workspace", "area": "be'
+    'st_practices", "pillar": "operations", "severity": "low", "effort": "low", "title": "Governance of e'
+    'xternal connections in Unity Catalog (Lakehouse Federation)", "recommendation": "Inventory the Lakeh'
+    'ouse Federation connections in Unity Catalog and check their network and credential dependencies.", '
+    '"business_impact": "Federated external connections are critical dependencies on third-party SQL engi'
+    'nes or platforms.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/query-federatio'
+    'n/"}, {"rule_id": "G08", "reference_id": "DBX-WAF-NET-03", "test": "outbound_control_plane_endpoints'
+    '", "level": "workspace", "area": "best_practices", "pillar": "reliability", "severity": "medium", "e'
+    'ffort": "low", "title": "Visibility of outbound network dependencies (outboundNetworkDependenciesEnd'
+    'points)", "recommendation": "Compare the firewall, UDR and NSG rules with the official list of outbo'
+    'und endpoints that the workspace needs to reach the control plane.", "business_impact": "Blocking re'
+    'quired outbound dependencies (Webapp, Control Plane NAT, Storage, Metastore, EventHub/ServiceBus) pr'
+    'events clusters from starting.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/ad'
+    'ministration-guide/cloud-configurations/azure/udr"}, {"rule_id": "R01", "reference_id": "DBX-WAF-RES'
+    '-01", "test": "storage_tls_and_public_blob", "level": "resource", "area": "security", "pillar": "sec'
+    'urity", "severity": "high", "effort": "low", "title": "Associated storage accounts with HTTPS, TLS 1'
+    '.2+ and no public blob access", "recommendation": "Require supportsHttpsTrafficOnly=true, minimumTls'
+    'Version=TLS1_2 and allowBlobPublicAccess=false on the associated ADLS Gen2 accounts.", "business_imp'
+    'act": "Allowing unencrypted traffic or anonymous container access exposes lakehouse assets.", "learn'
+    '_url": "https://learn.microsoft.com/en-us/azure/storage/blobs/security-recommendations"}, {"rule_id"'
+    ': "R02", "reference_id": "DBX-WAF-RES-02", "test": "storage_shared_key_and_network", "level": "resou'
+    'rce", "area": "security", "pillar": "security", "severity": "medium", "effort": "medium", "title": "'
+    'Shared key and network access restriction on associated storage accounts", "recommendation": "Evalua'
+    'te disabling allowSharedKeyAccess and restricting publicNetworkAccess on ADLS Gen2 accounts governed'
+    ' by Microsoft Entra ID / Unity Catalog.", "business_impact": "Account shared keys bypass the granula'
+    'r identity controls of Microsoft Entra and Unity Catalog.", "learn_url": "https://learn.microsoft.co'
+    'm/en-us/azure/storage/common/shared-key-authorization-prevent"}, {"rule_id": "R03", "reference_id": '
+    '"DBX-WAF-RES-03", "test": "keyvault_rbac_and_purge", "level": "resource", "area": "security", "pilla'
+    'r": "security", "severity": "medium", "effort": "medium", "title": "RBAC authorization and purge pro'
+    'tection on associated key vaults", "recommendation": "Enable enableRbacAuthorization and enablePurge'
+    'Protection on the key vaults linked to secret scopes or to the workspace CMK keys.", "business_impac'
+    't": "Without purge protection, accidental or malicious deletion of a CMK key or secret can be irreve'
+    'rsible.", "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/general/security-features"'
+    '}, {"rule_id": "R04", "reference_id": "DBX-WAF-RES-04", "test": "nsg_exposure", "level": "resource",'
+    ' "area": "security", "pillar": "security", "severity": "high", "effort": "medium", "title": "Adminis'
+    'trative ports exposed to the internet on associated NSGs", "recommendation": "Remove or restrict inb'
+    'ound Allow rules from the internet (0.0.0.0/0, *, Internet) to SSH (22), RDP (3389) or all ports on '
+    'the workspace subnets.", "business_impact": "Inbound rules open to the internet on cluster subnets b'
+    'reak data-plane isolation.", "learn_url": "https://learn.microsoft.com/en-us/azure/databricks/securi'
+    'ty/network/classic/vnet-inject"}, {"rule_id": "R05", "reference_id": "DBX-WAF-RES-05", "test": "priv'
+    'ate_endpoint_approved", "level": "resource", "area": "best_practices", "pillar": "reliability", "sev'
+    'erity": "medium", "effort": "low", "title": "Approved state on associated private endpoint connectio'
+    'ns", "recommendation": "Confirm that every private endpoint connection associated with the workspace'
+    ' or its linked resources is in the Approved state.", "business_impact": "A private endpoint in the P'
+    'ending, Rejected or Disconnected state breaks the intended private connectivity.", "learn_url": "htt'
+    'ps://learn.microsoft.com/en-us/azure/databricks/security/network/classic/private-link"}, {"rule_id":'
+    ' "R06", "reference_id": "DBX-WAF-COST-04", "test": "cost_attribution", "level": "workspace", "area":'
+    ' "finops", "pillar": "cost", "severity": "low", "effort": "medium", "title": "Actual cost attributio'
+    'n (ActualCost) and DBU granularity by workload", "recommendation": "Combine the observed ARM actual '
+    'costs with cluster and job tagging and the system.billing.usage table to attribute DBU consumption b'
+    'y team or pipeline.", "business_impact": "ActualCost at Azure ResourceId level doesn\'t break down, o'
+    'n its own, the internal consumption of each job, SQL warehouse or user.", "learn_url": "https://lear'
+    'n.microsoft.com/en-us/azure/databricks/admin/system-tables/billing"}]}'
 ))
 HTML_TEMPLATE = (
     '<!doctype html>\n<!--\nTHESIS: An offline Lakehouse consulting dossier connects dated Azure Databricks'
@@ -446,1674 +430,1660 @@ HTML_TEMPLATE = (
     'atabricks lava/teal ribbon (#ff3621, #00875a); colour never substitutes for evidence.\nSTORY: Read th'
     'e verdict and coverage first, confirm workspace identity and provenance, inspect OBSERVED vs INFERRE'
     'D vs UNKNOWN dependencies, drill into workloads/Unity Catalog, then act on the prioritised plan and '
-    'check the source ledger.\n-->\n<html lang="es-ES">\n<head>\n<meta charset="utf-8">\n<meta name="viewport"'
-    ' content="width=device-width,initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="d'
-    "efault-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src da"
-    'ta:; connect-src \'none\'; base-uri \'none\'; form-action \'none\'; object-src \'none\'">\n<meta name="color-'
-    'scheme" content="light dark">\n<title>Revisión Azure Databricks | Mapa de dependencias y configuració'
-    'n</title>\n<style>\n:root{\ncolor-scheme:light;\n--brand-navy: #003865; --brand-lava: #ff3621; --brand-s'
-    'teel: #0066a1; --brand-teal: #00875a;\n--paper:#f2f5f8;--surface:#ffffff;--soft:#eef2f6;--hover:#f6f9'
-    'fc;\n--ink:#16212c;--title:#002b4e;--muted:#4f5d6b;--line:#dde3ea;--line2:#c2ccd6;\n--link:#0058a3;--f'
-    'ocus:#0b6bcb;--sel:#cfe3f7;--chart:#0066a1;--chart-2:#8fb3d3;--edge:#4d7aa3;\n--bar-bg:#ffffff;--bar-'
-    'hover:#eef2f6;--btn:#003865;--btn-hover:#002848;--btn-ink:#ffffff;\n--hero-a:#003865;--hero-b:#00223c'
-    ';--hero-muted:#c3d5e8;--hero-line:rgba(255,255,255,.24);\n--up-ink:#b42318;--down-ink:#067647;\n--shad'
-    'ow:0 1px 2px rgba(16,24,40,.05),0 10px 28px rgba(16,24,40,.07);\n--crit-ink:#b42318;--crit-bg:#fee4e2'
-    ';--crit-bar:#d92d20;\n--high-ink:#b93815;--high-bg:#ffead5;--high-bar:#ef6820;\n--med-ink:#93370d;--me'
-    'd-bg:#fef0c7;--med-bar:#f79009;\n--low-ink:#175cd3;--low-bg:#d1e9ff;--low-bar:#2e90fa;\n--info-ink:#34'
-    '4054;--info-bg:#eaecf0;--info-bar:#98a2b3;\n--ok-ink:#067647;--ok-bg:#dcfae6;--ok-bar:#17b26a;\n--obs-'
-    'ink:#00603f;--obs-bg:#ddf4ea;--obs-line:#00875a;\n--inf-ink:#8a4b00;--inf-bg:#fff1d6;--inf-line:#c777'
-    '00;\n--unk-ink:#475467;--unk-bg:#eaecf0;--unk-line:#98a2b3;\n}\n:root[data-theme="dark"]{\ncolor-scheme:'
-    'dark;\n--paper:#0d141b;--surface:#15202a;--soft:#1c2834;--hover:#19242f;\n--ink:#e6edf3;--title:#f1f6f'
-    'b;--muted:#a9b7c5;--line:#26333f;--line2:#3a4a5a;\n--link:#8cc8ff;--focus:#8cc8ff;--sel:#24476b;--cha'
-    'rt:#6fb6f0;--chart-2:#3f6d94;--edge:#7aa7cf;\n--up-ink:#ffb4ab;--down-ink:#a6f4c5;\n--bar-bg:#101920;-'
-    '-bar-hover:#1c2834;--btn:#8cc8ff;--btn-hover:#a9d6ff;--btn-ink:#0b1620;\n--hero-a:#0a2742;--hero-b:#0'
-    '61626;--hero-muted:#bdd0e3;\n--shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);\n--crit-i'
-    'nk:#ffb4ab;--crit-bg:#4a1c1a;--high-ink:#ffc29e;--high-bg:#4a2614;\n--med-ink:#fedf89;--med-bg:#45330'
-    'f;--low-ink:#a8d4ff;--low-bg:#13304f;\n--info-ink:#d0d5dd;--info-bg:#2a3441;--ok-ink:#a6f4c5;--ok-bg:'
-    '#133a28;\n--obs-ink:#8ce9bf;--obs-bg:#12382a;--inf-ink:#f5d875;--inf-bg:#3d3216;--unk-ink:#cbd5e1;--u'
-    'nk-bg:#2a3441;\n}\n*{box-sizing:border-box}\nhtml{scroll-padding-top:78px;-webkit-text-size-adjust:100%'
-    ';scrollbar-color:var(--line2) var(--paper)}\nbody{margin:0;background:var(--paper);color:var(--ink);f'
-    'ont:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;overfl'
-    'ow-wrap:break-word}\n::selection{background:var(--sel);color:var(--ink)}\n[hidden]{display:none !impor'
-    'tant}\na{color:var(--link);text-underline-offset:3px}\nbutton,input,select{font:inherit;color:inherit}'
-    '\n:focus-visible{outline:3px solid var(--focus);outline-offset:2px}\n.sr{position:absolute;width:1px;h'
-    'eight:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}\n.ski'
-    'p{position:absolute;left:16px;top:-100px;z-index:60;padding:10px 14px;background:var(--surface);colo'
-    'r:var(--ink);border:2px solid var(--focus);border-radius:8px}\n.skip:focus{top:10px}\nsvg.i{width:16px'
-    ';height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-li'
-    'nejoin:round}\n.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;min-hei'
-    'ght:60px;padding:8px clamp(14px,3vw,40px);background:var(--bar-bg);box-shadow:0 1px 0 var(--line)}\n.'
-    'brand{display:flex;flex:none;align-items:center;gap:10px;color:var(--ink);text-decoration:none}\n.bra'
-    'nd .mark{width:30px;height:30px;flex:none}\n.wordmark{font-weight:700;font-size:16.5px;letter-spacing'
-    ':-.01em;white-space:nowrap;color:var(--title)}\n.product{font-size:13.5px;color:var(--muted);white-sp'
-    'ace:nowrap;padding-left:10px;border-left:1px solid var(--line2)}\n.bar-nav{display:flex;gap:2px;margi'
-    'n-left:6px;min-width:0;overflow:hidden}\n.bar-nav a{color:var(--muted);text-decoration:none;font-size'
-    ':14px;font-weight:600;padding:8px 9px;border-radius:8px;white-space:nowrap}\n.bar-nav a:hover,.bar-na'
-    'v a[aria-current="true"]{background:var(--bar-hover);color:var(--title)}\n.acts{margin-left:auto;disp'
-    'lay:flex;align-items:center;gap:8px}\n.tag{font-size:12.5px;font-weight:600;color:var(--muted);border'
-    ':1px solid var(--line2);border-radius:999px;padding:5px 11px;white-space:nowrap}\n.btn{display:inline'
-    '-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 15px;border:1px so'
-    'lid transparent;border-radius:10px;background:var(--btn);color:var(--btn-ink);font-weight:600;font-s'
-    'ize:14px;cursor:pointer;white-space:nowrap;text-decoration:none;list-style:none}\n.btn:hover{backgrou'
-    'nd:var(--btn-hover)}\n.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line2)'
-    '}\n.btn.ghost:hover{background:var(--bar-hover)}\n.btn.icon{width:40px;padding:0}\n.btn.sm{min-height:3'
-    '4px;padding:0 12px;font-size:13px}\nsummary.btn::-webkit-details-marker{display:none}\n#theme-toggle .'
-    'sun,#theme-toggle[aria-pressed="true"] .moon{display:none}\n#theme-toggle[aria-pressed="true"] .sun{d'
-    'isplay:block}\n.menu{position:relative}\n.menu-pop{position:absolute;right:0;top:calc(100% + 6px);z-in'
-    'dex:40;min-width:260px;display:grid;gap:2px;padding:6px;background:var(--surface);border:1px solid v'
-    'ar(--line);border-radius:12px;box-shadow:var(--shadow)}\n.menu-pop button,.menu-pop a{display:block;w'
-    'idth:100%;padding:9px 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-a'
-    'lign:left;text-decoration:none;font-size:14px;font-weight:600;cursor:pointer}\n.menu-pop button:hover'
-    ',.menu-pop a:hover{background:var(--soft)}\n.menu-pop small{display:block;font-weight:400;color:var(-'
-    '-muted);font-size:12.5px}\n.toc{display:none}\n.brand-ribbon{display:flex;height:5px}\n.brand-ribbon sp'
-    'an{flex:1}\n.brand-ribbon .navy{background:var(--brand-navy)}\n.brand-ribbon .lava{background:var(--br'
-    'and-lava)}\n.brand-ribbon .steel{background:var(--brand-steel)}\n.brand-ribbon .teal{background:var(--'
-    'brand-teal)}\nselect,input[type="search"]{min-height:40px;max-width:100%;padding:0 12px;border:1px so'
-    'lid var(--line2);border-radius:10px;background:var(--surface);color:var(--ink)}\ninput[type="search"]'
-    '::placeholder{color:var(--muted);opacity:1}\nselect:focus-visible,input:focus-visible{outline:3px sol'
-    'id var(--focus);outline-offset:1px}\n.multi-band{background:var(--surface);border-bottom:1px solid va'
-    'r(--line)}\n.band-in{max-width:1400px;margin:0 auto;padding:12px clamp(14px,3vw,40px);display:flex;fl'
-    'ex-wrap:wrap;gap:10px 24px;align-items:center;justify-content:space-between;font-size:14px}\n.band-in'
-    ' p{margin:0;color:var(--muted)}\n.band-in b{color:var(--ink)}\n.ws-select{display:flex;align-items:cen'
-    'ter;gap:10px;font-weight:600}\n.hero{position:relative;background:linear-gradient(150deg,var(--hero-a'
-    ') 0%,var(--hero-b) 100%);color:#ffffff;padding:clamp(28px,4.2vw,52px) clamp(14px,3vw,40px) 104px}\n.h'
-    'ero-in{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24p'
-    'x 52px;align-items:start}\n.hero h1{margin:0 0 14px;font-size:clamp(28px,3vw,44px);line-height:1.12;f'
-    'ont-weight:700;letter-spacing:-.02em;text-wrap:balance;color:#ffffff}\n.lead{margin:0;max-width:72ch;'
-    'font-size:17px;line-height:1.55;color:var(--hero-muted)}\n.lead b{color:#ffffff;font-weight:700}\n.met'
-    'a{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}\n.meta span{font-size:12.5px;padding:5px 11px;'
-    'border-radius:999px;border:1px solid var(--hero-line);color:var(--hero-muted);white-space:nowrap}\n.m'
-    'eta b{color:#ffffff;font-weight:600}\n.meta span.on{background:rgba(255,255,255,.12);border-color:rgb'
-    'a(255,255,255,.45);color:#ffffff;font-weight:700;letter-spacing:.02em}\n.hero-side{display:grid;gap:1'
-    '4px}\n.plaque-k{margin:0 0 6px;font-size:12.5px;color:var(--hero-muted)}\n.brand-plaque{color-scheme:o'
-    'nly light;display:flex;align-items:center;justify-content:center;min-height:64px;padding:10px 16px;b'
-    'order-radius:12px;background:#ffffff;color:#334155}\n.brand-plaque img{display:block;max-width:100%;m'
-    'ax-height:44px;object-fit:contain}\n.brand-placeholder{font-size:14px;font-weight:700;letter-spacing:'
-    '.16em;color:#334155}\n.client-name{margin:6px 0 0;font-size:14px;font-weight:600;color:#ffffff}\n.sign'
-    'al{padding:18px 20px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid var(--sig-'
-    'line)}\n.signal .k{font-size:13px;font-weight:600;color:var(--hero-muted)}\n.signal b{display:block;ma'
-    'rgin-top:4px;font-size:26px;line-height:1.15;font-weight:700;color:var(--sig-ink)}\n.signal p{margin:'
-    '8px 0 0;font-size:14px;color:var(--hero-muted)}\n.signal.crit{--sig-ink:#ffb4ab;--sig-line:rgba(255,1'
-    '80,171,.55)}\n.signal.warn{--sig-ink:#fedf89;--sig-line:rgba(254,223,137,.5)}\n.signal.act{--sig-ink:#'
-    'fdb022;--sig-line:rgba(253,176,34,.5)}\n.signal.ok{--sig-ink:#a6f4c5;--sig-line:rgba(166,244,197,.45)'
-    '}\n.signal.info{--sig-ink:#e4e7ec;--sig-line:rgba(255,255,255,.35)}\n.dist{grid-column:1 / -1}\n.dist-h'
-    'ead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;margin-bottom:8px;font-si'
-    'ze:13.5px;color:var(--hero-muted)}\n.dist-head b,.legend b{color:#ffffff}\n.track{display:flex;height:'
-    '14px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.16)}\n.track i{display:block;he'
-    'ight:100%}\n.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:10px;font-size:13.5px;color:v'
-    'ar(--hero-muted)}\n.legend span{display:inline-flex;align-items:center;gap:7px}\n.legend i{display:inl'
-    'ine-block;width:10px;height:10px;border-radius:3px}\n.page{max-width:1400px;margin:0 auto;padding:0 c'
-    'lamp(14px,3vw,40px) 56px}\n.kpis{position:relative;z-index:2;display:grid;grid-template-columns:repea'
-    't(auto-fit,minmax(min(100%,178px),1fr));gap:14px;margin-top:-62px}\n.kpi{min-width:0;padding:18px 20p'
-    'x;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)'
-    '}\n.kpi .v{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 5px;font-size:33px;line-height:1.05'
-    ';font-weight:700;letter-spacing:-.02em;color:var(--title)}\n.kpi .v small{font-size:15px;font-weight:'
-    '600;letter-spacing:0;color:var(--muted)}\n.kpi .l{margin-top:9px;font-size:14px;font-weight:600}\n.kpi'
-    ' .s{margin-top:3px;font-size:13px;color:var(--muted)}\n.sim,.note{display:flex;gap:10px;align-items:f'
-    'lex-start;margin-top:16px;padding:11px 16px;border-radius:12px;font-size:14px}\n.sim{background:repea'
-    'ting-linear-gradient(135deg,#fffaeb 0 12px,#fef0c7 12px 24px);border:1px solid #fedf89;color:#7a2e0e'
-    ';font-weight:600}\n.note{background:var(--surface);border:1px solid var(--line);color:var(--ink)}\n.si'
-    'm svg.i,.note svg.i{width:18px;height:18px;margin-top:1px}\n.note svg.i{color:var(--med-bar)}\n.chapte'
-    'r{margin-top:48px;scroll-margin-top:78px}\n.sh{margin-bottom:16px}\n.sh h2{margin:0;font-size:23px;lin'
-    'e-height:1.3;font-weight:700;letter-spacing:-.01em;color:var(--title);text-wrap:balance}\n.sh p{margi'
-    'n:6px 0 0;max-width:75ch;font-size:14.5px;color:var(--muted)}\n.grid2{display:grid;grid-template-colu'
-    'mns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px}\n.stack-gap>* + *{margin-top:16px}\n.card{m'
-    'in-width:0;padding:20px 22px;background:var(--surface);border:1px solid var(--line);border-radius:16'
-    'px;box-shadow:var(--shadow)}\n.card h3{margin:0 0 4px;font-size:17px;line-height:1.3;font-weight:700;'
-    'color:var(--title)}\n.card .sub{margin:0 0 14px;font-size:13.5px;color:var(--muted)}\n.card.flat{paddi'
-    'ng:0;overflow:hidden}\n.card-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:sp'
-    'ace-between;gap:4px 16px;padding:18px 22px 12px}\n.card-head h3{margin:0}\n.card-head p{margin:0;font-'
-    'size:13.5px;color:var(--muted)}\n.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min'
-    '(100%,250px),1fr));gap:16px 28px;margin:0}\n.facts dt{margin-bottom:3px;font-size:12.5px;color:var(--'
-    'muted)}\n.facts dd{margin:0;font-size:14.5px;font-weight:600;min-width:0}\n.facts dd small{display:blo'
-    'ck;font-weight:400;color:var(--muted);font-size:12.5px}\n.plist,.msgs{list-style:none;margin:0;paddin'
-    'g:0}\n.msgs li{position:relative;padding:9px 0 9px 18px;border-top:1px solid var(--line);font-size:14'
-    '.5px}\n.msgs li:first-child{border-top:0;padding-top:2px}\n.msgs li::before{content:"";position:absolu'
-    'te;left:2px;top:17px;width:6px;height:6px;border-radius:50%;background:var(--chart)}\n.msgs li:first-'
-    'child::before{top:10px}\n.plist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px'
-    ';padding:12px 0;border-top:1px solid var(--line)}\n.plist li:first-child{border-top:0;padding-top:0}\n'
-    '.plist .pt{font-weight:600}\n.plist .pm{grid-column:2;font-size:13.5px;color:var(--muted)}\n.bars{disp'
-    'lay:grid;gap:12px}\n.brow{display:grid;grid-template-columns:minmax(120px,36%) minmax(0,1fr) auto;gap'
-    ':12px;align-items:center;font-size:14px}\n.brow .bl{min-width:0}\n.brow .bl small,.brow .bv small{disp'
-    'lay:block;font-size:12.5px;font-weight:400;color:var(--muted)}\n.bt{height:10px;border-radius:999px;o'
-    'verflow:hidden;background:var(--soft)}\n.bt i{display:block;height:100%;min-width:2px;border-radius:9'
-    '99px;background:var(--chart)}\n.brow .bv{text-align:right;font-weight:700;white-space:nowrap}\n.brow.n'
-    'a .bv{font-weight:600;color:var(--muted)}\n#check-status .brow{grid-template-columns:minmax(150px,46%'
-    ') minmax(0,1fr) auto}\n.wrap,.graph{overflow-x:auto;border-top:1px solid var(--line);background:linea'
-    'r-gradient(90deg,var(--surface) 30%,rgba(255,255,255,0)) left / 36px 100% no-repeat local,linear-gra'
-    'dient(270deg,var(--surface) 30%,rgba(255,255,255,0)) right / 36px 100% no-repeat local,radial-gradie'
-    'nt(farthest-side at 0 50%,rgba(16,24,40,.18),rgba(16,24,40,0)) left / 14px 100% no-repeat scroll,rad'
-    'ial-gradient(farthest-side at 100% 50%,rgba(16,24,40,.18),rgba(16,24,40,0)) right / 14px 100% no-rep'
-    'eat scroll}\ntable{width:100%;border-collapse:collapse;font-size:14px;text-align:left}\nth{padding:10p'
-    'x 14px;background:var(--soft);color:var(--title);font-size:12px;font-weight:700;letter-spacing:.04em'
-    ';text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:bott'
-    'om}\ntd{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}\ntbody tr:last-child'
-    ' td{border-bottom:0}\ntbody tr:hover{background:var(--hover)}\ntable.dense{font-size:13.5px}\n.dense td'
-    ',.dense th{padding-left:11px;padding-right:11px}\ntd.n,th.n{text-align:right;white-space:nowrap}\ntd.n'
-    'w{white-space:nowrap}\ntd.w{min-width:240px}\ntd.empty-cell{color:var(--muted)}\ntr.pg{display:none}\n.t'
-    'h-sort{all:unset;display:inline-flex;align-items:center;gap:4px;cursor:pointer}\n.th-sort:focus-visib'
-    'le{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}\n.th-sort::after{content:"";w'
-    'idth:0;height:0;border:4px solid transparent;border-top-color:currentColor;opacity:.35;margin-top:4p'
-    'x}\nth[aria-sort="ascending"] .th-sort::after{border-top-color:transparent;border-bottom-color:curren'
-    'tColor;margin-top:-4px;opacity:1}\nth[aria-sort="descending"] .th-sort::after{opacity:1}\n.more-row{di'
-    'splay:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;padding:12px;border'
-    '-top:1px solid var(--line)}\n.more-note{font-size:13px;color:var(--muted)}\n.stack b{display:block;fon'
-    't-weight:600}\n.stack small{display:block;font-size:12.5px;color:var(--muted)}\n.mono{font-family:ui-m'
-    'onospace,"Cascadia Mono",Consolas,monospace;font-size:12.5px}\n.nw{white-space:nowrap}\n.muted{color:v'
-    'ar(--muted)}\n.fd p,.fr p{margin:3px 0 0}\n.fd p{font-size:13.5px;color:var(--muted)}\n.res b{display:b'
-    'lock;font-weight:600}\n.res small{display:block;font-size:12.5px;color:var(--muted)}\n.ext{display:inl'
-    'ine-flex;align-items:center;gap:4px;margin-top:3px;font-size:13px;font-weight:600;white-space:nowrap'
-    '}\n.ext svg.i{width:13px;height:13px}\n.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}\n.chi'
-    'ps span{padding:1px 8px;border-radius:7px;background:var(--soft);color:var(--muted);font-size:12px}\n'
-    '.chips b{color:var(--ink);font-weight:600}\ndetails.json{margin-top:6px;font-size:12.5px}\ndetails.jso'
-    'n summary{cursor:pointer;color:var(--link);font-weight:600}\ndetails.json pre{max-width:620px;max-hei'
-    'ght:260px;overflow:auto;margin:6px 0 0;padding:10px;border-radius:8px;background:var(--soft);font:12'
-    'px/1.45 ui-monospace,"Cascadia Mono",Consolas,monospace;white-space:pre}\n.pill{display:inline-flex;a'
-    'lign-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:700;line'
-    '-height:1.6;white-space:nowrap}\n.pill::before{content:"";width:7px;height:7px;border-radius:50%;back'
-    'ground:var(--d,currentColor)}\n.sev-critical{color:var(--crit-ink);background:var(--crit-bg);--d:var('
-    '--crit-bar)}\n.sev-high{color:var(--high-ink);background:var(--high-bg);--d:var(--high-bar)}\n.sev-med'
-    'ium{color:var(--med-ink);background:var(--med-bg);--d:var(--med-bar)}\n.sev-low{color:var(--low-ink);'
-    'background:var(--low-bg);--d:var(--low-bar)}\n.sev-info,.tone-info{color:var(--info-ink);background:v'
-    'ar(--info-bg);--d:var(--info-bar)}\n.tone-ok{color:var(--ok-ink);background:var(--ok-bg);--d:var(--ok'
-    '-bar)}\n.tone-warn{color:var(--med-ink);background:var(--med-bg);--d:var(--med-bar)}\n.tone-crit{color'
-    ':var(--crit-ink);background:var(--crit-bg);--d:var(--crit-bar)}\n.cls-OBSERVED{color:var(--obs-ink);b'
-    'ackground:var(--obs-bg);--d:var(--obs-line)}\n.cls-INFERRED{color:var(--inf-ink);background:var(--inf'
-    '-bg);--d:var(--inf-line);outline:1px dashed var(--inf-line);outline-offset:-1px}\n.cls-UNKNOWN{color:'
-    'var(--unk-ink);background:var(--unk-bg);--d:transparent}\n.cls-UNKNOWN::before{box-shadow:inset 0 0 0'
-    ' 1.5px var(--unk-line)}\n.st{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-wei'
-    'ght:600;white-space:nowrap}\n.st::before{content:"";width:9px;height:9px;border-radius:50%;background'
-    ':var(--d)}\n.st-failed{--d:var(--crit-bar)}\n.st-passed{--d:var(--ok-bar)}\n.st-not_evaluated{--d:var(-'
-    '-info-bar)}\n.st-not_applicable{--d:transparent;color:var(--muted)}\n.st-not_applicable::before{box-sh'
-    'adow:inset 0 0 0 2px var(--info-bar)}\n.tools{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:f'
-    'lex-end;padding:0 22px 16px}\n.field{display:grid;gap:4px;min-width:0;font-size:12.5px;font-weight:60'
-    '0;color:var(--muted)}\n.field select,.field input{color:var(--ink);font-size:14px;font-weight:400}\n.f'
-    'ield.grow{flex:1 1 220px}\n.field.grow input{width:100%}\n.cls-sum{display:flex;flex-wrap:wrap;gap:8px'
-    ';margin:-4px 0 16px}\n.tabs{display:inline-flex;flex-wrap:wrap;gap:4px;margin:0 0 16px;padding:4px;ba'
-    'ckground:var(--soft);border:1px solid var(--line);border-radius:12px}\n.tabs button{min-height:40px;p'
-    'adding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:14px;fo'
-    'nt-weight:600;cursor:pointer}\n.tabs button:hover{color:var(--title)}\n.tabs button[aria-selected="tru'
-    'e"]{background:var(--surface);color:var(--title);box-shadow:0 1px 2px rgba(16,24,40,.1),0 0 0 1px va'
-    'r(--line)}\n.graph{padding:4px 22px 6px}\n.graph svg{display:block;width:100%;min-width:760px;height:a'
-    'uto}\n.g-col{fill:var(--muted);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:upp'
-    'ercase}\n.g-node rect{fill:var(--surface);stroke:var(--line2);stroke-width:1.2}\n.g-node.ws rect{strok'
-    'e:var(--brand-steel);stroke-width:2}\n.g-node.inf rect{fill:var(--inf-bg);stroke:var(--inf-line);stro'
-    'ke-dasharray:5 4}\n.g-l1{fill:var(--ink);font-size:12.5px;font-weight:600}\n.g-l2{fill:var(--muted);fo'
-    'nt-size:11px}\n.edge{fill:none;stroke:var(--edge);stroke-width:1.3;opacity:.75}\n.edge.inf{stroke:var('
-    '--inf-line);stroke-dasharray:6 5;opacity:1}\n.arr.obs{fill:var(--edge)}\n.arr.inf{fill:var(--inf-line)'
-    '}\n.g-legend{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;padding:10px 22px 16px;font-'
-    'size:13px;color:var(--muted)}\n.g-legend span{display:inline-flex;align-items:center;gap:8px}\n.g-lege'
-    'nd svg{width:34px;height:10px}\n.ref-box rect{fill:var(--soft);stroke:var(--brand-steel);stroke-width'
-    ':1.5;stroke-dasharray:6 4}\n.ref-t{fill:var(--title);font-size:13px;font-weight:700}\n.ref-s{fill:var('
-    '--muted);font-size:11.5px}\n.ref-link{stroke:var(--brand-lava);stroke-width:2}\n.ref-flag rect{fill:va'
-    'r(--high-bg)}\n.ref-flag text{fill:var(--high-ink);font-size:11px;font-weight:700;letter-spacing:.05e'
-    'm}\n.ref-note{fill:var(--high-ink);font-size:12.5px;font-weight:600}\n.stat{font-size:34px;line-height'
-    ':1.1;font-weight:700;letter-spacing:-.02em;color:var(--title);margin:6px 0 4px}\n.stat small{font-siz'
-    'e:15px;font-weight:600;color:var(--muted);letter-spacing:0}\n.stat.na{font-size:24px}\n.notes{margin:1'
-    '2px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}\n.notes li + li{margin-top:4px}\n.plan{di'
-    'splay:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:s'
-    'tart}\n.steps{list-style:none;margin:12px 0 0;padding:0}\n.steps li{display:grid;grid-template-columns'
-    ':28px minmax(0,1fr);gap:4px 12px;padding:12px 0;border-top:1px solid var(--line)}\n.steps .no{display'
-    ':grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--btn);color:var(--'
-    'btn-ink);font-size:13px;font-weight:700}\n.steps .sx{min-width:0}\n.steps .sx p{margin:4px 0 0;font-si'
-    'ze:14px}\n.steps .sm{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;margin-top:6px;font-'
-    'size:12.5px;color:var(--muted)}\n.steps .sm .ext{margin-top:0}\n.empty{display:flex;gap:12px;align-ite'
-    'ms:center;color:var(--muted);font-size:14px}\n.empty svg.i{width:22px;height:22px;color:var(--ok-bar)'
-    '}\n.dl2{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:10px 20px;margin:0;f'
-    'ont-size:14px}\n.dl2 dt{color:var(--muted)}\n.dl2 dd{margin:0}\n.dl2 ul{margin:0;padding-left:18px}\n.st'
-    'ate-card{max-width:1320px;margin:28px auto;padding:20px 22px;border:1px solid var(--crit-bar);border'
-    '-radius:16px;background:var(--crit-bg);color:var(--crit-ink)}\n.state-card h2{margin:0 0 6px;font-siz'
-    'e:20px}\n.state-card p{margin:0;color:var(--ink)}\n.state-card dl{margin:12px 0 0;color:var(--ink)}\n.h'
-    'ero h1,.sh h2,.signal b{font-family:var(--display,inherit)}\nhtml.brand-font .hero h1{font-weight:600'
-    ';letter-spacing:0;font-size:clamp(32px,3.6vw,48px);line-height:1.08}\nhtml.brand-font .sh h2{font-wei'
-    'ght:600;letter-spacing:0;font-size:27px}\nhtml.brand-font .signal b{font-weight:600;letter-spacing:0;'
-    'font-size:28px}\n.client-logo{display:none}\nhtml.brand-bar .brand .mark,html.brand-bar .wordmark{disp'
-    'lay:none}\nhtml.brand-bar .client-logo{display:block;height:30px;width:auto;max-width:200px}\nhtml.bra'
-    'nd-bar .product{padding-left:16px;border-left-color:var(--line)}\nhtml.brand-bar .brand-ribbon,html.b'
-    'rand-bar #plaque-block{display:none}\nhtml.brand-bar .bar{box-shadow:none;border-bottom:3px solid var'
-    '(--brand-rule,var(--btn))}\nhtml.branded .foot{max-width:none;margin:0;padding:18px clamp(14px,3vw,40'
-    'px) 28px;border-top:0;background:var(--foot-bg,transparent);color:var(--foot-ink,var(--muted))}\n.cos'
-    't-head{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px 40px;align-items:st'
-    'art}\n.cstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}\n.cstat .k{fon'
-    't-size:13px;font-weight:600;color:var(--muted)}\n.cstat .n{margin-top:4px;font-size:30px;line-height:'
-    '1.08;font-weight:700;letter-spacing:-.02em;color:var(--title);white-space:nowrap}\n.cstat .n small{ma'
-    'rgin-left:5px;font-size:14px;font-weight:600;letter-spacing:0;color:var(--muted)}\n.cstat .d{margin-t'
-    'op:5px;font-size:13px;color:var(--muted)}\n.up{color:var(--up-ink);font-weight:600}\n.down{color:var(-'
-    '-down-ink);font-weight:600}\n.cost-trend h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var('
-    '--muted)}\n.mrow{display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr) auto;gap:12px;ali'
-    'gn-items:center;padding:6px 0;font-size:13.5px}\n.mrow .ml{font-weight:600;white-space:nowrap}\n.mrow '
-    '.ml small{display:block;font-size:12px;font-weight:400;color:var(--muted)}\n.mrow .mv{text-align:righ'
-    't;font-weight:700;white-space:nowrap}\n.strack{display:flex;height:14px;border-radius:999px;overflow:'
-    'hidden;background:var(--soft)}\n.strack i{display:block;height:100%}\n.seg-dbu{background:var(--chart)'
-    '}\n.seg-infra{background:var(--chart-2)}\n.mrow.partial .strack i{background-image:repeating-linear-gr'
-    'adient(135deg,rgba(255,255,255,.5) 0 4px,rgba(255,255,255,0) 4px 8px)}\n.keys{display:flex;flex-wrap:'
-    'wrap;gap:4px 16px;margin-top:8px;font-size:12.5px;color:var(--muted)}\n.keys span{display:inline-flex'
-    ';align-items:center;gap:6px}\n.keys i{display:inline-block;width:10px;height:10px;border-radius:3px}\n'
-    '.vm-sizes{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var'
-    '(--muted)}\n.vm-sizes .chips{margin-top:6px}\n.cost-tabs{margin:0 22px 14px}\n.movers{display:grid;grid'
-    '-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 36px}\n.movers h4{margin:4px 0 2'
-    'px;font-size:13px;font-weight:600;color:var(--muted)}\n.mover{display:grid;grid-template-columns:minm'
-    'ax(0,1fr) auto;gap:2px 14px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}\n.mover b'
-    '{font-weight:600;overflow-wrap:anywhere}\n.mover .dv{text-align:right;font-weight:700;white-space:now'
-    'rap}\n.mover small{font-size:12.5px;color:var(--muted)}\n.gapn{display:flex;flex-wrap:wrap;align-items'
-    ':baseline;gap:4px 12px;margin:2px 0 14px}\n.gapn b{font-size:30px;line-height:1.1;font-weight:700;let'
-    'ter-spacing:-.02em;color:var(--title)}\n.gapn span{font-size:14px;color:var(--muted)}\n.sav{font-weigh'
-    't:700;white-space:nowrap}\n.sav small{display:block;font-size:12px;font-weight:400;color:var(--muted)'
-    ';white-space:normal}\n.sav.nc{font-weight:600;color:var(--muted)}\n.legacy-sum{display:flex;flex-wrap:'
-    'wrap;gap:6px 28px;align-items:baseline;padding:0 22px 14px}\n.legacy-sum .stat{margin:0}\n.legacy-sum '
-    '.notes{margin:0;max-width:80ch}\n.sys-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))'
-    ';gap:16px 40px;margin-top:20px}\n.sys-grid h4,.sys-h{margin:0 0 8px;font-size:13px;font-weight:600;co'
-    'lor:var(--muted)}\n.sys-h{margin-top:14px}\n.sys-wrap{margin:0 -22px;border-bottom:1px solid var(--lin'
-    'e)}\n#sec-finops .bars{grid-template-columns:minmax(120px,36%) minmax(0,1fr) auto;column-gap:12px}\n#s'
-    'ec-finops .bars>*{grid-column:1 / -1}\n#sec-finops .bars>.brow{grid-template-columns:subgrid}\n.h3row{'
-    'display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:4px}\n.h3row h3{margin:0}\n@'
-    'media (max-width:1400px){#workspace-error-view,#opening-state{margin:28px clamp(14px,3vw,40px)}}\n.fo'
-    'ot{max-width:1320px;margin:0 auto;padding:20px 0 40px;border-top:1px solid var(--line);color:var(--m'
-    'uted);font-size:13px}\n@media (max-width:1400px){.foot{margin:0 clamp(14px,3vw,40px)}}\n@media (max-wi'
-    'dth:1360px){.bar-nav,.tag{display:none} .toc{display:block}}\n@media (max-width:1040px){.hero-in{grid'
-    '-template-columns:1fr} .hero-side{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))'
-    '} .product{display:none} .cost-head,.sys-grid{grid-template-columns:minmax(0,1fr)}}\n@media (max-widt'
-    'h:720px){\n.btn .lbl{display:none}\n.btn{padding:0 11px}\n.acts{gap:6px}\n.hero{padding-bottom:92px}\n.le'
-    'ad{font-size:16px}\n.brand-plaque{min-height:52px}\n.kpis{grid-template-columns:repeat(2,minmax(0,1fr)'
-    ');gap:10px}\n.kpi{padding:14px 16px}\n.kpi .v{font-size:27px}\n.brow,#check-status .brow{grid-template-'
-    'columns:minmax(0,1fr) auto}\n.brow .bt{grid-column:1 / -1;grid-row:2}\n.tools,.card-head,.g-legend{pad'
-    'ding-left:16px;padding-right:16px}\n.graph{padding-left:16px;padding-right:16px}\n.card{padding:16px}\n'
-    '.card.flat{padding:0}\n.dl2{grid-template-columns:1fr;gap:2px 0}\n.dl2 dd + dt{margin-top:10px}\n.cost-'
-    'tabs{margin-left:16px;margin-right:16px}\n.sys-wrap{margin:0 -16px}\n#sec-finops .bars{grid-template-c'
-    'olumns:minmax(0,1fr) auto}\n.legacy-sum{padding-left:16px;padding-right:16px}\n.cstats{gap:16px 18px}\n'
-    '.cstat .n{font-size:25px}\nhtml.brand-font .hero h1{font-size:30px}\nhtml.brand-font .sh h2{font-size:'
-    '24px}\n}\n@media (max-width:420px){.wordmark{font-size:15px} .brand .mark{width:26px;height:26px} .btn'
-    '.icon,.acts .btn{width:38px;min-height:38px;padding:0}}\n@media (max-width:360px){.bar{gap:8px} .acts'
-    '{gap:4px} .brand{flex:0 1 auto;min-width:0} .wordmark{overflow:hidden;text-overflow:ellipsis}}\n@medi'
-    'a (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto !important}}\n@pa'
-    'ge{size:A4;margin:14mm 12mm 16mm}\n@media print{\n*{-webkit-print-color-adjust:exact;print-color-adjus'
-    't:exact}\nhtml,body{background:#ffffff;font-size:12px}\n.bar,.skip,.tools,.more-row,.tabs,.ws-select,d'
-    'etails.json{display:none !important}\n.multi-band{border:0}\n.hero{padding:22px 24px 74px;border-radiu'
-    's:14px}\n.hero-in{grid-template-columns:minmax(0,1fr) 210px;gap:14px 26px}\n.hero-side{grid-template-c'
-    'olumns:1fr}\n.hero h1{font-size:25px}\n.lead{font-size:12.5px}\n.signal b{font-size:19px}\n.page{padding'
-    ':0}\n.kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:-54px}\n.kpi{padding:12px'
-    ' 14px;box-shadow:none}\n.kpi .v{font-size:24px}\n.card{box-shadow:none;break-inside:avoid}\n.card.flat{'
-    'break-inside:auto}\n.grid2{grid-template-columns:1fr 1fr}\n.plan{grid-template-columns:1fr}\n.plan .car'
-    'd{break-inside:auto}\n.steps .sx b,.plist .pt{font-size:12px}\n.steps .sx p,.msgs li,.brow{font-size:1'
-    '1.5px}\n.plist .pm,.steps .sm,.brow small,.facts dt,.facts dd small{font-size:10.5px}\n.facts dd{font-'
-    'size:12px}\n.chapter{margin-top:24px}\n.sh{break-after:avoid;break-inside:avoid}\n.card-head{display:bl'
-    'ock;break-after:avoid;break-inside:avoid}\n.card-head p{margin-top:2px}\n.sh::after,.card-head::after{'
-    'content:"";display:block;height:150px;margin-bottom:-150px}\n.sh p{font-size:12px}\ntr,.kpi,.signal,.b'
-    'row,.steps li,.plist li{break-inside:avoid}\nthead{display:table-header-group}\ntr.pg{display:table-ro'
-    'w !important}\n.wrap,.graph{overflow:visible;background:none}\ntable,table.dense{font-size:10.5px}\ntd,'
-    'th,.dense td,.dense th{padding:5px 7px}\ntd{overflow-wrap:break-word}\ntd .mono,td.w,.chips span{overf'
-    'low-wrap:anywhere}\ntd small,td p,td .ext,td .st,td .pill,.chips span,.card td small,.card td p{font-'
-    'size:9.5px}\nth[data-label] .th-sort{display:none}\nth[data-label]::before{content:attr(data-label)}\nt'
-    'd .pill{padding:1px 7px;gap:4px}\ntd .pill::before{width:5px;height:5px}\n.sh h2{font-size:18px}\n.card'
-    ' h3{font-size:13.5px}\n.card .sub,.card-head p,.notes,.dl2{font-size:10.5px}\nth{font-size:9px;white-s'
-    'pace:normal}\ntd.nw,td .nw{white-space:normal}\ntd.w{min-width:0}\n.mono{font-size:9.5px}\n.graph svg{mi'
-    'n-width:0}\n[hidden].print-show{display:block !important}\na{color:inherit;text-decoration:none}\n.foot'
-    '{padding:14px 0 0}\n.cost-head{grid-template-columns:1.25fr 1fr;gap:12px 24px}\n.cstat .n{font-size:20'
-    'px}\n.cstat .d,.mrow,.mover,.keys,.vm-sizes{font-size:10.5px}\n.gapn b{font-size:20px}\n.sys-grid{grid-'
-    'template-columns:1fr 1fr}\n.brow .bl small,.brow .bv small{font-size:10.5px}\n.mrow,.mover,.cstat{brea'
-    'k-inside:avoid}\nhtml.brand-font .hero h1{font-size:28px}\nhtml.brand-font .sh h2{font-size:20px}\nhtml'
-    '.branded .foot{background:none;color:#475467}\n}\n</style>\n</head>\n<body>\n<a class="skip" href="#main-'
-    'document">Saltar al contenido principal</a>\n<header class="bar">\n  <a class="brand" href="#sec-cover'
-    '">\n    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" h'
-    'eight="32" rx="8" fill="#003865"/><path d="M16 7.5l9 4.6-9 4.6-9-4.6z" fill="#ff3621"/><path d="M7 1'
-    '6.4l9 4.6 9-4.6M7 20.8l9 4.6 9-4.6" fill="none" stroke="#ffffff" stroke-width="1.9" stroke-linejoin='
-    '"round"/></svg>\n    <span class="wordmark">Azure SRE Agent</span>\n    <span class="product" id="bar-'
-    'product">Dependencias Azure Databricks</span>\n  </a>\n  <nav class="bar-nav" aria-label="Contenido de'
-    'l informe" id="bar-nav">\n    <a href="#sec-dependencies">Dependencias</a>\n    <a href="#sec-inventor'
-    'y">Inventario</a>\n    <a href="#sec-findings">Hallazgos</a>\n    <a href="#sec-finops">Costes</a>\n   '
-    ' <a href="#sec-actions">Plan</a>\n    <a href="#sec-sources">Fuentes</a>\n  </nav>\n  <div class="acts"'
-    '>\n    <details class="menu toc">\n      <summary class="btn ghost" aria-label="Contenido"><svg class='
-    '"i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h10"/></sv'
-    'g><span class="lbl">Contenido</span></summary>\n      <nav class="menu-pop" aria-label="Contenido" id'
-    '="toc-menu">\n        <a href="#sec-cover">1. Portada y procedencia</a>\n        <a href="#sec-executi'
-    've">2. Resumen ejecutivo y WAF</a>\n        <a href="#sec-dependencies">3. Mapa de dependencias</a>\n '
-    '       <a href="#sec-inventory">4. Inventario Lakehouse y ARM</a>\n        <a href="#sec-findings">5.'
-    ' Hallazgos y reglas</a>\n        <a href="#sec-finops">6. Costes de Databricks</a>\n        <a href="#'
-    'sec-actions">7. Plan de acción</a>\n        <a href="#sec-sources">8. Fuentes y metodología</a>\n     '
-    ' </nav>\n    </details>\n    <span class="tag">Solo lectura</span>\n    <button type="button" class="bt'
-    'n ghost icon" id="theme-toggle" aria-pressed="false" title="Modo oscuro"><svg class="i moon" viewBox'
-    '="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.'
-    '5z"/></svg><svg class="i sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="1'
-    '2" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1'
-    'l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span class="sr">Modo oscuro</span></button>\n    <details class="m'
-    'enu" id="export-menu">\n      <summary class="btn ghost" aria-label="Exportar"><svg class="i" viewBox'
-    '="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><sp'
-    'an class="lbl">Exportar</span></summary>\n      <div class="menu-pop">\n        <button type="button" '
-    'id="export-json-btn">Instantánea completa (JSON)<small>Modelo normalizado embebido en este informe</'
-    'small></button>\n        <button type="button" id="export-deps-csv-btn">Dependencias (CSV)<small>Nodo'
-    's, relaciones y puntos ciegos del workspace</small></button>\n        <button type="button" id="expor'
-    't-findings-csv-btn">Comprobaciones (CSV)<small>Todas las reglas evaluadas con su evidencia</small></'
-    'button>\n        <button type="button" id="export-costs-csv-btn">Coste por carga (CSV)<small>Clústere'
-    's, jobs, warehouses, pools y etiquetas del mes</small></button>\n        <button type="button" id="ex'
-    'port-signals-csv-btn">Señales de optimización (CSV)<small>Cada señal con su coste y su ahorro estima'
-    'do</small></button>\n      </div>\n    </details>\n    <button type="button" class="btn" id="print-btn"'
-    '><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 9V3h10v6M7 18H5'
-    'a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg><span class'
-    '="lbl">Imprimir / PDF</span></button>\n  </div>\n</header>\n<div class="brand-ribbon" aria-hidden="true'
-    '"><span class="navy"></span><span class="lava"></span><span class="steel"></span><span class="teal">'
-    '</span></div>\n<div class="multi-band" id="multi-overview" hidden>\n  <div class="band-in">\n    <p id='
-    '"multi-summary"></p>\n    <label class="ws-select" id="workspace-selector-wrap" hidden>Workspace\n    '
-    '  <select id="workspace-selector" aria-label="Seleccionar workspace"></select>\n    </label>\n  </div>'
-    '\n</div>\n<main id="main-document" tabindex="-1">\n  <div id="opening-state" class="state-card" role="a'
-    'lert" hidden></div>\n  <div id="workspace-error-view" class="state-card" role="alert" hidden></div>\n '
-    ' <div id="report-body" hidden>\n    <section class="hero" id="sec-cover" aria-labelledby="cover-title'
-    '">\n      <div class="hero-in">\n        <div>\n          <h1 id="cover-title">Revisión de arquitectura'
-    ', dependencias y configuración de Azure Databricks</h1>\n          <p class="lead" id="cover-lead"></'
-    'p>\n          <div class="meta" id="cover-badges"></div>\n        </div>\n        <aside class="hero-si'
-    'de" aria-label="Cliente y veredicto">\n          <div id="plaque-block">\n            <p class="plaque'
-    '-k">Preparado para</p>\n            <div class="brand-plaque" id="brand-plaque"></div>\n            <p'
-    ' class="client-name" id="client-name-label"></p>\n          </div>\n          <div class="signal" id="'
-    'verdict"></div>\n        </aside>\n        <div class="dist" id="severity-dist"></div>\n      </div>\n  '
-    '  </section>\n    <div class="page">\n      <div class="kpis" id="kpis"></div>\n      <div id="notices"'
-    '></div>\n\n      <section class="chapter" id="sec-identity" aria-labelledby="h-identity">\n        <div'
-    ' class="sh"><h2 id="h-identity">1. Workspace, identidad y procedencia</h2><p>Qué workspace se revisó'
-    ', con qué identidad y desde qué tenant: el contexto que da validez a cada cifra de este informe.</p>'
-    '</div>\n        <div class="card"><dl class="facts" id="cover-facts"></dl></div>\n      </section>\n\n  '
-    '    <section class="chapter" id="sec-executive" aria-labelledby="h-exec">\n        <div class="sh"><h'
-    '2 id="h-exec">2. Lectura ejecutiva, cobertura e indicadores locales</h2><p>El índice local mide únic'
-    'amente las reglas evaluadas sobre evidencia observada. Nunca sustituye una evaluación oficial de Mic'
-    'rosoft Well-Architected ni oculta fuentes no evaluadas.</p></div>\n        <div class="grid2">\n      '
-    '    <div class="card"><h3>Lectura ejecutiva</h3><p class="sub">Lo esencial de esta revisión, empezan'
-    'do por el coste.</p><ul class="msgs" id="executive-messages"></ul></div>\n          <div class="card"'
-    '><h3>Distribución de comprobaciones</h3><p class="sub">Estado de cada regla local frente a la eviden'
-    'cia observada.</p><div class="bars" id="check-status"></div></div>\n          <div class="card"><h3>D'
-    'esglose por área</h3><p class="sub">Índice local por área de revisión, junto a su cobertura evaluada'
-    '.</p><div class="bars" id="area-scores"></div></div>\n          <div class="card"><h3>Desglose por pi'
-    'lar Well-Architected</h3><p class="sub">Mismo cálculo agrupado por pilar; no es una puntuación ofici'
-    'al WAF.</p><div class="bars" id="pillar-scores"></div></div>\n        </div>\n        <div class="card'
-    '" style="margin-top:16px"><h3>Prioridades críticas y de alta severidad observadas</h3><p class="sub"'
-    '>Comprobaciones que no cumplen con severidad crítica o alta, con el objeto afectado y su evidencia.<'
-    '/p><ul class="plist" id="priority-findings"></ul></div>\n      </section>\n\n      <section class="chap'
-    'ter" id="sec-dependencies" aria-labelledby="h-deps">\n        <div class="sh"><h2 id="h-deps">3. Mapa'
-    ' de dependencias y arquitectura Lakehouse</h2><p>Cada relación se clasifica explícitamente como <str'
-    'ong>OBSERVED</strong> (join exacto de ID/clave nativa confirmado en las APIs), <strong>INFERRED</str'
-    'ong> (referencia explícita de URI/host hacia un recurso no recolectado en ARM) o <strong>UNKNOWN</st'
-    'rong> (linaje dinámico en tiempo de ejecución o alcance no consultado sin arrancar cómputo).</p></di'
-    'v>\n        <div class="cls-sum" id="dep-class-summary"></div>\n        <div class="tabs" role="tablis'
-    't" aria-label="Vistas de arquitectura y dependencias">\n          <button type="button" role="tab" id'
-    '="tab-dep-observed" aria-selected="true" aria-controls="panel-dep-observed">Mapa de dependencias obs'
-    'ervado e inferido</button>\n          <button type="button" role="tab" id="tab-dep-reference" aria-se'
-    'lected="false" aria-controls="panel-dep-reference" tabindex="-1">Propuesta de referencia - NO desple'
-    'gada</button>\n        </div>\n        <div id="panel-dep-observed" class="print-show" role="tabpanel"'
-    ' aria-labelledby="tab-dep-observed">\n          <div class="card flat">\n            <div class="card-'
-    'head"><h3>Grafo de vecindario</h3><p id="dep-graph-note"></p></div>\n            <div class="tools">\n'
-    '              <label class="field">Capa\n                <select id="dep-layer-filter">\n             '
-    '     <option value="all">Todas las capas</option>\n                  <option value="control_plane">Pl'
-    'ano de control (ARM)</option>\n                  <option value="compute">Cómputo (Clústeres / Pools /'
-    ' Warehouses)</option>\n                  <option value="orchestration">Orquestación (Jobs / Tareas / '
-    'Pipelines)</option>\n                  <option value="governance">Gobernanza (Unity Catalog / Secret '
-    'Scopes)</option>\n                  <option value="associated_resource">Recursos Azure asociados</opt'
-    'ion>\n                </select>\n              </label>\n              <label class="field">Clasificaci'
-    'ón\n                <select id="dep-class-filter">\n                  <option value="all">Todas (OBSER'
-    'VED / INFERRED / UNKNOWN)</option>\n                  <option value="OBSERVED">OBSERVED (Join nativo '
-    'exacto)</option>\n                  <option value="INFERRED">INFERRED (Referencia URI/host)</option>\n'
-    '                  <option value="UNKNOWN">UNKNOWN (Punto ciego explícito)</option>\n                <'
-    '/select>\n              </label>\n              <label class="field grow">Buscar nodo / carga\n        '
-    '        <input type="search" id="dep-search-filter" placeholder="Job, clúster, catálogo, cuenta ADLS'
-    '…">\n              </label>\n              <button type="button" class="btn ghost" id="dep-clear">Limp'
-    'iar filtros</button>\n            </div>\n            <div class="graph" id="dep-graph-box"></div>\n   '
-    '         <div class="g-legend" aria-hidden="true">\n              <span><svg viewBox="0 0 34 10"><lin'
-    'e x1="1" y1="5" x2="33" y2="5" class="edge"/></svg>OBSERVED · join nativo</span>\n              <span'
-    '><svg viewBox="0 0 34 10"><line x1="1" y1="5" x2="33" y2="5" class="edge inf"/></svg>INFERRED · URI/'
-    'host sin inventario ARM</span>\n              <span id="dep-graph-caption"></span>\n            </div>'
-    '\n          </div>\n          <div class="stack-gap" style="margin-top:16px">\n            <div class="'
-    'card flat"><div class="card-head"><h3>Relaciones de dependencia (<span id="dep-edges-count">0</span>'
-    ')</h3><p>Origen, relación y destino con los campos de join exactos.</p></div><div class="wrap"><tabl'
-    'e class="dense" id="dep-edges-table"></table></div></div>\n            <div class="card flat"><div cl'
-    'ass="card-head"><h3>Nodos del grafo (<span id="dep-nodes-count">0</span>)</h3><p>Cada objeto con su '
-    'fuente y un resumen de la evidencia.</p></div><div class="wrap"><table class="dense" id="dep-nodes-t'
-    'able"></table></div></div>\n            <div class="card flat"><div class="card-head"><h3>Puntos cieg'
-    'os y alcances UNKNOWN (<span id="dep-unknowns-count">0</span>)</h3><p>Lo que esta revisión no puede '
-    'ver sin ejecutar cómputo o leer código.</p></div><div class="wrap"><table class="dense" id="dep-unkn'
-    'owns-table"></table></div></div>\n            <div class="card flat"><div class="card-head"><h3>Refer'
-    'encias rotas detectadas (<span id="dep-broken-count">0</span>)</h3><p>Identificadores referenciados '
-    'que no existen en el inventario observado.</p></div><div class="wrap"><table class="dense" id="dep-b'
-    'roken-table"></table></div></div>\n          </div>\n        </div>\n        <div id="panel-dep-referen'
-    'ce" class="print-show" role="tabpanel" aria-labelledby="tab-dep-reference" hidden>\n          <div cl'
-    'ass="card flat">\n            <div class="card-head"><h3>Arquitectura de referencia Azure Databricks '
-    'Lakehouse — Propuesta NO desplegada</h3><p>Línea base recomendada por Microsoft y Databricks Well-Ar'
-    'chitected Lakehouse. <strong>No representa recursos desplegados en el entorno del cliente.</strong><'
-    '/p></div>\n            <div class="graph" id="ref-arch-box"></div>\n            <div class="wrap"><tab'
-    'le id="ref-arch-table"></table></div>\n          </div>\n        </div>\n      </section>\n\n      <secti'
-    'on class="chapter" id="sec-inventory" aria-labelledby="h-inv">\n        <div class="sh"><h2 id="h-inv'
-    '">4. Inventario de Workspace, Cómputo, Orquestación, Unity Catalog y Recursos Asociados</h2><p>Los o'
-    'bjetos sobre los que se evalúan las reglas. Cada fila procede de una lectura de API registrada en la'
-    ' sección 8.</p></div>\n        <div class="stack-gap">\n          <div class="card flat"><div class="c'
-    'ard-head"><h3>Clústeres All-Purpose, Job Clusters, Instance Pools y Cluster Policies</h3><p id="inv-'
-    'compute-count"></p></div><div class="wrap"><table class="dense" id="inv-compute-table"></table></div'
-    '></div>\n          <div class="card flat"><div class="card-head"><h3>Jobs, DAG de tareas, Pipelines d'
-    'eclarativos (Lakeflow / DLT) y SQL Warehouses</h3><p id="inv-orchestration-count"></p></div><div cla'
-    'ss="wrap"><table class="dense" id="inv-orchestration-table"></table></div></div>\n          <div clas'
-    's="card flat"><div class="card-head"><h3>Unity Catalog (Metastore, Catálogos, Esquemas, Storage Cred'
-    'entials, External Locations, Conexiones) y Secret Scopes</h3><p id="inv-uc-count"></p></div><div cla'
-    'ss="wrap"><table class="dense" id="inv-uc-table"></table></div></div>\n          <div class="card fla'
-    't"><div class="card-head"><h3>Recursos Azure asociados y Endpoints de dependencia saliente del plano'
-    ' de control</h3><p id="inv-resources-count"></p></div><div class="wrap"><table class="dense" id="inv'
-    '-resources-table"></table></div></div>\n        </div>\n      </section>\n\n      <section class="chapte'
-    'r" id="sec-findings" aria-labelledby="h-find">\n        <div class="sh"><h2 id="h-find">5. Hallazgos '
-    'y evaluación detallada de reglas</h2><p>Cada comprobación local con su estado, la evidencia observad'
-    'a y la recomendación. Las que no cumplen aparecen primero; filtre, ordene por columna y exporte.</p>'
-    '</div>\n        <div class="card flat">\n          <div class="card-head"><h3>Registro de comprobacion'
-    'es</h3><p id="findings-count-label"></p></div>\n          <div class="tools">\n            <label clas'
-    's="field">Área\n              <select id="find-area-filter">\n                <option value="all">Toda'
-    's</option>\n                <option value="best_practices">Buenas prácticas</option>\n                '
-    '<option value="security">Seguridad</option>\n                <option value="finops">FinOps</option>\n '
-    '               <option value="optimization">Optimización</option>\n              </select>\n          '
-    '  </label>\n            <label class="field">Nivel\n              <select id="find-level-filter">\n    '
-    '            <option value="all">Todos</option>\n                <option value="workspace">Workspace /'
-    ' Gobernanza</option>\n                <option value="workload">Workload (Cómputo / Jobs / SQL)</optio'
-    'n>\n                <option value="resource">Recurso Azure asociado</option>\n              </select>\n'
-    '            </label>\n            <label class="field">Severidad\n              <select id="find-sev-f'
-    'ilter">\n                <option value="all">Todas</option>\n                <option value="critical">'
-    'Crítica</option>\n                <option value="high">Alta</option>\n                <option value="m'
-    'edium">Media</option>\n                <option value="low">Baja</option>\n              </select>\n    '
-    '        </label>\n            <label class="field">Estado\n              <select id="find-status-filte'
-    'r">\n                <option value="all">Todos</option>\n                <option value="failed">No cum'
-    'ple (failed)</option>\n                <option value="passed">Cumple (passed)</option>\n              '
-    '  <option value="not_evaluated">No evaluado</option>\n                <option value="not_applicable">'
-    'No aplica</option>\n              </select>\n            </label>\n            <label class="field grow'
-    '">Buscar recurso / carga\n              <input type="search" id="find-search-filter" placeholder="Fil'
-    'trar por regla, job, clúster…">\n            </label>\n            <button type="button" class="btn gh'
-    'ost" id="find-clear">Limpiar</button>\n            <button type="button" class="btn ghost" id="find-e'
-    'xport-btn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11'
-    'M7 10l5 5 5-5M5 20h14"/></svg>CSV filtrado</button>\n          </div>\n          <div class="wrap"><ta'
-    'ble class="dense" id="findings-table"></table></div>\n        </div>\n      </section>\n\n      <section'
-    ' class="chapter" id="sec-finops" aria-labelledby="h-finops">\n        <div class="sh"><h2 id="h-finop'
-    's">6. Costes de Databricks: de dónde vienen y cómo optimizarlos</h2><p id="cost-intro">El coste del '
-    'mes en Cost Management, repartido por las etiquetas que Databricks pone a cada clúster, job, SQL war'
-    'ehouse y pool, y los cambios de configuración que lo reducirían.</p></div>\n        <div id="cost-emp'
-    'ty" hidden></div>\n        <div id="cost-body">\n          <div id="cost-data">\n          <div class="'
-    'card cost-head">\n            <div class="cstats" id="cost-stats"></div>\n            <div class="cost'
-    '-trend" id="cost-trend"></div>\n          </div>\n          <div class="grid2" style="margin-top:16px"'
-    '>\n            <div class="card"><h3>DBU por tipo de cómputo</h3><p class="sub" id="cost-dbu-sub">Lo '
-    'que Databricks factura por unidad de procesamiento, según el tipo de carga.</p><div class="bars" id='
-    '"cost-dbu-bars"></div></div>\n            <div class="card"><h3>Infraestructura por servicio</h3><p c'
-    'lass="sub" id="cost-infra-sub">Máquinas virtuales, discos y red que el área de trabajo usa en vuestr'
-    'a suscripción.</p><div class="bars" id="cost-infra-bars"></div><div class="vm-sizes" id="cost-vm-siz'
-    'es"></div></div>\n          </div>\n          <div class="card flat" style="margin-top:16px">\n        '
-    '    <div class="card-head"><h3>Quién lo consume</h3><p id="cost-attr-note"></p></div>\n            <d'
-    'iv class="tabs cost-tabs" role="tablist" aria-label="Reparto del coste" id="cost-tabs"></div>\n      '
-    '      <div class="tools">\n              <label class="field grow">Buscar\n                <input type'
-    '="search" id="cost-attr-search" placeholder="Clúster, job, warehouse, pool o valor de etiqueta…">\n  '
-    '            </label>\n              <button type="button" class="btn ghost" id="cost-attr-export"><sv'
-    'g class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M'
-    '5 20h14"/></svg>CSV del reparto</button>\n            </div>\n            <div class="wrap" role="tabp'
-    'anel" id="cost-attr-panel" aria-labelledby="cost-tab-cluster"><table class="dense" id="cost-attr-tab'
-    'le"></table></div>\n          </div>\n          <div class="grid2" style="margin-top:16px">\n          '
-    '  <div class="card"><h3>Lo que no explica ninguna etiqueta</h3><p class="sub">Coste sin la etiqueta '
-    '<span class="mono">Vendor</span> que Databricks pone a todo el cómputo clásico: servicios compartido'
-    's del área de trabajo y cómputo serverless.</p><div id="cost-gap"></div></div>\n            <div clas'
-    's="card"><h3>Cobertura de vuestras etiquetas</h3><p class="sub" id="cost-tags-sub">Parte del coste d'
-    'el mes que lleva cada etiqueta de imputación configurada.</p><div class="bars" id="cost-tag-bars"></'
-    'div><ul class="notes" id="cost-tag-notes"></ul></div>\n          </div>\n          <div class="card" s'
-    'tyle="margin-top:16px"><h3>Qué ha cambiado frente al mes anterior</h3><p class="sub" id="cost-movers'
-    '-sub">Clústeres, jobs, SQL warehouses y pools con mayor variación.</p><div class="movers" id="cost-m'
-    'overs"></div></div>\n          </div>\n          <div class="card flat" style="margin-top:16px">\n     '
-    '       <div class="card-head"><h3>Cómo optimizarlo</h3><p id="cost-signals-count"></p></div>\n       '
-    '     <div class="tools">\n              <label class="field">Severidad\n                <select id="co'
-    'st-sig-sev">\n                  <option value="all">Todas</option>\n                  <option value="h'
-    'igh">Alta</option>\n                  <option value="medium">Media</option>\n                  <option'
-    ' value="low">Baja</option>\n                </select>\n              </label>\n              <label cla'
-    'ss="field">Ahorro\n                <select id="cost-sig-saving">\n                  <option value="all'
-    '">Todas las señales</option>\n                  <option value="with">Con ahorro estimado</option>\n   '
-    '             </select>\n              </label>\n              <label class="field grow">Buscar\n       '
-    '         <input type="search" id="cost-sig-search" placeholder="Señal, clúster, job, warehouse…">\n  '
-    '            </label>\n              <button type="button" class="btn ghost" id="cost-sig-export"><svg'
-    ' class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5'
-    ' 20h14"/></svg>CSV filtrado</button>\n            </div>\n            <div class="wrap"><table class="'
-    'dense" id="cost-signals-table"></table></div>\n          </div>\n          <div class="card" style="ma'
-    'rgin-top:16px" id="cost-system"></div>\n          <div class="card" style="margin-top:16px">\n        '
-    '    <h3>Método, supuestos y fuentes de coste</h3>\n            <p class="sub">Cómo se calcula cada ci'
-    'fra de esta sección. Ninguna consulta arranca cómputo ni cambia nada.</p>\n            <dl class="dl2'
-    '" id="cost-method"></dl>\n          </div>\n        </div>\n        <div class="card flat legacy-cost" '
-    'style="margin-top:16px" id="finops-legacy">\n          <div class="card-head"><h3>Coste ARM del alcan'
-    'ce aprobado (<span class="mono">cost_scope</span>)</h3><p id="finops-cost-window"></p></div>\n       '
-    '   <div class="legacy-sum"><div class="stat" id="finops-actual-cost"></div><ul class="notes" id="fin'
-    'ops-cost-note"></ul></div>\n          <div class="wrap"><table class="dense" id="finops-cost-table"><'
-    '/table></div>\n        </div>\n      </section>\n\n      <section class="chapter" id="sec-actions" aria-'
-    'labelledby="h-actions">\n        <div class="sh"><h2 id="h-actions">7. Plan de acción priorizado para'
-    ' revisión humana</h2><p>Los horizontes Quick-win (&lt;1 semana), Corto plazo (1-3 meses) y Medio pla'
-    'zo son categorías orientativas de planificación, no promesas de entrega ni cambios automáticos.</p><'
-    '/div>\n        <div class="plan" id="actions-plan"></div>\n      </section>\n\n      <section class="cha'
-    'pter" id="sec-sources" aria-labelledby="h-sources">\n        <div class="sh"><h2 id="h-sources">8. Re'
-    'gistro de fuentes, recibos HTTP y límites metodológicos</h2><p>Qué fuentes se leyeron, con qué resul'
-    'tado y qué queda fuera del alcance. El índice local solo se interpreta junto a esta cobertura.</p></'
-    'div>\n        <div class="card flat">\n          <div class="card-head"><h3>Cobertura de fuentes</h3><'
-    'p id="sources-summary"></p></div>\n          <div class="bars" id="sources-bars" style="padding:0 22p'
-    'x 16px"></div>\n          <div class="wrap"><table class="dense" id="sources-table"></table></div>\n  '
-    '      </div>\n        <div class="card" style="margin-top:16px">\n          <h3>Método e interpretació'
-    'n</h3>\n          <p class="sub">Cómo se calcula cada indicador y qué no puede afirmar esta revisión.'
-    '</p>\n          <dl class="dl2" id="method-notes"></dl>\n          <h3 style="margin-top:18px">Limitac'
-    'iones y reglas de interpretación</h3>\n          <ul class="notes" id="methodology-limitations"></ul>'
-    '\n        </div>\n      </section>\n    </div>\n  </div>\n</main>\n<footer class="foot" id="report-footer"'
-    '></footer>\n<script type="application/json" id="report-data">__REPORT_DATA_JSON__</script>\n<script>\n('
-    'function () {\n  "use strict";\n  var SVGNS = "http://www.w3.org/2000/svg";\n  var LAYERS = ["control_p'
-    'lane", "compute", "orchestration", "governance", "associated_resource"];\n  var SEVS = ["critical", "'
-    'high", "medium", "low"];\n  var STATUS_ORDER = { failed: 0, not_evaluated: 1, passed: 2, not_applicab'
-    'le: 3 };\n  var L = {\n    status: { passed: "Cumple", failed: "No cumple", not_evaluated: "No evaluad'
-    'o", not_applicable: "No aplica" },\n    sev: { critical: "Crítica", high: "Alta", medium: "Media", lo'
-    'w: "Baja" },\n    area: { best_practices: "Buenas prácticas", security: "Seguridad", finops: "FinOps"'
-    ', optimization: "Optimización" },\n    pillar: { reliability: "Fiabilidad", security: "Seguridad", co'
-    'st: "Optimización de costes", operations: "Excelencia operativa", performance: "Eficiencia del rendi'
-    'miento" },\n    level: { workspace: "Workspace", workload: "Carga de trabajo", resource: "Recurso Azu'
-    're" },\n    layer: { control_plane: "Plano de control", compute: "Cómputo", orchestration: "Orquestac'
-    'ión", governance: "Gobernanza", associated_resource: "Recursos asociados" },\n    src: { complete: "C'
-    'ompleta", partial: "Parcial", denied: "Denegada", error: "Error", not_configured: "No configurada", '
-    'not_applicable: "No aplica" },\n    effort: { L: "esfuerzo bajo", M: "esfuerzo medio", H: "esfuerzo a'
-    'lto" },\n    kind: {\n      databricks_workspace: "Workspace", managed_resource_group: "Grupo administ'
-    'rado", outbound_dependency_category: "Endpoint saliente",\n      all_purpose_cluster: "Clúster all-pu'
-    'rpose", job_cluster_spec: "Job cluster", instance_pool: "Instance pool", cluster_policy: "Cluster po'
-    'licy",\n      sql_warehouse: "SQL Warehouse", job: "Job", job_task: "Tarea de job", dlt_pipeline: "Pi'
-    'peline DLT", secret_scope: "Secret scope",\n      uc_metastore: "Metastore UC", uc_catalog: "Catálogo'
-    ' UC", uc_schema: "Esquema UC", uc_storage_credential: "Storage credential",\n      uc_external_locati'
-    'on: "External location", uc_connection: "Conexión UC", external_storage_target: "Almacenamiento exte'
-    'rno",\n      external_key_vault_target: "Key Vault externo", "microsoft.network/virtualnetworks": "Re'
-    'd virtual", "microsoft.network/virtualnetworks/subnets": "Subred",\n      "microsoft.network/networks'
-    'ecuritygroups": "NSG", "microsoft.network/privateendpoints": "Private Endpoint", "microsoft.databric'
-    'ks/accessconnectors": "Access Connector",\n      "microsoft.managedidentity/userassignedidentities": '
-    '"Identidad administrada", "microsoft.storage/storageaccounts": "Cuenta de almacenamiento",\n      "mi'
-    'crosoft.keyvault/vaults": "Key Vault", AllPurposeCluster: "Clúster all-purpose", InstancePool: "Inst'
-    'ance pool", ClusterPolicy: "Cluster policy",\n      "microsoft.network/routetables": "Tabla de rutas"'
-    ', "microsoft.network/natgateways": "NAT Gateway", "microsoft.network/publicipaddresses": "IP pública'
-    '",\n      "microsoft.network/loadbalancers": "Load Balancer", "microsoft.network/privatednszones": "Z'
-    'ona DNS privada", "microsoft.eventhub/namespaces": "Event Hubs",\n      external_access_connector_tar'
-    'get: "Access Connector externo", external_arm_target: "Recurso ARM externo",\n      inferred_adls_sto'
-    'rage_uri_target: "URI ADLS inferida", inferred_catalog_storage_uri_target: "Almacenamiento de catálo'
-    'go inferido",\n      inferred_pipeline_storage_uri_target: "Almacenamiento de pipeline inferido", per'
-    'mission_filtered_absence_or_deleted_target: "Destino no visible o eliminado",\n      GlobalInitScript'
-    ': "Init script global", OutboundDependency: "Endpoint saliente"\n    }\n  };\n  var SEV_WORD = { critic'
-    'al: ["crítica", "críticas"], high: ["alta", "altas"], medium: ["media", "medias"], low: ["baja", "ba'
-    'jas"] };\n  var SEV_BAR = { critical: "var(--crit-bar)", high: "var(--high-bar)", medium: "var(--med-'
-    'bar)", low: "var(--low-bar)" };\n  var NF = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2'
-    ' });\n  var NF2 = new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2'
-    ' });\n  var ICON = {\n    ext: ["M14 4h6v6", "M20 4l-9 9", "M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1'
-    ' 1 0 0 1 1-1h5"],\n    check: ["M20 6L9 17l-5-5"],\n    alert: ["M12 3.5l9 16H3z", "M12 10v4", "M12 17'
-    '.2v.3"],\n    info: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z", "M12 11v5", "M12 7.8v.3"]\n  };\n\n  funct'
-    'ion el(tag, attrs, children) {\n    var node = document.createElement(tag);\n    if (attrs) {\n      Ob'
-    'ject.keys(attrs).forEach(function (k) {\n        if (k === "text") { node.textContent = String(attrs['
-    'k]); }\n        else if (k === "className") { if (attrs[k]) { node.className = attrs[k]; } }\n        '
-    'else if (attrs[k] !== null && attrs[k] !== undefined) { node.setAttribute(k, String(attrs[k])); }\n  '
-    '    });\n    }\n    if (children) {\n      children.forEach(function (c) {\n        if (typeof c === "st'
-    'ring" || typeof c === "number") { node.appendChild(document.createTextNode(String(c))); }\n        el'
-    'se if (c) { node.appendChild(c); }\n      });\n    }\n    return node;\n  }\n  function svg(tag, attrs, t'
-    'ext) {\n    var node = document.createElementNS(SVGNS, tag);\n    Object.keys(attrs || {}).forEach(fun'
-    'ction (k) { node.setAttribute(k, String(attrs[k])); });\n    if (text !== undefined) { node.textConte'
-    'nt = String(text); }\n    return node;\n  }\n  function clear(node) { while (node.firstChild) { node.re'
-    'moveChild(node.firstChild); } }\n  function icon(name) {\n    var s = svg("svg", { "class": "i", viewB'
-    'ox: "0 0 24 24", "aria-hidden": "true", focusable: "false" });\n    ICON[name].forEach(function (d) {'
-    ' s.appendChild(svg("path", { d: d })); });\n    return s;\n  }\n  function lab(map, key) {\n    if (key '
-    '=== null || key === undefined || key === "") { return "—"; }\n    return Object.prototype.hasOwnPrope'
-    'rty.call(map, key) ? map[key] : String(key);\n  }\n  function isNum(v) { return typeof v === "number" '
-    '&& isFinite(v); }\n  function num(v) { return isNum(v) ? NF.format(v) : (v === null || v === undefine'
-    'd || v === "" ? "—" : String(v)); }\n  function pct(v) { return isNum(v) ? NF.format(v) + "\\u00a0%" :'
-    ' "No evaluado"; }\n  function utc(s) {\n    if (!s) { return "—"; }\n    var m = /^(\\d{4}-\\d{2}-\\d{2})T'
-    '(\\d{2}:\\d{2})/.exec(String(s));\n    return m ? m[1] + " " + m[2] + " UTC" : String(s);\n  }\n  functio'
-    'n day(s) { var m = /^(\\d{4}-\\d{2}-\\d{2})/.exec(String(s || "")); return m ? m[1] : "—"; }\n  function'
-    ' plural(n, one, many) { return n === 1 ? one : many; }\n  function yesNo(v) { return v === true ? "Sí'
-    '" : v === false ? "No" : "No observado"; }\n  function access(v) { return v === "Disabled" ? "Deshabi'
-    'litado" : v === "Enabled" ? "Habilitado" : (v || "No observado"); }\n  function rich(node, parts) {\n '
-    '   clear(node);\n    parts.forEach(function (p) { if (p !== "" && p !== null) { node.appendChild(Arra'
-    'y.isArray(p) ? el("b", { text: p[0] }) : document.createTextNode(String(p))); } });\n    return node;'
-    '\n  }\n  function brk(text, cls) {\n    var span = el("span", { className: cls === undefined ? "mono" :'
-    ' cls });\n    var s = String(text === null || text === undefined || text === "" ? "—" : text), buf = '
-    '"";\n    if (s.length <= 24) { span.textContent = s; span.className += " nw"; return span; }\n    for '
-    '(var i = 0; i < s.length; i++) {\n      buf += s.charAt(i);\n      if ("/_.-:,".indexOf(s.charAt(i)) >'
-    '= 0 && i < s.length - 1) {\n        span.appendChild(document.createTextNode(buf));\n        span.appe'
-    'ndChild(document.createElement("wbr"));\n        buf = "";\n      }\n    }\n    if (buf) { span.appendCh'
-    'ild(document.createTextNode(buf)); }\n    return span;\n  }\n  function mono(text) { return el("span", '
-    '{ className: "mono nw", text: text === null || text === undefined || text === "" ? "—" : text }); }\n'
-    '  function stack(main, sub) {\n    var d = el("div", { className: "stack" });\n    var b = el("b");\n  '
-    '  if (main instanceof Node) { b.appendChild(main); } else { b.textContent = main === null || main =='
-    '= undefined || main === "" ? "—" : String(main); }\n    d.appendChild(b);\n    if (sub instanceof Node'
-    ') { var w = el("small"); w.appendChild(sub); d.appendChild(w); }\n    else if (sub) { d.appendChild(e'
-    'l("small", { text: sub })); }\n    return d;\n  }\n  function pill(cls, text, title) { return el("span"'
-    ', { className: "pill " + cls, text: text, title: title || null }); }\n  function sevPill(sev, label) '
-    '{ return pill(SEVS.indexOf(sev) >= 0 ? "sev-" + sev : "sev-info", label || lab(L.sev, sev)); }\n  fun'
-    'ction clsPill(c) { return pill("cls-" + (c === "OBSERVED" || c === "INFERRED" ? c : "UNKNOWN"), c ||'
-    ' "UNKNOWN"); }\n  function statusTag(st) { return el("span", { className: "st st-" + (STATUS_ORDER[st'
-    '] !== undefined ? st : "not_evaluated"), title: st, text: lab(L.status, st) }); }\n  function srcTone'
-    '(st) { return st === "complete" ? "tone-ok" : st === "partial" ? "tone-warn" : (st === "denied" || s'
-    't === "error") ? "tone-crit" : "tone-info"; }\n  function srcPill(st) { return pill(srcTone(st), lab('
-    'L.src, st), st); }\n  function kindLabel(kind) { var t = lab(L.kind, kind); return el("span", { text:'
-    ' t, title: kind && t !== kind ? kind : null }); }\n  function emptyState(text) { return el("div", { c'
-    'lassName: "empty" }, [icon("check"), el("span", { text: text })]); }\n  function safeLearnUrl(u) {\n  '
-    '  if (typeof u !== "string") { return null; }\n    try {\n      var parsed = new URL(u);\n      return '
-    '(parsed.protocol === "https:" && (parsed.hostname === "learn.microsoft.com" || parsed.hostname === "'
-    'docs.databricks.com")) ? u : null;\n    } catch (e) { return null; }\n  }\n  function extLink(href, tex'
-    't) { return el("a", { className: "ext", href: href, target: "_blank", rel: "noopener noreferrer" }, '
-    '[text, icon("ext")]); }\n  var ARM_RE = /^\\/subscriptions\\/[0-9a-f-]{36}\\/resourcegroups\\/([^\\/]+)\\/p'
-    'roviders\\/(microsoft\\.[a-z0-9]+\\/[a-z0-9]+)\\/([^\\/]+)(?:\\/([a-z0-9]+)\\/([^\\/]+))?$/i;\n  function arm'
-    'Cell(id, name) {\n    var m = ARM_RE.exec(String(id || ""));\n    if (!m) { return brk(id); }\n    var '
-    'box = el("div", { className: "res" });\n    box.appendChild(el("b", { text: name || m[5] || m[3] }));'
-    '\n    box.appendChild(el("small", null, [brk(m[1] + " · " + m[2] + (m[4] ? "/" + m[4] : ""), "")]));\n'
-    '    var a = extLink("https://portal.azure.com/#@/resource" + id, "Portal");\n    a.setAttribute("titl'
-    'e", id);\n    box.appendChild(a);\n    return box;\n  }\n  function kvChips(obj, max) {\n    var wrap = e'
-    'l("div", { className: "chips" }), shown = 0;\n    Object.keys(obj || {}).forEach(function (k) {\n     '
-    ' var v = obj[k];\n      if (v === null || v === undefined || v === "" || typeof v === "object" || sho'
-    'wn >= max) { return; }\n      var s = String(v);\n      if (s.indexOf("/subscriptions/") === 0 || s.le'
-    'ngth > 70) { return; }\n      wrap.appendChild(el("span", null, [k + ": ", el("b", { text: s })]));\n '
-    '     shown++;\n    });\n    return shown ? wrap : null;\n  }\n  function evidenceCell(obj) {\n    var box'
-    ' = el("div"), chips = kvChips(obj, 4), json = JSON.stringify(obj || {}, null, 1);\n    if (chips) { b'
-    'ox.appendChild(chips); }\n    if (json && json.length > 2) {\n      var d = el("details", { className:'
-    ' "json" });\n      d.appendChild(el("summary", { text: "JSON completo" }));\n      d.appendChild(el("p'
-    're", { text: json }));\n      box.appendChild(d);\n    }\n    if (!box.firstChild) { box.textContent = '
-    '"—"; }\n    return box;\n  }\n\n  var TSTATE = {};\n  function spec(c) { return (c !== null && typeof c ='
-    '== "object" && !(c instanceof Node) && Object.prototype.hasOwnProperty.call(c, "v")) ? c : { v: c };'
-    ' }\n  function sortValue(c) {\n    if (c.s !== undefined) { return c.s; }\n    return c.v instanceof No'
-    'de ? c.v.textContent : (c.v === null || c.v === undefined ? "" : c.v);\n  }\n  function renderTable(ta'
-    'bleNode, headers, rows, opts) {\n    var st = TSTATE[tableNode.id] || (TSTATE[tableNode.id] = { sort:'
-    ' -1, dir: 1 });\n    st.headers = headers.map(function (h) { return typeof h === "string" ? { t: h } '
-    ': h; });\n    st.rows = rows.map(function (r) { return r.map(spec); });\n    st.opts = opts || {};\n   '
-    ' st.limit = st.opts.page || 0;\n    drawTable(tableNode, st, null);\n  }\n  function drawTable(tableNod'
-    'e, st, focus) {\n    var headers = st.headers, opts = st.opts, rows = st.rows;\n    if (st.sort >= 0) '
-    '{\n      var i = st.sort, dir = st.dir;\n      rows = rows.map(function (r, idx) { return { r: r, idx:'
-    ' idx }; }).sort(function (a, b) {\n        var x = sortValue(a.r[i]), y = sortValue(b.r[i]);\n        '
-    'var d = (isNum(x) && isNum(y)) ? x - y : String(x).localeCompare(String(y), "es", { numeric: true, s'
-    'ensitivity: "base" });\n        return d * dir || a.idx - b.idx;\n      }).map(function (o) { return o'
-    '.r; });\n    }\n    clear(tableNode);\n    var thead = el("thead"), trh = el("tr");\n    headers.forEach'
-    '(function (h, hi) {\n      var th = el("th", { className: h.c || null, scope: "col" });\n      if (opt'
-    's.sortable && h.s !== false) {\n        var b = el("button", { type: "button", className: "th-sort", '
-    'text: h.t });\n        th.setAttribute("data-label", h.t);\n        if (st.sort === hi) { th.setAttrib'
-    'ute("aria-sort", st.dir === 1 ? "ascending" : "descending"); }\n        b.addEventListener("click", f'
-    'unction () {\n          if (st.sort === hi) { st.dir = -st.dir; } else { st.sort = hi; st.dir = 1; }\n'
-    '          drawTable(tableNode, st, "th" + hi);\n        });\n        th.appendChild(b);\n      } else {'
-    ' th.textContent = h.t; }\n      trh.appendChild(th);\n    });\n    thead.appendChild(trh);\n    tableNod'
-    'e.appendChild(thead);\n    var tbody = el("tbody");\n    if (!rows.length) {\n      var tr0 = el("tr");'
-    '\n      tr0.appendChild(el("td", { colspan: headers.length, className: "empty-cell", text: opts.empty'
-    ' || "Sin registros en este alcance o filtro." }));\n      tbody.appendChild(tr0);\n    }\n    rows.forE'
-    'ach(function (cells, ri) {\n      var tr = el("tr", { className: st.limit && ri >= st.limit ? "pg" : '
-    'null });\n      cells.forEach(function (c, ci) {\n        var td = el("td", { className: [headers[ci] '
-    '&& headers[ci].c, c.c].filter(Boolean).join(" ") || null });\n        if (c.v instanceof Node) { td.a'
-    'ppendChild(c.v); }\n        else { td.textContent = c.v === null || c.v === undefined || c.v === "" ?'
-    ' "—" : String(c.v); }\n        tr.appendChild(td);\n      });\n      tbody.appendChild(tr);\n    });\n   '
-    ' tableNode.appendChild(tbody);\n    var wrap = tableNode.parentNode, more = wrap.nextElementSibling;\n'
-    '    if (!more || !more.classList.contains("more-row")) {\n      more = el("div", { className: "more-r'
-    'ow" });\n      wrap.parentNode.insertBefore(more, wrap.nextSibling);\n    }\n    clear(more);\n    var h'
-    'iddenRows = st.limit ? Math.max(0, rows.length - st.limit) : 0;\n    more.hidden = hiddenRows === 0;\n'
-    '    if (hiddenRows) {\n      var step = opts.page;\n      var b1 = el("button", { type: "button", clas'
-    'sName: "btn ghost sm", "data-k": "more", text: "Mostrar " + Math.min(step, hiddenRows) + " más" });\n'
-    '      b1.addEventListener("click", function () { st.limit += step; drawTable(tableNode, st, "more");'
-    ' });\n      var b2 = el("button", { type: "button", className: "btn ghost sm", "data-k": "all", text:'
-    ' "Mostrar todas (" + rows.length + ")" });\n      b2.addEventListener("click", function () { st.limit'
-    ' = 0; drawTable(tableNode, st, "table"); });\n      more.appendChild(el("span", { className: "more-no'
-    'te", text: "Mostrando " + st.limit + " de " + rows.length + " filas" }));\n      more.appendChild(b1)'
-    ';\n      more.appendChild(b2);\n    }\n    if (focus) {\n      var target = focus.indexOf("th") === 0 ? '
-    'tableNode.querySelectorAll(".th-sort")[Number(focus.slice(2))] : focus === "more" ? more.querySelect'
-    'or("[data-k=more]") : null;\n      if (target) { target.focus(); }\n      else if (focus === "more" ||'
-    ' focus === "table") { tableNode.setAttribute("tabindex", "-1"); tableNode.focus(); }\n    }\n  }\n\n  va'
-    'r rawText = document.getElementById("report-data").textContent;\n  var rootData;\n  try {\n    rootData'
-    ' = JSON.parse(rawText);\n  } catch (e) {\n    var openErr = document.getElementById("opening-state");\n'
-    '    openErr.hidden = false;\n    openErr.textContent = "Error al cargar el modelo JSON embebido del i'
-    'nforme.";\n    return;\n  }\n\n  var isMulti = rootData && rootData.schema_version === "databricks-dep-m'
-    'ulti-workspace-v1";\n  var currentSnap = null;\n\n  var themeBtn = document.getElementById("theme-toggl'
-    'e");\n  themeBtn.addEventListener("click", function () {\n    var dark = document.documentElement.getA'
-    'ttribute("data-theme") === "dark";\n    if (dark) { document.documentElement.removeAttribute("data-th'
-    'eme"); }\n    else { document.documentElement.setAttribute("data-theme", "dark"); }\n    themeBtn.setA'
-    'ttribute("aria-pressed", dark ? "false" : "true");\n  });\n  document.getElementById("print-btn").addE'
-    'ventListener("click", function () { window.print(); });\n  var themeBeforePrint = null;\n  window.addE'
-    'ventListener("beforeprint", function () {\n    themeBeforePrint = document.documentElement.getAttribu'
-    'te("data-theme");\n    document.documentElement.removeAttribute("data-theme");\n  });\n  window.addEven'
-    'tListener("afterprint", function () {\n    if (themeBeforePrint) { document.documentElement.setAttrib'
-    'ute("data-theme", themeBeforePrint); }\n    themeBeforePrint = null;\n  });\n\n  function closeMenus(exc'
-    'ept) {\n    [].forEach.call(document.querySelectorAll("details.menu[open]"), function (d) { if (d !=='
-    ' except) { d.removeAttribute("open"); } });\n  }\n  document.addEventListener("click", function (ev) {'
-    '\n    var inside = ev.target.closest ? ev.target.closest("details.menu") : null;\n    closeMenus(insid'
-    'e);\n    if (inside && ev.target.closest("a, button") && !ev.target.closest("summary")) { inside.remo'
-    'veAttribute("open"); }\n  });\n  document.addEventListener("keydown", function (ev) {\n    if (ev.key !'
-    '== "Escape") { return; }\n    var open = document.querySelector("details.menu[open]");\n    if (open) '
-    '{ open.removeAttribute("open"); open.querySelector("summary").focus(); }\n  });\n\n  function downloadB'
-    'lob(filename, content, mime) {\n    var blob = new Blob([content], { type: mime });\n    var url = URL'
-    '.createObjectURL(blob);\n    var a = el("a", { href: url, download: filename });\n    document.body.ap'
-    'pendChild(a);\n    a.click();\n    document.body.removeChild(a);\n    URL.revokeObjectURL(url);\n  }\n  f'
-    'unction csvEscape(v) {\n    if (v === null || v === undefined) { return ""; }\n    var s = typeof v =='
-    '= "object" ? JSON.stringify(v) : String(v);\n    if (/^[=+\\-@\\t\\r\\n]/.test(s.trimLeft())) { s = "\'" +'
-    ' s; }\n    return \'"\' + s.replace(/"/g, \'""\') + \'"\';\n  }\n  var CHECK_COLS = ["check_id", "rule_id", "'
-    'title", "status", "level", "area", "pillar", "severity", "workload_name", "reason", "recommendation"'
-    ', "learn_url"];\n  function checksCsv(list) {\n    var lines = [CHECK_COLS.join(",")];\n    list.forEac'
-    'h(function (r) { lines.push(CHECK_COLS.map(function (c) { return csvEscape(r[c]); }).join(",")); });'
-    '\n    return "\\uFEFF" + lines.join("\\r\\n");\n  }\n  document.getElementById("export-json-btn").addEvent'
-    'Listener("click", function () {\n    downloadBlob("databricks-dependency-snapshot.json", JSON.stringi'
-    'fy(rootData, null, 2), "application/json;charset=utf-8");\n  });\n  document.getElementById("export-de'
-    'ps-csv-btn").addEventListener("click", function () {\n    if (!currentSnap) { return; }\n    var cols '
-    '= ["record_type", "classification", "layer", "id", "kind", "label", "from", "to", "relation", "join_'
-    'fields", "source_ids"];\n    var lines = [cols.join(",")];\n    var dep = currentSnap.dependencies;\n  '
-    '  [].concat(dep.nodes || [], dep.edges || [], dep.unknowns || []).forEach(function (r) {\n      lines'
-    '.push(cols.map(function (c) { return csvEscape(r[c]); }).join(","));\n    });\n    downloadBlob("datab'
-    'ricks-dependencies.csv", "\\uFEFF" + lines.join("\\r\\n"), "text/csv;charset=utf-8");\n  });\n  document.'
-    'getElementById("export-findings-csv-btn").addEventListener("click", function () {\n    if (!currentSn'
-    'ap) { return; }\n    downloadBlob("databricks-findings.csv", checksCsv(currentSnap.checks || []), "te'
-    'xt/csv;charset=utf-8");\n  });\n\n  var tabObs = document.getElementById("tab-dep-observed");\n  var tab'
-    'Ref = document.getElementById("tab-dep-reference");\n  var panelObs = document.getElementById("panel-'
-    'dep-observed");\n  var panelRef = document.getElementById("panel-dep-reference");\n  function selectTa'
-    'b(ref) {\n    tabObs.setAttribute("aria-selected", ref ? "false" : "true");\n    tabRef.setAttribute("'
-    'aria-selected", ref ? "true" : "false");\n    tabObs.setAttribute("tabindex", ref ? "-1" : "0");\n    '
-    'tabRef.setAttribute("tabindex", ref ? "0" : "-1");\n    panelObs.hidden = ref;\n    panelRef.hidden = '
-    '!ref;\n  }\n  tabObs.addEventListener("click", function () { selectTab(false); });\n  tabRef.addEventLi'
-    'stener("click", function () { selectTab(true); });\n  [tabObs, tabRef].forEach(function (t) {\n    t.a'
-    'ddEventListener("keydown", function (ev) {\n      if (ev.key === "ArrowRight" || ev.key === "ArrowLef'
-    't") {\n        var ref = t === tabObs;\n        selectTab(ref);\n        (ref ? tabRef : tabObs).focus('
-    ');\n        ev.preventDefault();\n      }\n    });\n  });\n\n  function fitText(s, max) { s = String(s || '
-    '""); return s.length > max ? s.slice(0, Math.max(1, max - 1)) + "…" : s; }\n  function nodeLines(n) {'
-    '\n    var label = String(n.label || n.name || n.id), kind = lab(L.kind, n.kind), cut = label.indexOf('
-    '" :: ");\n    if (cut < 0) { cut = label.indexOf(" / "); }\n    if (cut > 0) { return [label.slice(lab'
-    'el.indexOf(" ", cut + 1) + 1), kind + " · " + label.slice(0, cut)]; }\n    return [label, kind + (n.c'
-    'lassification === "INFERRED" ? " · INFERRED" : "")];\n  }\n  function renderNeighborhoodSvg(nodes, edg'
-    'es) {\n    var box = document.getElementById("dep-graph-box");\n    var caption = document.getElementB'
-    'yId("dep-graph-caption");\n    clear(box);\n    if (!nodes.length) { box.appendChild(emptyState("Ningú'
-    'n nodo coincide con este filtro.")); caption.textContent = ""; return; }\n    var deg = {};\n    edges'
-    '.forEach(function (e) { deg[e.from] = (deg[e.from] || 0) + 1; deg[e.to] = (deg[e.to] || 0) + 1; });\n'
-    '    var subset = nodes.map(function (n, i) {\n      return { n: n, i: i, r: (n.kind === "databricks_w'
-    'orkspace" ? 1000 : 0) + (n.classification === "INFERRED" ? 500 : 0) + (deg[n.id] || 0) };\n    }).sor'
-    't(function (a, b) { return b.r - a.r || a.i - b.i; }).slice(0, 13).map(function (x) { return x.n; })'
-    ';\n    var order = LAYERS.slice();\n    subset.forEach(function (n) { if (order.indexOf(n.layer) < 0) '
-    '{ order.push(n.layer); } });\n    var cols = [];\n    order.forEach(function (layer) {\n      var ns = '
-    'subset.filter(function (n) { return n.layer === layer; });\n      for (var i = 0; i < ns.length; i +='
-    ' 5) { cols.push({ layer: layer, nodes: ns.slice(i, i + 5), head: i === 0 }); }\n    });\n    var W = 1'
-    '200, colW = W / cols.length, bw = Math.min(214, colW - 30), bh = 50, gy = 20, top = 34;\n    var rows'
-    ' = Math.max.apply(null, cols.map(function (c) { return c.nodes.length; }));\n    var H = top + rows *'
-    ' (bh + gy);\n    var pos = {};\n    cols.forEach(function (c, ci) {\n      var off = (rows - c.nodes.le'
-    'ngth) * (bh + gy) / 2;\n      c.nodes.forEach(function (n, ri) { pos[n.id] = { x: colW * ci + colW / '
-    '2, y: top + off + ri * (bh + gy) + bh / 2, c: ci }; });\n    });\n    var s = svg("svg", { viewBox: "0'
-    ' 0 " + W + " " + H, role: "img", "aria-label": "Grafo de dependencias: " + subset.length + " de " + '
-    'nodes.length + " nodos filtrados, agrupados por capa." });\n    var defs = svg("defs");\n    ["obs", "'
-    'inf"].forEach(function (k) {\n      var m = svg("marker", { id: "dep-arrow-" + k, viewBox: "0 0 10 10'
-    '", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto" });\n      m.appendChild(svg("pa'
-    'th", { d: "M0 0L10 5L0 10z", "class": "arr " + k }));\n      defs.appendChild(m);\n    });\n    s.appen'
-    'dChild(defs);\n    cols.forEach(function (c, ci) {\n      if (c.head) { s.appendChild(svg("text", { x:'
-    ' colW * ci + colW / 2 - bw / 2, y: 16, "class": "g-col" }, fitText(lab(L.layer, c.layer), Math.floor'
-    '(bw / 7.5)))); }\n    });\n    var drawn = 0;\n    edges.forEach(function (e) {\n      var a = pos[e.fro'
-    'm], b = pos[e.to];\n      if (!a || !b || e.from === e.to) { return; }\n      var sx, ex, c1, c2;\n    '
-    '  if (a.c < b.c) { sx = a.x + bw / 2; ex = b.x - bw / 2 - 2; c1 = sx + (ex - sx) / 2; c2 = ex - (ex '
-    '- sx) / 2; }\n      else if (a.c > b.c) { sx = a.x - bw / 2; ex = b.x + bw / 2 + 2; c1 = sx - (sx - e'
-    'x) / 2; c2 = ex + (sx - ex) / 2; }\n      else { sx = a.x + bw / 2; ex = b.x + bw / 2 + 2; c1 = sx + '
-    '26; c2 = ex + 26; }\n      var k = e.classification === "INFERRED" ? "inf" : "obs";\n      s.appendChi'
-    'ld(svg("path", { d: "M" + sx + " " + a.y + " C" + c1 + " " + a.y + " " + c2 + " " + b.y + " " + ex +'
-    ' " " + b.y, "class": "edge " + k, "marker-end": "url(#dep-arrow-" + k + ")" }));\n      drawn++;\n    '
-    '});\n    var maxChars = Math.floor((bw - 22) / 6.9);\n    subset.forEach(function (n) {\n      var p = '
-    'pos[n.id], lines = nodeLines(n);\n      var g = svg("g", { "class": "g-node" + (n.classification === '
-    '"INFERRED" ? " inf" : "") + (n.kind === "databricks_workspace" ? " ws" : "") });\n      g.appendChild'
-    '(svg("title", {}, (n.label || n.id) + " · " + (n.kind || "") + " · " + (n.classification || "")));\n '
-    '     g.appendChild(svg("rect", { x: p.x - bw / 2, y: p.y - bh / 2, width: bw, height: bh, rx: 8 }));'
-    '\n      g.appendChild(svg("text", { x: p.x - bw / 2 + 11, y: p.y - 3, "class": "g-l1" }, fitText(line'
-    's[0], maxChars)));\n      g.appendChild(svg("text", { x: p.x - bw / 2 + 11, y: p.y + 14, "class": "g-'
-    'l2" }, fitText(lines[1], Math.floor((bw - 22) / 6))));\n      s.appendChild(g);\n    });\n    box.appen'
-    'dChild(s);\n    caption.textContent = "Mostrando " + subset.length + " de " + nodes.length + " nodos '
-    'filtrados y " + drawn + " relaciones entre ellos (vista acotada a 13 nodos: workspace, referencias I'
-    'NFERRED y nodos más conectados). Las tablas contienen el 100 % de los nodos, aristas y puntos ciegos'
-    '.";\n  }\n\n  function renderReferenceArchitecture() {\n    var box = document.getElementById("ref-arch-'
-    'box");\n    clear(box);\n    var s = svg("svg", { viewBox: "0 0 1200 236", role: "img", "aria-label": '
-    '"Arquitectura de referencia Azure Databricks Lakehouse - Propuesta NO desplegada" });\n    var flag ='
-    ' svg("g", { "class": "ref-flag" });\n    flag.appendChild(svg("rect", { x: 0, y: 4, width: 300, heigh'
-    't: 24, rx: 12 }));\n    flag.appendChild(svg("text", { x: 14, y: 20 }, "PROPUESTA DE REFERENCIA · NO '
-    'DESPLEGADA"));\n    s.appendChild(flag);\n    var boxes = [\n      ["Red y Perímetro (ARM)", "VNet Inje'
-    'ction + SCC + Private Link"],\n      ["Identidad y Secretos", "Entra SP/UAMI + Key Vault Scopes"],\n  '
-    '    ["Cómputo y Orquestación", "Cluster Policies + Job/Serverless"],\n      ["Unity Catalog & ADLS", '
-    '"Access Connector UAMI + Linaje"]\n    ];\n    var bw = 262, gap = (1200 - 4 * bw) / 3;\n    boxes.forE'
-    'ach(function (b, i) {\n      var x = i * (bw + gap);\n      if (i < boxes.length - 1) { s.appendChild('
-    'svg("line", { x1: x + bw, y1: 92, x2: x + bw + gap, y2: 92, "class": "ref-link" })); }\n      var g ='
-    ' svg("g", { "class": "ref-box" });\n      g.appendChild(svg("rect", { x: x + 1, y: 52, width: bw - 2,'
-    ' height: 80, rx: 10 }));\n      g.appendChild(svg("text", { x: x + 18, y: 86, "class": "ref-t" }, b[0'
-    ']));\n      g.appendChild(svg("text", { x: x + 18, y: 108, "class": "ref-s" }, b[1]));\n      s.append'
-    'Child(g);\n    });\n    s.appendChild(svg("text", { x: 0, y: 176, "class": "ref-note" }, "PROPUESTA DE'
-    ' REFERENCIA (NO DESPLEGADA): Integración entre tenants mediante Entra Multi-tenant FIC o Lighthouse '
-    '+ Databricks OIDC."));\n    s.appendChild(svg("text", { x: 0, y: 204, "class": "ref-s" }, "Componente'
-    's recomendados para comparar con el mapa observado; ninguno se ha detectado ni creado en el workspac'
-    'e revisado."));\n    box.appendChild(s);\n    renderTable(document.getElementById("ref-arch-table"),\n '
-    '     ["Componente de referencia", "Práctica recomendada Microsoft / Databricks", "Compromiso / Trade'
-    '-off"],\n      [\n        ["VNet Injection + Secure Cluster Connectivity", "Desplegar en VNet propia c'
-    'on enableNoPublicIp=true y subredes delegadas host/container con NSG.", "Exige planificación IPAM y '
-    'rutas salientes hacia endpoints de plano de control."],\n        ["Private Link (Front-end / Back-end'
-    ' / WebAuth)", "Aislar tráfico de usuarios y plano de datos mediante Private Endpoints aprobados y zo'
-    'nas DNS privadas.", "Requiere SKU Premium y gestión de DNS privado entre redes hub-spoke."],\n       '
-    ' ["Unity Catalog + Access Connector (UAMI)", "Gobernar catálogos y External Locations con Storage Cr'
-    'edentials basadas en Managed Identity.", "Sustituye claves compartidas y montajes DBFS heredados."],'
-    '\n        ["Jobs sobre Job Compute / Serverless + Service Principal", "Ejecutar jobs productivos con '
-    'run_as Service Principal sobre cómputo efímero de Job o Serverless.", "Reduce coste DBU frente a All'
-    '-Purpose y evita fallos por baja de usuarios."],\n        ["Integración Cross-Tenant sin secretos", "'
-    'Usar App multitenant con Federated Identity Credential (UAMI) o Azure Lighthouse (ARM) + Databricks '
-    'OIDC Federation.", "Requiere consentimiento/asignación por administradores de ambos tenants."]\n     '
-    ' ].map(function (r) { return [{ v: el("b", { text: r[0] }) }, r[1], r[2]]; })\n    );\n  }\n\n  function'
-    ' applyDependencyFilters() {\n    if (!currentSnap) { return; }\n    var layer = document.getElementByI'
-    'd("dep-layer-filter").value;\n    var cls = document.getElementById("dep-class-filter").value;\n    va'
-    'r q = (document.getElementById("dep-search-filter").value || "").toLowerCase().trim();\n    var dep ='
-    ' currentSnap.dependencies || { nodes: [], edges: [], unknowns: [], broken_references: [] };\n    func'
-    'tion keep(r) {\n      if (layer !== "all" && r.layer !== layer) { return false; }\n      if (cls !== "'
-    'all" && r.classification !== cls) { return false; }\n      if (q && JSON.stringify(r).toLowerCase().i'
-    'ndexOf(q) === -1) { return false; }\n      return true;\n    }\n    var nodes = (dep.nodes || []).filte'
-    'r(keep);\n    var edges = (dep.edges || []).filter(keep);\n    var unknowns = (dep.unknowns || []).fil'
-    'ter(keep);\n    var byId = {};\n    (dep.nodes || []).forEach(function (n) { byId[n.id] = n; });\n    f'
-    'unction nodeCell(id) {\n      var n = byId[id];\n      return n ? { v: stack(brk(n.label || n.id, ""),'
-    ' lab(L.kind, n.kind)), s: n.label || n.id } : { v: brk(id) };\n    }\n    renderNeighborhoodSvg(nodes,'
-    ' edges);\n    document.getElementById("dep-edges-count").textContent = String(edges.length);\n    rend'
-    'erTable(document.getElementById("dep-edges-table"),\n      ["Clasificación", "Capa", "Origen", "Relac'
-    'ión", "Destino", "Campos join", "Fuentes"],\n      edges.map(function (e) {\n        return [\n        '
-    '  { v: clsPill(e.classification), s: e.classification },\n          lab(L.layer, e.layer),\n          '
-    'nodeCell(e.from),\n          { v: brk(e.relation), s: e.relation },\n          nodeCell(e.to),\n       '
-    '   { v: brk((e.join_fields || []).join(", ")) },\n          { v: brk((e.source_ids || []).join(", "))'
-    ' }\n        ];\n      }), { page: 12, sortable: true }\n    );\n    document.getElementById("dep-nodes-c'
-    'ount").textContent = String(nodes.length);\n    renderTable(document.getElementById("dep-nodes-table"'
-    '),\n      ["Clasificación", "Capa", "Tipo", "Nombre / etiqueta", "Fuente", { t: "Evidencia", s: false'
-    ', c: "w" }],\n      nodes.map(function (n) {\n        return [\n          { v: clsPill(n.classification'
-    '), s: n.classification },\n          lab(L.layer, n.layer),\n          { v: kindLabel(n.kind) },\n     '
-    '     { v: brk(n.label || n.id, ""), s: n.label },\n          { v: mono(n.source_id) },\n          { v:'
-    ' evidenceCell(n.evidence) }\n        ];\n      }), { page: 12, sortable: true }\n    );\n    var broken '
-    '= dep.broken_references || [];\n    document.getElementById("dep-broken-count").textContent = String('
-    'broken.length);\n    renderTable(document.getElementById("dep-broken-table"),\n      ["Objeto origen",'
-    ' "Tipo de referencia rota", "ID destino no encontrado"],\n      broken.map(function (b) { return [b.s'
-    'ource_object, b.kind, { v: brk(b.target_id) }]; }),\n      { empty: "Sin referencias rotas entre tare'
-    'as, clústeres, pools, políticas, pipelines, warehouses y credenciales." }\n    );\n    document.getEle'
-    'mentById("dep-unknowns-count").textContent = String(unknowns.length);\n    renderTable(document.getEl'
-    'ementById("dep-unknowns-table"),\n      ["Capa", "Código", "Descripción del punto ciego", "Fuentes"],'
-    '\n      unknowns.map(function (u) {\n        return [lab(L.layer, u.layer), { v: brk(u.code) }, u.mess'
-    'age, { v: brk((u.source_ids || []).join(", ")) }];\n      })\n    );\n  }\n\n  function observedValues(ev'
-    'idence) {\n    var merged = {};\n    (Array.isArray(evidence) ? evidence : []).forEach(function (ev) {'
-    '\n      if (ev && ev.value && typeof ev.value === "object" && !Array.isArray(ev.value)) {\n        Obj'
-    'ect.keys(ev.value).forEach(function (k) { merged[k] = ev.value[k]; });\n      }\n    });\n    return kv'
-    'Chips(merged, 3);\n  }\n  function filteredChecks() {\n    var area = document.getElementById("find-are'
-    'a-filter").value;\n    var level = document.getElementById("find-level-filter").value;\n    var sev = '
-    'document.getElementById("find-sev-filter").value;\n    var st = document.getElementById("find-status-'
-    'filter").value;\n    var q = (document.getElementById("find-search-filter").value || "").toLowerCase('
-    ').trim();\n    return (currentSnap.checks || []).filter(function (c) {\n      if (area !== "all" && c.'
-    'area !== area) { return false; }\n      if (level !== "all" && c.level !== level) { return false; }\n '
-    '     if (sev !== "all" && c.severity !== sev) { return false; }\n      if (st !== "all" && c.status !'
-    '== st) { return false; }\n      if (q && JSON.stringify(c).toLowerCase().indexOf(q) === -1) { return '
-    'false; }\n      return true;\n    });\n  }\n  function applyFindingFilters() {\n    if (!currentSnap) { r'
-    'eturn; }\n    var all = currentSnap.checks || [];\n    var filtered = filteredChecks().slice().sort(fu'
-    'nction (a, b) {\n      return (STATUS_ORDER[a.status] - STATUS_ORDER[b.status]) || (SEVS.indexOf(a.se'
-    'verity) - SEVS.indexOf(b.severity)) || String(a.rule_id).localeCompare(String(b.rule_id), "es", { nu'
-    'meric: true });\n    });\n    var failed = filtered.filter(function (c) { return c.status === "failed"'
-    '; }).length;\n    document.getElementById("findings-count-label").textContent = "Mostrando " + filter'
-    'ed.length + " de " + all.length + " comprobaciones · " + failed + plural(failed, " no cumple", " no '
-    'cumplen") + ".";\n    renderTable(document.getElementById("findings-table"),\n      [{ t: "Estado" }, '
-    '{ t: "Severidad" }, { t: "Regla" }, { t: "Área / pilar" }, { t: "Objeto" }, { t: "Hallazgo y evidenc'
-    'ia", c: "w" }, { t: "Recomendación", c: "w" }],\n      filtered.map(function (c) {\n        var link ='
-    ' safeLearnUrl(c.learn_url);\n        var detail = el("div", { className: "fd" });\n        detail.appe'
-    'ndChild(el("b", { text: c.title }));\n        detail.appendChild(el("p", { text: c.reason }));\n      '
-    '  var chips = observedValues(c.evidence);\n        if (chips) { detail.appendChild(chips); }\n        '
-    'var rec = el("div", { className: "fr" });\n        rec.appendChild(el("p", { text: c.recommendation }'
-    '));\n        if (link) { rec.appendChild(extLink(link, "Documentación oficial")); }\n        return [\n'
-    '          { v: statusTag(c.status), s: STATUS_ORDER[c.status] },\n          { v: sevPill(c.severity, '
-    'c.severity_label), s: SEVS.indexOf(c.severity) },\n          { v: stack(c.rule_id, mono(c.reference_i'
-    'd)), s: c.rule_id },\n          { v: stack(lab(L.area, c.area), lab(L.pillar, c.pillar)), s: lab(L.ar'
-    'ea, c.area) },\n          { v: stack(brk(c.workload_name || c.resource_name || c.workspace_name, ""),'
-    ' lab(L.level, c.level)), s: c.workload_name || c.resource_name || "" },\n          { v: detail, s: c.'
-    'title },\n          { v: rec, s: c.recommendation }\n        ];\n      }), { page: 15, sortable: true }'
-    '\n    );\n  }\n\n  ["dep-layer-filter", "dep-class-filter", "dep-search-filter"].forEach(function (id) {'
-    '\n    document.getElementById(id).addEventListener("input", applyDependencyFilters);\n    document.get'
-    'ElementById(id).addEventListener("change", applyDependencyFilters);\n  });\n  ["find-area-filter", "fi'
-    'nd-level-filter", "find-sev-filter", "find-status-filter", "find-search-filter"].forEach(function (i'
-    'd) {\n    document.getElementById(id).addEventListener("input", applyFindingFilters);\n    document.ge'
-    'tElementById(id).addEventListener("change", applyFindingFilters);\n  });\n  document.getElementById("d'
-    'ep-clear").addEventListener("click", function () {\n    document.getElementById("dep-layer-filter").v'
-    'alue = "all";\n    document.getElementById("dep-class-filter").value = "all";\n    document.getElement'
-    'ById("dep-search-filter").value = "";\n    applyDependencyFilters();\n  });\n  document.getElementById('
-    '"find-clear").addEventListener("click", function () {\n    ["find-area-filter", "find-level-filter", '
-    '"find-sev-filter", "find-status-filter"].forEach(function (id) { document.getElementById(id).value ='
-    ' "all"; });\n    document.getElementById("find-search-filter").value = "";\n    applyFindingFilters();'
-    '\n  });\n  document.getElementById("find-export-btn").addEventListener("click", function () {\n    if ('
-    '!currentSnap) { return; }\n    downloadBlob("databricks-findings-filtered.csv", checksCsv(filteredChe'
-    'cks()), "text/csv;charset=utf-8");\n  });\n\n  function barRow(label, sub, width, value, valueSub, colo'
-    'r, na) {\n    var row = el("div", { className: "brow" + (na ? " na" : "") });\n    var bl = el("div", '
-    '{ className: "bl" }, [label]);\n    if (sub) { bl.appendChild(el("small", { text: sub })); }\n    row.'
-    'appendChild(bl);\n    var bar = el("i");\n    bar.style.width = Math.max(0, Math.min(100, width)) + "%'
-    '";\n    if (color) { bar.style.background = color; }\n    if (na || !width) { bar.style.minWidth = "0"'
-    '; }\n    row.appendChild(el("div", { className: "bt" }, [bar]));\n    var bv = el("div", { className: '
-    '"bv", text: value });\n    if (valueSub) { bv.appendChild(el("small", { text: valueSub })); }\n    row'
-    '.appendChild(bv);\n    return row;\n  }\n  function scoreBars(id, map, labels) {\n    var holder = docum'
-    'ent.getElementById(id);\n    clear(holder);\n    Object.keys(map || {}).forEach(function (k) {\n      v'
-    'ar it = map[k] || {}, na = !isNum(it.score);\n      holder.appendChild(barRow(lab(labels, k), null, n'
-    'a ? 0 : it.score, na ? "No evaluado" : pct(it.score),\n        "cobertura " + (isNum(it.coverage_perc'
-    'ent) ? pct(it.coverage_percent) : "0\\u00a0%"), null, na));\n    });\n  }\n  function kpi(value, unit, l'
-    'abel, sub) {\n    var v = el("div", { className: "v" }, [String(value)]);\n    if (unit) { v.appendChi'
-    'ld(el("small", { text: unit })); }\n    return el("div", { className: "kpi" }, [v, el("div", { classN'
-    'ame: "l", text: label }), sub ? el("div", { className: "s", text: sub }) : null]);\n  }\n  function pc'
-    'tParts(v) { return isNum(v) ? [NF.format(v), "%"] : ["—", ""]; }\n  function sourcePlane(id) {\n    id'
-    ' = String(id || "");\n    if (id.indexOf("arm_") === 0 || id === "azure_cost") { return "Plano 1 · AR'
-    'M"; }\n    if (id.indexOf("dbx_") === 0) { return "Plano 2 · Databricks REST"; }\n    if (id.indexOf("'
-    'uc_") === 0) { return "Plano 2 · Unity Catalog"; }\n    return "Interno";\n  }\n  var SRC_COLOR = { com'
-    'plete: "var(--ok-bar)", partial: "var(--med-bar)", denied: "var(--crit-bar)", error: "var(--crit-bar'
-    ')", not_configured: "var(--info-bar)", not_applicable: "var(--line2)" };\n\n  function renderHero(snap'
-    ', g, counts) {\n    var ws = snap.workspace || {}, sc = (snap.dependencies && snap.dependencies.summa'
-    'ry_counts) || {};\n    var fails = (snap.findings || []).length, ev = g.evaluated || 0;\n    var sevTe'
-    'xt = SEVS.filter(function (s) { return counts[s]; }).map(function (s) { return counts[s] + " " + plu'
-    'ral(counts[s], SEV_WORD[s][0], SEV_WORD[s][1]); }).join(" · ");\n    var depParts = [" El mapa de dep'
-    'endencias reúne ", [num(sc.nodes_total || 0)], " nodos y ", [num(sc.edges_total || 0)], " relaciones'
-    ', con ", [num(sc.edges_inferred || 0)], " referencias INFERRED y ", [num(sc.unknowns_total || 0)], "'
-    ' puntos ciegos UNKNOWN."];\n    var ch = (snap.databricks_costs && snap.databricks_costs.headline) ||'
-    ' {};\n    if (isNum(ch.review_total)) {\n      costCurrency = snap.databricks_costs.currency || "";\n  '
-    '    depParts = depParts.concat([" Databricks costó ", [money(ch.review_total)], " en " + monthName(c'
-    'h.review_month)].concat(\n        isNum(ch.estimated_monthly_savings) ? ["; ahorro estimado ", ["≈ " '
-    '+ money(ch.estimated_monthly_savings)], " al mes (sección de costes)."] : ["."]));\n    }\n    rich(do'
-    'cument.getElementById("cover-lead"), ev ? [[num(fails)], plural(fails, " comprobación no cumple", " '
-    'comprobaciones no cumplen"), sevText ? " (" + sevText + ")" : "", " de ", [num(ev)], " evaluadas; ín'
-    'dice local ", [pct(g.score)], " con una cobertura del ", [pct(g.coverage_percent)], "."].concat(depP'
-    'arts)\n      : ["Ninguna comprobación pudo evaluarse con las fuentes disponibles; revise la cobertura'
-    ' en la sección 8."].concat(depParts));\n    var meta = document.getElementById("cover-badges");\n    c'
-    'lear(meta);\n    function chip(parts, on, title) { meta.appendChild(rich(el("span", { className: on ?'
-    ' "on" : null, title: title || null }), parts)); }\n    chip(["Generado ", [utc(snap.reference_utc)]])'
-    ';\n    chip(["Workspace ", [ws.name || "—"]]);\n    chip([[ws.cross_tenant ? "Entre tenants" : "Mismo '
-    'tenant"], " · " + (ws.auth_mode || "—")], false, ws.cross_tenant ? (ws.sre_tenant_id || "—") + " → "'
-    ' + (ws.target_tenant_id || "—") : ws.target_tenant_id);\n    chip(["Entorno ", [snap.environment || "'
-    '—"]]);\n    chip([snap.provenance === "SIMULATED" ? "DATOS SIMULADOS" : "DATOS " + (snap.provenance |'
-    '| "LIVE")], true);\n\n    var tone = "ok", title = counts.low ? "Sin desviaciones relevantes" : "Sin d'
-    'esviaciones observadas";\n    if (!ev) { tone = "info"; title = "Sin evaluar"; }\n    else if (counts.'
-    'critical) { tone = "crit"; title = "Acción requerida"; }\n    else if (counts.high || counts.medium) '
-    '{ tone = "warn"; title = "Requiere atención"; }\n    var lowCov = isNum(g.coverage_percent) && g.cove'
-    'rage_percent < 50;\n    if (lowCov && tone === "ok") { tone = "warn"; title = "Cobertura insuficiente'
-    '"; }\n    var verdict = document.getElementById("verdict");\n    verdict.className = "signal " + tone;'
-    '\n    clear(verdict);\n    verdict.appendChild(el("div", { className: "k", text: "Veredicto" }));\n    '
-    'verdict.appendChild(el("b", { text: title }));\n    verdict.appendChild(el("p", { text: (ev ? (sevTex'
-    't || "Ningún hallazgo") + " · cobertura " + pct(g.coverage_percent) : "Ninguna comprobación evaluada'
-    '") + (lowCov ? " · solo " + ev + " de " + (ev + (g.not_evaluated || 0)) + " evaluadas" : "") }));\n\n '
-    '   var dist = document.getElementById("severity-dist");\n    clear(dist);\n    dist.hidden = !fails;\n '
-    '   if (fails) {\n      dist.appendChild(rich(el("div", { className: "dist-head" }), ["Hallazgos por s'
-    'everidad", ""]));\n      dist.firstChild.appendChild(rich(el("span"), [[num(fails)], " de " + num(g.t'
-    'otal || 0) + " comprobaciones no cumplen"]));\n      var track = el("div", { className: "track", role'
-    ': "img", "aria-label": sevText });\n      var legend = el("div", { className: "legend" });\n      SEVS'
-    '.forEach(function (s) {\n        if (!counts[s]) { return; }\n        var seg = el("i", { title: L.sev'
-    '[s] + ": " + counts[s] });\n        seg.style.width = (100 * counts[s] / fails) + "%";\n        seg.st'
-    'yle.background = SEV_BAR[s];\n        track.appendChild(seg);\n        var key = el("i");\n        key.'
-    'style.background = SEV_BAR[s];\n        legend.appendChild(el("span", null, [key, L.sev[s] + " ", el('
-    '"b", { text: String(counts[s]) })]));\n      });\n      dist.appendChild(track);\n      dist.appendChil'
-    'd(legend);\n    }\n\n    var client = snap.client || { name: "CLIENTE", logo_data_uri: "", logo_alt: "L'
-    'ogotipo autorizado del cliente" };\n    var plaque = document.getElementById("brand-plaque");\n    cle'
-    'ar(plaque);\n    var hasLogo = client.logo_data_uri && /^data:image\\/(png|jpeg);base64,[A-Za-z0-9+/=]'
-    '+$/.test(client.logo_data_uri);\n    if (hasLogo) { plaque.appendChild(el("img", { src: client.logo_d'
-    'ata_uri, alt: client.logo_alt || client.name || "CLIENTE" })); }\n    else { plaque.appendChild(el("s'
-    'pan", { className: "brand-placeholder", text: client.name || "CLIENTE" })); }\n    var nameLabel = do'
-    'cument.getElementById("client-name-label");\n    nameLabel.textContent = client.name || "CLIENTE";\n  '
-    '  nameLabel.hidden = !hasLogo;\n  }\n\n  function renderKpis(snap, g, counts) {\n    var sc = (snap.depe'
-    'ndencies && snap.dependencies.summary_counts) || {}, fin = snap.finops || {};\n    var fails = (snap.'
-    'findings || []).length, ev = g.evaluated || 0;\n    var holder = document.getElementById("kpis");\n   '
-    ' clear(holder);\n    var sevText = SEVS.filter(function (s) { return counts[s]; }).map(function (s) {'
-    ' return counts[s] + " " + plural(counts[s], SEV_WORD[s][0], SEV_WORD[s][1]); }).join(" · ");\n    var'
-    ' sp = pctParts(g.score), cp = pctParts(g.coverage_percent);\n    var hasCost = isNum(fin.actual_cost)'
-    ';\n    var win = fin.window ? day(fin.window.start).slice(5) + " → " + day(fin.window.end).slice(5) :'
-    ' null;\n    var cm = snap.databricks_costs || {}, ch = cm.headline || {};\n    costCurrency = cm.curre'
-    'ncy || "";\n    var costKpi = isNum(ch.review_total)\n      ? kpi(NF0.format(ch.review_total), cm.curr'
-    'ency || "", "Coste Databricks", monthName(ch.review_month).split(" de ")[0] + (isNum(ch.dbu_share) ?'
-    ' " · " + NF0.format(ch.dbu_share) + " % DBU" : "") + (isNum(ch.estimated_monthly_savings) ? " · ahor'
-    'ro ≈ " + money(ch.estimated_monthly_savings) + "/mes" : " · " + signedPct(ch.change_pct) + " vs mes '
-    'anterior"))\n      : kpi(hasCost ? NF2.format(fin.actual_cost) : "—", hasCost ? (fin.currency || "") '
-    ': "", "Coste observado", hasCost ? "ActualCost · " + (win || "periodo acumulado") : "No evaluado");\n'
-    '    var list = FOCUS === "costs" && isNum(ch.review_total) ? [\n      kpi(NF0.format(ch.review_total)'
-    ', cm.currency || "", "Coste de " + monthName(ch.review_month).split(" de ")[0], signedPct(ch.change_'
-    'pct) + " frente a " + monthName(ch.previous_month).split(" de ")[0]),\n      kpi(NF0.format(ch.mtd_to'
-    'tal), cm.currency || "", "Mes en curso", "hasta el día " + ch.mtd_days + " de " + monthName(ch.curre'
-    'nt_month).split(" de ")[0]),\n      kpi(NF0.format(ch.dbu_share || 0), "%", "DBU", NF0.format(100 - ('
-    'ch.dbu_share || 0)) + " % infraestructura (" + money(ch.infra_total) + ")"),\n      kpi(isNum(ch.unat'
-    'tributed_share) ? NF1.format(ch.unattributed_share) : "—", isNum(ch.unattributed_share) ? "%" : "", '
-    '"Sin etiqueta de cómputo", isNum(ch.unattributed_total) ? money(ch.unattributed_total) + " sin atrib'
-    'uir" : "No evaluado"),\n      kpi(isNum(ch.estimated_monthly_savings) ? NF0.format(ch.estimated_month'
-    'ly_savings) : "—", isNum(ch.estimated_monthly_savings) ? cm.currency || "" : "", "Ahorro estimado al'
-    ' mes", ch.savings_signals + " de " + ch.signals + " señales, sin contar dos veces"),\n      kpi(num(f'
-    'ails), "", "Hallazgos de configuración", sevText || "Sin desviaciones observadas")\n    ] : [\n      k'
-    'pi(num(fails), "", "Hallazgos", sevText || "Sin desviaciones observadas"),\n      kpi(sp[0], sp[1], "'
-    'Índice local", ev ? "Sobre " + ev + " evaluadas" : "Sin comprobaciones evaluadas"),\n      kpi(cp[0],'
-    ' cp[1], "Cobertura evaluada", ev + " de " + (ev + (g.not_evaluated || 0)) + " aplicables"),\n      kp'
-    'i(num(sc.edges_total || 0), "", "Relaciones", num(sc.edges_observed || 0) + " OBSERVED · " + num(sc.'
-    'edges_inferred || 0) + " INFERRED"),\n      kpi(num(sc.unknowns_total || 0), "", "Puntos ciegos UNKNO'
-    'WN", num(sc.broken_references_total || 0) + plural(sc.broken_references_total || 0, " referencia rot'
-    'a", " referencias rotas")),\n      costKpi\n    ];\n    list.forEach(function (k) { holder.appendChild('
-    'k); });\n\n    var notices = document.getElementById("notices");\n    clear(notices);\n    if (snap.prov'
-    'enance === "SIMULATED") {\n      notices.appendChild(el("div", { className: "sim", role: "note" }, [i'
-    'con("alert"), el("span", { text: "Datos simulados: este informe procede de un conjunto sintético de '
-    'pruebas; las cifras no describen un workspace real." })]));\n    }\n    var gaps = (snap.sources || []'
-    ').filter(function (s) { return s.status !== "complete" && s.status !== "not_applicable"; });\n    if '
-    '(gaps.length) {\n      var listed = gaps.slice(0, 6).map(function (s) { return s.id + " (" + lab(L.sr'
-    'c, s.status).toLowerCase() + ")"; }).join(", ") + (gaps.length > 6 ? " y " + (gaps.length - 6) + " m'
-    'ás" : "");\n      notices.appendChild(el("div", { className: "note", role: "note" }, [icon("info"), e'
-    'l("span", { text: gaps.length + plural(gaps.length, " fuente sin datos completos: ", " fuentes sin d'
-    'atos completos: ") + listed + ". Las comprobaciones que dependen de ellas figuran como No evaluado ('
-    'sección 8)." })]));\n    }\n  }\n\n  function renderFacts(snap) {\n    var ws = snap.workspace || {};\n   '
-    ' var facts = document.getElementById("cover-facts");\n    clear(facts);\n    function fact(label, main'
-    ', sub) {\n      var dd = el("dd");\n      if (main instanceof Node) { dd.appendChild(main); } else { d'
-    'd.textContent = main === null || main === undefined || main === "" ? "—" : String(main); }\n      if '
-    '(sub instanceof Node) { var w = el("small"); w.appendChild(sub); dd.appendChild(w); } else if (sub) '
-    '{ dd.appendChild(el("small", { text: sub })); }\n      facts.appendChild(el("div", null, [el("dt", { '
-    'text: label }), dd]));\n    }\n    fact("Workspace", ws.name, brk(ws.workspace_url || "—"));\n    fact('
-    '"Recurso ARM", armCell(ws.id, ws.name));\n    fact("Grupo administrado", brk(ws.managed_resource_grou'
-    'p || "—", ""));\n    fact("Región · SKU", (ws.region || "—") + " · " + (ws.sku_name || "—"), ws.sku_t'
-    'ier ? "Nivel " + ws.sku_tier : null);\n    fact("Red", "Acceso público: " + access(ws.public_network_'
-    'access), "Sin IP pública (NPIP): " + yesNo(ws.enable_no_public_ip) + (ws.custom_virtual_network_id ?'
-    ' " · VNet inyectada" : ""));\n    fact("Autenticación", ws.auth_mode || "—", ws.cross_tenant ? "Entre'
-    ' tenants" : "Mismo tenant");\n    var tenants = el("span");\n    if (ws.cross_tenant) { tenants.append'
-    'Child(mono(ws.sre_tenant_id)); tenants.appendChild(el("br")); tenants.appendChild(mono("→ " + (ws.ta'
-    'rget_tenant_id || "—"))); }\n    else { tenants.appendChild(mono(ws.target_tenant_id)); }\n    fact(ws'
-    '.cross_tenant ? "Tenant SRE → tenant destino" : "Tenant", tenants);\n    fact("Unity Catalog por defe'
-    'cto", ws.default_catalog_name || "—", ws.default_catalog_type || null);\n  }\n\n  function renderExecut'
-    'ive(snap, g) {\n    var msgList = document.getElementById("executive-messages");\n    clear(msgList);\n'
-    '    (snap.executive_messages || []).forEach(function (m) { msgList.appendChild(el("li", { text: m })'
-    '); });\n    var total = Math.max(1, g.total || 0);\n    var status = document.getElementById("check-st'
-    'atus");\n    clear(status);\n    [\n      ["passed", "Configuración observada conforme con la regla loc'
-    'al.", "var(--ok-bar)"],\n      ["failed", "Desviación o referencia rota observada.", "var(--crit-bar)'
-    '"],\n      ["not_evaluated", "Fuente no disponible, requisito no confirmado o alcance sin cómputo.", '
-    '"var(--info-bar)"],\n      ["not_applicable", "Excluido del denominador por tipo de objeto o requisit'
-    'o falso.", "var(--line2)"]\n    ].forEach(function (r) {\n      var n = g[r[0]] || 0;\n      status.app'
-    'endChild(barRow(el("span", { className: "st st-" + r[0], text: L.status[r[0]] }), r[1], 100 * n / to'
-    'tal, num(n), NF.format(100 * n / total) + "\\u00a0%", r[2], !n));\n    });\n    scoreBars("area-scores"'
-    ', snap.scores && snap.scores.areas, L.area);\n    scoreBars("pillar-scores", snap.scores && snap.scor'
-    'es.pillars, L.pillar);\n    var list = document.getElementById("priority-findings");\n    clear(list);'
-    '\n    var priorities = (snap.findings || []).filter(function (f) { return f.severity === "critical" |'
-    '| f.severity === "high"; })\n      .sort(function (a, b) { return SEVS.indexOf(a.severity) - SEVS.ind'
-    'exOf(b.severity); });\n    if (!priorities.length) { list.appendChild(el("li", null, [emptyState("Sin'
-    ' hallazgos críticos ni de severidad alta en las comprobaciones evaluadas.")])); }\n    priorities.for'
-    'Each(function (f) {\n      list.appendChild(el("li", null, [\n        sevPill(f.severity, f.severity_l'
-    'abel),\n        el("div", { className: "pt", text: f.title }),\n        el("div", { className: "pm", t'
-    'ext: f.rule_id + " · " + lab(L.level, f.level) + (f.workload_name ? ": " + f.workload_name : "") + "'
-    ' — " + (f.business_impact || f.reason || "") })\n      ]));\n    });\n  }\n\n  function renderInventory(s'
-    'nap) {\n    var inv = snap.inventory || {};\n    function count(id, n, word) { document.getElementById'
-    '(id).textContent = n + " " + word; }\n    var computeRows = [].concat(inv.clusters || [], inv.instanc'
-    'e_pools || [], inv.cluster_policies || [], inv.global_init_scripts || []);\n    count("inv-compute-co'
-    'unt", computeRows.length, plural(computeRows.length, "objeto", "objetos"));\n    renderTable(document'
-    '.getElementById("inv-compute-table"),\n      ["Tipo", "Nombre / ID", "Estado / runtime", "Acceso / au'
-    'toterminación", "Política / pool"],\n      computeRows.map(function (r) {\n        return [\n          '
-    '{ v: kindLabel(r.kind) },\n          { v: stack(r.name || "—", mono(r.id)), s: r.name },\n          { '
-    'v: stack(r.state || "—", r.spark_version ? mono(r.spark_version) : null), s: r.state },\n          (r'
-    '.data_security_mode || "—") + (r.autotermination_minutes !== undefined && r.autotermination_minutes '
-    '!== null ? " · " + r.autotermination_minutes + " min" : ""),\n          { v: stack(r.policy_id ? mono'
-    '(r.policy_id) : "—", r.instance_pool_id ? mono("Pool: " + r.instance_pool_id) : null) }\n        ];\n '
-    '     }), { sortable: true }\n    );\n    var orchRows = [];\n    (inv.jobs || []).forEach(function (j) '
-    '{\n      var tasks = el("div", { className: "chips" });\n      (j.tasks || []).forEach(function (t) { '
-    'tasks.appendChild(el("span", { text: t.task_key })); });\n      orchRows.push([{ v: kindLabel("Job") '
-    '}, { v: stack(j.name, mono(j.id)), s: j.name }, j.scheduled ? "Programado" : "Sin programación",\n   '
-    '     { v: stack(j.run_as_service_principal ? "Service principal" : "Usuario (sin SP)", j.run_as_serv'
-    'ice_principal ? mono(j.run_as_service_principal) : null) },\n        { v: (j.tasks || []).length ? ta'
-    'sks : "—" }]);\n    });\n    (inv.pipelines || []).forEach(function (p) {\n      orchRows.push([{ v: ki'
-    'ndLabel("dlt_pipeline") }, { v: stack(p.name, mono(p.id)), s: p.name }, p.state || "—", "Serverless:'
-    ' " + yesNo(p.serverless),\n        "Catálogo " + (p.catalog || "hive_metastore") + " · destino " + (p'
-    '.target || "—")]);\n    });\n    (inv.sql_warehouses || []).forEach(function (w) {\n      orchRows.push'
-    '([{ v: kindLabel("sql_warehouse") }, { v: stack(w.name, mono(w.id)), s: w.name }, (w.state || "—") +'
-    ' " · " + (w.cluster_size || "—"),\n        "Serverless: " + yesNo(w.enable_serverless_compute) + " · '
-    'auto-stop " + (isNum(w.auto_stop_mins) ? w.auto_stop_mins + " min" : "—"), w.warehouse_type || "—"])'
-    ';\n    });\n    count("inv-orchestration-count", orchRows.length, plural(orchRows.length, "objeto", "o'
-    'bjetos"));\n    renderTable(document.getElementById("inv-orchestration-table"),\n      ["Tipo", "Nombr'
-    'e / ID", "Estado / programación", "Identidad / modo", "Tareas / destino"], orchRows, { sortable: tru'
-    'e });\n    var ucRows = [];\n    if (inv.uc_metastore) {\n      ucRows.push([L.kind.uc_metastore, { v: '
-    'brk(inv.uc_metastore.name, "") }, { v: mono(inv.uc_metastore.id) }, { v: brk(inv.uc_metastore.storag'
-    'e_root || "—") }, "Región " + (inv.uc_metastore.region || "—")]);\n    }\n    (inv.uc_catalogs || []).'
-    'forEach(function (c) { ucRows.push([L.kind.uc_catalog, { v: brk(c.name, "") }, c.catalog_type || "—"'
-    ', { v: brk(c.storage_root || "—") }, "Aislamiento " + (c.isolation_mode || "—")]); });\n    (inv.uc_s'
-    'chemas || []).forEach(function (s) { ucRows.push([L.kind.uc_schema, { v: brk(s.full_name, "") }, s.c'
-    'atalog_name, { v: brk(s.storage_root || "—") }, "—"]); });\n    (inv.uc_storage_credentials || []).fo'
-    'rEach(function (cr) { ucRows.push([L.kind.uc_storage_credential, { v: brk(cr.name, "") }, cr.uses_ma'
-    'naged_identity ? "Managed Identity" : "Service Principal", { v: cr.access_connector_id ? armCell(cr.'
-    'access_connector_id) : "—" }, "Solo lectura: " + yesNo(cr.read_only)]); });\n    (inv.uc_external_loc'
-    'ations || []).forEach(function (loc) { ucRows.push([L.kind.uc_external_location, { v: brk(loc.name, '
-    '"") }, "Credencial " + (loc.credential_name || "—"), { v: brk(loc.url || "—") }, "Solo lectura: " + '
-    'yesNo(loc.read_only)]); });\n    (inv.uc_connections || []).forEach(function (cn) { ucRows.push([L.ki'
-    'nd.uc_connection, { v: brk(cn.name, "") }, cn.connection_type || "—", { v: brk(cn.host || "—") }, "C'
-    'redencial " + (cn.credential_type || "—")]); });\n    (inv.secret_scopes || []).forEach(function (sc)'
-    ' { ucRows.push([L.kind.secret_scope, { v: brk(sc.name, "") }, sc.backend_type || "—", { v: sc.keyvau'
-    'lt_resource_id ? armCell(sc.keyvault_resource_id) : brk(sc.keyvault_dns_name || "—") }, "Valores nun'
-    'ca leídos"]); });\n    count("inv-uc-count", ucRows.length, plural(ucRows.length, "objeto", "objetos"'
-    '));\n    renderTable(document.getElementById("inv-uc-table"), ["Objeto", "Nombre", "Tipo / credencial'
-    '", { t: "URI / recurso", c: "w" }, "Detalle"], ucRows, { sortable: true });\n    var resRows = [];\n  '
-    '  (inv.related_resources || []).forEach(function (r) {\n      var a = r.association || {};\n      resR'
-    'ows.push([{ v: kindLabel(r.resource_kind) }, { v: armCell(r.id, r.name), s: r.name },\n        { v: s'
-    'tack(a.type || "—", brk([a.source_id, a.field].filter(Boolean).join(" · "))) }, { v: evidenceCell(r.'
-    'configuration) }]);\n    });\n    (inv.outbound_endpoints || []).forEach(function (o) {\n      var chip'
-    's = el("div", { className: "chips" });\n      (o.endpoints || []).forEach(function (ep) {\n        var'
-    ' ports = (ep.details || []).map(function (d) { return d.port; }).filter(Boolean).join(", ");\n       '
-    ' chips.appendChild(el("span", { text: (ep.domain_name || ep.domainName || "—") + (ports ? ":" + port'
-    's : "") }));\n      });\n      resRows.push([{ v: kindLabel("OutboundDependency") }, { v: stack(o.cate'
-    'gory || "—", null), s: o.category }, { v: stack("outboundNetworkDependenciesEndpoints", null) }, { v'
-    ': chips.firstChild ? chips : "—" }]);\n    });\n    count("inv-resources-count", resRows.length, plura'
-    'l(resRows.length, "recurso o endpoint", "recursos y endpoints"));\n    renderTable(document.getElemen'
-    'tById("inv-resources-table"), ["Tipo", "Recurso", "Asociación", { t: "Configuración observada", c: "'
-    'w", s: false }], resRows, { sortable: true });\n  }\n\n  function renderFinops(snap) {\n    var fin = sn'
-    'ap.finops || {};\n    var legacy = document.getElementById("finops-legacy");\n    var configured = (fi'
-    'n.cost_rows || []).length > 0 || fin.cost_source_complete;\n    var amount = document.getElementById('
-    '"finops-actual-cost");\n    clear(amount);\n    amount.hidden = !configured;\n    if (isNum(fin.actual_'
-    'cost)) { amount.className = "stat"; amount.appendChild(document.createTextNode(NF2.format(fin.actual'
-    '_cost) + " ")); amount.appendChild(el("small", { text: fin.currency || "" })); }\n    else { amount.c'
-    'lassName = "stat na"; amount.textContent = "No evaluado"; }\n    document.getElementById("finops-cost'
-    '-window").textContent = fin.window && configured ? "Ventana " + day(fin.window.start) + " → " + day('
-    'fin.window.end) + " · fuente azure_cost " + (fin.cost_source_complete ? "completa" : "incompleta") :'
-    ' "Desactivado (cost_scope = disabled). Opcional: importes por ResourceId aprobado, sin reparto por c'
-    'arga.";\n    var notes = document.getElementById("finops-cost-note");\n    clear(notes);\n    (configur'
-    'ed ? fin.notes || [] : []).forEach(function (n) { notes.appendChild(el("li", { text: n })); });\n    '
-    'var table = document.getElementById("finops-cost-table");\n    table.parentNode.hidden = !configured;'
-    '\n    renderTable(table,\n      ["Recurso", "Fecha", { t: "Importe", c: "n" }, "Moneda", "Base"],\n    '
-    '  (fin.cost_rows || []).map(function (r) {\n        return [{ v: armCell(r.resource_id) }, r.usage_da'
-    'te ? day(r.usage_date) : "Periodo acumulado", { v: isNum(r.amount) ? NF2.format(r.amount) : num(r.am'
-    'ount), s: r.amount }, r.currency, r.basis];\n      }), { empty: "Sin filas de facturación observadas '
-    'en el alcance aprobado." }\n    );\n    legacy.hidden = false;\n  }\n\n  var NF0 = new Intl.NumberFormat('
-    '"es-ES", { maximumFractionDigits: 0, useGrouping: "always" });\n  var NF1 = new Intl.NumberFormat("es'
-    '-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 });\n  var MONTHS = ["enero", "febrero", "'
-    'marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembr'
-    'e"];\n  var C = {\n    family: { all_purpose: "All-purpose (interactivo)", jobs: "Jobs", jobs_light: "'
-    'Jobs Light", sql: "SQL warehouses pro y clásicos", sql_serverless: "SQL warehouses serverless",\n    '
-    '  pipelines: "Pipelines (DLT)", serverless: "Serverless (notebooks y jobs)", ai: "IA y model serving'
-    '", other: "Otros DBU" },\n    category: { "virtual machines": "Máquinas virtuales", storage: "Almacen'
-    'amiento y discos", bandwidth: "Transferencia de datos", "virtual network": "Red virtual (NAT, IP púb'
-    'licas)",\n      "load balancer": "Load Balancer", "azure databricks": "DBU", "nat gateway": "NAT Gate'
-    'way" },\n    gapWhy: { storage: "Almacenamiento raíz del área de trabajo (DBFS) y discos sin clúster"'
-    ', "azure databricks": "No llevan etiquetas de Azure: se reparten con políticas de uso serverless o c'
-    'on las tablas de sistema",\n      bandwidth: "Transferencia de datos de salida", "virtual network": "'
-    'NAT Gateway e IP públicas del área de trabajo", "load balancer": "Load Balancer del área de trabajo"'
-    ',\n      "virtual machines": "Máquinas virtuales sin etiquetas de Databricks" },\n    dim: { cluster: '
-    '"Clústeres", job: "Jobs", warehouse: "SQL warehouses", pool: "Pools", creators: "Creadores" },\n    k'
-    'ind: { all_purpose: "Clúster interactivo", job_run: "Clúster de job", job_runs: "Clústeres efímeros '
-    'de jobs", pipeline: "Clúster de pipeline", pipeline_runs: "Clústeres de pipelines (DLT)",\n      not_'
-    'in_inventory: "No está en el inventario (eliminado o de otro tipo)", job: "Job", warehouse: "SQL war'
-    'ehouse", pool: "Pool" },\n    objKind: { AllPurposeCluster: "Clúster interactivo", Job: "Job", Instan'
-    'cePool: "Pool", SqlWarehouse: "SQL warehouse", ClusterPolicy: "Política de cómputo", Runtime: "Runti'
-    'me", NodeType: "Tipo de VM" },\n    saving: { lower_bound: "al menos", upper_bound: "hasta", estimate'
-    ': "≈" },\n    basis: { weekend_cost: "coste de sábados y domingos del mes", jobs_dbu_ratio: "DBU del '
-    'clúster × (1 − ratio jobs/all-purpose)", spot_discount: "VM de workers × descuento spot",\n      dail'
-    'y_floor: "coste mínimo diario × días del mes", always_on_weekends: "coste × fines de semana / días d'
-    'el mes" },\n    ev: { autotermination_minutes: "autoterminación (min)", state: "estado", uptime_hours'
-    ': "encendido (h)", active_days: "días con coste", weekend_cost: "coste en fin de semana",\n      jobs'
-    ': "jobs", jobs_count: "nº de jobs", dbu_cost: "coste DBU", availability: "disponibilidad", workers: '
-    '"workers", vm_cost: "coste VM", continuous: "continuo",\n      max_workers: "máx. workers", min_idle_'
-    'instances: "inactivas mínimas", idle_now: "inactivas ahora", idle_autotermination_minutes: "liberaci'
-    'ón de inactivas (min)",\n      daily_floor: "suelo diario", auto_stop_mins: "auto-stop (min)", server'
-    'less: "serverless", warehouse_type: "tipo", cluster_size: "tamaño", objects: "objetos",\n      alloca'
-    'tion_tags: "etiquetas", supported_list_checked: "lista oficial consultada", deprecated: "retirada" }'
-    ',\n    status: { complete: "Completa", partial: "Parcial", denied: "Denegada", error: "Error", skippe'
-    'd: "Omitida por tiempo", not_configured: "No configurada", not_collected: "No recogida" }\n  };\n  var'
-    ' costCurrency = "";\n  function monthName(label, short) {\n    var m = /^(\\d{4})-(\\d{2})$/.exec(String'
-    '(label || ""));\n    if (!m) { return String(label || "—"); }\n    var name = MONTHS[Number(m[2]) - 1]'
-    ' || m[2];\n    return short ? name.slice(0, 3) + " " + m[1] : name + " de " + m[1];\n  }\n  function mo'
-    'ney(v, cur) {\n    if (!isNum(v)) { return "—"; }\n    return (v === 0 ? "0" : Math.abs(v) < 10 ? NF2.'
-    'format(v) : NF0.format(v)) + (cur === "" ? "" : "\\u00a0" + (cur || costCurrency));\n  }\n  function si'
-    'gnedPct(v) { return isNum(v) ? (v > 0 ? "+" : v < 0 ? "−" : "") + NF1.format(Math.abs(v)) + "\\u00a0%'
-    '" : "—"; }\n  function deltaNode(pct, abs, cur) {\n    if (!isNum(pct) && !isNum(abs)) { return el("sp'
-    'an", { className: "muted", text: "sin mes anterior" }); }\n    var up = (isNum(abs) ? abs : pct) > 0;'
-    '\n    var text = isNum(pct) ? signedPct(pct) : (abs > 0 ? "+" : "−") + money(Math.abs(abs), cur);\n   '
-    ' return el("span", { className: up ? "up" : "down", text: text });\n  }\n  function sh(v) { return isN'
-    'um(v) ? NF1.format(v) + "\\u00a0%" : "—"; }\n  function lowerKey(s) { return String(s || "").toLowerCa'
-    'se(); }\n  function costRows(m) { return (m && m.attribution && m.attribution.rows) || []; }\n  functi'
-    'on rowName(r) {\n    if (r.kind === "job_runs") { return "Clústeres efímeros de jobs (" + r.count + p'
-    'lural(r.count, " ejecución", " ejecuciones") + ")"; }\n    if (r.kind === "pipeline_runs") { return "'
-    'Clústeres de pipelines (DLT)"; }\n    return r.name;\n  }\n  function tagChips(tags) {\n    var keys = O'
-    'bject.keys(tags || {});\n    if (!keys.length) { return el("span", { className: "muted", text: "Sin e'
-    'tiquetas" }); }\n    var wrap = el("div", { className: "chips" });\n    keys.forEach(function (k) { wr'
-    'ap.appendChild(el("span", null, [k + ": ", el("b", { text: String(tags[k]) })])); });\n    return wra'
-    'p;\n  }\n  function evText(v) {\n    if (Array.isArray(v)) { return v.join(", "); }\n    if (v === true)'
-    ' { return "Sí"; }\n    if (v === false) { return "No"; }\n    return isNum(v) ? NF.format(v) : String('
+    'check the source ledger.\n-->\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" co'
+    'ntent="width=device-width,initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="defa'
+    "ult-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:"
+    '; connect-src \'none\'; base-uri \'none\'; form-action \'none\'; object-src \'none\'">\n<meta name="color-sch'
+    'eme" content="light dark">\n<title>Azure Databricks review | Dependency map and configuration</title>'
+    '\n<style>\n:root{\ncolor-scheme:light;\n--brand-navy: #003865; --brand-lava: #ff3621; --brand-steel: #00'
+    '66a1; --brand-teal: #00875a;\n--paper:#f2f5f8;--surface:#ffffff;--soft:#eef2f6;--hover:#f6f9fc;\n--ink'
+    ':#16212c;--title:#002b4e;--muted:#4f5d6b;--line:#dde3ea;--line2:#c2ccd6;\n--link:#0058a3;--focus:#0b6'
+    'bcb;--sel:#cfe3f7;--chart:#0066a1;--chart-2:#8fb3d3;--edge:#4d7aa3;\n--bar-bg:#ffffff;--bar-hover:#ee'
+    'f2f6;--btn:#003865;--btn-hover:#002848;--btn-ink:#ffffff;\n--hero-a:#003865;--hero-b:#00223c;--hero-m'
+    'uted:#c3d5e8;--hero-line:rgba(255,255,255,.24);\n--up-ink:#b42318;--down-ink:#067647;\n--shadow:0 1px '
+    '2px rgba(16,24,40,.05),0 10px 28px rgba(16,24,40,.07);\n--crit-ink:#b42318;--crit-bg:#fee4e2;--crit-b'
+    'ar:#d92d20;\n--high-ink:#b93815;--high-bg:#ffead5;--high-bar:#ef6820;\n--med-ink:#93370d;--med-bg:#fef'
+    '0c7;--med-bar:#f79009;\n--low-ink:#175cd3;--low-bg:#d1e9ff;--low-bar:#2e90fa;\n--info-ink:#344054;--in'
+    'fo-bg:#eaecf0;--info-bar:#98a2b3;\n--ok-ink:#067647;--ok-bg:#dcfae6;--ok-bar:#17b26a;\n--obs-ink:#0060'
+    '3f;--obs-bg:#ddf4ea;--obs-line:#00875a;\n--inf-ink:#8a4b00;--inf-bg:#fff1d6;--inf-line:#c77700;\n--unk'
+    '-ink:#475467;--unk-bg:#eaecf0;--unk-line:#98a2b3;\n}\n:root[data-theme="dark"]{\ncolor-scheme:dark;\n--p'
+    'aper:#0d141b;--surface:#15202a;--soft:#1c2834;--hover:#19242f;\n--ink:#e6edf3;--title:#f1f6fb;--muted'
+    ':#a9b7c5;--line:#26333f;--line2:#3a4a5a;\n--link:#8cc8ff;--focus:#8cc8ff;--sel:#24476b;--chart:#6fb6f'
+    '0;--chart-2:#3f6d94;--edge:#7aa7cf;\n--up-ink:#ffb4ab;--down-ink:#a6f4c5;\n--bar-bg:#101920;--bar-hove'
+    'r:#1c2834;--btn:#8cc8ff;--btn-hover:#a9d6ff;--btn-ink:#0b1620;\n--hero-a:#0a2742;--hero-b:#061626;--h'
+    'ero-muted:#bdd0e3;\n--shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);\n--crit-ink:#ffb4a'
+    'b;--crit-bg:#4a1c1a;--high-ink:#ffc29e;--high-bg:#4a2614;\n--med-ink:#fedf89;--med-bg:#45330f;--low-i'
+    'nk:#a8d4ff;--low-bg:#13304f;\n--info-ink:#d0d5dd;--info-bg:#2a3441;--ok-ink:#a6f4c5;--ok-bg:#133a28;\n'
+    '--obs-ink:#8ce9bf;--obs-bg:#12382a;--inf-ink:#f5d875;--inf-bg:#3d3216;--unk-ink:#cbd5e1;--unk-bg:#2a'
+    '3441;\n}\n*{box-sizing:border-box}\nhtml{scroll-padding-top:78px;-webkit-text-size-adjust:100%;scrollba'
+    'r-color:var(--line2) var(--paper)}\nbody{margin:0;background:var(--paper);color:var(--ink);font:15px/'
+    '1.55 "Segoe UI",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;overflow-wrap:b'
+    'reak-word}\n::selection{background:var(--sel);color:var(--ink)}\n[hidden]{display:none !important}\na{c'
+    'olor:var(--link);text-underline-offset:3px}\nbutton,input,select{font:inherit;color:inherit}\n:focus-v'
+    'isible{outline:3px solid var(--focus);outline-offset:2px}\n.sr{position:absolute;width:1px;height:1px'
+    ';margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}\n.skip{positio'
+    'n:absolute;left:16px;top:-100px;z-index:60;padding:10px 14px;background:var(--surface);color:var(--i'
+    'nk);border:2px solid var(--focus);border-radius:8px}\n.skip:focus{top:10px}\nsvg.i{width:16px;height:1'
+    '6px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:ro'
+    'und}\n.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;min-height:60px;'
+    'padding:8px clamp(14px,3vw,40px);background:var(--bar-bg);box-shadow:0 1px 0 var(--line)}\n.brand{dis'
+    'play:flex;flex:none;align-items:center;gap:10px;color:var(--ink);text-decoration:none}\n.brand .mark{'
+    'width:30px;height:30px;flex:none}\n.wordmark{font-weight:700;font-size:16.5px;letter-spacing:-.01em;w'
+    'hite-space:nowrap;color:var(--title)}\n.product{font-size:13.5px;color:var(--muted);white-space:nowra'
+    'p;padding-left:10px;border-left:1px solid var(--line2)}\n.bar-nav{display:flex;gap:2px;margin-left:6p'
+    'x;min-width:0;overflow:hidden}\n.bar-nav a{color:var(--muted);text-decoration:none;font-size:14px;fon'
+    't-weight:600;padding:8px 9px;border-radius:8px;white-space:nowrap}\n.bar-nav a:hover,.bar-nav a[aria-'
+    'current="true"]{background:var(--bar-hover);color:var(--title)}\n.acts{margin-left:auto;display:flex;'
+    'align-items:center;gap:8px}\n.tag{font-size:12.5px;font-weight:600;color:var(--muted);border:1px soli'
+    'd var(--line2);border-radius:999px;padding:5px 11px;white-space:nowrap}\n.btn{display:inline-flex;ali'
+    'gn-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 15px;border:1px solid trans'
+    'parent;border-radius:10px;background:var(--btn);color:var(--btn-ink);font-weight:600;font-size:14px;'
+    'cursor:pointer;white-space:nowrap;text-decoration:none;list-style:none}\n.btn:hover{background:var(--'
+    'btn-hover)}\n.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line2)}\n.btn.gh'
+    'ost:hover{background:var(--bar-hover)}\n.btn.icon{width:40px;padding:0}\n.btn.sm{min-height:34px;paddi'
+    'ng:0 12px;font-size:13px}\nsummary.btn::-webkit-details-marker{display:none}\n#theme-toggle .sun,#them'
+    'e-toggle[aria-pressed="true"] .moon{display:none}\n#theme-toggle[aria-pressed="true"] .sun{display:bl'
+    'ock}\n.menu{position:relative}\n.menu-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;mi'
+    'n-width:260px;display:grid;gap:2px;padding:6px;background:var(--surface);border:1px solid var(--line'
+    ');border-radius:12px;box-shadow:var(--shadow)}\n.menu-pop button,.menu-pop a{display:block;width:100%'
+    ';padding:9px 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left'
+    ';text-decoration:none;font-size:14px;font-weight:600;cursor:pointer}\n.menu-pop button:hover,.menu-po'
+    'p a:hover{background:var(--soft)}\n.menu-pop small{display:block;font-weight:400;color:var(--muted);f'
+    'ont-size:12.5px}\n.toc{display:none}\n.brand-ribbon{display:flex;height:5px}\n.brand-ribbon span{flex:1'
+    '}\n.brand-ribbon .navy{background:var(--brand-navy)}\n.brand-ribbon .lava{background:var(--brand-lava)'
+    '}\n.brand-ribbon .steel{background:var(--brand-steel)}\n.brand-ribbon .teal{background:var(--brand-tea'
+    'l)}\nselect,input[type="search"]{min-height:40px;max-width:100%;padding:0 12px;border:1px solid var(-'
+    '-line2);border-radius:10px;background:var(--surface);color:var(--ink)}\ninput[type="search"]::placeho'
+    'lder{color:var(--muted);opacity:1}\nselect:focus-visible,input:focus-visible{outline:3px solid var(--'
+    'focus);outline-offset:1px}\n.multi-band{background:var(--surface);border-bottom:1px solid var(--line)'
+    '}\n.band-in{max-width:1400px;margin:0 auto;padding:12px clamp(14px,3vw,40px);display:flex;flex-wrap:w'
+    'rap;gap:10px 24px;align-items:center;justify-content:space-between;font-size:14px}\n.band-in p{margin'
+    ':0;color:var(--muted)}\n.band-in b{color:var(--ink)}\n.ws-select{display:flex;align-items:center;gap:1'
+    '0px;font-weight:600}\n.hero{position:relative;background:linear-gradient(150deg,var(--hero-a) 0%,var('
+    '--hero-b) 100%);color:#ffffff;padding:clamp(28px,4.2vw,52px) clamp(14px,3vw,40px) 104px}\n.hero-in{ma'
+    'x-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24px 52px;al'
+    'ign-items:start}\n.hero h1{margin:0 0 14px;font-size:clamp(28px,3vw,44px);line-height:1.12;font-weigh'
+    't:700;letter-spacing:-.02em;text-wrap:balance;color:#ffffff}\n.lead{margin:0;max-width:72ch;font-size'
+    ':17px;line-height:1.55;color:var(--hero-muted)}\n.lead b{color:#ffffff;font-weight:700}\n.meta{display'
+    ':flex;flex-wrap:wrap;gap:8px;margin-top:20px}\n.meta span{font-size:12.5px;padding:5px 11px;border-ra'
+    'dius:999px;border:1px solid var(--hero-line);color:var(--hero-muted);white-space:nowrap}\n.meta b{col'
+    'or:#ffffff;font-weight:600}\n.meta span.on{background:rgba(255,255,255,.12);border-color:rgba(255,255'
+    ',255,.45);color:#ffffff;font-weight:700;letter-spacing:.02em}\n.hero-side{display:grid;gap:14px}\n.pla'
+    'que-k{margin:0 0 6px;font-size:12.5px;color:var(--hero-muted)}\n.brand-plaque{color-scheme:only light'
+    ';display:flex;align-items:center;justify-content:center;min-height:64px;padding:10px 16px;border-rad'
+    'ius:12px;background:#ffffff;color:#334155}\n.brand-plaque img{display:block;max-width:100%;max-height'
+    ':44px;object-fit:contain}\n.brand-placeholder{font-size:14px;font-weight:700;letter-spacing:.16em;col'
+    'or:#334155}\n.client-name{margin:6px 0 0;font-size:14px;font-weight:600;color:#ffffff}\n.signal{paddin'
+    'g:18px 20px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid var(--sig-line)}\n.s'
+    'ignal .k{font-size:13px;font-weight:600;color:var(--hero-muted)}\n.signal b{display:block;margin-top:'
+    '4px;font-size:26px;line-height:1.15;font-weight:700;color:var(--sig-ink)}\n.signal p{margin:8px 0 0;f'
+    'ont-size:14px;color:var(--hero-muted)}\n.signal.crit{--sig-ink:#ffb4ab;--sig-line:rgba(255,180,171,.5'
+    '5)}\n.signal.warn{--sig-ink:#fedf89;--sig-line:rgba(254,223,137,.5)}\n.signal.act{--sig-ink:#fdb022;--'
+    'sig-line:rgba(253,176,34,.5)}\n.signal.ok{--sig-ink:#a6f4c5;--sig-line:rgba(166,244,197,.45)}\n.signal'
+    '.info{--sig-ink:#e4e7ec;--sig-line:rgba(255,255,255,.35)}\n.dist{grid-column:1 / -1}\n.dist-head{displ'
+    'ay:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;margin-bottom:8px;font-size:13.5px'
+    ';color:var(--hero-muted)}\n.dist-head b,.legend b{color:#ffffff}\n.track{display:flex;height:14px;bord'
+    'er-radius:999px;overflow:hidden;background:rgba(255,255,255,.16)}\n.track i{display:block;height:100%'
+    '}\n.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:10px;font-size:13.5px;color:var(--hero'
+    '-muted)}\n.legend span{display:inline-flex;align-items:center;gap:7px}\n.legend i{display:inline-block'
+    ';width:10px;height:10px;border-radius:3px}\n.page{max-width:1400px;margin:0 auto;padding:0 clamp(14px'
+    ',3vw,40px) 56px}\n.kpis{position:relative;z-index:2;display:grid;grid-template-columns:repeat(auto-fi'
+    't,minmax(min(100%,178px),1fr));gap:14px;margin-top:-62px}\n.kpi{min-width:0;padding:18px 20px;backgro'
+    'und:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}\n.kpi .v'
+    '{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 5px;font-size:33px;line-height:1.05;font-wei'
+    'ght:700;letter-spacing:-.02em;color:var(--title)}\n.kpi .v small{font-size:15px;font-weight:600;lette'
+    'r-spacing:0;color:var(--muted)}\n.kpi .l{margin-top:9px;font-size:14px;font-weight:600}\n.kpi .s{margi'
+    'n-top:3px;font-size:13px;color:var(--muted)}\n.sim,.note{display:flex;gap:10px;align-items:flex-start'
+    ';margin-top:16px;padding:11px 16px;border-radius:12px;font-size:14px}\n.sim{background:repeating-line'
+    'ar-gradient(135deg,#fffaeb 0 12px,#fef0c7 12px 24px);border:1px solid #fedf89;color:#7a2e0e;font-wei'
+    'ght:600}\n.note{background:var(--surface);border:1px solid var(--line);color:var(--ink)}\n.sim svg.i,.'
+    'note svg.i{width:18px;height:18px;margin-top:1px}\n.note svg.i{color:var(--med-bar)}\n.chapter{margin-'
+    'top:48px;scroll-margin-top:78px}\n.sh{margin-bottom:16px}\n.sh h2{margin:0;font-size:23px;line-height:'
+    '1.3;font-weight:700;letter-spacing:-.01em;color:var(--title);text-wrap:balance}\n.sh p{margin:6px 0 0'
+    ';max-width:75ch;font-size:14.5px;color:var(--muted)}\n.grid2{display:grid;grid-template-columns:repea'
+    't(auto-fit,minmax(min(100%,440px),1fr));gap:16px}\n.stack-gap>* + *{margin-top:16px}\n.card{min-width:'
+    '0;padding:20px 22px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-sh'
+    'adow:var(--shadow)}\n.card h3{margin:0 0 4px;font-size:17px;line-height:1.3;font-weight:700;color:var'
+    '(--title)}\n.card .sub{margin:0 0 14px;font-size:13.5px;color:var(--muted)}\n.card.flat{padding:0;over'
+    'flow:hidden}\n.card-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-betwe'
+    'en;gap:4px 16px;padding:18px 22px 12px}\n.card-head h3{margin:0}\n.card-head p{margin:0;font-size:13.5'
+    'px;color:var(--muted)}\n.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250'
+    'px),1fr));gap:16px 28px;margin:0}\n.facts dt{margin-bottom:3px;font-size:12.5px;color:var(--muted)}\n.'
+    'facts dd{margin:0;font-size:14.5px;font-weight:600;min-width:0}\n.facts dd small{display:block;font-w'
+    'eight:400;color:var(--muted);font-size:12.5px}\n.plist,.msgs{list-style:none;margin:0;padding:0}\n.msg'
+    's li{position:relative;padding:9px 0 9px 18px;border-top:1px solid var(--line);font-size:14.5px}\n.ms'
+    'gs li:first-child{border-top:0;padding-top:2px}\n.msgs li::before{content:"";position:absolute;left:2'
+    'px;top:17px;width:6px;height:6px;border-radius:50%;background:var(--chart)}\n.msgs li:first-child::be'
+    'fore{top:10px}\n.plist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:'
+    '12px 0;border-top:1px solid var(--line)}\n.plist li:first-child{border-top:0;padding-top:0}\n.plist .p'
+    't{font-weight:600}\n.plist .pm{grid-column:2;font-size:13.5px;color:var(--muted)}\n.bars{display:grid;'
+    'gap:12px}\n.brow{display:grid;grid-template-columns:minmax(120px,36%) minmax(0,1fr) auto;gap:12px;ali'
+    'gn-items:center;font-size:14px}\n.brow .bl{min-width:0}\n.brow .bl small,.brow .bv small{display:block'
+    ';font-size:12.5px;font-weight:400;color:var(--muted)}\n.bt{height:10px;border-radius:999px;overflow:h'
+    'idden;background:var(--soft)}\n.bt i{display:block;height:100%;min-width:2px;border-radius:999px;back'
+    'ground:var(--chart)}\n.brow .bv{text-align:right;font-weight:700;white-space:nowrap}\n.brow.na .bv{fon'
+    't-weight:600;color:var(--muted)}\n#check-status .brow{grid-template-columns:minmax(150px,46%) minmax('
+    '0,1fr) auto}\n.wrap,.graph{overflow-x:auto;border-top:1px solid var(--line);background:linear-gradien'
+    't(90deg,var(--surface) 30%,rgba(255,255,255,0)) left / 36px 100% no-repeat local,linear-gradient(270'
+    'deg,var(--surface) 30%,rgba(255,255,255,0)) right / 36px 100% no-repeat local,radial-gradient(farthe'
+    'st-side at 0 50%,rgba(16,24,40,.18),rgba(16,24,40,0)) left / 14px 100% no-repeat scroll,radial-gradi'
+    'ent(farthest-side at 100% 50%,rgba(16,24,40,.18),rgba(16,24,40,0)) right / 14px 100% no-repeat scrol'
+    'l}\ntable{width:100%;border-collapse:collapse;font-size:14px;text-align:left}\nth{padding:10px 14px;ba'
+    'ckground:var(--soft);color:var(--title);font-size:12px;font-weight:700;letter-spacing:.04em;text-tra'
+    'nsform:uppercase;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:bottom}\ntd{pa'
+    'dding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}\ntbody tr:last-child td{borde'
+    'r-bottom:0}\ntbody tr:hover{background:var(--hover)}\ntable.dense{font-size:13.5px}\n.dense td,.dense t'
+    'h{padding-left:11px;padding-right:11px}\ntd.n,th.n{text-align:right;white-space:nowrap}\ntd.nw{white-s'
+    'pace:nowrap}\ntd.w{min-width:240px}\ntd.empty-cell{color:var(--muted)}\ntr.pg{display:none}\n.th-sort{al'
+    'l:unset;display:inline-flex;align-items:center;gap:4px;cursor:pointer}\n.th-sort:focus-visible{outlin'
+    'e:3px solid var(--focus);outline-offset:2px;border-radius:4px}\n.th-sort::after{content:"";width:0;he'
+    'ight:0;border:4px solid transparent;border-top-color:currentColor;opacity:.35;margin-top:4px}\nth[ari'
+    'a-sort="ascending"] .th-sort::after{border-top-color:transparent;border-bottom-color:currentColor;ma'
+    'rgin-top:-4px;opacity:1}\nth[aria-sort="descending"] .th-sort::after{opacity:1}\n.more-row{display:fle'
+    'x;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;padding:12px;border-top:1px '
+    'solid var(--line)}\n.more-note{font-size:13px;color:var(--muted)}\n.stack b{display:block;font-weight:'
+    '600}\n.stack small{display:block;font-size:12.5px;color:var(--muted)}\n.mono{font-family:ui-monospace,'
+    '"Cascadia Mono",Consolas,monospace;font-size:12.5px}\n.nw{white-space:nowrap}\n.muted{color:var(--mute'
+    'd)}\n.fd p,.fr p{margin:3px 0 0}\n.fd p{font-size:13.5px;color:var(--muted)}\n.res b{display:block;font'
+    '-weight:600}\n.res small{display:block;font-size:12.5px;color:var(--muted)}\n.ext{display:inline-flex;'
+    'align-items:center;gap:4px;margin-top:3px;font-size:13px;font-weight:600;white-space:nowrap}\n.ext sv'
+    'g.i{width:13px;height:13px}\n.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}\n.chips span{p'
+    'adding:1px 8px;border-radius:7px;background:var(--soft);color:var(--muted);font-size:12px}\n.chips b{'
+    'color:var(--ink);font-weight:600}\ndetails.json{margin-top:6px;font-size:12.5px}\ndetails.json summary'
+    '{cursor:pointer;color:var(--link);font-weight:600}\ndetails.json pre{max-width:620px;max-height:260px'
+    ';overflow:auto;margin:6px 0 0;padding:10px;border-radius:8px;background:var(--soft);font:12px/1.45 u'
+    'i-monospace,"Cascadia Mono",Consolas,monospace;white-space:pre}\n.pill{display:inline-flex;align-item'
+    's:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:700;line-height:1'
+    '.6;white-space:nowrap}\n.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:va'
+    'r(--d,currentColor)}\n.sev-critical{color:var(--crit-ink);background:var(--crit-bg);--d:var(--crit-ba'
+    'r)}\n.sev-high{color:var(--high-ink);background:var(--high-bg);--d:var(--high-bar)}\n.sev-medium{color'
+    ':var(--med-ink);background:var(--med-bg);--d:var(--med-bar)}\n.sev-low{color:var(--low-ink);backgroun'
+    'd:var(--low-bg);--d:var(--low-bar)}\n.sev-info,.tone-info{color:var(--info-ink);background:var(--info'
+    '-bg);--d:var(--info-bar)}\n.tone-ok{color:var(--ok-ink);background:var(--ok-bg);--d:var(--ok-bar)}\n.t'
+    'one-warn{color:var(--med-ink);background:var(--med-bg);--d:var(--med-bar)}\n.tone-crit{color:var(--cr'
+    'it-ink);background:var(--crit-bg);--d:var(--crit-bar)}\n.cls-OBSERVED{color:var(--obs-ink);background'
+    ':var(--obs-bg);--d:var(--obs-line)}\n.cls-INFERRED{color:var(--inf-ink);background:var(--inf-bg);--d:'
+    'var(--inf-line);outline:1px dashed var(--inf-line);outline-offset:-1px}\n.cls-UNKNOWN{color:var(--unk'
+    '-ink);background:var(--unk-bg);--d:transparent}\n.cls-UNKNOWN::before{box-shadow:inset 0 0 0 1.5px va'
+    'r(--unk-line)}\n.st{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;w'
+    'hite-space:nowrap}\n.st::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--d)'
+    '}\n.st-failed{--d:var(--crit-bar)}\n.st-passed{--d:var(--ok-bar)}\n.st-not_evaluated{--d:var(--info-bar'
+    ')}\n.st-not_applicable{--d:transparent;color:var(--muted)}\n.st-not_applicable::before{box-shadow:inse'
+    't 0 0 0 2px var(--info-bar)}\n.tools{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;p'
+    'adding:0 22px 16px}\n.field{display:grid;gap:4px;min-width:0;font-size:12.5px;font-weight:600;color:v'
+    'ar(--muted)}\n.field select,.field input{color:var(--ink);font-size:14px;font-weight:400}\n.field.grow'
+    '{flex:1 1 220px}\n.field.grow input{width:100%}\n.cls-sum{display:flex;flex-wrap:wrap;gap:8px;margin:-'
+    '4px 0 16px}\n.tabs{display:inline-flex;flex-wrap:wrap;gap:4px;margin:0 0 16px;padding:4px;background:'
+    'var(--soft);border:1px solid var(--line);border-radius:12px}\n.tabs button{min-height:40px;padding:0 '
+    '16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:14px;font-weight'
+    ':600;cursor:pointer}\n.tabs button:hover{color:var(--title)}\n.tabs button[aria-selected="true"]{backg'
+    'round:var(--surface);color:var(--title);box-shadow:0 1px 2px rgba(16,24,40,.1),0 0 0 1px var(--line)'
+    '}\n.graph{padding:4px 22px 6px}\n.graph svg{display:block;width:100%;min-width:760px;height:auto}\n.g-c'
+    'ol{fill:var(--muted);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}\n.'
+    'g-node rect{fill:var(--surface);stroke:var(--line2);stroke-width:1.2}\n.g-node.ws rect{stroke:var(--b'
+    'rand-steel);stroke-width:2}\n.g-node.inf rect{fill:var(--inf-bg);stroke:var(--inf-line);stroke-dashar'
+    'ray:5 4}\n.g-l1{fill:var(--ink);font-size:12.5px;font-weight:600}\n.g-l2{fill:var(--muted);font-size:1'
+    '1px}\n.edge{fill:none;stroke:var(--edge);stroke-width:1.3;opacity:.75}\n.edge.inf{stroke:var(--inf-lin'
+    'e);stroke-dasharray:6 5;opacity:1}\n.arr.obs{fill:var(--edge)}\n.arr.inf{fill:var(--inf-line)}\n.g-lege'
+    'nd{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;padding:10px 22px 16px;font-size:13px'
+    ';color:var(--muted)}\n.g-legend span{display:inline-flex;align-items:center;gap:8px}\n.g-legend svg{wi'
+    'dth:34px;height:10px}\n.ref-box rect{fill:var(--soft);stroke:var(--brand-steel);stroke-width:1.5;stro'
+    'ke-dasharray:6 4}\n.ref-t{fill:var(--title);font-size:13px;font-weight:700}\n.ref-s{fill:var(--muted);'
+    'font-size:11.5px}\n.ref-link{stroke:var(--brand-lava);stroke-width:2}\n.ref-flag rect{fill:var(--high-'
+    'bg)}\n.ref-flag text{fill:var(--high-ink);font-size:11px;font-weight:700;letter-spacing:.05em}\n.ref-n'
+    'ote{fill:var(--high-ink);font-size:12.5px;font-weight:600}\n.stat{font-size:34px;line-height:1.1;font'
+    '-weight:700;letter-spacing:-.02em;color:var(--title);margin:6px 0 4px}\n.stat small{font-size:15px;fo'
+    'nt-weight:600;color:var(--muted);letter-spacing:0}\n.stat.na{font-size:24px}\n.notes{margin:12px 0 0;p'
+    'adding-left:18px;font-size:13px;color:var(--muted)}\n.notes li + li{margin-top:4px}\n.plan{display:gri'
+    'd;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:start}\n.st'
+    'eps{list-style:none;margin:12px 0 0;padding:0}\n.steps li{display:grid;grid-template-columns:28px min'
+    'max(0,1fr);gap:4px 12px;padding:12px 0;border-top:1px solid var(--line)}\n.steps .no{display:grid;pla'
+    'ce-items:center;width:28px;height:28px;border-radius:50%;background:var(--btn);color:var(--btn-ink);'
+    'font-size:13px;font-weight:700}\n.steps .sx{min-width:0}\n.steps .sx p{margin:4px 0 0;font-size:14px}\n'
+    '.steps .sm{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;margin-top:6px;font-size:12.5'
+    'px;color:var(--muted)}\n.steps .sm .ext{margin-top:0}\n.empty{display:flex;gap:12px;align-items:center'
+    ';color:var(--muted);font-size:14px}\n.empty svg.i{width:22px;height:22px;color:var(--ok-bar)}\n.dl2{di'
+    'splay:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:10px 20px;margin:0;font-size:'
+    '14px}\n.dl2 dt{color:var(--muted)}\n.dl2 dd{margin:0}\n.dl2 ul{margin:0;padding-left:18px}\n.state-card{'
+    'max-width:1320px;margin:28px auto;padding:20px 22px;border:1px solid var(--crit-bar);border-radius:1'
+    '6px;background:var(--crit-bg);color:var(--crit-ink)}\n.state-card h2{margin:0 0 6px;font-size:20px}\n.'
+    'state-card p{margin:0;color:var(--ink)}\n.state-card dl{margin:12px 0 0;color:var(--ink)}\n.hero h1,.s'
+    'h h2,.signal b{font-family:var(--display,inherit)}\nhtml.brand-font .hero h1{font-weight:600;letter-s'
+    'pacing:0;font-size:clamp(32px,3.6vw,48px);line-height:1.08}\nhtml.brand-font .sh h2{font-weight:600;l'
+    'etter-spacing:0;font-size:27px}\nhtml.brand-font .signal b{font-weight:600;letter-spacing:0;font-size'
+    ':28px}\n.client-logo{display:none}\nhtml.brand-bar .brand .mark,html.brand-bar .wordmark{display:none}'
+    '\nhtml.brand-bar .client-logo{display:block;height:30px;width:auto;max-width:200px}\nhtml.brand-bar .p'
+    'roduct{padding-left:16px;border-left-color:var(--line)}\nhtml.brand-bar .brand-ribbon,html.brand-bar '
+    '#plaque-block{display:none}\nhtml.brand-bar .bar{box-shadow:none;border-bottom:3px solid var(--brand-'
+    'rule,var(--btn))}\nhtml.branded .foot{max-width:none;margin:0;padding:18px clamp(14px,3vw,40px) 28px;'
+    'border-top:0;background:var(--foot-bg,transparent);color:var(--foot-ink,var(--muted))}\n.cost-head{di'
+    'splay:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px 40px;align-items:start}\n.cst'
+    'ats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}\n.cstat .k{font-size:13'
+    'px;font-weight:600;color:var(--muted)}\n.cstat .n{margin-top:4px;font-size:30px;line-height:1.08;font'
+    '-weight:700;letter-spacing:-.02em;color:var(--title);white-space:nowrap}\n.cstat .n small{margin-left'
+    ':5px;font-size:14px;font-weight:600;letter-spacing:0;color:var(--muted)}\n.cstat .d{margin-top:5px;fo'
+    'nt-size:13px;color:var(--muted)}\n.up{color:var(--up-ink);font-weight:600}\n.down{color:var(--down-ink'
+    ');font-weight:600}\n.cost-trend h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--muted)}'
+    '\n.mrow{display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr) auto;gap:12px;align-items:'
+    'center;padding:6px 0;font-size:13.5px}\n.mrow .ml{font-weight:600;white-space:nowrap}\n.mrow .ml small'
+    '{display:block;font-size:12px;font-weight:400;color:var(--muted)}\n.mrow .mv{text-align:right;font-we'
+    'ight:700;white-space:nowrap}\n.strack{display:flex;height:14px;border-radius:999px;overflow:hidden;ba'
+    'ckground:var(--soft)}\n.strack i{display:block;height:100%}\n.seg-dbu{background:var(--chart)}\n.seg-in'
+    'fra{background:var(--chart-2)}\n.mrow.partial .strack i{background-image:repeating-linear-gradient(13'
+    '5deg,rgba(255,255,255,.5) 0 4px,rgba(255,255,255,0) 4px 8px)}\n.keys{display:flex;flex-wrap:wrap;gap:'
+    '4px 16px;margin-top:8px;font-size:12.5px;color:var(--muted)}\n.keys span{display:inline-flex;align-it'
+    'ems:center;gap:6px}\n.keys i{display:inline-block;width:10px;height:10px;border-radius:3px}\n.vm-sizes'
+    '{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)'
+    '}\n.vm-sizes .chips{margin-top:6px}\n.cost-tabs{margin:0 22px 14px}\n.movers{display:grid;grid-template'
+    '-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 36px}\n.movers h4{margin:4px 0 2px;font-s'
+    'ize:13px;font-weight:600;color:var(--muted)}\n.mover{display:grid;grid-template-columns:minmax(0,1fr)'
+    ' auto;gap:2px 14px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}\n.mover b{font-wei'
+    'ght:600;overflow-wrap:anywhere}\n.mover .dv{text-align:right;font-weight:700;white-space:nowrap}\n.mov'
+    'er small{font-size:12.5px;color:var(--muted)}\n.gapn{display:flex;flex-wrap:wrap;align-items:baseline'
+    ';gap:4px 12px;margin:2px 0 14px}\n.gapn b{font-size:30px;line-height:1.1;font-weight:700;letter-spaci'
+    'ng:-.02em;color:var(--title)}\n.gapn span{font-size:14px;color:var(--muted)}\n.sav{font-weight:700;whi'
+    'te-space:nowrap}\n.sav small{display:block;font-size:12px;font-weight:400;color:var(--muted);white-sp'
+    'ace:normal}\n.sav.nc{font-weight:600;color:var(--muted)}\n.legacy-sum{display:flex;flex-wrap:wrap;gap:'
+    '6px 28px;align-items:baseline;padding:0 22px 14px}\n.legacy-sum .stat{margin:0}\n.legacy-sum .notes{ma'
+    'rgin:0;max-width:80ch}\n.sys-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px'
+    ' 40px;margin-top:20px}\n.sys-grid h4,.sys-h{margin:0 0 8px;font-size:13px;font-weight:600;color:var(-'
+    '-muted)}\n.sys-h{margin-top:14px}\n.sys-wrap{margin:0 -22px;border-bottom:1px solid var(--line)}\n#sec-'
+    'finops .bars{grid-template-columns:minmax(120px,36%) minmax(0,1fr) auto;column-gap:12px}\n#sec-finops'
+    ' .bars>*{grid-column:1 / -1}\n#sec-finops .bars>.brow{grid-template-columns:subgrid}\n.h3row{display:f'
+    'lex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:4px}\n.h3row h3{margin:0}\n@media (ma'
+    'x-width:1400px){#workspace-error-view,#opening-state{margin:28px clamp(14px,3vw,40px)}}\n.foot{max-wi'
+    'dth:1320px;margin:0 auto;padding:20px 0 40px;border-top:1px solid var(--line);color:var(--muted);fon'
+    't-size:13px}\n@media (max-width:1400px){.foot{margin:0 clamp(14px,3vw,40px)}}\n@media (max-width:1360p'
+    'x){.bar-nav,.tag{display:none} .toc{display:block}}\n@media (max-width:1040px){.hero-in{grid-template'
+    '-columns:1fr} .hero-side{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))} .produc'
+    't{display:none} .cost-head,.sys-grid{grid-template-columns:minmax(0,1fr)}}\n@media (max-width:720px){'
+    '\n.btn .lbl{display:none}\n.btn{padding:0 11px}\n.acts{gap:6px}\n.hero{padding-bottom:92px}\n.lead{font-s'
+    'ize:16px}\n.brand-plaque{min-height:52px}\n.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10p'
+    'x}\n.kpi{padding:14px 16px}\n.kpi .v{font-size:27px}\n.brow,#check-status .brow{grid-template-columns:m'
+    'inmax(0,1fr) auto}\n.brow .bt{grid-column:1 / -1;grid-row:2}\n.tools,.card-head,.g-legend{padding-left'
+    ':16px;padding-right:16px}\n.graph{padding-left:16px;padding-right:16px}\n.card{padding:16px}\n.card.fla'
+    't{padding:0}\n.dl2{grid-template-columns:1fr;gap:2px 0}\n.dl2 dd + dt{margin-top:10px}\n.cost-tabs{marg'
+    'in-left:16px;margin-right:16px}\n.sys-wrap{margin:0 -16px}\n#sec-finops .bars{grid-template-columns:mi'
+    'nmax(0,1fr) auto}\n.legacy-sum{padding-left:16px;padding-right:16px}\n.cstats{gap:16px 18px}\n.cstat .n'
+    '{font-size:25px}\nhtml.brand-font .hero h1{font-size:30px}\nhtml.brand-font .sh h2{font-size:24px}\n}\n@'
+    'media (max-width:420px){.wordmark{font-size:15px} .brand .mark{width:26px;height:26px} .btn.icon,.ac'
+    'ts .btn{width:38px;min-height:38px;padding:0}}\n@media (max-width:360px){.bar{gap:8px} .acts{gap:4px}'
+    ' .brand{flex:0 1 auto;min-width:0} .wordmark{overflow:hidden;text-overflow:ellipsis}}\n@media (prefer'
+    's-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto !important}}\n@page{size:A'
+    '4;margin:14mm 12mm 16mm}\n@media print{\n*{-webkit-print-color-adjust:exact;print-color-adjust:exact}\n'
+    'html,body{background:#ffffff;font-size:12px}\n.bar,.skip,.tools,.more-row,.tabs,.ws-select,details.js'
+    'on{display:none !important}\n.multi-band{border:0}\n.hero{padding:22px 24px 74px;border-radius:14px}\n.'
+    'hero-in{grid-template-columns:minmax(0,1fr) 210px;gap:14px 26px}\n.hero-side{grid-template-columns:1f'
+    'r}\n.hero h1{font-size:25px}\n.lead{font-size:12.5px}\n.signal b{font-size:19px}\n.page{padding:0}\n.kpis'
+    '{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:-54px}\n.kpi{padding:12px 14px;box'
+    '-shadow:none}\n.kpi .v{font-size:24px}\n.card{box-shadow:none;break-inside:avoid}\n.card.flat{break-ins'
+    'ide:auto}\n.grid2{grid-template-columns:1fr 1fr}\n.plan{grid-template-columns:1fr}\n.plan .card{break-i'
+    'nside:auto}\n.steps .sx b,.plist .pt{font-size:12px}\n.steps .sx p,.msgs li,.brow{font-size:11.5px}\n.p'
+    'list .pm,.steps .sm,.brow small,.facts dt,.facts dd small{font-size:10.5px}\n.facts dd{font-size:12px'
+    '}\n.chapter{margin-top:24px}\n.sh{break-after:avoid;break-inside:avoid}\n.card-head{display:block;break'
+    '-after:avoid;break-inside:avoid}\n.card-head p{margin-top:2px}\n.sh::after,.card-head::after{content:"'
+    '";display:block;height:150px;margin-bottom:-150px}\n.sh p{font-size:12px}\ntr,.kpi,.signal,.brow,.step'
+    's li,.plist li{break-inside:avoid}\nthead{display:table-header-group}\ntr.pg{display:table-row !import'
+    'ant}\n.wrap,.graph{overflow:visible;background:none}\ntable,table.dense{font-size:10.5px}\ntd,th,.dense'
+    ' td,.dense th{padding:5px 7px}\ntd{overflow-wrap:break-word}\ntd .mono,td.w,.chips span{overflow-wrap:'
+    'anywhere}\ntd small,td p,td .ext,td .st,td .pill,.chips span,.card td small,.card td p{font-size:9.5p'
+    'x}\nth[data-label] .th-sort{display:none}\nth[data-label]::before{content:attr(data-label)}\ntd .pill{p'
+    'adding:1px 7px;gap:4px}\ntd .pill::before{width:5px;height:5px}\n.sh h2{font-size:18px}\n.card h3{font-'
+    'size:13.5px}\n.card .sub,.card-head p,.notes,.dl2{font-size:10.5px}\nth{font-size:9px;white-space:norm'
+    'al}\ntd.nw,td .nw{white-space:normal}\ntd.w{min-width:0}\n.mono{font-size:9.5px}\n.graph svg{min-width:0'
+    '}\n[hidden].print-show{display:block !important}\na{color:inherit;text-decoration:none}\n.foot{padding:'
+    '14px 0 0}\n.cost-head{grid-template-columns:1.25fr 1fr;gap:12px 24px}\n.cstat .n{font-size:20px}\n.csta'
+    't .d,.mrow,.mover,.keys,.vm-sizes{font-size:10.5px}\n.gapn b{font-size:20px}\n.sys-grid{grid-template-'
+    'columns:1fr 1fr}\n.brow .bl small,.brow .bv small{font-size:10.5px}\n.mrow,.mover,.cstat{break-inside:'
+    'avoid}\nhtml.brand-font .hero h1{font-size:28px}\nhtml.brand-font .sh h2{font-size:20px}\nhtml.branded '
+    '.foot{background:none;color:#475467}\n}\n</style>\n</head>\n<body>\n<a class="skip" href="#main-document"'
+    '>Skip to main content</a>\n<header class="bar">\n  <a class="brand" href="#sec-cover">\n    <svg class='
+    '"mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" '
+    'fill="#003865"/><path d="M16 7.5l9 4.6-9 4.6-9-4.6z" fill="#ff3621"/><path d="M7 16.4l9 4.6 9-4.6M7 '
+    '20.8l9 4.6 9-4.6" fill="none" stroke="#ffffff" stroke-width="1.9" stroke-linejoin="round"/></svg>\n  '
+    '  <span class="wordmark">Azure SRE Agent</span>\n    <span class="product" id="bar-product">Azure Dat'
+    'abricks dependencies</span>\n  </a>\n  <nav class="bar-nav" aria-label="Report contents" id="bar-nav">'
+    '\n    <a href="#sec-dependencies">Dependencies</a>\n    <a href="#sec-inventory">Inventory</a>\n    <a '
+    'href="#sec-findings">Findings</a>\n    <a href="#sec-finops">Costs</a>\n    <a href="#sec-actions">Pla'
+    'n</a>\n    <a href="#sec-sources">Sources</a>\n  </nav>\n  <div class="acts">\n    <details class="menu '
+    'toc">\n      <summary class="btn ghost" aria-label="Contents"><svg class="i" viewBox="0 0 24 24" aria'
+    '-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="lbl">Contents'
+    '</span></summary>\n      <nav class="menu-pop" aria-label="Contents" id="toc-menu">\n        <a href="'
+    '#sec-cover">1. Cover and provenance</a>\n        <a href="#sec-executive">2. Executive summary and WA'
+    'F</a>\n        <a href="#sec-dependencies">3. Dependency map</a>\n        <a href="#sec-inventory">4. '
+    'Lakehouse and ARM inventory</a>\n        <a href="#sec-findings">5. Findings and rules</a>\n        <a'
+    ' href="#sec-finops">6. Databricks costs</a>\n        <a href="#sec-actions">7. Action plan</a>\n      '
+    '  <a href="#sec-sources">8. Sources and methodology</a>\n      </nav>\n    </details>\n    <span class='
+    '"tag">Read-only</span>\n    <button type="button" class="btn ghost icon" id="theme-toggle" aria-press'
+    'ed="false" title="Dark mode"><svg class="i moon" viewBox="0 0 24 24" aria-hidden="true" focusable="f'
+    'alse"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg><svg class="i sun" viewBox="0 0 2'
+    '4 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4'
+    '.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span clas'
+    's="sr">Dark mode</span></button>\n    <details class="menu" id="export-menu">\n      <summary class="b'
+    'tn ghost" aria-label="Export"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false'
+    '"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span class="lbl">Export</span></summary>\n      <di'
+    'v class="menu-pop">\n        <button type="button" id="export-json-btn">Full snapshot (JSON)<small>No'
+    'rmalized model embedded in this report</small></button>\n        <button type="button" id="export-dep'
+    's-csv-btn">Dependencies (CSV)<small>Workspace nodes, relationships and blind spots</small></button>\n'
+    '        <button type="button" id="export-findings-csv-btn">Checks (CSV)<small>Every evaluated rule w'
+    'ith its evidence</small></button>\n        <button type="button" id="export-costs-csv-btn">Cost by wo'
+    "rkload (CSV)<small>The month's clusters, jobs, warehouses, pools and tags</small></button>\n        <"
+    'button type="button" id="export-signals-csv-btn">Optimization signals (CSV)<small>Each signal with i'
+    'ts cost and estimated savings</small></button>\n      </div>\n    </details>\n    <button type="button"'
+    ' class="btn" id="print-btn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    '<path d="M7 9V3h10v6M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h'
+    '10v7H7z"/></svg><span class="lbl">Print / PDF</span></button>\n  </div>\n</header>\n<div class="brand-r'
+    'ibbon" aria-hidden="true"><span class="navy"></span><span class="lava"></span><span class="steel"></'
+    'span><span class="teal"></span></div>\n<div class="multi-band" id="multi-overview" hidden>\n  <div cla'
+    'ss="band-in">\n    <p id="multi-summary"></p>\n    <label class="ws-select" id="workspace-selector-wra'
+    'p" hidden>Workspace\n      <select id="workspace-selector" aria-label="Select workspace"></select>\n  '
+    '  </label>\n  </div>\n</div>\n<main id="main-document" tabindex="-1">\n  <div id="opening-state" class="'
+    'state-card" role="alert" hidden></div>\n  <div id="workspace-error-view" class="state-card" role="ale'
+    'rt" hidden></div>\n  <div id="report-body" hidden>\n    <section class="hero" id="sec-cover" aria-labe'
+    'lledby="cover-title">\n      <div class="hero-in">\n        <div>\n          <h1 id="cover-title">Azure'
+    ' Databricks architecture, dependency and configuration review</h1>\n          <p class="lead" id="cov'
+    'er-lead"></p>\n          <div class="meta" id="cover-badges"></div>\n        </div>\n        <aside cla'
+    'ss="hero-side" aria-label="Customer and verdict">\n          <div id="plaque-block">\n            <p c'
+    'lass="plaque-k">Prepared for</p>\n            <div class="brand-plaque" id="brand-plaque"></div>\n    '
+    '        <p class="client-name" id="client-name-label"></p>\n          </div>\n          <div class="si'
+    'gnal" id="verdict"></div>\n        </aside>\n        <div class="dist" id="severity-dist"></div>\n     '
+    ' </div>\n    </section>\n    <div class="page">\n      <div class="kpis" id="kpis"></div>\n      <div id'
+    '="notices"></div>\n\n      <section class="chapter" id="sec-identity" aria-labelledby="h-identity">\n  '
+    '      <div class="sh"><h2 id="h-identity">1. Workspace, identity and provenance</h2><p>Which workspa'
+    'ce was reviewed, with which identity and from which tenant: the context behind every figure in this '
+    'report.</p></div>\n        <div class="card"><dl class="facts" id="cover-facts"></dl></div>\n      </s'
+    'ection>\n\n      <section class="chapter" id="sec-executive" aria-labelledby="h-exec">\n        <div cl'
+    'ass="sh"><h2 id="h-exec">2. Executive summary, coverage and local indicators</h2><p>The local index '
+    'measures only the rules evaluated on observed evidence. It never replaces an official Microsoft Well'
+    '-Architected assessment or hides sources that weren\'t evaluated.</p></div>\n        <div class="grid2'
+    '">\n          <div class="card"><h3>Executive summary</h3><p class="sub">The key points of this revie'
+    'w, starting with cost.</p><ul class="msgs" id="executive-messages"></ul></div>\n          <div class='
+    '"card"><h3>Check distribution</h3><p class="sub">Status of each local rule against the observed evid'
+    'ence.</p><div class="bars" id="check-status"></div></div>\n          <div class="card"><h3>Breakdown '
+    'by area</h3><p class="sub">Local index by review area, beside its evaluated coverage.</p><div class='
+    '"bars" id="area-scores"></div></div>\n          <div class="card"><h3>Breakdown by Well-Architected p'
+    'illar</h3><p class="sub">The same calculation grouped by pillar; not an official WAF score.</p><div '
+    'class="bars" id="pillar-scores"></div></div>\n        </div>\n        <div class="card" style="margin-'
+    'top:16px"><h3>Observed critical and high-severity priorities</h3><p class="sub">Failed checks with c'
+    'ritical or high severity, with the affected object and its evidence.</p><ul class="plist" id="priori'
+    'ty-findings"></ul></div>\n      </section>\n\n      <section class="chapter" id="sec-dependencies" aria'
+    '-labelledby="h-deps">\n        <div class="sh"><h2 id="h-deps">3. Dependency map and Lakehouse archit'
+    'ecture</h2><p>Each relationship is explicitly classified as <strong>OBSERVED</strong> (exact native '
+    'ID/key join confirmed in the APIs), <strong>INFERRED</strong> (explicit URI/host reference to a reso'
+    "urce not collected in ARM) or <strong>UNKNOWN</strong> (runtime lineage, or a scope that can't be re"
+    'ad without starting compute).</p></div>\n        <div class="cls-sum" id="dep-class-summary"></div>\n '
+    '       <div class="tabs" role="tablist" aria-label="Architecture and dependency views">\n          <b'
+    'utton type="button" role="tab" id="tab-dep-observed" aria-selected="true" aria-controls="panel-dep-o'
+    'bserved">Observed and inferred dependency map</button>\n          <button type="button" role="tab" id'
+    '="tab-dep-reference" aria-selected="false" aria-controls="panel-dep-reference" tabindex="-1">Referen'
+    'ce proposal - NOT deployed</button>\n        </div>\n        <div id="panel-dep-observed" class="print'
+    '-show" role="tabpanel" aria-labelledby="tab-dep-observed">\n          <div class="card flat">\n       '
+    '     <div class="card-head"><h3>Neighborhood graph</h3><p id="dep-graph-note"></p></div>\n           '
+    ' <div class="tools">\n              <label class="field">Layer\n                <select id="dep-layer-'
+    'filter">\n                  <option value="all">All layers</option>\n                  <option value="'
+    'control_plane">Control plane (ARM)</option>\n                  <option value="compute">Compute (clust'
+    'ers / pools / warehouses)</option>\n                  <option value="orchestration">Orchestration (jo'
+    'bs / tasks / pipelines)</option>\n                  <option value="governance">Governance (Unity Cata'
+    'log / secret scopes)</option>\n                  <option value="associated_resource">Associated Azure'
+    ' resources</option>\n                </select>\n              </label>\n              <label class="fie'
+    'ld">Classification\n                <select id="dep-class-filter">\n                  <option value="a'
+    'll">All (OBSERVED / INFERRED / UNKNOWN)</option>\n                  <option value="OBSERVED">OBSERVED'
+    ' (exact native join)</option>\n                  <option value="INFERRED">INFERRED (URI/host referenc'
+    'e)</option>\n                  <option value="UNKNOWN">UNKNOWN (explicit blind spot)</option>\n       '
+    '         </select>\n              </label>\n              <label class="field grow">Search node / work'
+    'load\n                <input type="search" id="dep-search-filter" placeholder="Job, cluster, catalog,'
+    ' ADLS account…">\n              </label>\n              <button type="button" class="btn ghost" id="de'
+    'p-clear">Clear filters</button>\n            </div>\n            <div class="graph" id="dep-graph-box"'
+    '></div>\n            <div class="g-legend" aria-hidden="true">\n              <span><svg viewBox="0 0 '
+    '34 10"><line x1="1" y1="5" x2="33" y2="5" class="edge"/></svg>OBSERVED · native join</span>\n        '
+    '      <span><svg viewBox="0 0 34 10"><line x1="1" y1="5" x2="33" y2="5" class="edge inf"/></svg>INFE'
+    'RRED · URI/host not in the ARM inventory</span>\n              <span id="dep-graph-caption"></span>\n '
+    '           </div>\n          </div>\n          <div class="stack-gap" style="margin-top:16px">\n       '
+    '     <div class="card flat"><div class="card-head"><h3>Dependency relationships (<span id="dep-edges'
+    '-count">0</span>)</h3><p>Source, relationship and target with the exact join fields.</p></div><div c'
+    'lass="wrap"><table class="dense" id="dep-edges-table"></table></div></div>\n            <div class="c'
+    'ard flat"><div class="card-head"><h3>Graph nodes (<span id="dep-nodes-count">0</span>)</h3><p>Each o'
+    'bject with its source and an evidence summary.</p></div><div class="wrap"><table class="dense" id="d'
+    'ep-nodes-table"></table></div></div>\n            <div class="card flat"><div class="card-head"><h3>U'
+    'NKNOWN blind spots and scopes (<span id="dep-unknowns-count">0</span>)</h3><p>What this review can\'t'
+    ' see without running compute or reading code.</p></div><div class="wrap"><table class="dense" id="de'
+    'p-unknowns-table"></table></div></div>\n            <div class="card flat"><div class="card-head"><h3'
+    '>Broken references found (<span id="dep-broken-count">0</span>)</h3><p>Referenced identifiers that d'
+    'on\'t exist in the observed inventory.</p></div><div class="wrap"><table class="dense" id="dep-broken'
+    '-table"></table></div></div>\n          </div>\n        </div>\n        <div id="panel-dep-reference" c'
+    'lass="print-show" role="tabpanel" aria-labelledby="tab-dep-reference" hidden>\n          <div class="'
+    'card flat">\n            <div class="card-head"><h3>Azure Databricks Lakehouse reference architecture'
+    ' — proposal NOT deployed</h3><p>Baseline recommended by Microsoft and the Databricks Well-Architecte'
+    "d Lakehouse. <strong>It doesn't represent resources deployed in the customer's environment.</strong>"
+    '</p></div>\n            <div class="graph" id="ref-arch-box"></div>\n            <div class="wrap"><ta'
+    'ble id="ref-arch-table"></table></div>\n          </div>\n        </div>\n      </section>\n\n      <sect'
+    'ion class="chapter" id="sec-inventory" aria-labelledby="h-inv">\n        <div class="sh"><h2 id="h-in'
+    'v">4. Workspace, compute, orchestration, Unity Catalog and associated resource inventory</h2><p>The '
+    'objects the rules are evaluated on. Each row comes from an API read recorded in section 8.</p></div>'
+    '\n        <div class="stack-gap">\n          <div class="card flat"><div class="card-head"><h3>All-pur'
+    'pose clusters, job clusters, instance pools and cluster policies</h3><p id="inv-compute-count"></p><'
+    '/div><div class="wrap"><table class="dense" id="inv-compute-table"></table></div></div>\n          <d'
+    'iv class="card flat"><div class="card-head"><h3>Jobs, task DAGs, declarative pipelines (Lakeflow / D'
+    'LT) and SQL warehouses</h3><p id="inv-orchestration-count"></p></div><div class="wrap"><table class='
+    '"dense" id="inv-orchestration-table"></table></div></div>\n          <div class="card flat"><div clas'
+    's="card-head"><h3>Unity Catalog (metastore, catalogs, schemas, storage credentials, external locatio'
+    'ns, connections) and secret scopes</h3><p id="inv-uc-count"></p></div><div class="wrap"><table class'
+    '="dense" id="inv-uc-table"></table></div></div>\n          <div class="card flat"><div class="card-he'
+    'ad"><h3>Associated Azure resources and control-plane outbound dependency endpoints</h3><p id="inv-re'
+    'sources-count"></p></div><div class="wrap"><table class="dense" id="inv-resources-table"></table></d'
+    'iv></div>\n        </div>\n      </section>\n\n      <section class="chapter" id="sec-findings" aria-lab'
+    'elledby="h-find">\n        <div class="sh"><h2 id="h-find">5. Findings and detailed rule evaluation</'
+    'h2><p>Each local check with its status, the observed evidence and the recommendation. Failed checks '
+    'come first; filter, sort by column and export.</p></div>\n        <div class="card flat">\n          <'
+    'div class="card-head"><h3>Check register</h3><p id="findings-count-label"></p></div>\n          <div '
+    'class="tools">\n            <label class="field">Area\n              <select id="find-area-filter">\n  '
+    '              <option value="all">All</option>\n                <option value="best_practices">Best p'
+    'ractices</option>\n                <option value="security">Security</option>\n                <option'
+    ' value="finops">FinOps</option>\n                <option value="optimization">Optimization</option>\n '
+    '             </select>\n            </label>\n            <label class="field">Level\n              <se'
+    'lect id="find-level-filter">\n                <option value="all">All</option>\n                <optio'
+    'n value="workspace">Workspace / governance</option>\n                <option value="workload">Workloa'
+    'd (compute / jobs / SQL)</option>\n                <option value="resource">Associated Azure resource'
+    '</option>\n              </select>\n            </label>\n            <label class="field">Severity\n   '
+    '           <select id="find-sev-filter">\n                <option value="all">All</option>\n          '
+    '      <option value="critical">Critical</option>\n                <option value="high">High</option>\n'
+    '                <option value="medium">Medium</option>\n                <option value="low">Low</opti'
+    'on>\n              </select>\n            </label>\n            <label class="field">Status\n           '
+    '   <select id="find-status-filter">\n                <option value="all">All</option>\n               '
+    ' <option value="failed">Failed</option>\n                <option value="passed">Passed</option>\n     '
+    '           <option value="not_evaluated">Not evaluated</option>\n                <option value="not_a'
+    'pplicable">Not applicable</option>\n              </select>\n            </label>\n            <label c'
+    'lass="field grow">Search resource / workload\n              <input type="search" id="find-search-filt'
+    'er" placeholder="Filter by rule, job, cluster…">\n            </label>\n            <button type="butt'
+    'on" class="btn ghost" id="find-clear">Clear</button>\n            <button type="button" class="btn gh'
+    'ost" id="find-export-btn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><p'
+    'ath d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Filtered CSV</button>\n          </div>\n          <div c'
+    'lass="wrap"><table class="dense" id="findings-table"></table></div>\n        </div>\n      </section>\n'
+    '\n      <section class="chapter" id="sec-finops" aria-labelledby="h-finops">\n        <div class="sh">'
+    '<h2 id="h-finops">6. Databricks costs: where they come from and how to optimize them</h2><p id="cost'
+    '-intro">The month\'s cost in Cost Management, split by the tags Databricks puts on each cluster, job,'
+    ' SQL warehouse and pool, and the configuration changes that would reduce it.</p></div>\n        <div '
+    'id="cost-empty" hidden></div>\n        <div id="cost-body">\n          <div id="cost-data">\n          '
+    '<div class="card cost-head">\n            <div class="cstats" id="cost-stats"></div>\n            <div'
+    ' class="cost-trend" id="cost-trend"></div>\n          </div>\n          <div class="grid2" style="marg'
+    'in-top:16px">\n            <div class="card"><h3>DBU by compute type</h3><p class="sub" id="cost-dbu-'
+    'sub">What Databricks bills per processing unit, by workload type.</p><div class="bars" id="cost-dbu-'
+    'bars"></div></div>\n            <div class="card"><h3>Infrastructure by service</h3><p class="sub" id'
+    '="cost-infra-sub">Virtual machines, disks and network that the workspace uses in your subscription.<'
+    '/p><div class="bars" id="cost-infra-bars"></div><div class="vm-sizes" id="cost-vm-sizes"></div></div'
+    '>\n          </div>\n          <div class="card flat" style="margin-top:16px">\n            <div class='
+    '"card-head"><h3>Who consumes it</h3><p id="cost-attr-note"></p></div>\n            <div class="tabs c'
+    'ost-tabs" role="tablist" aria-label="Cost attribution" id="cost-tabs"></div>\n            <div class='
+    '"tools">\n              <label class="field grow">Search\n                <input type="search" id="cos'
+    't-attr-search" placeholder="Cluster, job, warehouse, pool or tag value…">\n              </label>\n   '
+    '           <button type="button" class="btn ghost" id="cost-attr-export"><svg class="i" viewBox="0 0'
+    ' 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Attribut'
+    'ion CSV</button>\n            </div>\n            <div class="wrap" role="tabpanel" id="cost-attr-pane'
+    'l" aria-labelledby="cost-tab-cluster"><table class="dense" id="cost-attr-table"></table></div>\n     '
+    '     </div>\n          <div class="grid2" style="margin-top:16px">\n            <div class="card"><h3>'
+    'What no tag explains</h3><p class="sub">Cost without the <span class="mono">Vendor</span> tag that D'
+    'atabricks puts on all classic compute: shared workspace services and serverless compute.</p><div id='
+    '"cost-gap"></div></div>\n            <div class="card"><h3>Coverage of your tags</h3><p class="sub" i'
+    'd="cost-tags-sub">Share of the month\'s cost that carries each configured allocation tag.</p><div cla'
+    'ss="bars" id="cost-tag-bars"></div><ul class="notes" id="cost-tag-notes"></ul></div>\n          </div'
+    '>\n          <div class="card" style="margin-top:16px"><h3>What changed from the previous month</h3><'
+    'p class="sub" id="cost-movers-sub">Clusters, jobs, SQL warehouses and pools with the largest change.'
+    '</p><div class="movers" id="cost-movers"></div></div>\n          </div>\n          <div class="card fl'
+    'at" style="margin-top:16px">\n            <div class="card-head"><h3>How to optimize it</h3><p id="co'
+    'st-signals-count"></p></div>\n            <div class="tools">\n              <label class="field">Seve'
+    'rity\n                <select id="cost-sig-sev">\n                  <option value="all">All</option>\n '
+    '                 <option value="high">High</option>\n                  <option value="medium">Medium<'
+    '/option>\n                  <option value="low">Low</option>\n                </select>\n              '
+    '</label>\n              <label class="field">Savings\n                <select id="cost-sig-saving">\n  '
+    '                <option value="all">All signals</option>\n                  <option value="with">With'
+    ' estimated savings</option>\n                </select>\n              </label>\n              <label cl'
+    'ass="field grow">Search\n                <input type="search" id="cost-sig-search" placeholder="Signa'
+    'l, cluster, job, warehouse…">\n              </label>\n              <button type="button" class="btn '
+    'ghost" id="cost-sig-export"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Filtered CSV</button>\n            </div>\n            '
+    '<div class="wrap"><table class="dense" id="cost-signals-table"></table></div>\n          </div>\n     '
+    '     <div class="card" style="margin-top:16px" id="cost-system"></div>\n          <div class="card" s'
+    'tyle="margin-top:16px">\n            <h3>Method, assumptions and cost sources</h3>\n            <p cla'
+    'ss="sub">How each figure in this section is calculated. No query starts compute or changes anything.'
+    '</p>\n            <dl class="dl2" id="cost-method"></dl>\n          </div>\n        </div>\n        <div'
+    ' class="card flat legacy-cost" style="margin-top:16px" id="finops-legacy">\n          <div class="car'
+    'd-head"><h3>ARM cost of the approved scope (<span class="mono">cost_scope</span>)</h3><p id="finops-'
+    'cost-window"></p></div>\n          <div class="legacy-sum"><div class="stat" id="finops-actual-cost">'
+    '</div><ul class="notes" id="finops-cost-note"></ul></div>\n          <div class="wrap"><table class="'
+    'dense" id="finops-cost-table"></table></div>\n        </div>\n      </section>\n\n      <section class="'
+    'chapter" id="sec-actions" aria-labelledby="h-actions">\n        <div class="sh"><h2 id="h-actions">7.'
+    ' Prioritized action plan for human review</h2><p>The Quick win (&lt;1 week), Short term (1-3 months)'
+    ' and Medium term horizons are indicative planning categories, not delivery commitments or automatic '
+    'changes.</p></div>\n        <div class="plan" id="actions-plan"></div>\n      </section>\n\n      <secti'
+    'on class="chapter" id="sec-sources" aria-labelledby="h-sources">\n        <div class="sh"><h2 id="h-s'
+    'ources">8. Source ledger, HTTP receipts and methodological limits</h2><p>Which sources were read, wi'
+    'th what result, and what is out of scope. Read the local index only together with this coverage.</p>'
+    '</div>\n        <div class="card flat">\n          <div class="card-head"><h3>Source coverage</h3><p i'
+    'd="sources-summary"></p></div>\n          <div class="bars" id="sources-bars" style="padding:0 22px 1'
+    '6px"></div>\n          <div class="wrap"><table class="dense" id="sources-table"></table></div>\n     '
+    '   </div>\n        <div class="card" style="margin-top:16px">\n          <h3>Method and interpretation'
+    '</h3>\n          <p class="sub">How each indicator is calculated and what this review can\'t claim.</p'
+    '>\n          <dl class="dl2" id="method-notes"></dl>\n          <h3 style="margin-top:18px">Limitation'
+    's and interpretation rules</h3>\n          <ul class="notes" id="methodology-limitations"></ul>\n     '
+    '   </div>\n      </section>\n    </div>\n  </div>\n</main>\n<footer class="foot" id="report-footer"></foo'
+    'ter>\n<script type="application/json" id="report-data">__REPORT_DATA_JSON__</script>\n<script>\n(functi'
+    'on () {\n  "use strict";\n  var SVGNS = "http://www.w3.org/2000/svg";\n  var LAYERS = ["control_plane",'
+    ' "compute", "orchestration", "governance", "associated_resource"];\n  var SEVS = ["critical", "high",'
+    ' "medium", "low"];\n  var STATUS_ORDER = { failed: 0, not_evaluated: 1, passed: 2, not_applicable: 3 '
+    '};\n  var L = {\n    status: { passed: "Passed", failed: "Failed", not_evaluated: "Not evaluated", not'
+    '_applicable: "Not applicable" },\n    sev: { critical: "Critical", high: "High", medium: "Medium", lo'
+    'w: "Low" },\n    area: { best_practices: "Best practices", security: "Security", finops: "FinOps", op'
+    'timization: "Optimization" },\n    pillar: { reliability: "Reliability", security: "Security", cost: '
+    '"Cost optimization", operations: "Operational excellence", performance: "Performance efficiency" },\n'
+    '    level: { workspace: "Workspace", workload: "Workload", resource: "Azure resource" },\n    layer: '
+    '{ control_plane: "Control plane", compute: "Compute", orchestration: "Orchestration", governance: "G'
+    'overnance", associated_resource: "Associated resources" },\n    src: { complete: "Complete", partial:'
+    ' "Partial", denied: "Denied", error: "Error", not_configured: "Not configured", not_applicable: "Not'
+    ' applicable" },\n    effort: { L: "low effort", M: "medium effort", H: "high effort" },\n    kind: {\n '
+    '     databricks_workspace: "Workspace", managed_resource_group: "Managed resource group", outbound_d'
+    'ependency_category: "Outbound endpoint",\n      all_purpose_cluster: "All-purpose cluster", job_clust'
+    'er_spec: "Job cluster", instance_pool: "Instance pool", cluster_policy: "Cluster policy",\n      sql_'
+    'warehouse: "SQL warehouse", job: "Job", job_task: "Job task", dlt_pipeline: "DLT pipeline", secret_s'
+    'cope: "Secret scope",\n      uc_metastore: "UC metastore", uc_catalog: "UC catalog", uc_schema: "UC s'
+    'chema", uc_storage_credential: "Storage credential",\n      uc_external_location: "External location"'
+    ', uc_connection: "UC connection", external_storage_target: "External storage",\n      external_key_va'
+    'ult_target: "External key vault", "microsoft.network/virtualnetworks": "Virtual network", "microsoft'
+    '.network/virtualnetworks/subnets": "Subnet",\n      "microsoft.network/networksecuritygroups": "NSG",'
+    ' "microsoft.network/privateendpoints": "Private endpoint", "microsoft.databricks/accessconnectors": '
+    '"Access connector",\n      "microsoft.managedidentity/userassignedidentities": "Managed identity", "m'
+    'icrosoft.storage/storageaccounts": "Storage account",\n      "microsoft.keyvault/vaults": "Key vault"'
+    ', AllPurposeCluster: "All-purpose cluster", InstancePool: "Instance pool", ClusterPolicy: "Cluster p'
+    'olicy",\n      "microsoft.network/routetables": "Route table", "microsoft.network/natgateways": "NAT '
+    'gateway", "microsoft.network/publicipaddresses": "Public IP address",\n      "microsoft.network/loadb'
+    'alancers": "Load balancer", "microsoft.network/privatednszones": "Private DNS zone", "microsoft.even'
+    'thub/namespaces": "Event Hubs",\n      external_access_connector_target: "External access connector",'
+    ' external_arm_target: "External ARM resource",\n      inferred_adls_storage_uri_target: "Inferred ADL'
+    'S URI", inferred_catalog_storage_uri_target: "Inferred catalog storage",\n      inferred_pipeline_sto'
+    'rage_uri_target: "Inferred pipeline storage", permission_filtered_absence_or_deleted_target: "Target'
+    ' not visible or deleted",\n      GlobalInitScript: "Global init script", OutboundDependency: "Outboun'
+    'd endpoint"\n    }\n  };\n  var SEV_WORD = { critical: ["critical", "critical"], high: ["high", "high"]'
+    ', medium: ["medium", "medium"], low: ["low", "low"] };\n  var SEV_BAR = { critical: "var(--crit-bar)"'
+    ', high: "var(--high-bar)", medium: "var(--med-bar)", low: "var(--low-bar)" };\n  var NF = new Intl.Nu'
+    'mberFormat("en-US", { maximumFractionDigits: 2 });\n  var NF2 = new Intl.NumberFormat("en-US", { mini'
+    'mumFractionDigits: 2, maximumFractionDigits: 2 });\n  var ICON = {\n    ext: ["M14 4h6v6", "M20 4l-9 9'
+    '", "M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"],\n    check: ["M20 6L9 17l-5-5"],\n    '
+    'alert: ["M12 3.5l9 16H3z", "M12 10v4", "M12 17.2v.3"],\n    info: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0'
+    ' 18z", "M12 11v5", "M12 7.8v.3"]\n  };\n\n  function el(tag, attrs, children) {\n    var node = document'
+    '.createElement(tag);\n    if (attrs) {\n      Object.keys(attrs).forEach(function (k) {\n        if (k '
+    '=== "text") { node.textContent = String(attrs[k]); }\n        else if (k === "className") { if (attrs'
+    '[k]) { node.className = attrs[k]; } }\n        else if (attrs[k] !== null && attrs[k] !== undefined) '
+    '{ node.setAttribute(k, String(attrs[k])); }\n      });\n    }\n    if (children) {\n      children.forEa'
+    'ch(function (c) {\n        if (typeof c === "string" || typeof c === "number") { node.appendChild(doc'
+    'ument.createTextNode(String(c))); }\n        else if (c) { node.appendChild(c); }\n      });\n    }\n   '
+    ' return node;\n  }\n  function svg(tag, attrs, text) {\n    var node = document.createElementNS(SVGNS, '
+    'tag);\n    Object.keys(attrs || {}).forEach(function (k) { node.setAttribute(k, String(attrs[k])); })'
+    ';\n    if (text !== undefined) { node.textContent = String(text); }\n    return node;\n  }\n  function c'
+    'lear(node) { while (node.firstChild) { node.removeChild(node.firstChild); } }\n  function icon(name) '
+    '{\n    var s = svg("svg", { "class": "i", viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "fa'
+    'lse" });\n    ICON[name].forEach(function (d) { s.appendChild(svg("path", { d: d })); });\n    return '
+    's;\n  }\n  function lab(map, key) {\n    if (key === null || key === undefined || key === "") { return '
+    '"—"; }\n    return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : String(key);\n  }\n  fun'
+    'ction isNum(v) { return typeof v === "number" && isFinite(v); }\n  function num(v) { return isNum(v) '
+    '? NF.format(v) : (v === null || v === undefined || v === "" ? "—" : String(v)); }\n  function pct(v) '
+    '{ return isNum(v) ? NF.format(v) + "%" : "Not evaluated"; }\n  function utc(s) {\n    if (!s) { return'
+    ' "—"; }\n    var m = /^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2})/.exec(String(s));\n    return m ? m[1] + " " '
+    '+ m[2] + " UTC" : String(s);\n  }\n  function day(s) { var m = /^(\\d{4}-\\d{2}-\\d{2})/.exec(String(s ||'
+    ' "")); return m ? m[1] : "—"; }\n  function plural(n, one, many) { return n === 1 ? one : many; }\n  f'
+    'unction yesNo(v) { return v === true ? "Yes" : v === false ? "No" : "Not observed"; }\n  function acc'
+    'ess(v) { return v === "Disabled" ? "Disabled" : v === "Enabled" ? "Enabled" : (v || "Not observed");'
+    ' }\n  function rich(node, parts) {\n    clear(node);\n    parts.forEach(function (p) { if (p !== "" && '
+    'p !== null) { node.appendChild(Array.isArray(p) ? el("b", { text: p[0] }) : document.createTextNode('
+    'String(p))); } });\n    return node;\n  }\n  function brk(text, cls) {\n    var span = el("span", { clas'
+    'sName: cls === undefined ? "mono" : cls });\n    var s = String(text === null || text === undefined |'
+    '| text === "" ? "—" : text), buf = "";\n    if (s.length <= 24) { span.textContent = s; span.classNam'
+    'e += " nw"; return span; }\n    for (var i = 0; i < s.length; i++) {\n      buf += s.charAt(i);\n      '
+    'if ("/_.-:,".indexOf(s.charAt(i)) >= 0 && i < s.length - 1) {\n        span.appendChild(document.crea'
+    'teTextNode(buf));\n        span.appendChild(document.createElement("wbr"));\n        buf = "";\n      }'
+    '\n    }\n    if (buf) { span.appendChild(document.createTextNode(buf)); }\n    return span;\n  }\n  funct'
+    'ion mono(text) { return el("span", { className: "mono nw", text: text === null || text === undefined'
+    ' || text === "" ? "—" : text }); }\n  function stack(main, sub) {\n    var d = el("div", { className: '
+    '"stack" });\n    var b = el("b");\n    if (main instanceof Node) { b.appendChild(main); } else { b.tex'
+    'tContent = main === null || main === undefined || main === "" ? "—" : String(main); }\n    d.appendCh'
+    'ild(b);\n    if (sub instanceof Node) { var w = el("small"); w.appendChild(sub); d.appendChild(w); }\n'
+    '    else if (sub) { d.appendChild(el("small", { text: sub })); }\n    return d;\n  }\n  function pill(c'
+    'ls, text, title) { return el("span", { className: "pill " + cls, text: text, title: title || null })'
+    '; }\n  function sevPill(sev, label) { return pill(SEVS.indexOf(sev) >= 0 ? "sev-" + sev : "sev-info",'
+    ' label || lab(L.sev, sev)); }\n  function clsPill(c) { return pill("cls-" + (c === "OBSERVED" || c =='
+    '= "INFERRED" ? c : "UNKNOWN"), c || "UNKNOWN"); }\n  function statusTag(st) { return el("span", { cla'
+    'ssName: "st st-" + (STATUS_ORDER[st] !== undefined ? st : "not_evaluated"), title: st, text: lab(L.s'
+    'tatus, st) }); }\n  function srcTone(st) { return st === "complete" ? "tone-ok" : st === "partial" ? '
+    '"tone-warn" : (st === "denied" || st === "error") ? "tone-crit" : "tone-info"; }\n  function srcPill('
+    'st) { return pill(srcTone(st), lab(L.src, st), st); }\n  function kindLabel(kind) { var t = lab(L.kin'
+    'd, kind); return el("span", { text: t, title: kind && t !== kind ? kind : null }); }\n  function empt'
+    'yState(text) { return el("div", { className: "empty" }, [icon("check"), el("span", { text: text })])'
+    '; }\n  function safeLearnUrl(u) {\n    if (typeof u !== "string") { return null; }\n    try {\n      var'
+    ' parsed = new URL(u);\n      return (parsed.protocol === "https:" && (parsed.hostname === "learn.micr'
+    'osoft.com" || parsed.hostname === "docs.databricks.com")) ? u : null;\n    } catch (e) { return null;'
+    ' }\n  }\n  function extLink(href, text) { return el("a", { className: "ext", href: href, target: "_bla'
+    'nk", rel: "noopener noreferrer" }, [text, icon("ext")]); }\n  var ARM_RE = /^\\/subscriptions\\/[0-9a-f'
+    '-]{36}\\/resourcegroups\\/([^\\/]+)\\/providers\\/(microsoft\\.[a-z0-9]+\\/[a-z0-9]+)\\/([^\\/]+)(?:\\/([a-z0-'
+    '9]+)\\/([^\\/]+))?$/i;\n  function armCell(id, name) {\n    var m = ARM_RE.exec(String(id || ""));\n    i'
+    'f (!m) { return brk(id); }\n    var box = el("div", { className: "res" });\n    box.appendChild(el("b"'
+    ', { text: name || m[5] || m[3] }));\n    box.appendChild(el("small", null, [brk(m[1] + " · " + m[2] +'
+    ' (m[4] ? "/" + m[4] : ""), "")]));\n    var a = extLink("https://portal.azure.com/#@/resource" + id, '
+    '"Portal");\n    a.setAttribute("title", id);\n    box.appendChild(a);\n    return box;\n  }\n  function k'
+    'vChips(obj, max) {\n    var wrap = el("div", { className: "chips" }), shown = 0;\n    Object.keys(obj '
+    '|| {}).forEach(function (k) {\n      var v = obj[k];\n      if (v === null || v === undefined || v ==='
+    ' "" || typeof v === "object" || shown >= max) { return; }\n      var s = String(v);\n      if (s.index'
+    'Of("/subscriptions/") === 0 || s.length > 70) { return; }\n      wrap.appendChild(el("span", null, [k'
+    ' + ": ", el("b", { text: s })]));\n      shown++;\n    });\n    return shown ? wrap : null;\n  }\n  funct'
+    'ion evidenceCell(obj) {\n    var box = el("div"), chips = kvChips(obj, 4), json = JSON.stringify(obj '
+    '|| {}, null, 1);\n    if (chips) { box.appendChild(chips); }\n    if (json && json.length > 2) {\n     '
+    ' var d = el("details", { className: "json" });\n      d.appendChild(el("summary", { text: "Full JSON"'
+    ' }));\n      d.appendChild(el("pre", { text: json }));\n      box.appendChild(d);\n    }\n    if (!box.f'
+    'irstChild) { box.textContent = "—"; }\n    return box;\n  }\n\n  var TSTATE = {};\n  function spec(c) { r'
+    'eturn (c !== null && typeof c === "object" && !(c instanceof Node) && Object.prototype.hasOwnPropert'
+    'y.call(c, "v")) ? c : { v: c }; }\n  function sortValue(c) {\n    if (c.s !== undefined) { return c.s;'
+    ' }\n    return c.v instanceof Node ? c.v.textContent : (c.v === null || c.v === undefined ? "" : c.v)'
+    ';\n  }\n  function renderTable(tableNode, headers, rows, opts) {\n    var st = TSTATE[tableNode.id] || '
+    '(TSTATE[tableNode.id] = { sort: -1, dir: 1 });\n    st.headers = headers.map(function (h) { return ty'
+    'peof h === "string" ? { t: h } : h; });\n    st.rows = rows.map(function (r) { return r.map(spec); })'
+    ';\n    st.opts = opts || {};\n    st.limit = st.opts.page || 0;\n    drawTable(tableNode, st, null);\n  '
+    '}\n  function drawTable(tableNode, st, focus) {\n    var headers = st.headers, opts = st.opts, rows = '
+    'st.rows;\n    if (st.sort >= 0) {\n      var i = st.sort, dir = st.dir;\n      rows = rows.map(function'
+    ' (r, idx) { return { r: r, idx: idx }; }).sort(function (a, b) {\n        var x = sortValue(a.r[i]), '
+    'y = sortValue(b.r[i]);\n        var d = (isNum(x) && isNum(y)) ? x - y : String(x).localeCompare(Stri'
+    'ng(y), "en", { numeric: true, sensitivity: "base" });\n        return d * dir || a.idx - b.idx;\n     '
+    ' }).map(function (o) { return o.r; });\n    }\n    clear(tableNode);\n    var thead = el("thead"), trh '
+    '= el("tr");\n    headers.forEach(function (h, hi) {\n      var th = el("th", { className: h.c || null,'
+    ' scope: "col" });\n      if (opts.sortable && h.s !== false) {\n        var b = el("button", { type: "'
+    'button", className: "th-sort", text: h.t });\n        th.setAttribute("data-label", h.t);\n        if '
+    '(st.sort === hi) { th.setAttribute("aria-sort", st.dir === 1 ? "ascending" : "descending"); }\n      '
+    '  b.addEventListener("click", function () {\n          if (st.sort === hi) { st.dir = -st.dir; } else'
+    ' { st.sort = hi; st.dir = 1; }\n          drawTable(tableNode, st, "th" + hi);\n        });\n        th'
+    '.appendChild(b);\n      } else { th.textContent = h.t; }\n      trh.appendChild(th);\n    });\n    thead'
+    '.appendChild(trh);\n    tableNode.appendChild(thead);\n    var tbody = el("tbody");\n    if (!rows.leng'
+    'th) {\n      var tr0 = el("tr");\n      tr0.appendChild(el("td", { colspan: headers.length, className:'
+    ' "empty-cell", text: opts.empty || "No records in this scope or filter." }));\n      tbody.appendChil'
+    'd(tr0);\n    }\n    rows.forEach(function (cells, ri) {\n      var tr = el("tr", { className: st.limit '
+    '&& ri >= st.limit ? "pg" : null });\n      cells.forEach(function (c, ci) {\n        var td = el("td",'
+    ' { className: [headers[ci] && headers[ci].c, c.c].filter(Boolean).join(" ") || null });\n        if ('
+    'c.v instanceof Node) { td.appendChild(c.v); }\n        else { td.textContent = c.v === null || c.v =='
+    '= undefined || c.v === "" ? "—" : String(c.v); }\n        tr.appendChild(td);\n      });\n      tbody.a'
+    'ppendChild(tr);\n    });\n    tableNode.appendChild(tbody);\n    var wrap = tableNode.parentNode, more '
+    '= wrap.nextElementSibling;\n    if (!more || !more.classList.contains("more-row")) {\n      more = el('
+    '"div", { className: "more-row" });\n      wrap.parentNode.insertBefore(more, wrap.nextSibling);\n    }'
+    '\n    clear(more);\n    var hiddenRows = st.limit ? Math.max(0, rows.length - st.limit) : 0;\n    more.'
+    'hidden = hiddenRows === 0;\n    if (hiddenRows) {\n      var step = opts.page;\n      var b1 = el("butt'
+    'on", { type: "button", className: "btn ghost sm", "data-k": "more", text: "Show " + Math.min(step, h'
+    'iddenRows) + " more" });\n      b1.addEventListener("click", function () { st.limit += step; drawTabl'
+    'e(tableNode, st, "more"); });\n      var b2 = el("button", { type: "button", className: "btn ghost sm'
+    '", "data-k": "all", text: "Show all (" + rows.length + ")" });\n      b2.addEventListener("click", fu'
+    'nction () { st.limit = 0; drawTable(tableNode, st, "table"); });\n      more.appendChild(el("span", {'
+    ' className: "more-note", text: "Showing " + st.limit + " of " + rows.length + " rows" }));\n      mor'
+    'e.appendChild(b1);\n      more.appendChild(b2);\n    }\n    if (focus) {\n      var target = focus.index'
+    'Of("th") === 0 ? tableNode.querySelectorAll(".th-sort")[Number(focus.slice(2))] : focus === "more" ?'
+    ' more.querySelector("[data-k=more]") : null;\n      if (target) { target.focus(); }\n      else if (fo'
+    'cus === "more" || focus === "table") { tableNode.setAttribute("tabindex", "-1"); tableNode.focus(); '
+    '}\n    }\n  }\n\n  var rawText = document.getElementById("report-data").textContent;\n  var rootData;\n  t'
+    'ry {\n    rootData = JSON.parse(rawText);\n  } catch (e) {\n    var openErr = document.getElementById("'
+    'opening-state");\n    openErr.hidden = false;\n    openErr.textContent = "Couldn\'t load the report\'s e'
+    'mbedded JSON model.";\n    return;\n  }\n\n  var isMulti = rootData && rootData.schema_version === "data'
+    'bricks-dep-multi-workspace-v1";\n  var currentSnap = null;\n\n  var themeBtn = document.getElementById('
+    '"theme-toggle");\n  themeBtn.addEventListener("click", function () {\n    var dark = document.document'
+    'Element.getAttribute("data-theme") === "dark";\n    if (dark) { document.documentElement.removeAttrib'
+    'ute("data-theme"); }\n    else { document.documentElement.setAttribute("data-theme", "dark"); }\n    t'
+    'hemeBtn.setAttribute("aria-pressed", dark ? "false" : "true");\n  });\n  document.getElementById("prin'
+    't-btn").addEventListener("click", function () { window.print(); });\n  var themeBeforePrint = null;\n '
+    ' window.addEventListener("beforeprint", function () {\n    themeBeforePrint = document.documentElemen'
+    't.getAttribute("data-theme");\n    document.documentElement.removeAttribute("data-theme");\n  });\n  wi'
+    'ndow.addEventListener("afterprint", function () {\n    if (themeBeforePrint) { document.documentEleme'
+    'nt.setAttribute("data-theme", themeBeforePrint); }\n    themeBeforePrint = null;\n  });\n\n  function cl'
+    'oseMenus(except) {\n    [].forEach.call(document.querySelectorAll("details.menu[open]"), function (d)'
+    ' { if (d !== except) { d.removeAttribute("open"); } });\n  }\n  document.addEventListener("click", fun'
+    'ction (ev) {\n    var inside = ev.target.closest ? ev.target.closest("details.menu") : null;\n    clos'
+    'eMenus(inside);\n    if (inside && ev.target.closest("a, button") && !ev.target.closest("summary")) {'
+    ' inside.removeAttribute("open"); }\n  });\n  document.addEventListener("keydown", function (ev) {\n    '
+    'if (ev.key !== "Escape") { return; }\n    var open = document.querySelector("details.menu[open]");\n  '
+    '  if (open) { open.removeAttribute("open"); open.querySelector("summary").focus(); }\n  });\n\n  functi'
+    'on downloadBlob(filename, content, mime) {\n    var blob = new Blob([content], { type: mime });\n    v'
+    'ar url = URL.createObjectURL(blob);\n    var a = el("a", { href: url, download: filename });\n    docu'
+    'ment.body.appendChild(a);\n    a.click();\n    document.body.removeChild(a);\n    URL.revokeObjectURL(u'
+    'rl);\n  }\n  function csvEscape(v) {\n    if (v === null || v === undefined) { return ""; }\n    var s ='
+    ' typeof v === "object" ? JSON.stringify(v) : String(v);\n    if (/^[=+\\-@\\t\\r\\n]/.test(s.trimLeft()))'
+    ' { s = "\'" + s; }\n    return \'"\' + s.replace(/"/g, \'""\') + \'"\';\n  }\n  var CHECK_COLS = ["check_id", '
+    '"rule_id", "title", "status", "level", "area", "pillar", "severity", "workload_name", "reason", "rec'
+    'ommendation", "learn_url"];\n  function checksCsv(list) {\n    var lines = [CHECK_COLS.join(",")];\n   '
+    ' list.forEach(function (r) { lines.push(CHECK_COLS.map(function (c) { return csvEscape(r[c]); }).joi'
+    'n(",")); });\n    return "\\uFEFF" + lines.join("\\r\\n");\n  }\n  document.getElementById("export-json-bt'
+    'n").addEventListener("click", function () {\n    downloadBlob("databricks-dependency-snapshot.json", '
+    'JSON.stringify(rootData, null, 2), "application/json;charset=utf-8");\n  });\n  document.getElementByI'
+    'd("export-deps-csv-btn").addEventListener("click", function () {\n    if (!currentSnap) { return; }\n '
+    '   var cols = ["record_type", "classification", "layer", "id", "kind", "label", "from", "to", "relat'
+    'ion", "join_fields", "source_ids"];\n    var lines = [cols.join(",")];\n    var dep = currentSnap.depe'
+    'ndencies;\n    [].concat(dep.nodes || [], dep.edges || [], dep.unknowns || []).forEach(function (r) {'
+    '\n      lines.push(cols.map(function (c) { return csvEscape(r[c]); }).join(","));\n    });\n    downloa'
+    'dBlob("databricks-dependencies.csv", "\\uFEFF" + lines.join("\\r\\n"), "text/csv;charset=utf-8");\n  });'
+    '\n  document.getElementById("export-findings-csv-btn").addEventListener("click", function () {\n    if'
+    ' (!currentSnap) { return; }\n    downloadBlob("databricks-findings.csv", checksCsv(currentSnap.checks'
+    ' || []), "text/csv;charset=utf-8");\n  });\n\n  var tabObs = document.getElementById("tab-dep-observed"'
+    ');\n  var tabRef = document.getElementById("tab-dep-reference");\n  var panelObs = document.getElement'
+    'ById("panel-dep-observed");\n  var panelRef = document.getElementById("panel-dep-reference");\n  funct'
+    'ion selectTab(ref) {\n    tabObs.setAttribute("aria-selected", ref ? "false" : "true");\n    tabRef.se'
+    'tAttribute("aria-selected", ref ? "true" : "false");\n    tabObs.setAttribute("tabindex", ref ? "-1" '
+    ': "0");\n    tabRef.setAttribute("tabindex", ref ? "0" : "-1");\n    panelObs.hidden = ref;\n    panelR'
+    'ef.hidden = !ref;\n  }\n  tabObs.addEventListener("click", function () { selectTab(false); });\n  tabRe'
+    'f.addEventListener("click", function () { selectTab(true); });\n  [tabObs, tabRef].forEach(function ('
+    't) {\n    t.addEventListener("keydown", function (ev) {\n      if (ev.key === "ArrowRight" || ev.key ='
+    '== "ArrowLeft") {\n        var ref = t === tabObs;\n        selectTab(ref);\n        (ref ? tabRef : ta'
+    'bObs).focus();\n        ev.preventDefault();\n      }\n    });\n  });\n\n  function fitText(s, max) { s = '
+    'String(s || ""); return s.length > max ? s.slice(0, Math.max(1, max - 1)) + "…" : s; }\n  function no'
+    'deLines(n) {\n    var label = String(n.label || n.name || n.id), kind = lab(L.kind, n.kind), cut = la'
+    'bel.indexOf(" :: ");\n    if (cut < 0) { cut = label.indexOf(" / "); }\n    if (cut > 0) { return [lab'
+    'el.slice(label.indexOf(" ", cut + 1) + 1), kind + " · " + label.slice(0, cut)]; }\n    return [label,'
+    ' kind + (n.classification === "INFERRED" ? " · INFERRED" : "")];\n  }\n  function renderNeighborhoodSv'
+    'g(nodes, edges) {\n    var box = document.getElementById("dep-graph-box");\n    var caption = document'
+    '.getElementById("dep-graph-caption");\n    clear(box);\n    if (!nodes.length) { box.appendChild(empty'
+    'State("No node matches this filter.")); caption.textContent = ""; return; }\n    var deg = {};\n    ed'
+    'ges.forEach(function (e) { deg[e.from] = (deg[e.from] || 0) + 1; deg[e.to] = (deg[e.to] || 0) + 1; }'
+    ');\n    var subset = nodes.map(function (n, i) {\n      return { n: n, i: i, r: (n.kind === "databrick'
+    's_workspace" ? 1000 : 0) + (n.classification === "INFERRED" ? 500 : 0) + (deg[n.id] || 0) };\n    }).'
+    'sort(function (a, b) { return b.r - a.r || a.i - b.i; }).slice(0, 13).map(function (x) { return x.n;'
+    ' });\n    var order = LAYERS.slice();\n    subset.forEach(function (n) { if (order.indexOf(n.layer) < '
+    '0) { order.push(n.layer); } });\n    var cols = [];\n    order.forEach(function (layer) {\n      var ns'
+    ' = subset.filter(function (n) { return n.layer === layer; });\n      for (var i = 0; i < ns.length; i'
+    ' += 5) { cols.push({ layer: layer, nodes: ns.slice(i, i + 5), head: i === 0 }); }\n    });\n    var W '
+    '= 1200, colW = W / cols.length, bw = Math.min(214, colW - 30), bh = 50, gy = 20, top = 34;\n    var r'
+    'ows = Math.max.apply(null, cols.map(function (c) { return c.nodes.length; }));\n    var H = top + row'
+    's * (bh + gy);\n    var pos = {};\n    cols.forEach(function (c, ci) {\n      var off = (rows - c.nodes'
+    '.length) * (bh + gy) / 2;\n      c.nodes.forEach(function (n, ri) { pos[n.id] = { x: colW * ci + colW'
+    ' / 2, y: top + off + ri * (bh + gy) + bh / 2, c: ci }; });\n    });\n    var s = svg("svg", { viewBox:'
+    ' "0 0 " + W + " " + H, role: "img", "aria-label": "Dependency graph: " + subset.length + " of " + no'
+    'des.length + " filtered nodes, grouped by layer." });\n    var defs = svg("defs");\n    ["obs", "inf"]'
+    '.forEach(function (k) {\n      var m = svg("marker", { id: "dep-arrow-" + k, viewBox: "0 0 10 10", re'
+    'fX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto" });\n      m.appendChild(svg("path", '
+    '{ d: "M0 0L10 5L0 10z", "class": "arr " + k }));\n      defs.appendChild(m);\n    });\n    s.appendChil'
+    'd(defs);\n    cols.forEach(function (c, ci) {\n      if (c.head) { s.appendChild(svg("text", { x: colW'
+    ' * ci + colW / 2 - bw / 2, y: 16, "class": "g-col" }, fitText(lab(L.layer, c.layer), Math.floor(bw /'
+    ' 7.5)))); }\n    });\n    var drawn = 0;\n    edges.forEach(function (e) {\n      var a = pos[e.from], b'
+    ' = pos[e.to];\n      if (!a || !b || e.from === e.to) { return; }\n      var sx, ex, c1, c2;\n      if '
+    '(a.c < b.c) { sx = a.x + bw / 2; ex = b.x - bw / 2 - 2; c1 = sx + (ex - sx) / 2; c2 = ex - (ex - sx)'
+    ' / 2; }\n      else if (a.c > b.c) { sx = a.x - bw / 2; ex = b.x + bw / 2 + 2; c1 = sx - (sx - ex) / '
+    '2; c2 = ex + (sx - ex) / 2; }\n      else { sx = a.x + bw / 2; ex = b.x + bw / 2 + 2; c1 = sx + 26; c'
+    '2 = ex + 26; }\n      var k = e.classification === "INFERRED" ? "inf" : "obs";\n      s.appendChild(sv'
+    'g("path", { d: "M" + sx + " " + a.y + " C" + c1 + " " + a.y + " " + c2 + " " + b.y + " " + ex + " " '
+    '+ b.y, "class": "edge " + k, "marker-end": "url(#dep-arrow-" + k + ")" }));\n      drawn++;\n    });\n '
+    '   var maxChars = Math.floor((bw - 22) / 6.9);\n    subset.forEach(function (n) {\n      var p = pos[n'
+    '.id], lines = nodeLines(n);\n      var g = svg("g", { "class": "g-node" + (n.classification === "INFE'
+    'RRED" ? " inf" : "") + (n.kind === "databricks_workspace" ? " ws" : "") });\n      g.appendChild(svg('
+    '"title", {}, (n.label || n.id) + " · " + (n.kind || "") + " · " + (n.classification || "")));\n      '
+    'g.appendChild(svg("rect", { x: p.x - bw / 2, y: p.y - bh / 2, width: bw, height: bh, rx: 8 }));\n    '
+    '  g.appendChild(svg("text", { x: p.x - bw / 2 + 11, y: p.y - 3, "class": "g-l1" }, fitText(lines[0],'
+    ' maxChars)));\n      g.appendChild(svg("text", { x: p.x - bw / 2 + 11, y: p.y + 14, "class": "g-l2" }'
+    ', fitText(lines[1], Math.floor((bw - 22) / 6))));\n      s.appendChild(g);\n    });\n    box.appendChil'
+    'd(s);\n    caption.textContent = "Showing " + subset.length + " of " + nodes.length + " filtered node'
+    's and " + drawn + " relationships between them (limited to 13 nodes: the workspace, INFERRED referen'
+    'ces and the most connected nodes). The tables list every node, edge and blind spot.";\n  }\n\n  functio'
+    'n renderReferenceArchitecture() {\n    var box = document.getElementById("ref-arch-box");\n    clear(b'
+    'ox);\n    var s = svg("svg", { viewBox: "0 0 1200 236", role: "img", "aria-label": "Azure Databricks '
+    'Lakehouse reference architecture - proposal NOT deployed" });\n    var flag = svg("g", { "class": "re'
+    'f-flag" });\n    flag.appendChild(svg("rect", { x: 0, y: 4, width: 300, height: 24, rx: 12 }));\n    f'
+    'lag.appendChild(svg("text", { x: 14, y: 20 }, "REFERENCE PROPOSAL · NOT DEPLOYED"));\n    s.appendChi'
+    'ld(flag);\n    var boxes = [\n      ["Network and perimeter (ARM)", "VNet injection + SCC + Private Li'
+    'nk"],\n      ["Identity and secrets", "Entra SP/UAMI + Key Vault scopes"],\n      ["Compute and orches'
+    'tration", "Cluster policies + job/serverless"],\n      ["Unity Catalog & ADLS", "Access connector UAM'
+    'I + lineage"]\n    ];\n    var bw = 262, gap = (1200 - 4 * bw) / 3;\n    boxes.forEach(function (b, i) '
+    '{\n      var x = i * (bw + gap);\n      if (i < boxes.length - 1) { s.appendChild(svg("line", { x1: x '
+    '+ bw, y1: 92, x2: x + bw + gap, y2: 92, "class": "ref-link" })); }\n      var g = svg("g", { "class":'
+    ' "ref-box" });\n      g.appendChild(svg("rect", { x: x + 1, y: 52, width: bw - 2, height: 80, rx: 10 '
+    '}));\n      g.appendChild(svg("text", { x: x + 18, y: 86, "class": "ref-t" }, b[0]));\n      g.appendC'
+    'hild(svg("text", { x: x + 18, y: 108, "class": "ref-s" }, b[1]));\n      s.appendChild(g);\n    });\n  '
+    '  s.appendChild(svg("text", { x: 0, y: 176, "class": "ref-note" }, "REFERENCE PROPOSAL (NOT DEPLOYED'
+    '): cross-tenant integration through an Entra multi-tenant FIC or Lighthouse + Databricks OIDC."));\n '
+    '   s.appendChild(svg("text", { x: 0, y: 204, "class": "ref-s" }, "Recommended components to compare '
+    'with the observed map; none was detected or created in the reviewed workspace."));\n    box.appendChi'
+    'ld(s);\n    renderTable(document.getElementById("ref-arch-table"),\n      ["Reference component", "Mic'
+    'rosoft / Databricks recommended practice", "Trade-off"],\n      [\n        ["VNet injection + secure c'
+    'luster connectivity", "Deploy into your own VNet with enableNoPublicIp=true and delegated host/conta'
+    'iner subnets with an NSG.", "Needs IPAM planning and outbound routes to the control-plane endpoints.'
+    '"],\n        ["Private Link (front-end / back-end / WebAuth)", "Isolate user and data-plane traffic w'
+    'ith approved private endpoints and private DNS zones.", "Needs the Premium SKU and private DNS manag'
+    'ement across hub-spoke networks."],\n        ["Unity Catalog + access connector (UAMI)", "Govern cata'
+    'logs and external locations with storage credentials based on a managed identity.", "Replaces shared'
+    ' keys and legacy DBFS mounts."],\n        ["Jobs on job compute / serverless + service principal", "R'
+    'un production jobs as a service principal (run_as) on ephemeral job compute or serverless.", "Lowers'
+    ' DBU cost compared with all-purpose compute and avoids failures when users leave."],\n        ["Cross'
+    '-tenant integration without secrets", "Use a multi-tenant app with a federated identity credential ('
+    'UAMI) or Azure Lighthouse (ARM) + Databricks OIDC federation.", "Needs consent and assignments from '
+    'administrators in both tenants."]\n      ].map(function (r) { return [{ v: el("b", { text: r[0] }) },'
+    ' r[1], r[2]]; })\n    );\n  }\n\n  function applyDependencyFilters() {\n    if (!currentSnap) { return; }'
+    '\n    var layer = document.getElementById("dep-layer-filter").value;\n    var cls = document.getElemen'
+    'tById("dep-class-filter").value;\n    var q = (document.getElementById("dep-search-filter").value || '
+    '"").toLowerCase().trim();\n    var dep = currentSnap.dependencies || { nodes: [], edges: [], unknowns'
+    ': [], broken_references: [] };\n    function keep(r) {\n      if (layer !== "all" && r.layer !== layer'
+    ') { return false; }\n      if (cls !== "all" && r.classification !== cls) { return false; }\n      if '
+    '(q && JSON.stringify(r).toLowerCase().indexOf(q) === -1) { return false; }\n      return true;\n    }\n'
+    '    var nodes = (dep.nodes || []).filter(keep);\n    var edges = (dep.edges || []).filter(keep);\n    '
+    'var unknowns = (dep.unknowns || []).filter(keep);\n    var byId = {};\n    (dep.nodes || []).forEach(f'
+    'unction (n) { byId[n.id] = n; });\n    function nodeCell(id) {\n      var n = byId[id];\n      return n'
+    ' ? { v: stack(brk(n.label || n.id, ""), lab(L.kind, n.kind)), s: n.label || n.id } : { v: brk(id) };'
+    '\n    }\n    renderNeighborhoodSvg(nodes, edges);\n    document.getElementById("dep-edges-count").textC'
+    'ontent = String(edges.length);\n    renderTable(document.getElementById("dep-edges-table"),\n      ["C'
+    'lassification", "Layer", "Source", "Relationship", "Target", "Join fields", "Sources"],\n      edges.'
+    'map(function (e) {\n        return [\n          { v: clsPill(e.classification), s: e.classification },'
+    '\n          lab(L.layer, e.layer),\n          nodeCell(e.from),\n          { v: brk(e.relation), s: e.r'
+    'elation },\n          nodeCell(e.to),\n          { v: brk((e.join_fields || []).join(", ")) },\n       '
+    '   { v: brk((e.source_ids || []).join(", ")) }\n        ];\n      }), { page: 12, sortable: true }\n   '
+    ' );\n    document.getElementById("dep-nodes-count").textContent = String(nodes.length);\n    renderTab'
+    'le(document.getElementById("dep-nodes-table"),\n      ["Classification", "Layer", "Type", "Name / lab'
+    'el", "Source", { t: "Evidence", s: false, c: "w" }],\n      nodes.map(function (n) {\n        return ['
+    '\n          { v: clsPill(n.classification), s: n.classification },\n          lab(L.layer, n.layer),\n '
+    '         { v: kindLabel(n.kind) },\n          { v: brk(n.label || n.id, ""), s: n.label },\n          '
+    '{ v: mono(n.source_id) },\n          { v: evidenceCell(n.evidence) }\n        ];\n      }), { page: 12,'
+    ' sortable: true }\n    );\n    var broken = dep.broken_references || [];\n    document.getElementById("'
+    'dep-broken-count").textContent = String(broken.length);\n    renderTable(document.getElementById("dep'
+    '-broken-table"),\n      ["Source object", "Broken reference type", "Target ID not found"],\n      brok'
+    'en.map(function (b) { return [b.source_object, b.kind, { v: brk(b.target_id) }]; }),\n      { empty: '
+    '"No broken references between tasks, clusters, pools, policies, pipelines, warehouses and credential'
+    's." }\n    );\n    document.getElementById("dep-unknowns-count").textContent = String(unknowns.length)'
+    ';\n    renderTable(document.getElementById("dep-unknowns-table"),\n      ["Layer", "Code", "Blind spot'
+    ' description", "Sources"],\n      unknowns.map(function (u) {\n        return [lab(L.layer, u.layer), '
+    '{ v: brk(u.code) }, u.message, { v: brk((u.source_ids || []).join(", ")) }];\n      })\n    );\n  }\n\n  '
+    'function observedValues(evidence) {\n    var merged = {};\n    (Array.isArray(evidence) ? evidence : ['
+    ']).forEach(function (ev) {\n      if (ev && ev.value && typeof ev.value === "object" && !Array.isArra'
+    'y(ev.value)) {\n        Object.keys(ev.value).forEach(function (k) { merged[k] = ev.value[k]; });\n   '
+    '   }\n    });\n    return kvChips(merged, 3);\n  }\n  function filteredChecks() {\n    var area = documen'
+    't.getElementById("find-area-filter").value;\n    var level = document.getElementById("find-level-filt'
+    'er").value;\n    var sev = document.getElementById("find-sev-filter").value;\n    var st = document.ge'
+    'tElementById("find-status-filter").value;\n    var q = (document.getElementById("find-search-filter")'
+    '.value || "").toLowerCase().trim();\n    return (currentSnap.checks || []).filter(function (c) {\n    '
+    '  if (area !== "all" && c.area !== area) { return false; }\n      if (level !== "all" && c.level !== '
+    'level) { return false; }\n      if (sev !== "all" && c.severity !== sev) { return false; }\n      if ('
+    'st !== "all" && c.status !== st) { return false; }\n      if (q && JSON.stringify(c).toLowerCase().in'
+    'dexOf(q) === -1) { return false; }\n      return true;\n    });\n  }\n  function applyFindingFilters() {'
+    '\n    if (!currentSnap) { return; }\n    var all = currentSnap.checks || [];\n    var filtered = filter'
+    'edChecks().slice().sort(function (a, b) {\n      return (STATUS_ORDER[a.status] - STATUS_ORDER[b.stat'
+    'us]) || (SEVS.indexOf(a.severity) - SEVS.indexOf(b.severity)) || String(a.rule_id).localeCompare(Str'
+    'ing(b.rule_id), "en", { numeric: true });\n    });\n    var failed = filtered.filter(function (c) { re'
+    'turn c.status === "failed"; }).length;\n    document.getElementById("findings-count-label").textConte'
+    'nt = "Showing " + filtered.length + " of " + all.length + " checks · " + failed + plural(failed, " f'
+    'ailed", " failed") + ".";\n    renderTable(document.getElementById("findings-table"),\n      [{ t: "St'
+    'atus" }, { t: "Severity" }, { t: "Rule" }, { t: "Area / pillar" }, { t: "Object" }, { t: "Finding an'
+    'd evidence", c: "w" }, { t: "Recommendation", c: "w" }],\n      filtered.map(function (c) {\n        v'
+    'ar link = safeLearnUrl(c.learn_url);\n        var detail = el("div", { className: "fd" });\n        de'
+    'tail.appendChild(el("b", { text: c.title }));\n        detail.appendChild(el("p", { text: c.reason })'
+    ');\n        var chips = observedValues(c.evidence);\n        if (chips) { detail.appendChild(chips); }'
+    '\n        var rec = el("div", { className: "fr" });\n        rec.appendChild(el("p", { text: c.recomme'
+    'ndation }));\n        if (link) { rec.appendChild(extLink(link, "Official documentation")); }\n       '
+    ' return [\n          { v: statusTag(c.status), s: STATUS_ORDER[c.status] },\n          { v: sevPill(c.'
+    'severity, c.severity_label), s: SEVS.indexOf(c.severity) },\n          { v: stack(c.rule_id, mono(c.r'
+    'eference_id)), s: c.rule_id },\n          { v: stack(lab(L.area, c.area), lab(L.pillar, c.pillar)), s'
+    ': lab(L.area, c.area) },\n          { v: stack(brk(c.workload_name || c.resource_name || c.workspace_'
+    'name, ""), lab(L.level, c.level)), s: c.workload_name || c.resource_name || "" },\n          { v: det'
+    'ail, s: c.title },\n          { v: rec, s: c.recommendation }\n        ];\n      }), { page: 15, sortab'
+    'le: true }\n    );\n  }\n\n  ["dep-layer-filter", "dep-class-filter", "dep-search-filter"].forEach(funct'
+    'ion (id) {\n    document.getElementById(id).addEventListener("input", applyDependencyFilters);\n    do'
+    'cument.getElementById(id).addEventListener("change", applyDependencyFilters);\n  });\n  ["find-area-fi'
+    'lter", "find-level-filter", "find-sev-filter", "find-status-filter", "find-search-filter"].forEach(f'
+    'unction (id) {\n    document.getElementById(id).addEventListener("input", applyFindingFilters);\n    d'
+    'ocument.getElementById(id).addEventListener("change", applyFindingFilters);\n  });\n  document.getElem'
+    'entById("dep-clear").addEventListener("click", function () {\n    document.getElementById("dep-layer-'
+    'filter").value = "all";\n    document.getElementById("dep-class-filter").value = "all";\n    document.'
+    'getElementById("dep-search-filter").value = "";\n    applyDependencyFilters();\n  });\n  document.getEl'
+    'ementById("find-clear").addEventListener("click", function () {\n    ["find-area-filter", "find-level'
+    '-filter", "find-sev-filter", "find-status-filter"].forEach(function (id) { document.getElementById(i'
+    'd).value = "all"; });\n    document.getElementById("find-search-filter").value = "";\n    applyFinding'
+    'Filters();\n  });\n  document.getElementById("find-export-btn").addEventListener("click", function () '
+    '{\n    if (!currentSnap) { return; }\n    downloadBlob("databricks-findings-filtered.csv", checksCsv(f'
+    'ilteredChecks()), "text/csv;charset=utf-8");\n  });\n\n  function barRow(label, sub, width, value, valu'
+    'eSub, color, na) {\n    var row = el("div", { className: "brow" + (na ? " na" : "") });\n    var bl = '
+    'el("div", { className: "bl" }, [label]);\n    if (sub) { bl.appendChild(el("small", { text: sub })); '
+    '}\n    row.appendChild(bl);\n    var bar = el("i");\n    bar.style.width = Math.max(0, Math.min(100, wi'
+    'dth)) + "%";\n    if (color) { bar.style.background = color; }\n    if (na || !width) { bar.style.minW'
+    'idth = "0"; }\n    row.appendChild(el("div", { className: "bt" }, [bar]));\n    var bv = el("div", { c'
+    'lassName: "bv", text: value });\n    if (valueSub) { bv.appendChild(el("small", { text: valueSub }));'
+    ' }\n    row.appendChild(bv);\n    return row;\n  }\n  function scoreBars(id, map, labels) {\n    var hold'
+    'er = document.getElementById(id);\n    clear(holder);\n    Object.keys(map || {}).forEach(function (k)'
+    ' {\n      var it = map[k] || {}, na = !isNum(it.score);\n      holder.appendChild(barRow(lab(labels, k'
+    '), null, na ? 0 : it.score, na ? "Not evaluated" : pct(it.score),\n        "coverage " + (isNum(it.co'
+    'verage_percent) ? pct(it.coverage_percent) : "0%"), null, na));\n    });\n  }\n  function kpi(value, un'
+    'it, label, sub) {\n    var v = el("div", { className: "v" }, [String(value)]);\n    if (unit) { v.appe'
+    'ndChild(el("small", { text: unit })); }\n    return el("div", { className: "kpi" }, [v, el("div", { c'
+    'lassName: "l", text: label }), sub ? el("div", { className: "s", text: sub }) : null]);\n  }\n  functi'
+    'on pctParts(v) { return isNum(v) ? [NF.format(v), "%"] : ["—", ""]; }\n  function sourcePlane(id) {\n '
+    '   id = String(id || "");\n    if (id.indexOf("arm_") === 0 || id === "azure_cost") { return "Plane 1'
+    ' · ARM"; }\n    if (id.indexOf("dbx_") === 0) { return "Plane 2 · Databricks REST"; }\n    if (id.inde'
+    'xOf("uc_") === 0) { return "Plane 2 · Unity Catalog"; }\n    return "Internal";\n  }\n  var SRC_COLOR ='
+    ' { complete: "var(--ok-bar)", partial: "var(--med-bar)", denied: "var(--crit-bar)", error: "var(--cr'
+    'it-bar)", not_configured: "var(--info-bar)", not_applicable: "var(--line2)" };\n\n  function renderHer'
+    'o(snap, g, counts) {\n    var ws = snap.workspace || {}, sc = (snap.dependencies && snap.dependencies'
+    '.summary_counts) || {};\n    var fails = (snap.findings || []).length, ev = g.evaluated || 0;\n    var'
+    ' sevText = SEVS.filter(function (s) { return counts[s]; }).map(function (s) { return counts[s] + " "'
+    ' + plural(counts[s], SEV_WORD[s][0], SEV_WORD[s][1]); }).join(" · ");\n    var depParts = [" The depe'
+    'ndency map holds ", [num(sc.nodes_total || 0)], " nodes and ", [num(sc.edges_total || 0)], " relatio'
+    'nships, with ", [num(sc.edges_inferred || 0)], " INFERRED references and ", [num(sc.unknowns_total |'
+    '| 0)], " UNKNOWN blind spots."];\n    var ch = (snap.databricks_costs && snap.databricks_costs.headli'
+    'ne) || {};\n    if (isNum(ch.review_total)) {\n      costCurrency = snap.databricks_costs.currency || '
+    '"";\n      depParts = depParts.concat([" Databricks cost ", [money(ch.review_total)], " in " + monthN'
+    'ame(ch.review_month)].concat(\n        isNum(ch.estimated_monthly_savings) ? ["; estimated savings ",'
+    ' ["≈ " + money(ch.estimated_monthly_savings)], " a month (cost section)."] : ["."]));\n    }\n    rich'
+    '(document.getElementById("cover-lead"), ev ? [[num(fails)], plural(fails, " failed", " failed"), sev'
+    'Text ? " (" + sevText + ")" : "", " of ", [num(ev)], " evaluated checks; local index ", [pct(g.score'
+    ')], " with ", [pct(g.coverage_percent)], " coverage."].concat(depParts)\n      : ["No check could be '
+    'evaluated with the available sources; review the coverage in section 8."].concat(depParts));\n    var'
+    ' meta = document.getElementById("cover-badges");\n    clear(meta);\n    function chip(parts, on, title'
+    ') { meta.appendChild(rich(el("span", { className: on ? "on" : null, title: title || null }), parts))'
+    '; }\n    chip(["Generated ", [utc(snap.reference_utc)]]);\n    chip(["Workspace ", [ws.name || "—"]]);'
+    '\n    chip([[ws.cross_tenant ? "Cross-tenant" : "Same tenant"], " · " + (ws.auth_mode || "—")], false'
+    ', ws.cross_tenant ? (ws.sre_tenant_id || "—") + " → " + (ws.target_tenant_id || "—") : ws.target_ten'
+    'ant_id);\n    chip(["Environment ", [snap.environment || "—"]]);\n    chip([snap.provenance === "SIMUL'
+    'ATED" ? "SIMULATED DATA" : (snap.provenance || "LIVE") + " DATA"], true);\n\n    var tone = "ok", titl'
+    'e = counts.low ? "No relevant deviations" : "No observed deviations";\n    if (!ev) { tone = "info"; '
+    'title = "Not evaluated"; }\n    else if (counts.critical) { tone = "crit"; title = "Action required";'
+    ' }\n    else if (counts.high || counts.medium) { tone = "warn"; title = "Needs attention"; }\n    var '
+    'lowCov = isNum(g.coverage_percent) && g.coverage_percent < 50;\n    if (lowCov && tone === "ok") { to'
+    'ne = "warn"; title = "Insufficient coverage"; }\n    var verdict = document.getElementById("verdict")'
+    ';\n    verdict.className = "signal " + tone;\n    clear(verdict);\n    verdict.appendChild(el("div", { '
+    'className: "k", text: "Verdict" }));\n    verdict.appendChild(el("b", { text: title }));\n    verdict.'
+    'appendChild(el("p", { text: (ev ? (sevText || "No findings") + " · coverage " + pct(g.coverage_perce'
+    'nt) : "No checks evaluated") + (lowCov ? " · only " + ev + " of " + (ev + (g.not_evaluated || 0)) + '
+    '" evaluated" : "") }));\n\n    var dist = document.getElementById("severity-dist");\n    clear(dist);\n '
+    '   dist.hidden = !fails;\n    if (fails) {\n      dist.appendChild(rich(el("div", { className: "dist-h'
+    'ead" }), ["Findings by severity", ""]));\n      dist.firstChild.appendChild(rich(el("span"), [[num(fa'
+    'ils)], " of " + num(g.total || 0) + " checks failed"]));\n      var track = el("div", { className: "t'
+    'rack", role: "img", "aria-label": sevText });\n      var legend = el("div", { className: "legend" });'
+    '\n      SEVS.forEach(function (s) {\n        if (!counts[s]) { return; }\n        var seg = el("i", { t'
+    'itle: L.sev[s] + ": " + counts[s] });\n        seg.style.width = (100 * counts[s] / fails) + "%";\n   '
+    '     seg.style.background = SEV_BAR[s];\n        track.appendChild(seg);\n        var key = el("i");\n '
+    '       key.style.background = SEV_BAR[s];\n        legend.appendChild(el("span", null, [key, L.sev[s]'
+    ' + " ", el("b", { text: String(counts[s]) })]));\n      });\n      dist.appendChild(track);\n      dist'
+    '.appendChild(legend);\n    }\n\n    var client = snap.client || { name: "Customer", logo_data_uri: "", '
+    'logo_alt: "Authorized customer logo" };\n    var plaque = document.getElementById("brand-plaque");\n  '
+    '  clear(plaque);\n    var hasLogo = client.logo_data_uri && /^data:image\\/(png|jpeg);base64,[A-Za-z0-'
+    '9+/=]+$/.test(client.logo_data_uri);\n    if (hasLogo) { plaque.appendChild(el("img", { src: client.l'
+    'ogo_data_uri, alt: client.logo_alt || client.name || "Customer" })); }\n    else { plaque.appendChild'
+    '(el("span", { className: "brand-placeholder", text: client.name || "Customer" })); }\n    var nameLab'
+    'el = document.getElementById("client-name-label");\n    nameLabel.textContent = client.name || "Custo'
+    'mer";\n    nameLabel.hidden = !hasLogo;\n  }\n\n  function renderKpis(snap, g, counts) {\n    var sc = (s'
+    'nap.dependencies && snap.dependencies.summary_counts) || {}, fin = snap.finops || {};\n    var fails '
+    '= (snap.findings || []).length, ev = g.evaluated || 0;\n    var holder = document.getElementById("kpi'
+    's");\n    clear(holder);\n    var sevText = SEVS.filter(function (s) { return counts[s]; }).map(functi'
+    'on (s) { return counts[s] + " " + plural(counts[s], SEV_WORD[s][0], SEV_WORD[s][1]); }).join(" · ");'
+    '\n    var sp = pctParts(g.score), cp = pctParts(g.coverage_percent);\n    var hasCost = isNum(fin.actu'
+    'al_cost);\n    var win = fin.window ? day(fin.window.start).slice(5) + " → " + day(fin.window.end).sl'
+    'ice(5) : null;\n    var cm = snap.databricks_costs || {}, ch = cm.headline || {};\n    costCurrency = '
+    'cm.currency || "";\n    var costKpi = isNum(ch.review_total)\n      ? kpi(NF0.format(ch.review_total),'
+    ' cm.currency || "", "Databricks cost", monthName(ch.review_month).split(" ")[0] + (isNum(ch.dbu_shar'
+    'e) ? " · " + NF0.format(ch.dbu_share) + "% DBU" : "") + (isNum(ch.estimated_monthly_savings) ? " · s'
+    'avings ≈ " + money(ch.estimated_monthly_savings) + "/month" : " · " + signedPct(ch.change_pct) + " v'
+    's previous month"))\n      : kpi(hasCost ? NF2.format(fin.actual_cost) : "—", hasCost ? (fin.currency'
+    ' || "") : "", "Observed cost", hasCost ? "ActualCost · " + (win || "period to date") : "Not evaluate'
+    'd");\n    var list = FOCUS === "costs" && isNum(ch.review_total) ? [\n      kpi(NF0.format(ch.review_t'
+    'otal), cm.currency || "", "Cost in " + monthName(ch.review_month).split(" ")[0], signedPct(ch.change'
+    '_pct) + " vs " + monthName(ch.previous_month).split(" ")[0]),\n      kpi(NF0.format(ch.mtd_total), cm'
+    '.currency || "", "Current month", "through " + ch.mtd_days + " " + monthName(ch.current_month).split'
+    '(" ")[0]),\n      kpi(NF0.format(ch.dbu_share || 0), "%", "DBU", NF0.format(100 - (ch.dbu_share || 0)'
+    ') + "% infrastructure (" + money(ch.infra_total) + ")"),\n      kpi(isNum(ch.unattributed_share) ? NF'
+    '1.format(ch.unattributed_share) : "—", isNum(ch.unattributed_share) ? "%" : "", "Without a compute t'
+    'ag", isNum(ch.unattributed_total) ? money(ch.unattributed_total) + " unattributed" : "Not evaluated"'
+    '),\n      kpi(isNum(ch.estimated_monthly_savings) ? NF0.format(ch.estimated_monthly_savings) : "—", i'
+    'sNum(ch.estimated_monthly_savings) ? cm.currency || "" : "", "Estimated monthly savings", ch.savings'
+    '_signals + " of " + ch.signals + " signals, nothing counted twice"),\n      kpi(num(fails), "", "Conf'
+    'iguration findings", sevText || "No observed deviations")\n    ] : [\n      kpi(num(fails), "", "Findi'
+    'ngs", sevText || "No observed deviations"),\n      kpi(sp[0], sp[1], "Local index", ev ? "Based on " '
+    '+ ev + " evaluated" : "No evaluated checks"),\n      kpi(cp[0], cp[1], "Evaluated coverage", ev + " o'
+    'f " + (ev + (g.not_evaluated || 0)) + " applicable"),\n      kpi(num(sc.edges_total || 0), "", "Relat'
+    'ionships", num(sc.edges_observed || 0) + " OBSERVED · " + num(sc.edges_inferred || 0) + " INFERRED")'
+    ',\n      kpi(num(sc.unknowns_total || 0), "", "UNKNOWN blind spots", num(sc.broken_references_total |'
+    '| 0) + plural(sc.broken_references_total || 0, " broken reference", " broken references")),\n      co'
+    'stKpi\n    ];\n    list.forEach(function (k) { holder.appendChild(k); });\n\n    var notices = document.'
+    'getElementById("notices");\n    clear(notices);\n    if (snap.provenance === "SIMULATED") {\n      noti'
+    'ces.appendChild(el("div", { className: "sim", role: "note" }, [icon("alert"), el("span", { text: "Si'
+    "mulated data: this report comes from a synthetic test dataset; the figures don't describe a real wor"
+    'kspace." })]));\n    }\n    var gaps = (snap.sources || []).filter(function (s) { return s.status !== '
+    '"complete" && s.status !== "not_applicable"; });\n    if (gaps.length) {\n      var listed = gaps.slic'
+    'e(0, 6).map(function (s) { return s.id + " (" + lab(L.src, s.status).toLowerCase() + ")"; }).join(",'
+    ' ") + (gaps.length > 6 ? " and " + (gaps.length - 6) + " more" : "");\n      notices.appendChild(el("'
+    'div", { className: "note", role: "note" }, [icon("info"), el("span", { text: gaps.length + plural(ga'
+    'ps.length, " source without complete data: ", " sources without complete data: ") + listed + ". Chec'
+    'ks that depend on them show as Not evaluated (section 8)." })]));\n    }\n  }\n\n  function renderFacts('
+    'snap) {\n    var ws = snap.workspace || {};\n    var facts = document.getElementById("cover-facts");\n '
+    '   clear(facts);\n    function fact(label, main, sub) {\n      var dd = el("dd");\n      if (main insta'
+    'nceof Node) { dd.appendChild(main); } else { dd.textContent = main === null || main === undefined ||'
+    ' main === "" ? "—" : String(main); }\n      if (sub instanceof Node) { var w = el("small"); w.appendC'
+    'hild(sub); dd.appendChild(w); } else if (sub) { dd.appendChild(el("small", { text: sub })); }\n      '
+    'facts.appendChild(el("div", null, [el("dt", { text: label }), dd]));\n    }\n    fact("Workspace", ws.'
+    'name, brk(ws.workspace_url || "—"));\n    fact("ARM resource", armCell(ws.id, ws.name));\n    fact("Ma'
+    'naged resource group", brk(ws.managed_resource_group || "—", ""));\n    fact("Region · SKU", (ws.regi'
+    'on || "—") + " · " + (ws.sku_name || "—"), ws.sku_tier ? "Tier " + ws.sku_tier : null);\n    fact("Ne'
+    'twork", "Public access: " + access(ws.public_network_access), "No public IP (NPIP): " + yesNo(ws.ena'
+    'ble_no_public_ip) + (ws.custom_virtual_network_id ? " · VNet injection" : ""));\n    fact("Authentica'
+    'tion", ws.auth_mode || "—", ws.cross_tenant ? "Cross-tenant" : "Same tenant");\n    var tenants = el('
+    '"span");\n    if (ws.cross_tenant) { tenants.appendChild(mono(ws.sre_tenant_id)); tenants.appendChild'
+    '(el("br")); tenants.appendChild(mono("→ " + (ws.target_tenant_id || "—"))); }\n    else { tenants.app'
+    'endChild(mono(ws.target_tenant_id)); }\n    fact(ws.cross_tenant ? "SRE tenant → target tenant" : "Te'
+    'nant", tenants);\n    fact("Default Unity Catalog catalog", ws.default_catalog_name || "—", ws.defaul'
+    't_catalog_type || null);\n  }\n\n  function renderExecutive(snap, g) {\n    var msgList = document.getEl'
+    'ementById("executive-messages");\n    clear(msgList);\n    (snap.executive_messages || []).forEach(fun'
+    'ction (m) { msgList.appendChild(el("li", { text: m })); });\n    var total = Math.max(1, g.total || 0'
+    ');\n    var status = document.getElementById("check-status");\n    clear(status);\n    [\n      ["passed'
+    '", "Observed configuration meets the local rule.", "var(--ok-bar)"],\n      ["failed", "Observed devi'
+    'ation or broken reference.", "var(--crit-bar)"],\n      ["not_evaluated", "Source not available, requ'
+    'irement not confirmed or scope that needs compute.", "var(--info-bar)"],\n      ["not_applicable", "E'
+    'xcluded from the denominator by object type or a false requirement.", "var(--line2)"]\n    ].forEach('
+    'function (r) {\n      var n = g[r[0]] || 0;\n      status.appendChild(barRow(el("span", { className: "'
+    'st st-" + r[0], text: L.status[r[0]] }), r[1], 100 * n / total, num(n), NF.format(100 * n / total) +'
+    ' "%", r[2], !n));\n    });\n    scoreBars("area-scores", snap.scores && snap.scores.areas, L.area);\n  '
+    '  scoreBars("pillar-scores", snap.scores && snap.scores.pillars, L.pillar);\n    var list = document.'
+    'getElementById("priority-findings");\n    clear(list);\n    var priorities = (snap.findings || []).fil'
+    'ter(function (f) { return f.severity === "critical" || f.severity === "high"; })\n      .sort(functio'
+    'n (a, b) { return SEVS.indexOf(a.severity) - SEVS.indexOf(b.severity); });\n    if (!priorities.lengt'
+    'h) { list.appendChild(el("li", null, [emptyState("No critical or high-severity findings in the evalu'
+    'ated checks.")])); }\n    priorities.forEach(function (f) {\n      list.appendChild(el("li", null, [\n '
+    '       sevPill(f.severity, f.severity_label),\n        el("div", { className: "pt", text: f.title }),'
+    '\n        el("div", { className: "pm", text: f.rule_id + " · " + lab(L.level, f.level) + (f.workload_'
+    'name ? ": " + f.workload_name : "") + " — " + (f.business_impact || f.reason || "") })\n      ]));\n  '
+    '  });\n  }\n\n  function renderInventory(snap) {\n    var inv = snap.inventory || {};\n    function count'
+    '(id, n, word) { document.getElementById(id).textContent = n + " " + word; }\n    var computeRows = []'
+    '.concat(inv.clusters || [], inv.instance_pools || [], inv.cluster_policies || [], inv.global_init_sc'
+    'ripts || []);\n    count("inv-compute-count", computeRows.length, plural(computeRows.length, "object"'
+    ', "objects"));\n    renderTable(document.getElementById("inv-compute-table"),\n      ["Type", "Name / '
+    'ID", "State / runtime", "Access / auto-termination", "Policy / pool"],\n      computeRows.map(functio'
+    'n (r) {\n        return [\n          { v: kindLabel(r.kind) },\n          { v: stack(r.name || "—", mon'
+    'o(r.id)), s: r.name },\n          { v: stack(r.state || "—", r.spark_version ? mono(r.spark_version) '
+    ': null), s: r.state },\n          (r.data_security_mode || "—") + (r.autotermination_minutes !== unde'
+    'fined && r.autotermination_minutes !== null ? " · " + r.autotermination_minutes + " min" : ""),\n    '
+    '      { v: stack(r.policy_id ? mono(r.policy_id) : "—", r.instance_pool_id ? mono("Pool: " + r.insta'
+    'nce_pool_id) : null) }\n        ];\n      }), { sortable: true }\n    );\n    var orchRows = [];\n    (in'
+    'v.jobs || []).forEach(function (j) {\n      var tasks = el("div", { className: "chips" });\n      (j.t'
+    'asks || []).forEach(function (t) { tasks.appendChild(el("span", { text: t.task_key })); });\n      or'
+    'chRows.push([{ v: kindLabel("Job") }, { v: stack(j.name, mono(j.id)), s: j.name }, j.scheduled ? "Sc'
+    'heduled" : "Not scheduled",\n        { v: stack(j.run_as_service_principal ? "Service principal" : "U'
+    'ser (no SP)", j.run_as_service_principal ? mono(j.run_as_service_principal) : null) },\n        { v: '
+    '(j.tasks || []).length ? tasks : "—" }]);\n    });\n    (inv.pipelines || []).forEach(function (p) {\n '
+    '     orchRows.push([{ v: kindLabel("dlt_pipeline") }, { v: stack(p.name, mono(p.id)), s: p.name }, p'
+    '.state || "—", "Serverless: " + yesNo(p.serverless),\n        "Catalog " + (p.catalog || "hive_metast'
+    'ore") + " · target " + (p.target || "—")]);\n    });\n    (inv.sql_warehouses || []).forEach(function '
+    '(w) {\n      orchRows.push([{ v: kindLabel("sql_warehouse") }, { v: stack(w.name, mono(w.id)), s: w.n'
+    'ame }, (w.state || "—") + " · " + (w.cluster_size || "—"),\n        "Serverless: " + yesNo(w.enable_s'
+    'erverless_compute) + " · auto-stop " + (isNum(w.auto_stop_mins) ? w.auto_stop_mins + " min" : "—"), '
+    'w.warehouse_type || "—"]);\n    });\n    count("inv-orchestration-count", orchRows.length, plural(orch'
+    'Rows.length, "object", "objects"));\n    renderTable(document.getElementById("inv-orchestration-table'
+    '"),\n      ["Type", "Name / ID", "State / schedule", "Identity / mode", "Tasks / target"], orchRows, '
+    '{ sortable: true });\n    var ucRows = [];\n    if (inv.uc_metastore) {\n      ucRows.push([L.kind.uc_m'
+    'etastore, { v: brk(inv.uc_metastore.name, "") }, { v: mono(inv.uc_metastore.id) }, { v: brk(inv.uc_m'
+    'etastore.storage_root || "—") }, "Region " + (inv.uc_metastore.region || "—")]);\n    }\n    (inv.uc_c'
+    'atalogs || []).forEach(function (c) { ucRows.push([L.kind.uc_catalog, { v: brk(c.name, "") }, c.cata'
+    'log_type || "—", { v: brk(c.storage_root || "—") }, "Isolation " + (c.isolation_mode || "—")]); });\n'
+    '    (inv.uc_schemas || []).forEach(function (s) { ucRows.push([L.kind.uc_schema, { v: brk(s.full_nam'
+    'e, "") }, s.catalog_name, { v: brk(s.storage_root || "—") }, "—"]); });\n    (inv.uc_storage_credenti'
+    'als || []).forEach(function (cr) { ucRows.push([L.kind.uc_storage_credential, { v: brk(cr.name, "") '
+    '}, cr.uses_managed_identity ? "Managed identity" : "Service principal", { v: cr.access_connector_id '
+    '? armCell(cr.access_connector_id) : "—" }, "Read-only: " + yesNo(cr.read_only)]); });\n    (inv.uc_ex'
+    'ternal_locations || []).forEach(function (loc) { ucRows.push([L.kind.uc_external_location, { v: brk('
+    'loc.name, "") }, "Credential " + (loc.credential_name || "—"), { v: brk(loc.url || "—") }, "Read-onl'
+    'y: " + yesNo(loc.read_only)]); });\n    (inv.uc_connections || []).forEach(function (cn) { ucRows.pus'
+    'h([L.kind.uc_connection, { v: brk(cn.name, "") }, cn.connection_type || "—", { v: brk(cn.host || "—"'
+    ') }, "Credential " + (cn.credential_type || "—")]); });\n    (inv.secret_scopes || []).forEach(functi'
+    'on (sc) { ucRows.push([L.kind.secret_scope, { v: brk(sc.name, "") }, sc.backend_type || "—", { v: sc'
+    '.keyvault_resource_id ? armCell(sc.keyvault_resource_id) : brk(sc.keyvault_dns_name || "—") }, "Valu'
+    'es never read"]); });\n    count("inv-uc-count", ucRows.length, plural(ucRows.length, "object", "obje'
+    'cts"));\n    renderTable(document.getElementById("inv-uc-table"), ["Object", "Name", "Type / credenti'
+    'al", { t: "URI / resource", c: "w" }, "Detail"], ucRows, { sortable: true });\n    var resRows = [];\n'
+    '    (inv.related_resources || []).forEach(function (r) {\n      var a = r.association || {};\n      re'
+    'sRows.push([{ v: kindLabel(r.resource_kind) }, { v: armCell(r.id, r.name), s: r.name },\n        { v:'
+    ' stack(a.type || "—", brk([a.source_id, a.field].filter(Boolean).join(" · "))) }, { v: evidenceCell('
+    'r.configuration) }]);\n    });\n    (inv.outbound_endpoints || []).forEach(function (o) {\n      var ch'
+    'ips = el("div", { className: "chips" });\n      (o.endpoints || []).forEach(function (ep) {\n        v'
+    'ar ports = (ep.details || []).map(function (d) { return d.port; }).filter(Boolean).join(", ");\n     '
+    '   chips.appendChild(el("span", { text: (ep.domain_name || ep.domainName || "—") + (ports ? ":" + po'
+    'rts : "") }));\n      });\n      resRows.push([{ v: kindLabel("OutboundDependency") }, { v: stack(o.ca'
+    'tegory || "—", null), s: o.category }, { v: stack("outboundNetworkDependenciesEndpoints", null) }, {'
+    ' v: chips.firstChild ? chips : "—" }]);\n    });\n    count("inv-resources-count", resRows.length, plu'
+    'ral(resRows.length, "resource or endpoint", "resources and endpoints"));\n    renderTable(document.ge'
+    'tElementById("inv-resources-table"), ["Type", "Resource", "Association", { t: "Observed configuratio'
+    'n", c: "w", s: false }], resRows, { sortable: true });\n  }\n\n  function renderFinops(snap) {\n    var '
+    'fin = snap.finops || {};\n    var legacy = document.getElementById("finops-legacy");\n    var configur'
+    'ed = (fin.cost_rows || []).length > 0 || fin.cost_source_complete;\n    var amount = document.getElem'
+    'entById("finops-actual-cost");\n    clear(amount);\n    amount.hidden = !configured;\n    if (isNum(fin'
+    '.actual_cost)) { amount.className = "stat"; amount.appendChild(document.createTextNode(NF2.format(fi'
+    'n.actual_cost) + " ")); amount.appendChild(el("small", { text: fin.currency || "" })); }\n    else { '
+    'amount.className = "stat na"; amount.textContent = "Not evaluated"; }\n    document.getElementById("f'
+    'inops-cost-window").textContent = fin.window && configured ? "Window " + day(fin.window.start) + " →'
+    ' " + day(fin.window.end) + " · azure_cost source " + (fin.cost_source_complete ? "complete" : "incom'
+    'plete") : "Off (cost_scope = disabled). Optional: amounts by approved ResourceId, with no split by w'
+    'orkload.";\n    var notes = document.getElementById("finops-cost-note");\n    clear(notes);\n    (confi'
+    'gured ? fin.notes || [] : []).forEach(function (n) { notes.appendChild(el("li", { text: n })); });\n '
+    '   var table = document.getElementById("finops-cost-table");\n    table.parentNode.hidden = !configur'
+    'ed;\n    renderTable(table,\n      ["Resource", "Date", { t: "Amount", c: "n" }, "Currency", "Basis"],'
+    '\n      (fin.cost_rows || []).map(function (r) {\n        return [{ v: armCell(r.resource_id) }, r.usa'
+    'ge_date ? day(r.usage_date) : "Period to date", { v: isNum(r.amount) ? NF2.format(r.amount) : num(r.'
+    'amount), s: r.amount }, r.currency, r.basis];\n      }), { empty: "No billing rows observed in the ap'
+    'proved scope." }\n    );\n    legacy.hidden = false;\n  }\n\n  var NF0 = new Intl.NumberFormat("en-US", {'
+    ' maximumFractionDigits: 0, useGrouping: "always" });\n  var NF1 = new Intl.NumberFormat("en-US", { mi'
+    'nimumFractionDigits: 1, maximumFractionDigits: 1 });\n  var MONTHS = ["January", "February", "March",'
+    ' "April", "May", "June", "July", "August", "September", "October", "November", "December"];\n  var C '
+    '= {\n    family: { all_purpose: "All-purpose (interactive)", jobs: "Jobs", jobs_light: "Jobs Light", '
+    'sql: "Pro and classic SQL warehouses", sql_serverless: "Serverless SQL warehouses",\n      pipelines:'
+    ' "Pipelines (DLT)", serverless: "Serverless (notebooks and jobs)", ai: "AI and model serving", other'
+    ': "Other DBUs" },\n    category: { "virtual machines": "Virtual machines", storage: "Storage and disk'
+    's", bandwidth: "Data transfer", "virtual network": "Virtual network (NAT, public IPs)",\n      "load '
+    'balancer": "Load balancer", "azure databricks": "DBU", "nat gateway": "NAT gateway" },\n    gapWhy: {'
+    ' storage: "Workspace root storage (DBFS) and disks without a cluster", "azure databricks": "They car'
+    'ry no Azure tags: split them with serverless usage policies or system tables",\n      bandwidth: "Out'
+    'bound data transfer", "virtual network": "Workspace NAT gateway and public IP addresses", "load bala'
+    'ncer": "Workspace load balancer",\n      "virtual machines": "Virtual machines without Databricks tag'
+    's" },\n    dim: { cluster: "Clusters", job: "Jobs", warehouse: "SQL warehouses", pool: "Pools", creat'
+    'ors: "Creators" },\n    kind: { all_purpose: "Interactive cluster", job_run: "Job cluster", job_runs:'
+    ' "Ephemeral job clusters", pipeline: "Pipeline cluster", pipeline_runs: "Pipeline clusters (DLT)",\n '
+    '     not_in_inventory: "Not in the inventory (deleted or another type)", job: "Job", warehouse: "SQL'
+    ' warehouse", pool: "Pool" },\n    objKind: { AllPurposeCluster: "Interactive cluster", Job: "Job", In'
+    'stancePool: "Pool", SqlWarehouse: "SQL warehouse", ClusterPolicy: "Compute policy", Runtime: "Runtim'
+    'e", NodeType: "VM type" },\n    saving: { lower_bound: "at least", upper_bound: "up to", estimate: "≈'
+    '" },\n    basis: { weekend_cost: "the month\'s Saturday and Sunday cost", jobs_dbu_ratio: "cluster DBU'
+    ' × (1 − jobs/all-purpose ratio)", spot_discount: "worker VMs × spot discount",\n      daily_floor: "m'
+    'inimum daily cost × days in the month", always_on_weekends: "cost × weekend days / days in the month'
+    '" },\n    ev: { autotermination_minutes: "auto-termination (min)", state: "state", uptime_hours: "run'
+    'ning (h)", active_days: "days with cost", weekend_cost: "weekend cost",\n      jobs: "jobs", jobs_cou'
+    'nt: "job count", dbu_cost: "DBU cost", availability: "availability", workers: "workers", vm_cost: "V'
+    'M cost", continuous: "continuous",\n      max_workers: "max workers", min_idle_instances: "min idle",'
+    ' idle_now: "idle now", idle_autotermination_minutes: "idle release (min)",\n      daily_floor: "daily'
+    ' floor", auto_stop_mins: "auto-stop (min)", serverless: "serverless", warehouse_type: "type", cluste'
+    'r_size: "size", objects: "objects",\n      allocation_tags: "tags", supported_list_checked: "official'
+    ' list checked", deprecated: "retired" },\n    status: { complete: "Complete", partial: "Partial", den'
+    'ied: "Denied", error: "Error", skipped: "Skipped (time limit)", not_configured: "Not configured", no'
+    't_collected: "Not collected" }\n  };\n  var costCurrency = "";\n  function monthName(label, short) {\n  '
+    '  var m = /^(\\d{4})-(\\d{2})$/.exec(String(label || ""));\n    if (!m) { return String(label || "—"); '
+    '}\n    var name = MONTHS[Number(m[2]) - 1] || m[2];\n    return short ? name.slice(0, 3) + " " + m[1] '
+    ': name + " " + m[1];\n  }\n  function money(v, cur) {\n    if (!isNum(v)) { return "—"; }\n    return (v'
+    ' === 0 ? "0" : Math.abs(v) < 10 ? NF2.format(v) : NF0.format(v)) + (cur === "" ? "" : "\\u00a0" + (cu'
+    'r || costCurrency));\n  }\n  function signedPct(v) { return isNum(v) ? (v > 0 ? "+" : v < 0 ? "−" : ""'
+    ') + NF1.format(Math.abs(v)) + "%" : "—"; }\n  function deltaNode(pct, abs, cur) {\n    if (!isNum(pct)'
+    ' && !isNum(abs)) { return el("span", { className: "muted", text: "no previous month" }); }\n    var u'
+    'p = (isNum(abs) ? abs : pct) > 0;\n    var text = isNum(pct) ? signedPct(pct) : (abs > 0 ? "+" : "−")'
+    ' + money(Math.abs(abs), cur);\n    return el("span", { className: up ? "up" : "down", text: text });\n'
+    '  }\n  function sh(v) { return isNum(v) ? NF1.format(v) + "%" : "—"; }\n  function lowerKey(s) { retur'
+    'n String(s || "").toLowerCase(); }\n  function costRows(m) { return (m && m.attribution && m.attribut'
+    'ion.rows) || []; }\n  function rowName(r) {\n    if (r.kind === "job_runs") { return "Ephemeral job cl'
+    'usters (" + r.count + plural(r.count, " run", " runs") + ")"; }\n    if (r.kind === "pipeline_runs") '
+    '{ return "Pipeline clusters (DLT)"; }\n    return r.name;\n  }\n  function tagChips(tags) {\n    var key'
+    's = Object.keys(tags || {});\n    if (!keys.length) { return el("span", { className: "muted", text: "'
+    'No tags" }); }\n    var wrap = el("div", { className: "chips" });\n    keys.forEach(function (k) { wra'
+    'p.appendChild(el("span", null, [k + ": ", el("b", { text: String(tags[k]) })])); });\n    return wrap'
+    ';\n  }\n  function evText(v) {\n    if (Array.isArray(v)) { return v.join(", "); }\n    if (v === true) '
+    '{ return "Yes"; }\n    if (v === false) { return "No"; }\n    return isNum(v) ? NF.format(v) : String('
     'v);\n  }\n  function sigChips(ev) {\n    var wrap = el("div", { className: "chips" }), n = 0;\n    Objec'
     't.keys(ev || {}).forEach(function (k) {\n      var v = ev[k];\n      if (v === null || v === undefined'
     ' || v === "" || (Array.isArray(v) && !v.length) || n >= 4) { return; }\n      var shown = /cost|floor'
     '/.test(k) && isNum(v) ? money(v) : evText(v);\n      wrap.appendChild(el("span", null, [(C.ev[k] || k'
     ') + ": ", el("b", { text: shown })]));\n      n++;\n    });\n    return n ? wrap : null;\n  }\n  function'
     ' savingCell(s) {\n    if (!isNum(s.estimated_monthly_saving)) { return { v: el("span", { className: "'
-    'muted", text: s.monthly_cost === null ? "—" : "No estimable" }), s: -1 }; }\n    var box = el("div", '
-    '{ className: "sav" + (s.counted ? "" : " nc") }, [(C.saving[s.saving_kind] || "≈") + " " + money(s.e'
-    'stimated_monthly_saving)]);\n    box.appendChild(el("small", { text: s.counted ? C.basis[s.saving_bas'
-    'is] || "" : "No suma: mismo objeto que un ahorro mayor" }));\n    return { v: box, s: s.counted ? s.e'
-    'stimated_monthly_saving : s.estimated_monthly_saving / 1000 };\n  }\n  var COST_TAB = "cluster";\n  fun'
-    'ction costTabs(m) {\n    var tabs = [];\n    ((m.attribution && m.attribution.dimensions) || []).forEa'
-    'ch(function (d) { tabs.push({ id: d.key, label: C.dim[d.key] || d.key }); });\n    if (m.attribution '
-    '&& (m.attribution.creators || []).length) { tabs.push({ id: "creators", label: C.dim.creators }); }\n'
-    '    ((m.attribution && m.attribution.custom_tags) || []).forEach(function (t) { tabs.push({ id: "tag'
-    ':" + t.tag, label: "Etiqueta " + t.tag }); });\n    return tabs;\n  }\n  function drawCostTabs(m) {\n   '
-    ' var holder = document.getElementById("cost-tabs");\n    clear(holder);\n    var tabs = costTabs(m);\n '
-    '   if (!tabs.some(function (t) { return t.id === COST_TAB; })) { COST_TAB = tabs.length ? tabs[0].id'
-    ' : "cluster"; }\n    tabs.forEach(function (t, i) {\n      var b = el("button", { type: "button", role'
-    ': "tab", id: "cost-tab-" + i, "aria-selected": t.id === COST_TAB ? "true" : "false", "aria-controls"'
-    ': "cost-attr-panel", tabindex: t.id === COST_TAB ? "0" : "-1", text: t.label });\n      b.addEventLis'
-    'tener("click", function () { COST_TAB = t.id; drawCostTabs(m); renderAttribution(m); });\n      b.add'
-    'EventListener("keydown", function (ev) {\n        if (ev.key !== "ArrowRight" && ev.key !== "ArrowLef'
-    't") { return; }\n        var next = tabs[(i + (ev.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs'
-    '.length];\n        COST_TAB = next.id;\n        drawCostTabs(m);\n        renderAttribution(m);\n       '
-    ' var focusBtn = document.querySelector(\'#cost-tabs [aria-selected="true"]\');\n        if (focusBtn) {'
-    ' focusBtn.focus(); }\n        ev.preventDefault();\n      });\n      if (t.id === COST_TAB) { document.'
-    'getElementById("cost-attr-panel").setAttribute("aria-labelledby", "cost-tab-" + i); }\n      holder.a'
-    'ppendChild(b);\n    });\n  }\n  function attributionView(m) {\n    var head = m.headline || {}, q = (doc'
-    'ument.getElementById("cost-attr-search").value || "").toLowerCase().trim();\n    var prev = monthName'
-    '(head.previous_month, true), view = { headers: [], rows: [], note: "" };\n    function keep(text) { r'
-    'eturn !q || String(text).toLowerCase().indexOf(q) >= 0; }\n    var deltaHead = { t: "Frente a " + pre'
-    'v, c: "n" };\n    if (COST_TAB === "creators") {\n      view.headers = ["Creador", { t: "Coste del mes'
-    '", c: "n" }, { t: "% del mes", c: "n" }];\n      view.rows = (m.attribution.creators || []).filter(fu'
-    'nction (r) { return keep(r.creator); }).map(function (r) {\n        return [{ v: brk(r.creator === "—'
-    '" ? "Sin creador conocido" : r.creator, ""), s: r.creator }, { v: money(r.total), s: r.total, c: "n"'
-    ' }, { v: sh(r.share), s: r.share, c: "n" }];\n      });\n      view.note = "Según quién creó cada clús'
-    'ter, job y SQL warehouse del inventario actual; lo eliminado no tiene creador.";\n      return view;\n'
-    '    }\n    if (COST_TAB.indexOf("tag:") === 0) {\n      var t = (m.attribution.custom_tags || []).filt'
-    'er(function (x) { return "tag:" + x.tag === COST_TAB; })[0] || { values: [] };\n      view.headers = '
-    '["Valor de " + t.tag, { t: "DBU", c: "n" }, { t: "Infraestructura", c: "n" }, { t: "Total", c: "n" }'
-    ', { t: "% del mes", c: "n" }, deltaHead];\n      view.rows = (t.values || []).filter(function (r) { r'
-    'eturn keep(r.value); }).map(function (r) {\n        return [{ v: el("b", { text: r.value }), s: r.val'
-    'ue }, { v: money(r.dbu), s: r.dbu, c: "n" }, { v: money(r.infra), s: r.infra, c: "n" }, { v: money(r'
-    '.total), s: r.total, c: "n" },\n          { v: sh(r.share), s: r.share, c: "n" }, { v: deltaNode(r.pr'
-    'evious_total ? 100 * (r.total - r.previous_total) / r.previous_total : null, r.total - r.previous_to'
-    'tal), s: r.total - r.previous_total, c: "n" }];\n      });\n      if (isNum(t.untagged_total) && keep('
-    '"sin etiqueta")) {\n        var why = (t.untagged_categories || []).slice(0, 3).map(function (c) { re'
-    'turn lab(C.category, lowerKey(c.category)) + " " + money(c.review); }).join(" · ");\n        view.row'
-    's.push([{ v: stack("Sin etiqueta " + t.tag, why || null), s: "~" }, { v: "—", c: "n", s: -1 }, { v: '
-    '"—", c: "n", s: -1 }, { v: money(t.untagged_total), s: t.untagged_total, c: "n" },\n          { v: sh'
-    '(isNum(head.review_total) && head.review_total ? 100 * t.untagged_total / head.review_total : null),'
-    ' s: t.untagged_total, c: "n" }, { v: "—", c: "n", s: 0 }]);\n      }\n      view.note = isNum(t.tagged'
-    '_share) ? "La etiqueta " + t.tag + " está en el " + sh(t.tagged_share) + " del coste del mes; sin el'
-    'la quedan " + money(t.untagged_total) + "." : "Consulta de la etiqueta " + t.tag + ": " + lab(C.stat'
-    'us, t.status) + ".";\n      return view;\n    }\n    var d = ((m.attribution && m.attribution.dimension'
-    's) || []).filter(function (x) { return x.key === COST_TAB; })[0] || {};\n    view.headers = ["Nombre"'
-    ', { t: "DBU", c: "n" }, { t: "Infraestructura", c: "n" }, { t: "Total", c: "n" }, { t: "% del mes", '
-    'c: "n" }, deltaHead, "Etiquetas de imputación"];\n    view.rows = costRows(m).filter(function (r) { r'
-    'eturn r.dimension === COST_TAB && keep(rowName(r) + " " + JSON.stringify(r.tags) + " " + (r.creator '
-    '|| "")); }).map(function (r) {\n      var grouped = r.kind === "job_runs" || r.kind === "pipeline_run'
-    's";\n      var sub = grouped ? (r.kind === "job_runs" ? "Detalle por job en la pestaña Jobs" : "Etiqu'
-    'etas en la definición de cada pipeline") : lab(C.kind, r.kind) + (r.creator ? " · " + r.creator : ""'
-    ');\n      return [{ v: stack(brk(rowName(r), ""), sub), s: rowName(r) }, { v: money(r.dbu), s: r.dbu,'
-    ' c: "n" }, { v: money(r.infra), s: r.infra, c: "n" }, { v: el("b", { text: money(r.total) }), s: r.t'
-    'otal, c: "n" },\n        { v: sh(r.share), s: r.share, c: "n" }, { v: deltaNode(r.change_pct, r.chang'
-    'e), s: r.change, c: "n" }, { v: grouped ? el("span", { className: "muted", text: "—" }) : tagChips(r'
-    '.tags) }];\n    });\n    if (isNum(d.untagged_total) && keep("sin etiqueta")) {\n      view.rows.push(['
-    '{ v: stack("Sin etiqueta " + d.tag, "Coste que esta etiqueta no explica"), s: "~" }, { v: "—", c: "n'
-    '", s: -1 }, { v: "—", c: "n", s: -1 }, { v: money(d.untagged_total), s: d.untagged_total, c: "n" },\n'
-    '        { v: sh(isNum(d.tagged_share) ? 100 - d.tagged_share : null), s: d.untagged_total, c: "n" },'
-    ' { v: "—", c: "n", s: 0 }, { v: "—" }]);\n    }\n    var why = { cluster: "Los jobs aparecen agrupados'
-    '; su detalle está en la pestaña Jobs.", job: "Solo el cómputo de jobs lleva JobId: un job que corre '
-    'en un clúster interactivo cuenta en ese clúster.",\n      warehouse: "Cada SQL warehouse con su DBU y'
-    ', si no es serverless, sus VM.", pool: "Las VM de un pool solo llevan las etiquetas del pool, nunca '
-    'las del clúster que las usa." }[COST_TAB] || "";\n    view.note = isNum(d.tagged_share) ? "La etiquet'
-    'a " + d.tag + " explica el " + sh(d.tagged_share) + " del coste del mes. " + why : "Consulta " + (d.'
-    'tag || "") + ": " + lab(C.status, d.status) + ".";\n    return view;\n  }\n  function renderAttribution'
-    '(m) {\n    var view = attributionView(m);\n    document.getElementById("cost-attr-note").textContent ='
-    ' view.note;\n    renderTable(document.getElementById("cost-attr-table"), view.headers, view.rows, { s'
-    'ortable: true, page: 12, empty: "Sin coste en esta vista." });\n  }\n  function filteredSignals(m) {\n '
-    '   var sev = document.getElementById("cost-sig-sev").value, sav = document.getElementById("cost-sig-'
-    'saving").value;\n    var q = (document.getElementById("cost-sig-search").value || "").toLowerCase().t'
-    'rim();\n    return (m.signals || []).filter(function (s) {\n      if (sev !== "all" && s.severity !== '
-    'sev) { return false; }\n      if (sav === "with" && !isNum(s.estimated_monthly_saving)) { return fals'
-    'e; }\n      return !q || JSON.stringify(s).toLowerCase().indexOf(q) >= 0;\n    });\n  }\n  function rend'
-    'erSignals(m) {\n    var all = m.signals || [], list = filteredSignals(m), head = m.headline || {};\n  '
-    '  var counted = all.filter(function (s) { return s.counted; });\n    document.getElementById("cost-si'
-    'gnals-count").textContent = "Mostrando " + list.length + " de " + all.length + plural(all.length, " '
-    'señal", " señales") +\n      (counted.length ? " · " + counted.length + " con ahorro estimado que sum'
-    'an " + money(head.estimated_monthly_savings) + " al mes (por objeto solo cuenta el mayor)." : ".");\n'
-    '    renderTable(document.getElementById("cost-signals-table"),\n      [{ t: "Severidad" }, { t: "Seña'
-    'l y evidencia", c: "w" }, { t: "Objeto" }, { t: "Coste del mes", c: "n" }, { t: "Ahorro estimado / m'
-    'es", c: "n" }, { t: "Qué hacer", c: "w" }],\n      list.map(function (s) {\n        var d = el("div", '
-    '{ className: "fd" }, [el("b", { text: s.title })]);\n        var chips = sigChips(s.evidence);\n      '
-    '  if (chips) { d.appendChild(chips); }\n        var rec = el("div", { className: "fr" }, [el("p", { t'
-    'ext: s.recommendation })]);\n        var link = safeLearnUrl(s.learn_url);\n        if (link) { rec.ap'
-    'pendChild(extLink(link, "Microsoft Learn")); }\n        return [\n          { v: sevPill(s.severity), '
-    's: ["high", "medium", "low"].indexOf(s.severity) },\n          { v: d, s: s.title },\n          { v: s'
-    'tack(brk(s.object_name, ""), lab(C.objKind, s.object_kind)), s: s.object_name },\n          { v: mone'
-    'y(s.monthly_cost), s: isNum(s.monthly_cost) ? s.monthly_cost : -1, c: "n" },\n          savingCell(s)'
-    ',\n          { v: rec, s: s.recommendation }\n        ];\n      }), { sortable: true, page: 12, empty: '
-    '"Ninguna señal coincide con el filtro." }\n    );\n  }\n  function costBars(holder, items, total, color'
-    ', cur) {\n    clear(holder);\n    var max = Math.max.apply(null, [1].concat(items.map(function (i) { r'
-    'eturn i.value; })));\n    items.forEach(function (i) { holder.appendChild(barRow(i.label, i.sub, 100 '
-    '* i.value / max, money(i.value, cur), i.valueSub, color, false)); });\n    if (!items.length) { holde'
-    'r.appendChild(emptyState("Sin coste en el mes revisado.")); }\n  }\n  function renderCostStats(m) {\n  '
-    '  var head = m.headline || {}, stats = document.getElementById("cost-stats");\n    clear(stats);\n    '
-    'function stat(k, n, unit, d) {\n      var nv = el("div", { className: "n" }, [String(n)]);\n      if ('
-    'unit) { nv.appendChild(el("small", { text: unit })); }\n      stats.appendChild(el("div", { className'
-    ': "cstat" }, [el("div", { className: "k", text: k }), nv, d ? (d instanceof Node ? el("div", { class'
-    'Name: "d" }, [d]) : el("div", { className: "d", text: d })) : null]));\n    }\n    var delta = el("spa'
-    'n", null, [deltaNode(head.change_pct, head.change), " frente a " + monthName(head.previous_month) + '
-    '" (" + money(head.previous_total) + ")"]);\n    stat("Coste de " + monthName(head.review_month), mone'
-    'y(head.review_total, ""), costCurrency, delta);\n    stat("DBU · infraestructura", isNum(head.dbu_sha'
-    're) ? NF0.format(head.dbu_share) + " · " + NF0.format(100 - head.dbu_share) : "—", "%", money(head.d'
-    'bu_total) + " DBU · " + money(head.infra_total) + " infraestructura");\n    stat("Sin etiqueta de cóm'
-    'puto", isNum(head.unattributed_share) ? NF1.format(head.unattributed_share) : "—", isNum(head.unattr'
-    'ibuted_share) ? "%" : "",\n      isNum(head.unattributed_total) ? money(head.unattributed_total) + " '
-    'en servicios compartidos y serverless" : "No evaluado");\n    stat("Ahorro estimado al mes", isNum(he'
-    'ad.estimated_monthly_savings) ? "≈ " + money(head.estimated_monthly_savings, "") : "—", isNum(head.e'
-    'stimated_monthly_savings) ? costCurrency : "",\n      isNum(head.estimated_monthly_savings) ? head.sa'
-    'vings_signals + " de " + head.signals + " señales, sin contar dos veces" : "Sin datos de coste para '
-    'estimarlo");\n    var trend = document.getElementById("cost-trend");\n    clear(trend);\n    trend.appe'
-    'ndChild(el("h4", { text: "Evolución mensual" }));\n    var maxTotal = Math.max.apply(null, [1].concat'
-    '((m.monthly || []).map(function (r) { return r.total; })));\n    (m.monthly || []).forEach(function ('
-    'r) {\n      var row = el("div", { className: "mrow" + (r.partial ? " partial" : "") });\n      row.app'
-    'endChild(el("div", { className: "ml" }, [monthName(r.month, true), r.partial ? el("small", { text: "'
-    'hasta el día " + (head.mtd_days || "—") }) : r.month === head.review_month ? el("small", { text: "me'
-    's revisado" }) : null]));\n      var track = el("div", { className: "strack", role: "img", "aria-labe'
-    'l": monthName(r.month) + ": " + money(r.dbu) + " DBU y " + money(r.infra) + " de infraestructura" })'
-    ';\n      [["seg-dbu", r.dbu], ["seg-infra", r.infra]].forEach(function (p) { var seg = el("i", { clas'
-    'sName: p[0] }); seg.style.width = (100 * p[1] / maxTotal) + "%"; track.appendChild(seg); });\n      r'
-    'ow.appendChild(track);\n      row.appendChild(el("div", { className: "mv", text: money(r.total) }));\n'
-    '      trend.appendChild(row);\n    });\n    trend.appendChild(el("div", { className: "keys" }, [el("sp'
-    'an", null, [el("i", { className: "seg-dbu" }), "DBU"]), el("span", null, [el("i", { className: "seg-'
-    'infra" }), "Infraestructura"])]));\n  }\n  function renderCostSplit(m) {\n    var split = m.split || {}'
-    ', head = m.headline || {};\n    costBars(document.getElementById("cost-dbu-bars"), (split.dbu_familie'
-    's || []).map(function (f) {\n      return { label: lab(C.family, f.key), sub: (f.meters || []).slice('
-    '0, 2).map(function (x) { return x.meter; }).join(" · "), value: f.review,\n        valueSub: sh(f.sha'
-    're) + (isNum(f.previous) && f.previous ? " · " + signedPct(100 * (f.review - f.previous) / f.previou'
-    's) : "") };\n    }), head.dbu_total, "var(--chart)");\n    var ap = (split.dbu_families || []).filter('
-    'function (f) { return f.key === "all_purpose"; })[0];\n    document.getElementById("cost-dbu-sub").te'
-    'xtContent = ap && isNum(ap.share) && ap.share >= 25\n      ? "El cómputo interactivo es el " + sh(ap.'
-    'share) + " de la DBU, y su DBU cuesta casi el doble que la de jobs."\n      : "Lo que Databricks fact'
-    'ura por unidad de procesamiento, según el tipo de carga.";\n    costBars(document.getElementById("cos'
-    't-infra-bars"), (split.infra_categories || []).map(function (c) {\n      return { label: lab(C.catego'
-    'ry, lowerKey(c.category)), sub: null, value: c.review, valueSub: sh(c.share) };\n    }), head.infra_t'
-    'otal, "var(--chart-2)");\n    var sizes = document.getElementById("cost-vm-sizes");\n    clear(sizes);'
-    '\n    if ((split.vm_sizes || []).length) {\n      sizes.appendChild(document.createTextNode("Tamaños d'
-    'e VM con más coste"));\n      var chips = el("div", { className: "chips" });\n      split.vm_sizes.sli'
-    'ce(0, 6).forEach(function (v) { chips.appendChild(el("span", null, [v.meter + " · ", el("b", { text:'
-    ' money(v.review) })])); });\n      sizes.appendChild(chips);\n    }\n  }\n  function renderGapAndTags(m)'
-    ' {\n    var gapBox = document.getElementById("cost-gap"), gap = m.attribution && m.attribution.gap;\n '
-    '   clear(gapBox);\n    if (!gap) { gapBox.appendChild(el("p", { className: "muted", text: "No evaluad'
-    'o: la consulta por la etiqueta Vendor no está disponible." })); }\n    else {\n      gapBox.appendChil'
-    'd(el("div", { className: "gapn" }, [el("b", { text: NF1.format(gap.share || 0) + "\\u00a0%" }), el("s'
-    'pan", { text: money(gap.total) + " del mes" })]));\n      var bars = el("div", { className: "bars" })'
-    ';\n      gapBox.appendChild(bars);\n      costBars(bars, (gap.categories || []).map(function (c) {\n   '
-    '     var key = lowerKey(c.category);\n        return { label: key === "azure databricks" ? "DBU serve'
-    'rless" : lab(C.category, key), sub: C.gapWhy[key] || null, value: c.review, valueSub: sh(c.share) };'
-    '\n      }), gap.total, "var(--info-bar)");\n    }\n    var tags = (m.attribution && m.attribution.custo'
-    'm_tags) || [], holder = document.getElementById("cost-tag-bars");\n    clear(holder);\n    tags.forEac'
-    'h(function (t) {\n      holder.appendChild(barRow(el("span", { className: "mono", text: t.tag }), isN'
-    'um(t.untagged_total) ? "Sin ella: " + money(t.untagged_total) : lab(C.status, t.status),\n        isN'
-    'um(t.tagged_share) ? t.tagged_share : 0, isNum(t.tagged_share) ? sh(t.tagged_share) : "—", null, "va'
-    'r(--chart)", !isNum(t.tagged_share)));\n    });\n    if (!tags.length) { holder.appendChild(el("p", { '
-    'className: "muted", text: "Sin etiquetas de imputación configuradas (COST_ALLOCATION_TAGS)." })); }\n'
-    '    var notes = document.getElementById("cost-tag-notes");\n    clear(notes);\n    (m.signals || []).f'
-    'ilter(function (s) { return s.code === "MISSING_ALLOCATION_TAGS" || s.code === "POLICY_TAGS"; }).sli'
-    'ce(0, 5).forEach(function (s) {\n      notes.appendChild(el("li", { text: s.title + ": " + ((s.eviden'
-    'ce && s.evidence.objects) || []).slice(0, 4).join("; ") }));\n    });\n  }\n  function renderMovers(m) '
-    '{\n    var holder = document.getElementById("cost-movers"), mv = m.movers || {}, head = m.headline ||'
-    ' {};\n    clear(holder);\n    document.getElementById("cost-movers-sub").textContent = "Clústeres, job'
-    's, SQL warehouses y pools con mayor variación de " + monthName(head.previous_month) + " a " + monthN'
-    'ame(head.review_month) + ".";\n    [["Suben", mv.up || []], ["Bajan", mv.down || []]].forEach(functio'
-    'n (g) {\n      var col = el("div", null, [el("h4", { text: g[0] })]);\n      if (!g[1].length) { col.a'
-    'ppendChild(el("p", { className: "muted", text: "Sin variaciones relevantes." })); }\n      g[1].forEa'
-    'ch(function (r) {\n        col.appendChild(el("div", { className: "mover" }, [\n          el("b", { te'
-    'xt: rowName(r) }),\n          el("span", { className: "dv " + (r.change > 0 ? "up" : "down"), text: ('
-    'r.change > 0 ? "+" : "−") + money(Math.abs(r.change)) }),\n          el("small", { text: lab(C.kind, '
-    'r.kind) + " · " + money(r.total) + " en " + monthName(head.review_month, true) }),\n          el("sma'
-    'll", { className: "dv", text: r.previous_total ? signedPct(r.change_pct) : "nuevo" })\n        ]));\n '
-    '     });\n      holder.appendChild(col);\n    });\n  }\n  function renderSystemTables(m) {\n    var box ='
-    ' document.getElementById("cost-system"), st = m.system_tables || { status: "not_configured" };\n    c'
-    'lear(box);\n    var on = st.status === "complete";\n    box.appendChild(el("div", { className: "h3row"'
-    ' }, [el("h3", { text: "Detalle por ejecución y usuario (tablas de sistema)" }),\n      pill(on ? "ton'
-    'e-warn" : st.status === "not_configured" ? "tone-info" : "tone-crit", on ? "Activado · consume DBU" '
-    ': st.status === "not_configured" ? "Desactivado" : lab(C.status, st.status))]));\n    if (!on) {\n    '
-    '  box.appendChild(el("p", { className: "sub", text: st.status === "not_configured"\n        ? "Opcion'
-    'al y desactivado por defecto porque consume DBU (y arranca el SQL warehouse si está parado). Con sys'
-    'tem_tables_warehouse_id (un SQL warehouse existente) la tool lanza una única consulta de solo lectur'
-    'a a system.billing.usage y system.billing.list_prices y muestra aquí el coste por ejecución de job y'
-    ' por usuario."\n        : "La consulta a las tablas de sistema no terminó: revise en la sección 8 la '
-    'fuente dbx_system_billing." }));\n      return;\n    }\n    var cur = st.currency || "USD";\n    var ws '
-    '= String(st.window && st.window.start || ""), we = String(st.window && st.window.end || "");\n    var'
-    ' wy = +ws.slice(0, 4), wm = +ws.slice(5, 7), nextMonth = wm === 12 ? (wy + 1) + "-01" : wy + "-" + S'
-    'tring(wm + 1).padStart(2, "0");\n    var wholeMonth = /^\\d{4}-\\d{2}-01/.test(ws) && we.slice(0, 10) ='
-    '== nextMonth + "-01";\n    box.appendChild(el("p", { className: "sub", text: "Coste a precio de lista'
-    ' (" + cur + ", sin descuentos) " + (wholeMonth ? "de " + monthName(ws.slice(0, 7)) : "de " + day(ws)'
-    ' + " a " + day(we)) + ", según system.billing.usage." }));\n    box.appendChild(el("h4", { className:'
-    ' "sys-h", text: "Ejecuciones y cargas con más coste" }));\n    var wrap = el("div", { className: "wra'
-    'p sys-wrap" }), table = el("table", { className: "dense", id: "cost-system-table" });\n    wrap.appen'
-    'dChild(table);\n    box.appendChild(wrap);\n    var grid = el("div", { className: "sys-grid" }), left '
-    '= el("div"), right = el("div");\n    left.appendChild(el("h4", { text: "Por usuario o service princip'
-    'al" }));\n    var ub = el("div", { className: "bars" });\n    left.appendChild(ub);\n    right.appendCh'
-    'ild(el("h4", { text: "Por producto" }));\n    var pb = el("div", { className: "bars" });\n    right.ap'
-    'pendChild(pb);\n    grid.appendChild(left);\n    grid.appendChild(right);\n    box.appendChild(grid);\n '
-    '   function sku(s) { return s ? String(s).replace(/_/g, " ").toLowerCase() : null; }\n    function pr'
-    'oduct(p) {\n      var known = { ALL_PURPOSE: "All-purpose (interactivo)", JOBS: "Jobs", SQL: "SQL war'
-    'ehouses", DLT: "Pipelines (DLT)", INTERACTIVE: "Notebooks serverless",\n        MODEL_SERVING: "Model'
-    ' serving", VECTOR_SEARCH: "Vector Search", LAKEHOUSE_MONITORING: "Lakehouse Monitoring", PREDICTIVE_'
-    'OPTIMIZATION: "Predictive optimization" };\n      return p ? known[String(p).toUpperCase()] || String'
-    '(p).charAt(0) + String(p).slice(1).replace(/_/g, " ").toLowerCase() : "—";\n    }\n    renderTable(tab'
-    'le, ["Producto", "Job · ejecución / recurso", "Ejecutado por", { t: "DBU", c: "n" }, { t: "Coste de '
-    'lista", c: "n" }],\n      (st.runs || []).map(function (r) {\n        var what = r.job_id ? "Job " + r'
-    '.job_id + (r.job_run_id ? " · ejecución " + r.job_run_id : "") : r.warehouse_id ? "Warehouse " + r.w'
-    'arehouse_id : r.cluster_id ? "Clúster " + r.cluster_id : r.pipeline_id ? "Pipeline " + r.pipeline_id'
-    ' : "—";\n        return [{ v: stack(product(r.product), sku(r.sku)), s: r.product }, { v: brk(what, "'
-    '") }, { v: brk(r.run_as || "—", "") }, { v: NF0.format(r.dbus || 0), s: r.dbus, c: "n" }, { v: money'
-    '(r.list_cost, cur), s: r.list_cost, c: "n" }];\n      }), { sortable: true, page: 8 });\n    costBars('
-    'ub, (st.users || []).slice(0, 8).map(function (u) { return { label: brk(u.run_as || "—", ""), value:'
-    ' u.list_cost || 0 }; }), null, "var(--chart)", cur);\n    costBars(pb, (st.products || []).slice(0, 8'
-    ').map(function (p) { return { label: product(p.product), sub: sku(p.sku), value: p.list_cost || 0 };'
-    ' }), null, "var(--chart-2)", cur);\n  }\n  function renderCostMethod(m) {\n    var dl = document.getEle'
-    'mentById("cost-method"), a = m.assumptions || {}, scope = m.scope || {}, p = m.periods || {};\n    cl'
-    'ear(dl);\n    function row(term, node) { dl.appendChild(el("dt", { text: term })); var dd = el("dd");'
-    ' dd.appendChild(node instanceof Node ? node : document.createTextNode(node)); dl.appendChild(dd); }\n'
-    '    row("Alcance", "Recurso del área de trabajo (DBU)" + (scope.managed_resource_group ? " y su grup'
-    'o de recursos administrado " + scope.managed_resource_group + " (VM, discos y red)" : "") +\n      (('
-    'scope.resource_ids || []).length > 1 ? ", más " + (scope.resource_ids.length - 1) + " recursos aprob'
-    'ados" : "") + "; coste " + (m.metric === "ActualCost" ? "real (vista de factura)" : "amortizado") + '
-    '" en " + (m.currency || "la moneda de facturación") + ".");\n    row("Meses", "Mes revisado " + month'
-    'Name(p.review) + " (cerrado), comparado con " + monthName(p.previous) + "; " + monthName(p.current) '
-    '+ " hasta el día " + (p.mtd_days || "—") + ". El coste de los dos últimos días puede cambiar.");\n   '
-    ' row("Reparto", "Cost Management agrupado por las etiquetas que Databricks pone al cómputo (ClusterN'
-    'ame, JobId, SqlEndpointId, DatabricksInstancePoolId, Vendor) y por " +\n      ((a.allocation_tags || '
-    '[]).length ? (a.allocation_tags || []).join(", ") : "ninguna etiqueta propia") + ", cada una con su '
-    'servicio (DBU frente a infraestructura).");\n    var rules = el("ul");\n    [\n      "Autoterminación d'
-    'esactivada: lo que costó el clúster en sábados y domingos (al menos, si nadie lo usa el fin de seman'
-    'a).",\n      "Jobs en un clúster interactivo: DBU del clúster × (1 − " + NF.format(a.jobs_to_all_purp'
-    'ose_dbu_ratio) + ") (hasta, si todo su uso son esos jobs).",\n      "Workers sin spot: coste de VM × '
-    'workers / (workers + 1) × " + NF0.format(100 * (a.spot_discount || 0)) + " % de descuento prudente."'
-    ',\n      "Pool con instancias inactivas mínimas: coste mínimo diario del pool × días del mes.",\n     '
-    ' "SQL warehouse sin auto-stop: coste × " + NF1.format(100 * (a.weekend_share || 0)) + " % (fines de '
-    'semana del mes).",\n      "Por objeto solo suma el mayor ahorro; los demás figuran como «no suma». La'
-    's demás señales no tienen un dato de coste que permita estimar sin inventar."\n    ].forEach(function'
-    ' (t) { rules.appendChild(el("li", { text: t })); });\n    row("Ahorro estimado", rules);\n    var chip'
-    's = el("div", { className: "chips" });\n    Object.keys(m.query_status || {}).forEach(function (k) { '
-    'chips.appendChild(el("span", null, [k + ": ", el("b", { text: lab(C.status, m.query_status[k]) })]))'
-    '; });\n    row("Consultas", chips.firstChild ? chips : "Sin consultas de coste (" + lab(C.status, m.s'
-    'tatus) + ").");\n    var sys = m.system_tables || {};\n    var gaps = (sys.status === "complete" ? "" '
-    ': "Uso por ejecución y por usuario (tablas de sistema, desactivadas por defecto); ") +\n      "almace'
-    'namiento y red fuera del grupo administrado salvo los recursos de approved_cost_resource_ids" +\n    '
-    '  (sys.status === "complete" ? "; el detalle de las tablas de sistema va a precio de lista, sin vues'
-    'tros descuentos." : ".");\n    row("No cubre", gaps.charAt(0).toUpperCase() + gaps.slice(1));\n  }\n  f'
-    'unction renderCosts(snap) {\n    var m = snap.databricks_costs, emptyBox = document.getElementById("c'
-    'ost-empty");\n    var body = document.getElementById("cost-body"), data = document.getElementById("co'
-    'st-data");\n    clear(emptyBox);\n    if (!m) {\n      body.hidden = true;\n      emptyBox.hidden = fals'
-    'e;\n      emptyBox.appendChild(el("div", { className: "note", role: "note" }, [icon("info"), el("span'
-    '", { text: "Esta instantánea no incluye el análisis de costes de Databricks." })]));\n      return;\n '
-    '   }\n    body.hidden = false;\n    costCurrency = m.currency || "";\n    var head = m.headline || {}, '
-    'hasData = isNum(head.review_total);\n    data.hidden = !hasData;\n    if (!hasData) {\n      emptyBox.h'
-    'idden = false;\n      var why = { not_configured: "El análisis de costes está desactivado en la confi'
-    'guración (cost_analysis_enabled = False).",\n        denied: "La identidad no puede leer costes: conc'
-    'eda Cost Management Reader (o Reader) en la suscripción y repita la revisión.",\n        not_collecte'
-    'd: "Esta ejecución no recogió costes de Cost Management." }[m.status] || "Cost Management no devolvi'
-    'ó datos utilizables (" + lab(C.status, m.status) + "); vea la fuente azure_cost_databricks en la sec'
-    'ción 8.";\n      emptyBox.appendChild(el("div", { className: "note", role: "note" }, [icon("info"), e'
-    'l("span", { text: why + " Las señales de configuración siguen abajo, sin ahorro estimado." })]));\n  '
-    '  } else {\n      emptyBox.hidden = true;\n      renderCostStats(m);\n      renderCostSplit(m);\n      d'
-    'rawCostTabs(m);\n      renderAttribution(m);\n      renderGapAndTags(m);\n      renderMovers(m);\n    }\n'
-    '    renderSignals(m);\n    renderSystemTables(m);\n    renderCostMethod(m);\n  }\n  ["cost-sig-sev", "co'
-    'st-sig-saving", "cost-sig-search"].forEach(function (id) {\n    var node = document.getElementById(id'
-    ');\n    ["input", "change"].forEach(function (evName) { node.addEventListener(evName, function () { i'
-    'f (currentSnap && currentSnap.databricks_costs) { renderSignals(currentSnap.databricks_costs); } });'
-    ' });\n  });\n  document.getElementById("cost-attr-search").addEventListener("input", function () { if '
-    '(currentSnap && currentSnap.databricks_costs) { renderAttribution(currentSnap.databricks_costs); } }'
-    ');\n  function csvLines(cols, rows) { return "\\uFEFF" + [cols.join(",")].concat(rows.map(function (r)'
-    ' { return cols.map(function (c) { return csvEscape(r[c]); }).join(","); })).join("\\r\\n"); }\n  functi'
-    'on costCsv() {\n    var m = currentSnap && currentSnap.databricks_costs;\n    if (!m) { return csvLine'
-    's(["dimension"], []); }\n    var rows = costRows(m).map(function (r) { return { dimension: r.dimensio'
-    'n, name: rowName(r), kind: r.kind, creator: r.creator, dbu: r.dbu, infra: r.infra, total: r.total, p'
-    'revious_total: r.previous_total, share: r.share, tags: r.tags, currency: m.currency, month: m.period'
-    's && m.periods.review }; });\n    ((m.attribution && m.attribution.custom_tags) || []).forEach(functi'
-    'on (t) {\n      (t.values || []).forEach(function (v) { rows.push({ dimension: "tag:" + t.tag, name: '
-    'v.value, kind: "tag_value", dbu: v.dbu, infra: v.infra, total: v.total, previous_total: v.previous_t'
-    'otal, share: v.share, currency: m.currency, month: m.periods && m.periods.review }); });\n      if (i'
-    'sNum(t.untagged_total)) { rows.push({ dimension: "tag:" + t.tag, name: "(sin etiqueta)", kind: "unta'
-    'gged", total: t.untagged_total, currency: m.currency, month: m.periods && m.periods.review }); }\n   '
-    ' });\n    return csvLines(["month", "dimension", "name", "kind", "creator", "dbu", "infra", "total", '
-    '"previous_total", "share", "tags", "currency"], rows);\n  }\n  function signalsCsv(list) {\n    var cur'
-    ' = currentSnap && currentSnap.databricks_costs ? currentSnap.databricks_costs.currency : "";\n    ret'
-    'urn csvLines(["id", "code", "severity", "title", "object_kind", "object_name", "monthly_cost", "esti'
-    'mated_monthly_saving", "saving_kind", "saving_basis", "counted", "currency", "recommendation", "lear'
-    'n_url", "evidence"],\n      list.map(function (s) { return Object.assign({ currency: cur }, s); }));\n'
-    '  }\n  document.getElementById("cost-attr-export").addEventListener("click", function () { downloadBl'
-    'ob("databricks-costes-por-carga.csv", costCsv(), "text/csv;charset=utf-8"); });\n  document.getElemen'
-    'tById("export-costs-csv-btn").addEventListener("click", function () { downloadBlob("databricks-coste'
-    's-por-carga.csv", costCsv(), "text/csv;charset=utf-8"); });\n  document.getElementById("cost-sig-expo'
-    'rt").addEventListener("click", function () { if (currentSnap && currentSnap.databricks_costs) { down'
-    'loadBlob("databricks-senales-filtradas.csv", signalsCsv(filteredSignals(currentSnap.databricks_costs'
-    ')), "text/csv;charset=utf-8"); } });\n  document.getElementById("export-signals-csv-btn").addEventLis'
-    'tener("click", function () { if (currentSnap && currentSnap.databricks_costs) { downloadBlob("databr'
-    'icks-senales-optimizacion.csv", signalsCsv(currentSnap.databricks_costs.signals || []), "text/csv;ch'
-    'arset=utf-8"); } });\n\n  var PRESENTATION = (rootData && rootData.presentation) || {};\n  var FOCUS = '
-    'PRESENTATION.focus === "costs" ? "costs" : "configuration";\n  function renumberSections() {\n    var '
-    'short = { "sec-finops": "Costes de Databricks", "sec-identity": "Workspace e identidad", "sec-execut'
-    'ive": "Resumen ejecutivo y WAF", "sec-dependencies": "Mapa de dependencias",\n      "sec-inventory": '
-    '"Inventario Lakehouse y ARM", "sec-findings": "Hallazgos y reglas", "sec-actions": "Plan de acción",'
-    ' "sec-sources": "Fuentes y metodología" };\n    var toc = document.getElementById("toc-menu");\n    cl'
-    'ear(toc);\n    toc.appendChild(el("a", { href: "#sec-cover", text: "Portada y veredicto" }));\n    [].'
-    'slice.call(document.querySelectorAll(".page > .chapter")).forEach(function (c, i) {\n      var h = c.'
-    'querySelector(".sh h2");\n      if (h) { h.textContent = h.textContent.replace(/^\\d+\\.\\s*/, (i + 1) +'
-    ' ". "); }\n      toc.appendChild(el("a", { href: "#" + c.id, text: (i + 1) + ". " + (short[c.id] || c'
-    '.id) }));\n    });\n  }\n  function applyPresentation() {\n    var p = PRESENTATION, root = document.doc'
-    'umentElement, css = "";\n    var theme = p.theme && typeof p.theme === "object" ? p.theme : {};\n    v'
-    'ar rules = Object.keys(theme).filter(function (k) {\n      return /^--[a-z0-9-]{1,32}$/.test(k) && /^'
-    '(#[0-9a-fA-F]{6}|rgba\\([0-9.,\\s]{7,40}\\))$/.test(String(theme[k]));\n    }).map(function (k) { return'
-    ' k + ":" + theme[k]; });\n    if (rules.length) { css += ":root{" + rules.join(";") + "}"; root.class'
-    'List.add("branded"); themeBtn.hidden = true; }\n    if (typeof p.display_font === "string" && /^data:'
-    'font\\/woff2;base64,[A-Za-z0-9+\\/=]+$/.test(p.display_font)) {\n      css += "@font-face{font-family:\\'
-    '"Brand Display\\";src:url(" + p.display_font + ") format(\\"woff2\\");font-weight:600;font-style:normal'
-    ';font-display:swap}" +\n        ":root{--display:\\"Brand Display\\",Didot,\\"Bodoni 72\\",\\"Bodoni MT\\",'
-    'Georgia,serif}";\n      root.classList.add("brand-font");\n    }\n    if (css) { var style = el("style"'
-    ', { id: "brand-style" }); style.textContent = css; document.head.appendChild(style); }\n    var clien'
-    't = rootData.client || {};\n    var barLogo = p.logo_placement === "bar" && client.logo_data_uri && /'
-    '^data:image\\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(client.logo_data_uri);\n    if (barLogo) {\n    '
-    '  root.classList.add("brand-bar");\n      var brand = document.querySelector(".bar .brand");\n      br'
-    'and.insertBefore(el("img", { className: "client-logo", src: client.logo_data_uri, alt: client.logo_a'
-    'lt || client.name || "" }), brand.firstChild);\n    }\n    document.getElementById("bar-product").text'
-    'Content = (FOCUS === "costs" ? "Costes y configuración de Azure Databricks" : "Dependencias Azure Da'
-    'tabricks") +\n      (barLogo && client.name ? " · " + client.name : "");\n    if (FOCUS === "costs") {'
-    '\n      document.querySelector(".page").insertBefore(document.getElementById("sec-finops"), document.'
-    'getElementById("sec-identity"));\n      var nav = document.getElementById("bar-nav");\n      nav.inser'
-    'tBefore(nav.querySelector(\'a[href="#sec-finops"]\'), nav.firstChild);\n      renumberSections();\n    }'
-    '\n  }\n  function renderCostHero(snap) {\n    var m = snap.databricks_costs || {}, h = m.headline || {}'
-    ', ws = snap.workspace || {};\n    if (FOCUS !== "costs" || !isNum(h.review_total)) { return; }\n    co'
-    'stCurrency = m.currency || "";\n    var month = monthName(h.review_month).split(" de ")[0], prev = mo'
-    'nthName(h.previous_month).split(" de ")[0];\n    document.getElementById("cover-title").textContent ='
-    ' "Costes de Azure Databricks: " + monthName(h.review_month);\n    var parts = ["Databricks costó ", ['
-    'money(h.review_total)], " en " + month + ", ", [signedPct(h.change_pct)], " frente a " + prev + ": e'
-    'l ", [NF0.format(h.dbu_share || 0) + "\\u00a0%"],\n      " son DBU y el ", [NF0.format(100 - (h.dbu_sh'
-    'are || 0)) + "\\u00a0%"], " infraestructura."];\n    if (isNum(h.unattributed_share)) { parts = parts.'
-    'concat([" El ", [sh(h.unattributed_share)], " no lo explica ninguna etiqueta de cómputo"]).concat(h.'
-    'first_tag && isNum(h.first_tag.tagged_share) ? ["; vuestra etiqueta ", [h.first_tag.tag], " cubre el'
-    ' ", [sh(h.first_tag.tagged_share)], "."] : ["."]); }\n    if (isNum(h.estimated_monthly_savings)) { p'
-    'arts = parts.concat([" ", [String(h.savings_signals)], plural(h.savings_signals, " cambio ahorraría"'
-    ', " cambios ahorrarían"), " unos ", [money(h.estimated_monthly_savings)], " al mes."]); }\n    rich(d'
-    'ocument.getElementById("cover-lead"), parts);\n    var meta = document.getElementById("cover-badges")'
-    ';\n    clear(meta);\n    function chip(p, on) { meta.appendChild(rich(el("span", { className: on ? "on'
-    '" : null }), p)); }\n    chip(["Generado ", [utc(snap.reference_utc)]]);\n    chip(["Workspace ", [ws.'
-    'name || "—"]]);\n    chip([m.metric === "ActualCost" ? "Coste real · " : "Coste amortizado · ", [m.cu'
-    'rrency || "—"]]);\n    chip(["Entorno ", [snap.environment || "—"]]);\n    chip([snap.provenance === "'
-    'SIMULATED" ? "DATOS SIMULADOS" : "DATOS " + (snap.provenance || "LIVE")], true);\n    var sev = h.sig'
-    'nals_by_severity || {}, tone = "ok", title = "En línea";\n    if (sev.high) { tone = "act"; title = "'
-    'Acción necesaria"; } else if (sev.medium) { tone = "warn"; title = "Revisión recomendada"; }\n    var'
-    ' verdict = document.getElementById("verdict");\n    verdict.className = "signal " + tone;\n    clear(v'
-    'erdict);\n    verdict.appendChild(el("div", { className: "k", text: "Veredicto" }));\n    verdict.appe'
-    'ndChild(el("b", { text: title }));\n    verdict.appendChild(el("p", { text: [isNum(h.estimated_monthl'
-    'y_savings) ? "Ahorro estimado ≈ " + money(h.estimated_monthly_savings) + "/mes" : null,\n      isNum('
-    'h.unattributed_share) ? sh(h.unattributed_share) + " sin atribuir" : null, h.signals + plural(h.sign'
-    'als, " señal", " señales")].filter(Boolean).join(" · ") }));\n    var dist = document.getElementById('
-    '"severity-dist");\n    clear(dist);\n    dist.hidden = !h.signals;\n    if (!h.signals) { return; }\n   '
-    ' var head = el("div", { className: "dist-head" }, [el("span", { text: "Señales de optimización por s'
-    'everidad" })]);\n    head.appendChild(rich(el("span"), [[num(h.signals)], plural(h.signals, " señal",'
-    ' " señales") + " en " + month]));\n    dist.appendChild(head);\n    var track = el("div", { className:'
-    ' "track", role: "img", "aria-label": ["high", "medium", "low"].map(function (s) { return (sev[s] || '
-    '0) + " " + L.sev[s].toLowerCase(); }).join(", ") });\n    var legend = el("div", { className: "legend'
-    '" });\n    ["high", "medium", "low"].forEach(function (s) {\n      if (!sev[s]) { return; }\n      var '
-    'seg = el("i", { title: L.sev[s] + ": " + sev[s] });\n      seg.style.width = (100 * sev[s] / h.signal'
-    's) + "%";\n      seg.style.background = SEV_BAR[s];\n      track.appendChild(seg);\n      var key = el('
-    '"i");\n      key.style.background = SEV_BAR[s];\n      legend.appendChild(el("span", null, [key, L.sev'
-    '[s] + " ", el("b", { text: String(sev[s]) })]));\n    });\n    dist.appendChild(track);\n    dist.appen'
-    'dChild(legend);\n  }\n\n  function renderActions(snap) {\n    var holder = document.getElementById("acti'
-    'ons-plan");\n    clear(holder);\n    var actions = snap.actions || [];\n    if (!actions.length) { hold'
-    'er.appendChild(el("div", { className: "card" }, [emptyState("Sin acciones: ninguna comprobación eval'
-    'uada requiere cambios.")])); return; }\n    [["quick_win", "Quick-win", "Menos de 1 semana"], ["short'
-    '_term", "Corto plazo", "1-3 meses"], ["medium_term", "Medio plazo", "Planificación posterior"]].forE'
-    'ach(function (h) {\n      var items = actions.filter(function (a) { return a.horizon === h[0]; });\n  '
-    '    var card = el("div", { className: "card" }, [el("h3", { text: h[1] }), el("p", { className: "sub'
-    '", text: h[2] + " · " + items.length + plural(items.length, " acción", " acciones") })]);\n      if ('
-    '!items.length) { card.appendChild(el("p", { className: "muted", text: "Sin acciones en este horizont'
-    'e." })); }\n      else {\n        var ol = el("ol", { className: "steps" });\n        items.forEach(fun'
-    'ction (a, i) {\n          var link = safeLearnUrl(a.learn_url);\n          var meta = el("div", { clas'
-    'sName: "sm" }, [sevPill(a.severity, a.severity_label), el("span", { text: a.rule_id + " · " + lab(L.'
-    'effort, a.effort_label) })]);\n          if (link) { meta.appendChild(extLink(link, "Documentación"))'
-    '; }\n          ol.appendChild(el("li", null, [\n            el("span", { className: "no", text: String'
-    '(i + 1) }),\n            el("div", { className: "sx" }, [el("b", { text: a.title }), el("div", { clas'
-    'sName: "muted", text: lab(L.level, a.level) + ": " + (a.workload_name || a.resource_id || "—") }), e'
-    'l("p", { text: a.recommendation }), meta])\n          ]));\n        });\n        card.appendChild(ol);\n'
-    '      }\n      holder.appendChild(card);\n    });\n  }\n\n  function renderSources(snap) {\n    var source'
-    's = snap.sources || [];\n    var byStatus = {};\n    sources.forEach(function (s) { byStatus[s.status]'
-    ' = (byStatus[s.status] || 0) + 1; });\n    var complete = byStatus.complete || 0;\n    document.getEle'
-    'mentById("sources-summary").textContent = complete + " de " + sources.length + plural(sources.length'
-    ', " fuente completa", " fuentes completas");\n    var bars = document.getElementById("sources-bars");'
-    '\n    clear(bars);\n    Object.keys(L.src).forEach(function (k) {\n      if (!byStatus[k]) { return; }\n'
-    '      bars.appendChild(barRow(srcPill(k), null, 100 * byStatus[k] / Math.max(1, sources.length), num'
-    '(byStatus[k]), null, SRC_COLOR[k], false));\n    });\n    renderTable(document.getElementById("sources'
-    '-table"),\n      ["Fuente", "Plano", "Estado", { t: "Páginas", c: "n" }, { t: "Registros", c: "n" }, '
-    '"Hora UTC", { t: "Nota / errores", c: "w" }],\n      sources.map(function (s) {\n        var note = el'
-    '("div");\n        if (s.note) { note.appendChild(el("span", { text: s.note })); }\n        (s.errors |'
-    '| []).forEach(function (e) {\n          note.appendChild(el("div", { className: "muted", text: [e.htt'
-    'p_status ? "HTTP " + e.http_status : null, e.code, e.message].filter(Boolean).join(" · ") }));\n     '
-    '   });\n        if (!note.firstChild) { note.textContent = "—"; }\n        return [{ v: mono(s.id), s:'
-    ' s.id }, { v: sourcePlane(s.id), c: "nw" }, { v: srcPill(s.status), s: s.status }, { v: num(s.pages)'
-    ', s: s.pages }, { v: num(s.records), s: s.records }, { v: utc(s.time), c: "nw" }, { v: note }];\n    '
-    '  }), { sortable: true, page: 12 }\n    );\n    var m = snap.methodology || {}, cat = m.catalogSnapsho'
-    't || {}, cov = m.catalog_coverage || {};\n    var dl = document.getElementById("method-notes");\n    c'
-    'lear(dl);\n    function row(term, node) { dl.appendChild(el("dt", { text: term })); var dd = el("dd")'
-    '; dd.appendChild(node instanceof Node ? node : document.createTextNode(node)); dl.appendChild(dd); }'
-    '\n    row("Índice local", m.score_formula || "—");\n    row("Cobertura", m.coverage_formula || "—");\n '
-    '   var catNode = el("span", { text: (cat.name || "Catálogo local") + " · " + (cov.local_rules || 0) '
-    '+ " reglas locales · recuperado " + (cat.retrieved_at || "—") + " " });\n    [[cat.service_guide_url,'
-    ' "Guía de servicio"], [cat.lakehouse_waf_url, "Lakehouse WAF"], [m.assessment_url, "Assessment ofici'
-    'al"]].forEach(function (l) {\n      var u = safeLearnUrl(l[0]);\n      if (u) { catNode.appendChild(do'
-    'cument.createTextNode(" ")); catNode.appendChild(extLink(u, l[1])); }\n    });\n    row("Catálogo de r'
-    'eglas", catNode);\n    var interp = el("ul");\n    (m.interpretation || []).forEach(function (t) { int'
-    'erp.appendChild(el("li", { text: t })); });\n    row("Interpretación", interp.firstChild ? interp : "'
-    '—");\n    var limList = document.getElementById("methodology-limitations");\n    clear(limList);\n    ('
-    'm.limitations || []).forEach(function (l) { limList.appendChild(el("li", { text: l })); });\n  }\n\n  f'
-    'unction cssString(s) { return String(s).replace(/\\\\/g, "\\\\\\\\").replace(/"/g, \'\\\\"\').replace(/[\\r\\n]+'
-    '/g, " ").replace(/</g, "\\\\3c "); }\n  function renderFooter(snap) {\n    var ws = snap.workspace || {}'
-    ', client = (snap.client && snap.client.name) || "CLIENTE";\n    var when = utc(snap.reference_utc), c'
-    'osts = FOCUS === "costs";\n    document.getElementById("report-footer").textContent = "Generado por A'
-    'zure SRE Agent · Solo lectura · generate-databricks-dependency-report · " + when + " · " + client;\n '
-    '   document.title = (ws.name ? ws.name + " · " : "") + (costs ? "Costes de Azure Databricks | Origen'
-    ' del coste y optimización" : "Revisión Azure Databricks | Mapa de dependencias y configuración");\n  '
-    '  var style = document.getElementById("print-page-style");\n    if (!style) { style = el("style", { i'
-    'd: "print-page-style" }); document.head.appendChild(style); }\n    var foot = (costs ? "Costes de Azu'
-    're Databricks · " : "Revisión Azure Databricks · ") + (ws.name || "—") + " · " + when + (snap.proven'
-    'ance === "SIMULATED" ? " · DATOS SIMULADOS" : "");\n    style.textContent = \'@page { @bottom-left { c'
-    'ontent: "\' + cssString(foot) + \'"; font: 8pt "Segoe UI", sans-serif; color: #667085; } @bottom-right'
-    ' { content: "Página " counter(page) " de " counter(pages); font: 8pt "Segoe UI", sans-serif; color: '
-    "#667085; } }';\n  }\n\n  function renderSnapshot(snap) {\n    currentSnap = snap;\n    document.getElemen"
-    'tById("workspace-error-view").hidden = true;\n    document.getElementById("report-body").hidden = fal'
-    'se;\n    var g = (snap.scores && snap.scores.global) || {};\n    var counts = { critical: 0, high: 0, '
-    'medium: 0, low: 0 };\n    (snap.findings || []).forEach(function (f) { if (counts[f.severity] !== und'
-    'efined) { counts[f.severity]++; } });\n    var sc = (snap.dependencies && snap.dependencies.summary_c'
-    'ounts) || {};\n    renderHero(snap, g, counts);\n    renderCostHero(snap);\n    renderKpis(snap, g, cou'
-    'nts);\n    renderFacts(snap);\n    renderExecutive(snap, g);\n    var sum = document.getElementById("de'
-    'p-class-summary");\n    clear(sum);\n    [["OBSERVED", sc.edges_observed, " relaciones"], ["INFERRED",'
-    ' sc.edges_inferred, " relaciones"], ["UNKNOWN", sc.unknowns_total, " puntos ciegos"]].forEach(functi'
-    'on (c) {\n      sum.appendChild(pill("cls-" + c[0], c[0] + " · " + num(c[1] || 0) + c[2]));\n    });\n '
-    '   sum.appendChild(pill("sev-info", num(sc.broken_references_total || 0) + plural(sc.broken_referenc'
-    'es_total || 0, " referencia rota", " referencias rotas")));\n    document.getElementById("dep-graph-n'
-    'ote").textContent = num(sc.nodes_total || 0) + " nodos · " + num(sc.edges_total || 0) + " relaciones'
-    ' en total";\n    renderInventory(snap);\n    renderFinops(snap);\n    renderCosts(snap);\n    renderActi'
-    'ons(snap);\n    renderSources(snap);\n    renderFooter(snap);\n    applyDependencyFilters();\n    applyF'
-    'indingFilters();\n    renderReferenceArchitecture();\n  }\n\n  applyPresentation();\n  if (isMulti) {\n   '
-    ' var selWrap = document.getElementById("workspace-selector-wrap");\n    var sel = document.getElement'
-    'ById("workspace-selector");\n    var runs = rootData.workspace_runs || [];\n    var agg = rootData.agg'
-    'regate || {};\n    document.getElementById("multi-overview").hidden = false;\n    selWrap.hidden = fal'
-    'se;\n    rich(document.getElementById("multi-summary"), ["Vista multi-workspace · ", [num(runs.length'
-    ')], plural(runs.length, " workspace seleccionado", " workspaces seleccionados") + " · ", [num(agg.fi'
-    'ndings_total || 0)], " hallazgos · ",\n      [num((agg.dependency_counts && agg.dependency_counts.nod'
-    'es_total) || 0)], " nodos de dependencia · ", [num(agg.failed_workspace_count || 0)], plural(agg.fai'
-    'led_workspace_count || 0, " workspace con error", " workspaces con error")]);\n    runs.forEach(funct'
-    'ion (r, idx) {\n      sel.appendChild(el("option", { value: String(idx), text: r.workspace_name + " ('
-    '" + r.status + ")" }));\n    });\n    var selectRun = function (idx) {\n      var run = runs[idx];\n    '
-    '  if (!run) { return; }\n      if (run.snapshot) {\n        renderSnapshot(run.snapshot);\n      } else'
-    ' {\n        currentSnap = null;\n        document.getElementById("report-body").hidden = true;\n       '
-    ' var errView = document.getElementById("workspace-error-view");\n        errView.hidden = false;\n    '
-    '    clear(errView);\n        var err = run.error || {};\n        errView.appendChild(el("h2", { text: '
-    '"Recolección fallida para el workspace " + run.workspace_name }));\n        errView.appendChild(el("p'
-    '", { text: "No se sustituyen datos vacíos ni puntuaciones de otro workspace. Seleccione otro workspa'
-    'ce o corrija el acceso y repita la revisión." }));\n        var dl = el("dl", { className: "dl2" });\n'
-    '        [["Código", err.code], ["Fuente", err.source_id], ["HTTP", err.http_status], ["Mensaje", err'
-    '.message], ["Hora UTC", utc(run.reference_utc)]].forEach(function (p) {\n          dl.appendChild(el('
-    '"dt", { text: p[0] }));\n          dl.appendChild(el("dd", { text: p[1] === null || p[1] === undefine'
-    'd || p[1] === "" ? "—" : String(p[1]) }));\n        });\n        errView.appendChild(dl);\n      }\n    '
-    '};\n    sel.addEventListener("change", function () { selectRun(Number(sel.value)); });\n    selectRun('
-    '0);\n  } else {\n    renderSnapshot(rootData);\n  }\n\n  var navLinks = [].slice.call(document.querySelec'
-    'torAll(".bar-nav a"));\n  if ("IntersectionObserver" in window && navLinks.length) {\n    var spy = ne'
-    'w IntersectionObserver(function (entries) {\n      entries.forEach(function (en) {\n        if (!en.is'
-    'Intersecting) { return; }\n        var id = en.target.id;\n        navLinks.forEach(function (a) { if '
-    '(a.getAttribute("href") === "#" + id) { a.setAttribute("aria-current", "true"); } else { a.removeAtt'
-    'ribute("aria-current"); } });\n      });\n    }, { rootMargin: "-80px 0px -65% 0px" });\n    ["sec-cove'
-    'r", "sec-identity", "sec-executive", "sec-dependencies", "sec-inventory", "sec-findings", "sec-finop'
-    's", "sec-actions", "sec-sources"].forEach(function (id) {\n      var node = document.getElementById(i'
-    'd);\n      if (node) { spy.observe(node); }\n    });\n  }\n})();\n</script>\n</body>\n</html>\n'
+    'muted", text: s.monthly_cost === null ? "—" : "No estimate" }), s: -1 }; }\n    var box = el("div", {'
+    ' className: "sav" + (s.counted ? "" : " nc") }, [(C.saving[s.saving_kind] || "≈") + " " + money(s.es'
+    'timated_monthly_saving)]);\n    box.appendChild(el("small", { text: s.counted ? C.basis[s.saving_basi'
+    's] || "" : "Not counted: same object as a larger saving" }));\n    return { v: box, s: s.counted ? s.'
+    'estimated_monthly_saving : s.estimated_monthly_saving / 1000 };\n  }\n  var COST_TAB = "cluster";\n  fu'
+    'nction costTabs(m) {\n    var tabs = [];\n    ((m.attribution && m.attribution.dimensions) || []).forE'
+    'ach(function (d) { tabs.push({ id: d.key, label: C.dim[d.key] || d.key }); });\n    if (m.attribution'
+    ' && (m.attribution.creators || []).length) { tabs.push({ id: "creators", label: C.dim.creators }); }'
+    '\n    ((m.attribution && m.attribution.custom_tags) || []).forEach(function (t) { tabs.push({ id: "ta'
+    'g:" + t.tag, label: "Tag " + t.tag }); });\n    return tabs;\n  }\n  function drawCostTabs(m) {\n    var'
+    ' holder = document.getElementById("cost-tabs");\n    clear(holder);\n    var tabs = costTabs(m);\n    i'
+    'f (!tabs.some(function (t) { return t.id === COST_TAB; })) { COST_TAB = tabs.length ? tabs[0].id : "'
+    'cluster"; }\n    tabs.forEach(function (t, i) {\n      var b = el("button", { type: "button", role: "t'
+    'ab", id: "cost-tab-" + i, "aria-selected": t.id === COST_TAB ? "true" : "false", "aria-controls": "c'
+    'ost-attr-panel", tabindex: t.id === COST_TAB ? "0" : "-1", text: t.label });\n      b.addEventListene'
+    'r("click", function () { COST_TAB = t.id; drawCostTabs(m); renderAttribution(m); });\n      b.addEven'
+    'tListener("keydown", function (ev) {\n        if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") '
+    '{ return; }\n        var next = tabs[(i + (ev.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.len'
+    'gth];\n        COST_TAB = next.id;\n        drawCostTabs(m);\n        renderAttribution(m);\n        var'
+    ' focusBtn = document.querySelector(\'#cost-tabs [aria-selected="true"]\');\n        if (focusBtn) { foc'
+    'usBtn.focus(); }\n        ev.preventDefault();\n      });\n      if (t.id === COST_TAB) { document.getE'
+    'lementById("cost-attr-panel").setAttribute("aria-labelledby", "cost-tab-" + i); }\n      holder.appen'
+    'dChild(b);\n    });\n  }\n  function attributionView(m) {\n    var head = m.headline || {}, q = (documen'
+    't.getElementById("cost-attr-search").value || "").toLowerCase().trim();\n    var prev = monthName(hea'
+    'd.previous_month, true), view = { headers: [], rows: [], note: "" };\n    function keep(text) { retur'
+    'n !q || String(text).toLowerCase().indexOf(q) >= 0; }\n    var deltaHead = { t: "vs " + prev, c: "n" '
+    '};\n    if (COST_TAB === "creators") {\n      view.headers = ["Creator", { t: "Month cost", c: "n" }, '
+    '{ t: "% of month", c: "n" }];\n      view.rows = (m.attribution.creators || []).filter(function (r) {'
+    ' return keep(r.creator); }).map(function (r) {\n        return [{ v: brk(r.creator === "—" ? "No know'
+    'n creator" : r.creator, ""), s: r.creator }, { v: money(r.total), s: r.total, c: "n" }, { v: sh(r.sh'
+    'are), s: r.share, c: "n" }];\n      });\n      view.note = "By who created each cluster, job and SQL w'
+    'arehouse in the current inventory; deleted objects have no creator.";\n      return view;\n    }\n    i'
+    'f (COST_TAB.indexOf("tag:") === 0) {\n      var t = (m.attribution.custom_tags || []).filter(function'
+    ' (x) { return "tag:" + x.tag === COST_TAB; })[0] || { values: [] };\n      view.headers = ["Tag value'
+    ' · " + t.tag, { t: "DBU", c: "n" }, { t: "Infrastructure", c: "n" }, { t: "Total", c: "n" }, { t: "%'
+    ' of month", c: "n" }, deltaHead];\n      view.rows = (t.values || []).filter(function (r) { return ke'
+    'ep(r.value); }).map(function (r) {\n        return [{ v: el("b", { text: r.value }), s: r.value }, { '
+    'v: money(r.dbu), s: r.dbu, c: "n" }, { v: money(r.infra), s: r.infra, c: "n" }, { v: money(r.total),'
+    ' s: r.total, c: "n" },\n          { v: sh(r.share), s: r.share, c: "n" }, { v: deltaNode(r.previous_t'
+    'otal ? 100 * (r.total - r.previous_total) / r.previous_total : null, r.total - r.previous_total), s:'
+    ' r.total - r.previous_total, c: "n" }];\n      });\n      if (isNum(t.untagged_total) && keep("untagge'
+    'd")) {\n        var why = (t.untagged_categories || []).slice(0, 3).map(function (c) { return lab(C.c'
+    'ategory, lowerKey(c.category)) + " " + money(c.review); }).join(" · ");\n        view.rows.push([{ v:'
+    ' stack("Untagged · " + t.tag, why || null), s: "~" }, { v: "—", c: "n", s: -1 }, { v: "—", c: "n", s'
+    ': -1 }, { v: money(t.untagged_total), s: t.untagged_total, c: "n" },\n          { v: sh(isNum(head.re'
+    'view_total) && head.review_total ? 100 * t.untagged_total / head.review_total : null), s: t.untagged'
+    '_total, c: "n" }, { v: "—", c: "n", s: 0 }]);\n      }\n      view.note = isNum(t.tagged_share) ? "The'
+    ' " + t.tag + " tag is on " + sh(t.tagged_share) + " of the month\'s cost; without it, " + money(t.unt'
+    'agged_total) + " remain." : "Query of tag " + t.tag + ": " + lab(C.status, t.status) + ".";\n      re'
+    'turn view;\n    }\n    var d = ((m.attribution && m.attribution.dimensions) || []).filter(function (x)'
+    ' { return x.key === COST_TAB; })[0] || {};\n    view.headers = ["Name", { t: "DBU", c: "n" }, { t: "I'
+    'nfrastructure", c: "n" }, { t: "Total", c: "n" }, { t: "% of month", c: "n" }, deltaHead, "Allocatio'
+    'n tags"];\n    view.rows = costRows(m).filter(function (r) { return r.dimension === COST_TAB && keep('
+    'rowName(r) + " " + JSON.stringify(r.tags) + " " + (r.creator || "")); }).map(function (r) {\n      va'
+    'r grouped = r.kind === "job_runs" || r.kind === "pipeline_runs";\n      var sub = grouped ? (r.kind ='
+    '== "job_runs" ? "Detail by job on the Jobs tab" : "Tags in each pipeline definition") : lab(C.kind, '
+    'r.kind) + (r.creator ? " · " + r.creator : "");\n      return [{ v: stack(brk(rowName(r), ""), sub), '
+    's: rowName(r) }, { v: money(r.dbu), s: r.dbu, c: "n" }, { v: money(r.infra), s: r.infra, c: "n" }, {'
+    ' v: el("b", { text: money(r.total) }), s: r.total, c: "n" },\n        { v: sh(r.share), s: r.share, c'
+    ': "n" }, { v: deltaNode(r.change_pct, r.change), s: r.change, c: "n" }, { v: grouped ? el("span", { '
+    'className: "muted", text: "—" }) : tagChips(r.tags) }];\n    });\n    if (isNum(d.untagged_total) && k'
+    'eep("untagged")) {\n      view.rows.push([{ v: stack("Untagged · " + d.tag, "Cost that this tag doesn'
+    '\'t explain"), s: "~" }, { v: "—", c: "n", s: -1 }, { v: "—", c: "n", s: -1 }, { v: money(d.untagged_'
+    'total), s: d.untagged_total, c: "n" },\n        { v: sh(isNum(d.tagged_share) ? 100 - d.tagged_share '
+    ': null), s: d.untagged_total, c: "n" }, { v: "—", c: "n", s: 0 }, { v: "—" }]);\n    }\n    var why = '
+    '{ cluster: "Jobs are grouped; their detail is on the Jobs tab.", job: "Only job compute carries JobI'
+    'd: a job that runs on an interactive cluster counts on that cluster.",\n      warehouse: "Each SQL wa'
+    'rehouse with its DBUs and, if it isn\'t serverless, its VMs.", pool: "A pool\'s VMs carry only the poo'
+    'l tags, never the tags of the cluster that uses them." }[COST_TAB] || "";\n    view.note = isNum(d.ta'
+    'gged_share) ? "The " + d.tag + " tag explains " + sh(d.tagged_share) + " of the month\'s cost. " + wh'
+    'y : "Query " + (d.tag || "") + ": " + lab(C.status, d.status) + ".";\n    return view;\n  }\n  function'
+    ' renderAttribution(m) {\n    var view = attributionView(m);\n    document.getElementById("cost-attr-no'
+    'te").textContent = view.note;\n    renderTable(document.getElementById("cost-attr-table"), view.heade'
+    'rs, view.rows, { sortable: true, page: 12, empty: "No cost in this view." });\n  }\n  function filtere'
+    'dSignals(m) {\n    var sev = document.getElementById("cost-sig-sev").value, sav = document.getElement'
+    'ById("cost-sig-saving").value;\n    var q = (document.getElementById("cost-sig-search").value || "").'
+    'toLowerCase().trim();\n    return (m.signals || []).filter(function (s) {\n      if (sev !== "all" && '
+    's.severity !== sev) { return false; }\n      if (sav === "with" && !isNum(s.estimated_monthly_saving)'
+    ') { return false; }\n      return !q || JSON.stringify(s).toLowerCase().indexOf(q) >= 0;\n    });\n  }\n'
+    '  function renderSignals(m) {\n    var all = m.signals || [], list = filteredSignals(m), head = m.hea'
+    'dline || {};\n    var counted = all.filter(function (s) { return s.counted; });\n    document.getEleme'
+    'ntById("cost-signals-count").textContent = "Showing " + list.length + " of " + all.length + plural(a'
+    'll.length, " signal", " signals") +\n      (counted.length ? " · " + counted.length + " with estimate'
+    'd savings that add up to " + money(head.estimated_monthly_savings) + " a month (only the largest per'
+    ' object counts)." : ".");\n    renderTable(document.getElementById("cost-signals-table"),\n      [{ t:'
+    ' "Severity" }, { t: "Signal and evidence", c: "w" }, { t: "Object" }, { t: "Month cost", c: "n" }, {'
+    ' t: "Estimated savings / month", c: "n" }, { t: "What to do", c: "w" }],\n      list.map(function (s)'
+    ' {\n        var d = el("div", { className: "fd" }, [el("b", { text: s.title })]);\n        var chips ='
+    ' sigChips(s.evidence);\n        if (chips) { d.appendChild(chips); }\n        var rec = el("div", { cl'
+    'assName: "fr" }, [el("p", { text: s.recommendation })]);\n        var link = safeLearnUrl(s.learn_url'
+    ');\n        if (link) { rec.appendChild(extLink(link, "Microsoft Learn")); }\n        return [\n       '
+    '   { v: sevPill(s.severity), s: ["high", "medium", "low"].indexOf(s.severity) },\n          { v: d, s'
+    ': s.title },\n          { v: stack(brk(s.object_name, ""), lab(C.objKind, s.object_kind)), s: s.objec'
+    't_name },\n          { v: money(s.monthly_cost), s: isNum(s.monthly_cost) ? s.monthly_cost : -1, c: "'
+    'n" },\n          savingCell(s),\n          { v: rec, s: s.recommendation }\n        ];\n      }), { sort'
+    'able: true, page: 12, empty: "No signal matches the filter." }\n    );\n  }\n  function costBars(holder'
+    ', items, total, color, cur) {\n    clear(holder);\n    var max = Math.max.apply(null, [1].concat(items'
+    '.map(function (i) { return i.value; })));\n    items.forEach(function (i) { holder.appendChild(barRow'
+    '(i.label, i.sub, 100 * i.value / max, money(i.value, cur), i.valueSub, color, false)); });\n    if (!'
+    'items.length) { holder.appendChild(emptyState("No cost in the reviewed month.")); }\n  }\n  function r'
+    'enderCostStats(m) {\n    var head = m.headline || {}, stats = document.getElementById("cost-stats");\n'
+    '    clear(stats);\n    function stat(k, n, unit, d) {\n      var nv = el("div", { className: "n" }, [S'
+    'tring(n)]);\n      if (unit) { nv.appendChild(el("small", { text: unit })); }\n      stats.appendChild'
+    '(el("div", { className: "cstat" }, [el("div", { className: "k", text: k }), nv, d ? (d instanceof No'
+    'de ? el("div", { className: "d" }, [d]) : el("div", { className: "d", text: d })) : null]));\n    }\n '
+    '   var delta = el("span", null, [deltaNode(head.change_pct, head.change), " vs " + monthName(head.pr'
+    'evious_month) + " (" + money(head.previous_total) + ")"]);\n    stat("Cost in " + monthName(head.revi'
+    'ew_month), money(head.review_total, ""), costCurrency, delta);\n    stat("DBU · infrastructure", isNu'
+    'm(head.dbu_share) ? NF0.format(head.dbu_share) + " · " + NF0.format(100 - head.dbu_share) : "—", "%"'
+    ', money(head.dbu_total) + " DBU · " + money(head.infra_total) + " infrastructure");\n    stat("Withou'
+    't a compute tag", isNum(head.unattributed_share) ? NF1.format(head.unattributed_share) : "—", isNum('
+    'head.unattributed_share) ? "%" : "",\n      isNum(head.unattributed_total) ? money(head.unattributed_'
+    'total) + " in shared services and serverless" : "Not evaluated");\n    stat("Estimated monthly saving'
+    's", isNum(head.estimated_monthly_savings) ? "≈ " + money(head.estimated_monthly_savings, "") : "—", '
+    'isNum(head.estimated_monthly_savings) ? costCurrency : "",\n      isNum(head.estimated_monthly_saving'
+    's) ? head.savings_signals + " of " + head.signals + " signals, nothing counted twice" : "No cost dat'
+    'a to estimate it");\n    var trend = document.getElementById("cost-trend");\n    clear(trend);\n    tre'
+    'nd.appendChild(el("h4", { text: "Monthly trend" }));\n    var maxTotal = Math.max.apply(null, [1].con'
+    'cat((m.monthly || []).map(function (r) { return r.total; })));\n    (m.monthly || []).forEach(functio'
+    'n (r) {\n      var row = el("div", { className: "mrow" + (r.partial ? " partial" : "") });\n      row.'
+    'appendChild(el("div", { className: "ml" }, [monthName(r.month, true), r.partial ? el("small", { text'
+    ': "through day " + (head.mtd_days || "—") }) : r.month === head.review_month ? el("small", { text: "'
+    'reviewed month" }) : null]));\n      var track = el("div", { className: "strack", role: "img", "aria-'
+    'label": monthName(r.month) + ": " + money(r.dbu) + " DBU and " + money(r.infra) + " infrastructure" '
+    '});\n      [["seg-dbu", r.dbu], ["seg-infra", r.infra]].forEach(function (p) { var seg = el("i", { cl'
+    'assName: p[0] }); seg.style.width = (100 * p[1] / maxTotal) + "%"; track.appendChild(seg); });\n     '
+    ' row.appendChild(track);\n      row.appendChild(el("div", { className: "mv", text: money(r.total) }))'
+    ';\n      trend.appendChild(row);\n    });\n    trend.appendChild(el("div", { className: "keys" }, [el("'
+    'span", null, [el("i", { className: "seg-dbu" }), "DBU"]), el("span", null, [el("i", { className: "se'
+    'g-infra" }), "Infrastructure"])]));\n  }\n  function renderCostSplit(m) {\n    var split = m.split || {'
+    '}, head = m.headline || {};\n    costBars(document.getElementById("cost-dbu-bars"), (split.dbu_famili'
+    'es || []).map(function (f) {\n      return { label: lab(C.family, f.key), sub: (f.meters || []).slice'
+    '(0, 2).map(function (x) { return x.meter; }).join(" · "), value: f.review,\n        valueSub: sh(f.sh'
+    'are) + (isNum(f.previous) && f.previous ? " · " + signedPct(100 * (f.review - f.previous) / f.previo'
+    'us) : "") };\n    }), head.dbu_total, "var(--chart)");\n    var ap = (split.dbu_families || []).filter'
+    '(function (f) { return f.key === "all_purpose"; })[0];\n    document.getElementById("cost-dbu-sub").t'
+    'extContent = ap && isNum(ap.share) && ap.share >= 25\n      ? "Interactive compute is " + sh(ap.share'
+    ') + " of DBU spend, and its DBU costs almost twice as much as a jobs DBU."\n      : "What Databricks '
+    'bills per processing unit, by workload type.";\n    costBars(document.getElementById("cost-infra-bars'
+    '"), (split.infra_categories || []).map(function (c) {\n      return { label: lab(C.category, lowerKey'
+    '(c.category)), sub: null, value: c.review, valueSub: sh(c.share) };\n    }), head.infra_total, "var(-'
+    '-chart-2)");\n    var sizes = document.getElementById("cost-vm-sizes");\n    clear(sizes);\n    if ((sp'
+    'lit.vm_sizes || []).length) {\n      sizes.appendChild(document.createTextNode("VM sizes with the hig'
+    'hest cost"));\n      var chips = el("div", { className: "chips" });\n      split.vm_sizes.slice(0, 6).'
+    'forEach(function (v) { chips.appendChild(el("span", null, [v.meter + " · ", el("b", { text: money(v.'
+    'review) })])); });\n      sizes.appendChild(chips);\n    }\n  }\n  function renderGapAndTags(m) {\n    va'
+    'r gapBox = document.getElementById("cost-gap"), gap = m.attribution && m.attribution.gap;\n    clear('
+    'gapBox);\n    if (!gap) { gapBox.appendChild(el("p", { className: "muted", text: "Not evaluated: the '
+    'query by the Vendor tag isn\'t available." })); }\n    else {\n      gapBox.appendChild(el("div", { cla'
+    'ssName: "gapn" }, [el("b", { text: NF1.format(gap.share || 0) + "%" }), el("span", { text: money(gap'
+    '.total) + " this month" })]));\n      var bars = el("div", { className: "bars" });\n      gapBox.appen'
+    'dChild(bars);\n      costBars(bars, (gap.categories || []).map(function (c) {\n        var key = lower'
+    'Key(c.category);\n        return { label: key === "azure databricks" ? "Serverless DBU" : lab(C.categ'
+    'ory, key), sub: C.gapWhy[key] || null, value: c.review, valueSub: sh(c.share) };\n      }), gap.total'
+    ', "var(--info-bar)");\n    }\n    var tags = (m.attribution && m.attribution.custom_tags) || [], holde'
+    'r = document.getElementById("cost-tag-bars");\n    clear(holder);\n    tags.forEach(function (t) {\n   '
+    '   holder.appendChild(barRow(el("span", { className: "mono", text: t.tag }), isNum(t.untagged_total)'
+    ' ? "Without it: " + money(t.untagged_total) : lab(C.status, t.status),\n        isNum(t.tagged_share)'
+    ' ? t.tagged_share : 0, isNum(t.tagged_share) ? sh(t.tagged_share) : "—", null, "var(--chart)", !isNu'
+    'm(t.tagged_share)));\n    });\n    if (!tags.length) { holder.appendChild(el("p", { className: "muted"'
+    ', text: "No allocation tags configured (COST_ALLOCATION_TAGS)." })); }\n    var notes = document.getE'
+    'lementById("cost-tag-notes");\n    clear(notes);\n    (m.signals || []).filter(function (s) { return s'
+    '.code === "MISSING_ALLOCATION_TAGS" || s.code === "POLICY_TAGS"; }).slice(0, 5).forEach(function (s)'
+    ' {\n      notes.appendChild(el("li", { text: s.title + ": " + ((s.evidence && s.evidence.objects) || '
+    '[]).slice(0, 4).join("; ") }));\n    });\n  }\n  function renderMovers(m) {\n    var holder = document.g'
+    'etElementById("cost-movers"), mv = m.movers || {}, head = m.headline || {};\n    clear(holder);\n    d'
+    'ocument.getElementById("cost-movers-sub").textContent = "Clusters, jobs, SQL warehouses and pools wi'
+    'th the largest change from " + monthName(head.previous_month) + " to " + monthName(head.review_month'
+    ') + ".";\n    [["Up", mv.up || []], ["Down", mv.down || []]].forEach(function (g) {\n      var col = e'
+    'l("div", null, [el("h4", { text: g[0] })]);\n      if (!g[1].length) { col.appendChild(el("p", { clas'
+    'sName: "muted", text: "No relevant changes." })); }\n      g[1].forEach(function (r) {\n        col.ap'
+    'pendChild(el("div", { className: "mover" }, [\n          el("b", { text: rowName(r) }),\n          el('
+    '"span", { className: "dv " + (r.change > 0 ? "up" : "down"), text: (r.change > 0 ? "+" : "−") + mone'
+    'y(Math.abs(r.change)) }),\n          el("small", { text: lab(C.kind, r.kind) + " · " + money(r.total)'
+    ' + " in " + monthName(head.review_month, true) }),\n          el("small", { className: "dv", text: r.'
+    'previous_total ? signedPct(r.change_pct) : "new" })\n        ]));\n      });\n      holder.appendChild('
+    'col);\n    });\n  }\n  function renderSystemTables(m) {\n    var box = document.getElementById("cost-sys'
+    'tem"), st = m.system_tables || { status: "not_configured" };\n    clear(box);\n    var on = st.status '
+    '=== "complete";\n    box.appendChild(el("div", { className: "h3row" }, [el("h3", { text: "Detail by r'
+    'un and user (system tables)" }),\n      pill(on ? "tone-warn" : st.status === "not_configured" ? "ton'
+    'e-info" : "tone-crit", on ? "On · consumes DBUs" : st.status === "not_configured" ? "Off" : lab(C.st'
+    'atus, st.status))]));\n    if (!on) {\n      box.appendChild(el("p", { className: "sub", text: st.stat'
+    'us === "not_configured"\n        ? "Optional and off by default because it consumes DBUs (and starts '
+    "the SQL warehouse if it's stopped). With system_tables_warehouse_id (an existing SQL warehouse), the"
+    ' tool runs one read-only query on system.billing.usage and system.billing.list_prices and shows the '
+    'cost per job run and per user here."\n        : "The system tables query didn\'t finish: check the dbx'
+    '_system_billing source in section 8." }));\n      return;\n    }\n    var cur = st.currency || "USD";\n '
+    '   var ws = String(st.window && st.window.start || ""), we = String(st.window && st.window.end || ""'
+    ');\n    var wy = +ws.slice(0, 4), wm = +ws.slice(5, 7), nextMonth = wm === 12 ? (wy + 1) + "-01" : wy'
+    ' + "-" + String(wm + 1).padStart(2, "0");\n    var wholeMonth = /^\\d{4}-\\d{2}-01/.test(ws) && we.slic'
+    'e(0, 10) === nextMonth + "-01";\n    box.appendChild(el("p", { className: "sub", text: "Cost at list '
+    'price (" + cur + ", no discounts) " + (wholeMonth ? "for " + monthName(ws.slice(0, 7)) : "from " + d'
+    'ay(ws) + " to " + day(we)) + ", from system.billing.usage." }));\n    box.appendChild(el("h4", { clas'
+    'sName: "sys-h", text: "Runs and workloads with the highest cost" }));\n    var wrap = el("div", { cla'
+    'ssName: "wrap sys-wrap" }), table = el("table", { className: "dense", id: "cost-system-table" });\n  '
+    '  wrap.appendChild(table);\n    box.appendChild(wrap);\n    var grid = el("div", { className: "sys-gri'
+    'd" }), left = el("div"), right = el("div");\n    left.appendChild(el("h4", { text: "By user or servic'
+    'e principal" }));\n    var ub = el("div", { className: "bars" });\n    left.appendChild(ub);\n    right'
+    '.appendChild(el("h4", { text: "By product" }));\n    var pb = el("div", { className: "bars" });\n    r'
+    'ight.appendChild(pb);\n    grid.appendChild(left);\n    grid.appendChild(right);\n    box.appendChild(g'
+    'rid);\n    function sku(s) { return s ? String(s).replace(/_/g, " ").toLowerCase() : null; }\n    func'
+    'tion product(p) {\n      var known = { ALL_PURPOSE: "All-purpose (interactive)", JOBS: "Jobs", SQL: "'
+    'SQL warehouses", DLT: "Pipelines (DLT)", INTERACTIVE: "Serverless notebooks",\n        MODEL_SERVING:'
+    ' "Model serving", VECTOR_SEARCH: "Vector Search", LAKEHOUSE_MONITORING: "Lakehouse Monitoring", PRED'
+    'ICTIVE_OPTIMIZATION: "Predictive optimization" };\n      return p ? known[String(p).toUpperCase()] ||'
+    ' String(p).charAt(0) + String(p).slice(1).replace(/_/g, " ").toLowerCase() : "—";\n    }\n    renderTa'
+    'ble(table, ["Product", "Job · run / resource", "Run by", { t: "DBU", c: "n" }, { t: "List cost", c: '
+    '"n" }],\n      (st.runs || []).map(function (r) {\n        var what = r.job_id ? "Job " + r.job_id + ('
+    'r.job_run_id ? " · run " + r.job_run_id : "") : r.warehouse_id ? "Warehouse " + r.warehouse_id : r.c'
+    'luster_id ? "Cluster " + r.cluster_id : r.pipeline_id ? "Pipeline " + r.pipeline_id : "—";\n        r'
+    'eturn [{ v: stack(product(r.product), sku(r.sku)), s: r.product }, { v: brk(what, "") }, { v: brk(r.'
+    'run_as || "—", "") }, { v: NF0.format(r.dbus || 0), s: r.dbus, c: "n" }, { v: money(r.list_cost, cur'
+    '), s: r.list_cost, c: "n" }];\n      }), { sortable: true, page: 8 });\n    costBars(ub, (st.users || '
+    '[]).slice(0, 8).map(function (u) { return { label: brk(u.run_as || "—", ""), value: u.list_cost || 0'
+    ' }; }), null, "var(--chart)", cur);\n    costBars(pb, (st.products || []).slice(0, 8).map(function (p'
+    ') { return { label: product(p.product), sub: sku(p.sku), value: p.list_cost || 0 }; }), null, "var(-'
+    '-chart-2)", cur);\n  }\n  function renderCostMethod(m) {\n    var dl = document.getElementById("cost-me'
+    'thod"), a = m.assumptions || {}, scope = m.scope || {}, p = m.periods || {};\n    clear(dl);\n    func'
+    'tion row(term, node) { dl.appendChild(el("dt", { text: term })); var dd = el("dd"); dd.appendChild(n'
+    'ode instanceof Node ? node : document.createTextNode(node)); dl.appendChild(dd); }\n    row("Scope", '
+    '"Workspace resource (DBU)" + (scope.managed_resource_group ? " and its managed resource group " + sc'
+    'ope.managed_resource_group + " (VMs, disks and network)" : "") +\n      ((scope.resource_ids || []).l'
+    'ength > 1 ? ", plus " + (scope.resource_ids.length - 1) + " approved resources" : "") + "; " + (m.me'
+    'tric === "ActualCost" ? "actual cost (invoice view)" : "amortized cost") + " in " + (m.currency || "'
+    'the billing currency") + ".");\n    row("Months", "Reviewed month " + monthName(p.review) + " (closed'
+    '), compared with " + monthName(p.previous) + "; " + monthName(p.current) + " through day " + (p.mtd_'
+    'days || "—") + ". The cost of the last two days can still change.");\n    row("Attribution", "Cost Ma'
+    'nagement grouped by the tags Databricks puts on compute (ClusterName, JobId, SqlEndpointId, Databric'
+    'ksInstancePoolId, Vendor) and by " +\n      ((a.allocation_tags || []).length ? (a.allocation_tags ||'
+    ' []).join(", ") : "none of your own tags") + ", each with its service (DBU vs infrastructure).");\n  '
+    '  var rules = el("ul");\n    [\n      "Auto-termination off: what the cluster cost on Saturdays and Su'
+    'ndays (a lower bound, if nobody uses it at weekends).",\n      "Jobs on an interactive cluster: clust'
+    'er DBU × (1 − " + NF.format(a.jobs_to_all_purpose_dbu_ratio) + ") (an upper bound, if those jobs are'
+    ' all of its use).",\n      "Workers without spot: VM cost × workers / (workers + 1) × " + NF0.format('
+    '100 * (a.spot_discount || 0)) + "% conservative discount.",\n      "Pool with minimum idle instances:'
+    ' the pool\'s minimum daily cost × days in the month.",\n      "SQL warehouse without auto-stop: cost ×'
+    ' " + NF1.format(100 * (a.weekend_share || 0)) + "% (weekend days in the month).",\n      "Only the la'
+    'rgest saving per object counts; the others show as \\u201cNot counted\\u201d. The other signals have n'
+    'o cost data that would allow an estimate without inventing one."\n    ].forEach(function (t) { rules.'
+    'appendChild(el("li", { text: t })); });\n    row("Estimated savings", rules);\n    var chips = el("div'
+    '", { className: "chips" });\n    Object.keys(m.query_status || {}).forEach(function (k) { chips.appen'
+    'dChild(el("span", null, [k + ": ", el("b", { text: lab(C.status, m.query_status[k]) })])); });\n    r'
+    'ow("Queries", chips.firstChild ? chips : "No cost queries (" + lab(C.status, m.status) + ").");\n    '
+    'var sys = m.system_tables || {};\n    var gaps = (sys.status === "complete" ? "" : "Usage per run and'
+    ' per user (system tables, off by default); ") +\n      "storage and network outside the managed resou'
+    'rce group, except the resources in approved_cost_resource_ids" +\n      (sys.status === "complete" ? '
+    '"; the system tables detail is at list price, without your discounts." : ".");\n    row("Not covered"'
+    ', gaps.charAt(0).toUpperCase() + gaps.slice(1));\n  }\n  function renderCosts(snap) {\n    var m = snap'
+    '.databricks_costs, emptyBox = document.getElementById("cost-empty");\n    var body = document.getElem'
+    'entById("cost-body"), data = document.getElementById("cost-data");\n    clear(emptyBox);\n    if (!m) '
+    '{\n      body.hidden = true;\n      emptyBox.hidden = false;\n      emptyBox.appendChild(el("div", { cl'
+    'assName: "note", role: "note" }, [icon("info"), el("span", { text: "This snapshot doesn\'t include th'
+    'e Databricks cost analysis." })]));\n      return;\n    }\n    body.hidden = false;\n    costCurrency = '
+    'm.currency || "";\n    var head = m.headline || {}, hasData = isNum(head.review_total);\n    data.hidd'
+    'en = !hasData;\n    if (!hasData) {\n      emptyBox.hidden = false;\n      var why = { not_configured: '
+    '"Cost analysis is off in the configuration (cost_analysis_enabled = False).",\n        denied: "The i'
+    "dentity can't read costs: grant Cost Management Reader (or Reader) on the subscription and run the r"
+    'eview again.",\n        not_collected: "This run didn\'t collect costs from Cost Management." }[m.stat'
+    'us] || "Cost Management returned no usable data (" + lab(C.status, m.status) + "); see the azure_cos'
+    't_databricks source in section 8.";\n      emptyBox.appendChild(el("div", { className: "note", role: '
+    '"note" }, [icon("info"), el("span", { text: why + " The configuration signals follow below, without '
+    'estimated savings." })]));\n    } else {\n      emptyBox.hidden = true;\n      renderCostStats(m);\n    '
+    '  renderCostSplit(m);\n      drawCostTabs(m);\n      renderAttribution(m);\n      renderGapAndTags(m);\n'
+    '      renderMovers(m);\n    }\n    renderSignals(m);\n    renderSystemTables(m);\n    renderCostMethod(m'
+    ');\n  }\n  ["cost-sig-sev", "cost-sig-saving", "cost-sig-search"].forEach(function (id) {\n    var node'
+    ' = document.getElementById(id);\n    ["input", "change"].forEach(function (evName) { node.addEventLis'
+    'tener(evName, function () { if (currentSnap && currentSnap.databricks_costs) { renderSignals(current'
+    'Snap.databricks_costs); } }); });\n  });\n  document.getElementById("cost-attr-search").addEventListen'
+    'er("input", function () { if (currentSnap && currentSnap.databricks_costs) { renderAttribution(curre'
+    'ntSnap.databricks_costs); } });\n  function csvLines(cols, rows) { return "\\uFEFF" + [cols.join(",")]'
+    '.concat(rows.map(function (r) { return cols.map(function (c) { return csvEscape(r[c]); }).join(",");'
+    ' })).join("\\r\\n"); }\n  function costCsv() {\n    var m = currentSnap && currentSnap.databricks_costs;'
+    '\n    if (!m) { return csvLines(["dimension"], []); }\n    var rows = costRows(m).map(function (r) { r'
+    'eturn { dimension: r.dimension, name: rowName(r), kind: r.kind, creator: r.creator, dbu: r.dbu, infr'
+    'a: r.infra, total: r.total, previous_total: r.previous_total, share: r.share, tags: r.tags, currency'
+    ': m.currency, month: m.periods && m.periods.review }; });\n    ((m.attribution && m.attribution.custo'
+    'm_tags) || []).forEach(function (t) {\n      (t.values || []).forEach(function (v) { rows.push({ dime'
+    'nsion: "tag:" + t.tag, name: v.value, kind: "tag_value", dbu: v.dbu, infra: v.infra, total: v.total,'
+    ' previous_total: v.previous_total, share: v.share, currency: m.currency, month: m.periods && m.perio'
+    'ds.review }); });\n      if (isNum(t.untagged_total)) { rows.push({ dimension: "tag:" + t.tag, name: '
+    '"(untagged)", kind: "untagged", total: t.untagged_total, currency: m.currency, month: m.periods && m'
+    '.periods.review }); }\n    });\n    return csvLines(["month", "dimension", "name", "kind", "creator", '
+    '"dbu", "infra", "total", "previous_total", "share", "tags", "currency"], rows);\n  }\n  function signa'
+    'lsCsv(list) {\n    var cur = currentSnap && currentSnap.databricks_costs ? currentSnap.databricks_cos'
+    'ts.currency : "";\n    return csvLines(["id", "code", "severity", "title", "object_kind", "object_nam'
+    'e", "monthly_cost", "estimated_monthly_saving", "saving_kind", "saving_basis", "counted", "currency"'
+    ', "recommendation", "learn_url", "evidence"],\n      list.map(function (s) { return Object.assign({ c'
+    'urrency: cur }, s); }));\n  }\n  document.getElementById("cost-attr-export").addEventListener("click",'
+    ' function () { downloadBlob("databricks-cost-by-workload.csv", costCsv(), "text/csv;charset=utf-8");'
+    ' });\n  document.getElementById("export-costs-csv-btn").addEventListener("click", function () { downl'
+    'oadBlob("databricks-cost-by-workload.csv", costCsv(), "text/csv;charset=utf-8"); });\n  document.getE'
+    'lementById("cost-sig-export").addEventListener("click", function () { if (currentSnap && currentSnap'
+    '.databricks_costs) { downloadBlob("databricks-signals-filtered.csv", signalsCsv(filteredSignals(curr'
+    'entSnap.databricks_costs)), "text/csv;charset=utf-8"); } });\n  document.getElementById("export-signa'
+    'ls-csv-btn").addEventListener("click", function () { if (currentSnap && currentSnap.databricks_costs'
+    ') { downloadBlob("databricks-optimization-signals.csv", signalsCsv(currentSnap.databricks_costs.sign'
+    'als || []), "text/csv;charset=utf-8"); } });\n\n  var PRESENTATION = (rootData && rootData.presentatio'
+    'n) || {};\n  var FOCUS = PRESENTATION.focus === "costs" ? "costs" : "configuration";\n  function renum'
+    'berSections() {\n    var short = { "sec-finops": "Databricks costs", "sec-identity": "Workspace and i'
+    'dentity", "sec-executive": "Executive summary and WAF", "sec-dependencies": "Dependency map",\n      '
+    '"sec-inventory": "Lakehouse and ARM inventory", "sec-findings": "Findings and rules", "sec-actions":'
+    ' "Action plan", "sec-sources": "Sources and methodology" };\n    var toc = document.getElementById("t'
+    'oc-menu");\n    clear(toc);\n    toc.appendChild(el("a", { href: "#sec-cover", text: "Cover and verdic'
+    't" }));\n    [].slice.call(document.querySelectorAll(".page > .chapter")).forEach(function (c, i) {\n '
+    '     var h = c.querySelector(".sh h2");\n      if (h) { h.textContent = h.textContent.replace(/^\\d+\\.'
+    '\\s*/, (i + 1) + ". "); }\n      toc.appendChild(el("a", { href: "#" + c.id, text: (i + 1) + ". " + (s'
+    'hort[c.id] || c.id) }));\n    });\n  }\n  function applyPresentation() {\n    var p = PRESENTATION, root'
+    ' = document.documentElement, css = "";\n    var theme = p.theme && typeof p.theme === "object" ? p.th'
+    'eme : {};\n    var rules = Object.keys(theme).filter(function (k) {\n      return /^--[a-z0-9-]{1,32}$'
+    '/.test(k) && /^(#[0-9a-fA-F]{6}|rgba\\([0-9.,\\s]{7,40}\\))$/.test(String(theme[k]));\n    }).map(functi'
+    'on (k) { return k + ":" + theme[k]; });\n    if (rules.length) { css += ":root{" + rules.join(";") + '
+    '"}"; root.classList.add("branded"); themeBtn.hidden = true; }\n    if (typeof p.display_font === "str'
+    'ing" && /^data:font\\/woff2;base64,[A-Za-z0-9+\\/=]+$/.test(p.display_font)) {\n      css += "@font-fac'
+    'e{font-family:\\"Brand Display\\";src:url(" + p.display_font + ") format(\\"woff2\\");font-weight:600;fo'
+    'nt-style:normal;font-display:swap}" +\n        ":root{--display:\\"Brand Display\\",Didot,\\"Bodoni 72\\"'
+    ',\\"Bodoni MT\\",Georgia,serif}";\n      root.classList.add("brand-font");\n    }\n    if (css) { var sty'
+    'le = el("style", { id: "brand-style" }); style.textContent = css; document.head.appendChild(style); '
+    '}\n    var client = rootData.client || {};\n    var barLogo = p.logo_placement === "bar" && client.log'
+    'o_data_uri && /^data:image\\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(client.logo_data_uri);\n    if ('
+    'barLogo) {\n      root.classList.add("brand-bar");\n      var brand = document.querySelector(".bar .br'
+    'and");\n      brand.insertBefore(el("img", { className: "client-logo", src: client.logo_data_uri, alt'
+    ': client.logo_alt || client.name || "" }), brand.firstChild);\n    }\n    document.getElementById("bar'
+    '-product").textContent = (FOCUS === "costs" ? "Azure Databricks costs and configuration" : "Azure Da'
+    'tabricks dependencies") +\n      (barLogo && client.name ? " · " + client.name : "");\n    if (FOCUS ='
+    '== "costs") {\n      document.querySelector(".page").insertBefore(document.getElementById("sec-finops'
+    '"), document.getElementById("sec-identity"));\n      var nav = document.getElementById("bar-nav");\n  '
+    '    nav.insertBefore(nav.querySelector(\'a[href="#sec-finops"]\'), nav.firstChild);\n      renumberSect'
+    'ions();\n    }\n  }\n  function renderCostHero(snap) {\n    var m = snap.databricks_costs || {}, h = m.h'
+    'eadline || {}, ws = snap.workspace || {};\n    if (FOCUS !== "costs" || !isNum(h.review_total)) { ret'
+    'urn; }\n    costCurrency = m.currency || "";\n    var month = monthName(h.review_month).split(" ")[0],'
+    ' prev = monthName(h.previous_month).split(" ")[0];\n    document.getElementById("cover-title").textCo'
+    'ntent = "Azure Databricks costs: " + monthName(h.review_month);\n    var parts = ["Databricks cost ",'
+    ' [money(h.review_total)], " in " + month + ", ", [signedPct(h.change_pct)], " vs " + prev + ": ", [N'
+    'F0.format(h.dbu_share || 0) + "%"],\n      " is DBU and ", [NF0.format(100 - (h.dbu_share || 0)) + "%'
+    '"], " infrastructure."];\n    if (isNum(h.unattributed_share)) { parts = parts.concat([" ", [sh(h.una'
+    'ttributed_share)], " isn\'t explained by any compute tag"]).concat(h.first_tag && isNum(h.first_tag.t'
+    'agged_share) ? ["; your ", [h.first_tag.tag], " tag covers ", [sh(h.first_tag.tagged_share)], "."] :'
+    ' ["."]); }\n    if (isNum(h.estimated_monthly_savings)) { parts = parts.concat([" ", [String(h.saving'
+    's_signals)], plural(h.savings_signals, " change would save", " changes would save"), " about ", [mon'
+    'ey(h.estimated_monthly_savings)], " a month."]); }\n    rich(document.getElementById("cover-lead"), p'
+    'arts);\n    var meta = document.getElementById("cover-badges");\n    clear(meta);\n    function chip(p,'
+    ' on) { meta.appendChild(rich(el("span", { className: on ? "on" : null }), p)); }\n    chip(["Generate'
+    'd ", [utc(snap.reference_utc)]]);\n    chip(["Workspace ", [ws.name || "—"]]);\n    chip([m.metric ==='
+    ' "ActualCost" ? "Actual cost · " : "Amortized cost · ", [m.currency || "—"]]);\n    chip(["Environmen'
+    't ", [snap.environment || "—"]]);\n    chip([snap.provenance === "SIMULATED" ? "SIMULATED DATA" : (sn'
+    'ap.provenance || "LIVE") + " DATA"], true);\n    var sev = h.signals_by_severity || {}, tone = "ok", '
+    'title = "On track";\n    if (sev.high) { tone = "act"; title = "Action needed"; } else if (sev.medium'
+    ') { tone = "warn"; title = "Review recommended"; }\n    var verdict = document.getElementById("verdic'
+    't");\n    verdict.className = "signal " + tone;\n    clear(verdict);\n    verdict.appendChild(el("div",'
+    ' { className: "k", text: "Verdict" }));\n    verdict.appendChild(el("b", { text: title }));\n    verdi'
+    'ct.appendChild(el("p", { text: [isNum(h.estimated_monthly_savings) ? "Estimated savings ≈ " + money('
+    'h.estimated_monthly_savings) + "/month" : null,\n      isNum(h.unattributed_share) ? sh(h.unattribute'
+    'd_share) + " unattributed" : null, h.signals + plural(h.signals, " signal", " signals")].filter(Bool'
+    'ean).join(" · ") }));\n    var dist = document.getElementById("severity-dist");\n    clear(dist);\n    '
+    'dist.hidden = !h.signals;\n    if (!h.signals) { return; }\n    var head = el("div", { className: "dis'
+    't-head" }, [el("span", { text: "Optimization signals by severity" })]);\n    head.appendChild(rich(el'
+    '("span"), [[num(h.signals)], plural(h.signals, " signal", " signals") + " in " + month]));\n    dist.'
+    'appendChild(head);\n    var track = el("div", { className: "track", role: "img", "aria-label": ["high'
+    '", "medium", "low"].map(function (s) { return (sev[s] || 0) + " " + L.sev[s].toLowerCase(); }).join('
+    '", ") });\n    var legend = el("div", { className: "legend" });\n    ["high", "medium", "low"].forEach'
+    '(function (s) {\n      if (!sev[s]) { return; }\n      var seg = el("i", { title: L.sev[s] + ": " + se'
+    'v[s] });\n      seg.style.width = (100 * sev[s] / h.signals) + "%";\n      seg.style.background = SEV_'
+    'BAR[s];\n      track.appendChild(seg);\n      var key = el("i");\n      key.style.background = SEV_BAR['
+    's];\n      legend.appendChild(el("span", null, [key, L.sev[s] + " ", el("b", { text: String(sev[s]) }'
+    ')]));\n    });\n    dist.appendChild(track);\n    dist.appendChild(legend);\n  }\n\n  function renderActio'
+    'ns(snap) {\n    var holder = document.getElementById("actions-plan");\n    clear(holder);\n    var acti'
+    'ons = snap.actions || [];\n    if (!actions.length) { holder.appendChild(el("div", { className: "card'
+    '" }, [emptyState("No actions: no evaluated check needs changes.")])); return; }\n    [["quick_win", "'
+    'Quick win", "Less than 1 week"], ["short_term", "Short term", "1-3 months"], ["medium_term", "Medium'
+    ' term", "Later planning"]].forEach(function (h) {\n      var items = actions.filter(function (a) { re'
+    'turn a.horizon === h[0]; });\n      var card = el("div", { className: "card" }, [el("h3", { text: h[1'
+    '] }), el("p", { className: "sub", text: h[2] + " · " + items.length + plural(items.length, " action"'
+    ', " actions") })]);\n      if (!items.length) { card.appendChild(el("p", { className: "muted", text: '
+    '"No actions in this horizon." })); }\n      else {\n        var ol = el("ol", { className: "steps" });'
+    '\n        items.forEach(function (a, i) {\n          var link = safeLearnUrl(a.learn_url);\n          v'
+    'ar meta = el("div", { className: "sm" }, [sevPill(a.severity, a.severity_label), el("span", { text: '
+    'a.rule_id + " · " + lab(L.effort, a.effort_label) })]);\n          if (link) { meta.appendChild(extLi'
+    'nk(link, "Documentation")); }\n          ol.appendChild(el("li", null, [\n            el("span", { cla'
+    'ssName: "no", text: String(i + 1) }),\n            el("div", { className: "sx" }, [el("b", { text: a.'
+    'title }), el("div", { className: "muted", text: lab(L.level, a.level) + ": " + (a.workload_name || a'
+    '.resource_id || "—") }), el("p", { text: a.recommendation }), meta])\n          ]));\n        });\n    '
+    '    card.appendChild(ol);\n      }\n      holder.appendChild(card);\n    });\n  }\n\n  function renderSour'
+    'ces(snap) {\n    var sources = snap.sources || [];\n    var byStatus = {};\n    sources.forEach(functio'
+    'n (s) { byStatus[s.status] = (byStatus[s.status] || 0) + 1; });\n    var complete = byStatus.complete'
+    ' || 0;\n    document.getElementById("sources-summary").textContent = complete + " of " + sources.leng'
+    'th + plural(sources.length, " source complete", " sources complete");\n    var bars = document.getEle'
+    'mentById("sources-bars");\n    clear(bars);\n    Object.keys(L.src).forEach(function (k) {\n      if (!'
+    'byStatus[k]) { return; }\n      bars.appendChild(barRow(srcPill(k), null, 100 * byStatus[k] / Math.ma'
+    'x(1, sources.length), num(byStatus[k]), null, SRC_COLOR[k], false));\n    });\n    renderTable(documen'
+    't.getElementById("sources-table"),\n      ["Source", "Plane", "Status", { t: "Pages", c: "n" }, { t: '
+    '"Records", c: "n" }, "UTC time", { t: "Note / errors", c: "w" }],\n      sources.map(function (s) {\n '
+    '       var note = el("div");\n        if (s.note) { note.appendChild(el("span", { text: s.note })); }'
+    '\n        (s.errors || []).forEach(function (e) {\n          note.appendChild(el("div", { className: "'
+    'muted", text: [e.http_status ? "HTTP " + e.http_status : null, e.code, e.message].filter(Boolean).jo'
+    'in(" · ") }));\n        });\n        if (!note.firstChild) { note.textContent = "—"; }\n        return '
+    '[{ v: mono(s.id), s: s.id }, { v: sourcePlane(s.id), c: "nw" }, { v: srcPill(s.status), s: s.status '
+    '}, { v: num(s.pages), s: s.pages }, { v: num(s.records), s: s.records }, { v: utc(s.time), c: "nw" }'
+    ', { v: note }];\n      }), { sortable: true, page: 12 }\n    );\n    var m = snap.methodology || {}, ca'
+    't = m.catalogSnapshot || {}, cov = m.catalog_coverage || {};\n    var dl = document.getElementById("m'
+    'ethod-notes");\n    clear(dl);\n    function row(term, node) { dl.appendChild(el("dt", { text: term })'
+    '); var dd = el("dd"); dd.appendChild(node instanceof Node ? node : document.createTextNode(node)); d'
+    'l.appendChild(dd); }\n    row("Local index", m.score_formula || "—");\n    row("Coverage", m.coverage_'
+    'formula || "—");\n    var catNode = el("span", { text: (cat.name || "Local catalog") + " · " + (cov.l'
+    'ocal_rules || 0) + " local rules · retrieved " + (cat.retrieved_at || "—") + " " });\n    [[cat.servi'
+    'ce_guide_url, "Service guide"], [cat.lakehouse_waf_url, "Lakehouse WAF"], [m.assessment_url, "Offici'
+    'al assessment"]].forEach(function (l) {\n      var u = safeLearnUrl(l[0]);\n      if (u) { catNode.app'
+    'endChild(document.createTextNode(" ")); catNode.appendChild(extLink(u, l[1])); }\n    });\n    row("Ru'
+    'le catalog", catNode);\n    var interp = el("ul");\n    (m.interpretation || []).forEach(function (t) '
+    '{ interp.appendChild(el("li", { text: t })); });\n    row("Interpretation", interp.firstChild ? inter'
+    'p : "—");\n    var limList = document.getElementById("methodology-limitations");\n    clear(limList);\n'
+    '    (m.limitations || []).forEach(function (l) { limList.appendChild(el("li", { text: l })); });\n  }'
+    '\n\n  function cssString(s) { return String(s).replace(/\\\\/g, "\\\\\\\\").replace(/"/g, \'\\\\"\').replace(/[\\'
+    'r\\n]+/g, " ").replace(/</g, "\\\\3c "); }\n  function renderFooter(snap) {\n    var ws = snap.workspace '
+    '|| {}, client = (snap.client && snap.client.name) || "Customer";\n    var when = utc(snap.reference_u'
+    'tc), costs = FOCUS === "costs";\n    document.getElementById("report-footer").textContent = "Generate'
+    'd by Azure SRE Agent · Read-only · generate-databricks-dependency-report · " + when + " · " + client'
+    ';\n    document.title = (ws.name ? ws.name + " · " : "") + (costs ? "Azure Databricks costs | Where c'
+    'ost comes from and how to optimize it" : "Azure Databricks review | Dependency map and configuration'
+    '");\n    var style = document.getElementById("print-page-style");\n    if (!style) { style = el("style'
+    '", { id: "print-page-style" }); document.head.appendChild(style); }\n    var foot = (costs ? "Azure D'
+    'atabricks costs · " : "Azure Databricks review · ") + (ws.name || "—") + " · " + when + (snap.proven'
+    'ance === "SIMULATED" ? " · SIMULATED DATA" : "");\n    style.textContent = \'@page { @bottom-left { co'
+    'ntent: "\' + cssString(foot) + \'"; font: 8pt "Segoe UI", sans-serif; color: #667085; } @bottom-right '
+    '{ content: "Page " counter(page) " of " counter(pages); font: 8pt "Segoe UI", sans-serif; color: #66'
+    "7085; } }';\n  }\n\n  function renderSnapshot(snap) {\n    currentSnap = snap;\n    document.getElementBy"
+    'Id("workspace-error-view").hidden = true;\n    document.getElementById("report-body").hidden = false;'
+    '\n    var g = (snap.scores && snap.scores.global) || {};\n    var counts = { critical: 0, high: 0, med'
+    'ium: 0, low: 0 };\n    (snap.findings || []).forEach(function (f) { if (counts[f.severity] !== undefi'
+    'ned) { counts[f.severity]++; } });\n    var sc = (snap.dependencies && snap.dependencies.summary_coun'
+    'ts) || {};\n    renderHero(snap, g, counts);\n    renderCostHero(snap);\n    renderKpis(snap, g, counts'
+    ');\n    renderFacts(snap);\n    renderExecutive(snap, g);\n    var sum = document.getElementById("dep-c'
+    'lass-summary");\n    clear(sum);\n    [["OBSERVED", sc.edges_observed, " relationships"], ["INFERRED",'
+    ' sc.edges_inferred, " relationships"], ["UNKNOWN", sc.unknowns_total, " blind spots"]].forEach(funct'
+    'ion (c) {\n      sum.appendChild(pill("cls-" + c[0], c[0] + " · " + num(c[1] || 0) + c[2]));\n    });\n'
+    '    sum.appendChild(pill("sev-info", num(sc.broken_references_total || 0) + plural(sc.broken_referen'
+    'ces_total || 0, " broken reference", " broken references")));\n    document.getElementById("dep-graph'
+    '-note").textContent = num(sc.nodes_total || 0) + " nodes · " + num(sc.edges_total || 0) + " relation'
+    'ships in total";\n    renderInventory(snap);\n    renderFinops(snap);\n    renderCosts(snap);\n    rende'
+    'rActions(snap);\n    renderSources(snap);\n    renderFooter(snap);\n    applyDependencyFilters();\n    a'
+    'pplyFindingFilters();\n    renderReferenceArchitecture();\n  }\n\n  applyPresentation();\n  if (isMulti) '
+    '{\n    var selWrap = document.getElementById("workspace-selector-wrap");\n    var sel = document.getEl'
+    'ementById("workspace-selector");\n    var runs = rootData.workspace_runs || [];\n    var agg = rootDat'
+    'a.aggregate || {};\n    document.getElementById("multi-overview").hidden = false;\n    selWrap.hidden '
+    '= false;\n    rich(document.getElementById("multi-summary"), ["Multi-workspace view · ", [num(runs.le'
+    'ngth)], plural(runs.length, " workspace selected", " workspaces selected") + " · ", [num(agg.finding'
+    's_total || 0)], " findings · ",\n      [num((agg.dependency_counts && agg.dependency_counts.nodes_tot'
+    'al) || 0)], " dependency nodes · ", [num(agg.failed_workspace_count || 0)], plural(agg.failed_worksp'
+    'ace_count || 0, " workspace with errors", " workspaces with errors")]);\n    runs.forEach(function (r'
+    ', idx) {\n      sel.appendChild(el("option", { value: String(idx), text: r.workspace_name + " (" + r.'
+    'status + ")" }));\n    });\n    var selectRun = function (idx) {\n      var run = runs[idx];\n      if ('
+    '!run) { return; }\n      if (run.snapshot) {\n        renderSnapshot(run.snapshot);\n      } else {\n   '
+    '     currentSnap = null;\n        document.getElementById("report-body").hidden = true;\n        var e'
+    'rrView = document.getElementById("workspace-error-view");\n        errView.hidden = false;\n        cl'
+    'ear(errView);\n        var err = run.error || {};\n        errView.appendChild(el("h2", { text: "Colle'
+    'ction failed for workspace " + run.workspace_name }));\n        errView.appendChild(el("p", { text: "'
+    'No empty data or scores from another workspace are substituted. Select another workspace, or fix the'
+    ' access and run the review again." }));\n        var dl = el("dl", { className: "dl2" });\n        [["'
+    'Code", err.code], ["Source", err.source_id], ["HTTP", err.http_status], ["Message", err.message], ["'
+    'UTC time", utc(run.reference_utc)]].forEach(function (p) {\n          dl.appendChild(el("dt", { text:'
+    ' p[0] }));\n          dl.appendChild(el("dd", { text: p[1] === null || p[1] === undefined || p[1] ==='
+    ' "" ? "—" : String(p[1]) }));\n        });\n        errView.appendChild(dl);\n      }\n    };\n    sel.ad'
+    'dEventListener("change", function () { selectRun(Number(sel.value)); });\n    selectRun(0);\n  } else '
+    '{\n    renderSnapshot(rootData);\n  }\n\n  var navLinks = [].slice.call(document.querySelectorAll(".bar-'
+    'nav a"));\n  if ("IntersectionObserver" in window && navLinks.length) {\n    var spy = new Intersectio'
+    'nObserver(function (entries) {\n      entries.forEach(function (en) {\n        if (!en.isIntersecting)'
+    ' { return; }\n        var id = en.target.id;\n        navLinks.forEach(function (a) { if (a.getAttribu'
+    'te("href") === "#" + id) { a.setAttribute("aria-current", "true"); } else { a.removeAttribute("aria-'
+    'current"); } });\n      });\n    }, { rootMargin: "-80px 0px -65% 0px" });\n    ["sec-cover", "sec-iden'
+    'tity", "sec-executive", "sec-dependencies", "sec-inventory", "sec-findings", "sec-finops", "sec-acti'
+    'ons", "sec-sources"].forEach(function (id) {\n      var node = document.getElementById(id);\n      if '
+    '(node) { spy.observe(node); }\n    });\n  }\n})();\n</script>\n</body>\n</html>\n'
 )
 # END BUILD-TIME ASSETS
 
@@ -4817,12 +4787,12 @@ def expected(raw, key):
 
 def conditional(value, requirement, reason, observed, sources=None):
     if requirement is False:
-        return outcome("not_applicable", "El requisito confirmado no aplica. " + reason, observed, sources)
+        return outcome("not_applicable", "The confirmed requirement doesn't apply. " + reason, observed, sources)
     if value is True:
-        return decision(True, reason + " Configuración observada; no prueba eficacia en tiempo de ejecución.", observed, sources)
+        return decision(True, reason + " Observed configuration; it doesn't prove runtime effectiveness.", observed, sources)
     if requirement is not True:
-        return outcome("not_evaluated", "Falta requisito confirmado del propietario o control compensatorio. " + reason, observed, sources)
-    return decision(value, reason + " Requisito confirmado por el propietario.", observed, sources)
+        return outcome("not_evaluated", "No owner-confirmed requirement or compensating control. " + reason, observed, sources)
+    return decision(value, reason + " Requirement confirmed by the owner.", observed, sources)
 
 
 def evaluate_workspace_rule(rule, raw, dep_graph):
@@ -4831,14 +4801,14 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         sku = (ws.get("sku_name") or ws.get("sku_tier") or "").lower()
         val = True if sku == "premium" else False if sku in ("standard", "trial") else None
         return conditional(val, expected(raw, "premium_required") if expected(raw, "premium_required") is not None else True,
-                           "SKU ARM observada del workspace.", {"sku_name": ws.get("sku_name"), "sku_tier": ws.get("sku_tier")}, ["arm_workspace"])
+                           "Observed ARM SKU of the workspace.", {"sku_name": ws.get("sku_name"), "sku_tier": ws.get("sku_tier")}, ["arm_workspace"])
     if test == "secure_cluster_connectivity":
-        return decision(ws.get("enable_no_public_ip"), "Parámetro enableNoPublicIp observado en ARM.", {"enable_no_public_ip": ws.get("enable_no_public_ip")}, ["arm_workspace"])
+        return decision(ws.get("enable_no_public_ip"), "enableNoPublicIp parameter observed in ARM.", {"enable_no_public_ip": ws.get("enable_no_public_ip")}, ["arm_workspace"])
     if test == "vnet_injection":
         vnet = ws.get("custom_virtual_network_id")
         vnet_val = True if vnet else (False if source_complete(raw, "arm_workspace") else None)
         return conditional(vnet_val, expected(raw, "vnet_injection_required") if expected(raw, "vnet_injection_required") is not None else True,
-                           "Parámetro customVirtualNetworkId e inyección de subredes host/container.", {
+                           "customVirtualNetworkId parameter and host/container subnet injection.", {
                                "custom_virtual_network_id": vnet,
                                "custom_public_subnet_name": ws.get("custom_public_subnet_name"),
                                "custom_private_subnet_name": ws.get("custom_private_subnet_name"),
@@ -4848,81 +4818,81 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         pes = ws.get("private_endpoint_connections", [])
         approved_pe = any(p.get("status") == "Approved" for p in pes)
         val = True if pna == "Disabled" or approved_pe else (False if pna == "Enabled" and not pes else None)
-        return conditional(val, expected(raw, "private_link_required"), "Configuración publicNetworkAccess, requiredNsgRules y Private Endpoints.", {
+        return conditional(val, expected(raw, "private_link_required"), "publicNetworkAccess, requiredNsgRules and private endpoint configuration.", {
             "public_network_access": pna, "required_nsg_rules": ws.get("required_nsg_rules"), "private_endpoint_connections": pes,
         }, ["arm_workspace"])
     if test == "access_connector_and_storage_firewall":
         ac = ws.get("access_connector", {})
         has_ac = bool(ac.get("id")) and ac.get("identity_type") in ("SystemAssigned", "UserAssigned", "SystemAssigned,UserAssigned")
         return decision(True if has_ac else False if source_complete(raw, "arm_workspace") else None,
-                        "Access Connector vinculado al workspace para identidad administrada.", {
+                        "Access connector linked to the workspace for managed identity.", {
                             "access_connector": ac, "default_storage_firewall": ws.get("default_storage_firewall"),
                         }, ["arm_workspace"])
     if test == "customer_managed_keys":
         cmk = ws.get("cmk", {})
         has_cmk = cmk.get("managed_services_key_source") == "Microsoft.Keyvault" and cmk.get("managed_disk_key_source") == "Microsoft.Keyvault"
-        return conditional(has_cmk, expected(raw, "cmk_required"), "Cifrado CMK de managedServices y managedDisk.", cmk, ["arm_workspace"])
+        return conditional(has_cmk, expected(raw, "cmk_required"), "CMK encryption of managedServices and managedDisk.", cmk, ["arm_workspace"])
     if test == "enhanced_security_compliance":
         esc = ws.get("enhanced_security_compliance", {})
         enabled = esc.get("enhanced_security_monitoring") == "Enabled" or esc.get("compliance_security_profile") == "Enabled"
-        return conditional(enabled, expected(raw, "enhanced_security_required"), "Perfil enhancedSecurityCompliance observado.", esc, ["arm_workspace"])
+        return conditional(enabled, expected(raw, "enhanced_security_required"), "Observed enhancedSecurityCompliance profile.", esc, ["arm_workspace"])
     if test == "diagnostics":
         rows = raw.get("arm_diagnostics", [])
         enabled = any(log.get("enabled") is True for r in rows for log in r.get("logs", []))
         val = True if enabled else False if source_complete(raw, "arm_diagnostics") else None
-        return decision(val, "Diagnostic settings habilitados en ARM; la ingesta efectiva requiere verificación separada.", {"diagnostic_settings": rows}, ["arm_diagnostics"])
+        return decision(val, "Diagnostic settings enabled in ARM; actual ingestion needs separate verification.", {"diagnostic_settings": rows}, ["arm_diagnostics"])
     if test == "pat_token_governance":
         if not source_complete(raw, "dbx_workspace_conf") or not isinstance(raw.get("workspace_conf"), dict):
-            return outcome("not_evaluated", "workspace-conf no disponible para revisar políticas de tokens PAT.", source_ids=["dbx_workspace_conf"])
+            return outcome("not_evaluated", "workspace-conf isn't available to review PAT token policies.", source_ids=["dbx_workspace_conf"])
         conf = raw["workspace_conf"]
         max_days = conf.get("maxTokenLifetimeDays")
         tokens_enabled = conf.get("enableTokensConfig")
         bounded = tokens_enabled == "false" or (max_days is not None and str(max_days).isdigit() and 0 < int(max_days) <= 90)
-        return decision(bounded, "Gobernanza de tokens PAT (enableTokensConfig y maxTokenLifetimeDays <= 90 días).", conf, ["dbx_workspace_conf"])
+        return decision(bounded, "PAT token governance (enableTokensConfig and maxTokenLifetimeDays <= 90 days).", conf, ["dbx_workspace_conf"])
     if test == "default_catalog_unity":
         dtype = ws.get("default_catalog_type")
         has_uc = bool(inv.get("uc_metastore"))
         val = True if dtype == "UnityCatalog" or has_uc else (False if dtype == "HiveMetastore" else None)
-        return decision(val, "Catálogo predeterminado UnityCatalog o metastore adjunto observado.", {
+        return decision(val, "Observed UnityCatalog default catalog or attached metastore.", {
             "default_catalog_type": dtype, "default_catalog_name": ws.get("default_catalog_name"),
             "uc_metastore_id": pick(inv.get("uc_metastore"), "id"),
         }, ["arm_workspace", "uc_metastore_summary"])
     if test == "global_init_scripts":
         if not source_complete(raw, "dbx_init_scripts"):
-            return outcome("not_evaluated", "Lista de global init scripts no disponible.", source_ids=["dbx_init_scripts"])
+            return outcome("not_evaluated", "The global init script list isn't available.", source_ids=["dbx_init_scripts"])
         enabled = [s for s in inv.get("global_init_scripts", []) if s.get("enabled") is True]
-        return decision(len(enabled) == 0, "Los global init scripts activos deben minimizarse y migrarse a políticas o volúmenes gobernados.", {
+        return decision(len(enabled) == 0, "Enabled global init scripts should be minimized and moved to policies or governed volumes.", {
             "total_scripts": len(inv.get("global_init_scripts", [])), "enabled_scripts": [s["name"] for s in enabled],
         }, ["dbx_init_scripts"])
     if test == "advisor":
         return decision(True if source_complete(raw, "arm_advisor") else None,
-                        "Recomendaciones cacheadas de Azure Advisor leídas para el workspace.", {"recommendations_count": len(raw.get("advisor", []))}, ["arm_advisor"])
+                        "Cached Azure Advisor recommendations read for the workspace.", {"recommendations_count": len(raw.get("advisor", []))}, ["arm_advisor"])
     if test == "uc_metastore_attached":
         if not source_complete(raw, "uc_metastore_summary"):
-            return outcome("not_evaluated", "Metastore summary de Unity Catalog no disponible.", source_ids=["uc_metastore_summary"])
+            return outcome("not_evaluated", "The Unity Catalog metastore summary isn't available.", source_ids=["uc_metastore_summary"])
         ms = inv.get("uc_metastore")
-        return decision(bool(ms and ms.get("metastore_id")), "Asignación de Metastore de Unity Catalog confirmada.", {"metastore": ms}, ["uc_metastore_summary"])
+        return decision(bool(ms and ms.get("metastore_id")), "Unity Catalog metastore assignment confirmed.", {"metastore": ms}, ["uc_metastore_summary"])
     if test == "uc_storage_credential_mi":
         if not source_complete(raw, "uc_storage_credentials"):
-            return outcome("not_evaluated", "Storage credentials de Unity Catalog no disponibles.", source_ids=["uc_storage_credentials"])
+            return outcome("not_evaluated", "Unity Catalog storage credentials aren't available.", source_ids=["uc_storage_credentials"])
         creds = inv.get("uc_storage_credentials", [])
         if not creds:
-            return outcome("not_evaluated", "No se observaron storage credentials registradas en Unity Catalog.", source_ids=["uc_storage_credentials"])
+            return outcome("not_evaluated", "No storage credentials registered in Unity Catalog were observed.", source_ids=["uc_storage_credentials"])
         sp_creds = [c["name"] for c in creds if c.get("uses_service_principal") or not c.get("uses_managed_identity")]
-        return decision(len(sp_creds) == 0, "Todas las storage credentials usan Azure Managed Identity vía Access Connector.", {
+        return decision(len(sp_creds) == 0, "All storage credentials use an Azure managed identity through an access connector.", {
             "total_credentials": len(creds), "non_managed_identity_credentials": sp_creds,
         }, ["uc_storage_credentials"])
     if test == "uc_external_locations_governed":
         if not source_complete(raw, "uc_external_locations", "uc_storage_credentials"):
-            return outcome("not_evaluated", "External locations o storage credentials incompletas.", source_ids=["uc_external_locations", "uc_storage_credentials"])
+            return outcome("not_evaluated", "External locations or storage credentials are incomplete.", source_ids=["uc_external_locations", "uc_storage_credentials"])
         locs = inv.get("uc_external_locations", [])
         if not locs:
-            return outcome("not_evaluated", "No se observaron external locations registradas.", source_ids=["uc_external_locations"])
+            return outcome("not_evaluated", "No registered external locations were observed.", source_ids=["uc_external_locations"])
         known_creds = {c["name"] for c in inv.get("uc_storage_credentials", [])}
         if all(str(l.get("url") or "").lower().startswith("abfss://") for l in locs) and any(not l.get("credential_name") for l in locs) and not known_creds:
             return outcome(
                 "not_evaluated",
-                "External locations observadas vía permiso mínimo BROWSE con URI abfss://, pero credential_name y uc_storage_credentials están filtrados por ACL de Unity Catalog.",
+                "External locations observed through the minimal BROWSE permission with abfss:// URIs, but credential_name and uc_storage_credentials are filtered by Unity Catalog ACLs.",
                 {"total_external_locations": len(locs), "browse_only_projection": True},
                 ["uc_external_locations", "uc_storage_credentials"],
             )
@@ -4931,17 +4901,17 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
             if not l.get("credential_name") or l["credential_name"] not in known_creds
             or not str(l.get("url") or "").lower().startswith("abfss://")
         ]
-        return decision(len(ungoverned) == 0, "External locations vinculadas a Storage Credential existente y URI abfss://.", {
+        return decision(len(ungoverned) == 0, "External locations linked to an existing storage credential with an abfss:// URI.", {
             "total_external_locations": len(locs), "non_compliant_locations": ungoverned,
         }, ["uc_external_locations", "uc_storage_credentials"])
     if test == "secret_scopes_keyvault":
         if not source_complete(raw, "dbx_secret_scopes"):
-            return outcome("not_evaluated", "Secret scopes no disponibles.", source_ids=["dbx_secret_scopes"])
+            return outcome("not_evaluated", "Secret scopes aren't available.", source_ids=["dbx_secret_scopes"])
         scopes = inv.get("secret_scopes", [])
         if not scopes:
-            return outcome("not_evaluated", "No se observaron secret scopes en el workspace.", source_ids=["dbx_secret_scopes"])
+            return outcome("not_evaluated", "No secret scopes were observed in the workspace.", source_ids=["dbx_secret_scopes"])
         dbx_backed = [s["name"] for s in scopes if s.get("backend_type") != "AZURE_KEYVAULT"]
-        return decision(len(dbx_backed) == 0, "Secret scopes respaldados por Azure Key Vault (AZURE_KEYVAULT).", {
+        return decision(len(dbx_backed) == 0, "Secret scopes backed by Azure Key Vault (AZURE_KEYVAULT).", {
             "total_scopes": len(scopes), "databricks_backed_scopes": dbx_backed,
         }, ["dbx_secret_scopes"])
     if test == "dependency_integrity":
@@ -4962,7 +4932,7 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         if broken:
             return decision(
                 False,
-                "Se detectaron referencias internas rotas confirmadas dentro de definiciones completas de Jobs (job_cluster_key o depends_on inexistentes).",
+                "Confirmed broken internal references were found in complete job definitions (job_cluster_key or depends_on values that don't exist).",
                 {
                     "broken_references_count": len(broken),
                     "broken_references": broken,
@@ -4973,7 +4943,7 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         if not source_complete(raw, *dep_sources) or incomplete_jobs or incomplete_pipes or unverified:
             return outcome(
                 "not_evaluated",
-                "Existen fuentes de dependencias incompletas, detalles de jobs/pipelines truncados o referencias entre objetos no verificadas (las APIs list de Databricks filtran por ACL, por lo que la ausencia de un ID externo se mantiene UNKNOWN en lugar de declararse rota).",
+                "Some dependency sources are incomplete, job or pipeline details are truncated, or references between objects are unverified (Databricks list APIs filter by ACL, so a missing external ID stays UNKNOWN instead of being declared broken).",
                 {
                     "broken_references_count": 0,
                     "unverified_references_count": len(unverified),
@@ -4985,7 +4955,7 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
             )
         return decision(
             True,
-            "Todas las fuentes de dependencia están completas y todas las referencias entre tareas de Jobs, clústeres, pools, políticas, pipelines, warehouses y credenciales resuelven en el mapa de dependencias.",
+            "All dependency sources are complete, and every reference between job tasks, clusters, pools, policies, pipelines, warehouses and credentials resolves in the dependency map.",
             {
                 "broken_references_count": 0,
                 "unverified_references_count": 0,
@@ -4995,24 +4965,24 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
     if test == "runtime_table_lineage":
         return outcome(
             "not_evaluated",
-            "El linaje dinámico de tablas y columnas (system.access.table_lineage / column_lineage) requiere ejecutar consultas en un SQL Warehouse activo y no se ejecuta ni simula desde este colector de plano de control.",
+            "Runtime table and column lineage (system.access.table_lineage / column_lineage) needs queries on a running SQL warehouse; this control-plane collector neither runs nor simulates them.",
             {"system_tables_queried": False},
             ["uc_system_lineage"],
         )
     if test == "lakehouse_federation_connections":
         if not source_complete(raw, "uc_connections"):
-            return outcome("not_evaluated", "Conexiones de Lakehouse Federation no disponibles.", source_ids=["uc_connections"])
+            return outcome("not_evaluated", "Lakehouse Federation connections aren't available.", source_ids=["uc_connections"])
         conns = inv.get("uc_connections", [])
         if not conns:
-            return outcome("not_applicable", "No existen conexiones externas de Lakehouse Federation registradas en el metastore.", {"connections_count": 0}, ["uc_connections"])
-        return decision(True, "Conexiones externas de Lakehouse Federation inventariadas en el mapa de dependencias.", {
+            return outcome("not_applicable", "No external Lakehouse Federation connections are registered in the metastore.", {"connections_count": 0}, ["uc_connections"])
+        return decision(True, "External Lakehouse Federation connections inventoried in the dependency map.", {
             "connections": [{"name": c["name"], "type": c.get("connection_type"), "host": c.get("host")} for c in conns],
         }, ["uc_connections"])
     if test == "outbound_control_plane_endpoints":
         if not source_complete(raw, "arm_outbound_endpoints"):
-            return outcome("not_evaluated", "Lista oficial outboundNetworkDependenciesEndpoints no disponible.", source_ids=["arm_outbound_endpoints"])
+            return outcome("not_evaluated", "The official outboundNetworkDependenciesEndpoints list isn't available.", source_ids=["arm_outbound_endpoints"])
         eps = inv.get("outbound_endpoints", [])
-        return decision(bool(eps), "Dependencias de red saliente hacia el plano de control inventariadas desde ARM.", {
+        return decision(bool(eps), "Outbound network dependencies to the control plane inventoried from ARM.", {
             "categories": [e["category"] for e in eps], "count": len(eps),
         }, ["arm_outbound_endpoints"])
     if test == "cost_attribution":
@@ -5021,13 +4991,13 @@ def evaluate_workspace_rule(rule, raw, dep_graph):
         if gap is not None and first and first.get("tagged_share") is not None:
             return decision(
                 gap <= 10 and first["tagged_share"] >= 80,
-                "Atribución del coste de Databricks por etiquetas en Cost Management: como mucho un 10 % sin etiqueta de cómputo y al menos un 80 % con la etiqueta de imputación principal.",
+                "Databricks cost attribution by tags in Cost Management: at most 10% without a compute tag and at least 80% with the main allocation tag.",
                 {"month": head.get("review_month"), "unattributed_share": gap, "allocation_tag": first["tag"], "tagged_share": first["tagged_share"]},
                 ["azure_cost_databricks"],
             )
         return outcome(
             "not_evaluated",
-            "Sin datos de Cost Management para Databricks (análisis de costes desactivado, lectura denegada o sin consumo): no se puede medir qué parte del coste explican las etiquetas.",
+            "No Cost Management data for Databricks (cost analysis off, read denied or no usage): the share of cost that tags explain can't be measured.",
             {"cost_status": (raw.get("databricks_cost_model") or {}).get("status")},
             ["azure_cost_databricks"],
         )
@@ -5042,26 +5012,26 @@ def evaluate_workload_rule(rule, row, raw):
             return None
         if test == "cluster_autotermination":
             if kind == "JobCluster":
-                return outcome("not_applicable", "Clúster efímero de Job: finaliza automáticamente al terminar la tarea.", {"cluster_source": row.get("cluster_source")}, [row["source_id"]])
+                return outcome("not_applicable", "Ephemeral job cluster: it ends automatically when the task finishes.", {"cluster_source": row.get("cluster_source")}, [row["source_id"]])
             mins = row.get("autotermination_minutes")
             val = True if isinstance(mins, (int, float)) and 0 < mins <= 60 else False
-            return decision(val, "Autoterminación configurada <= 60 minutos en clúster All-Purpose.", {"autotermination_minutes": mins}, [row["source_id"]])
+            return decision(val, "Auto-termination of 60 minutes or less on the all-purpose cluster.", {"autotermination_minutes": mins}, [row["source_id"]])
         if test == "cluster_policy_bound":
-            return decision(bool(row.get("policy_id")), "Asociación de policy_id observada en el clúster.", {"policy_id": row.get("policy_id")}, [row["source_id"]])
+            return decision(bool(row.get("policy_id")), "policy_id association observed on the cluster.", {"policy_id": row.get("policy_id")}, [row["source_id"]])
         if test == "cluster_access_mode":
             mode = (row.get("data_security_mode") or "").upper()
             val = True if mode in ("USER_ISOLATION", "SINGLE_USER", "SHARED") else False if mode in ("NONE", "LEGACY_PASSTHROUGH", "LEGACY_TABLE_ACL", "LEGACY_SINGLE_USER", "") else None
-            return decision(val, "Modo de acceso data_security_mode compatible con Unity Catalog y aislamiento.", {"data_security_mode": row.get("data_security_mode")}, [row["source_id"]])
+            return decision(val, "data_security_mode access mode compatible with Unity Catalog and isolation.", {"data_security_mode": row.get("data_security_mode")}, [row["source_id"]])
         if test == "cluster_runtime_lts":
             sv = row.get("spark_version") or ""
             match = re.match(r"^(\d+)\.(\d+)", sv)
             major = int(match.group(1)) if match else None
             is_lts = "lts" in sv.lower()
             val = True if major is not None and major >= 13 and is_lts else False if major is not None else None
-            return decision(val, "Versión de Databricks Runtime LTS >= 13.x observada.", {"spark_version": sv}, [row["source_id"]])
+            return decision(val, "Databricks Runtime LTS >= 13.x observed.", {"spark_version": sv}, [row["source_id"]])
         if test == "cluster_autoscaling_or_pool":
             has_auto = bool(row.get("autoscale")) or bool(row.get("instance_pool_id"))
-            return decision(has_auto, "Autoscale o vinculación a Instance Pool observada en el clúster.", {
+            return decision(has_auto, "Autoscale or instance pool binding observed on the cluster.", {
                 "autoscale": row.get("autoscale"), "instance_pool_id": row.get("instance_pool_id"), "num_workers": row.get("num_workers"),
             }, [row["source_id"]])
 
@@ -5071,20 +5041,20 @@ def evaluate_workload_rule(rule, row, raw):
         tasks = row.get("tasks", [])
         if test == "job_uses_job_compute":
             all_purpose_tasks = [t["task_key"] for t in tasks if t.get("existing_cluster_id")]
-            return decision(len(all_purpose_tasks) == 0, "Las tareas del Job usan Job Compute, Serverless, SQL Warehouse o Pipeline en lugar de existing_cluster_id All-Purpose.", {
+            return decision(len(all_purpose_tasks) == 0, "Job tasks use job compute, serverless, a SQL warehouse or a pipeline instead of an all-purpose existing_cluster_id.", {
                 "tasks_total": len(tasks), "tasks_on_all_purpose_cluster": all_purpose_tasks,
             }, [row["source_id"]])
         if test == "job_resilience_settings":
             has_timeout = bool(row.get("timeout_seconds")) or (bool(tasks) and all(bool(t.get("timeout_seconds")) for t in tasks))
             has_notif = row.get("has_notifications") is True
-            return decision(has_timeout and has_notif, "Job configurado con timeout_seconds y notificaciones de fallo/alerta.", {
+            return decision(has_timeout and has_notif, "Job configured with timeout_seconds and failure/alert notifications.", {
                 "job_timeout_seconds": row.get("timeout_seconds"), "has_notifications": has_notif,
             }, [row["source_id"]])
         if test == "job_service_principal_run_as":
             sp = row.get("run_as_service_principal")
             user = row.get("run_as_user_name")
             val = True if sp else False if user else None
-            return decision(val, "Identidad de ejecución run_as del Job asignada a un Service Principal.", {
+            return decision(val, "Job run_as identity assigned to a service principal.", {
                 "run_as_service_principal": sp, "run_as_user_name": user,
             }, [row["source_id"]])
 
@@ -5094,7 +5064,7 @@ def evaluate_workload_rule(rule, row, raw):
         mins = row.get("auto_stop_mins")
         serverless = row.get("enable_serverless_compute") is True or (row.get("warehouse_type") or "").upper() == "PRO"
         val = True if isinstance(mins, (int, float)) and 0 < mins <= 30 and serverless else False
-        return decision(val, "SQL Warehouse con auto_stop_mins <= 30 minutos y modo Serverless/Pro.", {
+        return decision(val, "SQL warehouse with auto_stop_mins <= 30 minutes and serverless/pro mode.", {
             "auto_stop_mins": mins, "enable_serverless_compute": row.get("enable_serverless_compute"), "warehouse_type": row.get("warehouse_type"),
         }, [row["source_id"]])
 
@@ -5104,13 +5074,13 @@ def evaluate_workload_rule(rule, row, raw):
         if row.get("detail_collected") is False:
             return outcome(
                 "not_evaluated",
-                "El detalle spec del pipeline (/api/2.0/pipelines/{id}) no estuvo disponible; el listado resumen no incluye catalog/schema.",
+                "The pipeline spec detail (/api/2.0/pipelines/{id}) wasn't available; the summary list doesn't include catalog/schema.",
                 {"pipeline_id": row.get("id"), "detail_collected": False},
                 [row.get("detail_source_id") or row["source_id"]],
             )
         cat = row.get("catalog")
         val = True if cat and cat.lower() not in ("hive_metastore", "") else False
-        return decision(val, "Pipeline declarativo configurado con catálogo destino en Unity Catalog.", {
+        return decision(val, "Declarative pipeline configured with a target catalog in Unity Catalog.", {
             "catalog": cat, "schema": row.get("schema") or row.get("target"), "target": row.get("target"), "serverless": row.get("serverless"),
         }, [row.get("detail_source_id") or row["source_id"]])
     return None
@@ -5129,24 +5099,24 @@ def evaluate_resource_rule(rule, row, raw):
         val = False if (https is False or tls in ("TLS1_0", "TLS1_1") or pub_blob is True) else (
             True if https is True and tls in ("TLS1_2", "TLS1_3") and pub_blob is False else None
         )
-        return decision(val, "HTTPS obligatorio, TLS >= 1.2 y allowBlobPublicAccess=false en cuenta de almacenamiento asociada.", cfg, [row["source_id"]])
+        return decision(val, "HTTPS required, TLS >= 1.2 and allowBlobPublicAccess=false on the associated storage account.", cfg, [row["source_id"]])
     if test == "storage_shared_key_and_network":
         if rkind != "microsoft.storage/storageaccounts":
             return None
         shared = cfg.get("allowSharedKeyAccess")
         pna = cfg.get("publicNetworkAccess")
         if row.get("name", "").lower() == (raw["workspace"].get("dbfs_storage_account_name") or "").lower():
-            return outcome("not_applicable", "Cuenta DBFS root administrada por la plataforma Azure Databricks.", cfg, [row["source_id"]])
+            return outcome("not_applicable", "DBFS root account managed by the Azure Databricks platform.", cfg, [row["source_id"]])
         val = True if shared is False and pna == "Disabled" else False if shared is True or pna == "Enabled" else None
         return conditional(val, expected(raw, "shared_key_disabled_required") if expected(raw, "shared_key_disabled_required") is not None else True,
-                           "Shared Key y acceso público en cuenta ADLS Gen2 asociada.", cfg, [row["source_id"]])
+                           "Shared key and public access on the associated ADLS Gen2 account.", cfg, [row["source_id"]])
     if test == "keyvault_rbac_and_purge":
         if rkind != "microsoft.keyvault/vaults":
             return None
         rbac = cfg.get("enableRbacAuthorization")
         purge = cfg.get("enablePurgeProtection")
         val = True if rbac is True and purge is True else False if rbac is False or purge is False else None
-        return decision(val, "Key Vault asociado con Azure RBAC y Purge Protection habilitados.", cfg, [row["source_id"]])
+        return decision(val, "Associated key vault with Azure RBAC and purge protection enabled.", cfg, [row["source_id"]])
     if test == "nsg_exposure":
         if rkind != "microsoft.network/networksecuritygroups":
             return None
@@ -5159,7 +5129,7 @@ def evaluate_resource_rule(rule, row, raw):
             ports = ([srule.get("destinationPortRange")] if srule.get("destinationPortRange") else []) + (srule.get("destinationPortRanges") or [])
             if any(s in ("*", "0.0.0.0/0", "::/0", "Internet") for s in srcs) and any(p in ("*", "22", "3389", "0-65535") for p in ports):
                 exposed.append(srule)
-        return decision(len(exposed) == 0, "Reglas Inbound Allow desde Internet hacia puertos administrativos en NSG asociado.", {
+        return decision(len(exposed) == 0, "Inbound Allow rules from the internet to administrative ports on the associated NSG.", {
             "exposed_rules": exposed, "total_rules": len(rules),
         }, [row["source_id"]])
     if test == "private_endpoint_approved":
@@ -5167,14 +5137,14 @@ def evaluate_resource_rule(rule, row, raw):
             return None
         conns = row.get("connections", [])
         val = True if conns and all(c.get("status") == "Approved" for c in conns) else False if conns else None
-        return decision(val, "Estado de aprobación de las conexiones Private Endpoint asociadas.", {"connections": conns}, [row["source_id"]])
+        return decision(val, "Approval state of the associated private endpoint connections.", {"connections": conns}, [row["source_id"]])
     return None
 
 
 def make_check(rule, target_id, target_name, workload_name, evaluation, reference, ws):
     status = evaluation["status"]
     cid = rule["rule_id"] + "-" + hashlib.sha256((ws["id"].lower() + "|" + rule["rule_id"] + "|" + str(target_id)).encode("utf-8")).hexdigest()[:10]
-    sev_labels = {"critical": "Crítica", "high": "Alta", "medium": "Media", "low": "Baja"}
+    sev_labels = {"critical": "Critical", "high": "High", "medium": "Medium", "low": "Low"}
     eff_labels = {"low": "L", "medium": "M", "high": "H"}
     return {
         "check_id": cid,
@@ -5234,7 +5204,7 @@ def evaluate(raw, reference, dep_graph):
             if not matched_any:
                 checks.append(make_check(rule, ws["id"], ws["name"], "", outcome(
                     "not_evaluated",
-                    "No se observaron objetos de carga aplicables o la fuente REST del workspace no estuvo disponible; ausencia no equivale a cumplimiento.",
+                    "No applicable workload objects were observed, or the workspace REST source wasn't available; absence isn't compliance.",
                     {}, ["dbx_clusters", "dbx_jobs", "dbx_pipelines", "dbx_sql_warehouses"],
                 ), reference, ws))
         elif rule["level"] == "resource":
@@ -5247,7 +5217,7 @@ def evaluate(raw, reference, dep_graph):
             if not matched_res:
                 checks.append(make_check(rule, ws["id"], ws["name"], "", outcome(
                     "not_evaluated",
-                    "No se recolectaron recursos ARM asociados de este tipo en el alcance aprobado; no se asume ausencia de riesgo.",
+                    "No associated ARM resources of this type were collected in the approved scope; no absence of risk is assumed.",
                     {}, ["arm_workspace"],
                 ), reference, ws))
     return checks
@@ -5310,16 +5280,16 @@ def finops_for(raw):
             if not isinstance(mins, (int, float)) or mins <= 0 or mins > 60:
                 candidates.append({
                     "id": "FINOPS-CL-" + hashlib.sha256(cl["id"].encode("utf-8")).hexdigest()[:10],
-                    "title": "Revisar autoterminación en clúster interactivo All-Purpose",
+                    "title": "Review auto-termination on the interactive all-purpose cluster",
                     "resource_id": ws["id"] + "/clusters/" + cl["id"],
                     "workload_name": cl["name"],
                     "source_id": cl["source_id"],
-                    "basis": "Configuración observada de autotermination_minutes en /api/2.0/clusters/list; sin estimar ahorro DBU.",
+                    "basis": "autotermination_minutes configuration observed in /api/2.0/clusters/list; DBU savings not estimated.",
                     "value": mins if mins is not None else "disabled",
                     "unit": "minutes",
                     "sample_count": 1,
                     "window": None,
-                    "recommendation": "Ajustar autotermination_minutes (<= 60 min) y aplicar Cluster Policy para contener consumo en inactividad.",
+                    "recommendation": "Set autotermination_minutes (<= 60 min) and apply a cluster policy to limit idle consumption.",
                     "estimated_savings": None,
                 })
     for job in inv.get("jobs", []):
@@ -5327,16 +5297,16 @@ def finops_for(raw):
         if ap_tasks:
             candidates.append({
                 "id": "FINOPS-JOB-" + hashlib.sha256(job["id"].encode("utf-8")).hexdigest()[:10],
-                "title": "Revisar tareas de Job ejecutando sobre clúster All-Purpose",
+                "title": "Review job tasks running on an all-purpose cluster",
                 "resource_id": ws["id"] + "/jobs/" + job["id"],
                 "workload_name": job["name"],
                 "source_id": job["source_id"],
-                "basis": "Tareas con existing_cluster_id observadas en /api/2.1/jobs/list; la tarifa DBU de Jobs Compute/Serverless es inferior a All-Purpose.",
+                "basis": "Tasks with existing_cluster_id observed in /api/2.1/jobs/list; the job compute/serverless DBU rate is lower than all-purpose.",
                 "value": len(ap_tasks),
                 "unit": "tasks_on_all_purpose",
                 "sample_count": 1,
                 "window": None,
-                "recommendation": "Evaluar migración de tareas a job_cluster_key o Jobs Serverless tras validar dependencias de librerías e init scripts.",
+                "recommendation": "Evaluate moving the tasks to job_cluster_key or serverless jobs after validating library and init script dependencies.",
                 "estimated_savings": None,
             })
     for wh in inv.get("sql_warehouses", []):
@@ -5344,16 +5314,16 @@ def finops_for(raw):
         if not isinstance(mins, (int, float)) or mins <= 0 or mins > 30:
             candidates.append({
                 "id": "FINOPS-WH-" + hashlib.sha256(wh["id"].encode("utf-8")).hexdigest()[:10],
-                "title": "Revisar auto_stop_mins en SQL Warehouse",
+                "title": "Review auto_stop_mins on the SQL warehouse",
                 "resource_id": ws["id"] + "/warehouses/" + wh["id"],
                 "workload_name": wh["name"],
                 "source_id": wh["source_id"],
-                "basis": "Configuración auto_stop_mins observada en /api/2.0/sql/warehouses; sin proyectar ahorro monetario.",
+                "basis": "auto_stop_mins configuration observed in /api/2.0/sql/warehouses; no monetary savings projected.",
                 "value": mins if mins is not None else "disabled",
                 "unit": "minutes",
                 "sample_count": 1,
                 "window": None,
-                "recommendation": "Redefinir auto_stop_mins <= 30 min o evaluar Serverless SQL Warehouse.",
+                "recommendation": "Set auto_stop_mins <= 30 min or evaluate a serverless SQL warehouse.",
                 "estimated_savings": None,
             })
     cost_rows = raw.get("cost_rows", [])
@@ -5678,17 +5648,16 @@ def _money(value):
     return round(value, 2) if isinstance(value, (int, float)) else None
 
 
-def es_amount(value, decimals=0):
+def en_amount(value, decimals=0):
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         return "—"
-    formatted = format(round(value, decimals), "," + "." + str(decimals) + "f")
-    return formatted.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+    return format(round(value, decimals), "," + "." + str(decimals) + "f")
 
 
-def es_month(label):
-    names = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+def en_month(label):
+    names = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
     match = re.fullmatch(r"(\d{4})-(\d{2})", str(label or ""))
-    return names[int(match.group(2)) - 1] + " de " + match.group(1) if match and 1 <= int(match.group(2)) <= 12 else str(label)
+    return names[int(match.group(2)) - 1] + " " + match.group(1) if match and 1 <= int(match.group(2)) <= 12 else str(label)
 
 
 def _pct(part, whole):
@@ -5802,9 +5771,9 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
     def workers_label(spec):
         auto = spec.get("autoscale") if isinstance(spec.get("autoscale"), dict) else None
         if auto and auto.get("max_workers"):
-            return str(auto.get("min_workers") or 0) + "–" + str(auto["max_workers"]) + " (autoescalado)"
+            return str(auto.get("min_workers") or 0) + "–" + str(auto["max_workers"]) + " (autoscaling)"
         if spec.get("autoscale_max_workers") and not spec.get("num_workers"):
-            return "hasta " + str(spec["autoscale_max_workers"]) + " (autoescalado)"
+            return "up to " + str(spec["autoscale_max_workers"]) + " (autoscaling)"
         return spec.get("num_workers")
 
     def missing_tags(tags):
@@ -5822,20 +5791,20 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
             profile = daily_profile(daily.get("daily_cluster", {}).get(c["name"]), labels, periods["review_start"])
             saving = profile["weekend_cost"] if off and profile and profile["weekend_cost"] > 0 else None
             add("AUTOTERM_OFF" if off else "AUTOTERM_LONG", "high" if off else "medium",
-                "Clúster interactivo sin autoterminación" if off else "Autoterminación larga en clúster interactivo",
+                "Interactive cluster without auto-termination" if off else "Long auto-termination on an interactive cluster",
                 "AllPurposeCluster", c["id"], c["name"],
                 {"autotermination_minutes": 0 if off else mins, "state": c.get("state"), "uptime_hours": uptime,
                  "active_days": profile and profile["active_days"], "weekend_cost": profile and profile["weekend_cost"]},
                 total(slot), saving, "lower_bound", "weekend_cost",
-                "Configurar autotermination_minutes en " + str(min(30, COST_AUTOTERMINATION_MAX_MINUTES)) + " minutos o menos y fijarlo con una política de cómputo.",
+                "Set autotermination_minutes to " + str(min(30, COST_AUTOTERMINATION_MAX_MINUTES)) + " minutes or less and enforce it with a compute policy.",
                 "autotermination")
         w = workers(c)
         if w and not c.get("instance_pool_id") and not str(c.get("azure_availability") or "ON_DEMAND_AZURE").upper().startswith("SPOT"):
             saving = slot["vm"] * w / (w + 1.0) * COST_SPOT_DISCOUNT if slot and slot["vm"] else None
-            add("NO_SPOT", "low", "Workers sin instancias spot en clúster interactivo", "AllPurposeCluster", c["id"], c["name"],
+            add("NO_SPOT", "low", "Workers without spot instances on an interactive cluster", "AllPurposeCluster", c["id"], c["name"],
                 {"availability": c.get("azure_availability") or "ON_DEMAND_AZURE", "workers": workers_label(c), "vm_cost": slot and _money(slot["vm"])},
                 total(slot), saving, "estimate", "spot_discount",
-                "Usar SPOT_WITH_FALLBACK_AZURE en los workers (first_on_demand=1 mantiene el driver bajo demanda) si la carga tolera reintentos.",
+                "Use SPOT_WITH_FALLBACK_AZURE on the workers (first_on_demand=1 keeps the driver on demand) if the workload tolerates retries.",
                 "spot")
     by_cluster = {}
     for job in inventory.get("jobs", []):
@@ -5849,11 +5818,11 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
         name = cluster["name"] if cluster else cid
         slot = clusters_cost.get(name)
         saving = slot["dbu"] * (1 - COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO) if slot and slot["dbu"] else None
-        add("JOBS_ON_ALL_PURPOSE", "high", "Jobs programados en cómputo interactivo (all-purpose)", "AllPurposeCluster", cid, name,
+        add("JOBS_ON_ALL_PURPOSE", "high", "Scheduled jobs on interactive (all-purpose) compute", "AllPurposeCluster", cid, name,
             {"jobs": sorted(names)[:6], "jobs_count": len(names), "dbu_cost": slot and _money(slot["dbu"])},
             total(slot), saving, "upper_bound", "jobs_dbu_ratio",
-            "Mover las tareas a cómputo de jobs (job_cluster_key) o serverless: la DBU de jobs cuesta en torno a un "
-            + str(round(100 * (1 - COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO))) + " % menos que la all-purpose.",
+            "Move the tasks to job compute (job_cluster_key) or serverless: a jobs DBU costs about "
+            + str(round(100 * (1 - COST_JOBS_TO_ALL_PURPOSE_DBU_RATIO))) + "% less than an all-purpose DBU.",
             "jobs_compute", "M")
     for job in inventory.get("jobs", []):
         slot = jobs_cost.get(job["id"])
@@ -5863,32 +5832,32 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
             top = max(on_demand, key=workers)
             w = workers(top)
             saving = slot["vm"] * w / (w + 1.0) * COST_SPOT_DISCOUNT if slot and slot["vm"] else None
-            add("NO_SPOT", "medium", "Clúster de job sin instancias spot", "Job", job["id"], job["name"],
+            add("NO_SPOT", "medium", "Job cluster without spot instances", "Job", job["id"], job["name"],
                 {"availability": "ON_DEMAND_AZURE", "workers": workers_label(top), "vm_cost": slot and _money(slot["vm"]), "continuous": job.get("continuous")},
                 total(slot), saving, "estimate", "spot_discount",
-                "Usar SPOT_WITH_FALLBACK_AZURE en los workers del job cluster; mantener el driver bajo demanda.", "spot")
+                "Use SPOT_WITH_FALLBACK_AZURE on the job cluster workers; keep the driver on demand.", "spot")
         if job.get("continuous"):
-            add("CONTINUOUS_JOB", "medium", "Job continuo: cómputo encendido todo el mes", "Job", job["id"], job["name"],
+            add("CONTINUOUS_JOB", "medium", "Continuous job: compute on all month", "Job", job["id"], job["name"],
                 {"continuous": True}, total(slot), None, None, None,
-                "Confirmar que necesita latencia continua; si no, usar disparadores programados o por llegada de ficheros.", "streaming", "M")
+                "Confirm that it needs continuous latency; if not, use scheduled or file arrival triggers.", "streaming", "M")
         big = [jc for jc in job.get("job_clusters", []) if (jc.get("autoscale_max_workers") or jc.get("num_workers") or 0) >= 8
                and str(jc.get("runtime_engine") or "").upper() != "PHOTON"]
         if big:
-            add("PHOTON_CANDIDATE", "low", "Job grande sin Photon: evaluar", "Job", job["id"], job["name"],
+            add("PHOTON_CANDIDATE", "low", "Large job without Photon: evaluate", "Job", job["id"], job["name"],
                 {"max_workers": max(jc.get("autoscale_max_workers") or jc.get("num_workers") or 0 for jc in big)},
                 total(slot), None, None, None,
-                "Probar Photon en una ejecución: cuesta más DBU por hora pero suele terminar antes en SQL y ETL.", "photon", "M")
+                "Try Photon on one run: it costs more DBUs per hour but usually finishes sooner on SQL and ETL.", "photon", "M")
     for pool in inventory.get("instance_pools", []):
         slot = pools_cost.get(pool["id"])
         idle_min = pool.get("min_idle_instances") or 0
         if idle_min > 0:
             profile = daily_profile(daily.get("daily_pool", {}).get(pool["id"]), labels, periods["review_start"])
             saving = profile["floor"] * labels["review_days"] if profile and profile["floor"] > 0 else None
-            add("POOL_IDLE", "medium", "Pool con instancias inactivas siempre encendidas", "InstancePool", pool["id"], pool["name"],
+            add("POOL_IDLE", "medium", "Pool with idle instances always on", "InstancePool", pool["id"], pool["name"],
                 {"min_idle_instances": idle_min, "idle_now": (pool.get("stats") or {}).get("idle_count"),
                  "idle_autotermination_minutes": pool.get("idle_instance_autotermination_minutes"), "daily_floor": profile and profile["floor"]},
                 total(slot), saving, "estimate", "daily_floor",
-                "Bajar min_idle_instances a 0 (o al mínimo justificado) y la autoterminación de inactivas a 10-15 minutos.", "pools")
+                "Lower min_idle_instances to 0 (or the minimum you can justify) and set idle instance auto-termination between 10 and 15 minutes.", "pools")
     for wh in inventory.get("sql_warehouses", []):
         slot = warehouses_cost.get(wh["id"])
         mins = wh.get("auto_stop_mins")
@@ -5896,31 +5865,31 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
             never = not isinstance(mins, (int, float)) or mins <= 0
             saving = slot["review"] * weekend_share if never and slot and slot["review"] else None
             add("WAREHOUSE_AUTOSTOP", "high" if never else "medium",
-                "SQL warehouse sin auto-stop" if never else "Auto-stop largo en SQL warehouse", "SqlWarehouse", wh["id"], wh["name"],
+                "SQL warehouse without auto-stop" if never else "Long auto-stop on a SQL warehouse", "SqlWarehouse", wh["id"], wh["name"],
                 {"auto_stop_mins": mins or 0, "state": wh.get("state"), "serverless": wh.get("enable_serverless_compute")},
                 total(slot), saving, "estimate", "always_on_weekends",
-                "Configurar auto-stop en 10-" + str(COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES) + " minutos (serverless arranca en segundos).", "warehouse")
+                "Set auto-stop between 10 and " + str(COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES) + " minutes (serverless starts in seconds).", "warehouse")
         if wh.get("enable_serverless_compute") is not True:
-            add("WAREHOUSE_SERVERLESS", "low", "SQL warehouse clásico o pro: evaluar serverless", "SqlWarehouse", wh["id"], wh["name"],
+            add("WAREHOUSE_SERVERLESS", "low", "Classic or pro SQL warehouse: evaluate serverless", "SqlWarehouse", wh["id"], wh["name"],
                 {"warehouse_type": wh.get("warehouse_type"), "cluster_size": wh.get("cluster_size")}, total(slot), None, None, None,
-                "Evaluar serverless: arranque en segundos, auto-stop corto y sin VM en vuestra suscripción.", "warehouse")
+                "Evaluate serverless: it starts in seconds, has a short auto-stop and runs no VMs in your subscription.", "warehouse")
     no_policy = [c for c in ap if not c.get("policy_id")]
     if no_policy:
         cost = sum(clusters_cost[c["name"]]["review"] for c in no_policy if c["name"] in clusters_cost)
-        add("NO_POLICY", "low", "Clústeres interactivos sin política de cómputo", "AllPurposeCluster", "no-policy",
-            str(len(no_policy)) + (" clúster" if len(no_policy) == 1 else " clústeres"),
+        add("NO_POLICY", "low", "Interactive clusters without a compute policy", "AllPurposeCluster", "no-policy",
+            str(len(no_policy)) + (" cluster" if len(no_policy) == 1 else " clusters"),
             {"objects": [c["name"] for c in no_policy][:8]}, cost, None, None, None,
-            "Asignar una política que fije autoterminación, tamaños, spot y etiquetas de imputación.", "policies")
+            "Assign a policy that sets auto-termination, sizes, spot and allocation tags.", "policies")
     if tags_wanted:
         weak = [p for p in inventory.get("cluster_policies", []) if p.get("enforced_tag_keys") is not None
                 and [t for t in tags_wanted if t not in {k.lower() for k in p["enforced_tag_keys"]}]]
         if weak:
-            add("POLICY_TAGS", "medium", "Políticas que no obligan las etiquetas de imputación", "ClusterPolicy", "policy-tags",
-                str(len(weak)) + (" política" if len(weak) == 1 else " políticas"),
+            add("POLICY_TAGS", "medium", "Policies that don't enforce the allocation tags", "ClusterPolicy", "policy-tags",
+                str(len(weak)) + (" policy" if len(weak) == 1 else " policies"),
                 {"objects": [p["name"] for p in weak][:8], "allocation_tags": COST_ALLOCATION_TAGS}, None, None, None, None,
-                "Añadir custom_tags." + COST_ALLOCATION_TAGS[0] + " (y las demás) como etiquetas fijas u obligatorias en cada política.", "policies")
+                "Add custom_tags." + COST_ALLOCATION_TAGS[0] + " (and the others) as fixed or required tags in each policy.", "policies")
         groups = (
-            ("AllPurposeCluster", ("clúster interactivo", "clústeres interactivos"), [(c["name"], c.get("custom_tags"), total(clusters_cost.get(c["name"]))) for c in ap]),
+            ("AllPurposeCluster", ("interactive cluster", "interactive clusters"), [(c["name"], c.get("custom_tags"), total(clusters_cost.get(c["name"]))) for c in ap]),
             ("Job", ("job", "jobs"), [(j["name"], job_effective_tags(j), total(jobs_cost.get(j["id"])))
                                        for j in inventory.get("jobs", []) if j.get("job_clusters")]),
             ("InstancePool", ("pool", "pools"), [(p["name"], p.get("custom_tags"), total(pools_cost.get(p["id"]))) for p in inventory.get("instance_pools", [])]),
@@ -5932,16 +5901,16 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
                 cost = sum(c for _, c, _ in missing if c)
                 untagged = sum(1 for _, _, m in missing if len(m) == len(COST_ALLOCATION_TAGS))
                 add("MISSING_ALLOCATION_TAGS", "medium" if cost else "low",
-                    ("Sin etiquetas de imputación en " if untagged == len(missing) else "Etiquetas de imputación incompletas en ") + labels[1],
+                    ("No allocation tags on " if untagged == len(missing) else "Incomplete allocation tags on ") + labels[1],
                     kind, "tags-" + kind, str(len(missing)) + " " + labels[len(missing) != 1],
-                    {"objects": [n + " (falta " + ", ".join(m) + ")" for n, _, m in missing][:8], "allocation_tags": COST_ALLOCATION_TAGS},
+                    {"objects": [n + " (missing " + ", ".join(m) + ")" for n, _, m in missing][:8], "allocation_tags": COST_ALLOCATION_TAGS},
                     cost or None, None, None, None,
                     {
-                        "AllPurposeCluster": "Añadir las etiquetas que faltan en custom_tags de cada clúster y hacerlas obligatorias con una política de cómputo.",
-                        "Job": "Añadir las etiquetas que faltan como etiquetas del job (se propagan a sus job clusters) o en custom_tags del job cluster.",
-                        "InstancePool": "Añadir las etiquetas que faltan en custom_tags del pool: sus VM solo heredan las etiquetas del pool, no las del clúster.",
-                        "SqlWarehouse": "Añadir las etiquetas que faltan en las etiquetas del SQL warehouse.",
-                    }[kind] + " Etiquetas: " + ", ".join(COST_ALLOCATION_TAGS) + ".",
+                        "AllPurposeCluster": "Add the missing tags to each cluster's custom_tags and make them required with a compute policy.",
+                        "Job": "Add the missing tags as job tags (they propagate to its job clusters) or in the job cluster's custom_tags.",
+                        "InstancePool": "Add the missing tags to the pool's custom_tags: its VMs inherit only the pool tags, not the cluster tags.",
+                        "SqlWarehouse": "Add the missing tags to the SQL warehouse tags.",
+                    }[kind] + " Tags: " + ", ".join(COST_ALLOCATION_TAGS) + ".",
                     "tags")
     versions = set((catalog or {}).get("spark_versions") or [])
     by_version, by_node = {}, {}
@@ -5956,17 +5925,17 @@ def cost_signals(inventory, catalog, tables, labels, periods, reference):
         if node and (info.get("is_deprecated") or OLD_NODE_RE.match(node)):
             by_node.setdefault(node, set()).add(name)
     for version, names in sorted(by_version.items()):
-        add("RUNTIME_EOS", "medium", "Runtime fuera de soporte" if versions else "Runtime antiguo", "Runtime", version, version,
+        add("RUNTIME_EOS", "medium", "Unsupported runtime" if versions else "Old runtime", "Runtime", version, version,
             {"objects": sorted(names)[:8], "supported_list_checked": bool(versions)}, None, None, None, None,
-            "Actualizar a una versión LTS soportada (más rendimiento por DBU y parches de seguridad).", "runtime", "M")
+            "Upgrade to a supported LTS version (more performance per DBU and security patches).", "runtime", "M")
     vm_sizes = tables["vm_sizes"] if tables else {}
     for node, names in sorted(by_node.items()):
         size = _vm_meter(node)
         cost = sum(v for meter, v in vm_sizes.items() if (meter or "").lower().startswith(size)) if vm_sizes else None
-        add("OLD_NODE_FAMILY", "low", "Familia de VM antigua o retirada", "NodeType", node, node,
+        add("OLD_NODE_FAMILY", "low", "Old or retired VM family", "NodeType", node, node,
             {"objects": sorted(names)[:8], "deprecated": bool(((catalog or {}).get("node_types") or {}).get(node, {}).get("is_deprecated"))},
             cost or None, None, None, None,
-            "Comparar con la generación actual (por ejemplo Dds_v5 o Eds_v5): suele dar más rendimiento por euro.", "node_types", "M")
+            "Compare with the current generation (for example Dds_v5 or Eds_v5): it usually gives better price-performance.", "node_types", "M")
     best = {}
     for s in signals:
         if s["estimated_monthly_saving"]:
@@ -6036,9 +6005,9 @@ def attribution_rows(dimension, slots, inventory, review_total):
     rows = []
     for row in grouped.values():
         if row["kind"] == "job_runs":
-            row["name"] = "Clústeres efímeros de jobs (" + str(row["count"]) + (" ejecución)" if row["count"] == 1 else " ejecuciones)")
+            row["name"] = "Ephemeral job clusters (" + str(row["count"]) + (" run)" if row["count"] == 1 else " runs)")
         elif row["kind"] == "pipeline_runs":
-            row["name"] = "Clústeres de pipelines (DLT)"
+            row["name"] = "Pipeline clusters (DLT)"
         row["change"] = round(row["total"] - row["previous_total"], 2)
         row["change_pct"] = _pct(row["total"] - row["previous_total"], row["previous_total"])
         row["share"] = _pct(row["total"], review_total)
@@ -6247,36 +6216,36 @@ def demo_cost_data(reference, inventory):
     wh = lambda wid: {"Vendor": "Databricks", "SqlEndpointId": wid}
     pool = lambda pid: {"Vendor": "Databricks", "DatabricksInstancePoolId": pid}
     items = [
-        (ap("bi-ventas-compartido"), {"team": "ventas", "project": "cuadros-mando"}, db, "Premium All-purpose Compute DBU", 3360, 2640, "always"),
-        (ap("bi-ventas-compartido"), {"team": "ventas", "project": "cuadros-mando"}, vm, "DS4 v2", 2050, 1610, "always"),
-        (ap("bi-ventas-compartido"), {"team": "ventas", "project": "cuadros-mando"}, st, "P10 LRS Disk", 140, 130, "always"),
-        (ap("ds-prevision-demanda"), {"team": "data-science", "project": "prevision-demanda", "cc": "CC-410"}, db, "Premium All-purpose Photon DBU", 820, 760, "weekdays"),
-        (ap("ds-prevision-demanda"), {"team": "data-science", "project": "prevision-demanda", "cc": "CC-410"}, vm, "E8ds v5 Spot", 310, 290, "weekdays"),
-        (ap("ds-prevision-demanda"), {"team": "data-science", "project": "prevision-demanda", "cc": "CC-410"}, st, "P10 LRS Disk", 45, 40, "weekdays"),
-        (ap("ingenieria-adhoc"), {"team": "ingenieria"}, db, "Premium All-purpose Compute DBU", 410, 450, "light"),
-        (ap("ingenieria-adhoc"), {"team": "ingenieria"}, vm, "D8ds v5", 260, 280, "light"),
-        (ap("ingenieria-adhoc"), {"team": "ingenieria"}, st, "P10 LRS Disk", 25, 25, "light"),
-        (ap("legado-informes"), {}, db, "Premium All-purpose Compute DBU", 190, 260, "sparse"),
-        (ap("legado-informes"), {}, vm, "DS3 v2", 120, 150, "sparse"),
-        (ap("legado-informes"), {}, st, "P10 LRS Disk", 15, 15, "sparse"),
-        (ap("finanzas-cierre"), {"team": "finanzas", "project": "cierre-mensual", "cc": "CC-200"}, db, "Premium All-purpose Compute DBU", 260, 180, "month_end"),
+        (ap("bi-sales-shared"), {"team": "sales", "project": "dashboards"}, db, "Premium All-purpose Compute DBU", 3360, 2640, "always"),
+        (ap("bi-sales-shared"), {"team": "sales", "project": "dashboards"}, vm, "DS4 v2", 2050, 1610, "always"),
+        (ap("bi-sales-shared"), {"team": "sales", "project": "dashboards"}, st, "P10 LRS Disk", 140, 130, "always"),
+        (ap("ds-demand-forecast"), {"team": "data-science", "project": "demand-forecast", "cc": "CC-410"}, db, "Premium All-purpose Photon DBU", 820, 760, "weekdays"),
+        (ap("ds-demand-forecast"), {"team": "data-science", "project": "demand-forecast", "cc": "CC-410"}, vm, "E8ds v5 Spot", 310, 290, "weekdays"),
+        (ap("ds-demand-forecast"), {"team": "data-science", "project": "demand-forecast", "cc": "CC-410"}, st, "P10 LRS Disk", 45, 40, "weekdays"),
+        (ap("engineering-adhoc"), {"team": "engineering"}, db, "Premium All-purpose Compute DBU", 410, 450, "light"),
+        (ap("engineering-adhoc"), {"team": "engineering"}, vm, "D8ds v5", 260, 280, "light"),
+        (ap("engineering-adhoc"), {"team": "engineering"}, st, "P10 LRS Disk", 25, 25, "light"),
+        (ap("legacy-reports"), {}, db, "Premium All-purpose Compute DBU", 190, 260, "sparse"),
+        (ap("legacy-reports"), {}, vm, "DS3 v2", 120, 150, "sparse"),
+        (ap("legacy-reports"), {}, st, "P10 LRS Disk", 15, 15, "sparse"),
+        (ap("finance-close"), {"team": "finance", "project": "month-end-close", "cc": "CC-200"}, db, "Premium All-purpose Compute DBU", 260, 180, "month_end"),
         (pool("1015-090000-pool-general"), {}, vm, "D4ds v5", 1180, 1120, "pool"),
         (pool("1015-090000-pool-general"), {}, st, "P10 LRS Disk", 60, 58, "pool"),
-        (pool("1015-091500-pool-etlnoche"), {"team": "ingenieria"}, vm, "E8ds v5 Spot", 220, 240, "nightly"),
-        (job("1001", "318842"), {"team": "ventas", "project": "etl-ventas", "cc": "CC-100"}, db, "Premium Jobs Compute DBU", 1640, 1480, "nightly"),
-        (job("1001", "318842"), {"team": "ventas", "project": "etl-ventas", "cc": "CC-100"}, vm, "D8ds v5", 1020, 930, "nightly"),
-        (job("1001", "318842"), {"team": "ventas", "project": "etl-ventas", "cc": "CC-100"}, st, "P10 LRS Disk", 70, 65, "nightly"),
-        (job("1004", "551220"), {"team": "data-science", "project": "prevision-demanda"}, db, "Premium Jobs Compute DBU", 690, 640, "nightly"),
-        (job("1004", "551220"), {"team": "data-science", "project": "prevision-demanda"}, vm, "E8ds v5 Spot", 160, 150, "nightly"),
+        (pool("1015-091500-pool-etlnight"), {"team": "engineering"}, vm, "E8ds v5 Spot", 220, 240, "nightly"),
+        (job("1001", "318842"), {"team": "sales", "project": "etl-sales", "cc": "CC-100"}, db, "Premium Jobs Compute DBU", 1640, 1480, "nightly"),
+        (job("1001", "318842"), {"team": "sales", "project": "etl-sales", "cc": "CC-100"}, vm, "D8ds v5", 1020, 930, "nightly"),
+        (job("1001", "318842"), {"team": "sales", "project": "etl-sales", "cc": "CC-100"}, st, "P10 LRS Disk", 70, 65, "nightly"),
+        (job("1004", "551220"), {"team": "data-science", "project": "demand-forecast"}, db, "Premium Jobs Compute DBU", 690, 640, "nightly"),
+        (job("1004", "551220"), {"team": "data-science", "project": "demand-forecast"}, vm, "E8ds v5 Spot", 160, 150, "nightly"),
         (job("1005", "77310"), {}, db, "Premium Jobs Compute DBU", 380, 300, "nightly"),
         (job("1005", "77310"), {}, vm, "DS3 v2", 240, 190, "nightly"),
-        (job("1006", "1"), {"team": "ingenieria", "project": "ingesta-erp", "cc": "CC-300"}, db, "Premium Jobs Compute DBU", 520, 505, "always"),
-        (job("1006", "1"), {"team": "ingenieria", "project": "ingesta-erp", "cc": "CC-300"}, vm, "D4ds v5", 300, 290, "always"),
-        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-pedidos"}, {"team": "ingenieria", "project": "ingesta-erp"}, db, "Premium DLT Core Compute DBU", 430, 380, "nightly"),
-        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-pedidos"}, {"team": "ingenieria", "project": "ingesta-erp"}, vm, "D4ds v5", 140, 120, "nightly"),
-        (wh("a1b2c3d4e5f60718"), {"team": "ventas"}, db, "Premium SQL Compute Pro DBU", 1920, 1700, "always"),
-        (wh("a1b2c3d4e5f60718"), {"team": "ventas"}, vm, "E8ds v5", 640, 560, "always"),
-        (wh("b2c3d4e5f6071829"), {"team": "finanzas", "project": "cierre-mensual", "cc": "CC-200"}, db, "Premium Serverless SQL DBU", 640, 590, "weekdays"),
+        (job("1006", "1"), {"team": "engineering", "project": "erp-ingest", "cc": "CC-300"}, db, "Premium Jobs Compute DBU", 520, 505, "always"),
+        (job("1006", "1"), {"team": "engineering", "project": "erp-ingest", "cc": "CC-300"}, vm, "D4ds v5", 300, 290, "always"),
+        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-orders"}, {"team": "engineering", "project": "erp-ingest"}, db, "Premium DLT Core Compute DBU", 430, 380, "nightly"),
+        ({"Vendor": "Databricks", "ClusterName": "dlt-execution-0c1d2e3f-orders"}, {"team": "engineering", "project": "erp-ingest"}, vm, "D4ds v5", 140, 120, "nightly"),
+        (wh("a1b2c3d4e5f60718"), {"team": "sales"}, db, "Premium SQL Compute Pro DBU", 1920, 1700, "always"),
+        (wh("a1b2c3d4e5f60718"), {"team": "sales"}, vm, "E8ds v5", 640, 560, "always"),
+        (wh("b2c3d4e5f6071829"), {"team": "finance", "project": "month-end-close", "cc": "CC-200"}, db, "Premium Serverless SQL DBU", 640, 590, "weekdays"),
         ({}, {}, db, "Premium Serverless Compute DBU", 520, 260, "weekdays"),
         ({}, {}, st, "Hot LRS Data Stored", 420, 400, "always"),
         ({}, {}, "Bandwidth", "Standard Data Transfer Out", 180, 170, "always"),
@@ -6323,7 +6292,7 @@ def demo_cost_data(reference, inventory):
                         "pages": 1, "seconds": 1.4, "error": None}
     return {
         "metric": COST_METRIC, "periods": labels, "queries": queries,
-        "scope": {"subscription_id": DEMO_SUBSCRIPTION, "resource_ids": [], "managed_resource_group": "databricks-rg-dbx-analitica-prod"},
+        "scope": {"subscription_id": DEMO_SUBSCRIPTION, "resource_ids": [], "managed_resource_group": "databricks-rg-dbx-analytics-prod"},
     }
 
 
@@ -6331,9 +6300,9 @@ def demo_system_billing(reference):
     periods = cost_periods(reference)
     rows = []
     for job_id, name, runs, cost, sku, user in (
-        ("1001", "etl-ventas-diario", 31, 52.9, "PREMIUM_JOBS_COMPUTE", "sp-etl-produccion"),
-        ("1004", "prevision-demanda-semanal", 4, 172.5, "PREMIUM_JOBS_COMPUTE", "luis.martin@example.com"),
-        ("1005", "calidad-datos-silver", 31, 12.3, "PREMIUM_JOBS_COMPUTE", "jorge.lopez@example.com"),
+        ("1001", "etl-sales-daily", 31, 52.9, "PREMIUM_JOBS_COMPUTE", "sp-etl-production"),
+        ("1004", "demand-forecast-weekly", 4, 172.5, "PREMIUM_JOBS_COMPUTE", "luis.martin@example.com"),
+        ("1005", "data-quality-silver", 31, 12.3, "PREMIUM_JOBS_COMPUTE", "jorge.lopez@example.com"),
     ):
         for n in range(min(runs, 6)):
             rows.append({"row_type": "run", "product": "JOBS", "sku": sku, "cluster_id": None, "job_id": job_id, "job_run_id": str(700000 + int(job_id) * 10 + n),
@@ -6344,7 +6313,7 @@ def demo_system_billing(reference):
     rows.append({"row_type": "run", "product": "SQL", "sku": "PREMIUM_SQL_PRO_COMPUTE", "cluster_id": None, "job_id": None, "job_run_id": None,
                  "warehouse_id": "a1b2c3d4e5f60718", "pipeline_id": None, "run_as": None, "dbus": 3740.0, "list_cost": 2057.0, "currency": "USD"})
     rows.sort(key=lambda r: -r["list_cost"])
-    for user, dbus, cost in (("ana.garcia@example.com", 6545.5, 3600.0), ("sp-etl-produccion", 5880.0, 1764.0), ("luis.martin@example.com", 3790.0, 1595.0),
+    for user, dbus, cost in (("ana.garcia@example.com", 6545.5, 3600.0), ("sp-etl-production", 5880.0, 1764.0), ("luis.martin@example.com", 3790.0, 1595.0),
                              ("marta.ruiz@example.com", 800.0, 440.0), ("jorge.lopez@example.com", 1615.0, 650.0)):
         rows.append({"row_type": "user", "product": None, "sku": None, "cluster_id": None, "job_id": None, "job_run_id": None, "warehouse_id": None,
                      "pipeline_id": None, "run_as": user, "dbus": dbus, "list_cost": cost, "currency": "USD"})
@@ -6359,7 +6328,7 @@ def demo_system_billing(reference):
 
 def demo_raw(reference):
     """Complete SIMULATED workspace (operation=self_test): no network, no configuration, clearly labelled everywhere."""
-    sub, rg, name, host = DEMO_SUBSCRIPTION, "rg-datos-prod", "dbx-analitica-prod", "adb-1234567890123456.7.azuredatabricks.net"
+    sub, rg, name, host = DEMO_SUBSCRIPTION, "rg-data-prod", "dbx-analytics-prod", "adb-1234567890123456.7.azuredatabricks.net"
     base = "/subscriptions/" + sub + "/resourceGroups/" + rg + "/providers/"
     config = {
         "name": name, "resource_group": rg, "workspace_host": host, "environment": "PRODUCTION", "auth_mode": "same_tenant_uami",
@@ -6370,8 +6339,8 @@ def demo_raw(reference):
         "sre_tenant_id": DEMO_TENANT, "target_tenant_id": DEMO_TENANT, "cross_tenant": False, "subscription_id": sub,
         "id": base + "Microsoft.Databricks/workspaces/" + name,
     }
-    vnet, ac = base + "Microsoft.Network/virtualNetworks/vnet-datos-prod", base + "Microsoft.Databricks/accessConnectors/ac-datos-prod"
-    nsg, st, kv = base + "Microsoft.Network/networkSecurityGroups/nsg-dbx-prod", base + "Microsoft.Storage/storageAccounts/stlagodatosprod", base + "Microsoft.KeyVault/vaults/kv-datos-prod"
+    vnet, ac = base + "Microsoft.Network/virtualNetworks/vnet-data-prod", base + "Microsoft.Databricks/accessConnectors/ac-data-prod"
+    nsg, st, kv = base + "Microsoft.Network/networkSecurityGroups/nsg-dbx-prod", base + "Microsoft.Storage/storageAccounts/stdatalakeprod", base + "Microsoft.KeyVault/vaults/kv-data-prod"
     ws = normalize_workspace({
         "id": config["id"], "name": name, "location": "westeurope", "sku": {"name": "premium"},
         "properties": {
@@ -6386,42 +6355,42 @@ def demo_raw(reference):
     }, "arm_workspace", reference, config)
     related = [normalize_resource(item, "arm_resource_" + str(i + 1), reference, config, {"type": "direct_reference", "source_id": "arm_workspace", "field": field})
                for i, (item, field) in enumerate((
-                   ({"id": vnet, "name": "vnet-datos-prod", "location": "westeurope", "properties": {"addressSpace": {"addressPrefixes": ["10.20.0.0/16"]},
+                   ({"id": vnet, "name": "vnet-data-prod", "location": "westeurope", "properties": {"addressSpace": {"addressPrefixes": ["10.20.0.0/16"]},
                      "subnets": [{"id": vnet + "/subnets/snet-dbx-host"}, {"id": vnet + "/subnets/snet-dbx-container"}]}}, "parameters.customVirtualNetworkId"),
                    ({"id": vnet + "/subnets/snet-dbx-host", "name": "snet-dbx-host", "properties": {"addressPrefix": "10.20.1.0/24", "networkSecurityGroup": {"id": nsg},
                      "delegations": [{"name": "dbx", "properties": {"serviceName": "Microsoft.Databricks/workspaces"}}]}}, "parameters.customPublicSubnetName"),
                    ({"id": vnet + "/subnets/snet-dbx-container", "name": "snet-dbx-container", "properties": {"addressPrefix": "10.20.2.0/24", "networkSecurityGroup": {"id": nsg},
                      "delegations": [{"name": "dbx", "properties": {"serviceName": "Microsoft.Databricks/workspaces"}}]}}, "parameters.customPrivateSubnetName"),
                    ({"id": nsg, "name": "nsg-dbx-prod", "properties": {"securityRules": []}}, "nsg_id"),
-                   ({"id": ac, "name": "ac-datos-prod", "identity": {"type": "SystemAssigned"}, "properties": {"provisioningState": "Succeeded"}}, "accessConnector.id"),
-                   ({"id": st, "name": "stlagodatosprod", "sku": {"name": "Standard_ZRS"}, "properties": {"supportsHttpsTrafficOnly": True, "minimumTlsVersion": "TLS1_2",
+                   ({"id": ac, "name": "ac-data-prod", "identity": {"type": "SystemAssigned"}, "properties": {"provisioningState": "Succeeded"}}, "accessConnector.id"),
+                   ({"id": st, "name": "stdatalakeprod", "sku": {"name": "Standard_ZRS"}, "properties": {"supportsHttpsTrafficOnly": True, "minimumTlsVersion": "TLS1_2",
                      "allowBlobPublicAccess": False, "allowSharedKeyAccess": True, "publicNetworkAccess": "Enabled", "isHnsEnabled": True,
-                     "primaryEndpoints": {"dfs": "https://stlagodatosprod.dfs.core.windows.net/"}}}, "approved_related_resource_ids"),
-                   ({"id": kv, "name": "kv-datos-prod", "properties": {"enableRbacAuthorization": True, "enablePurgeProtection": True, "enableSoftDelete": True,
-                     "publicNetworkAccess": "Disabled", "vaultUri": "https://kv-datos-prod.vault.azure.net/"}}, "keyvault_metadata.resource_id"),
+                     "primaryEndpoints": {"dfs": "https://stdatalakeprod.dfs.core.windows.net/"}}}, "approved_related_resource_ids"),
+                   ({"id": kv, "name": "kv-data-prod", "properties": {"enableRbacAuthorization": True, "enablePurgeProtection": True, "enableSoftDelete": True,
+                     "publicNetworkAccess": "Disabled", "vaultUri": "https://kv-data-prod.vault.azure.net/"}}, "keyvault_metadata.resource_id"),
                ))]
     day_ms = 86400000
     now_ms = int(datetime.fromisoformat(reference.replace("Z", "+00:00")).timestamp() * 1000)
     tags = lambda **kw: {COST_ALLOCATION_TAGS[i]: kw[r] for i, r in enumerate(("team", "project", "cc")) if len(COST_ALLOCATION_TAGS) > i and r in kw}
     cluster_specs = [
-        {"cluster_id": "0915-081203-bivts01", "cluster_name": "bi-ventas-compartido", "cluster_source": "UI", "state": "RUNNING", "spark_version": "13.3.x-scala2.12",
+        {"cluster_id": "0915-081203-bivts01", "cluster_name": "bi-sales-shared", "cluster_source": "UI", "state": "RUNNING", "spark_version": "13.3.x-scala2.12",
          "node_type_id": "Standard_DS4_v2", "autoscale": {"min_workers": 2, "max_workers": 8}, "autotermination_minutes": 0, "data_security_mode": "USER_ISOLATION",
-         "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="ventas", project="cuadros-mando"),
+         "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="sales", project="dashboards"),
          "creator_user_name": "ana.garcia@example.com", "start_time": now_ms - 40 * day_ms, "last_restarted_time": now_ms - 9 * day_ms},
-        {"cluster_id": "0915-091530-dsprv02", "cluster_name": "ds-prevision-demanda", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "15.4.x-cpu-ml-scala2.12",
-         "node_type_id": "Standard_E8ds_v5", "num_workers": 4, "autotermination_minutes": 120, "data_security_mode": "SINGLE_USER", "policy_id": "POL-CIENCIA-DATOS",
+        {"cluster_id": "0915-091530-dsprv02", "cluster_name": "ds-demand-forecast", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "15.4.x-cpu-ml-scala2.12",
+         "node_type_id": "Standard_E8ds_v5", "num_workers": 4, "autotermination_minutes": 120, "data_security_mode": "SINGLE_USER", "policy_id": "POL-DATA-SCIENCE",
          "runtime_engine": "PHOTON", "azure_attributes": {"availability": "SPOT_WITH_FALLBACK_AZURE", "first_on_demand": 1},
-         "custom_tags": tags(team="data-science", project="prevision-demanda", cc="CC-410"), "creator_user_name": "luis.martin@example.com"},
-        {"cluster_id": "0915-102244-ingad03", "cluster_name": "ingenieria-adhoc", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "14.3.x-scala2.12",
+         "custom_tags": tags(team="data-science", project="demand-forecast", cc="CC-410"), "creator_user_name": "luis.martin@example.com"},
+        {"cluster_id": "0915-102244-ingad03", "cluster_name": "engineering-adhoc", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "14.3.x-scala2.12",
          "node_type_id": "Standard_D8ds_v5", "autoscale": {"min_workers": 1, "max_workers": 4}, "autotermination_minutes": 30, "data_security_mode": "USER_ISOLATION",
-         "policy_id": "POL-USO-PERSONAL", "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="ingenieria"),
+         "policy_id": "POL-PERSONAL-USE", "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "custom_tags": tags(team="engineering"),
          "creator_user_name": "marta.ruiz@example.com"},
-        {"cluster_id": "0915-110001-legin04", "cluster_name": "legado-informes", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "10.4.x-scala2.12",
+        {"cluster_id": "0915-110001-legin04", "cluster_name": "legacy-reports", "cluster_source": "UI", "state": "TERMINATED", "spark_version": "10.4.x-scala2.12",
          "node_type_id": "Standard_DS3_v2", "num_workers": 2, "autotermination_minutes": 60, "data_security_mode": "NONE",
          "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "creator_user_name": "jorge.lopez@example.com"},
-        {"cluster_id": "0915-120000-fincr05", "cluster_name": "finanzas-cierre", "cluster_source": "API", "state": "TERMINATED", "spark_version": "15.4.x-scala2.12",
-         "node_type_id": "Standard_D4ds_v5", "num_workers": 2, "autotermination_minutes": 20, "data_security_mode": "USER_ISOLATION", "policy_id": "POL-USO-PERSONAL",
-         "instance_pool_id": "1015-090000-pool-general", "custom_tags": tags(team="finanzas", project="cierre-mensual", cc="CC-200"),
+        {"cluster_id": "0915-120000-fincr05", "cluster_name": "finance-close", "cluster_source": "API", "state": "TERMINATED", "spark_version": "15.4.x-scala2.12",
+         "node_type_id": "Standard_D4ds_v5", "num_workers": 2, "autotermination_minutes": 20, "data_security_mode": "USER_ISOLATION", "policy_id": "POL-PERSONAL-USE",
+         "instance_pool_id": "1015-090000-pool-general", "custom_tags": tags(team="finance", project="month-end-close", cc="CC-200"),
          "creator_user_name": "elena.sanz@example.com"},
         {"cluster_id": "1103-020000-job1004", "cluster_name": "job-1004-run-551220", "cluster_source": "JOB", "state": "TERMINATED", "spark_version": "15.4.x-cpu-ml-scala2.12",
          "node_type_id": "Standard_E8ds_v5", "num_workers": 6, "data_security_mode": "SINGLE_USER"},
@@ -6431,61 +6400,61 @@ def demo_raw(reference):
         {"instance_pool_id": "1015-090000-pool-general", "instance_pool_name": "pool-general", "node_type_id": "Standard_D4ds_v5", "min_idle_instances": 4,
          "max_capacity": 20, "idle_instance_autotermination_minutes": 60, "azure_attributes": {"availability": "ON_DEMAND_AZURE"}, "state": "ACTIVE",
          "stats": {"used_count": 1, "idle_count": 4}},
-        {"instance_pool_id": "1015-091500-pool-etlnoche", "instance_pool_name": "pool-etl-noche", "node_type_id": "Standard_E8ds_v5", "min_idle_instances": 0,
+        {"instance_pool_id": "1015-091500-pool-etlnight", "instance_pool_name": "pool-etl-night", "node_type_id": "Standard_E8ds_v5", "min_idle_instances": 0,
          "max_capacity": 30, "idle_instance_autotermination_minutes": 15, "azure_attributes": {"availability": "SPOT_WITH_FALLBACK_AZURE"}, "state": "ACTIVE",
-         "custom_tags": tags(team="ingenieria"), "stats": {"used_count": 0, "idle_count": 0}},
+         "custom_tags": tags(team="engineering"), "stats": {"used_count": 0, "idle_count": 0}},
     )]
     tag_rules = lambda *keys: {"custom_tags." + COST_ALLOCATION_TAGS[i]: {"type": "unlimited", "isOptional": False} for i in keys if len(COST_ALLOCATION_TAGS) > i}
     policies = [normalize_policy(p, "dbx_cluster_policies", reference, config) for p in (
-        {"policy_id": "POL-USO-PERSONAL", "name": "pol-uso-personal", "policy_family_id": "personal-vm",
+        {"policy_id": "POL-PERSONAL-USE", "name": "pol-personal-use", "policy_family_id": "personal-vm",
          "definition": json.dumps({**tag_rules(0), "autotermination_minutes": {"type": "fixed", "value": 30}})},
-        {"policy_id": "POL-CIENCIA-DATOS", "name": "pol-ciencia-datos", "definition": json.dumps({**tag_rules(0, 1), "autotermination_minutes": {"type": "range", "maxValue": 120}})},
-        {"policy_id": "POL-JOBS-PRODUCCION", "name": "pol-jobs-produccion", "definition": json.dumps(tag_rules(0, 1, 2))},
+        {"policy_id": "POL-DATA-SCIENCE", "name": "pol-data-science", "definition": json.dumps({**tag_rules(0, 1), "autotermination_minutes": {"type": "range", "maxValue": 120}})},
+        {"policy_id": "POL-JOBS-PRODUCTION", "name": "pol-jobs-production", "definition": json.dumps(tag_rules(0, 1, 2))},
     )]
     job_cluster = lambda key, node, pol, avail, extra, **kw: {"job_cluster_key": key, "new_cluster": {
         "spark_version": kw.pop("version", "15.4.x-scala2.12"), "node_type_id": node, "policy_id": pol, "azure_attributes": {"availability": avail},
         "custom_tags": tags(**kw), "data_security_mode": "SINGLE_USER", **extra}}
     job_specs = [
-        (1001, "etl-ventas-diario", {"quartz_cron_expression": "0 0 2 * * ?"}, [job_cluster("jc-etl", "Standard_D8ds_v5", "POL-JOBS-PRODUCCION", "ON_DEMAND_AZURE",
-          {"autoscale": {"min_workers": 2, "max_workers": 10}}, team="ventas", project="etl-ventas", cc="CC-100")], [("bronce", "jc-etl", None), ("plata", "jc-etl", None)]),
-        (1002, "refresco-cuadros-mando", {"quartz_cron_expression": "0 30 6 * * ?"}, [], [("refresco", None, "0915-081203-bivts01")]),
-        (1003, "export-pedidos-distribuidores", {"quartz_cron_expression": "0 0 7 * * ?"}, [], [("export", None, "0915-081203-bivts01")]),
-        (1004, "prevision-demanda-semanal", {"quartz_cron_expression": "0 0 4 ? * MON"}, [job_cluster("jc-ml", "Standard_E8ds_v5", "POL-CIENCIA-DATOS",
-          "SPOT_WITH_FALLBACK_AZURE", {"num_workers": 6}, version="15.4.x-cpu-ml-scala2.12", team="data-science", project="prevision-demanda")], [("entrenar", "jc-ml", None)]),
-        (1005, "calidad-datos-silver", {"quartz_cron_expression": "0 0 3 * * ?"}, [job_cluster("jc-calidad", "Standard_DS3_v2", None, "ON_DEMAND_AZURE",
-          {"num_workers": 4}, version="12.2.x-scala2.12")], [("validar", "jc-calidad", None)]),
-        (1006, "ingesta-erp-continua", None, [job_cluster("jc-stream", "Standard_D4ds_v5", "POL-JOBS-PRODUCCION", "ON_DEMAND_AZURE", {"num_workers": 2},
-          team="ingenieria", project="ingesta-erp", cc="CC-300")], [("stream", "jc-stream", None)]),
+        (1001, "etl-sales-daily", {"quartz_cron_expression": "0 0 2 * * ?"}, [job_cluster("jc-etl", "Standard_D8ds_v5", "POL-JOBS-PRODUCTION", "ON_DEMAND_AZURE",
+          {"autoscale": {"min_workers": 2, "max_workers": 10}}, team="sales", project="etl-sales", cc="CC-100")], [("bronze", "jc-etl", None), ("silver", "jc-etl", None)]),
+        (1002, "dashboard-refresh", {"quartz_cron_expression": "0 30 6 * * ?"}, [], [("refresh", None, "0915-081203-bivts01")]),
+        (1003, "distributor-orders-export", {"quartz_cron_expression": "0 0 7 * * ?"}, [], [("export", None, "0915-081203-bivts01")]),
+        (1004, "demand-forecast-weekly", {"quartz_cron_expression": "0 0 4 ? * MON"}, [job_cluster("jc-ml", "Standard_E8ds_v5", "POL-DATA-SCIENCE",
+          "SPOT_WITH_FALLBACK_AZURE", {"num_workers": 6}, version="15.4.x-cpu-ml-scala2.12", team="data-science", project="demand-forecast")], [("train", "jc-ml", None)]),
+        (1005, "data-quality-silver", {"quartz_cron_expression": "0 0 3 * * ?"}, [job_cluster("jc-quality", "Standard_DS3_v2", None, "ON_DEMAND_AZURE",
+          {"num_workers": 4}, version="12.2.x-scala2.12")], [("validate", "jc-quality", None)]),
+        (1006, "erp-ingest-continuous", None, [job_cluster("jc-stream", "Standard_D4ds_v5", "POL-JOBS-PRODUCTION", "ON_DEMAND_AZURE", {"num_workers": 2},
+          team="engineering", project="erp-ingest", cc="CC-300")], [("stream", "jc-stream", None)]),
     ]
     jobs = []
     for jid, jname, schedule, clusters_spec, tasks in job_specs:
-        settings = {"name": jname, "job_clusters": clusters_spec, "timeout_seconds": 7200, "email_notifications": {"on_failure": ["datos@example.com"]},
+        settings = {"name": jname, "job_clusters": clusters_spec, "timeout_seconds": 7200, "email_notifications": {"on_failure": ["data@example.com"]},
                     "run_as": {"service_principal_name": "00000000-0000-4000-8000-0000000000c3"} if jid in (1001, 1006) else {"user_name": "ana.garcia@example.com"},
-                    "tasks": [{"task_key": key, "job_cluster_key": jck, "existing_cluster_id": ecid, "notebook_task": {"notebook_path": "/Repos/datos/" + jname + "/" + key}}
+                    "tasks": [{"task_key": key, "job_cluster_key": jck, "existing_cluster_id": ecid, "notebook_task": {"notebook_path": "/Repos/data/" + jname + "/" + key}}
                               for key, jck, ecid in tasks]}
         settings.update({"schedule": schedule} if schedule else {"continuous": {"pause_status": "UNPAUSED"}})
         jobs.append(normalize_job({"job_id": jid, "creator_user_name": "ana.garcia@example.com", "settings": settings}, "dbx_jobs", reference, config))
-    pipelines = [normalize_pipeline({"pipeline_id": "0c1d2e3f-pedidos", "name": "dlt-pedidos", "state": "IDLE", "catalog": "main", "target": "plata_pedidos",
+    pipelines = [normalize_pipeline({"pipeline_id": "0c1d2e3f-orders", "name": "dlt-orders", "state": "IDLE", "catalog": "main", "target": "silver_orders",
                                      "serverless": False, "continuous": False}, "dbx_pipelines", reference, config)]
     warehouses = [normalize_warehouse(w, "dbx_sql_warehouses", reference, config) for w in (
-        {"id": "a1b2c3d4e5f60718", "name": "wh-bi-ventas", "state": "RUNNING", "cluster_size": "Medium", "warehouse_type": "PRO", "enable_serverless_compute": False,
+        {"id": "a1b2c3d4e5f60718", "name": "wh-bi-sales", "state": "RUNNING", "cluster_size": "Medium", "warehouse_type": "PRO", "enable_serverless_compute": False,
          "auto_stop_mins": 0, "min_num_clusters": 1, "max_num_clusters": 2, "num_clusters": 1, "num_active_sessions": 0, "creator_name": "ana.garcia@example.com",
-         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="ventas").items()]}},
-        {"id": "b2c3d4e5f6071829", "name": "wh-finanzas-serverless", "state": "STOPPED", "cluster_size": "Small", "warehouse_type": "PRO",
+         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="sales").items()]}},
+        {"id": "b2c3d4e5f6071829", "name": "wh-finance-serverless", "state": "STOPPED", "cluster_size": "Small", "warehouse_type": "PRO",
          "enable_serverless_compute": True, "auto_stop_mins": 10, "min_num_clusters": 1, "max_num_clusters": 1, "creator_name": "elena.sanz@example.com",
-         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="finanzas", project="cierre-mensual", cc="CC-200").items()]}},
+         "tags": {"custom_tags": [{"key": k, "value": v} for k, v in tags(team="finance", project="month-end-close", cc="CC-200").items()]}},
     )]
-    scopes = [normalize_secret_scope({"name": "kv-datos-prod", "backend_type": "AZURE_KEYVAULT",
-                                      "keyvault_metadata": {"resource_id": kv, "dns_name": "https://kv-datos-prod.vault.azure.net/"}}, "dbx_secret_scopes", reference, config)]
+    scopes = [normalize_secret_scope({"name": "kv-data-prod", "backend_type": "AZURE_KEYVAULT",
+                                      "keyvault_metadata": {"resource_id": kv, "dns_name": "https://kv-data-prod.vault.azure.net/"}}, "dbx_secret_scopes", reference, config)]
     metastore = normalize_metastore({"metastore_id": "ms-weu-demo", "name": "metastore-westeurope", "region": "westeurope",
-                                     "storage_root": "abfss://metastore@stlagodatosprod.dfs.core.windows.net/root"}, "uc_metastore_summary", reference, config)
-    catalogs = [normalize_catalog({"name": n, "catalog_type": "MANAGED_CATALOG", "storage_root": "abfss://" + n + "@stlagodatosprod.dfs.core.windows.net/" + n,
-                                   "isolation_mode": "ISOLATED", "metastore_id": "ms-weu-demo"}, "uc_catalogs", reference, config) for n in ("main", "ventas", "ciencia_datos")]
+                                     "storage_root": "abfss://metastore@stdatalakeprod.dfs.core.windows.net/root"}, "uc_metastore_summary", reference, config)
+    catalogs = [normalize_catalog({"name": n, "catalog_type": "MANAGED_CATALOG", "storage_root": "abfss://" + n + "@stdatalakeprod.dfs.core.windows.net/" + n,
+                                   "isolation_mode": "ISOLATED", "metastore_id": "ms-weu-demo"}, "uc_catalogs", reference, config) for n in ("main", "sales", "data_science")]
     schemas = [normalize_schema({"full_name": "main." + n, "name": n, "catalog_name": "main", "metastore_id": "ms-weu-demo"}, "uc_schemas", reference, config)
-               for n in ("bronce_pedidos", "plata_pedidos")]
-    creds = [normalize_storage_credential({"id": "sc-demo-01", "name": "cred-lago-datos", "read_only": False,
+               for n in ("bronze_orders", "silver_orders")]
+    creds = [normalize_storage_credential({"id": "sc-demo-01", "name": "cred-data-lake", "read_only": False,
                                            "azure_managed_identity": {"access_connector_id": ac}}, "uc_storage_credentials", reference, config)]
-    locations = [normalize_external_location({"name": "ext-lago-curado", "url": "abfss://curado@stlagodatosprod.dfs.core.windows.net/", "credential_name": "cred-lago-datos",
+    locations = [normalize_external_location({"name": "ext-lake-curated", "url": "abfss://curated@stdatalakeprod.dfs.core.windows.net/", "credential_name": "cred-data-lake",
                                                "read_only": False, "metastore_id": "ms-weu-demo"}, "uc_external_locations", reference, config)]
     outbound = [normalize_outbound_endpoint({"category": "Webapp", "endpoints": [{"domainName": "westeurope.azuredatabricks.net", "endpointDetails": [{"port": 443}]}]},
                                             "arm_outbound_endpoints", reference, config)]
@@ -6569,14 +6538,14 @@ def finish_snapshot(raw, reference, provenance="LIVE", environment="UNSPECIFIED"
     dep_counts = dep_graph["summary_counts"]
     head = cost_model.get("headline") or {}
     cost_message = (
-        "Databricks costó " + es_amount(head["review_total"]) + " " + (cost_model.get("currency") or "") + " en " + es_month(head["review_month"])
-        + " (" + es_amount(head.get("dbu_share"), 1) + " % DBU, " + es_amount(100 - (head.get("dbu_share") or 0), 1) + " % infraestructura)"
-        + ("; " + es_amount(head["unattributed_share"], 1) + " % sin etiqueta de cómputo" if head.get("unattributed_share") is not None else "")
-        + ("; ahorro estimado " + es_amount(head["estimated_monthly_savings"]) + " " + (cost_model.get("currency") or "") + "/mes con reglas documentadas."
+        "Databricks cost " + en_amount(head["review_total"]) + " " + (cost_model.get("currency") or "") + " in " + en_month(head["review_month"])
+        + " (" + en_amount(head.get("dbu_share"), 1) + "% DBU, " + en_amount(100 - (head.get("dbu_share") or 0), 1) + "% infrastructure)"
+        + ("; " + en_amount(head["unattributed_share"], 1) + "% without a compute tag" if head.get("unattributed_share") is not None else "")
+        + ("; estimated savings " + en_amount(head["estimated_monthly_savings"]) + " " + (cost_model.get("currency") or "") + "/month with documented rules."
            if head.get("estimated_monthly_savings") else ".")
     ) if head.get("review_total") is not None else (
-        str(head.get("signals") or 0) + " señales de optimización de costes observadas en la configuración; sin datos de coste ("
-        + str(cost_model.get("status")) + "), así que no se estima ahorro."
+        str(head.get("signals") or 0) + " cost optimization signals observed in the configuration; no cost data ("
+        + str(cost_model.get("status")) + "), so no savings are estimated."
     )
     return {
         "schema_version": "1.0",
@@ -6603,11 +6572,11 @@ def finish_snapshot(raw, reference, provenance="LIVE", environment="UNSPECIFIED"
         "actions": actions_for(findings),
         "executive_messages": [
             cost_message,
-            str(dep_counts["nodes_total"]) + " nodos en el mapa de dependencias (" + str(dep_counts["edges_observed"]) + " relaciones OBSERVED, " + str(dep_counts["edges_inferred"]) + " INFERRED explícitas y " + str(dep_counts["unknowns_total"]) + " puntos ciegos UNKNOWN).",
-            str(len(findings)) + " hallazgos de configuración y dependencias observados (" + str(critical) + " críticos reales, sin rellenar un Top 5 ficticio).",
-            str(global_score["evaluated"]) + " de " + str(global_score["evaluated"] + global_score["not_evaluated"]) + " comprobaciones aplicables evaluadas; la cobertura se muestra junto al índice local.",
-            str(dep_counts["broken_references_total"]) + " referencias rotas detectadas entre tareas de Jobs, clústeres, pools, políticas, pipelines, warehouses y credenciales.",
-            str(len(blind_spots)) + " fuentes con estado parcial, denegado o no configurado; ningún clúster se inició para esta revisión.",
+            str(dep_counts["nodes_total"]) + " nodes in the dependency map (" + str(dep_counts["edges_observed"]) + " OBSERVED relationships, " + str(dep_counts["edges_inferred"]) + " explicit INFERRED relationships and " + str(dep_counts["unknowns_total"]) + " UNKNOWN blind spots).",
+            str(len(findings)) + " observed configuration and dependency findings (" + str(critical) + " critical; the list is never padded to a top 5).",
+            str(global_score["evaluated"]) + " of " + str(global_score["evaluated"] + global_score["not_evaluated"]) + " applicable checks evaluated; coverage is shown beside the local index.",
+            str(dep_counts["broken_references_total"]) + " broken references found between job tasks, clusters, pools, policies, pipelines, warehouses and credentials.",
+            str(len(blind_spots)) + " sources partial, denied or not configured; no cluster was started for this review.",
         ],
         "methodology": {
             "score_kind": "local_assessment_indicator",

@@ -1,6 +1,6 @@
 ---
 name: databricks-dependency-live
-description: Read-only, evidence-qualified Azure Databricks dependency mapping, configuration, security, cost attribution (where Databricks cost comes from and how to optimise it) and optimization review using the single fixed-scope tool.
+description: Read-only, evidence-qualified Azure Databricks dependency mapping, configuration, security, cost attribution (where Databricks cost comes from and how to optimize it) and optimization review using the single fixed-scope tool.
 ---
 
 # Azure Databricks dependency and configuration review
@@ -109,7 +109,7 @@ findings CSV (`findings_csv_path`) and dependencies CSV
 
 ## Databricks costs (report section 6, `view="costs"`)
 
-The cost section answers *where Databricks cost comes from and how to optimise
+The cost section answers *where Databricks cost comes from and how to optimize
 it*. It reads Azure Cost Management (amortized cost by default) for the
 workspace resource and its managed resource group, grouped by the tags
 Databricks puts on compute (`ClusterName`, `JobId`, `SqlEndpointId`,
@@ -117,11 +117,11 @@ Databricks puts on compute (`ClusterName`, `JobId`, `SqlEndpointId`,
 
 - Answer in this order: cost of the last closed month and its change, DBU vs
   infrastructure, the clusters, jobs, SQL warehouses and pools that concentrate
-  it, the share no tag explains, then the top optimisation signals.
+  it, the share no tag explains, then the top optimization signals.
 - Every saving is an estimate with a `saving_kind` (`lower_bound`,
   `upper_bound` or `estimate`) and a documented formula; say so, never promise
   it, and never add savings across signals of the same object (only rows with
-  `counted=true` add up). Signals without a saving are "No estimable".
+  `counted=true` add up). Signals without a saving show "No estimate".
 - The unattributed share is cost without the `Vendor` tag: shared workspace
   services and serverless DBUs, which carry no Azure tags. Explain it; do not
   spread it across teams.
@@ -148,8 +148,8 @@ Use `operation="query"` with `view` in `summary`, `workspace`, `compute`,
   `transport_capped` and fresh-collection disclosure under the 3,500-byte
   default-serialized response budget.
 - Scores are local assessment indicators, never an official Microsoft WAF or
-  Databricks grade. Always report evaluated, `not_evaluated` (`No evaluado`) and
-  `not_applicable` (`No aplica`) counts alongside any score.
+  Databricks grade. Always report evaluated, `not_evaluated` (`Not evaluated`) and
+  `not_applicable` (`Not applicable`) counts alongside any score.
 
 ## Never do
 

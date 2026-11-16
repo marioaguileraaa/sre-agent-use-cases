@@ -104,26 +104,26 @@ class ReportUiTests(unittest.TestCase):
                 page.on("pageerror", lambda exc: errors.append(str(exc)))
                 page.set_content(html, wait_until="load")
                 self.assertEqual(errors, [])
-                self.assertEqual(page.locator("#client-name-label").inner_text(), "CLIENTE")
-                self.assertIn("Mostrando 9 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertEqual(page.locator("#client-name-label").inner_text(), "Customer")
+                self.assertIn("Showing 9 of 9 machines.", page.locator("#machines-count-label").inner_text())
 
                 # Filter by failure_category
                 page.select_option("#filter-category", "assessment_stuck_or_readiness_undetermined")
-                self.assertIn("Mostrando 2 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertIn("Showing 2 of 9 machines.", page.locator("#machines-count-label").inner_text())
 
                 # Filter by hotpatch_or_patch_extension_error (primary category of one machine, secondary of another via matched_categories)
                 page.select_option("#filter-category", "hotpatch_or_patch_extension_error")
-                self.assertIn("Mostrando 2 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertIn("Showing 2 of 9 machines.", page.locator("#machines-count-label").inner_text())
 
                 # Reset filters
                 page.click("#filter-reset-btn")
-                self.assertIn("Mostrando 9 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertIn("Showing 9 of 9 machines.", page.locator("#machines-count-label").inner_text())
 
                 # Filter by hosting=arc and search
                 page.select_option("#filter-hosting", "arc")
-                self.assertIn("Mostrando 5 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertIn("Showing 5 of 9 machines.", page.locator("#machines-count-label").inner_text())
                 page.fill("#filter-search", "KB5128493")
-                self.assertIn("Mostrando 1 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertIn("Showing 1 of 9 machines.", page.locator("#machines-count-label").inner_text())
                 page.click("#filter-reset-btn")
 
                 # Collapse / expand drawers
@@ -136,7 +136,7 @@ class ReportUiTests(unittest.TestCase):
                 # Category breakdown rows drive the investigation filter; the register sorts by column
                 page.click('#category-breakdown button[data-cat="assessment_stuck_or_readiness_undetermined"]')
                 self.assertEqual(page.input_value("#filter-category"), "assessment_stuck_or_readiness_undetermined")
-                self.assertIn("Mostrando 2 de 9 máquinas.", page.locator("#machines-count-label").inner_text())
+                self.assertIn("Showing 2 of 9 machines.", page.locator("#machines-count-label").inner_text())
                 page.click("#filter-reset-btn")
                 page.click('#machines-table button[data-sort="name"]')
                 names = page.locator("#machines-table tr.machine-row .nm").all_inner_texts()

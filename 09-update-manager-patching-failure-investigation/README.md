@@ -9,7 +9,7 @@ Automate **post-patching cycle verification** and **per-machine root-cause failu
 | Automated correlation of 7 Azure Resource Graph (`2022-10-01`) datasets across `resources`, `patchassessmentresources`, `patchinstallationresources`, and `maintenanceresources` | Arbitrary guest OS command execution (`runCommand`) or reading private guest filesystem logs not surfaced to ARM |
 | Per-machine classification into 7 operational categories (`maintenance_window_unresponsive`, `arc_agent_expired_or_disconnected`, `assessment_stuck_or_readiness_undetermined`, `hotpatch_or_patch_extension_error`, `pending_security_patches_unscheduled`, `unassessed_no_update_manager_telemetry`, `healthy`) with exact source/log evidence | Unattended remediation, VM power-state changes, or triggering `installPatches` / `assessPatches` |
 | Monthly scheduled automation (`0 8 1 * *`) plus on-demand full reports and bounded `query` views (`summary`, `machines`, `failures`, `cycles`, `patches`, `extensions`, `coverage`, `actions`) under the 3,500-byte JSON transport budget | Reading extension `settings` or `protectedSettings` |
-| Four native downloadable files (`patch-<ts>-<hash>.html`, `-snapshot.json`, `-machines.csv`, `-patches.csv`) rendered in a Swiss Architectural Industrial Operations Ledger (`es-ES`) | Customer branding in public Git source (`CLIENT_NAME = "CLIENTE"` and `CLIENT_LOGO_DATA_URI = ""` by default) |
+| Four native downloadable files (`patch-<ts>-<hash>.html`, `-snapshot.json`, `-machines.csv`, `-patches.csv`) rendered in English in a Swiss Architectural Industrial Operations Ledger | Customer branding in public Git source (`CLIENT_NAME = "Customer"` and `CLIENT_LOGO_DATA_URI = ""` by default) |
 
 > [!NOTE]
 > **Update 16 November 2026 — tool name and today's portal.** Today's portal limits **Tool Name** to 36 characters, so this guide's tool is now named `patching-investigation-report`; the file you paste keeps its name, `generate-patching-investigation-report.py`. The portal screenshots of Steps 2 to 7 were recaptured in today's portal (**Build + configure → Agent Canvas**, **Custom agents**, `/agent` in chat, **Automation**); the Step 5 evidence card comes from an earlier run and may show the previous name `generate-patching-investigation-report`, created through the API. If you already created the tool with a cut name, use exactly the saved name in the skill, the subagent instructions, **Choose tools** and the scheduled task prompt.
@@ -57,7 +57,7 @@ All data collection is strictly read-only (`POST https://management.azure.com/pr
 
 ## Step 1 - Configure the private standalone file
 
-In your private deployment copy outside Git, set `SUBSCRIPTION_ID` and `MANAGED_IDENTITY_CLIENT_ID` at the top of `generate-patching-investigation-report.py`. Keep `CLIENT_NAME = "CLIENTE"` and `CLIENT_LOGO_DATA_URI = ""` in committed repository files; if embedding an approved PNG/JPEG logo in a private deployment copy, `validate_logo()` verifies the raster via Pillow (`<= 100,000` bytes, `<= 2048 x 2048` px, single frame) before any network call.
+In your private deployment copy outside Git, set `SUBSCRIPTION_ID` and `MANAGED_IDENTITY_CLIENT_ID` at the top of `generate-patching-investigation-report.py`. Keep `CLIENT_NAME = "Customer"` and `CLIENT_LOGO_DATA_URI = ""` in committed repository files; if embedding an approved PNG/JPEG logo in a private deployment copy, `validate_logo()` verifies the raster via Pillow (`<= 100,000` bytes, `<= 2048 x 2048` px, single frame) before any network call.
 
 ## Step 2 - Create the Python tool and verify its 8 typed parameters
 
@@ -140,25 +140,32 @@ Open **New chat**, type `/agent` followed by the specialist name and pick **patc
 
 ![Agent chip and the report prompt in the composer](images/newui-chat-ready.png)
 
-*Composer (`newui-chat-ready.png`): **(1)** chip **Agent: patching-investigation-live**; **(2)** the report prompt (the Spanish full-report prompt of the prompts file); **(3)** send (not clicked in the capture).*
+*Composer (`newui-chat-ready.png`): **(1)** chip **Agent: patching-investigation-live**; **(2)** the report prompt (here its Spanish version from the prompts file); **(3)** send (not clicked in the capture).*
 
 ![Live chat delivering all four patching investigation files](images/03-live-chat-four-downloads.png)
 
-*Live report turn (`03-live-chat-four-downloads.png`, evidence card rendered from an earlier run, not a portal screenshot; today's portal labels may differ): **(1)** single-call report prompt; **(2)** all four native files delivered in the thread; **(3)** Spanish executive summary of maintenance cycles and per-machine root causes.*
+*Live report turn (`03-live-chat-four-downloads.png`, evidence card rendered from an earlier run, not a portal screenshot; today's portal labels may differ): **(1)** single-call report prompt; **(2)** all four native files delivered in the thread; **(3)** executive summary of maintenance cycles and per-machine root causes. That run used the Spanish prompt, so the agent answered in Spanish: it answers in the user's language (English by default).*
 
 ## Step 6 - Explore the HTML post-patching & failure investigation dossier
 
+A sample run with **simulated data** is in [`sample-run/`](sample-run/):
+- the [HTML report](sample-run/patch-20261020T160000Z-18966844ec9a.html) (download it and open it in a browser);
+- the [JSON snapshot](sample-run/patch-20261020T160000Z-18966844ec9a-snapshot.json);
+- the [machines CSV](sample-run/patch-20261020T160000Z-18966844ec9a-machines.csv) and the [cycles and patches CSV](sample-run/patch-20261020T160000Z-18966844ec9a-patches.csv).
+
+The tool wrote these four files from the case's offline test fixture, without calling Azure. Every machine, resource group, maintenance configuration and GUID in them is fictitious (`contoso-vm-app-01`, `rg-contoso-servers-weu`, `00000000-0000-0000-0000-000000000001`), and the report shows its **Simulated data** banner. The screenshots below come from that report.
+
 ![HTML report cover and post-patching cycle summary](images/04-report-cover-and-cycle-summary.png)
 
-*HTML dossier cover and executive summary (`04-report-cover-and-cycle-summary.png`, anonymized `CLIENTE` view rendered from synthetic data): **(1)** top bar with the read-only chip, dark mode, the JSON/CSV export menu and Print / PDF; **(2)** verdict-first header: one sentence with the key numbers, UTC window and LIVE/SIMULATED provenance chips, the verdict card with the first action to take, and the machines-by-severity bar; **(3)** KPI ledger summarizing evaluated machines, machines with blockers, maintenance cycles (`UpdateSuccessfullyApplied` vs `ShutdownOrUnresponsive`), installation runs, pending security patches and failed extensions.*
+*HTML dossier cover and executive summary (`04-report-cover-and-cycle-summary.png`, from the sample run): **(1)** top bar with the **Read-only** chip, **Dark mode**, the **Export** menu (JSON and two CSVs) and **Print / PDF**; **(2)** verdict-first header: one sentence with the key numbers, UTC window and LIVE/SIMULATED provenance chips, the verdict card (**Action required**) with **Start with** and the first action to take, and the machines-by-severity bar; **(3)** KPI ledger summarizing evaluated machines, machines with blockers, maintenance cycles (`UpdateSuccessfullyApplied` vs `ShutdownOrUnresponsive`), installation runs, pending security patches and failed extensions.*
 
 ![Automated per-machine failure root-cause investigation ledger](images/05-report-automated-failure-investigation.png)
 
-*Automated per-machine root-cause investigation ledger (`05-report-automated-failure-investigation.png`): **(1)** filters by failure category, hosting plane (`azure`/`arc`), severity and free-text search, plus reset, CSV of the current view and collapse/expand all; **(2)** sortable per-machine register with severity pills and the expandable root-cause evidence drawer showing the correlated evidence, the recommended human action, and the ARG reference (machine name + resource group + Portal link) or guest extension log path.*
+*Automated per-machine root-cause investigation ledger (`05-report-automated-failure-investigation.png`): **(1)** filters by failure category, hosting plane (`azure`/`arc`), severity and free-text search, plus **Reset filters**, **CSV of this view** and **Collapse all details**; **(2)** sortable per-machine register with severity pills and the expandable root-cause evidence drawer showing the correlated evidence, the recommended human action, and the ARG reference (machine name + resource group + Portal link) or guest extension log path.*
 
 ![Maintenance cycles, software patches and source coverage ledger](images/06-report-cycles-patches-and-sources.png)
 
-*Maintenance cycles, pending/installed KBs, and source receipts (`06-report-cycles-patches-and-sources.png`): **(1)** maintenance window executions and installation runs, newest first, with `ShutdownOrUnresponsive` in red and correlation IDs shortened to configuration name + resource group + Portal link; **(2)** the sticky section index with live counts leads to the software patches ledger, guest extensions and the 7/7 read-only Azure Resource Graph source receipts with methodological boundaries. The prioritised action plan sits right after the executive summary.*
+*Maintenance cycles, pending/installed KBs, and source receipts (`06-report-cycles-patches-and-sources.png`): **(1)** maintenance window executions and installation runs, newest first, with `ShutdownOrUnresponsive` in red and correlation IDs shortened to configuration name + resource group + Portal link; **(2)** the sticky section index with live counts leads to the software patches ledger, guest extensions and the 7/7 read-only Azure Resource Graph source receipts with methodological boundaries. The prioritized action plan sits right after the executive summary.*
 
 ## Step 7 - Configure the monthly scheduled task (`0 8 1 * *`)
 

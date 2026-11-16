@@ -12,7 +12,7 @@ Operations directors, SRE leads, hybrid infrastructure engineers, and cloud gove
 
 ## Product Purpose
 
-Consolidate five read-only Azure evidence streams — native Azure Monitor alerts (`alertsmanagementresources`), Azure Service Health communications (`Microsoft.ResourceHealth/events`), cross-estate control-plane and guest extension posture (`Azure Resource Graph`), guest/platform telemetry anomalies (`Log Analytics InsightsMetrics, Perf, Heartbeat`), and correlated Azure Advisor recommendations (`Microsoft.Advisor/recommendations`) — into a single executive and technical dossier with a prioritized Recommended Actions (`acciones recomendadas`) ledger.
+Consolidate five read-only Azure evidence streams — native Azure Monitor alerts (`alertsmanagementresources`), Azure Service Health communications (`Microsoft.ResourceHealth/events`), cross-estate control-plane and guest extension posture (`Azure Resource Graph`), guest/platform telemetry anomalies (`Log Analytics InsightsMetrics, Perf, Heartbeat`), and correlated Azure Advisor recommendations (`Microsoft.Advisor/recommendations`) — into a single executive and technical dossier with a prioritized Recommended Actions ledger.
 
 ## Operating Context
 
@@ -22,5 +22,5 @@ An offline, single-file HTML operational ledger with zero external dependencies,
 
 - Read-only collection across Azure Resource Graph, Azure Resource Health, Log Analytics, and Azure Advisor using an explicit user-assigned managed identity (`MANAGED_IDENTITY_CLIENT_ID`).
 - Strictly separates native fired/resolved alerts, official Azure Service Health platform events, control-plane/extension failures, and statistical/threshold telemetry anomalies.
-- Prioritizes recommended actions across three operational horizons (`Inmediato <24h`, `Corto plazo 1-7 días`, `Ciclo mensual`) linked to exact incident, anomaly, and Advisor IDs.
-- Public repository files use generic `CLIENTE` branding and empty `CLIENT_LOGO_DATA_URI`; private customer deployments validate embedded PNG/JPEG rasters with Pillow.
+- Prioritizes recommended actions across three operational horizons (`Immediate <24h`, `Short term 1-7 days`, `Monthly cycle`) linked to exact incident, anomaly, and Advisor IDs.
+- Public repository files use generic `Customer` branding and empty `CLIENT_LOGO_DATA_URI`; private customer deployments validate embedded PNG/JPEG rasters with Pillow.

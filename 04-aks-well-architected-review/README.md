@@ -6,18 +6,30 @@ Turn a fixed, approved AKS scope into a dated review of **best practices,
 security, FinOps and optimization**. Start with the executive reading, follow a
 namespace or workload into its evidence, inspect confirmed resource
 relationships, and compare them with a clearly **undeployed Azure reference
-proposal**. The report is in Spanish; this deployment guide is in English.
+proposal**.
 
-![Report cover rendered from the SIMULATED public fixture: verdict, provenance chips and KPI cards](images/aks04-report-00-cover.png)
+![Report cover from the English SIMULATED sample run: verdict, provenance chips and KPI cards](images/aks04-report-00-cover.png)
+
+**English sample run:** [`sample-run/`](sample-run/) holds the four files that
+the standalone tool wrote for one two-cluster report: the
+[HTML report](sample-run/simulated-20261010T120000Z-4596adfa1b2c.html)
+(download it and open it in a browser), the
+[JSON snapshot](sample-run/simulated-20261010T120000Z-4596adfa1b2c-snapshot.json),
+the [findings CSV](sample-run/simulated-20261010T120000Z-4596adfa1b2c-findings.csv)
+and the [inventory CSV](sample-run/simulated-20261010T120000Z-4596adfa1b2c-inventory.csv).
+It uses **simulated data**: the public test fixture with fictitious Contoso
+names (`contoso-aks-prod-01`, `contoso-aks-prod-02`) and placeholder GUIDs.
+Nothing in it was read from Azure.
 
 **Portal screenshots are evidence, not mockups**: they show the real Azure
 SRE Agent interface. The `newui-*` images are captures of **today's portal
 (16 November 2026)**, taken read-only on the lab agent: the guide's names,
 values and files are typed or pasted into the forms but nothing is saved,
 tested, sent or run, and readback panels show the existing lab objects under
-the guide's names. **Report screenshots** are rendered from the permanently
-**SIMULATED** public test fixture through the real engine and the current
-report design; they contain no customer, tenant or lab data. The October
+the guide's names. **Report screenshots** come from the English
+[sample run](sample-run/), which the real standalone tool wrote from the
+permanently **SIMULATED** public test fixture with fictitious Contoso names;
+they contain no customer, tenant or lab data. The October
 Builder captures that these replace are kept in `images/` for reference
 ([Dated evidence](#dated-evidence-and-release-state)); where they show private
 values, those are masked only in the image, never removed from the original
@@ -36,14 +48,14 @@ evidence. See the [capture manifest](images/capture-manifest.json).
 > **Live baseline: PARTIAL_LIVE.** The approved existing LAB deployment
 > delivered all four real files automatically. Its source reference is
 > **2026-10-13T18:17:15Z**: all 19 configured Kubernetes GET sources returned
-> HTTP 502, so dependent observations remain **No evaluado**, not healthy zero
+> HTTP 502, so dependent observations remain **Not evaluated**, not healthy zero
 > workloads. On **2026-10-14**, the authorized operator saved/read back the
 > corrected two-scope, 12-input package. The fresh combined report with
 > **2026-10-14T09:25:00Z / 09:26:26Z** per-cluster references passed the actual
 > UI/export/print gate and all four native HTTP 200 downloads. Its first
 > cluster still has 19 Kubernetes 502 blind spots; the second remains stopped.
 > These dated results come from the live baseline; the report screenshots in
-> this guide use the SIMULATED fixture instead.
+> this guide use the SIMULATED sample run instead.
 > [Dated evidence and release state](#dated-evidence-and-release-state).
 
 ## Contents
@@ -136,7 +148,7 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 | Approved associated-resource IDs, node-RG inventory choice and optional billing scope/timeframe | Agree which reads are in scope and which remain disabled. Node-RG inventory, resource-detail access and billing-query authorization are not the same permission. |
 | Four independent read-boundary results and any source exclusions | [Step 0](#step-0---identify-the-reporting-identity-and-approve-scope): ARM, clusterUser, Kubernetes data and billing. Record denied/unavailable kinds explicitly; do not ask for Cluster Admin to make a demo green. |
 | Availability, scaling, segmentation and other actual workload requirements | Unknown requirements stay unknown; they are not invented from the report's reference architecture. |
-| Approved audience, optional authorized logo and report reviewer | Use only this customer's authorized artwork in the private copy. Generic source and reusable screenshots remain `CLIENTE` / **client NAME**; never copy a previous customer's branding or inline logo. |
+| Approved audience, optional authorized logo and report reviewer | Use only this customer's authorized artwork in the private copy. The generic source default is `Customer` and the reusable screenshots show the fictitious **Contoso**; never copy a previous customer's branding or inline logo. |
 
 ### Reproduce the workflow, not the LAB's result
 
@@ -145,7 +157,7 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 | Watch the demonstration | Walk through [Step 6](#step-6---read-and-explore-the-html-report) and the [scope matrix](#customer-scope-coverage-and-checklist-limits) with the customer. | Four real files, dated source receipts and separate score/coverage. The demonstrated 19 Kubernetes 502s and stopped second cluster remain limitations, not a completed customer workload review. |
 | Configure your own approved scope | Download the actual [standalone tool](generate-aks-waf-report.py), [schema](tool-parameters.schema.json), [requirements](requirements.txt), [runtime skill](skills/aks-waf-live/SKILL.md), [specialist instructions](subagent-instructions-and-prompts.md) and the optional [permissions script](grant-aks-permissions.ps1). Complete Steps 0-1 privately. | Valid Python/JSON/Markdown downloads, not GitHub sign-in HTML; confirmed IDs/permissions, matching code/schema cluster allowlists and authorized branding only. No collector edits or rebuild are needed for customer configuration. |
 | Create and read back the components | Follow the actual portal steps in [Step 2](#step-2---create-the-python-tool-and-verify-its-inputs), [Step 3](#step-3---create-the-runtime-skill) and [Step 4](#step-4---create-the-restricted-specialist). Use all [12 current typed inputs](#verify-the-current-typed-schema), not an old screenshot's 11. | Saved whole-file code, correct defaults/enums/bounds and the documented identity design; then exactly one tool and one skill on the specialist. A filled but unsaved form is not deployment. |
-| Accept your first customer run | In normal chat, explicitly select the specialist and follow [Step 5](#step-5---run-one-report-in-normal-chat-and-download-its-files), then inspect each selected cluster as in Step 6. | Four actual downloads for the requested scope and matching run references. `No evaluado` means evidence/applicability is missing, not passed; an empty workload table after failed GETs means unknown, not no workloads. Use [Troubleshooting](#troubleshooting) without broadening access or starting a stopped cluster. |
+| Accept your first customer run | In normal chat, explicitly select the specialist and follow [Step 5](#step-5---run-one-report-in-normal-chat-and-download-its-files), then inspect each selected cluster as in Step 6. | Four actual downloads for the requested scope and matching run references. `Not evaluated` means evidence/applicability is missing, not passed; an empty workload table after failed GETs means unknown, not no workloads. Use [Troubleshooting](#troubleshooting) without broadening access or starting a stopped cluster. |
 | Decide on repetition later | Only after acceptance and a separate customer request, use [Step 7](#step-7---keep-reporting-cadence-optional). | Approved owner/scope/cadence/cost and an actual saved/read-back task plus any separately authorized run receipt; no schedule is required for an on-demand implementation. |
 
 ## How the pieces fit together
@@ -163,7 +175,7 @@ flowchart LR
     A --> M["Complete normalized snapshot<br/>local rules + confirmed graph"]
     K --> M
     F --> M
-    M --> R["Offline Spanish HTML<br/>full JSON + two CSVs"]
+    M --> R["Offline HTML report<br/>full JSON + two CSVs"]
     R --> D["Four native links<br/>from this actual SRE thread"]
 ```
 
@@ -286,6 +298,7 @@ so you do not have to scroll back here.
 | [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Restricted specialist instructions and copy-ready report/query prompts |
 | [`grant-aks-permissions.ps1`](grant-aks-permissions.ps1) | Optional: grants the read-only roles to the reporting UAMI and writes `approved-clusters.generated.py`; see [Multi-subscription fleet](#multi-subscription-fleet-tens-of-subscriptions-hundreds-of-clusters) |
 | [`report_template.html`](report_template.html) | Development source for the offline UI; **do not paste it as a Python tool** |
+| [`sample-run/`](sample-run/) | English sample run: the four files of one SIMULATED two-cluster report (fictitious Contoso data) |
 | [`rules_catalog.json`](rules_catalog.json) and [`references/`](references/) | Source-qualified local-rule mappings, pinned checklist and licenses |
 
 ## Step 0 - Identify the reporting identity and approve scope
@@ -317,21 +330,21 @@ so you do not have to scroll back here.
 flowchart TD
     U["Reporting UAMI<br/>(MANAGED_IDENTITY_CLIENT_ID)"] --> B1["1. ARM cluster/pool/diagnostics/version/Advisor reads<br/>Role: Reader on approved subscription / resource scopes"]
     B1 -->|"Primary AKS GET denied/error"| E1["Single-cluster: stop error (no fabricated files)<br/>Multi-cluster: failed cluster recorded in run_errors"]
-    B1 -->|"Sub-source denied (e.g. diagnostics/versions/Advisor)"| P1["Partial source receipt -> dependent checks No evaluado"]
+    B1 -->|"Sub-source denied (e.g. diagnostics/versions/Advisor)"| P1["Partial source receipt -> dependent checks Not evaluated"]
     B1 -->|"AKS Running + Managed Entra + RBAC"| B2["2. listClusterUserCredential action<br/>Role: Azure Kubernetes Service Cluster User Role"]
-    B2 -->|"Denied (403) or cluster Stopped"| P2["kube_cluster_user denied/not_applicable -> all 19 Kubernetes kinds No evaluado"]
+    B2 -->|"Denied (403) or cluster Stopped"| P2["kube_cluster_user denied/not_applicable -> all 19 Kubernetes kinds Not evaluated"]
     B2 -->|"Server FQDN + public CA returned"| B3["3. 19 fixed Kubernetes GET lists<br/>Role: AKS RBAC / Kubernetes RBAC data reads"]
-    B3 -->|"Per-kind 403 / 502 / timeout"| P3["Independent per-kind receipt (denied/error) -> dependent workload/cluster checks No evaluado"]
+    B3 -->|"Per-kind 403 / 502 / timeout"| P3["Independent per-kind receipt (denied/error) -> dependent workload/cluster checks Not evaluated"]
     U --> B4["4. Optional ActualCost Cost Management query<br/>Scope: node_resource_group or resource_ids"]
-    B4 -->|"cost_scope=disabled, 403, or 429"| P4["azure_cost not_configured/denied/error -> FinOps billing No evaluado (never 0.00)"]
+    B4 -->|"cost_scope=disabled, 403, or 429"| P4["azure_cost not_configured/denied/error -> FinOps billing Not evaluated (never 0.00)"]
 ```
 
-| Read boundary | Exact API / operation | Required role & scope | Outcome if missing, denied or unreachable (`No evaluado` vs stop error) |
+| Read boundary | Exact API / operation | Required role & scope | Outcome if missing, denied or unreachable (`Not evaluated` vs stop error) |
 |---|---|---|---|
-| **1. ARM cluster/pool/diagnostics/version/Advisor reads** | ARM `GET` on `managedClusters`, `agentPools`, `maintenanceConfigurations`, `diagnosticSettings`, `upgradeProfiles`, subscription regional `orchestrators` and filtered cached `Advisor/recommendations` | **Reader** (or verified equivalent) on the monitored subscription or exact cluster, node-RG and approved related resources | Primary `arm_cluster` / `arm_node_pools` failure stops a single-cluster run with a sanitized error (or records the cluster in `run_errors` in a multi-cluster run); optional ARM sub-source denials record `denied`/`error` and leave only dependent rules **`No evaluado`** |
-| **2. `listClusterUserCredential` action** | ARM `POST .../managedClusters/<name>/listClusterUserCredential` (extracts server FQDN + public CA only; never admin credentials) | **Azure Kubernetes Service Cluster User Role** on each approved AKS resource (ARM `Reader` alone does **not** grant this `POST` action) | `kube_cluster_user` is recorded as `denied` (or `not_applicable` when the cluster is `Stopped`); all 19 Kubernetes data-plane lists and workload checks remain **`No evaluado`**, while ARM/billing evidence still delivers |
-| **3. 19 fixed Kubernetes GET lists** | 19 HTTPS `GET` lists against the cluster API server (`namespaces`, `nodes`, `pods`, `services`, `pvcs`, `pvs`, `resource_quotas`, `deployments`, `statefulsets`, `daemonsets`, `replicasets`, `jobs`, `cronjobs`, `pdbs`, `hpas`, `network_policies`, `storage_classes`, `node_metrics`, `pod_metrics`) | **Azure Kubernetes Service RBAC Reader** + cluster-scoped `nodes`/`persistentvolumes`/`storageclasses`/`metrics.k8s.io` read binding (or equivalent Kubernetes RBAC `get`/`list`) | Each failed or forbidden kind records its own `403`/`502` receipt independently; successful kinds are retained and only rules depending on unavailable kinds become **`No evaluado`** (never zero workloads) |
-| **4. Optional `ActualCost` Cost Management query** | ARM `POST .../providers/Microsoft.CostManagement/query` on `node_resource_group` or subscription `resource_ids` filter | **Cost Management Reader** (or `Microsoft.CostManagement/query/action`) on the exact queried `node_resource_group` or subscription scope | When `cost_scope="disabled"`, denied (`403`) or throttled (`429`), `azure_cost` is `not_configured`/`denied`/`error` and FinOps cost/savings stay **`No evaluado` / `Por estimar`** (never `$0`) |
+| **1. ARM cluster/pool/diagnostics/version/Advisor reads** | ARM `GET` on `managedClusters`, `agentPools`, `maintenanceConfigurations`, `diagnosticSettings`, `upgradeProfiles`, subscription regional `orchestrators` and filtered cached `Advisor/recommendations` | **Reader** (or verified equivalent) on the monitored subscription or exact cluster, node-RG and approved related resources | Primary `arm_cluster` / `arm_node_pools` failure stops a single-cluster run with a sanitized error (or records the cluster in `run_errors` in a multi-cluster run); optional ARM sub-source denials record `denied`/`error` and leave only dependent rules **`Not evaluated`** |
+| **2. `listClusterUserCredential` action** | ARM `POST .../managedClusters/<name>/listClusterUserCredential` (extracts server FQDN + public CA only; never admin credentials) | **Azure Kubernetes Service Cluster User Role** on each approved AKS resource (ARM `Reader` alone does **not** grant this `POST` action) | `kube_cluster_user` is recorded as `denied` (or `not_applicable` when the cluster is `Stopped`); all 19 Kubernetes data-plane lists and workload checks remain **`Not evaluated`**, while ARM/billing evidence still delivers |
+| **3. 19 fixed Kubernetes GET lists** | 19 HTTPS `GET` lists against the cluster API server (`namespaces`, `nodes`, `pods`, `services`, `pvcs`, `pvs`, `resource_quotas`, `deployments`, `statefulsets`, `daemonsets`, `replicasets`, `jobs`, `cronjobs`, `pdbs`, `hpas`, `network_policies`, `storage_classes`, `node_metrics`, `pod_metrics`) | **Azure Kubernetes Service RBAC Reader** + cluster-scoped `nodes`/`persistentvolumes`/`storageclasses`/`metrics.k8s.io` read binding (or equivalent Kubernetes RBAC `get`/`list`) | Each failed or forbidden kind records its own `403`/`502` receipt independently; successful kinds are retained and only rules depending on unavailable kinds become **`Not evaluated`** (never zero workloads) |
+| **4. Optional `ActualCost` Cost Management query** | ARM `POST .../providers/Microsoft.CostManagement/query` on `node_resource_group` or subscription `resource_ids` filter | **Cost Management Reader** (or `Microsoft.CostManagement/query/action`) on the exact queried `node_resource_group` or subscription scope | When `cost_scope="disabled"`, denied (`403`) or throttled (`429`), `azure_cost` is `not_configured`/`denied`/`error` and FinOps cost/savings stay **`Not evaluated` / `To be estimated`** (never `$0`) |
 
 Cached Advisor reads remain filtered to the approved AKS ResourceId. ACR role
 metadata, when configured, is restricted to the observed kubelet principal and
@@ -360,7 +373,7 @@ these all-namespace/cluster-scoped endpoints. A namespace-only grant does not
 magically make an all-namespace list succeed. Have the customer's access team
 verify its actual authorization mode and explicitly permitted reads; this
 guide supplies no guessed universal minimum custom role and no Cluster Admin
-shortcut. Keep unavailable kinds **No evaluado**.
+shortcut. Keep unavailable kinds **Not evaluated**.
 
 ### Customer administrator's assignment procedure
 
@@ -391,7 +404,7 @@ been approved:
 > [!WARNING]
 > Never use `--admin`, OBO, another identity, insecure TLS, an alternate
 > endpoint/proxy, `az aks command invoke`, exec or port-forward to bypass a denied
-> source. Missing evidence must remain **No evaluado**.
+> source. Missing evidence must remain **Not evaluated**.
 
 **Checkpoint:** the four boundaries are recorded independently. A successful
 ARM read is not proof that Kubernetes or Cost Management reads work.
@@ -405,8 +418,11 @@ ARM read is not proof that Kubernetes or Cost Management reads work.
 1. Save the canonical Python file **outside the repository**.
 2. Replace `SUBSCRIPTION_ID`, `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` with
    the approved values. Use the UAMI **Client ID** from Step 0.
-3. Set `CLIENT_NAME`; the generic source default is `CLIENTE`. Documentation images use
-   the exact privacy replacement **client NAME**, not real customer branding.
+3. Set `CLIENT_NAME`; the generic source default is `Customer`. The documentation
+   images and the sample run use the fictitious **Contoso**, not real customer branding.
+   The name appears after **Prepared for**; without a logo the plaque keeps the fixed
+   **CUSTOMER** placeholder, so the sample also sets the optional logo to a plain
+   CONTOSO wordmark ([Optional private branding](#optional-private-branding)).
 4. Configure `APPROVED_CLUSTERS` with the exact approved names and resource
    groups. Its order defines the legacy empty-selector default.
 
@@ -414,9 +430,9 @@ ARM read is not proof that Kubernetes or Cost Management reads work.
 SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
 TENANT_ID = "<YOUR_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 CLUSTER_DEFAULTS = {
     "environment": "UNSPECIFIED",
     "kubernetes_enabled": True,
@@ -693,7 +709,7 @@ four read boundaries still require explicit approval and verification.
    `view` = `summary`, `area`/`level`/`severity`/`status` = `all`, `limit` =
    `25`, `offset` = `0`), leaving the other boxes empty.
    An authorized operator tests the code before creation. If a source fails,
-   inspect the sanitized error and its **No evaluado** result; do not broaden
+   inspect the sanitized error and its **Not evaluated** result; do not broaden
    access or fabricate a smaller successful scope.
 6. **Create tool** stays grey until you run **Test**; select it only after the
    approved test. Reopen/read back the saved source hash, parameter
@@ -850,7 +866,7 @@ permission.
    <APPROVED_AKS_NAME>. Use operation=report once, include all three levels,
    four areas and five WAF pillars, and immediately deliver the HTML,
    complete JSON, findings CSV and inventory CSV. Show score and coverage
-   together, preserve No evaluado/No aplica and source errors. Change nothing.
+   together, preserve Not evaluated/Not applicable and source errors. Change nothing.
    ```
 
    ```json
@@ -927,7 +943,7 @@ plain text and can be left out:
 <APPROVED_AKS_NAME> con operation=report. Cubre cluster, workloads y recursos
 asociados: buenas practicas, seguridad, FinOps y optimizacion, con los cinco
 pilares WAF. Entrega HTML, JSON completo, CSV de hallazgos y CSV de inventario.
-Muestra cobertura, fuentes, No evaluado/No aplica y limites. No cambies nada.
+Muestra cobertura, fuentes, Not evaluated/Not applicable y limites. No cambies nada.
 ```
 
 - **Source coverage follow-up (ES):**
@@ -950,26 +966,26 @@ JSON beside it privately; the HTML already embeds the complete model.
 
 ### Start with identity, date and coverage
 
-1. Read the blue band at the top: the **Veredicto** card, the one-line summary
+1. Read the blue band at the top: the **Verdict** card, the one-line summary
    and the chips (UTC reference, **LIVE/SIMULATED** provenance, environment,
    cluster) are different facts. The severity bar and the KPI cards below it
    repeat supplied counts; they do not recompute anything.
-2. Open **Resumen ejecutivo**. Read the local index **beside** coverage, then
-   **Qué hacer a continuación** (the first actions of the supplied plan).
-3. Use the chart's table to distinguish **Superadas**, **Con hallazgo**,
-   **No evaluadas** and **No aplicables**. Its total is a count of checks, not
+2. Open **Executive summary**. Read the local index **beside** coverage, then
+   **What to do next** (the first actions of the supplied plan).
+3. Use the chart's table to distinguish **Passed**, **Failed**,
+   **Not evaluated** and **Not applicable**. Its total is a count of checks, not
    a health grade. Unknowns are neutral, never green.
 
 ![SIMULATED assessment reading with separate score, status bar and coverage](images/aks04-report-01-assessment.png)
 
 The local index is `100 × passed / (passed + failed)`. Coverage is
 `100 × evaluated / (evaluated + not_evaluated)`; N/A is excluded. No evaluated
-checks means `null` / **No evaluado**. A screenshot is not a fresh collection,
+checks means `null` / **Not evaluated**. A screenshot is not a fresh collection,
 and a high pass indicator with low coverage is not a healthy cluster.
 
 ### Follow namespace, workload and resource evidence
 
-1. Under **Explorar el alcance**, select a namespace.
+1. Under **Explore the scope**, select a namespace.
 2. Select the workload. The UI uses its Kubernetes UID, or namespace/kind/name
    when UID is unavailable; it does not mix workloads through the cluster's
    shared ARM parent ID.
@@ -987,24 +1003,24 @@ not observed cluster data.
 
 ### Inspect observed architecture, then the undeployed proposal
 
-1. Open **Arquitectura > Arquitectura observada**.
-2. Use **Tipo de recurso** and **Recurso / objeto observado**, or the grouped
+1. Open **Architecture > Observed architecture**.
+2. Use **Resource type** and **Observed resource / object**, or the grouped
    resource tree. Inspect real ARM IDs and Kubernetes identities.
 3. Open node/edge receipts to see exact join fields and sources. A service
    annotation alone is intent, not an observed LB mapping. Public/private
    frontend/IP evidence qualifies **ELB/ILB**; ELB means **Azure public Load
    Balancer**, not AWS.
-4. Check **Relaciones no evaluadas**. An unavailable kind or missing exact join
+4. Check **Relationships not evaluated and topology limits**. An unavailable kind or missing exact join
    is not an invented edge.
 
-![SIMULATED observed architecture with exact-ID neighbourhood and property receipts](images/aks04-report-03-observed-architecture.png)
+![SIMULATED observed architecture with exact-ID neighborhood and property receipts](images/aks04-report-03-observed-architecture.png)
 
-The illustration shows a bounded neighbourhood (at most thirteen nodes) and
+The illustration shows a bounded neighborhood (at most thirteen nodes) and
 its visible/total counts. Complete node/edge/unknown tables and JSON retain all
 records. On a phone, scroll the diagram locally; do not interpret abbreviated
 labels as replacement identities.
 
-5. Select **Propuesta de referencia - NO desplegada**. This separate view
+5. Select **Reference proposal - NOT deployed**. This separate view
    illustrates conditional Azure baseline choices: protected HTTP(S) or public
    L4 entry, private frontend when appropriate, pool/subnet separation,
    namespace controls and platform services **only if required and approved**.
@@ -1019,9 +1035,9 @@ view merely because it appears in an architecture example.
 
 ### Read FinOps without turning candidates into savings
 
-1. Open **FinOps**. **Coste observado** shows the provided amount and actual
+1. Open **FinOps**. **Observed cost** shows the provided amount and actual
    currency. Read its billing period, exact scope and association.
-2. Read **Ahorro estimado** independently. **Por estimar / No calculado**
+2. Read **Estimated savings** independently. **To be estimated / Not calculated**
    means no monetary savings model was supplied, **not zero savings**.
 3. Open utilization/candidate receipts: timestamp, duration, units, samples,
    numerator/denominator and business need must accompany a capacity review.
@@ -1039,9 +1055,9 @@ are needed before a monetary savings figure is meaningful.
 ### Select clusters, export and print
 
 The multi-cluster document has a separate supplied aggregate and an explicit
-**Clúster de la lectura detallada** selector. Selecting a cluster resets local
+**Cluster for the detailed view** selector. Selecting a cluster resets local
 filters. A failed primary read shows its error and **no borrowed score, cost,
-workload or topology**. In the top band, the **Clúster 1 de 2 · cambiar** chip
+workload or topology**. In the top band, the **Cluster 1 of 2 · change** chip
 jumps to that selector. Configured roster entries absent from the artifact are
 marked unavailable for local selection; choosing them requires a new approved
 SRE call.
@@ -1052,12 +1068,12 @@ or an unsafe path is not equivalent. Each run retains its own exact UTC
 reference; sequential collection times need not equal the wrapper reference.
 Original IDs and timestamps are never rewritten in display or exports.
 
-**JSON completo** preserves the original wrapper and every run, including
+**Full JSON** preserves the original wrapper and every run, including
 errors. Scope JSON filters only the selected snapshot and explicitly preserves
 all other snapshots/errors and the original aggregate. CSV exports include all
-matching records, not just the visible page. **Hallazgos** are sorted by
-severity by default (**Ordenar** restores the engine order); exports keep the
-engine order. **Imprimir / PDF** expands the matching evidence into an A4
+matching records, not just the visible page. **Findings** are sorted by
+severity by default (**Sort** restores the engine order); exports keep the
+engine order. **Print / PDF** expands the matching evidence into an A4
 document with a running footer (title, cluster, UTC reference, page number);
 both architecture views retain the undeployed label.
 
@@ -1125,7 +1141,7 @@ the actual returned paths. written is not download verification;
 http_verified=false must not hide provided aliases.
 Summarize only returned UTC/source coverage, counts and local assessment
 beside unknowns. Disclose partial/error sources; unavailable Kubernetes stays
-No evaluado, not historical workloads or health. Do not claim the current
+Not evaluated, not historical workloads or health. Do not claim the current
 configuration or samples cover the previous calendar month. Never grant roles,
 enable plans, start/stop a cluster, remediate, call operator assets, fabricate
 links, drop evidence, split the requested scope or upload to alternative storage.
@@ -1171,7 +1187,7 @@ New-cloud captures remain **Not collected** until that deployment happens.
 | clusterUser HTTP 403 | Ask the authorized operator to verify the exact minimal approved permission; never use admin kubeconfig |
 | A Kubernetes kind HTTP 403 | Preserve that blind spot; AKS RBAC Reader can exclude cluster-scoped kinds |
 | Kubernetes HTTP 502 / TLS / timeout | Inspect approved reachability, source and peer/FQDN validation; no insecure/proxy/endpoint workaround |
-| Cost HTTP 429 | Bounded retries, then the actual error / No evaluado; no zero cost or savings |
+| Cost HTTP 429 | Bounded retries, then the actual error / Not evaluated; no zero cost or savings |
 | Partial list / continuation / cap error | Retain normalized rows with their partial receipt; do not call page one the whole estate |
 | Invalid HTML startup | Request a complete compatible snapshot; the UI deliberately exposes no partial success |
 | File/response limit exceeded | Keep the requested full scope; do not drop records, ZIP, upload to Storage or silently compress metadata |
@@ -1185,7 +1201,7 @@ New-cloud captures remain **Not collected** until that deployment happens.
 | Evidence | What it establishes |
 |---|---|
 | Existing approved LAB, source reference **2026-10-13T18:17:15Z** | Actual ordinary chat automatically delivered four native URLs; all four original downloads returned HTTP 200; current Kubernetes evidence was source-partial |
-| Current baseline local index / coverage | **94.44 / 100**, **15.13%** coverage; **18** evaluated, **101** No evaluado, **1** N/A; not an official score or health assertion |
+| Current baseline local index / coverage | **94.44 / 100**, **15.13%** coverage; **18** evaluated, **101** Not evaluated, **1** N/A; not an official score or health assertion |
 | Current baseline billing | **295.82358809701833 USD**, MonthToDate **2026-10-01 to 2026-10-13T18:17:15Z**, **53** billed ResourceId rows; estimated savings `null` |
 | Earlier source **2026-10-13T14:41:50Z** | **53 workloads / 77 pods** were captured then; Nodes/PVs/StorageClasses had HTTP 403. Historical source plus later replay, not present Kubernetes recovery |
 | Real Builder captures, 2026-10-13 | Actual saved one-tool/one-skill specialist and the UI controls of that date; unsaved code/parameter/identity previews are identified as previews. Replaced in the steps by today's captures and kept for reference: [Test playground](images/aks04-step01-cluster-choice.png), [Python menu](images/aks04-step02-01-python-menu.png), [Code](images/aks04-step02-02-code.png), [paging](images/aks04-step02-03-typed-parameters.png), [Identity](images/aks04-step02-04-identity.png), [skill](images/aks04-step03-skill-readback.png), [specialist](images/aks04-step04-agent-readback.png), [scheduling](images/aks04-step07-scheduling.png), [Trigger menu](images/aks04-step07-create-menu.png) |
@@ -1224,7 +1240,7 @@ unchanged. This is delivery/UI validation, **not** Kubernetes recovery or
 new-cluster/power-schedule deployment.
 
 The earlier workload-complete replay showed **98.41 / 100** over 63 evaluated
-checks and **31.19%** coverage, with 139 No evaluado and 355 N/A. Its chart is
+checks and **31.19%** coverage, with 139 Not evaluated and 355 N/A. Its chart is
 not current source health. No earlier workload is inserted into the later 502
 report, and no current/source-partial capture is captioned as recovered.
 
@@ -1443,10 +1459,10 @@ Select `/agent aks-waf-live` in **New chat** and use any of these prompts in **S
   @aks-waf-live Query the Cost Optimization pillar findings (operation="query", view="findings", pillar="Cost Optimization") and summarize the concrete optimization opportunities across node VM SKUs, autoscale min/max bounds, dev/test lifecycle, and observed CPU/memory utilization.
   ```
 
-### 6. Unassessed In-Cluster Kubernetes Checks vs. ARM Plane / Controles Dentro de Kubernetes (`No evaluado`) frente a ARM
+### 6. Unassessed In-Cluster Kubernetes Checks vs. ARM Plane / Controles Dentro de Kubernetes (`Not evaluated`) frente a ARM
 - **Castellano:**
   ```text
-  @aks-waf-live Que controles de la checklist oficial de AKS quedaron en estado "No evaluado" porque requieren inspeccionar objetos dentro de la API de Kubernetes (PodDisruptionBudgets, ResourceQuotas, requests/limits de pods) y no solo el plano ARM?
+  @aks-waf-live Que controles de la checklist oficial de AKS quedaron en estado "Not evaluated" porque requieren inspeccionar objetos dentro de la API de Kubernetes (PodDisruptionBudgets, ResourceQuotas, requests/limits de pods) y no solo el plano ARM?
   ```
 - **English:**
   ```text

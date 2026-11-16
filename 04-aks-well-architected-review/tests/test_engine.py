@@ -253,7 +253,7 @@ class EngineTests(unittest.TestCase):
         for rule_id in ("C09", "C10"):
             check = self.check(rule_id)
             self.assertEqual(check["status"], "passed")
-            self.assertIn("no prueba eficacia", check["reason"])
+            self.assertIn("does not prove effectiveness", check["reason"])
         self.raw["cluster"]["defender_enabled"] = None
         self.assertEqual(self.check("C10")["status"], "not_evaluated")
 

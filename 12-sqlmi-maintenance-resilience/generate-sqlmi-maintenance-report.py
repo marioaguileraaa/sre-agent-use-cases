@@ -7,7 +7,7 @@
 #      and which absorb them (with retries).
 #   4) Recommended window per instance from real load, plus an action plan with commands.
 # Modes: data_source="demo" (deterministic simulated data, no configuration needed) | "live" | "auto".
-# The report itself is written in Spanish (same convention as case 11).
+# Outputs: a self-contained HTML report, the full JSON and two CSV files, all in English.
 # Read-only · Version 1.0 · October 2026
 
 
@@ -51,7 +51,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
     operation = (operation or "report").strip().lower()
     if operation not in ("report", "summary", "upcoming"):
         operation = "report"
-    period_map = {"last_30d": ("Últimos 30 días", 30), "last_14d": ("Últimos 14 días", 14), "last_7d": ("Últimos 7 días", 7)}
+    period_map = {"last_30d": ("Last 30 days", 30), "last_14d": ("Last 14 days", 14), "last_7d": ("Last 7 days", 7)}
     period_key = (period or "last_30d").strip().lower()
     if period_key not in period_map:
         period_key = "last_30d"
@@ -68,7 +68,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
     def file_url(name):
         return f"/api/files/tmp/ThreadFiles/{m_tid.group(1)}/{quote(name, safe='')}" if m_tid else str(cwd / name)
 
-    # ---- Hora local (zoneinfo si existe; si no, regla CET/CEST de la UE) -------------------------------
+    # ---- Local time (zoneinfo when available; otherwise the EU CET/CEST rule) --------------------------
     try:
         from zoneinfo import ZoneInfo
         _TZ = ZoneInfo(LOCAL_TIMEZONE)
@@ -114,20 +114,20 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
             return None
         return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
 
-    DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    DIAS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     def fmt_local(dt, with_day=True):
         if not dt:
             return "—"
         lo = to_local(dt)
-        return (DIAS[lo.weekday()] + " " if with_day else "") + lo.strftime("%d/%m %H:%M")
+        return (DIAS[lo.weekday()] + " " if with_day else "") + lo.strftime("%d\u00a0%b %H:%M")
 
-    # ---- Ventanas de mantenimiento de SQL MI (Microsoft Learn: maintenance-window) ---------------------
+    # ---- SQL MI maintenance windows (Microsoft Learn: maintenance-window) ------------------------------
     WINDOWS = {
-        "Default": "Por defecto · 17:00–08:00 todos los días",
-        "Weekday": "Entre semana · Lun–Jue 22:00–06:00",
-        "Weekend": "Fin de semana · Vie–Dom 22:00–06:00",
-        "Custom": "Configuración no estándar",
+        "Default": "Default · 17:00–08:00 every day",
+        "Weekday": "Weekday · Mon–Thu 22:00–06:00",
+        "Weekend": "Weekend · Fri–Sun 22:00–06:00",
+        "Custom": "Non-standard configuration",
     }
     WINDOW_SUFFIX = {"Weekday": "MI_1", "Weekend": "MI_2"}
 
@@ -209,7 +209,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
     TRANSIENT = {"233", "997", "10060", "10053", "10054", "4060", "4221", "1204", "1205", "1222", "10928", "10929",
                  "40501", "49918", "49919", "49920", "40143", "40197", "40540", "40613", "-2"}
 
-    # ==== Colectores LIVE (solo lectura) ================================================================
+    # ==== LIVE collectors (read-only) ===================================================================
     t0 = time.monotonic()
     sources = []
 
@@ -234,7 +234,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         def req(method, url, body=None, scope=ARM + "/.default", tries=3):
             for i in range(tries):
                 if left() < 4:
-                    raise TimeoutError("presupuesto de tiempo agotado")
+                    raise TimeoutError("time budget exhausted")
                 r = requests.request(method, url, json=body, timeout=min(30, max(5, left() - 2)),
                                      headers={"Authorization": "Bearer " + tok(scope), "Content-Type": "application/json"})
                 if r.status_code in (429, 500, 502, 503, 504) and i < tries - 1:
@@ -264,7 +264,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         d = {"mode": "live", "instances": [], "events": [], "upcoming": [], "alerts": [],
              "dep_hourly": [], "dep_fail": [], "req_fail": [], "cpu": {}, "telemetry": False}
 
-        # 1) Inventario SQL MI
+        # 1) SQL MI inventory
         try:
             rows = arg("resources | where type =~ 'microsoft.sql/managedinstances' | project id, name, location, "
                        "resourceGroup, subscriptionId, tags, skuName=tostring(sku.name), tier=tostring(sku.tier), "
@@ -282,12 +282,12 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                     "cfg_id": r.get("cfg") or "", "proxy": "Redirect" if px.lower() in ("redirect", "default") else ("Proxy" if px.lower() == "proxy" else "—"),
                     "zone_redundant": bool(r.get("zr")), "pool": bool(r.get("pool")), "fqdn": r.get("fqdn") or "",
                     "tags": r.get("tags") or {}, "fog": None, "fog_role": None, "fog_partner": None})
-            src("Resource Graph · inventario SQL MI", "ok", f"{len(rows)} instancias")
+            src("Resource Graph · SQL MI inventory", "ok", f"{len(rows)} instance{'s' if len(rows) != 1 else ''}")
         except Exception as e:
-            src("Resource Graph · inventario SQL MI", "error", e)
+            src("Resource Graph · SQL MI inventory", "error", e)
         by_id = {i["id"].lower(): i for i in d["instances"]}
 
-        # 2) Failover groups (REST por grupo de recursos y región)
+        # 2) Failover groups (REST per resource group and region)
         fog_err = 0
         for key in sorted({(i["sub"], i["rg"], i["location"]) for i in d["instances"]}):
             try:
@@ -304,9 +304,9 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                                 x["fog_partner"] = other["name"] if other else None
             except Exception:
                 fog_err += 1
-        src("ARM · failover groups", "ok" if not fog_err else "partial", f"{fog_err} errores" if fog_err else "")
+        src("ARM · failover groups", "ok" if not fog_err else "partial", f"{fog_err} error{'s' if fog_err != 1 else ''}" if fog_err else "")
 
-        # 3) Próximos mantenimientos (Service Health) y updates por recurso (Maintenance)
+        # 3) Upcoming maintenance (Service Health) and per-resource updates (Maintenance)
         try:
             rows = arg("servicehealthresources | where type =~ 'Microsoft.ResourceHealth/events' | extend p=properties "
                        "| where tostring(p.EventType) == 'PlannedMaintenance' | mv-expand imp=p.Impact "
@@ -320,13 +320,13 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                     continue
                 seen.add(r.get("trackingId"))
                 regs = [re.sub(r"\s+", "", (x.get("ImpactedRegion") or "")).lower() for x in (r.get("regions") or []) if isinstance(x, dict)]
-                d["upcoming"].append({"tracking_id": r.get("trackingId"), "title": r.get("title") or "Mantenimiento planificado",
+                d["upcoming"].append({"tracking_id": r.get("trackingId"), "title": r.get("title") or "Planned maintenance",
                                       "start": st.isoformat(), "end": (en or st + timedelta(hours=8)).isoformat(),
                                       "regions": regs, "impacted": [i["name"] for i in d["instances"] if i["location"] in regs],
                                       "source": "Service Health"})
-            src("Service Health · mantenimiento planificado", "ok", f"{len(d['upcoming'])} eventos")
+            src("Service Health · planned maintenance", "ok", f"{len(d['upcoming'])} event{'s' if len(d['upcoming']) != 1 else ''}")
         except Exception as e:
-            src("Service Health · mantenimiento planificado", "error", e)
+            src("Service Health · planned maintenance", "error", e)
         try:
             rows = arg("maintenanceresources | where type =~ 'microsoft.maintenance/updates' "
                        "| where tolower(id) contains '/microsoft.sql/managedinstances/' or tolower(tostring(properties.resourceId)) "
@@ -350,11 +350,11 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                                           "start": st.isoformat(), "end": en.isoformat(), "regions": [mi["location"]],
                                           "impacted": [mi["name"]], "source": "Maintenance"})
                 n += 1
-            src("Resource Graph · maintenanceresources", "ok", f"{n} updates pendientes")
+            src("Resource Graph · maintenanceresources", "ok", f"{n} pending update{'s' if n != 1 else ''}")
         except Exception as e:
             src("Resource Graph · maintenanceresources", "partial", e)
 
-        # 4) Alertas de Service Health
+        # 4) Service Health alerts
         try:
             rows = arg("resources | where type =~ 'microsoft.insights/activitylogalerts' | project name, "
                        "enabled=tobool(properties.enabled), cond=properties.condition")
@@ -380,12 +380,12 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                 d["alerts"].append({"name": r.get("name"), "enabled": r.get("enabled") is not False,
                                     "covers_maintenance": not inc or any("maintenance" in x for v in inc for x in v),
                                     "covers_sqlmi": not svc or any("managed instance" in x for v in svc for x in v),
-                                    "types": sorted({x for v in inc for x in v}) or ["todas"]})
-            src("Resource Graph · alertas Service Health", "ok", f"{len(d['alerts'])} alertas")
+                                    "types": sorted({x for v in inc for x in v}) or ["all"]})
+            src("Resource Graph · Service Health alerts", "ok", f"{len(d['alerts'])} alert{'s' if len(d['alerts']) != 1 else ''}")
         except Exception as e:
-            src("Resource Graph · alertas Service Health", "error", e)
+            src("Resource Graph · Service Health alerts", "error", e)
 
-        # 5) Resource Health (reconfiguraciones) + CPU por instancia, en paralelo
+        # 5) Resource Health (reconfigurations) + CPU per instance, in parallel
         def rh(mi):
             out = []
             j = req("GET", f"{ARM}{mi['id']}/providers/Microsoft.ResourceHealth/availabilityStatuses?api-version=2022-10-01&$top=200")
@@ -428,10 +428,10 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                     d["cpu"][n] = f.result()
                 except Exception:
                     cpu_err += 1
-        src("Resource Health · historial", "ok" if not rh_err else "partial", f"{len(d['events'])} eventos; {rh_err} errores")
-        src("Azure Monitor · avg_cpu_percent", "ok" if not cpu_err else "partial", f"{cpu_err} errores" if cpu_err else "")
+        src("Resource Health · history", "ok" if not rh_err else "partial", f"{len(d['events'])} event{'s' if len(d['events']) != 1 else ''}; {rh_err} error{'s' if rh_err != 1 else ''}")
+        src("Azure Monitor · avg_cpu_percent", "ok" if not cpu_err else "partial", f"{cpu_err} error{'s' if cpu_err != 1 else ''}" if cpu_err else "")
 
-        # 6) Failovers manuales (Activity Log)
+        # 6) Manual failovers (Activity Log)
         try:
             names = {i["id"].lower(): i["name"] for i in d["instances"]}
             for sub in sorted({i["sub"] for i in d["instances"]}):
@@ -452,14 +452,14 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                         else:
                             d["events"].append({"mi": names[rid], "start": t.isoformat(), "duration_s": 10,
                                                 "reason": "UserInitiated", "source": "Activity Log"})
-            src("Activity Log · failovers manuales", "ok")
+            src("Activity Log · manual failovers", "ok")
         except Exception as e:
-            src("Activity Log · failovers manuales", "partial", e)
+            src("Activity Log · manual failovers", "partial", e)
 
-        # 7) Application Insights (workspace-based) vía Log Analytics
+        # 7) Application Insights (workspace-based) via Log Analytics
         wss = _csv_list(LOG_ANALYTICS_WORKSPACE_IDS)
         if not wss:
-            src("Application Insights · dependencias SQL", "skipped", "LOG_ANALYTICS_WORKSPACE_IDS sin configurar")
+            src("Application Insights · SQL dependencies", "skipped", "LOG_ANALYTICS_WORKSPACE_IDS not configured")
         days = period_days
 
         def la(ws, q):
@@ -482,7 +482,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                 src(f"Application Insights · workspace …{ws[-6:]}", "error", e)
         return d
 
-    # ==== Dataset DEMO (simulado, determinista; sin datos reales de cliente) ==============================
+    # ==== DEMO dataset (simulated, deterministic; no real customer data) ==================================
     def collect_demo():
         rnd = random.Random(20261022)
         SUB = "00000000-0000-0000-0000-000000000000"
@@ -492,21 +492,21 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
             return {"id": f"/subscriptions/{SUB}/resourceGroups/{rg}/providers/Microsoft.Sql/managedInstances/{name}",
                     "name": name, "sub": SUB, "rg": rg, "location": loc, "tier": tier, "vcores": vc,
                     "cfg_id": "" if win == "Default" else config_id(SUB, loc, win), "proxy": proxy, "zone_redundant": tier == "BusinessCritical",
-                    "pool": False, "fqdn": f"{name}.{DNS}", "tags": tags or {"entorno": "prd"},
+                    "pool": False, "fqdn": f"{name}.{DNS}", "tags": tags or {"environment": "prd"},
                     "fog": fog, "fog_role": role, "fog_partner": partner}
         inst = [
             mi("sqlmi-core-prd", "spaincentral", "BusinessCritical", 16, "Default", "Proxy",
-               {"entorno": "prd", "app": "core"}, "fog-core", "Primary", "sqlmi-core-dr"),
+               {"environment": "prd", "app": "core"}, "fog-core", "Primary", "sqlmi-core-dr"),
             mi("sqlmi-core-dr", "westeurope", "BusinessCritical", 16, "Default", "Proxy",
-               {"entorno": "prd", "app": "core", "rol": "dr"}, "fog-core", "Secondary", "sqlmi-core-prd", "rg-data-dr"),
-            mi("sqlmi-orders-prd", "spaincentral", "GeneralPurpose", 8, "Weekday", "Redirect", {"entorno": "prd", "app": "orders"}),
-            mi("sqlmi-bookings-prd", "spaincentral", "GeneralPurpose", 8, "Default", "Redirect", {"entorno": "prd", "app": "bookings"}),
+               {"environment": "prd", "app": "core", "role": "dr"}, "fog-core", "Secondary", "sqlmi-core-prd", "rg-data-dr"),
+            mi("sqlmi-orders-prd", "spaincentral", "GeneralPurpose", 8, "Weekday", "Redirect", {"environment": "prd", "app": "orders"}),
+            mi("sqlmi-bookings-prd", "spaincentral", "GeneralPurpose", 8, "Default", "Redirect", {"environment": "prd", "app": "bookings"}),
             mi("sqlmi-dwh-prd", "spaincentral", "GeneralPurpose", 16, "Weekend", "Redirect",
-               {"entorno": "prd", "app": "dwh", "batch-hours": "23-04"}),
-            mi("sqlmi-pre", "spaincentral", "GeneralPurpose", 4, "Default", "Redirect", {"entorno": "pre"}, rg="rg-data-pre"),
+               {"environment": "prd", "app": "dwh", "batch-hours": "23-04"}),
+            mi("sqlmi-pre", "spaincentral", "GeneralPurpose", 4, "Default", "Redirect", {"environment": "pre"}, rg="rg-data-pre"),
         ]
         fog_host = f"fog-core.{DNS}"
-        # app: (rpm base, [(target host, db)], perfil de reintentos, horario)
+        # app: (base rpm, [(target host, db)], retry profile, schedule)
         APPS = {
             "customer-portal-web": (420, [(fog_host, "CoreDB")], "none", "web"),
             "pricing-api": (260, [(f"sqlmi-core-prd.{DNS}", "PricingDB")], "none", "web"),
@@ -589,23 +589,23 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
             if rnd.random() < 0.5:
                 req_fail.append({"app": app, "ts": t.isoformat(), "n": 1})
         up_start = at_local(-3, (to_local(now_utc).weekday() + 3) % 7, 17, 0)
-        upcoming = [{"tracking_id": "QK4X-9TZ", "title": "Mantenimiento planificado de Azure SQL Managed Instance · Spain Central",
+        upcoming = [{"tracking_id": "QK4X-9TZ", "title": "Planned maintenance for Azure SQL Managed Instance · Spain Central",
                      "start": up_start.isoformat(), "end": (up_start + timedelta(hours=15)).isoformat(), "regions": ["spaincentral"],
                      "impacted": ["sqlmi-core-prd", "sqlmi-bookings-prd", "sqlmi-pre"], "source": "Service Health"}]
-        alerts = [{"name": "alr-servicehealth-incidencias", "enabled": True, "covers_maintenance": False, "covers_sqlmi": True,
+        alerts = [{"name": "alr-servicehealth-incidents", "enabled": True, "covers_maintenance": False, "covers_sqlmi": True,
                    "types": ["incident"]}]
-        for name, st, det in [("Resource Graph · inventario SQL MI", "ok", "6 instancias"), ("ARM · failover groups", "ok", "1 grupo"),
-                              ("Service Health · mantenimiento planificado", "ok", "1 evento"),
-                              ("Resource Graph · maintenanceresources", "ok", "3 updates pendientes"),
-                              ("Resource Graph · alertas Service Health", "ok", "1 alerta"),
-                              ("Resource Health · historial", "ok", f"{len(events)} eventos"),
-                              ("Activity Log · failovers manuales", "ok", "1 drill"),
-                              ("Application Insights · dependencias SQL", "ok", f"{len(APPS)} aplicaciones")]:
-            src(name + " (simulado)", st, det)
+        for name, st, det in [("Resource Graph · SQL MI inventory", "ok", "6 instances"), ("ARM · failover groups", "ok", "1 group"),
+                              ("Service Health · planned maintenance", "ok", "1 event"),
+                              ("Resource Graph · maintenanceresources", "ok", "3 pending updates"),
+                              ("Resource Graph · Service Health alerts", "ok", "1 alert"),
+                              ("Resource Health · history", "ok", f"{len(events)} events"),
+                              ("Activity Log · manual failovers", "ok", "1 drill"),
+                              ("Application Insights · SQL dependencies", "ok", f"{len(APPS)} applications")]:
+            src(name + " (simulated)", st, det)
         return {"mode": "demo", "instances": inst, "events": events, "upcoming": upcoming, "alerts": alerts,
                 "dep_hourly": dep_hourly, "dep_fail": dep_fail, "req_fail": req_fail, "cpu": {}, "telemetry": True}
 
-    # ==== Obtener datos ================================================================================
+    # ==== Get the data =================================================================================
     replay = os.environ.get("SQLMI_REPLAY", "").strip()
     if replay and Path(replay).is_file():
         raw = json.loads(Path(replay).read_text(encoding="utf-8"))["raw"]
@@ -614,16 +614,16 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         raw = collect_demo()
     else:
         if not _configured(MANAGED_IDENTITY_CLIENT_ID):
-            return {"status": "error", "mode": "live", "message": "Configura MANAGED_IDENTITY_CLIENT_ID en el código de la tool "
-                    "(README paso 4) o ejecuta con data_source='demo'."}
+            return {"status": "error", "mode": "live", "message": "Set MANAGED_IDENTITY_CLIENT_ID in the tool code "
+                    "(README, step 4) or run with data_source='demo'."}
         try:
             raw = collect_live()
         except Exception as e:
-            return {"status": "error", "mode": "live", "message": f"Error recogiendo datos: {e}", "sources": sources}
+            return {"status": "error", "mode": "live", "message": f"Error collecting data: {e}", "sources": sources}
         if not raw["instances"]:
             return {"status": "no_data", "mode": "live", "sources": sources,
-                    "message": "La identidad no ve ninguna SQL Managed Instance. Revisa el rol Reader (README paso 3) "
-                               "o ejecuta con data_source='demo' para ver el informe de ejemplo."}
+                    "message": "The identity cannot see any SQL Managed Instance. Check the Reader role (README, step 3) "
+                               "or run with data_source='demo' to see the sample report."}
     MODE = raw["mode"]
     insts = raw["instances"]
     by_name = {i["name"]: i for i in insts}
@@ -641,7 +641,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         lab = host.split(".")[0]
         return lab if lab in by_name else fog_primary.get(lab)
 
-    # ---- Mapa de carga 7x24 por instancia (media de llamadas SQL por hora local) ----------------------
+    # ---- 7x24 load map per instance (average SQL calls per local hour) --------------------------------
     occ = defaultdict(int)
     h = start_utc.replace(minute=0, second=0)
     while h < now_utc:
@@ -679,9 +679,9 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
     for i in insts:
         if i["name"] not in heat_src and i.get("fog_partner") in heat_src:
             heat[i["name"]] = heat[i["fog_partner"]]
-            heat_src[i["name"]] = f"carga del primario ({i['fog_partner']})"
+            heat_src[i["name"]] = f"load of the primary ({i['fog_partner']})"
 
-    # ---- Eventos: ventana, hora local, eventos detectados por telemetría ------------------------------
+    # ---- Events: window, local time and events detected from telemetry -------------------------------
     fails_by_mi = defaultdict(list)
     for r in raw["dep_fail"]:
         mi, t = mi_of_target(r.get("target")), parse_dt(r.get("ts"))
@@ -701,8 +701,8 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                     per_min[t.replace(second=0)] += n
             for t, n in sorted(per_min.items()):
                 if n >= 25 and not any(e["mi"] == mi and abs((parse_dt(e["start"]) - t).total_seconds()) < 900 for e in events):
-                    events.append({"mi": mi, "start": t.isoformat(), "duration_s": 60, "reason": "Detected", "source": "Telemetría"})
-    REASON = {"Planned": "Planificado", "Unplanned": "No planificado", "UserInitiated": "Manual (drill)", "Detected": "Detectado (telemetría)"}
+                    events.append({"mi": mi, "start": t.isoformat(), "duration_s": 60, "reason": "Detected", "source": "Telemetry"})
+    REASON = {"Planned": "Planned", "Unplanned": "Unplanned", "UserInitiated": "Manual (drill)", "Detected": "Detected (telemetry)"}
     for e in events:
         t = parse_dt(e["start"])
         e["_t"], e["local"] = t, fmt_local(t)
@@ -710,7 +710,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         e["reason_es"] = REASON.get(e["reason"], e["reason"])
     events.sort(key=lambda x: x["_t"])
 
-    # ---- Correlación evento -> dependencias fallidas -> errores de usuario -------------------------------
+    # ---- Correlation: event -> failed dependencies -> user errors --------------------------------------
     impact = []
     app_stats = defaultdict(lambda: {"dep": 0, "user": 0, "events": 0, "codes": defaultdict(int)})
 
@@ -718,7 +718,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         return e["_t"] - timedelta(minutes=2), e["_t"] + timedelta(seconds=e["duration_s"]) + timedelta(minutes=5)
 
     def nearest(cands, t):
-        # Cada fallo se asigna a un único evento (el más cercano) para no contar dos veces reconfiguraciones seguidas.
+        # Each failure goes to a single event (the nearest one) so back-to-back reconfigurations are not counted twice.
         hits = [k for k in cands if ev_span(events[k])[0] <= t <= ev_span(events[k])[1]]
         return min(hits, key=lambda k: abs((t - events[k]["_t"]).total_seconds())) if hits else None
     ev_by_mi = defaultdict(list)
@@ -756,11 +756,11 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
 
     def verdict(dep, user):
         if not raw.get("telemetry"):
-            return "Sin telemetría"
+            return "No telemetry"
         if dep == 0:
-            return "Sin impacto observado"
+            return "No impact observed"
         r = user / dep
-        return "Sin reintentos" if r >= 0.5 else ("Parcial" if r >= 0.05 else "Resiliente")
+        return "No retries" if r >= 0.5 else ("Partial" if r >= 0.05 else "Resilient")
     apps = []
     for (app, mi), n in app_mi.items():
         if not any(x["app"] == app for x in apps):
@@ -770,15 +770,15 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                          "dep_failures": s["dep"], "user_errors": s["user"],
                          "ratio": round(s["user"] / s["dep"], 2) if s["dep"] else None, "verdict": verdict(s["dep"], s["user"]),
                          "codes": ", ".join(f"{c}×{v}" for c, v in sorted(s["codes"].items(), key=lambda x: -x[1])[:4])})
-    ORDER = {"Sin reintentos": 0, "Parcial": 1, "Resiliente": 2, "Sin impacto observado": 3, "Sin telemetría": 4}
+    ORDER = {"No retries": 0, "Partial": 1, "Resilient": 2, "No impact observed": 3, "No telemetry": 4}
     apps.sort(key=lambda x: (ORDER.get(x["verdict"], 9), -x["user_errors"]))
-    risky = {a["app"] for a in apps if a["verdict"] in ("Sin reintentos", "Parcial")}
+    risky = {a["app"] for a in apps if a["verdict"] in ("No retries", "Partial")}
     apps_by_mi = defaultdict(list)
     for a in apps:
         for m in a["mis"]:
             apps_by_mi[m].append(a)
 
-    # ---- Recomendación de ventana por instancia ----------------------------------------------------------
+    # ---- Recommended window per instance ----------------------------------------------------------------
     def win_score(mi, w):
         hm = heat.get(mi)
         if not hm:
@@ -794,7 +794,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         cand = {w: s for w, s in i["scores"].items() if w != "Default" and s is not None}
         if cand and not i["pool"]:
             best = min(cand, key=cand.get)
-            # Solo se recomienda cambiar si mejora >10 %: cambiar la ventana cambia la IP de la instancia.
+            # Only recommend a change if it improves the score by more than 10%: changing the window changes the instance IP.
             cur = cand.get(i["window"])
             i["recommended"] = i["window"] if cur is not None and cand[best] >= cur * 0.9 else best
     for i in insts:
@@ -816,7 +816,7 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                     est += e["user_errors"] * min(1.0, mean_w / max(hm[lo.weekday()][lo.hour], 1e-9))
         i["user_errors_planned"], i["user_errors_est"] = actual, int(round(est))
 
-    # ---- Hallazgos priorizados ------------------------------------------------------------------------------
+    # ---- Prioritized findings --------------------------------------------------------------------------------
     findings = []
 
     def add(sev, title, scope, detail, action, cmd=""):
@@ -826,93 +826,97 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
     for u in up7:
         at = sorted({a["app"] for m in u["impacted"] for a in apps_by_mi.get(m, []) if a["app"] in risky})
         if at:
-            add("Alta", f"Mantenimiento en {max(0, (parse_dt(u['start']) - now_utc).days)} días con aplicaciones sin reintentos",
-                ", ".join(u["impacted"]), f"{u['title']} ({u['tracking_id']}) empieza {fmt_local(parse_dt(u['start']))}. "
-                f"Aplicaciones en riesgo: {', '.join(at)}.",
-                "Avisar a los equipos de esas aplicaciones, tener el runbook de comunicación listo y, si es posible, "
-                "aplicar antes la ventana recomendada o validar los reintentos.")
+            add("High", f"Maintenance in {max(0, (parse_dt(u['start']) - now_utc).days)} day{'s' if max(0, (parse_dt(u['start']) - now_utc).days) != 1 else ''} "
+                "with applications without retries",
+                ", ".join(u["impacted"]), f"{u['title']} ({u['tracking_id']}) starts {fmt_local(parse_dt(u['start']))}. "
+                f"Applications at risk: {', '.join(at)}.",
+                "Warn the teams that own these applications, have the communication runbook ready and, if possible, "
+                "apply the recommended window beforehand or validate the retries.")
     for a in apps:
-        if a["verdict"] == "Sin reintentos":
-            add("Alta", "Aplicación sin lógica de reintentos", a["app"], f"{a['user_errors']} errores de usuario por "
-                f"{a['dep_failures']} fallos SQL transitorios en {a['events']} reconfiguraciones (ratio {a['ratio']}).",
-                "Implementar reintentos con backoff exponencial para errores transitorios (ver retry-samples/). "
-                "Es la única medida que elimina el impacto, también en eventos no planificados.")
-        elif a["verdict"] == "Parcial":
-            add("Media", "Aplicación con reintentos parciales", a["app"], f"{a['user_errors']} errores de usuario de "
-                f"{a['dep_failures']} fallos SQL (ratio {a['ratio']}): reintenta en algunos caminos pero no en todos.",
-                "Revisar que el reintento cubra apertura de conexión y comandos, y que el timeout total sea ≥ 60 s.")
+        if a["verdict"] == "No retries":
+            add("High", "Application without retry logic", a["app"], f"{a['user_errors']:,} user error{'s' if a['user_errors'] != 1 else ''} from "
+                f"{a['dep_failures']:,} transient SQL failure{'s' if a['dep_failures'] != 1 else ''} in {a['events']} "
+                f"reconfiguration{'s' if a['events'] != 1 else ''} (ratio {a['ratio']}).",
+                "Implement retries with exponential backoff for transient errors (see retry-samples/). "
+                "It is the only measure that removes the impact, including during unplanned events.")
+        elif a["verdict"] == "Partial":
+            add("Medium", "Application with partial retries", a["app"], f"{a['user_errors']:,} user error{'s' if a['user_errors'] != 1 else ''} out of "
+                f"{a['dep_failures']:,} SQL failure{'s' if a['dep_failures'] != 1 else ''} (ratio {a['ratio']}): it retries on some paths "
+                "but not on all of them.",
+                "Check that the retry covers opening the connection and running the commands, and that the total timeout is ≥ 60 s.")
     if not any(x["enabled"] and x["covers_maintenance"] and x["covers_sqlmi"] for x in raw["alerts"]):
         partial = [x["name"] for x in raw["alerts"] if x["enabled"]]
-        add("Alta", "Sin aviso anticipado de mantenimiento de SQL MI", "Suscripción",
-            "Ninguna alerta de Service Health cubre 'Mantenimiento planificado' para SQL Managed Instance"
-            + (f" (existe {', '.join(partial)}, pero no incluye Maintenance)." if partial else "."),
-            "Crear la alerta (aviso 24 h antes, al inicio y al final) con create-sqlmi-maintenance-alert.ps1.",
+        add("High", "No advance notice of SQL MI maintenance", "Subscription",
+            "No Service Health alert covers 'Planned maintenance' for SQL Managed Instance"
+            + (f" ({', '.join(partial)} exists, but it does not include Maintenance)." if partial else "."),
+            "Create the alert (notice 24 h before, at the start and at the end) with create-sqlmi-maintenance-alert.ps1.",
             "./create-sqlmi-maintenance-alert.ps1 -SubscriptionId <SUB_ID> -ResourceGroup <RG> -ActionGroupId <ACTION_GROUP_ID>")
     for i in prd:
         if i["window"] == "Default" and not i["pool"] and i.get("fog_role") != "Secondary":
             hit = [a["app"] for a in apps_by_mi.get(i["name"], []) if a["app"] in risky]
             rec = i["recommended"] or "Weekday"
-            red = (f" Estimación: {i['user_errors_planned']} → ~{i['user_errors_est']} errores de usuario en mantenimientos planificados."
+            red = (f" Estimate: {i['user_errors_planned']:,} → ~{i['user_errors_est']:,} user errors in planned maintenance."
                    if i["user_errors_planned"] else "")
-            add("Alta" if hit else "Media", "Instancia de producción en la ventana por defecto (17:00–08:00)", i["name"],
-                "La ventana por defecto incluye la franja de tarde con tráfico alto." + (f" Apps afectadas: {', '.join(hit)}." if hit else "") + red,
-                f"Cambiar a {WINDOWS[rec]} (mejor puntuación según la carga real). Cambia la IP de la instancia: actualizar NSG/firewalls.",
+            add("High" if hit else "Medium", "Production instance on the default window", i["name"],
+                "The default window (17:00–08:00) includes the evening hours with high traffic." + (f" Affected apps: {', '.join(hit)}." if hit else "") + red,
+                f"Change to {WINDOWS[rec]} (best score from the real load). The instance IP changes: update NSGs and firewalls.",
                 f"az sql mi update -g {i['rg']} -n {i['name']} --maint-config-id \"{config_id(i['sub'], i['location'], rec)}\"")
     for i in insts:
         if i.get("fog_role") == "Primary" and i.get("fog_partner") in by_name:
             s = by_name[i["fog_partner"]]
             if not i["paired"] and i["window"] == s["window"]:
-                add("Alta", "Failover group con la misma ventana en regiones no emparejadas", f"{i['fog']} ({i['name']} / {s['name']})",
-                    f"{region_label(i['location'])} y {region_label(s['location'])} no son pareja de región: Azure puede mantener ambas "
-                    "réplicas en la misma franja.",
-                    f"Primario en {WINDOWS[i['recommended'] or 'Weekday']}, secundario en {WINDOWS[s['recommended'] or 'Weekend']}. "
-                    "Cambiar primero el secundario.",
+                add("High", "Failover group with the same window in non-paired regions", f"{i['fog']} ({i['name']} / {s['name']})",
+                    f"{region_label(i['location'])} and {region_label(s['location'])} are not a region pair: Azure can maintain both "
+                    "replicas in the same time slot.",
+                    f"Primary on {WINDOWS[i['recommended'] or 'Weekday']}, secondary on {WINDOWS[s['recommended'] or 'Weekend']}. "
+                    "Change the secondary first.",
                     f"az sql mi update -g {s['rg']} -n {s['name']} --maint-config-id \"{config_id(s['sub'], s['location'], s['recommended'] or 'Weekend')}\"")
     for i in insts:
         if i["proxy"] == "Proxy":
-            add("Media", "Tipo de conexión Proxy", i["name"], "Proxy es el modo heredado: añade latencia y genera más desconexiones "
-                "por el mantenimiento del gateway. Redirect es el valor por defecto desde octubre de 2025.",
-                "Cambiar a Redirect (abrir puertos 11000–11999 desde las subredes cliente; validar en preproducción).",
+            add("Medium", "Proxy connection type", i["name"], "Proxy is the legacy mode: it adds latency and causes more disconnections "
+                "during gateway maintenance. Redirect has been the default since October 2025.",
+                "Change to Redirect (open ports 11000–11999 from the client subnets; validate in pre-production).",
                 f"az sql mi update -g {i['rg']} -n {i['name']} --proxy-override Redirect")
     for i in insts:
         if i["batch"] and i["batch"] & WINDOW_CELLS.get(i["window"], set()):
             n = sum(1 for e in events if e["mi"] == i["name"] and (lambda lo: (lo.weekday(), lo.hour))(to_local(e["_t"])) in i["batch"])
-            add("Media", "La ventana se solapa con los procesos batch", i["name"], f"Batch {i['batch_label']} dentro de "
-                f"{WINDOWS[i['window']]}; {n} reconfiguración(es) cayeron en horario batch.",
-                "Asegurar que los jobs son reanudables/idempotentes, o mover el batch fuera de la ventana.")
+            add("Medium", "The window overlaps the batch jobs", i["name"], f"Batch {i['batch_label']} falls inside "
+                f"{WINDOWS[i['window']]}; {n} reconfiguration{'s' if n != 1 else ''} happened during batch hours.",
+                "Make sure the jobs are resumable and idempotent, or move the batch outside the window.")
     unpl = [e for e in events if e["reason"] in ("Unplanned", "Detected")]
     if unpl:
-        add("Media", "Eventos no planificados: la ventana no protege", ", ".join(sorted({e["mi"] for e in unpl})),
-            f"{len(unpl)} eventos fuera de control de la ventana, con {sum(e['user_errors'] for e in unpl)} errores de usuario.",
-            "Solo los reintentos en la aplicación evitan este impacto. Ninguna ventana lo resuelve.")
+        add("Medium", "Unplanned events: no window protects against them", ", ".join(sorted({e["mi"] for e in unpl})),
+            f"{len(unpl)} event{'s' if len(unpl) != 1 else ''} outside the window's control, with {sum(e['user_errors'] for e in unpl):,} "
+            f"user error{'s' if sum(e['user_errors'] for e in unpl) != 1 else ''}.",
+            "Only retries in the application prevent this impact. No window solves it.")
     for i in prd:
         if i["tier"] == "GeneralPurpose" and any(a["app"] in risky for a in apps_by_mi.get(i["name"], [])):
-            add("Info", "General Purpose con aplicaciones críticas", i["name"], "En GP la reconfiguración mueve el motor a otro nodo; "
-                "en Business Critical conmuta a una réplica ya caliente.", "Valorar Business Critical solo si tras los reintentos sigue habiendo impacto.")
+            add("Info", "General Purpose with critical applications", i["name"], "In GP the reconfiguration moves the engine to another node; "
+                "in Business Critical it fails over to an already warm replica.", "Consider Business Critical only if there is still impact once retries are in place.")
     outside = [e for e in events if e["reason"] == "Planned" and not e["in_window"]]
     if outside:
-        add("Info", "Eventos planificados fuera de la ventana configurada", ", ".join(sorted({e["mi"] for e in outside})),
-            f"{len(outside)} eventos. Azure puede aplicar actualizaciones críticas fuera de ventana.", "Revisar en Service Health el motivo.")
+        add("Info", "Planned events outside the configured window", ", ".join(sorted({e["mi"] for e in outside})),
+            f"{len(outside)} event{'s' if len(outside) != 1 else ''}. Azure can apply critical updates outside the window.", "Check the reason in Service Health.")
     for i in insts:
         if i["pool"]:
-            add("Info", "Instancia en instance pool", i["name"], "La ventana de mantenimiento no se puede configurar en instance pools.", "—")
+            add("Info", "Instance in an instance pool", i["name"], "The maintenance window cannot be configured in instance pools.", "—")
     if raw.get("telemetry"):
         for i in prd:
             if not apps_by_mi.get(i["name"]) and i.get("fog_role") != "Secondary":
-                add("Info", "Instancia sin telemetría de aplicaciones", i["name"], "Ninguna dependencia SQL de Application Insights apunta a esta instancia.",
-                    "Habilitar Application Insights en las aplicaciones que la usan para medir el impacto real.")
+                add("Info", "Instance without application telemetry", i["name"], "No Application Insights SQL dependency points to this instance.",
+                    "Enable Application Insights in the applications that use it to measure the real impact.")
     if any(f["command"].startswith("az sql mi update") and "maint-config-id" in f["command"] for f in findings):
-        add("Info", "Cambiar la ventana cambia la IP de la instancia", "Todas", "La operación mueve la instancia a otro cluster "
-            "virtual: cambia la IP y requiere IPs libres en la subred.", "Planificar el cambio en horario valle, actualizar NSG/firewalls y "
-            "comprobar el tamaño de subred.")
-    SEV = {"Alta": 0, "Media": 1, "Info": 2}
+        add("Info", "Changing the window changes the instance IP", "All", "The operation moves the instance to another virtual "
+            "cluster: the IP changes and free IPs are needed in the subnet.", "Plan the change for off-peak hours, update NSGs and firewalls, "
+            "and check the subnet size.")
+    SEV = {"High": 0, "Medium": 1, "Info": 2}
     findings.sort(key=lambda f: SEV[f["severity"]])
 
     # ---- KPIs ------------------------------------------------------------------------------------------
     durs = [e["duration_s"] for e in events]
     nxt = min(raw["upcoming"], key=lambda u: u["start"]) if raw["upcoming"] else None
     user_total = sum(e["user_errors"] for e in events)
-    user_norety = sum(a["user_errors"] for a in apps if a["verdict"] == "Sin reintentos")
+    user_norety = sum(a["user_errors"] for a in apps if a["verdict"] == "No retries")
     kpis = {
         "managed_instances_prd": len(prd),
         "prd_on_default_window": sum(1 for i in prd if i["window"] == "Default"),
@@ -923,16 +927,19 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         "max_duration_s": max(durs) if durs else 0,
         "user_errors": user_total,
         "user_errors_no_retry_pct": round(100 * user_norety / user_total) if user_total else 0,
-        "apps_no_retry": sum(1 for a in apps if a["verdict"] == "Sin reintentos"),
-        "apps_partial": sum(1 for a in apps if a["verdict"] == "Parcial"),
+        "apps_no_retry": sum(1 for a in apps if a["verdict"] == "No retries"),
+        "apps_partial": sum(1 for a in apps if a["verdict"] == "Partial"),
         "apps_total": len(apps),
         "next_maintenance": fmt_local(parse_dt(nxt["start"])) if nxt else "—",
         "maintenance_alert": any(x["enabled"] and x["covers_maintenance"] and x["covers_sqlmi"] for x in raw["alerts"]),
     }
-    answer = (f"{period_label}: {kpis['reconfigurations']} reconfiguraciones de SQL MI (media {kpis['avg_duration_s']} s, máx "
-              f"{kpis['max_duration_s']} s). {user_total} errores llegaron a usuarios; el {kpis['user_errors_no_retry_pct']} % viene de "
-              f"{kpis['apps_no_retry']} aplicaciones sin reintentos. La ventana decide CUÁNDO ocurre la reconfiguración; los reintentos "
-              f"deciden SI el usuario lo nota. {kpis['unplanned']} eventos no planificados no los habría evitado ninguna ventana.")
+    answer = (f"{period_label}: {kpis['reconfigurations']} SQL MI reconfiguration{'s' if kpis['reconfigurations'] != 1 else ''} "
+              f"(average {kpis['avg_duration_s']} s, max "
+              f"{kpis['max_duration_s']} s). {user_total:,} error{'s' if user_total != 1 else ''} reached users; "
+              f"{kpis['user_errors_no_retry_pct']}% came from "
+              f"{kpis['apps_no_retry']} application{'s' if kpis['apps_no_retry'] != 1 else ''} without retries. The window decides WHEN the "
+              f"reconfiguration happens; retries decide IF users notice. Unplanned events that no window could have prevented: "
+              f"{kpis['unplanned']}.")
     if operation == "summary":
         return {"status": "ok", "mode": MODE, "period": period_label, "kpis": kpis, "answer": answer,
                 "findings": [{k: f[k] for k in ("severity", "title", "scope", "action", "command")} for f in findings],
@@ -943,14 +950,14 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
                 at_risk_apps=sorted({a["app"] for m in u["impacted"] for a in apps_by_mi.get(m, []) if a["app"] in risky})) for u in raw["upcoming"]],
                 "maintenance_alert": kpis["maintenance_alert"], "sources": sources}
 
-    # ==== Informe HTML ==================================================================================
+    # ==== HTML report ===================================================================================
     # Presentation only: same data, sections and order. Self-contained (no network), responsive, A4 print.
     E = lambda v: html.escape("" if v is None else str(v))
     NIL = '<span class="nil">—</span>'
 
     def N(v):
-        # Thousands with a narrow no-break space: unambiguous in Spanish and English.
-        return f"{v:,}".replace(",", "\u202f") if isinstance(v, int) and not isinstance(v, bool) else E(v)
+        # Thousands with a comma separator (English convention).
+        return f"{v:,}" if isinstance(v, int) and not isinstance(v, bool) else E(v)
 
     def nw(text):
         # Resource names never break at their hyphens.
@@ -967,19 +974,19 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         attrs = (("data-raw", raw), ("data-n", n), ("class", cls or None), ("data-label", label or None))
         return "<td" + "".join(f' {k}="{E(v)}"' for k, v in attrs if v is not None) + f">{body}</td>"
 
-    def dtable(stub, label, cols, rows, filters="", stack=False, empty="Sin datos."):
+    def dtable(stub, label, cols, rows, filters="", stack=False, empty="No data."):
         # Search, filters, sortable headers, CSV export of the visible rows and a live row count.
         if not rows:
             return f'<div class="card"><p class="empty">{E(empty)}</p></div>'
         th = "".join(f'<th scope="col" data-l="{E(h)}"{" class=n" if k else ""}><button type="button" class="sort" data-i="{i}">{E(h)}</button></th>'
                      for i, (h, k) in enumerate(cols))
-        return (f'<div class="card dt" data-file="{stub}-{stamp}"><div class="tools"><input class="f-q" type="search" placeholder="Buscar…" '
-                f'aria-label="Buscar en {E(label)}">{filters}<button class="btn ghost f-csv" type="button">{ICON["dl"]}Exportar CSV</button>'
-                f'<span class="cnt" aria-live="polite"></span></div><div class="wrap" role="region" tabindex="0" aria-label="Tabla: {E(label)}">'
+        return (f'<div class="card dt" data-file="{stub}-{stamp}"><div class="tools"><input class="f-q" type="search" placeholder="Search…" '
+                f'aria-label="Search {E(label)}">{filters}<button class="btn ghost f-csv" type="button">{ICON["dl"]}Export CSV</button>'
+                f'<span class="cnt" aria-live="polite"></span></div><div class="wrap" role="region" tabindex="0" aria-label="Table: {E(label)}">'
                 f'<table{" class=stack" if stack else ""}><thead><tr>{th}</tr></thead><tbody>{"".join(rows)}</tbody></table></div></div>')
 
     def fselect(key, label, opts):
-        return (f'<select data-f="{key}" aria-label="{label}"><option value="">{label}: todas</option>'
+        return (f'<select data-f="{key}" aria-label="{label}"><option value="">{label}: all</option>'
                 + "".join(f'<option value="{E(v)}">{E(v)} ({c})</option>' for v, c in opts) + "</select>")
 
     def section(sid, title, why, body):
@@ -990,19 +997,19 @@ def main(operation: str = "report", period: str = "last_30d", data_source: str =
         "alert": "M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
         "ext": "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"}.items()}
     # Shared severity palette of the report family: tone class + bar colour.
-    SEVT = {"Alta": ("high", "#ef6820"), "Media": ("med", "#f79009"), "Info": ("neu", "#98a2b3")}
-    VT = {"Sin reintentos": ("crit", "#d92d20"), "Parcial": ("med", "#f79009"), "Resiliente": ("ok", "#12b76a")}
+    SEVT = {"High": ("high", "#ef6820"), "Medium": ("med", "#f79009"), "Info": ("neu", "#98a2b3")}
+    VT = {"No retries": ("crit", "#d92d20"), "Partial": ("med", "#f79009"), "Resilient": ("ok", "#12b76a")}
     RT = {"Planned": ("low", "#0078d4"), "Unplanned": ("crit", "#d92d20"), "UserInitiated": ("neu", "#667085"), "Detected": ("med", "#dc6803")}
     stamp_utc = now_utc.strftime("%Y-%m-%d %H:%M")
-    title = "Resiliencia de Azure SQL Managed Instance ante mantenimiento"
+    title = "Azure SQL Managed Instance maintenance resilience"
     sevn = {s: sum(1 for f in findings if f["severity"] == s) for s in SEVT}
-    attention = bool(sevn["Alta"] or sevn["Media"])
-    PL = {"Alta": ("alta", "altas"), "Media": ("media", "medias"), "Info": ("info", "info")}
-    vdetail = (f"{len(findings)} {'acción' if len(findings) == 1 else 'acciones'}: "
-               + ", ".join(f"{n} {PL[s][n != 1]}" for s, n in sevn.items() if n)) if findings else "Sin acciones pendientes."
+    attention = bool(sevn["High"] or sevn["Medium"])
+    PL = {"High": ("high", "high"), "Medium": ("medium", "medium"), "Info": ("info", "info")}
+    vdetail = (f"{len(findings)} {'action' if len(findings) == 1 else 'actions'}: "
+               + ", ".join(f"{n} {PL[s][n != 1]}" for s, n in sevn.items() if n)) if findings else "No pending actions."
     g4 = lambda t: re.sub(r"(?<![\d.,])\d{4,}(?![\d.,])", lambda m: N(int(m.group(0))), t)
-    a_lead, a_sep, a_rest = answer.partition("La ventana decide")
-    a_key, a_dot, a_tail = (a_sep + a_rest).partition("lo nota.")
+    a_lead, a_sep, a_rest = answer.partition("The window decides")
+    a_key, a_dot, a_tail = (a_sep + a_rest).partition("notice.")
     CSS = """
 :root{--paper:#f3f5f8;--ink:#172338;--title:#1d3354;--muted:#526075;--line:#dfe5ee;--line2:#c3cddb;--soft:#eef2f7;--blue:#0078d4;--link:#0063b1;--hm:#c9d4e3;--mono:ui-monospace,'Cascadia Mono',Consolas,monospace;--sh:0 1px 2px rgba(23,35,56,.05),0 10px 28px rgba(23,35,56,.07)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scrollbar-color:var(--line2) var(--paper)}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;font-variant-numeric:tabular-nums}
@@ -1093,96 +1100,97 @@ td small,.pill,.sev{font-size:10.5px}.pill,.sev{padding:1px 7px}.c-s,.c-w,.tl,.h
 $$('.dt').forEach(card=>{const tb=card.querySelector('tbody'),rows=[...tb.rows],q=card.querySelector('.f-q'),sels=$$('select[data-f]',card),cnt=card.querySelector('.cnt');
 const val=c=>c.dataset.raw!==undefined?c.dataset.raw:c.textContent.trim();
 const draw=()=>{const t=q.value.trim().toLowerCase();let m=0;rows.forEach(r=>{const ok=(!t||r.textContent.toLowerCase().includes(t))&&sels.every(s=>!s.value||r.dataset[s.dataset.f]===s.value);r.hidden=!ok;if(ok)m++});
-cnt.textContent=m+' de '+rows.length+' filas'};q.addEventListener('input',draw);sels.forEach(s=>s.addEventListener('change',draw));
+cnt.textContent=m+' of '+rows.length+' rows'};q.addEventListener('input',draw);sels.forEach(s=>s.addEventListener('change',draw));
 $$('th .sort',card).forEach(b=>b.addEventListener('click',()=>{const th=b.parentNode,i=+b.dataset.i,asc=th.getAttribute('aria-sort')!=='ascending';
 $$('th',card).forEach(h=>h.removeAttribute('aria-sort'));th.setAttribute('aria-sort',asc?'ascending':'descending');
-rows.sort((a,z)=>{const x=a.cells[i],y=z.cells[i],nx=x.dataset.n,ny=y.dataset.n,d=(nx!==undefined&&ny!==undefined)?nx-ny:val(x).localeCompare(val(y),'es',{numeric:true,sensitivity:'base'});return asc?d:-d});
+rows.sort((a,z)=>{const x=a.cells[i],y=z.cells[i],nx=x.dataset.n,ny=y.dataset.n,d=(nx!==undefined&&ny!==undefined)?nx-ny:val(x).localeCompare(val(y),'en',{numeric:true,sensitivity:'base'});return asc?d:-d});
 rows.forEach(r=>tb.appendChild(r))}));
 card.querySelector('.f-csv').addEventListener('click',()=>{const Q=v=>'"'+String(v).replace(/"/g,'""')+'"';
 const lines=[$$('thead th',card).map(h=>Q(h.textContent.trim())).join(';')].concat(rows.filter(r=>!r.hidden).map(r=>[...r.cells].map(c=>Q(val(c))).join(';')));
 const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));
 a.download=card.dataset.file+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});draw()});
-$$('[data-copy]').forEach(b=>b.addEventListener('click',()=>{const c=b.closest('.cmd').querySelector('code'),done=()=>{b.textContent='Copiado';setTimeout(()=>{b.textContent='Copiar'},1600)};
+$$('[data-copy]').forEach(b=>b.addEventListener('click',()=>{const c=b.closest('.cmd').querySelector('code'),done=()=>{b.textContent='Copied';setTimeout(()=>{b.textContent='Copy'},1600)};
 const sel=()=>{const r=document.createRange();r.selectNodeContents(c);const s=getSelection();s.removeAllRanges();s.addRange(r);try{if(document.execCommand('copy'))done()}catch(e){}};
 if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(c.textContent).then(done,sel);else sel()}));
 $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})();
 """
     pf = 'font:8px/1.2 "Segoe UI",Arial,sans-serif;color:#667085'
-    out = ['<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" '
+    out = ['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" '
            'content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'">'
-           f'<title>SQL MI · Resiliencia ante mantenimiento</title><style>{CSS}@page{{size:A4;margin:12mm 10mm 14mm;@bottom-left{{content:"{title} · {stamp_utc} UTC";{pf}}}'
-           f'@bottom-right{{content:"Página " counter(page) " de " counter(pages);{pf}}}}}</style></head><body><a class="skip" href="#main">Saltar al contenido</a>'
-           '<header class="bar"><a class="brand" href="#resumen"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0078d4"/>'
+           f'<title>SQL MI · Maintenance resilience</title><style>{CSS}@page{{size:A4;margin:12mm 10mm 14mm;@bottom-left{{content:"{title} · {stamp_utc} UTC";{pf}}}'
+           f'@bottom-right{{content:"Page " counter(page) " of " counter(pages);{pf}}}}}</style></head><body><a class="skip" href="#main">Skip to content</a>'
+           '<header class="bar"><a class="brand" href="#summary"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0078d4"/>'
            '<g fill="none" stroke="#fff" stroke-width="2.2"><ellipse cx="16" cy="9.5" rx="8" ry="3.2"/><path d="M8 9.5v13c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2v-13M8 16c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2"/>'
-           '</g></svg>Azure SRE Agent</a><span class="ctx">SQL Managed Instance · mantenimiento</span><nav aria-label="Secciones del informe">'
-           + "".join(f'<a href="#{a.lower()}">{a}</a>' for a in ("Resumen", "Acciones", "Instancias", "Eventos", "Aplicaciones", "Carga", "Fuentes"))
-           + f'</nav><div class="acts"><span class="tag">Solo lectura</span><button class="btn" type="button" data-print aria-label="Imprimir o guardar como PDF">{ICON["print"]}'
-           '<span class="lbl">Imprimir / PDF</span></button></div></header><main id="main">']
+           '</g></svg>Azure SRE Agent</a><span class="ctx">SQL Managed Instance · maintenance</span><nav aria-label="Report sections">'
+           + "".join(f'<a href="#{a.lower()}">{a}</a>' for a in ("Summary", "Actions", "Instances", "Events", "Applications", "Load", "Sources"))
+           + f'</nav><div class="acts"><span class="tag">Read-only</span><button class="btn" type="button" data-print aria-label="Print or save as PDF">{ICON["print"]}'
+           '<span class="lbl">Print / PDF</span></button></div></header><main id="main">']
     # Hero: verdict first (the short answer, the verdict and the priority mix)
-    chips = [f"Generado {stamp_utc} UTC", period_label, f"Horas en {LOCAL_TIMEZONE}", f"{len(insts)} instancias · {len(prd)} de producción"]
+    chips = [f"Generated {stamp_utc} UTC", period_label, f"Times in {LOCAL_TIMEZONE}",
+             f"{len(insts)} instance{'s' if len(insts) != 1 else ''} · {len(prd)} production"]
     gaps = sum(1 for s in sources if s["status"] != "ok")
-    out.append(f'<div class="hero" id="resumen"><div class="hero-in"><div><h1>{E(title)}</h1><p class="lead">{g4(E(a_lead.strip()))}</p>'
+    out.append(f'<div class="hero" id="summary"><div class="hero-in"><div><h1>{E(title)}</h1><p class="lead">{g4(E(a_lead.strip()))}</p>'
                + (f'<p class="thesis"><b>{E(a_key + a_dot)}</b> {g4(E(a_tail.strip()))}</p>' if a_sep else "")
                + '<div class="meta">' + "".join(f"<span>{E(c)}</span>" for c in chips)
-               + f'<span class="on">{"DATOS SIMULADOS (demo)" if MODE == "demo" else "DATOS REALES"}</span>'
-               + (f'<span class="on">Cobertura parcial: {gaps} de {len(sources)} fuentes sin datos completos</span>' if gaps else "") + "</div></div>"
-               f'<div class="verdict{"" if attention else " good"}" role="group" aria-label="Veredicto">Veredicto<b>{"Requiere atención" if attention else "Sin incidencias relevantes"}</b>{E(vdetail)}</div>')
+               + f'<span class="on">{"SIMULATED DATA (demo)" if MODE == "demo" else "LIVE DATA"}</span>'
+               + (f'<span class="on">Partial coverage: {gaps} of {len(sources)} sources without complete data</span>' if gaps else "") + "</div></div>"
+               f'<div class="verdict{"" if attention else " good"}" role="group" aria-label="Verdict">Verdict<b>{"Needs attention" if attention else "No significant issues"}</b>{E(vdetail)}</div>')
     if findings:
-        out.append(f'<div class="dist"><div class="track" role="img" aria-label="Acciones por prioridad: {E(vdetail)}">'
+        out.append(f'<div class="dist"><div class="track" role="img" aria-label="Actions by priority: {E(vdetail)}">'
                    + "".join(f'<i style="width:{100 * n / len(findings):.2f}%;background:{SEVT[s][1]}"></i>' for s, n in sevn.items() if n)
                    + '</div><div class="legend">' + "".join(f'<span><i style="background:{SEVT[s][1]}"></i>{s} <b>{n}</b></span>' for s, n in sevn.items() if n) + "</div></div>")
     nm = kpis["next_maintenance"].split(" ")
-    DAYS = dict(zip(DIAS, ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")))
+    DAYS = dict(zip(DIAS, ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
     ue = kpis["user_errors"]
-    K = [(N(ue), "errores vistos por usuarios", f"{kpis['user_errors_no_retry_pct']} % en apps sin reintentos" if ue else "", "bad"),
-         (f"{N(kpis['apps_no_retry'])}<small>/{N(kpis['apps_total'])}</small>", "apps sin reintentos",
-          f"+{kpis['apps_partial']} parciales" if kpis["apps_partial"] else "", "warn"),
-         (N(kpis["reconfigurations"]), "reconfiguraciones", f"{kpis['planned']} planif. · {kpis['unplanned']} no planif.", ""),
-         (f"{E(kpis['avg_duration_s'])}<small>s</small>", "duración media", f"máx {E(kpis['max_duration_s'])} s", ""),
-         (f"{N(kpis['prd_on_default_window'])}<small>/{N(kpis['managed_instances_prd'])}</small>", "producción en ventana por defecto",
-          f"{N(kpis['managed_instances_prd'])} SQL MI de producción", ""),
+    K = [(N(ue), "user-facing errors", f"{kpis['user_errors_no_retry_pct']}% in apps without retries" if ue else "", "bad"),
+         (f"{N(kpis['apps_no_retry'])}<small>/{N(kpis['apps_total'])}</small>", "apps without retries",
+          f"+{kpis['apps_partial']} partial" if kpis["apps_partial"] else "", "warn"),
+         (N(kpis["reconfigurations"]), "reconfigurations", f"{kpis['planned']} planned · {kpis['unplanned']} unplanned", ""),
+         (f"{E(kpis['avg_duration_s'])}<small>s</small>", "average duration", f"max {E(kpis['max_duration_s'])} s", ""),
+         (f"{N(kpis['prd_on_default_window'])}<small>/{N(kpis['managed_instances_prd'])}</small>", "production on default window",
+          f"{N(kpis['managed_instances_prd'])} production instance{'s' if kpis['managed_instances_prd'] != 1 else ''}", ""),
          (f"{E(nm[1])}<small>{E(nm[2])}</small>" if len(nm) == 3 else E(nm[0]),
-          f"próximo mantenimiento · {DAYS.get(nm[0], nm[0])}" if len(nm) == 3 else "próximo mantenimiento",
-          "con alerta de mantenimiento" if kpis["maintenance_alert"] else "sin alerta de mantenimiento", "good" if kpis["maintenance_alert"] else "bad")]
+          f"next maintenance · {DAYS.get(nm[0], nm[0])}" if len(nm) == 3 else "next maintenance",
+          "maintenance alert configured" if kpis["maintenance_alert"] else "no maintenance alert", "good" if kpis["maintenance_alert"] else "bad")]
     out.append('</div></div><div class="body"><div class="kpis">' + "".join(
         f'<div class="kpi"><div class="v">{v}</div><div class="l">{E(lab)}</div>' + (f'<div class="f {t}">{f}</div>' if f else "") + "</div>"
         for v, lab, f, t in K) + "</div>")
     if MODE == "demo":
-        out.append(f'<div class="sim" role="note">{ICON["alert"]}MODO DEMO — datos simulados para mostrar el informe. Configura la tool (README paso 4) para analizar tu entorno.</div>')
+        out.append(f'<div class="sim" role="note">{ICON["alert"]}DEMO MODE — simulated data that shows what the report looks like. Configure the tool (README, step 4) to analyze your environment.</div>')
 
-    # Próximo mantenimiento
+    # Next maintenance
     ups = []
     for u in sorted(raw["upcoming"], key=lambda x: x["start"]):
         at = sorted({a["app"] for m in u["impacted"] for a in apps_by_mi.get(m, []) if a["app"] in risky})
         st_, en_ = parse_dt(u["start"]), parse_dt(u["end"])
         dd = (st_ - now_utc).days
-        when = ((f"empieza en {dd} día{'s' if dd != 1 else ''}" if dd >= 1 else "empieza en menos de 24 h") if st_ > now_utc
-                else "en curso" if en_ >= now_utc else "finalizado")
+        when = ((f"starts in {dd} day{'s' if dd != 1 else ''}" if dd >= 1 else "starts in less than 24 h") if st_ > now_utc
+                else "in progress" if en_ >= now_utc else "ended")
         ups.append(f'<div class="card"><div class="up-h"><div><h3>{E(u["title"])}</h3><p class="sub">{E(u["tracking_id"])} · {E(u["source"])} · {when}</p></div>'
-                   + (pill(f"{len(at)} aplicaciones en riesgo", "crit") if at else pill("Sin aplicaciones en riesgo", "ok"))
-                   + f'</div><dl class="facts"><div><dt>Inicio (hora local)</dt><dd>{E(fmt_local(st_))}</dd></div><div><dt>Fin (hora local)</dt><dd>{E(fmt_local(en_))}</dd></div>'
-                   + '<div><dt>Instancias</dt><dd class="chips">' + ("".join(f"<span>{E(m)}</span>" for m in u["impacted"]) or NIL) + "</dd></div>"
-                   + '<div class="wide"><dt>Aplicaciones en riesgo (sin reintentos o parciales)</dt>'
-                   + (f'<dd class="chips risk">{"".join(f"<span>{E(a)}</span>" for a in at)}</dd>' if at else '<dd class="ok-t">Sin aplicaciones en riesgo detectadas.</dd>')
+                   + (pill(f"{len(at)} application{'s' if len(at) != 1 else ''} at risk", "crit") if at else pill("No applications at risk", "ok"))
+                   + f'</div><dl class="facts"><div><dt>Start (local time)</dt><dd>{E(fmt_local(st_))}</dd></div><div><dt>End (local time)</dt><dd>{E(fmt_local(en_))}</dd></div>'
+                   + '<div><dt>Instances</dt><dd class="chips">' + ("".join(f"<span>{E(m)}</span>" for m in u["impacted"]) or NIL) + "</dd></div>"
+                   + '<div class="wide"><dt>Applications at risk (no retries or partial)</dt>'
+                   + (f'<dd class="chips risk">{"".join(f"<span>{E(a)}</span>" for a in at)}</dd>' if at else '<dd class="ok-t">No applications at risk detected.</dd>')
                    + "</div></dl></div>")
-    out.append(section("proximo", "Próximo mantenimiento", "Lo que Azure ya ha publicado en Service Health para tus instancias y qué aplicaciones lo notarán.",
-                       "".join(ups) or '<div class="card"><p class="empty">No hay mantenimientos planificados publicados en Service Health para tus SQL MI.</p></div>'))
+    out.append(section("next", "Next maintenance", "What Azure has already published in Service Health for your instances, and which applications will notice it.",
+                       "".join(ups) or '<div class="card"><p class="empty">Service Health has no planned maintenance published for your SQL MI.</p></div>'))
 
-    # Acciones priorizadas (findings register)
+    # Prioritized actions (findings register)
     rows = []
     for f in findings:
-        cmd = (f'<div class="cmd"><div>Comando<button class="copy" type="button" data-copy>Copiar</button></div><code>'
+        cmd = (f'<div class="cmd"><div>Command<button class="copy" type="button" data-copy>Copy</button></div><code>'
                + re.sub(r"[^\s/]+|/", lambda m: "/<wbr>" if m.group(0) == "/" else f'<span class="nw">{m.group(0)}</span>', E(f["command"])) + "</code></div>"
                if f["command"] else "")
         rows.append(f'<tr data-sev="{E(f["severity"])}">' + td(f'<span class="sev t-{SEVT[f["severity"]][0]}">{E(f["severity"])}</span>', f["severity"], SEV[f["severity"]])
-                    + td(f'<b>{E(f["title"])}</b>', f["title"], cls="c-t", label="Hallazgo") + td(nw(f["scope"]), f["scope"], cls="c-s", label="Ámbito")
-                    + td(E(f["detail"]), f["detail"], cls="c-d", label="Detalle")
-                    + td(E(f["action"]) + cmd, f["action"] + (" | " + f["command"] if f["command"] else ""), cls="c-a", label="Qué hacer") + "</tr>")
-    out.append(section("acciones", "Acciones priorizadas", "Ordenadas por prioridad y con el comando exacto. El agente no cambia nada: tu equipo valida y ejecuta.",
-                       dtable("sqlmi-acciones", "Acciones priorizadas", [("Prioridad", ""), ("Hallazgo", ""), ("Ámbito", ""), ("Detalle", ""), ("Qué hacer", "")], rows,
-                              fselect("sev", "Prioridad", [(s, n) for s, n in sevn.items() if n]), True, "Sin acciones: ninguna regla se ha cumplido en esta ejecución.")))
+                    + td(f'<b>{E(f["title"])}</b>', f["title"], cls="c-t", label="Finding") + td(nw(f["scope"]), f["scope"], cls="c-s", label="Scope")
+                    + td(E(f["detail"]), f["detail"], cls="c-d", label="Detail")
+                    + td(E(f["action"]) + cmd, f["action"] + (" | " + f["command"] if f["command"] else ""), cls="c-a", label="What to do") + "</tr>")
+    out.append(section("actions", "Prioritized actions", "Sorted by priority, each with the exact command. The agent changes nothing: your team validates and runs them.",
+                       dtable("sqlmi-actions", "Prioritized actions", [("Priority", ""), ("Finding", ""), ("Scope", ""), ("Detail", ""), ("What to do", "")], rows,
+                              fselect("sev", "Priority", [(s, n) for s, n in sevn.items() if n]), True, "No actions: no rule was triggered in this run.")))
 
-    # Instancias y ventanas
+    # Instances and windows
     rows = []
     for i in sorted(insts, key=lambda x: (x["env"] != "prd", x["name"])):
         bc = i["tier"] == "BusinessCritical"
@@ -1196,23 +1204,23 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
                          f'{"BC" if bc else "GP"} · {i["vcores"]} vCores', cls="nw")
                     + td(pill(i["env"], "low" if i["env"] == "prd" else "neu"), i["env"]) + td(win_html(i["window"]), WINDOWS[i["window"]], cls="c-w")
                     + td(pill("Proxy", "high") if i["proxy"] == "Proxy" else E(i["proxy"]), i["proxy"])
-                    + td(f'{E(i["fog"])}<small>{"primario" if i["fog_role"] == "Primary" else "secundario"}</small>' if i.get("fog") else NIL,
+                    + td(f'{E(i["fog"])}<small>{"primary" if i["fog_role"] == "Primary" else "secondary"}</small>' if i.get("fog") else NIL,
                          f'{i["fog"]} · {i["fog_role"]}' if i.get("fog") else "—", cls="nw")
-                    + td(win_html(i["recommended"]) if change else pill("Mantener", "ok") if i["recommended"] else NIL,
-                         WINDOWS[i["recommended"]] if change else "Mantener" if i["recommended"] else "—", cls="c-w")
-                    + td(est, est.replace("\u202f", ""), i["user_errors_planned"], "n") + "</tr>")
-    out.append(section("instancias", "Instancias y ventanas", "Ventana actual frente a la recomendada por la carga real de cada instancia.",
-                       dtable("sqlmi-instancias", "Instancias y ventanas", [("Instancia", ""), ("Región", ""), ("Tier", ""), ("Entorno", ""), ("Ventana actual", ""),
-                              ("Conexión", ""), ("Failover group", ""), ("Ventana recomendada", ""), ("Errores usuario (planificados)", "n")], rows,
-                              empty="No hay instancias en el inventario.")
-                       + '<p class="note">La estimación de errores aplica la carga media de la ventana recomendada a los eventos planificados reales. '
-                         'Es orientativa: solo los reintentos eliminan el impacto.</p>'))
+                    + td(win_html(i["recommended"]) if change else pill("Keep", "ok") if i["recommended"] else NIL,
+                         WINDOWS[i["recommended"]] if change else "Keep" if i["recommended"] else "—", cls="c-w")
+                    + td(est, est.replace(",", ""), i["user_errors_planned"], "n") + "</tr>")
+    out.append(section("instances", "Instances and windows", "Current window versus the one recommended by the real load of each instance.",
+                       dtable("sqlmi-instances", "Instances and windows", [("Instance", ""), ("Region", ""), ("Tier", ""), ("Environment", ""), ("Current window", ""),
+                              ("Connection", ""), ("Failover group", ""), ("Recommended window", ""), ("User errors (planned)", "n")], rows,
+                              empty="No instances in the inventory.")
+                       + '<p class="note">The error estimate applies the average load of the recommended window to the real planned events. '
+                         'It is indicative only: only retries remove the impact.</p>'))
 
-    # Reconfiguraciones y errores de usuario: timeline in HTML so the text keeps its size on a phone and on paper
+    # Reconfigurations and user errors: timeline in HTML so the text keeps its size on a phone and on paper
     body = ""
     if events:
         span = (now_utc - start_utc).total_seconds()
-        ticks = [(100 * k / period_days, to_local(start_utc + timedelta(days=k)).strftime("%d/%m")) for k in range(0, period_days + 1, max(1, period_days // 6))]
+        ticks = [(100 * k / period_days, to_local(start_utc + timedelta(days=k)).strftime("%d %b")) for k in range(0, period_days + 1, max(1, period_days // 6))]
         grid = "".join(f'<i class="gl" style="left:{x:.2f}%"></i>' for x, _ in ticks)
         tl = []
         for m in sorted({e["mi"] for e in events}, key=lambda m: list(by_name).index(m)):
@@ -1221,8 +1229,8 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
                 x = max(0.0, min(100.0, 100 * (e["_t"] - start_utc).total_seconds() / span))
                 r = 4 + min(9, e["duration_s"] / 3)
                 dots.append(f'<span class="ev" style="left:{x:.2f}%;width:{2 * r + 4:.0f}px;height:{2 * r + 4:.0f}px;background:{RT.get(e["reason"], ("", "#98a2b3"))[1]}" '
-                            f'title="{E(e["local"])} · {E(e["reason_es"])} · {e["duration_s"]} s · {e["user_errors"]} errores usuario"></span>')
-                # Reconfiguraciones muy próximas (p. ej. 2 en el mismo mantenimiento) comparten una sola etiqueta.
+                            f'title="{E(e["local"])} · {E(e["reason_es"])} · {e["duration_s"]} s · {e["user_errors"]:,} user error{"s" if e["user_errors"] != 1 else ""}"></span>')
+                # Reconfigurations very close together (for example 2 in the same maintenance) share a single label.
                 if groups and x - groups[-1][0] < 1.8:
                     groups[-1][1] += e["user_errors"]
                     groups[-1][2] = max(groups[-1][2], r)
@@ -1233,40 +1241,40 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
                           for x, u, r, c in groups if u)
             tl.append(f'<div class="tl-row"><b title="{E(m)}">{E(m)}</b><div class="tl-track">{grid}{"".join(dots)}{lab}</div></div>')
         tl.append('<div class="tl-row tl-ax"><span></span><div class="tl-track">' + "".join(f'<span class="tk" style="left:{x:.2f}%">{t}</span>' for x, t in ticks) + "</div></div>")
-        body = (f'<div class="card"><div class="tl-scroll"><div class="tl" role="img" aria-label="Línea de tiempo de {len(events)} reconfiguraciones por instancia; '
-                'el detalle está en la tabla siguiente">' + "".join(tl) + '</div></div><div class="keys">'
+        body = (f'<div class="card"><div class="tl-scroll"><div class="tl" role="img" aria-label="Timeline of {len(events)} reconfiguration{"s" if len(events) != 1 else ""} by instance; '
+                'the details are in the table below">' + "".join(tl) + '</div></div><div class="keys">'
                 + "".join(f'<span><i style="background:{RT[k][1]}"></i>{REASON[k]}</span>' for k in RT)
-                + '<span>número rojo = errores vistos por usuarios · tamaño = duración</span></div></div><div style="height:16px"></div>')
+                + '<span>red number = user-facing errors · size = duration</span></div></div><div style="height:16px"></div>')
     rows = []
     for e in reversed(events):
-        inw = ("Sí" if e["in_window"] else "No") if e["reason"] == "Planned" else "n/a"
-        rows.append(f'<tr data-tipo="{E(e["reason_es"])}">' + td(E(e["local"]), e["local"], e["_t"].timestamp(), "nw") + td(f'<span class="nw">{E(e["mi"])}</span>', e["mi"])
+        inw = ("Yes" if e["in_window"] else "No") if e["reason"] == "Planned" else "n/a"
+        rows.append(f'<tr data-type="{E(e["reason_es"])}">' + td(E(e["local"]), e["local"], e["_t"].timestamp(), "nw") + td(f'<span class="nw">{E(e["mi"])}</span>', e["mi"])
                     + td(pill(e["reason_es"], RT.get(e["reason"], ("neu",))[0]), e["reason_es"]) + td(f'{e["duration_s"]} s', e["duration_s"], e["duration_s"], "n")
                     + td(pill(inw, "high") if inw == "No" else inw, inw) + td(N(e["dep_failures"]), e["dep_failures"], e["dep_failures"], "n")
                     + td(f'<span class="u">{N(e["user_errors"])}</span>' if e["user_errors"] else "0", e["user_errors"], e["user_errors"], "n")
                     + td(nw(", ".join(e["apps"])) if e["apps"] else NIL, ", ".join(e["apps"]), cls="c-d") + "</tr>")
     tipos = sorted({e["reason_es"] for e in events})
-    out.append(section("eventos", "Reconfiguraciones y errores de usuario", "Cada reconfiguración corta las conexiones unos segundos; el número rojo indica cuántos errores vieron los usuarios.",
-                       body + dtable("sqlmi-reconfiguraciones", "Reconfiguraciones", [("Fecha (hora local)", ""), ("Instancia", ""), ("Tipo", ""), ("Duración", "n"),
-                                     ("¿En ventana?", ""), ("Fallos SQL transitorios", "n"), ("Errores usuario", "n"), ("Aplicaciones", "")], rows,
-                                     fselect("tipo", "Tipo", [(t, sum(1 for e in events if e["reason_es"] == t)) for t in tipos]),
-                                     empty="No hubo reconfiguraciones en el periodo analizado.")))
+    out.append(section("events", "Reconfigurations and user errors", "Each reconfiguration drops connections for a few seconds; the red number shows how many errors users saw.",
+                       body + dtable("sqlmi-reconfigurations", "Reconfigurations", [("Date (local time)", ""), ("Instance", ""), ("Type", ""), ("Duration", "n"),
+                                     ("In window?", ""), ("Transient SQL failures", "n"), ("User errors", "n"), ("Applications", "")], rows,
+                                     fselect("type", "Type", [(t, sum(1 for e in events if e["reason_es"] == t)) for t in tipos]),
+                                     empty="No reconfigurations in the analyzed period.")))
 
-    # Aplicaciones: bar = SQL transient failures, coloured part = the ones users saw
+    # Applications: bar = SQL transient failures, coloured part = the ones users saw
     body = ""
     if apps:
         top = max([max(a["dep_failures"], a["user_errors"]) for a in apps] + [1])
-        body = ('<div class="grid2"><div class="card"><h3>Errores de usuario frente a fallos SQL</h3><p class="sub">Barra gris = fallos SQL transitorios durante '
-                'reconfiguraciones; tramo de color = los que llegaron al usuario.</p><div class="bars">'
+        body = ('<div class="grid2"><div class="card"><h3>User errors versus SQL failures</h3><p class="sub">Gray bar = transient SQL failures during '
+                'reconfigurations; colored segment = the ones that reached users.</p><div class="bars">'
                 + "".join(f'<div class="brow"><span class="bl" title="{E(a["app"])}">{E(a["app"])}</span><span class="bt"><i style="width:{100 * a["dep_failures"] / top:.1f}%"></i>'
                           f'<i style="width:{100 * a["user_errors"] / top:.1f}%;background:{VT.get(a["verdict"], ("", "#98a2b3"))[1]}"></i></span>'
-                          f'<b>{N(a["user_errors"])} <small>de {N(a["dep_failures"])}</small></b></div>' for a in apps)
-                + '</div></div><div class="card"><h3>Cómo se lee el veredicto</h3><p class="sub">Ratio = errores de usuario (peticiones HTTP 5xx) ÷ fallos SQL '
-                'transitorios durante la reconfiguración.</p><ul class="lg">'
-                f'<li>{pill("Sin reintentos", "crit")}<span>Ratio ≥ 0.5: el error llega al usuario.</span></li>'
-                f'<li>{pill("Parcial", "med")}<span>Entre 0.05 y 0.5: reintenta en algunos caminos, no en todos.</span></li>'
-                f'<li>{pill("Resiliente", "ok")}<span>Ratio &lt; 0.05: la aplicación absorbe la reconfiguración.</span></li>'
-                f'<li>{pill("Sin impacto observado", "neu")}<span>Sin fallos SQL transitorios durante las reconfiguraciones.</span></li></ul></div></div>'
+                          f'<b>{N(a["user_errors"])} <small>of {N(a["dep_failures"])}</small></b></div>' for a in apps)
+                + '</div></div><div class="card"><h3>How to read the verdict</h3><p class="sub">Ratio = user errors (HTTP 5xx requests) ÷ transient SQL '
+                'failures during the reconfiguration.</p><ul class="lg">'
+                f'<li>{pill("No retries", "crit")}<span>Ratio ≥ 0.5: the error reaches the user.</span></li>'
+                f'<li>{pill("Partial", "med")}<span>Between 0.05 and 0.5: it retries on some paths, not on all of them.</span></li>'
+                f'<li>{pill("Resilient", "ok")}<span>Ratio &lt; 0.05: the application absorbs the reconfiguration.</span></li>'
+                f'<li>{pill("No impact observed", "neu")}<span>No transient SQL failures during the reconfigurations.</span></li></ul></div></div>'
                 '<div style="height:16px"></div>')
     rows = []
     for a in apps:
@@ -1276,13 +1284,13 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
                     + (td(E(a["ratio"]), a["ratio"], a["ratio"], "n") if a["ratio"] is not None else td(NIL, "—", -1, "n"))
                     + td(pill(a["verdict"], VT.get(a["verdict"], ("neu",))[0]), a["verdict"], ORDER.get(a["verdict"], 9))
                     + td(E(a["codes"]) if a["codes"] else NIL, a["codes"] or "—", cls="c-c") + "</tr>")
-    out.append(section("aplicaciones", "Aplicaciones: ¿absorben la reconfiguración?", "Mismas reconfiguraciones, distinto resultado: la diferencia la marcan los reintentos.",
-                       body + dtable("sqlmi-aplicaciones", "Aplicaciones", [("Aplicación", ""), ("Instancias", ""), ("Llamadas SQL", "n"), ("Reconfig. afectadas", "n"),
-                                     ("Fallos SQL transitorios", "n"), ("Errores usuario", "n"), ("Ratio", "n"), ("Veredicto", ""), ("Códigos", "")], rows,
-                                     fselect("ver", "Veredicto", [(v, sum(1 for a in apps if a["verdict"] == v)) for v in ORDER if any(a["verdict"] == v for a in apps)]),
-                                     empty="No hay aplicaciones con telemetría SQL en el periodo.")))
+    out.append(section("applications", "Applications: do they absorb the reconfiguration?", "Same reconfigurations, different outcome: retries make the difference.",
+                       body + dtable("sqlmi-applications", "Applications", [("Application", ""), ("Instances", ""), ("SQL calls", "n"), ("Affected reconfig.", "n"),
+                                     ("Transient SQL failures", "n"), ("User errors", "n"), ("Ratio", "n"), ("Verdict", ""), ("Codes", "")], rows,
+                                     fselect("ver", "Verdict", [(v, sum(1 for a in apps if a["verdict"] == v)) for v in ORDER if any(a["verdict"] == v for a in apps)]),
+                                     empty="No applications with SQL telemetry in the period.")))
 
-    # Carga real vs. ventanas de mantenimiento
+    # Real load vs. maintenance windows
     cards = []
     for i in insts:
         hm = heat.get(i["name"])
@@ -1302,46 +1310,46 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
         sc = {w: s for w, s in i["scores"].items() if s is not None}
         best = min(sc, key=sc.get) if sc else None
         score = " · ".join(f"<b>{E(WINDOWS[w].split(' · ')[0])} {s}</b>" if w == best else f"{E(WINDOWS[w].split(' · ')[0])} {s}" for w, s in sc.items())
-        cards.append(f'<div class="card hm-card"><h3>{E(i["name"])}</h3><div class="hm-meta"><span>Fuente: <b>{E(heat_src.get(i["name"], "—"))}</b></span>'
-                     f'<span>Actual: <b>{E(WINDOWS[i["window"]])}</b></span>' + (f'<span>Recomendada: <b>{E(WINDOWS[i["recommended"]])}</b></span>' if rw else "")
+        cards.append(f'<div class="card hm-card"><h3>{E(i["name"])}</h3><div class="hm-meta"><span>Source: <b>{E(heat_src.get(i["name"], "—"))}</b></span>'
+                     f'<span>Current: <b>{E(WINDOWS[i["window"]])}</b></span>' + (f'<span>Recommended: <b>{E(WINDOWS[i["recommended"]])}</b></span>' if rw else "")
                      + (f'<span>Batch <b>{E(i["batch_label"])}</b></span>' if i["batch_label"] else "")
-                     + f'</div><div class="hm-scroll"><div class="hm" role="img" aria-label="Carga media por día y hora local de {E(i["name"])}; ventana actual {E(WINDOWS[i["window"]])}'
-                     + (f'; recomendada {E(WINDOWS[i["recommended"]])}' if rw else "") + '">' + "".join(cells) + '</div></div><div class="scale"><span><i class="ramp"></i>menos → más carga</span>'
-                     '<span><i class="w" style="background-color:#7fa5cc"></i>ventana actual</span><span><i class="r"></i>ventana recomendada</span></div>'
-                     + (f'<p class="note">Puntuación (menor = mejor): {score}</p>' if score else "") + "</div>")
-    out.append(section("carga", "Carga real vs. ventanas de mantenimiento", "Carga media por día y hora local: la mejor ventana es la que cae donde hay menos carga.",
-                       f'<div class="hm-grid">{"".join(cards)}</div>' if cards else '<div class="card"><p class="empty">Sin datos de carga por hora para estas instancias.</p></div>'))
+                     + f'</div><div class="hm-scroll"><div class="hm" role="img" aria-label="Average load by day and local hour for {E(i["name"])}; current window {E(WINDOWS[i["window"]])}'
+                     + (f'; recommended {E(WINDOWS[i["recommended"]])}' if rw else "") + '">' + "".join(cells) + '</div></div><div class="scale"><span><i class="ramp"></i>less → more load</span>'
+                     '<span><i class="w" style="background-color:#7fa5cc"></i>current window</span><span><i class="r"></i>recommended window</span></div>'
+                     + (f'<p class="note">Score (lower = better): {score}</p>' if score else "") + "</div>")
+    out.append(section("load", "Real load vs. maintenance windows", "Average load by day and local hour: the best window falls where the load is lowest.",
+                       f'<div class="hm-grid">{"".join(cards)}</div>' if cards else '<div class="card"><p class="empty">No hourly load data for these instances.</p></div>'))
 
-    out.append(section("azure", "Qué permite Azure, qué no y qué hacer", "Los límites de la plataforma y el orden de las medidas que sí dependen de ti.",
+    out.append(section("azure", "What Azure allows, what it does not and what to do", "The platform limits, and the order of the measures that do depend on you.",
                        '<div class="grid3 az">'
-                       '<div class="card"><h3>Lo que Azure permite</h3><ul><li>3 ventanas: por defecto (17:00–08:00), entre semana (Lun–Jue 22:00–06:00) y '
-                       'fin de semana (Vie–Dom 22:00–06:00), en hora local de la región.</li><li>Aviso 24 h antes, al inicio y al final mediante alertas de '
-                       'Service Health.</li><li>Ventanas distintas en primario y secundario de un failover group.</li><li>Conexión Redirect (menos '
-                       'desconexiones por mantenimiento del gateway).</li><li>Failover manual para ensayar (máx. 1 cada 15 min).</li></ul></div>'
-                       '<div class="card"><h3>Lo que Azure no permite</h3><ul class="no"><li>Elegir día y hora exactos ni ventanas a medida como en on-premises.</li>'
-                       '<li>Posponer o cancelar un mantenimiento concreto.</li><li>Evitar eventos no planificados (hardware, red) ni actualizaciones '
-                       'críticas que pueden aplicarse fuera de ventana.</li><li>Una reconfiguración sin desconexión: siempre corta conexiones unos segundos.</li></ul></div>'
-                       '<div class="card"><h3>Qué hacer (en este orden)</h3><ol><li><b>Reintentos</b> con backoff en todas las aplicaciones: elimina el '
-                       'impacto en planificados y no planificados.</li><li>Alerta de mantenimiento + comunicación a negocio.</li><li>Ventana entre semana o '
-                       'fin de semana según la carga real; ventanas distintas en el failover group.</li><li>Redirect en lugar de Proxy.</li>'
-                       '<li>Ensayo trimestral en preproducción con failover manual.</li></ol></div></div>'))
+                       '<div class="card"><h3>What Azure allows</h3><ul><li>3 windows: default (17:00–08:00), weekday (Mon–Thu 22:00–06:00) and '
+                       'weekend (Fri–Sun 22:00–06:00), in the local time of the region.</li><li>Notice 24 h before, at the start and at the end through '
+                       'Service Health alerts.</li><li>Different windows on the primary and the secondary of a failover group.</li><li>Redirect connection type (fewer '
+                       'disconnections from gateway maintenance).</li><li>Manual failover for drills (max. 1 every 15 min).</li></ul></div>'
+                       '<div class="card"><h3>What Azure does not allow</h3><ul class="no"><li>Choosing an exact day and hour, or custom windows as on-premises.</li>'
+                       '<li>Postponing or canceling a specific maintenance.</li><li>Avoiding unplanned events (hardware, network) or critical updates '
+                       'that can be applied outside the window.</li><li>A reconfiguration without disconnection: it always drops connections for a few seconds.</li></ul></div>'
+                       '<div class="card"><h3>What to do (in this order)</h3><ol><li><b>Retries</b> with backoff in every application: they remove the '
+                       'impact of planned and unplanned events.</li><li>Maintenance alert + communication to the business.</li><li>Weekday or '
+                       'weekend window based on the real load; different windows in the failover group.</li><li>Redirect instead of Proxy.</li>'
+                       '<li>Quarterly drill in pre-production with a manual failover.</li></ol></div></div>'))
     STT = {"ok": "ok", "partial": "med", "error": "crit"}
-    out.append(section("fuentes", "Fuentes y cobertura", "Qué se consultó y con qué resultado. Todo en modo solo lectura con la identidad del agente.",
-                       '<div class="card flat"><div class="wrap" role="region" tabindex="0" aria-label="Tabla: Fuentes y cobertura" style="border-top:0"><table><thead><tr>'
-                       + "".join(f'<th scope="col"><span class="th">{h}</span></th>' for h in ("Fuente", "Estado", "Detalle")) + "</tr></thead><tbody>"
+    out.append(section("sources", "Sources and coverage", "What was queried and with what result. All queries are read-only and use the agent's identity.",
+                       '<div class="card flat"><div class="wrap" role="region" tabindex="0" aria-label="Table: Sources and coverage" style="border-top:0"><table><thead><tr>'
+                       + "".join(f'<th scope="col"><span class="th">{h}</span></th>' for h in ("Source", "Status", "Detail")) + "</tr></thead><tbody>"
                        + "".join(f'<tr><td>{E(s["source"])}</td><td>{pill(s["status"], STT.get(s["status"], "neu"))}</td><td>{E(s["detail"]) or NIL}</td></tr>' for s in sources)
                        + "</tbody></table></div></div>"))
     LEARN = "https://learn.microsoft.com/azure/azure-sql/managed-instance/"
     refs = [("Maintenance window (SQL MI)", LEARN + "maintenance-window"), ("Advance notifications", LEARN + "advance-notifications"),
             ("Connection types", LEARN + "connection-types-overview"),
             ("Configurable retry logic (SqlClient)", "https://learn.microsoft.com/sql/connect/ado-net/configurable-retry-logic")]
-    out.append(f'</div></main><footer><p>Informe de solo lectura generado por Azure SRE Agent · tool generate-sqlmi-maintenance-report v1.0 · {stamp_utc} UTC.</p>'
-               '<p>Referencias: Microsoft Learn — ' + ", ".join(f'<a href="{u}" target="_blank" rel="noopener noreferrer">{t}</a>' for t, u in refs)
+    out.append(f'</div></main><footer><p>Read-only report generated by Azure SRE Agent · tool generate-sqlmi-maintenance-report v1.0 · {stamp_utc} UTC.</p>'
+               '<p>References: Microsoft Learn — ' + ", ".join(f'<a href="{u}" target="_blank" rel="noopener noreferrer">{t}</a>' for t, u in refs)
                + f'.</p></footer><script>{JS}</script></body></html>')
     html_doc = "".join(out)
 
-    # ==== Salidas ======================================================================================
-    base_name = f"sqlmi-mantenimiento-{stamp}"
+    # ==== Outputs ======================================================================================
+    base_name = f"sqlmi-maintenance-{stamp}"
     files = {}
     try:
         p = cwd / f"{base_name}.html"
@@ -1357,14 +1365,14 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
         files["json"] = file_url(p.name)
         buf = io.StringIO()
         w = csv.writer(buf, delimiter=";")
-        w.writerow(["instancia", "region", "tier", "vcores", "entorno", "ventana_actual", "maintenance_configuration_id", "conexion",
-                    "failover_group", "rol", "ventana_recomendada", "maintenance_configuration_id_recomendado",
-                    "errores_usuario_planificados", "errores_usuario_estimados"])
+        w.writerow(["instance", "region", "tier", "vcores", "environment", "current_window", "maintenance_configuration_id", "connection_type",
+                    "failover_group", "failover_role", "recommended_window", "recommended_maintenance_configuration_id",
+                    "user_errors_planned", "user_errors_estimated"])
         for i in insts:
             w.writerow([i["name"], i["location"], i["tier"], i["vcores"], i["env"], i["window"], i["cfg_id"] or "SQL_Default", i["proxy"],
                         i.get("fog") or "", i.get("fog_role") or "", i["recommended"] or "", i["recommended_id"] or "",
                         i["user_errors_planned"], i["user_errors_est"]])
-        p = cwd / f"{base_name}-instancias.csv"
+        p = cwd / f"{base_name}-instances.csv"
         p.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
         files["csv_instances"] = file_url(p.name)
         buf = io.StringIO()
@@ -1373,11 +1381,11 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
         w.writerow(cols)
         for r in impact:
             w.writerow([r[c] for c in cols])
-        p = cwd / f"{base_name}-impacto.csv"
+        p = cwd / f"{base_name}-impact.csv"
         p.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
         files["csv_impact"] = file_url(p.name)
     except Exception as e:
-        return {"status": "error", "mode": MODE, "message": f"No se pudieron escribir los ficheros: {e}", "kpis": kpis}
+        return {"status": "error", "mode": MODE, "message": f"Could not write the files: {e}", "kpis": kpis}
 
     return {
         "status": "ok",
@@ -1389,7 +1397,7 @@ $$('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()))})(
         "top_actions": [{k: f[k] for k in ("severity", "title", "scope", "action", "command")} for f in findings[:6]],
         "next_maintenance": nxt and {"tracking_id": nxt["tracking_id"], "start_local": fmt_local(parse_dt(nxt["start"])),
                                      "impacted": nxt["impacted"]},
-        "message": ("MODO DEMO (datos simulados). " if MODE == "demo" else "")
-                   + f"Informe listo: [Abrir informe HTML]({files['html']}) · [JSON]({files['json']}) · "
-                     f"[CSV instancias]({files['csv_instances']}) · [CSV impacto]({files['csv_impact']})",
+        "message": ("DEMO MODE (simulated data). " if MODE == "demo" else "")
+                   + f"Report ready: [Open HTML report]({files['html']}) · [JSON]({files['json']}) · "
+                     f"[Instances CSV]({files['csv_instances']}) · [Impact CSV]({files['csv_impact']})",
     }

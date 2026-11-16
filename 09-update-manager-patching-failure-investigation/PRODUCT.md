@@ -28,5 +28,5 @@ An offline, single-file HTML industrial operations workpaper suitable for monthl
 ## Brand Commitments
 
 - **Swiss Architectural Industrial Operations Ledger**: combines deep anthracite slate (`#141B24`), warm architectural stone (`#F6F5F2`), crisp 1px-bordered workpaper surfaces (`#FFFFFF`, `#D8DCE3`), vivid industrial orange structural accents (`#FF4E00`), and accessible burnt orange interactive text tokens (`#C23800`, >=4.5:1 on white).
-- Generic repository source files never contain a customer name, customer logo, or private identifiers (`CLIENT_NAME = "CLIENTE"`, `CLIENT_LOGO_DATA_URI = ""`). Authorized operators privately configure a Pillow-validated PNG/JPEG data URI outside Git.
-- Spanish business and technical operations language (`es-ES`) in the generated HTML report; English implementation and onboarding documentation in `README.md`.
+- Generic repository source files never contain a customer name, customer logo, or private identifiers (`CLIENT_NAME = "Customer"`, `CLIENT_LOGO_DATA_URI = ""`). Authorized operators privately configure a Pillow-validated PNG/JPEG data URI outside Git.
+- English (`en`) business and technical operations language in the generated HTML report, the CSV files and the JSON snapshot, and in the implementation and onboarding documentation (`README.md`).

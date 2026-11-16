@@ -98,7 +98,7 @@ class ReportUiTests(unittest.TestCase):
                 page.on("pageerror", lambda exc: errors.append(str(exc)))
                 page.set_content(html, wait_until="load")
                 self.assertEqual(errors, [])
-                self.assertEqual(page.locator("#client-name-label").inner_text(), "CLIENTE")
+                self.assertEqual(page.locator("#client-name-label").inner_text(), "Customer")
 
                 total_incidents = int(page.locator("#incidents-count").inner_text())
                 total_anomalies = int(page.locator("#anomalies-count").inner_text())

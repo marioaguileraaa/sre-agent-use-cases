@@ -24,11 +24,11 @@ from uuid import UUID, uuid4
 
 SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_MANAGED_IDENTITY_CLIENT_ID>"
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 OUTPUT_DIRECTORY = "patching-investigation-reports"
 
 ARM_ORIGIN = "https://management.azure.com"
@@ -86,20 +86,20 @@ CATEGORY_SEVERITY = {
     "healthy": "info",
 }
 CATEGORY_LABELS = {
-    "maintenance_window_unresponsive": "Ventana de mantenimiento sin respuesta o fallo de ejecución",
-    "arc_agent_expired_or_disconnected": "Agente Azure Arc expirado o desconectado",
-    "assessment_stuck_or_readiness_undetermined": "Evaluación en curso atascada o soporte de parcheo indeterminado",
-    "hotpatch_or_patch_extension_error": "Error en Hotpatch o extensión de gestión/parcheo en huésped",
-    "pending_security_patches_unscheduled": "Actualizaciones de seguridad/rollup pendientes sin ventana asignada",
-    "unassessed_no_update_manager_telemetry": "Sin telemetría de evaluación ni instalación en Update Manager",
-    "healthy": "Parcheo verificado y sin bloqueos activos",
+    "maintenance_window_unresponsive": "Maintenance window unresponsive or run failed",
+    "arc_agent_expired_or_disconnected": "Azure Arc agent expired or disconnected",
+    "assessment_stuck_or_readiness_undetermined": "Assessment stuck in progress or patch support undetermined",
+    "hotpatch_or_patch_extension_error": "Hotpatch or guest management/patch extension error",
+    "pending_security_patches_unscheduled": "Pending security/rollup updates with no assigned window",
+    "unassessed_no_update_manager_telemetry": "No assessment or installation telemetry in Update Manager",
+    "healthy": "Patching verified, no active blockers",
 }
 SEVERITY_LABELS = {
-    "critical": "Crítica",
-    "high": "Alta",
-    "medium": "Media",
-    "low": "Baja",
-    "info": "Correcto",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "info": "Passed",
 }
 SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
 SOURCE_IDS = (
@@ -119,861 +119,854 @@ HTML_TEMPLATE = (
     ' per-machine root-cause diagnostics without logging into individual hosts.\nOWN-WORLD: Deep anthracit'
     'e slate (#141B24) chrome and verdict band, warm architectural stone (#F6F5F2) ground, 1px structural'
     ' rules (#D8DCE3), industrial vivid orange structural rule (#FF4E00), accessible burnt orange (#C2380'
-    '0) and the shared Azure SRE Agent severity scale.\n-->\n<html lang="es-ES">\n<head>\n<meta charset="utf-'
-    '8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<meta http-equiv="Content-Se'
-    'curity-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; i'
-    'mg-src data:; connect-src \'none\'; base-uri \'none\'; form-action \'none\'; object-src \'none\'">\n<meta nam'
-    'e="color-scheme" content="light dark">\n<title>Informe post-parcheo e investigación de fallos · Azure'
-    ' Update Manager</title>\n<style>\n:root {\n  color-scheme: light;\n  --canvas: #F6F5F2;\n  --surface: #FF'
-    'FFFF;\n  --subtle: #F9FAFB;\n  --wash: #EFECE6;\n  --hover: #FBFAF8;\n  --ink: #141B24;\n  --muted: #4755'
-    '69;\n  --line: #D8DCE3;\n  --line-soft: #E6E8EC;\n  --field-line: #64748B;\n  --accent: #FF4E00;\n  --acc'
-    'ent-text: #C23800;\n  --accent-hover: #9A2C00;\n  --accent-wash: #FFF3ED;\n  --focus: #C23800;\n  --chro'
-    'me: #141B24;\n  --chrome-hover: #1E293B;\n  --chrome-line: #334155;\n  --chrome-muted: #B8C2CF;\n  --on-'
-    'chrome: #FFFFFF;\n  --hero-bg: #141B24;\n  --hero-panel: #1C2531;\n  --hero-line: rgba(255, 255, 255, 0'
-    '.16);\n  --hero-muted: #C5CEDA;\n  --shadow: 0 1px 2px rgba(20, 27, 36, 0.06), 0 8px 24px rgba(20, 27,'
-    ' 36, 0.08);\n  --edge: rgba(20, 27, 36, 0.18);\n  --crit-ink: #B42318; --crit-bg: #FEE4E2; --crit-bar:'
-    ' #D92D20;\n  --high-ink: #B93815; --high-bg: #FFEAD5; --high-bar: #EF6820;\n  --med-ink: #93370D; --me'
-    'd-bg: #FEF0C7; --med-bar: #F79009;\n  --low-ink: #175CD3; --low-bg: #D1E9FF; --low-bar: #2E90FA;\n  --'
-    'info-ink: #344054; --info-bg: #EAECF0;\n  --ok-ink: #067647; --ok-bg: #DCFAE6; --ok-bar: #17B26A;\n  -'
-    "-note-ink: #7A2E0E; --note-bg: #FFFAEB; --note-line: #FEDF89;\n  --font-sans: 'Outfit', 'Segoe UI', s"
-    "ystem-ui, -apple-system, sans-serif;\n  --font-mono: 'Consolas', ui-monospace, monospace;\n  --bar-h: "
-    '61px;\n}\n:root[data-theme="dark"] {\n  color-scheme: dark;\n  --canvas: #0F141B;\n  --surface: #161E29;\n'
-    '  --subtle: #1B2430;\n  --wash: #243040;\n  --hover: #1A2330;\n  --ink: #F1F5F9;\n  --muted: #CBD5E1;\n  '
-    '--line: #334155;\n  --line-soft: #273244;\n  --field-line: #94A3B8;\n  --accent-text: #FF8552;\n  --acce'
-    'nt-hover: #FFA07A;\n  --accent-wash: #2B1912;\n  --focus: #FF8552;\n  --chrome: #0B0F15;\n  --chrome-hov'
-    'er: #1B2430;\n  --hero-bg: #0B0F15;\n  --hero-panel: #161E29;\n  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45'
-    '), 0 8px 24px rgba(0, 0, 0, 0.35);\n  --edge: rgba(0, 0, 0, 0.6);\n  --crit-ink: #FDA29B; --crit-bg: r'
-    'gba(217, 45, 32, 0.24);\n  --high-ink: #F9B98A; --high-bg: rgba(239, 104, 32, 0.22);\n  --med-ink: #FE'
-    'C84B; --med-bg: rgba(247, 144, 9, 0.2);\n  --low-ink: #84CAFF; --low-bg: rgba(46, 144, 250, 0.22);\n  '
-    '--info-ink: #D0D5DD; --info-bg: rgba(152, 162, 179, 0.2);\n  --ok-ink: #75E0A7; --ok-bg: rgba(23, 178'
-    ', 106, 0.2);\n  --note-ink: #FEC84B; --note-bg: #2E2210; --note-line: #6B4E16;\n}\n* { box-sizing: bord'
-    'er-box; }\nhtml { scroll-padding-top: calc(var(--bar-h) + 16px); scrollbar-color: var(--field-line) v'
-    'ar(--canvas); -webkit-text-size-adjust: 100%; }\nbody { margin: 0; background: var(--canvas); color: '
-    'var(--ink); font: 15px/1.55 var(--font-sans); overflow-wrap: break-word; -webkit-font-smoothing: ant'
-    'ialiased; }\n[hidden] { display: none !important; }\n::selection { background: #FFD5C2; color: #141B24'
-    '; }\na { color: var(--accent-text); text-underline-offset: 3px; }\na:hover { color: var(--accent-hover'
-    '); }\nbutton, input, select { font: inherit; color: inherit; }\ninput { caret-color: var(--accent-text'
-    '); }\n:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }\n.bar :focus-visible, .'
-    'hero :focus-visible { outline-color: #FF8552; }\nh1, h2, h3 { margin: 0; }\np { margin: 0; }\ncode, .mo'
-    'no { font-family: var(--font-mono); font-size: 12.5px; }\n.sr-only { position: absolute; width: 1px; '
-    'height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }\n.skip { position: absolut'
-    'e; left: 16px; top: -100px; z-index: 50; padding: 10px 14px; background: var(--surface); color: var('
-    '--ink); border: 2px solid var(--accent-text); border-radius: 6px; }\n.skip:focus { top: 12px; }\nsvg {'
-    ' width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-'
-    'linecap: round; stroke-linejoin: round; }\n\n.btn { display: inline-flex; align-items: center; justify'
-    '-content: center; gap: 8px; min-height: 38px; padding: 0 14px; border: 1px solid var(--field-line); '
-    'border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 600'
-    '; line-height: 1.2; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease, b'
-    'order-color 150ms ease, color 150ms ease; }\n.btn:hover { background: var(--wash); }\n.btn:active { tr'
-    'ansform: translateY(1px); }\n.btn.sm { min-height: 32px; padding: 0 10px; font-size: 13px; }\n\n.bar { '
-    'position: sticky; top: 0; z-index: 30; background: var(--chrome); color: var(--on-chrome); border-bo'
-    'ttom: 3px solid var(--accent); }\n.bar-in { max-width: 1440px; margin: 0 auto; min-height: 58px; padd'
-    'ing: 8px 32px; display: flex; align-items: center; gap: 16px; }\n.brand { display: flex; align-items:'
-    ' center; gap: 12px; min-width: 0; }\n.mark { width: 10px; height: 22px; background: var(--accent); fl'
-    'ex: none; }\n.wordmark { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; white-space: now'
-    'rap; }\n.brand-sep { width: 1px; height: 22px; background: var(--chrome-line); flex: none; }\n.plaque '
-    '{ display: flex; align-items: center; height: 36px; padding: 4px 10px; background: #FFFFFF; border-r'
-    'adius: 4px; flex: none; }\n.plaque:empty { display: none; }\n.plaque img { display: block; max-height:'
-    ' 28px; max-width: 168px; width: auto; height: auto; }\n.client { min-width: 0; font-size: 15px; font-'
-    'weight: 600; color: var(--on-chrome); white-space: nowrap; overflow: hidden; text-overflow: ellipsis'
-    '; }\n.acts { margin-left: auto; display: flex; align-items: center; gap: 8px; }\n.ro { font-size: 12.5'
-    'px; font-weight: 600; color: var(--chrome-muted); border: 1px solid var(--chrome-line); border-radiu'
-    's: 999px; padding: 4px 11px; white-space: nowrap; }\n.bar .btn { background: transparent; color: var('
-    '--on-chrome); border-color: var(--chrome-line); }\n.bar .btn:hover { background: var(--chrome-hover);'
-    ' border-color: var(--chrome-muted); }\n.bar .btn.primary { background: var(--accent); border-color: v'
-    'ar(--accent); color: #141B24; }\n.bar .btn.primary:hover { background: #FF6A2B; border-color: #FF6A2B'
-    '; color: #141B24; }\n.menu-wrap { position: relative; }\n.menu { position: absolute; right: 0; top: ca'
-    'lc(100% + 8px); z-index: 40; min-width: 270px; padding: 6px; background: var(--surface); color: var('
-    '--ink); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 32px rgba(20, 27, 36, '
-    '0.22); }\n.menu button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; wi'
-    'dth: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; text-align: left; cur'
-    'sor: pointer; font-size: 14px; font-weight: 600; }\n.menu button span { font-size: 12.5px; font-weigh'
-    't: 400; color: var(--muted); }\n.menu button:hover { background: var(--wash); }\n\n.hero { background: '
-    'var(--hero-bg); color: #FFFFFF; padding: 40px 32px 92px; }\n.hero-in { max-width: 1376px; margin: 0 a'
-    'uto; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px 48px; align-items: start;'
-    ' }\n.hero h1 { font-size: 42px; line-height: 1.12; font-weight: 700; letter-spacing: -0.02em; text-wr'
-    'ap: balance; }\n.lead { margin-top: 14px; font-size: 18px; line-height: 1.5; max-width: 68ch; color: '
-    'var(--hero-muted); }\n.lead b { color: #FFFFFF; font-weight: 600; }\n.meta { display: flex; flex-wrap:'
-    ' wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }\n.meta li { font-size: 13px; paddi'
-    'ng: 4px 11px; border: 1px solid var(--hero-line); border-radius: 999px; color: var(--hero-muted); ma'
-    'x-width: 100%; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }\n.meta li.on { color: #'
-    'FFFFFF; font-weight: 600; border-color: rgba(255, 255, 255, 0.4); }\n.verdict { background: var(--her'
-    'o-panel); border: 1px solid var(--hero-line); border-radius: 10px; padding: 20px 22px; }\n.v-k { font'
-    '-size: 13px; font-weight: 600; color: var(--hero-muted); }\n.v-word { margin-top: 4px; font-size: 28p'
-    'x; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }\n.v-crit .v-word { color: #FDA29B;'
-    ' }\n.v-high .v-word { color: #F9B98A; }\n.v-med .v-word { color: #FEC84B; }\n.v-ok .v-word { color: #75'
-    'E0A7; }\n.v-detail { margin-top: 8px; font-size: 14px; color: var(--hero-muted); font-variant-numeric'
-    ': tabular-nums; }\n.dist { grid-column: 1 / -1; }\n.dist-head { display: flex; justify-content: space-'
-    'between; gap: 16px; font-size: 13px; color: var(--hero-muted); margin-bottom: 8px; }\n.track { displa'
-    'y: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--hero-line); }\n.trac'
-    'k i { display: block; height: 100%; }\n.legend { display: flex; flex-wrap: wrap; gap: 6px 20px; margi'
-    'n: 10px 0 0; padding: 0; list-style: none; font-size: 13.5px; color: var(--hero-muted); }\n.legend li'
-    ' { display: inline-flex; align-items: center; gap: 7px; }\n.legend b { color: #FFFFFF; font-variant-n'
-    'umeric: tabular-nums; }\n.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block;'
-    ' flex: none; }\n.s-crit { background: var(--crit-bar); }\n.s-high { background: var(--high-bar); }\n.s-'
-    'med { background: var(--med-bar); }\n.s-low { background: var(--low-bar); }\n.s-ok { background: var(-'
-    '-ok-bar); }\n\n.kpi-wrap { max-width: 1440px; margin: -58px auto 0; padding: 0 32px; position: relativ'
-    'e; z-index: 2; }\n.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; '
-    'background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-s'
-    'hadow: var(--shadow); }\n.kpi { background: var(--surface); padding: 18px 20px 16px; min-width: 0; }\n'
-    '.kv { display: block; font-size: 36px; line-height: 1.05; font-weight: 700; letter-spacing: -0.02em;'
-    ' font-variant-numeric: tabular-nums; }\n.kl { display: block; margin-top: 8px; font-size: 14px; font-'
-    'weight: 600; line-height: 1.35; }\n.ks { display: block; margin-top: 4px; font-size: 13px; color: var'
-    '(--muted); font-variant-numeric: tabular-nums; }\n.tone-crit { color: var(--crit-ink); }\n.tone-high {'
-    ' color: var(--high-ink); }\n.tone-med { color: var(--med-ink); }\n.tone-ok { color: var(--ok-ink); }\n.'
-    'sim { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 10px 14px; borde'
-    'r: 1px solid var(--note-line); background: var(--note-bg); color: var(--note-ink); border-radius: 8p'
-    'x; font-size: 14px; font-weight: 600; }\n.sim svg { margin-top: 2px; }\n\n.layout { max-width: 1440px; '
-    'margin: 36px auto 0; padding: 0 32px 24px; display: grid; grid-template-columns: 200px minmax(0, 1fr'
-    '); gap: 32px; align-items: start; }\n.toc { position: sticky; top: calc(var(--bar-h) + 24px); font-si'
-    'ze: 14px; }\n.toc-h { font-size: 12.5px; font-weight: 600; color: var(--muted); margin: 0 0 8px 10px;'
-    ' }\n.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }\n.toc a { display: f'
-    'lex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 7px 10px; border-radi'
-    'us: 6px; color: var(--ink); text-decoration: none; }\n.toc a:hover { background: var(--wash); color: '
-    'var(--ink); }\n.toc a[aria-current="true"] { background: var(--surface); color: var(--accent-text); f'
-    'ont-weight: 600; box-shadow: 0 1px 2px rgba(20, 27, 36, 0.08); }\n.toc-n { font-size: 12.5px; color: '
-    'var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }\n.sections { min-width: 0; }\n.s'
-    'ection { margin-top: 44px; }\n.section:first-child { margin-top: 0; }\n.sh { margin-bottom: 14px; }\n.s'
-    'h h2 { font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }\n.sh p { marg'
-    'in-top: 4px; font-size: 14px; color: var(--muted); max-width: 75ch; }\n.grid2 { display: grid; grid-t'
-    'emplate-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px; }\n.grid2 + .card, .card'
-    ' + .grid2 { margin-top: 16px; }\n.card { background: var(--surface); border: 1px solid var(--line); b'
-    'order-radius: 10px; padding: 20px 22px; box-shadow: var(--shadow); min-width: 0; }\n.card.flat { padd'
-    'ing: 0; overflow: clip; }\n.card h3 { font-size: 16px; line-height: 1.3; font-weight: 700; }\n.card .s'
-    'ub { margin: 3px 0 14px; font-size: 13.5px; color: var(--muted); max-width: 75ch; }\n\n.cats { display'
-    ': grid; gap: 2px; }\n.crow { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(70px, 1fr)'
-    ' 82px; gap: 12px; align-items: center; width: 100%; padding: 7px 8px; border: 0; border-radius: 6px;'
-    ' background: none; text-align: left; font-size: 14px; cursor: pointer; }\n.crow:hover { background: v'
-    'ar(--wash); }\n.crow:disabled { cursor: default; color: var(--muted); }\n.crow:disabled:hover { backgr'
-    'ound: none; }\n.ct { height: 10px; border-radius: 999px; background: var(--line-soft); overflow: hidd'
-    'en; }\n.ct i { display: block; height: 100%; border-radius: 999px; }\n.cv { text-align: right; font-si'
-    'ze: 13.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }\n.cv b { '
-    'color: var(--ink); }\n.facts { list-style: none; margin: 0; padding: 0; }\n.facts li { padding: 9px 0;'
-    ' border-top: 1px solid var(--line-soft); font-size: 14px; max-width: 80ch; font-variant-numeric: tab'
-    'ular-nums; }\n.facts li:first-child { border-top: 0; padding-top: 0; }\n.facts code { overflow-wrap: b'
-    'reak-word; }\n\n.plan { list-style: none; margin: 0; padding: 0; }\n.plan-item { display: grid; grid-te'
-    'mplate-columns: 32px minmax(0, 1fr); gap: 16px; padding: 20px 22px; border-top: 1px solid var(--line'
-    '-soft); }\n.plan-item:first-child { border-top: 0; }\n.plan-n { width: 32px; height: 32px; border-radi'
-    'us: 50%; background: var(--wash); display: grid; place-items: center; font-size: 14px; font-weight: '
-    '700; font-variant-numeric: tabular-nums; }\n.plan-body { display: grid; grid-template-columns: minmax'
-    '(0, 1.25fr) minmax(0, 1fr); gap: 8px 32px; align-items: start; }\n.plan-head { grid-column: 1 / -1; d'
-    'isplay: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }\n.plan-head h3 { font-size: 16px'
-    '; line-height: 1.35; font-weight: 700; }\n.plan-c { font-size: 13px; color: var(--muted); white-space'
-    ': nowrap; }\n.plan-act { font-size: 15px; max-width: 75ch; }\n.plan-dx { margin-top: 6px; font-size: 1'
-    '3.5px; color: var(--muted); max-width: 75ch; }\n.plan-ref { margin-top: 8px; font-size: 13px; color: '
-    'var(--muted); }\n.plan-ref code { color: var(--muted); }\n.plan-ms { display: flex; flex-wrap: wrap; a'
-    'lign-items: center; gap: 6px; }\n.lab { font-size: 12.5px; font-weight: 600; color: var(--muted); mar'
-    'gin-right: 4px; }\n.mchip { padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; back'
-    'ground: var(--surface); color: var(--accent-text); font-family: var(--font-mono); font-size: 12.5px;'
-    ' cursor: pointer; }\n.mchip:hover { border-color: var(--accent-text); background: var(--accent-wash);'
-    ' }\n.empty-state { padding: 22px; color: var(--muted); }\n\n.tools { display: flex; flex-wrap: wrap; ga'
-    'p: 12px; align-items: flex-end; padding: 16px 20px; background: var(--subtle); border-bottom: 1px so'
-    'lid var(--line-soft); }\n.fld { display: grid; gap: 4px; flex: 1 1 170px; min-width: 0; font-size: 13'
-    'px; font-weight: 600; color: var(--muted); }\n.fld.grow { flex: 2 1 240px; }\n.fld select, .fld input '
-    '{ width: 100%; min-height: 38px; padding: 0 10px; border: 1px solid var(--field-line); border-radius'
-    ': 6px; background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 400; }\n.fld inpu'
-    't::placeholder { color: var(--muted); opacity: 1; }\n.tool-btns { display: flex; flex-wrap: wrap; gap'
-    ': 8px; }\n.status-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-b'
-    'etween; gap: 8px 16px; min-height: 48px; padding: 8px 20px; font-size: 13.5px; color: var(--muted); '
-    'font-variant-numeric: tabular-nums; }\n.table-wrap { position: relative; overflow-x: auto; border-top'
-    ': 1px solid var(--line-soft); background: linear-gradient(90deg, var(--surface) 30%, rgba(255, 255, '
-    '255, 0)) left / 40px 100% no-repeat local, linear-gradient(270deg, var(--surface) 30%, rgba(255, 255'
-    ', 255, 0)) right / 40px 100% no-repeat local, radial-gradient(farthest-side at 0 50%, var(--edge), r'
-    'gba(0, 0, 0, 0)) left / 14px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, var(-'
-    '-edge), rgba(0, 0, 0, 0)) right / 14px 100% no-repeat scroll; }\n.card > .table-wrap:first-child { bo'
-    'rder-top: 0; }\ntable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric'
-    ': tabular-nums; }\nth { padding: 10px 14px; background: var(--subtle); border-bottom: 1px solid var(-'
-    '-line); color: var(--muted); font-size: 12.5px; font-weight: 600; text-align: left; vertical-align: '
-    'bottom; }\ntd { padding: 12px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; o'
-    'verflow-wrap: break-word; }\ntbody tr:last-child td { border-bottom: 0; }\ntbody tr:hover td { backgro'
-    'und: var(--hover); }\nth.n, td.n { text-align: right; }\nth.nw, td.nw, .nw { white-space: nowrap; }\ntd'
-    '.empty { color: var(--muted); padding: 18px 20px; }\n.sm { display: block; margin-top: 2px; font-size'
-    ': 13px; color: var(--muted); }\n.sort { display: inline-flex; align-items: center; gap: 4px; padding:'
-    ' 0; border: 0; background: none; color: inherit; font-size: inherit; font-weight: 600; cursor: point'
-    'er; text-align: inherit; }\n.sort:hover { color: var(--accent-text); }\n.sort svg { width: 12px; heigh'
-    't: 12px; opacity: 0.35; }\nth[aria-sort] .sort { color: var(--ink); }\nth[aria-sort] .sort svg { opaci'
-    'ty: 1; }\nth[aria-sort="ascending"] .sort svg { transform: rotate(180deg); }\n.reg td { padding-top: 1'
-    '4px; }\n.nm { font-weight: 700; white-space: nowrap; }\n.dx { min-width: 300px; }\n.dx-t { display: blo'
-    'ck; font-weight: 600; }\n.dx-h { display: block; margin-top: 2px; }\n.tgl { margin-top: 10px; }\n.big {'
-    ' display: block; font-size: 18px; line-height: 1.2; font-weight: 700; }\n.seg { white-space: nowrap; '
-    '}\n.wide { min-width: 240px; }\n.reg tr.machine-row:has(+ tr.drawer-row:not([hidden])) td { border-bot'
-    'tom: 0; }\ntr.drawer-row td, tbody tr.drawer-row:hover td { background: var(--subtle); padding: 0 14p'
-    'x 16px; border-bottom: 1px solid var(--line); }\n.drawer { position: sticky; left: 14px; max-width: c'
-    'alc(var(--wrap-w, 100%) - 28px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); ga'
-    'p: 12px 32px; padding: 14px 4px 0; border-top: 1px dashed var(--line); }\n.drawer p { max-width: 75ch'
-    '; }\n.drawer * + .dk { margin-top: 12px; }\n.dk { margin: 0 0 4px; font-size: 12.5px; font-weight: 700'
-    '; color: var(--accent-text); }\n.act { font-weight: 600; }\n.issues, .kbs { list-style: none; margin: '
-    '0; padding: 0; display: grid; gap: 6px; }\n.issues li { display: flex; gap: 8px; align-items: baselin'
-    'e; }\n.kbs li { font-size: 13.5px; }\ncode.ref { display: inline; color: var(--ink); overflow-wrap: br'
-    'eak-word; }\n.arm { display: grid; gap: 1px; min-width: 150px; }\n.refs { display: grid; gap: 6px; mar'
-    'gin-top: 2px; }\n.ref-arm { display: grid; gap: 1px; }\n.refs .arm { min-width: 0; }`n.refs .src { col'
-    'or: var(--muted); }`ntd.host { min-width: 190px; }\n.arm .mono { overflow-wrap: break-word; color: va'
-    'r(--ink); }\n.kind b { display: block; font-weight: 600; }\n.stack { display: flex; flex-direction: co'
-    'lumn; align-items: flex-start; gap: 6px; }\n.v-next { margin-top: 14px; padding-top: 12px; border-top'
-    ': 1px solid var(--hero-line); font-size: 14px; color: var(--hero-muted); }\n.v-next a { color: #FF9F7'
-    '3; font-weight: 600; }\n.v-next a:hover { color: #FFC2A6; }\n.more-row { display: flex; justify-conten'
-    't: center; padding: 12px; border-top: 1px solid var(--line-soft); }\n\n.pill { display: inline-flex; a'
-    'lign-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: var(--info-bg); c'
-    'olor: var(--info-ink); font-size: 12.5px; font-weight: 600; line-height: 1.5; white-space: nowrap; }'
-    '\n.pill.sev::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentCo'
-    'lor; flex: none; }\n.pill.crit { background: var(--crit-bg); color: var(--crit-ink); }\n.pill.high { b'
-    'ackground: var(--high-bg); color: var(--high-ink); }\n.pill.med { background: var(--med-bg); color: v'
-    'ar(--med-ink); }\n.pill.low { background: var(--low-bg); color: var(--low-ink); }\n.pill.ok { backgrou'
-    'nd: var(--ok-bg); color: var(--ok-ink); }\n.pill.neutral { background: var(--info-bg); color: var(--i'
-    'nfo-ink); }\n.pill + .sm { margin-top: 6px; }\n\n.error-banner { max-width: 1376px; margin: 24px auto; '
-    'padding: 18px; border: 1px solid var(--crit-ink); background: var(--crit-bg); color: var(--crit-ink)'
-    '; border-radius: 8px; }\n.foot { max-width: 1440px; margin: 0 auto; padding: 24px 32px 40px; display:'
-    ' flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: var(-'
-    '-muted); }\n\n@media (prefers-reduced-motion: no-preference) {\n  html { scroll-behavior: smooth; }\n}\n@'
-    'media (prefers-reduced-motion: reduce) {\n  * { transition: none !important; }\n}\n@media (max-width: 1'
-    '180px) {\n  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }\n  .hero-in { grid-template-co'
-    'lumns: minmax(0, 1fr) 300px; gap: 28px 40px; }\n  .hero h1 { font-size: 36px; }\n}\n@media (max-width: '
-    '1100px) {\n  html { scroll-padding-top: calc(var(--bar-h) + 64px); }\n  .hero-in { grid-template-colum'
-    'ns: minmax(0, 1fr); }\n  .layout { display: block; margin-top: 24px; }\n  .toc { top: var(--bar-h); z-'
-    'index: 20; margin: 0 -32px 28px; padding: 8px 32px; background: var(--canvas); border-bottom: 1px so'
-    'lid var(--line); overflow-x: auto; }\n  .toc-h { display: none; }\n  .toc ol { display: flex; gap: 4px'
-    '; width: max-content; }\n  .toc a { white-space: nowrap; padding: 6px 10px; }\n}\n@media (max-width: 90'
-    '0px) {\n  .ro { display: none; }\n  .plan-body { grid-template-columns: minmax(0, 1fr); }\n}\n@media (ma'
-    'x-width: 640px) {\n  .bar-in { padding: 8px 14px; gap: 10px; }\n  .wordmark, .brand-sep { display: non'
-    'e; }\n  .bar .btn { padding: 0 10px; }\n  .bar .btn .lbl { position: absolute; width: 1px; height: 1px'
-    '; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }\n  .hero { padding: 28px 16px 80px; }'
-    '\n  .hero h1 { font-size: 30px; }\n  .lead { font-size: 16px; }\n  .kpi-wrap { padding: 0 16px; }\n  .kp'
-    'is { grid-template-columns: repeat(2, minmax(0, 1fr)); }\n  .kpi { padding: 14px 12px 12px; }\n  .kv {'
-    ' font-size: 28px; }\n  .ks { font-size: 12.5px; }\n  .layout { padding: 0 16px 16px; }\n  .toc { positi'
-    'on: static; margin: 0 -16px 24px; padding: 8px 16px; }\n  .card { padding: 16px; }\n  .tools { padding'
-    ': 14px 16px; }\n  .status-row { padding: 8px 16px; }\n  .plan-item { grid-template-columns: minmax(0, '
-    '1fr); gap: 8px; padding: 16px; }\n  .drawer { grid-template-columns: minmax(0, 1fr); }\n  .crow { grid'
-    '-template-columns: minmax(0, 1fr) 76px; }\n  .crow .ct { grid-column: 1 / -1; grid-row: 2; }\n  .plan-'
-    'ref code, .drawer code, .facts code { overflow-wrap: anywhere; }\n  .plan-ref .seg, .drawer .seg { wh'
-    'ite-space: normal; }\n  .foot { padding: 20px 16px 32px; }\n}\n@page { size: A4; margin: 12mm 11mm 14mm'
-    '; @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 9px/1.2 \'Outfit\', \'S'
-    "egoe UI', system-ui, sans-serif; color: #475569; } }\n@media print {\n  * { -webkit-print-color-adjust"
-    ': exact; print-color-adjust: exact; }\n  html { scroll-padding-top: 0; }\n  body { background: #FFFFFF'
-    '; font-size: 12px; }\n  .skip, .acts, .toc, .tools, .more-row, .no-print, .tgl, .dlink, .arm a { disp'
-    'lay: none !important; }\n  .bar { position: static; border-bottom-width: 2px; }\n  .bar-in { min-heigh'
-    't: 0; padding: 4px 0 6px; }\n  .hero { padding: 18px 20px 62px; }\n  .hero-in { grid-template-columns:'
-    ' minmax(0, 1fr) 200px; gap: 12px 24px; }\n  .hero h1 { font-size: 24px; }\n  .lead { font-size: 12.5px'
-    '; margin-top: 8px; }\n  .meta { margin-top: 10px; gap: 5px; }\n  .meta li { font-size: 10px; padding: '
-    '1px 7px; }\n  .verdict { padding: 12px 14px; }\n  .v-k, .v-detail { font-size: 11px; }\n  .v-word { fon'
-    't-size: 19px; }\n  .dist-head, .legend { font-size: 11px; }\n  .track { height: 9px; }\n  .kpi-wrap { m'
-    'argin-top: -46px; padding: 0 12px; }\n  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); box'
-    '-shadow: none; }\n  .kpi { padding: 9px 12px; }\n  .kv { font-size: 21px; }\n  .kl { font-size: 11.5px;'
-    ' margin-top: 3px; }\n  .ks { font-size: 10.5px; }\n  .sim { font-size: 11px; padding: 5px 10px; margin'
-    '-top: 8px; }\n  .layout { display: block; padding: 0; margin-top: 14px; }\n  .section { margin-top: 18'
-    'px; }\n  .sh { break-inside: avoid; break-after: avoid; margin-bottom: 8px; }\n  .sh h2 { font-size: 1'
-    '6px; }\n  .sh p { font-size: 11px; }\n  .card { box-shadow: none; padding: 10px 12px; break-inside: au'
-    'to; }\n  .card.flat { padding: 0; overflow: visible; }\n  .card h3 { font-size: 12.5px; }\n  .card .sub'
-    ' { font-size: 10.5px; margin-bottom: 8px; }\n  .kpi, .plan-item, .verdict, tr, .crow, .facts li { bre'
-    'ak-inside: avoid; }\n  .grid2 { grid-template-columns: 1fr 1fr; gap: 10px; }\n  .grid2 + .card, .card '
-    '+ .grid2 { margin-top: 10px; }\n  .crow { font-size: 11.5px; padding: 3px 0; grid-template-columns: m'
-    'inmax(0, 1.6fr) minmax(40px, 1fr) 54px; gap: 8px; }\n  .cv { font-size: 10.5px; }\n  .facts li { font-'
-    'size: 11.5px; padding: 5px 0; }\n  thead { display: table-header-group; }\n  .table-wrap { overflow: v'
-    'isible; background: none; }\n  table { font-size: 11px; }\n  th { font-size: 10.5px; padding: 5px 6px;'
-    ' }\n  td { padding: 6px; }\n  .reg td { padding-top: 7px; }\n  .sm, code, .mono, .plan-ref code { font-'
-    'size: 10px; }\n  .pill { font-size: 10px; padding: 0 6px; gap: 4px; }\n  .pill.sev::before { width: 5p'
-    'x; height: 5px; }\n  th.nw, td.nw { white-space: normal; }\n  .dx, .wide, .arm, td.host { min-width: 0'
-    '; }\n  .big { font-size: 12px; }\n  tr.drawer-row[hidden] { display: table-row !important; }\n  tr.draw'
-    'er-row td { padding: 0 6px 8px; }\n  .drawer { position: static; max-width: none; gap: 4px 16px; padd'
-    'ing-top: 6px; }\n  .drawer p { font-size: 11px; }\n  .dk { font-size: 10.5px; margin-bottom: 2px; }\n  '
-    '.drawer * + .dk { margin-top: 6px; }\n  .status-row { min-height: 0; padding: 5px 12px; font-size: 10'
-    '.5px; }\n  .plan-item { grid-template-columns: 22px minmax(0, 1fr); gap: 10px; padding: 9px 12px; }\n '
-    ' .plan-n { width: 22px; height: 22px; font-size: 10.5px; }\n  .plan-body { grid-template-columns: min'
-    'max(0, 1.3fr) minmax(0, 1fr); gap: 4px 18px; }\n  .plan-head h3 { font-size: 12px; }\n  .plan-c, .plan'
-    '-dx, .plan-ref, .lab { font-size: 11px; }\n  .plan-act { font-size: 12px; }\n  .mchip { font-size: 10p'
-    'x; padding: 0 5px; }\n  .kbs li { font-size: 11px; }\n  .v-next { font-size: 11px; margin-top: 8px; pa'
-    'dding-top: 6px; }\n  .sort { display: contents; }\n  .sort svg { display: none; }\n  .foot { padding: 1'
-    '0px 0 0; font-size: 10.5px; }\n  a { color: inherit; text-decoration: none; }\n}\n</style>\n</head>\n<bod'
-    'y>\n<a class="skip" href="#main-ledger">Saltar al contenido principal</a>\n<header class="bar">\n  <div'
+    '0) and the shared Azure SRE Agent severity scale.\n-->\n<html lang="en">\n<head>\n<meta charset="utf-8">'
+    '\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<meta http-equiv="Content-Secur'
+    'ity-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; img-'
+    'src data:; connect-src \'none\'; base-uri \'none\'; form-action \'none\'; object-src \'none\'">\n<meta name="'
+    'color-scheme" content="light dark">\n<title>Post-patching report and failure investigation · Azure Up'
+    'date Manager</title>\n<style>\n:root {\n  color-scheme: light;\n  --canvas: #F6F5F2;\n  --surface: #FFFFF'
+    'F;\n  --subtle: #F9FAFB;\n  --wash: #EFECE6;\n  --hover: #FBFAF8;\n  --ink: #141B24;\n  --muted: #475569;'
+    '\n  --line: #D8DCE3;\n  --line-soft: #E6E8EC;\n  --field-line: #64748B;\n  --accent: #FF4E00;\n  --accent'
+    '-text: #C23800;\n  --accent-hover: #9A2C00;\n  --accent-wash: #FFF3ED;\n  --focus: #C23800;\n  --chrome:'
+    ' #141B24;\n  --chrome-hover: #1E293B;\n  --chrome-line: #334155;\n  --chrome-muted: #B8C2CF;\n  --on-chr'
+    'ome: #FFFFFF;\n  --hero-bg: #141B24;\n  --hero-panel: #1C2531;\n  --hero-line: rgba(255, 255, 255, 0.16'
+    ');\n  --hero-muted: #C5CEDA;\n  --shadow: 0 1px 2px rgba(20, 27, 36, 0.06), 0 8px 24px rgba(20, 27, 36'
+    ', 0.08);\n  --edge: rgba(20, 27, 36, 0.18);\n  --crit-ink: #B42318; --crit-bg: #FEE4E2; --crit-bar: #D'
+    '92D20;\n  --high-ink: #B93815; --high-bg: #FFEAD5; --high-bar: #EF6820;\n  --med-ink: #93370D; --med-b'
+    'g: #FEF0C7; --med-bar: #F79009;\n  --low-ink: #175CD3; --low-bg: #D1E9FF; --low-bar: #2E90FA;\n  --inf'
+    'o-ink: #344054; --info-bg: #EAECF0;\n  --ok-ink: #067647; --ok-bg: #DCFAE6; --ok-bar: #17B26A;\n  --no'
+    "te-ink: #7A2E0E; --note-bg: #FFFAEB; --note-line: #FEDF89;\n  --font-sans: 'Outfit', 'Segoe UI', syst"
+    "em-ui, -apple-system, sans-serif;\n  --font-mono: 'Consolas', ui-monospace, monospace;\n  --bar-h: 61p"
+    'x;\n}\n:root[data-theme="dark"] {\n  color-scheme: dark;\n  --canvas: #0F141B;\n  --surface: #161E29;\n  -'
+    '-subtle: #1B2430;\n  --wash: #243040;\n  --hover: #1A2330;\n  --ink: #F1F5F9;\n  --muted: #CBD5E1;\n  --l'
+    'ine: #334155;\n  --line-soft: #273244;\n  --field-line: #94A3B8;\n  --accent-text: #FF8552;\n  --accent-'
+    'hover: #FFA07A;\n  --accent-wash: #2B1912;\n  --focus: #FF8552;\n  --chrome: #0B0F15;\n  --chrome-hover:'
+    ' #1B2430;\n  --hero-bg: #0B0F15;\n  --hero-panel: #161E29;\n  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), '
+    '0 8px 24px rgba(0, 0, 0, 0.35);\n  --edge: rgba(0, 0, 0, 0.6);\n  --crit-ink: #FDA29B; --crit-bg: rgba'
+    '(217, 45, 32, 0.24);\n  --high-ink: #F9B98A; --high-bg: rgba(239, 104, 32, 0.22);\n  --med-ink: #FEC84'
+    'B; --med-bg: rgba(247, 144, 9, 0.2);\n  --low-ink: #84CAFF; --low-bg: rgba(46, 144, 250, 0.22);\n  --i'
+    'nfo-ink: #D0D5DD; --info-bg: rgba(152, 162, 179, 0.2);\n  --ok-ink: #75E0A7; --ok-bg: rgba(23, 178, 1'
+    '06, 0.2);\n  --note-ink: #FEC84B; --note-bg: #2E2210; --note-line: #6B4E16;\n}\n* { box-sizing: border-'
+    'box; }\nhtml { scroll-padding-top: calc(var(--bar-h) + 16px); scrollbar-color: var(--field-line) var('
+    '--canvas); -webkit-text-size-adjust: 100%; }\nbody { margin: 0; background: var(--canvas); color: var'
+    '(--ink); font: 15px/1.55 var(--font-sans); overflow-wrap: break-word; -webkit-font-smoothing: antial'
+    'iased; }\n[hidden] { display: none !important; }\n::selection { background: #FFD5C2; color: #141B24; }'
+    '\na { color: var(--accent-text); text-underline-offset: 3px; }\na:hover { color: var(--accent-hover); '
+    '}\nbutton, input, select { font: inherit; color: inherit; }\ninput { caret-color: var(--accent-text); '
+    '}\n:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }\n.bar :focus-visible, .her'
+    'o :focus-visible { outline-color: #FF8552; }\nh1, h2, h3 { margin: 0; }\np { margin: 0; }\ncode, .mono '
+    '{ font-family: var(--font-mono); font-size: 12.5px; }\n.sr-only { position: absolute; width: 1px; hei'
+    'ght: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }\n.skip { position: absolute; '
+    'left: 16px; top: -100px; z-index: 50; padding: 10px 14px; background: var(--surface); color: var(--i'
+    'nk); border: 2px solid var(--accent-text); border-radius: 6px; }\n.skip:focus { top: 12px; }\nsvg { wi'
+    'dth: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-lin'
+    'ecap: round; stroke-linejoin: round; }\n\n.btn { display: inline-flex; align-items: center; justify-co'
+    'ntent: center; gap: 8px; min-height: 38px; padding: 0 14px; border: 1px solid var(--field-line); bor'
+    'der-radius: 6px; background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 600; l'
+    'ine-height: 1.2; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease, bord'
+    'er-color 150ms ease, color 150ms ease; }\n.btn:hover { background: var(--wash); }\n.btn:active { trans'
+    'form: translateY(1px); }\n.btn.sm { min-height: 32px; padding: 0 10px; font-size: 13px; }\n\n.bar { pos'
+    'ition: sticky; top: 0; z-index: 30; background: var(--chrome); color: var(--on-chrome); border-botto'
+    'm: 3px solid var(--accent); }\n.bar-in { max-width: 1440px; margin: 0 auto; min-height: 58px; padding'
+    ': 8px 32px; display: flex; align-items: center; gap: 16px; }\n.brand { display: flex; align-items: ce'
+    'nter; gap: 12px; min-width: 0; }\n.mark { width: 10px; height: 22px; background: var(--accent); flex:'
+    ' none; }\n.wordmark { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap'
+    '; }\n.brand-sep { width: 1px; height: 22px; background: var(--chrome-line); flex: none; }\n.plaque { d'
+    'isplay: flex; align-items: center; height: 36px; padding: 4px 10px; background: #FFFFFF; border-radi'
+    'us: 4px; flex: none; }\n.plaque:empty { display: none; }\n.plaque img { display: block; max-height: 28'
+    'px; max-width: 168px; width: auto; height: auto; }\n.client { min-width: 0; font-size: 15px; font-wei'
+    'ght: 600; color: var(--on-chrome); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }'
+    '\n.acts { margin-left: auto; display: flex; align-items: center; gap: 8px; }\n.ro { font-size: 12.5px;'
+    ' font-weight: 600; color: var(--chrome-muted); border: 1px solid var(--chrome-line); border-radius: '
+    '999px; padding: 4px 11px; white-space: nowrap; }\n.bar .btn { background: transparent; color: var(--o'
+    'n-chrome); border-color: var(--chrome-line); }\n.bar .btn:hover { background: var(--chrome-hover); bo'
+    'rder-color: var(--chrome-muted); }\n.bar .btn.primary { background: var(--accent); border-color: var('
+    '--accent); color: #141B24; }\n.bar .btn.primary:hover { background: #FF6A2B; border-color: #FF6A2B; c'
+    'olor: #141B24; }\n.menu-wrap { position: relative; }\n.menu { position: absolute; right: 0; top: calc('
+    '100% + 8px); z-index: 40; min-width: 270px; padding: 6px; background: var(--surface); color: var(--i'
+    'nk); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 32px rgba(20, 27, 36, 0.2'
+    '2); }\n.menu button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width'
+    ': 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; text-align: left; cursor'
+    ': pointer; font-size: 14px; font-weight: 600; }\n.menu button span { font-size: 12.5px; font-weight: '
+    '400; color: var(--muted); }\n.menu button:hover { background: var(--wash); }\n\n.hero { background: var'
+    '(--hero-bg); color: #FFFFFF; padding: 40px 32px 92px; }\n.hero-in { max-width: 1376px; margin: 0 auto'
+    '; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px 48px; align-items: start; }\n'
+    '.hero h1 { font-size: 42px; line-height: 1.12; font-weight: 700; letter-spacing: -0.02em; text-wrap:'
+    ' balance; }\n.lead { margin-top: 14px; font-size: 18px; line-height: 1.5; max-width: 68ch; color: var'
+    '(--hero-muted); }\n.lead b { color: #FFFFFF; font-weight: 600; }\n.meta { display: flex; flex-wrap: wr'
+    'ap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }\n.meta li { font-size: 13px; padding:'
+    ' 4px 11px; border: 1px solid var(--hero-line); border-radius: 999px; color: var(--hero-muted); max-w'
+    'idth: 100%; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }\n.meta li.on { color: #FFF'
+    'FFF; font-weight: 600; border-color: rgba(255, 255, 255, 0.4); }\n.verdict { background: var(--hero-p'
+    'anel); border: 1px solid var(--hero-line); border-radius: 10px; padding: 20px 22px; }\n.v-k { font-si'
+    'ze: 13px; font-weight: 600; color: var(--hero-muted); }\n.v-word { margin-top: 4px; font-size: 28px; '
+    'line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }\n.v-crit .v-word { color: #FDA29B; }\n'
+    '.v-high .v-word { color: #F9B98A; }\n.v-med .v-word { color: #FEC84B; }\n.v-ok .v-word { color: #75E0A'
+    '7; }\n.v-detail { margin-top: 8px; font-size: 14px; color: var(--hero-muted); font-variant-numeric: t'
+    'abular-nums; }\n.dist { grid-column: 1 / -1; }\n.dist-head { display: flex; justify-content: space-bet'
+    'ween; gap: 16px; font-size: 13px; color: var(--hero-muted); margin-bottom: 8px; }\n.track { display: '
+    'flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--hero-line); }\n.track i'
+    ' { display: block; height: 100%; }\n.legend { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: '
+    '10px 0 0; padding: 0; list-style: none; font-size: 13.5px; color: var(--hero-muted); }\n.legend li { '
+    'display: inline-flex; align-items: center; gap: 7px; }\n.legend b { color: #FFFFFF; font-variant-nume'
+    'ric: tabular-nums; }\n.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; fl'
+    'ex: none; }\n.s-crit { background: var(--crit-bar); }\n.s-high { background: var(--high-bar); }\n.s-med'
+    ' { background: var(--med-bar); }\n.s-low { background: var(--low-bar); }\n.s-ok { background: var(--ok'
+    '-bar); }\n\n.kpi-wrap { max-width: 1440px; margin: -58px auto 0; padding: 0 32px; position: relative; '
+    'z-index: 2; }\n.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; bac'
+    'kground: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shad'
+    'ow: var(--shadow); }\n.kpi { background: var(--surface); padding: 18px 20px 16px; min-width: 0; }\n.kv'
+    ' { display: block; font-size: 36px; line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; fo'
+    'nt-variant-numeric: tabular-nums; }\n.kl { display: block; margin-top: 8px; font-size: 14px; font-wei'
+    'ght: 600; line-height: 1.35; }\n.ks { display: block; margin-top: 4px; font-size: 13px; color: var(--'
+    'muted); font-variant-numeric: tabular-nums; }\n.tone-crit { color: var(--crit-ink); }\n.tone-high { co'
+    'lor: var(--high-ink); }\n.tone-med { color: var(--med-ink); }\n.tone-ok { color: var(--ok-ink); }\n.sim'
+    ' { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 10px 14px; border: '
+    '1px solid var(--note-line); background: var(--note-bg); color: var(--note-ink); border-radius: 8px; '
+    'font-size: 14px; font-weight: 600; }\n.sim svg { margin-top: 2px; }\n\n.layout { max-width: 1440px; mar'
+    'gin: 36px auto 0; padding: 0 32px 24px; display: grid; grid-template-columns: 200px minmax(0, 1fr); '
+    'gap: 32px; align-items: start; }\n.toc { position: sticky; top: calc(var(--bar-h) + 24px); font-size:'
+    ' 14px; }\n.toc-h { font-size: 12.5px; font-weight: 600; color: var(--muted); margin: 0 0 8px 10px; }\n'
+    '.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }\n.toc a { display: flex'
+    '; justify-content: space-between; align-items: baseline; gap: 8px; padding: 7px 10px; border-radius:'
+    ' 6px; color: var(--ink); text-decoration: none; }\n.toc a:hover { background: var(--wash); color: var'
+    '(--ink); }\n.toc a[aria-current="true"] { background: var(--surface); color: var(--accent-text); font'
+    '-weight: 600; box-shadow: 0 1px 2px rgba(20, 27, 36, 0.08); }\n.toc-n { font-size: 12.5px; color: var'
+    '(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }\n.sections { min-width: 0; }\n.sect'
+    'ion { margin-top: 44px; }\n.section:first-child { margin-top: 0; }\n.sh { margin-bottom: 14px; }\n.sh h'
+    '2 { font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }\n.sh p { margin-'
+    'top: 4px; font-size: 14px; color: var(--muted); max-width: 75ch; }\n.grid2 { display: grid; grid-temp'
+    'late-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px; }\n.grid2 + .card, .card + '
+    '.grid2 { margin-top: 16px; }\n.card { background: var(--surface); border: 1px solid var(--line); bord'
+    'er-radius: 10px; padding: 20px 22px; box-shadow: var(--shadow); min-width: 0; }\n.card.flat { padding'
+    ': 0; overflow: clip; }\n.card h3 { font-size: 16px; line-height: 1.3; font-weight: 700; }\n.card .sub '
+    '{ margin: 3px 0 14px; font-size: 13.5px; color: var(--muted); max-width: 75ch; }\n\n.cats { display: g'
+    'rid; gap: 2px; }\n.crow { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(70px, 1fr) 82'
+    'px; gap: 12px; align-items: center; width: 100%; padding: 7px 8px; border: 0; border-radius: 6px; ba'
+    'ckground: none; text-align: left; font-size: 14px; cursor: pointer; }\n.crow:hover { background: var('
+    '--wash); }\n.crow:disabled { cursor: default; color: var(--muted); }\n.crow:disabled:hover { backgroun'
+    'd: none; }\n.ct { height: 10px; border-radius: 999px; background: var(--line-soft); overflow: hidden;'
+    ' }\n.ct i { display: block; height: 100%; border-radius: 999px; }\n.cv { text-align: right; font-size:'
+    ' 13.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }\n.cv b { col'
+    'or: var(--ink); }\n.facts { list-style: none; margin: 0; padding: 0; }\n.facts li { padding: 9px 0; bo'
+    'rder-top: 1px solid var(--line-soft); font-size: 14px; max-width: 80ch; font-variant-numeric: tabula'
+    'r-nums; }\n.facts li:first-child { border-top: 0; padding-top: 0; }\n.facts code { overflow-wrap: brea'
+    'k-word; }\n\n.plan { list-style: none; margin: 0; padding: 0; }\n.plan-item { display: grid; grid-templ'
+    'ate-columns: 32px minmax(0, 1fr); gap: 16px; padding: 20px 22px; border-top: 1px solid var(--line-so'
+    'ft); }\n.plan-item:first-child { border-top: 0; }\n.plan-n { width: 32px; height: 32px; border-radius:'
+    ' 50%; background: var(--wash); display: grid; place-items: center; font-size: 14px; font-weight: 700'
+    '; font-variant-numeric: tabular-nums; }\n.plan-body { display: grid; grid-template-columns: minmax(0,'
+    ' 1.25fr) minmax(0, 1fr); gap: 8px 32px; align-items: start; }\n.plan-head { grid-column: 1 / -1; disp'
+    'lay: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }\n.plan-head h3 { font-size: 16px; l'
+    'ine-height: 1.35; font-weight: 700; }\n.plan-c { font-size: 13px; color: var(--muted); white-space: n'
+    'owrap; }\n.plan-act { font-size: 15px; max-width: 75ch; }\n.plan-dx { margin-top: 6px; font-size: 13.5'
+    'px; color: var(--muted); max-width: 75ch; }\n.plan-ref { margin-top: 8px; font-size: 13px; color: var'
+    '(--muted); }\n.plan-ref code { color: var(--muted); }\n.plan-ms { display: flex; flex-wrap: wrap; alig'
+    'n-items: center; gap: 6px; }\n.lab { font-size: 12.5px; font-weight: 600; color: var(--muted); margin'
+    '-right: 4px; }\n.mchip { padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; backgro'
+    'und: var(--surface); color: var(--accent-text); font-family: var(--font-mono); font-size: 12.5px; cu'
+    'rsor: pointer; }\n.mchip:hover { border-color: var(--accent-text); background: var(--accent-wash); }\n'
+    '.empty-state { padding: 22px; color: var(--muted); }\n\n.tools { display: flex; flex-wrap: wrap; gap: '
+    '12px; align-items: flex-end; padding: 16px 20px; background: var(--subtle); border-bottom: 1px solid'
+    ' var(--line-soft); }\n.fld { display: grid; gap: 4px; flex: 1 1 170px; min-width: 0; font-size: 13px;'
+    ' font-weight: 600; color: var(--muted); }\n.fld.grow { flex: 2 1 240px; }\n.fld select, .fld input { w'
+    'idth: 100%; min-height: 38px; padding: 0 10px; border: 1px solid var(--field-line); border-radius: 6'
+    'px; background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 400; }\n.fld input::'
+    'placeholder { color: var(--muted); opacity: 1; }\n.tool-btns { display: flex; flex-wrap: wrap; gap: 8'
+    'px; }\n.status-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-betw'
+    'een; gap: 8px 16px; min-height: 48px; padding: 8px 20px; font-size: 13.5px; color: var(--muted); fon'
+    't-variant-numeric: tabular-nums; }\n.table-wrap { position: relative; overflow-x: auto; border-top: 1'
+    'px solid var(--line-soft); background: linear-gradient(90deg, var(--surface) 30%, rgba(255, 255, 255'
+    ', 0)) left / 40px 100% no-repeat local, linear-gradient(270deg, var(--surface) 30%, rgba(255, 255, 2'
+    '55, 0)) right / 40px 100% no-repeat local, radial-gradient(farthest-side at 0 50%, var(--edge), rgba'
+    '(0, 0, 0, 0)) left / 14px 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, var(--ed'
+    'ge), rgba(0, 0, 0, 0)) right / 14px 100% no-repeat scroll; }\n.card > .table-wrap:first-child { borde'
+    'r-top: 0; }\ntable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: t'
+    'abular-nums; }\nth { padding: 10px 14px; background: var(--subtle); border-bottom: 1px solid var(--li'
+    'ne); color: var(--muted); font-size: 12.5px; font-weight: 600; text-align: left; vertical-align: bot'
+    'tom; }\ntd { padding: 12px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; over'
+    'flow-wrap: break-word; }\ntbody tr:last-child td { border-bottom: 0; }\ntbody tr:hover td { background'
+    ': var(--hover); }\nth.n, td.n { text-align: right; }\nth.nw, td.nw, .nw { white-space: nowrap; }\ntd.em'
+    'pty { color: var(--muted); padding: 18px 20px; }\n.sm { display: block; margin-top: 2px; font-size: 1'
+    '3px; color: var(--muted); }\n.sort { display: inline-flex; align-items: center; gap: 4px; padding: 0;'
+    ' border: 0; background: none; color: inherit; font-size: inherit; font-weight: 600; cursor: pointer;'
+    ' text-align: inherit; }\n.sort:hover { color: var(--accent-text); }\n.sort svg { width: 12px; height: '
+    '12px; opacity: 0.35; }\nth[aria-sort] .sort { color: var(--ink); }\nth[aria-sort] .sort svg { opacity:'
+    ' 1; }\nth[aria-sort="ascending"] .sort svg { transform: rotate(180deg); }\n.reg td { padding-top: 14px'
+    '; }\n.nm { font-weight: 700; white-space: nowrap; }\n.dx { min-width: 300px; }\n.dx-t { display: block;'
+    ' font-weight: 600; }\n.dx-h { display: block; margin-top: 2px; }\n.tgl { margin-top: 10px; }\n.big { di'
+    'splay: block; font-size: 18px; line-height: 1.2; font-weight: 700; }\n.seg { white-space: nowrap; }\n.'
+    'wide { min-width: 240px; }\n.reg tr.machine-row:has(+ tr.drawer-row:not([hidden])) td { border-bottom'
+    ': 0; }\ntr.drawer-row td, tbody tr.drawer-row:hover td { background: var(--subtle); padding: 0 14px 1'
+    '6px; border-bottom: 1px solid var(--line); }\n.drawer { position: sticky; left: 14px; max-width: calc'
+    '(var(--wrap-w, 100%) - 28px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: '
+    '12px 32px; padding: 14px 4px 0; border-top: 1px dashed var(--line); }\n.drawer p { max-width: 75ch; }'
+    '\n.drawer * + .dk { margin-top: 12px; }\n.dk { margin: 0 0 4px; font-size: 12.5px; font-weight: 700; c'
+    'olor: var(--accent-text); }\n.act { font-weight: 600; }\n.issues, .kbs { list-style: none; margin: 0; '
+    'padding: 0; display: grid; gap: 6px; }\n.issues li { display: flex; gap: 8px; align-items: baseline; '
+    '}\n.kbs li { font-size: 13.5px; }\ncode.ref { display: inline; color: var(--ink); overflow-wrap: break'
+    '-word; }\n.arm { display: grid; gap: 1px; min-width: 150px; }\n.refs { display: grid; gap: 6px; margin'
+    '-top: 2px; }\n.ref-arm { display: grid; gap: 1px; }\n.refs .arm { min-width: 0; }`n.refs .src { color:'
+    ' var(--muted); }`ntd.host { min-width: 190px; }\n.arm .mono { overflow-wrap: break-word; color: var(-'
+    '-ink); }\n.kind b { display: block; font-weight: 600; }\n.stack { display: flex; flex-direction: colum'
+    'n; align-items: flex-start; gap: 6px; }\n.v-next { margin-top: 14px; padding-top: 12px; border-top: 1'
+    'px solid var(--hero-line); font-size: 14px; color: var(--hero-muted); }\n.v-next a { color: #FF9F73; '
+    'font-weight: 600; }\n.v-next a:hover { color: #FFC2A6; }\n.more-row { display: flex; justify-content: '
+    'center; padding: 12px; border-top: 1px solid var(--line-soft); }\n\n.pill { display: inline-flex; alig'
+    'n-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: var(--info-bg); colo'
+    'r: var(--info-ink); font-size: 12.5px; font-weight: 600; line-height: 1.5; white-space: nowrap; }\n.p'
+    'ill.sev::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor'
+    '; flex: none; }\n.pill.crit { background: var(--crit-bg); color: var(--crit-ink); }\n.pill.high { back'
+    'ground: var(--high-bg); color: var(--high-ink); }\n.pill.med { background: var(--med-bg); color: var('
+    '--med-ink); }\n.pill.low { background: var(--low-bg); color: var(--low-ink); }\n.pill.ok { background:'
+    ' var(--ok-bg); color: var(--ok-ink); }\n.pill.neutral { background: var(--info-bg); color: var(--info'
+    '-ink); }\n.pill + .sm { margin-top: 6px; }\n\n.error-banner { max-width: 1376px; margin: 24px auto; pad'
+    'ding: 18px; border: 1px solid var(--crit-ink); background: var(--crit-bg); color: var(--crit-ink); b'
+    'order-radius: 8px; }\n.foot { max-width: 1440px; margin: 0 auto; padding: 24px 32px 40px; display: fl'
+    'ex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: var(--mu'
+    'ted); }\n\n@media (prefers-reduced-motion: no-preference) {\n  html { scroll-behavior: smooth; }\n}\n@med'
+    'ia (prefers-reduced-motion: reduce) {\n  * { transition: none !important; }\n}\n@media (max-width: 1180'
+    'px) {\n  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }\n  .hero-in { grid-template-colum'
+    'ns: minmax(0, 1fr) 300px; gap: 28px 40px; }\n  .hero h1 { font-size: 36px; }\n}\n@media (max-width: 110'
+    '0px) {\n  html { scroll-padding-top: calc(var(--bar-h) + 64px); }\n  .hero-in { grid-template-columns:'
+    ' minmax(0, 1fr); }\n  .layout { display: block; margin-top: 24px; }\n  .toc { top: var(--bar-h); z-ind'
+    'ex: 20; margin: 0 -32px 28px; padding: 8px 32px; background: var(--canvas); border-bottom: 1px solid'
+    ' var(--line); overflow-x: auto; }\n  .toc-h { display: none; }\n  .toc ol { display: flex; gap: 4px; w'
+    'idth: max-content; }\n  .toc a { white-space: nowrap; padding: 6px 10px; }\n}\n@media (max-width: 900px'
+    ') {\n  .ro { display: none; }\n  .plan-body { grid-template-columns: minmax(0, 1fr); }\n}\n@media (max-w'
+    'idth: 640px) {\n  .bar-in { padding: 8px 14px; gap: 10px; }\n  .wordmark, .brand-sep { display: none; '
+    '}\n  .bar .btn { padding: 0 10px; }\n  .bar .btn .lbl { position: absolute; width: 1px; height: 1px; o'
+    'verflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }\n  .hero { padding: 28px 16px 80px; }\n  '
+    '.hero h1 { font-size: 30px; }\n  .lead { font-size: 16px; }\n  .kpi-wrap { padding: 0 16px; }\n  .kpis '
+    '{ grid-template-columns: repeat(2, minmax(0, 1fr)); }\n  .kpi { padding: 14px 12px 12px; }\n  .kv { fo'
+    'nt-size: 28px; }\n  .ks { font-size: 12.5px; }\n  .layout { padding: 0 16px 16px; }\n  .toc { position:'
+    ' static; margin: 0 -16px 24px; padding: 8px 16px; }\n  .card { padding: 16px; }\n  .tools { padding: 1'
+    '4px 16px; }\n  .status-row { padding: 8px 16px; }\n  .plan-item { grid-template-columns: minmax(0, 1fr'
+    '); gap: 8px; padding: 16px; }\n  .drawer { grid-template-columns: minmax(0, 1fr); }\n  .crow { grid-te'
+    'mplate-columns: minmax(0, 1fr) 76px; }\n  .crow .ct { grid-column: 1 / -1; grid-row: 2; }\n  .plan-ref'
+    ' code, .drawer code, .facts code, .issues span { overflow-wrap: anywhere; }\n  .plan-ref .seg, .drawe'
+    'r .seg { white-space: normal; }\n  .foot { padding: 20px 16px 32px; }\n}\n@page { size: A4; margin: 12m'
+    'm 11mm 14mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 9px/1.2 \'Ou'
+    "tfit', 'Segoe UI', system-ui, sans-serif; color: #475569; } }\n@media print {\n  * { -webkit-print-col"
+    'or-adjust: exact; print-color-adjust: exact; }\n  html { scroll-padding-top: 0; }\n  body { background'
+    ': #FFFFFF; font-size: 12px; }\n  .skip, .acts, .toc, .tools, .more-row, .no-print, .tgl, .dlink, .arm'
+    ' a { display: none !important; }\n  .bar { position: static; border-bottom-width: 2px; }\n  .bar-in { '
+    'min-height: 0; padding: 4px 0 6px; }\n  .hero { padding: 18px 20px 62px; }\n  .hero-in { grid-template'
+    '-columns: minmax(0, 1fr) 200px; gap: 12px 24px; }\n  .hero h1 { font-size: 24px; }\n  .lead { font-siz'
+    'e: 12.5px; margin-top: 8px; }\n  .meta { margin-top: 10px; gap: 5px; }\n  .meta li { font-size: 10px; '
+    'padding: 1px 7px; }\n  .verdict { padding: 12px 14px; }\n  .v-k, .v-detail { font-size: 11px; }\n  .v-w'
+    'ord { font-size: 19px; }\n  .dist-head, .legend { font-size: 11px; }\n  .track { height: 9px; }\n  .kpi'
+    '-wrap { margin-top: -46px; padding: 0 12px; }\n  .kpis { grid-template-columns: repeat(3, minmax(0, 1'
+    'fr)); box-shadow: none; }\n  .kpi { padding: 9px 12px; }\n  .kv { font-size: 21px; }\n  .kl { font-size'
+    ': 11.5px; margin-top: 3px; }\n  .ks { font-size: 10.5px; }\n  .sim { font-size: 11px; padding: 5px 10p'
+    'x; margin-top: 8px; }\n  .layout { display: block; padding: 0; margin-top: 14px; }\n  .section { margi'
+    'n-top: 18px; }\n  .sh { break-inside: avoid; break-after: avoid; margin-bottom: 8px; }\n  .sh h2 { fon'
+    't-size: 16px; }\n  .sh p { font-size: 11px; }\n  .card { box-shadow: none; padding: 10px 12px; break-i'
+    'nside: auto; }\n  .card.flat { padding: 0; overflow: visible; }\n  .card h3 { font-size: 12.5px; }\n  .'
+    'card .sub { font-size: 10.5px; margin-bottom: 8px; }\n  .kpi, .plan-item, .verdict, tr, .crow, .facts'
+    ' li { break-inside: avoid; }\n  .grid2 { grid-template-columns: 1fr 1fr; gap: 10px; }\n  .grid2 + .car'
+    'd, .card + .grid2 { margin-top: 10px; }\n  .crow { font-size: 11.5px; padding: 3px 0; grid-template-c'
+    'olumns: minmax(0, 1.6fr) minmax(40px, 1fr) 54px; gap: 8px; }\n  .cv { font-size: 10.5px; }\n  .facts l'
+    'i { font-size: 11.5px; padding: 5px 0; }\n  thead { display: table-header-group; }\n  .table-wrap { ov'
+    'erflow: visible; background: none; }\n  table { font-size: 11px; }\n  th { font-size: 10.5px; padding:'
+    ' 5px 6px; }\n  td { padding: 6px; }\n  .reg td { padding-top: 7px; }\n  .sm, code, .mono, .plan-ref cod'
+    'e { font-size: 10px; }\n  .pill { font-size: 10px; padding: 0 6px; gap: 4px; }\n  .pill.sev::before { '
+    'width: 5px; height: 5px; }\n  th.nw, td.nw { white-space: normal; }\n  .dx, .wide, .arm, td.host { min'
+    '-width: 0; }\n  .big { font-size: 12px; }\n  tr.drawer-row[hidden] { display: table-row !important; }\n'
+    '  tr.drawer-row td { padding: 0 6px 8px; }\n  .drawer { position: static; max-width: none; gap: 4px 1'
+    '6px; padding-top: 6px; }\n  .drawer p { font-size: 11px; }\n  .dk { font-size: 10.5px; margin-bottom: '
+    '2px; }\n  .drawer * + .dk { margin-top: 6px; }\n  .status-row { min-height: 0; padding: 5px 12px; font'
+    '-size: 10.5px; }\n  .plan-item { grid-template-columns: 22px minmax(0, 1fr); gap: 10px; padding: 9px '
+    '12px; }\n  .plan-n { width: 22px; height: 22px; font-size: 10.5px; }\n  .plan-body { grid-template-col'
+    'umns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 4px 18px; }\n  .plan-head h3 { font-size: 12px; }\n  .plan'
+    '-c, .plan-dx, .plan-ref, .lab { font-size: 11px; }\n  .plan-act { font-size: 12px; }\n  .mchip { font-'
+    'size: 10px; padding: 0 5px; }\n  .kbs li { font-size: 11px; }\n  .v-next { font-size: 11px; margin-top'
+    ': 8px; padding-top: 6px; }\n  .sort { display: contents; }\n  .sort svg { display: none; }\n  .foot { p'
+    'adding: 10px 0 0; font-size: 10.5px; }\n  a { color: inherit; text-decoration: none; }\n}\n</style>\n</h'
+    'ead>\n<body>\n<a class="skip" href="#main-ledger">Skip to main content</a>\n<header class="bar">\n  <div'
     ' class="bar-in">\n    <div class="brand">\n      <span class="mark" aria-hidden="true"></span>\n      <'
     'span class="wordmark">Azure SRE Agent</span>\n      <span class="brand-sep" aria-hidden="true"></span'
     '>\n      <span class="plaque" id="brand-plaque"></span>\n      <span class="client" id="client-name-la'
-    'bel"></span>\n    </div>\n    <div class="acts">\n      <span class="ro">Solo lectura · Azure Resource '
-    'Graph</span>\n      <button type="button" class="btn" id="theme-toggle"><svg viewBox="0 0 24 24" aria'
-    '-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/><'
-    '/svg><span class="lbl" id="theme-label">Modo oscuro</span></button>\n      <div class="menu-wrap">\n  '
-    '      <button type="button" class="btn" id="export-menu-btn" aria-expanded="false" aria-controls="ex'
-    'port-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5'
-    ' 19h14"/></svg><span class="lbl">Exportar</span></button>\n        <div class="menu" id="export-menu"'
-    ' hidden>\n          <button type="button" id="export-json-btn">Exportar JSON<span>Snapshot completo n'
-    'ormalizado</span></button>\n          <button type="button" id="export-machines-csv-btn">Exportar Dia'
-    'gnóstico Máquinas CSV<span>Una fila por máquina con causa raíz y acción</span></button>\n          <b'
-    'utton type="button" id="export-patches-csv-btn">Exportar Ciclos y Parches CSV<span>Ciclos de manteni'
-    'miento y softwarePatches</span></button>\n        </div>\n      </div>\n      <button type="button" cla'
-    'ss="btn primary" id="print-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 1'
-    '7H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg><span cl'
-    'ass="lbl">Imprimir / PDF</span></button>\n    </div>\n  </div>\n</header>\n\n<main id="main-ledger" tabin'
-    'dex="-1">\n  <div id="error-box" class="error-banner" role="alert" hidden></div>\n  <div id="report-co'
-    'ntent" hidden>\n    <section class="hero" id="sec-cover" aria-labelledby="cover-title">\n      <div cl'
-    'ass="hero-in">\n        <div>\n          <h1 id="cover-title">Informe post-parcheo e investigación aut'
-    'omática de fallos</h1>\n          <p class="lead" id="cover-subtitle"></p>\n          <ul class="meta"'
-    ' id="cover-tags" aria-label="Alcance y procedencia"></ul>\n        </div>\n        <div class="verdict'
-    '" id="verdict-card">\n          <p class="v-k">Veredicto del ciclo de parcheo</p>\n          <p class='
-    '"v-word" id="verdict-label"></p>\n          <p class="v-detail" id="verdict-detail"></p>\n          <p'
-    ' class="v-next" id="verdict-next" hidden></p>\n        </div>\n        <div class="dist">\n          <d'
-    'iv class="dist-head"><span>Máquinas por severidad de diagnóstico</span><span id="dist-total"></span>'
-    '</div>\n          <div class="track" id="severity-track" role="img"></div>\n          <ul class="legen'
-    'd" id="severity-legend"></ul>\n        </div>\n      </div>\n    </section>\n\n    <div class="kpi-wrap">'
-    '\n      <div class="kpis" id="kpi-strip"></div>\n      <p class="sim" id="sim-note" hidden><svg viewBo'
-    'x="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3zM12 10v4M12 17h.01"/></svg><span id="si'
-    'm-text"></span></p>\n    </div>\n\n    <div class="layout">\n      <nav class="toc" aria-labelledby="toc'
-    '-h">\n        <p class="toc-h" id="toc-h">Secciones del informe</p>\n        <ol>\n          <li><a hre'
-    'f="#sec-cover">Portada y alcance</a></li>\n          <li><a href="#sec-executive">Resumen ejecutivo</'
-    'a></li>\n          <li><a href="#sec-actions">Plan de acción <span class="toc-n" id="toc-n-actions"><'
-    '/span></a></li>\n          <li><a href="#sec-investigation">Investigación por máquina <span class="to'
-    'c-n" id="toc-n-machines"></span></a></li>\n          <li><a href="#sec-cycles">Ciclos e instalaciones'
-    ' <span class="toc-n" id="toc-n-cycles"></span></a></li>\n          <li><a href="#sec-patches">Parches'
-    ' <span class="toc-n" id="toc-n-patches"></span></a></li>\n          <li><a href="#sec-extensions">Ext'
-    'ensiones y Hotpatch <span class="toc-n" id="toc-n-extensions"></span></a></li>\n          <li><a href'
-    '="#sec-sources">Fuentes y método <span class="toc-n" id="toc-n-sources"></span></a></li>\n        </o'
-    'l>\n      </nav>\n\n      <div class="sections">\n        <section class="section" id="sec-executive" ar'
-    'ia-labelledby="h-executive">\n          <div class="sh">\n            <h2 id="h-executive">Resumen eje'
-    'cutivo del ciclo de parcheo</h2>\n            <p>Dónde se concentran los bloqueos y qué ha confirmado'
-    ' la correlación automática, sin iniciar sesión en ningún host.</p>\n          </div>\n          <div c'
-    'lass="grid2">\n            <div class="card">\n              <h3>Máquinas por categoría de diagnóstico'
-    '</h3>\n              <p class="sub">Categoría principal de cada máquina. Seleccione una para filtrar '
-    'la investigación.</p>\n              <div class="cats" id="category-breakdown"></div>\n            </d'
-    'iv>\n            <div class="card">\n              <h3>Conclusiones operativas verificadas</h3>\n      '
-    '        <p class="sub">Correlación read-only sobre <code>Microsoft.Compute/<wbr>virtualMachines</cod'
-    'e> y <code>Microsoft.HybridCompute/<wbr>machines</code>.</p>\n              <ul class="facts" id="exe'
-    'cutive-messages"></ul>\n            </div>\n          </div>\n        </section>\n\n        <section clas'
-    's="section" id="sec-actions" aria-labelledby="h-actions">\n          <div class="sh">\n            <h2'
-    ' id="h-actions">Plan de acción priorizado</h2>\n            <p>Qué hacer primero: una acción por tipo'
-    ' de bloqueo, ordenada por severidad y por número de máquinas afectadas.</p>\n          </div>\n       '
-    '   <ol class="plan card flat" id="actions-table"></ol>\n        </section>\n\n        <section class="s'
-    'ection" id="sec-investigation" aria-labelledby="h-investigation">\n          <div class="sh">\n       '
-    '     <h2 id="h-investigation">Investigación automática de causa raíz por máquina</h2>\n            <p'
-    '>Por qué no se ha parcheado cada máquina: estado de evaluación, parches pendientes, ciclos de ventan'
-    'a y la evidencia exacta del bloqueo.</p>\n          </div>\n          <div class="card flat">\n        '
-    '    <div class="tools">\n              <label class="fld"><span>Categoría de fallo</span>\n           '
-    '     <select id="filter-category">\n                  <option value="all">Todas las categorías</optio'
-    'n>\n                  <option value="maintenance_window_unresponsive">Ventana sin respuesta (Shutdown'
-    'OrUnresponsive / fallo)</option>\n                  <option value="arc_agent_expired_or_disconnected"'
-    '>Agente Azure Arc expirado o desconectado</option>\n                  <option value="assessment_stuck'
-    '_or_readiness_undetermined">Evaluación en curso (InProgress) / UnableToDetermine</option>\n          '
-    '        <option value="hotpatch_or_patch_extension_error">Error en Hotpatch o extensión de huésped</'
-    'option>\n                  <option value="pending_security_patches_unscheduled">Parches de seguridad '
-    'pendientes sin ventana asignada</option>\n                  <option value="unassessed_no_update_manag'
-    'er_telemetry">Sin telemetría en Update Manager (apagadas / no evaluadas)</option>\n                  '
-    '<option value="healthy">Sin bloqueos activos (healthy)</option>\n                </select>\n          '
-    '    </label>\n              <label class="fld"><span>Alojamiento</span>\n                <select id="f'
-    'ilter-hosting">\n                  <option value="all">Todos (Azure VM + Azure Arc)</option>\n        '
-    '          <option value="azure">Azure VM (microsoft.compute)</option>\n                  <option valu'
-    'e="arc">Azure Arc (microsoft.hybridcompute)</option>\n                </select>\n              </label'
-    '>\n              <label class="fld"><span>Severidad</span>\n                <select id="filter-severit'
-    'y">\n                  <option value="all">Todas las severidades</option>\n                  <option v'
-    'alue="critical">Crítica</option>\n                  <option value="high">Alta</option>\n              '
-    '    <option value="medium">Media</option>\n                  <option value="low">Baja</option>\n      '
-    '            <option value="info">Correcto</option>\n                </select>\n              </label>\n'
-    '              <label class="fld grow"><span>Buscar</span>\n                <input type="search" id="f'
-    'ilter-search" placeholder="Máquina, KB, grupo de recursos o error" autocomplete="off">\n             '
-    ' </label>\n            </div>\n            <div class="status-row">\n              <span id="machines-c'
-    'ount-label" aria-live="polite"></span>\n              <div class="tool-btns no-print">\n              '
-    '  <button type="button" class="btn sm" id="filter-reset-btn">Restablecer filtros</button>\n          '
-    '      <button type="button" class="btn sm" id="machines-view-csv-btn"><svg viewBox="0 0 24 24" aria-'
-    'hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>CSV de la vista</button>\n '
-    '               <button type="button" class="btn sm" id="toggle-all-drawers-btn">Contraer todos los d'
-    'etalles</button>\n              </div>\n            </div>\n            <div class="table-wrap"><table '
-    'id="machines-table" class="reg"></table></div>\n          </div>\n        </section>\n\n        <section'
-    ' class="section" id="sec-cycles" aria-labelledby="h-cycles">\n          <div class="sh">\n            '
-    '<h2 id="h-cycles">Ciclos de mantenimiento y ejecuciones de instalación</h2>\n            <p>Ejecucion'
-    'es programadas en <code>maintenanceresources</code> (UpdateSuccessfullyApplied frente a ShutdownOrUn'
-    'responsive) contrastadas con los resultados de <code>patchinstallationresources</code>.</p>\n        '
-    '  </div>\n          <div class="card flat">\n            <div class="tools">\n              <label clas'
-    's="fld"><span>Estado de ciclo o ejecución</span>\n                <select id="cycle-status-filter">\n '
-    '                 <option value="all">Todos los estados</option>\n                  <option value="Shu'
-    'tdownOrUnresponsive">ShutdownOrUnresponsive</option>\n                  <option value="UpdateSuccessf'
-    'ullyApplied">UpdateSuccessfullyApplied</option>\n                  <option value="Succeeded">Succeede'
-    'd (Instalación / Configuración)</option>\n                  <option value="Assigned">Assigned (Asigna'
-    'ción activa)</option>\n                </select>\n              </label>\n              <label class="f'
-    'ld grow"><span>Buscar</span>\n                <input type="search" id="cycle-search-filter" placehold'
-    'er="Máquina, configuración o correlationId" autocomplete="off">\n              </label>\n            <'
-    '/div>\n            <div class="status-row"><span id="cycles-count-label" aria-live="polite"></span></'
-    'div>\n            <div class="table-wrap"><table id="cycles-table"></table></div>\n            <div cl'
-    'ass="more-row" id="cycles-more-row" hidden><button type="button" class="btn" id="cycles-more-btn">Mo'
-    'strar 80 registros más</button></div>\n          </div>\n        </section>\n\n        <section class="s'
-    'ection" id="sec-patches" aria-labelledby="h-patches">\n          <div class="sh">\n            <h2 id='
-    '"h-patches">Parches de software pendientes e instalados</h2>\n            <p>Paquetes pendientes segú'
-    'n <code>patchassessmentresources/<wbr>softwarepatches</code> y registros de <code>patchinstallationr'
-    'esources/<wbr>softwarepatches</code> (instalados o no seleccionados en la ventana).</p>\n          </'
-    'div>\n          <div class="card flat">\n            <div class="tools">\n              <label class="f'
-    'ld"><span>Origen o estado del parche</span>\n                <select id="patch-state-filter">\n       '
-    '           <option value="all">Todos (Pendientes + Ejecuciones)</option>\n                  <option v'
-    'alue="PendingAssessment">Pendientes de instalar (PendingAssessment)</option>\n                  <opti'
-    'on value="Installed">Instalados en ventana (Installed)</option>\n                  <option value="Not'
-    'Selected">No seleccionados en ventana (NotSelected)</option>\n                </select>\n             '
-    ' </label>\n              <label class="fld"><span>Clasificación</span>\n                <select id="pa'
-    'tch-class-filter">\n                  <option value="all">Todas las clasificaciones</option>\n        '
-    '          <option value="Security">Security / Critical</option>\n                  <option value="Upd'
-    'ateRollUp">UpdateRollUp</option>\n                  <option value="Definition">Definition</option>\n  '
-    '                <option value="Updates">Updates</option>\n                  <option value="Other">Oth'
-    'er</option>\n                </select>\n              </label>\n              <label class="fld grow"><'
-    'span>Buscar</span>\n                <input type="search" id="patch-search-filter" placeholder="KB, pa'
-    'quete o máquina" autocomplete="off">\n              </label>\n            </div>\n            <div clas'
-    's="status-row"><span id="patches-count-label" aria-live="polite"></span></div>\n            <div clas'
-    's="table-wrap"><table id="patches-table"></table></div>\n            <div class="more-row" id="patche'
-    's-more-row" hidden><button type="button" class="btn" id="patches-more-btn">Mostrar 80 registros más<'
-    '/button></div>\n          </div>\n        </section>\n\n        <section class="section" id="sec-extensi'
-    'ons" aria-labelledby="h-extensions">\n          <div class="sh">\n            <h2 id="h-extensions">Ex'
-    'tensiones de huésped y preparación Hotpatch</h2>\n            <p>Inventario read-only de <code>virtua'
-    'lMachines/<wbr>extensions</code> y <code>HybridCompute/<wbr>machines/<wbr>extensions</code>; nunca s'
-    'e leen <code>settings</code> ni <code>protectedSettings</code>.</p>\n          </div>\n          <div '
-    'class="card flat"><div class="table-wrap"><table id="extensions-table"></table></div></div>\n        '
-    '</section>\n\n        <section class="section" id="sec-sources" aria-labelledby="h-sources">\n         '
-    ' <div class="sh">\n            <h2 id="h-sources">Recibos de Azure Resource Graph y metodología</h2>\n'
-    '            <p>Qué se consultó, con qué resultado y qué límites tiene este informe.</p>\n          </'
-    'div>\n          <div class="card flat"><div class="table-wrap"><table id="sources-table"></table></di'
-    'v></div>\n          <div class="grid2">\n            <div class="card">\n              <h3>Límites meto'
-    'dológicos y garantías de seguridad</h3>\n              <ul class="facts" id="methodology-list" style='
-    '"margin-top:12px"></ul>\n            </div>\n            <div class="card">\n              <h3>Tablas c'
-    'onsultadas y cadencia</h3>\n              <ul class="facts" id="method-tables" style="margin-top:12px'
-    '"></ul>\n            </div>\n          </div>\n        </section>\n      </div>\n    </div>\n    <footer c'
-    'lass="foot"><span id="foot-left"></span><span id="foot-right"></span></footer>\n  </div>\n</main>\n\n<sc'
-    'ript type="application/json" id="report-data">__REPORT_DATA_JSON__</script>\n<script>\n(function () {\n'
-    '  "use strict";\n  var D = document;\n  function $(id) { return D.getElementById(id); }\n  function cle'
-    'ar(node) {\n    while (node.firstChild) { node.removeChild(node.firstChild); }\n  }\n  function el(tag,'
-    ' opts) {\n    var node = D.createElement(tag);\n    if (opts) {\n      if (opts.className) { node.class'
-    'Name = opts.className; }\n      if (opts.text !== undefined && opts.text !== null) { node.textContent'
-    ' = String(opts.text); }\n      if (opts.id) { node.id = opts.id; }\n      if (opts.title) { node.title'
-    ' = opts.title; }\n      if (opts.colspan) { node.setAttribute("colspan", String(opts.colspan)); }\n   '
-    '   if (opts.src) { node.setAttribute("src", opts.src); }\n      if (opts.alt !== undefined) { node.se'
-    'tAttribute("alt", opts.alt); }\n      if (opts.attrs) { Object.keys(opts.attrs).forEach(function (k) '
-    '{ node.setAttribute(k, opts.attrs[k]); }); }\n      if (opts.kids) {\n        opts.kids.forEach(functi'
-    'on (kid) {\n          if (kid !== null && kid !== undefined && kid !== "") { node.appendChild(typeof '
-    'kid === "object" ? kid : D.createTextNode(String(kid))); }\n        });\n      }\n    }\n    return node'
-    ';\n  }\n  var NF = window.Intl && Intl.NumberFormat ? new Intl.NumberFormat("es-ES") : null;\n  functio'
-    'n num(v) { var n = Number(v) || 0; return NF ? NF.format(n) : String(n); }\n  function pl(n, one, man'
-    'y) { return num(n) + " " + (Number(n) === 1 ? one : many); }\n  function utc(v) {\n    if (!v) { retur'
-    'n "—"; }\n    var m = /^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2})/.exec(String(v));\n    return m ? m[1] + " "'
-    ' + m[2] : String(v);\n  }\n  function day(v) { return v ? String(v).slice(0, 10) : "—"; }\n  function b'
-    'reakable(text) {\n    var frag = D.createDocumentFragment();\n    String(text === null || text === und'
-    'efined ? "—" : text).split(/(\\s+|[\\/\\\\])/).forEach(function (part) {\n      if (!part) { return; }\n  '
-    '    if (part === "/" || part === "\\\\") {\n        frag.appendChild(D.createTextNode(part));\n        f'
-    'rag.appendChild(D.createElement("wbr"));\n      } else if (/^\\s+$/.test(part)) {\n        frag.appendC'
-    'hild(D.createTextNode(" "));\n      } else {\n        frag.appendChild(el("span", { className: "seg", '
-    'text: part }));\n      }\n    });\n    return frag;\n  }\n  function code(text, cls) {\n    var c = el("co'
-    'de", { className: cls || "" });\n    c.appendChild(breakable(text));\n    return c;\n  }\n  function csv'
-    'Cell(v) {\n    if (v === null || v === undefined) { return \'""\'; }\n    var s = typeof v === "object" '
-    '? JSON.stringify(v) : String(v);\n    if (/^[=+\\-@\\t\\r\\n]/.test(s.trimLeft ? s.trimLeft() : s)) { s ='
-    ' "\'" + s; }\n    return \'"\' + s.replace(/"/g, \'""\') + \'"\';\n  }\n  function downloadBlob(filename, mime'
-    ', content) {\n    var blob = new Blob([content], { type: mime });\n    var url = URL.createObjectURL(b'
-    'lob);\n    var a = D.createElement("a");\n    a.href = url;\n    a.download = filename;\n    D.body.appe'
-    'ndChild(a);\n    a.click();\n    D.body.removeChild(a);\n    setTimeout(function () { URL.revokeObjectU'
-    'RL(url); }, 250);\n  }\n\n  var SEV = {\n    critical: ["crit", "Crítica", "crítica", "críticas"],\n    h'
-    'igh: ["high", "Alta", "alta", "altas"],\n    medium: ["med", "Media", "media", "medias"],\n    low: ["'
-    'low", "Baja", "baja", "bajas"],\n    info: ["ok", "Correcto", "correcta", "correctas"]\n  };\n  var SEV'
-    '_RANK = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };\n  var TONE = {\n    Failed: "crit", Shu'
-    'tdownOrUnresponsive: "crit", Expired: "crit", Disconnected: "crit", error: "crit", denied: "crit",\n '
-    '   InProgress: "med", UnableToDetermine: "med", Warning: "med", PendingAssessment: "med", Pending: "'
-    'med", partial: "med",\n    Succeeded: "ok", UpdateSuccessfullyApplied: "ok", Installed: "ok", Connect'
-    'ed: "ok", Ready: "ok", Supported: "ok", complete: "ok", running: "ok"\n  };\n  var KIND = {\n    "micro'
-    'soft.maintenance/applyupdates": "Ejecución de ventana",\n    "microsoft.maintenance/configurationassi'
-    'gnments": "Asignación de configuración",\n    "microsoft.maintenance/maintenanceconfigurations/applyu'
-    'pdates": "Ejecución de configuración",\n    "patchinstallationresources": "Instalación de parches"\n  '
-    '};\n  var SOURCE_STATUS = { complete: "Completa", partial: "Parcial", denied: "Denegada", error: "Err'
-    'or" };\n  var CATS = [\n    ["maintenance_window_unresponsive", "Ventana de mantenimiento sin respuest'
-    'a (ShutdownOrUnresponsive)", "critical"],\n    ["arc_agent_expired_or_disconnected", "Agente Azure Ar'
-    'c expirado o desconectado", "critical"],\n    ["assessment_stuck_or_readiness_undetermined", "Evaluac'
-    'ión en curso (InProgress) / soporte UnableToDetermine", "high"],\n    ["hotpatch_or_patch_extension_e'
-    'rror", "Error en Hotpatch o extensión de huésped", "high"],\n    ["pending_security_patches_unschedul'
-    'ed", "Parches de seguridad/rollup pendientes sin ventana asignada", "medium"],\n    ["unassessed_no_u'
-    'pdate_manager_telemetry", "Sin telemetría de evaluación en Update Manager (VMs apagadas)", "low"],\n '
-    '   ["healthy", "Parcheo verificado y sin bloqueos activos", "info"]\n  ];\n  function sevPill(sev, lab'
-    'el) {\n    var s = SEV[sev] || ["neutral", sev || "—"];\n    return el("span", { className: "pill sev '
-    '" + s[0], text: label || s[1] });\n  }\n  function statusPill(value) {\n    var raw = value === null ||'
-    ' value === undefined || value === "" ? "—" : String(value);\n    var shown = raw.replace(/^PowerState'
-    '\\//, "");\n    return el("span", { className: "pill " + (TONE[shown] || "neutral"), text: shown, titl'
-    'e: raw !== shown ? raw : null });\n  }\n  function classPill(c) {\n    var tone = c === "Critical" ? "c'
-    'rit" : c === "Security" ? "high" : c === "UpdateRollUp" ? "med" : "neutral";\n    return el("span", {'
-    ' className: "pill " + tone, text: c || "—" });\n  }\n  function yesNo(v) { return v === true ? "Sí" : '
-    'v === false ? "No" : "—"; }\n  function portal(id) { return "https://portal.azure.com/#resource" + id'
-    '; }\n  function portalLink(id, text) {\n    return el("a", { className: "dlink", text: text || "Azure '
-    'Portal", attrs: { href: portal(id), target: "_blank", rel: "noopener noreferrer" } });\n  }\n  functio'
-    'n armCell(id) {\n    var s = String(id || "");\n    var m = /^\\/subscriptions\\/([^\\/]+)(?:\\/resourceGr'
-    'oups\\/([^\\/]+))?(?:\\/providers\\/(.+))?$/i.exec(s);\n    if (!m) { return code(s || "—", "ref"); }\n   '
-    ' var rest = m[3] ? m[3].split("/") : [];\n    var shown = rest.length > 3 ? rest.slice(2).filter(func'
-    'tion (seg) { return seg.toLowerCase() !== "providers" && !/^microsoft\\.[a-z]+$/i.test(seg); }).join('
-    '"/") : (rest.length ? rest[rest.length - 1] : (m[2] || m[1]));\n    var top = "/subscriptions/" + m[1'
-    '] + (m[2] ? "/resourceGroups/" + m[2] : "") + (rest.length >= 3 ? "/providers/" + rest.slice(0, 3).j'
-    'oin("/") : "");\n    var box = el("span", { className: "arm" });\n    var main = el("span", { classNam'
-    'e: "mono", title: s });\n    main.appendChild(breakable(shown));\n    box.appendChild(main);\n    box.a'
-    'ppendChild(el("span", { className: "sm", kids: [m[2] || ("suscripción " + m[1]), el("span", { classN'
-    'ame: "dlink", kids: [" · ", portalLink(top, "Portal")] })] }));\n    return box;\n  }\n  function refBl'
-    'ock(text) {\n    var box = el("span", { className: "refs" });\n    String(text || "—").split(" :: ").f'
-    'orEach(function (part) {\n      var m = /^([A-Za-z]+)=(\\/subscriptions\\/\\S+)$/.exec(part.trim()) || /'
-    '^()(\\/subscriptions\\/\\S+)$/.exec(part.trim());\n      box.appendChild(m ? el("span", { className: "re'
-    'f-arm", kids: [m[1] ? el("span", { className: "sm", text: m[1] }) : null, armCell(m[2])] }) : code(p'
-    'art, /^arg_[a-z_]+$/.test(part.trim()) ? "ref src" : "ref"));\n    });\n    return box;\n  }\n\n  var raw'
-    'Json = $("report-data").textContent;\n  var snap = null;\n  try {\n    snap = JSON.parse(rawJson);\n  } '
-    'catch (err) {\n    var errBox = $("error-box");\n    errBox.hidden = false;\n    errBox.textContent = "'
-    'Error al decodificar el snapshot JSON incrustado: " + String(err);\n    return;\n  }\n  var S = snap.su'
-    'mmary || {};\n  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: r'
-    'educe)").matches;\n  function goTo(id) {\n    var target = $(id);\n    if (target) { target.scrollIntoV'
-    'iew({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); }\n  }\n\n  var MACHINE_COLS = [\n '
-    '   "machine_name", "hosting", "resource_group", "location", "os_type", "os_name",\n    "power_or_arc_'
-    'state", "assessment_status", "vm_guest_patch_readiness",\n    "pending_security_or_critical", "pendin'
-    'g_update_rollup", "pending_total",\n    "cycles_succeeded", "cycles_unresponsive", "install_runs_in_w'
-    'indow",\n    "failure_category", "severity", "investigation_headline", "root_cause_evidence",\n    "lo'
-    'g_or_source_reference", "recommended_human_action", "resource_id"\n  ];\n  function machinesCsv(list) '
-    '{\n    var lines = [MACHINE_COLS.join(",")];\n    list.forEach(function (m) {\n      var row = [\n      '
-    '  m.name, m.hosting, m.resource_group, m.location, m.os_type, m.os_name,\n        m.power_or_arc_stat'
-    'e, m.assessment_status, m.vm_guest_patch_readiness,\n        m.pending_counts ? m.pending_counts.secu'
-    'rity_or_critical : 0,\n        m.pending_counts ? m.pending_counts.update_rollup : 0,\n        m.pendi'
-    'ng_counts ? m.pending_counts.total : 0,\n        m.maintenance_cycles_summary ? m.maintenance_cycles_'
-    'summary.succeeded : 0,\n        m.maintenance_cycles_summary ? m.maintenance_cycles_summary.unrespons'
-    'ive : 0,\n        m.installations_summary ? m.installations_summary.runs_in_window : 0,\n        m.fai'
-    'lure_category, m.severity, m.investigation_headline, m.root_cause_evidence,\n        m.log_or_source_'
-    'reference, m.recommended_human_action, m.resource_id\n      ];\n      lines.push(row.map(csvCell).join'
-    '(","));\n    });\n    return "\\uFEFF" + lines.join("\\r\\n");\n  }\n\n  var root = D.documentElement;\n  $("'
-    'theme-toggle").addEventListener("click", function () {\n    var dark = root.getAttribute("data-theme"'
-    ') !== "dark";\n    if (dark) { root.setAttribute("data-theme", "dark"); } else { root.removeAttribute'
-    '("data-theme"); }\n    $("theme-label").textContent = dark ? "Modo claro" : "Modo oscuro";\n  });\n  va'
-    'r menuBtn = $("export-menu-btn");\n  var menu = $("export-menu");\n  function setMenu(open) {\n    menu'
-    '.hidden = !open;\n    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");\n  }\n  menuBtn.a'
-    'ddEventListener("click", function (e) {\n    e.stopPropagation();\n    setMenu(menu.hidden);\n    if (!'
-    'menu.hidden) { menu.querySelector("button").focus(); }\n  });\n  menu.addEventListener("click", functi'
-    'on (e) { if (e.target.closest("button")) { setMenu(false); } });\n  D.addEventListener("click", funct'
-    'ion (e) { if (!menu.hidden && !menu.contains(e.target)) { setMenu(false); } });\n  D.addEventListener'
-    '("keydown", function (e) {\n    if (e.key === "Escape" && !menu.hidden) { setMenu(false); menuBtn.foc'
-    'us(); }\n  });\n  $("print-btn").addEventListener("click", function () { window.print(); });\n  $("expo'
-    'rt-json-btn").addEventListener("click", function () {\n    downloadBlob("patching-investigation-snaps'
-    'hot.json", "application/json;charset=utf-8", JSON.stringify(snap, null, 2));\n  });\n  $("export-machi'
-    'nes-csv-btn").addEventListener("click", function () {\n    downloadBlob("patching-investigation-machi'
-    'nes.csv", "text/csv;charset=utf-8", machinesCsv(snap.machines || []));\n  });\n  $("export-patches-csv'
-    '-btn").addEventListener("click", function () {\n    var cols = ["record_kind", "machine_name", "statu'
-    's_or_state", "classification", "kb_id", "name", "version", "timestamp_utc", "reference_id"];\n    var'
-    ' lines = [cols.join(",")];\n    ((snap.cycles && snap.cycles.maintenance_cycles) || []).forEach(funct'
-    'ion (c) {\n      lines.push([c.type, c.machine_name, c.status, c.maintenance_scope || "MaintenanceCyc'
-    'le", "", c.maintenance_configuration_name || c.name, "", c.start_utc || "", c.correlation_id || c.re'
-    'source_id].map(csvCell).join(","));\n    });\n    ((snap.patches && snap.patches.combined) || []).forE'
-    'ach(function (p) {\n      lines.push([p.record_kind, p.machine_name, p.installation_state, p.primary_'
-    'classification, p.kb_id, p.patch_name, p.version, p.last_modified_utc || "", p.resource_id].map(csvC'
-    'ell).join(","));\n    });\n    downloadBlob("patching-investigation-patches.csv", "text/csv;charset=ut'
-    'f-8", "\\uFEFF" + lines.join("\\r\\n"));\n  });\n\n  function rich(node, parts) {\n    clear(node);\n    par'
-    'ts.forEach(function (p) { node.appendChild(typeof p === "string" ? D.createTextNode(p) : el("b", { t'
-    'ext: p.b })); });\n  }\n\n  function renderCover() {\n    var client = snap.client || {};\n    var name ='
-    ' client.name || "CLIENTE";\n    var plaque = $("brand-plaque");\n    var label = $("client-name-label"'
-    ');\n    clear(plaque);\n    label.textContent = name;\n    if (client.logo_data_uri && /^data:image\\/(p'
-    'ng|jpeg);base64,[A-Za-z0-9+/=]+$/.test(client.logo_data_uri)) {\n      plaque.appendChild(el("img", {'
-    ' src: client.logo_data_uri, alt: client.logo_alt || name }));\n      label.className = "client sr-onl'
-    'y";\n    }\n\n    var win = snap.window || {};\n    var total = S.machines_total || 0;\n    var blockers '
-    '= S.machines_with_blockers_total || 0;\n    var crit = S.critical_machines_total || 0;\n    var high ='
-    ' S.high_machines_total || 0;\n    var med = S.medium_machines_total || 0;\n    var low = S.low_machine'
-    's_total || 0;\n    var ok = S.healthy_machines_total || 0;\n    var parts = ["De ", { b: pl(total, "má'
-    'quina", "máquinas") }, " (" + num(S.azure_vms_total || 0) + " Azure VM y " + num(S.arc_machines_tota'
-    'l || 0) + " Azure Arc), "];\n    if (!blockers) {\n      parts.push("ninguna tiene bloqueos de parcheo'
-    ' activos.");\n    } else {\n      var sevBits = [];\n      if (crit) { sevBits.push(pl(crit, "crítica",'
-    ' "críticas")); }\n      if (high) { sevBits.push(pl(high, "alta", "altas")); }\n      if (blockers ==='
-    ' 1) {\n        parts.push({ b: "1" }, " tiene un bloqueo de parcheo" + (crit ? " de severidad crítica'
-    '" : high ? " de severidad alta" : "") + ".");\n      } else {\n        parts.push({ b: num(blockers) }'
-    ', " tienen bloqueos de parcheo");\n        if (sevBits.length) { parts.push(", de ellas ", { b: sevBi'
-    'ts.join(" y ") }); }\n        parts.push(".");\n      }\n    }\n    var cycles = S.maintenance_cycles_in'
-    '_window || 0;\n    var unresp = S.maintenance_cycles_unresponsive || 0;\n    var sec = S.pending_secur'
-    'ity_or_critical_patches || 0;\n    if (!cycles) {\n      parts.push(" No hubo ejecuciones de ventana d'
-    'e mantenimiento en el periodo");\n    } else if (!unresp) {\n      parts.push(" " + (cycles === 1 ? "L'
-    'a ejecución de ventana se aplicó" : "Las " + num(cycles) + " ejecuciones de ventana se aplicaron") +'
-    ' " sin ShutdownOrUnresponsive");\n    } else {\n      parts.push(" ", { b: num(unresp) + " de " + pl(c'
-    'ycles, "ejecución de ventana", "ejecuciones de ventana") }, (unresp === 1 ? " terminó" : " terminaro'
-    'n") + " en ShutdownOrUnresponsive");\n    }\n    if (sec) {\n      parts.push(sec === 1 ? " y queda " :'
-    ' " y quedan ", { b: pl(sec, "parche de seguridad o crítico", "parches de seguridad o críticos") }, s'
-    'ec === 1 ? " pendiente." : " pendientes.");\n    } else {\n      parts.push(" y no quedan parches de s'
-    'eguridad o críticos pendientes.");\n    }\n    rich($("cover-subtitle"), parts);\n\n    var sources = sn'
-    'ap.sources || [];\n    var complete = sources.filter(function (s) { return s.status === "complete"; }'
-    ').length;\n    var prov = snap.provenance || "LIVE";\n    var tags = $("cover-tags");\n    clear(tags);'
-    '\n    [\n      ["Generado " + utc(snap.reference_utc) + " UTC"],\n      ["Ventana " + (win.period || "—'
-    '") + ": " + day(win.start_utc) + " a " + day(win.end_utc) + " (" + num(win.hours || 0) + " h)"],\n   '
-    '   ["Procedencia " + prov + " · entorno " + (snap.environment || "—"), "on"],\n      ["Suscripción " '
-    '+ (snap.subscription_id || "—")],\n      ["Azure Resource Graph 2022-10-01 · " + complete + "/" + sou'
-    'rces.length + " fuentes completas"],\n      ["Programación mensual " + ((snap.methodology && snap.met'
-    'hodology.scheduled_cadence_cron) || "0 8 1 * *")]\n    ].forEach(function (t) { tags.appendChild(el("'
-    'li", { className: t[1] || "", text: t[0] })); });\n\n    var v = crit ? ["crit", "Acción requerida"] :'
-    ' high ? ["high", "Requiere atención"] : (med || low) ? ["med", "Revisar"] : ["ok", "Sin bloqueos"];\n'
-    '    $("verdict-card").className = "verdict v-" + v[0];\n    $("verdict-label").textContent = v[1];\n  '
-    '  var counts = [["critical", crit], ["high", high], ["medium", med], ["low", low], ["info", ok]];\n  '
-    '  var detail = counts.filter(function (c) { return c[1]; }).map(function (c) { return num(c[1]) + " '
-    '" + (c[1] === 1 ? SEV[c[0]][2] : SEV[c[0]][3]); }).join(" · ");\n    if (complete < sources.length) {'
-    ' detail += (detail ? ". " : "") + "Cobertura parcial: " + complete + " de " + sources.length + " fue'
-    'ntes completas."; }\n    $("verdict-detail").textContent = detail || "Sin máquinas en el inventario."'
-    ';\n    var first = (snap.actions || [])[0];\n    if (first) {\n      var next = $("verdict-next");\n    '
-    '  next.hidden = false;\n      next.appendChild(D.createTextNode("Empiece por: "));\n      next.appendC'
-    'hild(el("a", { text: first.failure_category_label || first.failure_category, attrs: { href: "#sec-ac'
-    'tions" } }));\n      next.appendChild(D.createTextNode(" · " + pl(first.affected_machines_count || 0,'
-    ' "máquina", "máquinas") + "."));\n    }\n\n    $("dist-total").textContent = pl(total, "máquina", "máqu'
-    'inas");\n    var track = $("severity-track");\n    var legend = $("severity-legend");\n    clear(track)'
-    ';\n    clear(legend);\n    var aria = [];\n    counts.forEach(function (c) {\n      if (!c[1]) { return;'
-    ' }\n      var s = SEV[c[0]];\n      var seg = el("i", { className: "s-" + s[0], title: s[1] + ": " + c'
-    '[1] });\n      seg.style.width = (c[1] * 100 / Math.max(1, total)) + "%";\n      track.appendChild(seg'
-    ');\n      legend.appendChild(el("li", { kids: [el("span", { className: "dot s-" + s[0] }), s[1] + " "'
-    ', el("b", { text: num(c[1]) })] }));\n      aria.push(num(c[1]) + " " + (c[1] === 1 ? s[2] : s[3]));\n'
-    '    });\n    track.setAttribute("aria-label", "Máquinas por severidad: " + (aria.join(", ") || "ningu'
-    'na"));\n\n    var prv = snap.provenance === "SIMULATED";\n    $("sim-note").hidden = !prv;\n    $("sim-t'
-    'ext").textContent = "Datos simulados (" + prov + " · " + (snap.environment || "—") + "): cifras de d'
-    'emostración que no proceden de un tenant real.";\n\n    var cName = name;\n    $("foot-left").textConte'
-    'nt = "Azure SRE Agent · Informe post-parcheo e investigación de fallos · " + cName;\n    $("foot-righ'
-    't").textContent = "Generado " + utc(snap.reference_utc) + " UTC · herramienta de solo lectura";\n    '
-    'var pageTitle = "Informe post-parcheo · Azure Update Manager · " + cName + " · " + utc(snap.referenc'
-    'e_utc) + " UTC";\n    var pageStyle = D.createElement("style");\n    pageStyle.textContent = \'@page { '
-    '@bottom-left { content: "\' + pageTitle.replace(/[\\\\"]/g, "\\\\$&").replace(/[\\r\\n\\f]/g, " ") + \'"; fon'
-    "t: 9px/1.2 \\'Outfit\\', \\'Segoe UI\\', system-ui, sans-serif; color: #475569; } }';\n    D.head.appendC"
-    'hild(pageStyle);\n  }\n\n  function renderKpis() {\n    var blockers = S.machines_with_blockers_total ||'
-    ' 0;\n    var unresp = S.maintenance_cycles_unresponsive || 0;\n    var sec = S.pending_security_or_cri'
-    'tical_patches || 0;\n    var failedExt = S.guest_extensions_failed || 0;\n    var failedRuns = S.insta'
-    'llation_runs_failed || 0;\n    var blockTone = S.critical_machines_total ? "crit" : S.high_machines_t'
-    'otal ? "high" : blockers ? "med" : "ok";\n    var kpis = [\n      [num(S.machines_total || 0), "Máquin'
-    'as evaluadas", num(S.azure_vms_total || 0) + " Azure VM · " + num(S.arc_machines_total || 0) + " Azu'
-    're Arc", ""],\n      [num(blockers), "Máquinas con bloqueos", pl(S.critical_machines_total || 0, "crí'
-    'tica", "críticas") + " · " + pl(S.high_machines_total || 0, "alta", "altas"), blockTone],\n      [num'
-    '(S.maintenance_cycles_succeeded || 0) + " / " + num(S.maintenance_cycles_in_window || 0), "Ciclos de'
-    ' ventana aplicados", num(unresp) + " ShutdownOrUnresponsive", unresp ? "crit" : ""],\n      [num(S.in'
-    'stallation_runs_in_window || 0), "Ejecuciones de instalación", pl(S.installed_patches_in_window || 0'
-    ', "parche instalado", "parches instalados") + (failedRuns ? " · " + num(failedRuns) + " con fallos" '
-    ': ""), failedRuns ? "high" : ""],\n      [num(sec), "Parches de seguridad o críticos pendientes", num'
-    '(S.pending_rollup_patches || 0) + " UpdateRollUp · " + num(S.pending_total_patches || 0) + " en tota'
-    'l", sec ? "med" : ""],\n      [num(failedExt), "Extensiones en estado Failed", "de " + pl(S.guest_ext'
-    'ensions_total || 0, "extensión", "extensiones") + " de huésped", failedExt ? "high" : ""]\n    ];\n   '
-    ' var strip = $("kpi-strip");\n    clear(strip);\n    kpis.forEach(function (k) {\n      strip.appendChi'
-    'ld(el("div", { className: "kpi", kids: [\n        el("span", { className: "kv" + (k[3] ? " tone-" + k'
-    '[3] : ""), text: k[0] }),\n        el("span", { className: "kl", text: k[1] }),\n        el("span", { '
-    'className: "ks", text: k[2] })\n      ] }));\n    });\n  }\n\n  function renderExecutive() {\n    var msgL'
-    'ist = $("executive-messages");\n    clear(msgList);\n    (snap.executive_messages || []).forEach(funct'
-    'ion (m) { msgList.appendChild(el("li", { text: m })); });\n    var box = $("category-breakdown");\n   '
-    ' clear(box);\n    var catCounts = S.category_counts || {};\n    var total = Math.max(1, S.machines_tot'
-    'al || 0);\n    CATS.forEach(function (info) {\n      var count = catCounts[info[0]] || 0;\n      var pc'
-    't = Math.round((count * 100) / total);\n      var row = el("button", { className: "crow", attrs: { ty'
-    'pe: "button", "data-cat": info[0] } });\n      row.appendChild(el("span", { text: info[1] }));\n      '
-    'var track = el("span", { className: "ct" });\n      var fill = el("i", { className: "s-" + SEV[info[2'
-    ']][0] });\n      fill.style.width = (count ? Math.max(pct, 2) : 0) + "%";\n      track.appendChild(fil'
-    'l);\n      row.appendChild(track);\n      row.appendChild(el("span", { className: "cv", kids: [el("b",'
-    ' { text: num(count) }), " · " + pct + "\\u00a0%"] }));\n      row.setAttribute("aria-label", info[1] +'
-    ' ": " + pl(count, "máquina", "máquinas") + ". Filtrar la investigación");\n      if (!count) { row.di'
-    'sabled = true; }\n      box.appendChild(row);\n    });\n  }\n  $("category-breakdown").addEventListener('
-    '"click", function (e) {\n    var row = e.target.closest("button[data-cat]");\n    if (!row) { return; '
-    '}\n    resetMachineFilters();\n    $("filter-category").value = row.getAttribute("data-cat");\n    appl'
-    'yMachineFilters();\n    goTo("sec-investigation");\n  });\n\n  function renderActions() {\n    var list ='
-    ' $("actions-table");\n    clear(list);\n    var acts = snap.actions || [];\n    if (!acts.length) {\n   '
-    '   list.appendChild(el("li", { className: "empty-state", text: "Sin acciones pendientes: ninguna máq'
-    'uina presenta bloqueos de parcheo en esta ventana." }));\n      return;\n    }\n    acts.forEach(functi'
-    'on (a, i) {\n      var ms = el("div", { className: "plan-ms", kids: [el("span", { className: "lab", t'
-    'ext: "Máquinas" })] });\n      (a.affected_machines || []).forEach(function (name) {\n        ms.appen'
-    'dChild(el("button", { className: "mchip", text: name, attrs: { type: "button", "data-machine": name,'
-    ' "aria-label": "Ver " + name + " en la investigación por máquina" } }));\n      });\n      var body = '
-    'el("div", { className: "plan-body", kids: [\n        el("div", { className: "plan-head", kids: [\n    '
-    '      sevPill(a.severity, a.severity_label),\n          el("h3", { text: a.failure_category_label || '
-    'a.failure_category }),\n          el("span", { className: "plan-c", text: pl(a.affected_machines_coun'
-    't || 0, "máquina afectada", "máquinas afectadas") })\n        ] }),\n        el("div", { kids: [\n     '
-    '     el("p", { className: "plan-act", text: a.recommended_human_action }),\n          el("p", { class'
-    'Name: "plan-dx", kids: [el("span", { className: "lab", text: "Diagnóstico" }), a.investigation_summa'
-    'ry] })\n        ] }),\n        el("div", { kids: [\n          ms,\n          el("div", { className: "pla'
-    'n-ref", kids: [el("span", { className: "lab", text: "Referencia técnica" }), refBlock(a.sample_sourc'
-    'e_reference)] }),\n          el("p", { className: "plan-ref", kids: [el("span", { className: "lab", t'
-    'ext: "Categoría" }), el("code", { text: a.failure_category })] })\n        ] })\n      ] });\n      lis'
-    't.appendChild(el("li", { className: "plan-item", kids: [el("span", { className: "plan-n", text: Stri'
-    'ng(i + 1), attrs: { "aria-hidden": "true" } }), body] }));\n    });\n  }\n  $("actions-table").addEvent'
-    'Listener("click", function (e) {\n    var chip = e.target.closest("button[data-machine]");\n    if (!c'
-    'hip) { return; }\n    resetMachineFilters();\n    $("filter-search").value = chip.getAttribute("data-m'
-    'achine");\n    applyMachineFilters();\n    goTo("sec-investigation");\n  });\n\n  var drawersExpanded = t'
-    'rue;\n  var sortKey = "severity";\n  var sortAsc = false;\n  var SORT_ASC = { severity: false, name: tr'
-    'ue, pending: false, cycles: false };\n  var currentMachines = [];\n  function sortValue(m, key) {\n    '
-    'if (key === "name") { return String(m.name || "").toLowerCase(); }\n    if (key === "pending") { retu'
-    'rn (m.pending_counts || {}).security_or_critical || 0; }\n    if (key === "cycles") { return (m.maint'
-    'enance_cycles_summary || {}).unresponsive || 0; }\n    return SEV_RANK[m.severity] !== undefined ? 4 '
-    '- SEV_RANK[m.severity] : -1;\n  }\n  function sortHead(label, key, cls) {\n    var th = el("th", { clas'
-    'sName: cls || "", attrs: { scope: "col" } });\n    if (sortKey === key) { th.setAttribute("aria-sort"'
-    ', sortAsc ? "ascending" : "descending"); }\n    var b = el("button", { className: "sort", text: label'
-    ', attrs: { type: "button", "data-sort": key } });\n    b.insertAdjacentHTML("beforeend", \'<svg viewBo'
-    'x="0 0 12 12" aria-hidden="true"><path d="M6 2v8M3 7l3 3 3-3"/></svg>\');\n    th.appendChild(b);\n    '
-    'return th;\n  }\n  function setToggle(btn, open) {\n    clear(btn);\n    btn.appendChild(D.createTextNod'
-    'e(open ? "Ocultar causa" : "Ver causa"));\n    btn.appendChild(el("span", { className: "sr-only", tex'
-    't: " de " + btn.getAttribute("data-name") }));\n    btn.setAttribute("aria-expanded", open ? "true" :'
-    ' "false");\n  }\n  function resetMachineFilters() {\n    $("filter-category").value = "all";\n    $("fil'
-    'ter-hosting").value = "all";\n    $("filter-severity").value = "all";\n    $("filter-search").value = '
-    '"";\n  }\n\n  function applyMachineFilters() {\n    var cat = $("filter-category").value;\n    var host ='
-    ' $("filter-hosting").value;\n    var sev = $("filter-severity").value;\n    var q = ($("filter-search"'
-    ').value || "").toLowerCase().trim();\n    var allMachines = snap.machines || [];\n    var filtered = a'
-    'llMachines.filter(function (m) {\n      if (cat !== "all" && m.failure_category !== cat && (m.matched'
-    '_categories || []).indexOf(cat) === -1) { return false; }\n      if (host !== "all" && m.hosting !== '
-    'host) { return false; }\n      if (sev !== "all" && m.severity !== sev) { return false; }\n      if (q'
-    ' && JSON.stringify(m).toLowerCase().indexOf(q) === -1) { return false; }\n      return true;\n    });\n'
-    '    filtered = filtered.map(function (m, i) { return [m, i]; }).sort(function (a, b) {\n      var x ='
-    ' sortValue(a[0], sortKey);\n      var y = sortValue(b[0], sortKey);\n      var d = typeof x === "numbe'
-    'r" ? x - y : x.localeCompare(y, "es", { numeric: true });\n      return (sortAsc ? d : -d) || a[1] - '
-    'b[1];\n    }).map(function (pair) { return pair[0]; });\n    currentMachines = filtered;\n\n    $("machi'
-    'nes-count-label").textContent = "Mostrando " + filtered.length + " de " + allMachines.length + " máq'
-    'uinas.";\n\n    var table = $("machines-table");\n    clear(table);\n    var thead = el("thead");\n    va'
-    'r trH = el("tr");\n    trH.appendChild(sortHead("Severidad", "severity", "nw"));\n    trH.appendChild('
-    'sortHead("Máquina", "name"));\n    trH.appendChild(el("th", { text: "Diagnóstico automático de causa '
-    'raíz", attrs: { scope: "col" } }));\n    trH.appendChild(el("th", { text: "Host y evaluación", attrs:'
-    ' { scope: "col" } }));\n    trH.appendChild(sortHead("Pendientes", "pending", "n"));\n    trH.appendCh'
-    'ild(sortHead("Ciclos", "cycles", "n"));\n    thead.appendChild(trH);\n    table.appendChild(thead);\n\n '
-    '   var tbody = el("tbody");\n    if (!filtered.length) {\n      var emptyTr = el("tr");\n      emptyTr.'
-    'appendChild(el("td", { colspan: 6, className: "empty", text: "Ninguna máquina coincide con los filtr'
-    'os seleccionados. Use «Restablecer filtros» para ver todas." }));\n      tbody.appendChild(emptyTr);\n'
-    '      table.appendChild(tbody);\n      return;\n    }\n\n    filtered.forEach(function (m, idx) {\n      '
-    'var drawerId = "drawer-machine-" + idx;\n      var tr = el("tr", { className: "machine-row" });\n     '
-    ' tr.appendChild(el("td", { className: "nw", kids: [sevPill(m.severity, m.severity_label)] }));\n     '
-    ' tr.appendChild(el("td", { kids: [\n        el("span", { className: "nm", text: m.name }),\n        el'
-    '("span", { className: "sm nw", text: m.resource_group || "—" }),\n        el("span", { className: "sm'
-    ' nw", text: (m.hosting === "arc" ? "Azure Arc" : "Azure VM") + " · " + (m.location || "—") })\n      '
-    '] }));\n      var extra = (m.matched_categories || []).length - 1;\n      var btn = el("button", { cla'
-    'ssName: "btn sm tgl", attrs: { type: "button", "aria-controls": drawerId, "data-drawer": drawerId, "'
-    'data-name": m.name } });\n      setToggle(btn, drawersExpanded);\n      tr.appendChild(el("td", { clas'
-    'sName: "dx", kids: [\n        el("span", { className: "dx-t", text: m.failure_category_label || m.fai'
-    'lure_category }),\n        el("span", { className: "dx-h", text: m.investigation_headline }),\n       '
-    ' extra > 0 ? el("span", { className: "sm", text: "+ " + pl(extra, "bloqueo adicional", "bloqueos adi'
-    'cionales") + " en el detalle" }) : null,\n        btn\n      ] }));\n      tr.appendChild(el("td", { cl'
-    'assName: "host", kids: [\n        statusPill(m.power_or_arc_state),\n        el("span", { className: "'
-    'sm", text: (m.os_name || m.os_type || "—") + (m.agent_version ? " · agente " + m.agent_version : "")'
-    ' }),\n        el("span", { className: "sm nw", text: "Evaluación: " + (m.assessment_status || "—") })'
-    ',\n        el("span", { className: "sm nw", text: "Readiness: " + (m.vm_guest_patch_readiness || "—")'
-    ' })\n      ] }));\n      var pc = m.pending_counts || {};\n      tr.appendChild(el("td", { className: "'
-    'n", kids: [\n        el("span", { className: "big", text: num(pc.security_or_critical || 0) }),\n     '
-    '   el("span", { className: "sm nw", text: "seg./crít." }),\n        el("span", { className: "sm nw", '
-    'text: num(pc.update_rollup || 0) + " RollUp · " + num(pc.total || 0) + " total" })\n      ] }));\n    '
-    '  var mc = m.maintenance_cycles_summary || {};\n      var ic = m.installations_summary || {};\n      t'
-    'r.appendChild(el("td", { className: "n", kids: [\n        el("span", { className: "nw", text: num(mc.'
-    'succeeded || 0) + " OK · " + num(mc.unresponsive || 0) + " sin resp." }),\n        el("span", { class'
-    'Name: "sm nw", text: pl(ic.runs_in_window || 0, "instalación", "instalaciones") })\n      ] }));\n    '
-    '  tbody.appendChild(tr);\n\n      var dTr = el("tr", { className: "drawer-row", id: drawerId });\n     '
-    ' dTr.hidden = !drawersExpanded;\n      var c1 = el("div", { kids: [\n        el("p", { className: "dk"'
-    ', text: "Evidencia técnica correlacionada (sin login al host)" }),\n        el("p", { text: m.root_ca'
-    'use_evidence })\n      ] });\n      var issues = m.all_detected_issues || [];\n      if (issues.length '
-    '> 1) {\n        c1.appendChild(el("p", { className: "dk", text: "Bloqueos detectados en esta máquina '
-    '(" + issues.length + ")" }));\n        var ul = el("ul", { className: "issues" });\n        issues.for'
-    'Each(function (iss) { ul.appendChild(el("li", { kids: [sevPill(iss.severity), el("span", { text: iss'
-    '.investigation_headline })] })); });\n        c1.appendChild(ul);\n      }\n      var c2 = el("div", { '
-    'kids: [\n        el("p", { className: "dk", text: "Acción recomendada" }),\n        el("p", { classNam'
-    'e: "act", text: m.recommended_human_action }),\n        el("p", { className: "dk", text: "Referencia '
-    'de fuente ARG o ruta de log" }),\n        el("div", { kids: [refBlock(m.log_or_source_reference || m.'
-    'resource_id)] })\n      ] });\n      if ((m.pending_security_patches || []).length) {\n        c2.appen'
-    'dChild(el("p", { className: "dk", text: "Parches Security/RollUp pendientes" }));\n        var kbs = '
-    'el("ul", { className: "kbs" });\n        m.pending_security_patches.forEach(function (p) {\n          '
-    'kbs.appendChild(el("li", { kids: [p.kb_id ? el("code", { text: "KB" + p.kb_id }) : null, p.kb_id ? "'
-    ' " : null, p.patch_name] }));\n        });\n        c2.appendChild(kbs);\n      }\n      c2.appendChild('
-    'el("p", { className: "sm", kids: ["Categoría ", el("code", { text: m.failure_category }), m.resource'
-    '_id ? el("span", { className: "dlink", kids: [" · ", portalLink(m.resource_id, "Abrir en Azure Porta'
-    'l")] }) : null] }));\n      var dTd = el("td", { colspan: 6 });\n      dTd.appendChild(el("div", { cla'
-    'ssName: "drawer", kids: [c1, c2] }));\n      dTr.appendChild(dTd);\n      tbody.appendChild(dTr);\n    '
-    '});\n    table.appendChild(tbody);\n  }\n  $("machines-table").addEventListener("click", function (e) {'
-    '\n    var sortBtn = e.target.closest("button[data-sort]");\n    if (sortBtn) {\n      var key = sortBtn'
-    '.getAttribute("data-sort");\n      if (key === sortKey) { sortAsc = !sortAsc; } else { sortKey = key;'
-    ' sortAsc = SORT_ASC[key]; }\n      applyMachineFilters();\n      var again = $("machines-table").query'
-    'Selector(\'button[data-sort="\' + key + \'"]\');\n      if (again) { again.focus(); }\n      return;\n    }'
-    '\n    var tgl = e.target.closest("button[data-drawer]");\n    if (tgl) {\n      var row = $(tgl.getAttr'
-    'ibute("data-drawer"));\n      row.hidden = !row.hidden;\n      setToggle(tgl, !row.hidden);\n    }\n  })'
-    ';\n\n  function renderTable(tableNode, cols, rows, emptyText) {\n    clear(tableNode);\n    var thead = '
-    'el("thead");\n    var trHead = el("tr");\n    cols.forEach(function (c) { trHead.appendChild(el("th", '
-    '{ text: c[0], className: c[1] || "", attrs: { scope: "col" } })); });\n    thead.appendChild(trHead);'
-    '\n    tableNode.appendChild(thead);\n    var tbody = el("tbody");\n    if (!rows.length) {\n      var em'
-    'ptyRow = el("tr");\n      emptyRow.appendChild(el("td", { colspan: cols.length, className: "empty", t'
-    'ext: emptyText || "Sin registros que coincidan con los criterios actuales." }));\n      tbody.appendC'
-    'hild(emptyRow);\n    }\n    rows.forEach(function (r) {\n      var tr = el("tr");\n      r.forEach(funct'
-    'ion (cell, i) {\n        var td = el("td", { className: cols[i][1] || "" });\n        if (cell && cell'
-    '.nodeType) {\n          td.appendChild(cell);\n        } else {\n          td.textContent = cell === nu'
-    'll || cell === undefined || cell === "" ? "—" : String(cell);\n        }\n        tr.appendChild(td);\n'
-    '      });\n      tbody.appendChild(tr);\n    });\n    tableNode.appendChild(tbody);\n  }\n\n  var PAGE = 8'
-    '0;\n  var cycleLimit = PAGE;\n  var patchLimit = PAGE;\n  function applyCycleFilters(keepLimit) {\n    i'
-    'f (!keepLimit) { cycleLimit = PAGE; }\n    var st = $("cycle-status-filter").value;\n    var q = ($("c'
-    'ycle-search-filter").value || "").toLowerCase().trim();\n    var combined = [];\n    ((snap.cycles && '
-    'snap.cycles.maintenance_cycles) || []).forEach(function (c) {\n      combined.push({\n        kind: c.'
-    'type,\n        machine: c.machine_name || "Configuración global",\n        status: c.status,\n        s'
-    'tart: c.start_utc || "",\n        end: c.end_utc || "",\n        config: c.maintenance_configuration_n'
-    'ame || c.name || "—",\n        recur: c.schedule_recur_every || "",\n        ref: c.correlation_id || '
-    'c.resource_id\n      });\n    });\n    ((snap.cycles && snap.cycles.installation_runs) || []).forEach(f'
-    'unction (i) {\n      combined.push({\n        kind: "patchinstallationresources",\n        machine: i.m'
-    'achine_name,\n        status: i.status,\n        start: i.start_utc || "",\n        end: i.last_modifie'
-    'd_utc || "",\n        detail: "Instalados " + i.installed_patch_count + " · fallidos " + i.failed_pat'
-    'ch_count + " · no seleccionados " + i.not_selected_patch_count + " · reinicio " + i.reboot_status,\n '
-    '       ref: i.maintenance_run_id || i.resource_id\n      });\n    });\n    combined.sort(function (a, b'
-    ') { return (b.start || "").localeCompare(a.start || ""); });\n    var filtered = combined.filter(func'
-    'tion (r) {\n      if (st !== "all" && r.status !== st) { return false; }\n      if (q && JSON.stringif'
-    'y(r).toLowerCase().indexOf(q) === -1) { return false; }\n      return true;\n    });\n    var shown = f'
-    'iltered.slice(0, cycleLimit);\n    $("cycles-count-label").textContent = "Mostrando " + shown.length '
-    '+ " de " + filtered.length + " registros de ciclos e instalaciones (total combinado: " + combined.le'
-    'ngth + ").";\n    $("cycles-more-row").hidden = filtered.length <= cycleLimit;\n    $("toc-n-cycles").'
-    'textContent = num(combined.length);\n    renderTable(\n      $("cycles-table"),\n      [["Registro"], ['
-    '"Máquina o ámbito", "nw"], ["Estado", "nw"], ["Inicio y fin (UTC)", "nw"], ["Detalle de ejecución"],'
-    ' ["Referencia (correlación o recurso)"]],\n      shown.map(function (r) {\n        return [\n          '
-    'el("span", { className: "kind", title: r.kind, kids: [el("b", { text: KIND[r.kind] || r.kind }), el('
-    '"span", { className: "sm", text: r.kind === "patchinstallationresources" ? "patchinstallationresourc'
-    'es" : "maintenanceresources" })] }),\n          r.machine,\n          statusPill(r.status),\n          '
-    'el("span", { kids: [utc(r.start), el("span", { className: "sm", text: r.end ? "a " + utc(r.end) : ""'
-    ' })] }),\n          r.config ? el("span", { kids: ["Configuración ", el("span", { className: "seg", t'
-    'ext: r.config }), r.recur ? " (" + r.recur + ")" : null] }) : r.detail,\n          armCell(r.ref)\n   '
-    '     ];\n      })\n    );\n  }\n\n  function applyPatchFilters(keepLimit) {\n    if (!keepLimit) { patchLi'
-    'mit = PAGE; }\n    var st = $("patch-state-filter").value;\n    var cl = $("patch-class-filter").value'
-    ';\n    var q = ($("patch-search-filter").value || "").toLowerCase().trim();\n    var allPatches = (sna'
-    'p.patches && snap.patches.combined) || [];\n    var filtered = allPatches.filter(function (p) {\n     '
-    ' if (st !== "all" && p.installation_state !== st) { return false; }\n      if (cl !== "all") {\n      '
-    '  if (cl === "Security") {\n          if (p.primary_classification !== "Security" && p.primary_classi'
-    'fication !== "Critical") { return false; }\n        } else if (p.primary_classification !== cl) {\n   '
-    '       return false;\n        }\n      }\n      if (q && JSON.stringify(p).toLowerCase().indexOf(q) ==='
-    ' -1) { return false; }\n      return true;\n    });\n    var shown = filtered.slice(0, patchLimit);\n   '
-    ' $("patches-count-label").textContent = "Mostrando " + shown.length + " de " + filtered.length + " r'
-    'egistros de softwarePatches (total recolectado: " + allPatches.length + ").";\n    $("patches-more-ro'
-    'w").hidden = filtered.length <= patchLimit;\n    renderTable(\n      $("patches-table"),\n      [["Máqu'
-    'ina", "nw"], ["Estado y clasificación", "nw"], ["KB / ID"], ["Paquete o actualización", "wide"], ["F'
-    'echa (UTC)", "nw"]],\n      shown.map(function (p) {\n        var sub = [p.version ? "versión " + p.ve'
-    'rsion : "", p.reboot_behavior ? "reinicio " + p.reboot_behavior : ""].filter(Boolean).join(" · ");\n '
-    '       return [\n          p.machine_name,\n          el("span", { className: "stack", kids: [statusPi'
-    'll(p.installation_state), classPill(p.primary_classification)] }),\n          code(p.kb_id ? "KB" + p'
-    '.kb_id : (p.patch_id || "—"), "ref"),\n          el("span", { kids: [p.patch_name || "—", sub ? el("s'
-    'pan", { className: "sm", text: sub }) : null] }),\n          utc(p.last_modified_utc)\n        ];\n    '
-    '  })\n    );\n  }\n\n  function renderExtensionsAndSources() {\n    var exts = snap.extensions || [];\n   '
-    ' renderTable(\n      $("extensions-table"),\n      [["Máquina", "nw"], ["Alojamiento", "nw"], ["Extens'
-    'ión"], ["Publisher / tipo"], ["Versión", "nw"], ["Estado", "nw"], ["AutoUpgrade minor / auto", "nw"]'
+    'bel"></span>\n    </div>\n    <div class="acts">\n      <span class="ro">Read-only · Azure Resource Gra'
+    'ph</span>\n      <button type="button" class="btn" id="theme-toggle"><svg viewBox="0 0 24 24" aria-hi'
+    'dden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></sv'
+    'g><span class="lbl" id="theme-label">Dark mode</span></button>\n      <div class="menu-wrap">\n       '
+    ' <button type="button" class="btn" id="export-menu-btn" aria-expanded="false" aria-controls="export-'
+    'menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h1'
+    '4"/></svg><span class="lbl">Export</span></button>\n        <div class="menu" id="export-menu" hidden'
+    '>\n          <button type="button" id="export-json-btn">Export JSON<span>Full normalized snapshot</sp'
+    'an></button>\n          <button type="button" id="export-machines-csv-btn">Export machine diagnostics'
+    ' CSV<span>One row per machine with root cause and action</span></button>\n          <button type="but'
+    'ton" id="export-patches-csv-btn">Export cycles and patches CSV<span>Maintenance cycles and softwareP'
+    'atches</span></button>\n        </div>\n      </div>\n      <button type="button" class="btn primary" i'
+    'd="print-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v'
+    '-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg><span class="lbl">Print / '
+    'PDF</span></button>\n    </div>\n  </div>\n</header>\n\n<main id="main-ledger" tabindex="-1">\n  <div id="'
+    'error-box" class="error-banner" role="alert" hidden></div>\n  <div id="report-content" hidden>\n    <s'
+    'ection class="hero" id="sec-cover" aria-labelledby="cover-title">\n      <div class="hero-in">\n      '
+    '  <div>\n          <h1 id="cover-title">Post-patching report and automated failure investigation</h1>'
+    '\n          <p class="lead" id="cover-subtitle"></p>\n          <ul class="meta" id="cover-tags" aria-'
+    'label="Scope and provenance"></ul>\n        </div>\n        <div class="verdict" id="verdict-card">\n  '
+    '        <p class="v-k">Patching cycle verdict</p>\n          <p class="v-word" id="verdict-label"></p'
+    '>\n          <p class="v-detail" id="verdict-detail"></p>\n          <p class="v-next" id="verdict-nex'
+    't" hidden></p>\n        </div>\n        <div class="dist">\n          <div class="dist-head"><span>Mach'
+    'ines by diagnostic severity</span><span id="dist-total"></span></div>\n          <div class="track" i'
+    'd="severity-track" role="img"></div>\n          <ul class="legend" id="severity-legend"></ul>\n       '
+    ' </div>\n      </div>\n    </section>\n\n    <div class="kpi-wrap">\n      <div class="kpis" id="kpi-stri'
+    'p"></div>\n      <p class="sim" id="sim-note" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><pat'
+    'h d="M12 3 2 20h20L12 3zM12 10v4M12 17h.01"/></svg><span id="sim-text"></span></p>\n    </div>\n\n    <'
+    'div class="layout">\n      <nav class="toc" aria-labelledby="toc-h">\n        <p class="toc-h" id="toc'
+    '-h">Report sections</p>\n        <ol>\n          <li><a href="#sec-cover">Cover and scope</a></li>\n   '
+    '       <li><a href="#sec-executive">Executive summary</a></li>\n          <li><a href="#sec-actions">'
+    'Action plan <span class="toc-n" id="toc-n-actions"></span></a></li>\n          <li><a href="#sec-inve'
+    'stigation">Per-machine investigation <span class="toc-n" id="toc-n-machines"></span></a></li>\n      '
+    '    <li><a href="#sec-cycles">Cycles and installations <span class="toc-n" id="toc-n-cycles"></span>'
+    '</a></li>\n          <li><a href="#sec-patches">Patches <span class="toc-n" id="toc-n-patches"></span'
+    '></a></li>\n          <li><a href="#sec-extensions">Extensions and Hotpatch <span class="toc-n" id="t'
+    'oc-n-extensions"></span></a></li>\n          <li><a href="#sec-sources">Sources and method <span clas'
+    's="toc-n" id="toc-n-sources"></span></a></li>\n        </ol>\n      </nav>\n\n      <div class="sections'
+    '">\n        <section class="section" id="sec-executive" aria-labelledby="h-executive">\n          <div'
+    ' class="sh">\n            <h2 id="h-executive">Patching cycle executive summary</h2>\n            <p>W'
+    'here the blockers are and what the automated correlation confirmed, without signing in to any host.<'
+    '/p>\n          </div>\n          <div class="grid2">\n            <div class="card">\n              <h3>'
+    'Machines by diagnostic category</h3>\n              <p class="sub">Primary category of each machine. '
+    'Select one to filter the investigation.</p>\n              <div class="cats" id="category-breakdown">'
+    '</div>\n            </div>\n            <div class="card">\n              <h3>Verified operational conc'
+    'lusions</h3>\n              <p class="sub">Read-only correlation across <code>Microsoft.Compute/<wbr>'
+    'virtualMachines</code> and <code>Microsoft.HybridCompute/<wbr>machines</code>.</p>\n              <ul'
+    ' class="facts" id="executive-messages"></ul>\n            </div>\n          </div>\n        </section>\n'
+    '\n        <section class="section" id="sec-actions" aria-labelledby="h-actions">\n          <div class'
+    '="sh">\n            <h2 id="h-actions">Prioritized action plan</h2>\n            <p>What to do first: '
+    'one action per blocker type, ordered by severity and by the number of affected machines.</p>\n       '
+    '   </div>\n          <ol class="plan card flat" id="actions-table"></ol>\n        </section>\n\n        '
+    '<section class="section" id="sec-investigation" aria-labelledby="h-investigation">\n          <div cl'
+    'ass="sh">\n            <h2 id="h-investigation">Automated per-machine root-cause investigation</h2>\n '
+    '           <p>Why each machine was not patched: assessment state, pending patches, window cycles and'
+    ' the exact evidence of the blocker.</p>\n          </div>\n          <div class="card flat">\n         '
+    '   <div class="tools">\n              <label class="fld"><span>Failure category</span>\n              '
+    '  <select id="filter-category">\n                  <option value="all">All categories</option>\n      '
+    '            <option value="maintenance_window_unresponsive">Window unresponsive (ShutdownOrUnrespons'
+    'ive / failure)</option>\n                  <option value="arc_agent_expired_or_disconnected">Azure Ar'
+    'c agent expired or disconnected</option>\n                  <option value="assessment_stuck_or_readin'
+    'ess_undetermined">Assessment in progress (InProgress) / UnableToDetermine</option>\n                 '
+    ' <option value="hotpatch_or_patch_extension_error">Hotpatch or guest extension error</option>\n      '
+    '            <option value="pending_security_patches_unscheduled">Pending security patches with no as'
+    'signed window</option>\n                  <option value="unassessed_no_update_manager_telemetry">No U'
+    'pdate Manager telemetry (stopped / not assessed)</option>\n                  <option value="healthy">'
+    'No active blockers (healthy)</option>\n                </select>\n              </label>\n             '
+    ' <label class="fld"><span>Hosting</span>\n                <select id="filter-hosting">\n              '
+    '    <option value="all">All (Azure VM + Azure Arc)</option>\n                  <option value="azure">'
+    'Azure VM (microsoft.compute)</option>\n                  <option value="arc">Azure Arc (microsoft.hyb'
+    'ridcompute)</option>\n                </select>\n              </label>\n              <label class="fl'
+    'd"><span>Severity</span>\n                <select id="filter-severity">\n                  <option val'
+    'ue="all">All severities</option>\n                  <option value="critical">Critical</option>\n      '
+    '            <option value="high">High</option>\n                  <option value="medium">Medium</opti'
+    'on>\n                  <option value="low">Low</option>\n                  <option value="info">Passed'
+    '</option>\n                </select>\n              </label>\n              <label class="fld grow"><sp'
+    'an>Search</span>\n                <input type="search" id="filter-search" placeholder="Machine, KB, r'
+    'esource group or error" autocomplete="off">\n              </label>\n            </div>\n            <d'
+    'iv class="status-row">\n              <span id="machines-count-label" aria-live="polite"></span>\n    '
+    '          <div class="tool-btns no-print">\n                <button type="button" class="btn sm" id="'
+    'filter-reset-btn">Reset filters</button>\n                <button type="button" class="btn sm" id="ma'
+    'chines-view-csv-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15'
+    'l4.5-4.5M5 19h14"/></svg>CSV of this view</button>\n                <button type="button" class="btn '
+    'sm" id="toggle-all-drawers-btn">Collapse all details</button>\n              </div>\n            </div'
+    '>\n            <div class="table-wrap"><table id="machines-table" class="reg"></table></div>\n        '
+    '  </div>\n        </section>\n\n        <section class="section" id="sec-cycles" aria-labelledby="h-cyc'
+    'les">\n          <div class="sh">\n            <h2 id="h-cycles">Maintenance cycles and installation r'
+    'uns</h2>\n            <p>Scheduled runs in <code>maintenanceresources</code> (UpdateSuccessfullyAppli'
+    'ed versus ShutdownOrUnresponsive) compared with the results in <code>patchinstallationresources</cod'
+    'e>.</p>\n          </div>\n          <div class="card flat">\n            <div class="tools">\n         '
+    '     <label class="fld"><span>Cycle or run status</span>\n                <select id="cycle-status-fi'
+    'lter">\n                  <option value="all">All statuses</option>\n                  <option value="'
+    'ShutdownOrUnresponsive">ShutdownOrUnresponsive</option>\n                  <option value="UpdateSucce'
+    'ssfullyApplied">UpdateSuccessfullyApplied</option>\n                  <option value="Succeeded">Succe'
+    'eded (installation / configuration)</option>\n                  <option value="Assigned">Assigned (ac'
+    'tive assignment)</option>\n                </select>\n              </label>\n              <label clas'
+    's="fld grow"><span>Search</span>\n                <input type="search" id="cycle-search-filter" place'
+    'holder="Machine, configuration or correlationId" autocomplete="off">\n              </label>\n        '
+    '    </div>\n            <div class="status-row"><span id="cycles-count-label" aria-live="polite"></sp'
+    'an></div>\n            <div class="table-wrap"><table id="cycles-table"></table></div>\n            <d'
+    'iv class="more-row" id="cycles-more-row" hidden><button type="button" class="btn" id="cycles-more-bt'
+    'n">Show 80 more records</button></div>\n          </div>\n        </section>\n\n        <section class="'
+    'section" id="sec-patches" aria-labelledby="h-patches">\n          <div class="sh">\n            <h2 id'
+    '="h-patches">Pending and installed software patches</h2>\n            <p>Pending packages from <code>'
+    'patchassessmentresources/<wbr>softwarepatches</code> and records from <code>patchinstallationresourc'
+    'es/<wbr>softwarepatches</code> (installed or not selected in the window).</p>\n          </div>\n     '
+    '     <div class="card flat">\n            <div class="tools">\n              <label class="fld"><span>'
+    'Patch source or state</span>\n                <select id="patch-state-filter">\n                  <opt'
+    'ion value="all">All (pending + runs)</option>\n                  <option value="PendingAssessment">Pe'
+    'nding installation (PendingAssessment)</option>\n                  <option value="Installed">Installe'
+    'd in the window (Installed)</option>\n                  <option value="NotSelected">Not selected in t'
+    'he window (NotSelected)</option>\n                </select>\n              </label>\n              <lab'
+    'el class="fld"><span>Classification</span>\n                <select id="patch-class-filter">\n        '
+    '          <option value="all">All classifications</option>\n                  <option value="Security'
+    '">Security / Critical</option>\n                  <option value="UpdateRollUp">UpdateRollUp</option>\n'
+    '                  <option value="Definition">Definition</option>\n                  <option value="Up'
+    'dates">Updates</option>\n                  <option value="Other">Other</option>\n                </sel'
+    'ect>\n              </label>\n              <label class="fld grow"><span>Search</span>\n              '
+    '  <input type="search" id="patch-search-filter" placeholder="KB, package or machine" autocomplete="o'
+    'ff">\n              </label>\n            </div>\n            <div class="status-row"><span id="patches'
+    '-count-label" aria-live="polite"></span></div>\n            <div class="table-wrap"><table id="patche'
+    's-table"></table></div>\n            <div class="more-row" id="patches-more-row" hidden><button type='
+    '"button" class="btn" id="patches-more-btn">Show 80 more records</button></div>\n          </div>\n    '
+    '    </section>\n\n        <section class="section" id="sec-extensions" aria-labelledby="h-extensions">'
+    '\n          <div class="sh">\n            <h2 id="h-extensions">Guest extensions and Hotpatch readines'
+    's</h2>\n            <p>Read-only inventory of <code>virtualMachines/<wbr>extensions</code> and <code>'
+    'HybridCompute/<wbr>machines/<wbr>extensions</code>; <code>settings</code> and <code>protectedSetting'
+    's</code> are never read.</p>\n          </div>\n          <div class="card flat"><div class="table-wra'
+    'p"><table id="extensions-table"></table></div></div>\n        </section>\n\n        <section class="sec'
+    'tion" id="sec-sources" aria-labelledby="h-sources">\n          <div class="sh">\n            <h2 id="h'
+    '-sources">Azure Resource Graph receipts and method</h2>\n            <p>What was queried, with what r'
+    'esult, and the limits of this report.</p>\n          </div>\n          <div class="card flat"><div cla'
+    'ss="table-wrap"><table id="sources-table"></table></div></div>\n          <div class="grid2">\n       '
+    '     <div class="card">\n              <h3>Method limits and safety guarantees</h3>\n              <ul'
+    ' class="facts" id="methodology-list" style="margin-top:12px"></ul>\n            </div>\n            <d'
+    'iv class="card">\n              <h3>Queried tables and cadence</h3>\n              <ul class="facts" i'
+    'd="method-tables" style="margin-top:12px"></ul>\n            </div>\n          </div>\n        </sectio'
+    'n>\n      </div>\n    </div>\n    <footer class="foot"><span id="foot-left"></span><span id="foot-right'
+    '"></span></footer>\n  </div>\n</main>\n\n<script type="application/json" id="report-data">__REPORT_DATA_'
+    'JSON__</script>\n<script>\n(function () {\n  "use strict";\n  var D = document;\n  function $(id) { retur'
+    'n D.getElementById(id); }\n  function clear(node) {\n    while (node.firstChild) { node.removeChild(no'
+    'de.firstChild); }\n  }\n  function el(tag, opts) {\n    var node = D.createElement(tag);\n    if (opts) '
+    '{\n      if (opts.className) { node.className = opts.className; }\n      if (opts.text !== undefined &'
+    '& opts.text !== null) { node.textContent = String(opts.text); }\n      if (opts.id) { node.id = opts.'
+    'id; }\n      if (opts.title) { node.title = opts.title; }\n      if (opts.colspan) { node.setAttribute'
+    '("colspan", String(opts.colspan)); }\n      if (opts.src) { node.setAttribute("src", opts.src); }\n   '
+    '   if (opts.alt !== undefined) { node.setAttribute("alt", opts.alt); }\n      if (opts.attrs) { Objec'
+    't.keys(opts.attrs).forEach(function (k) { node.setAttribute(k, opts.attrs[k]); }); }\n      if (opts.'
+    'kids) {\n        opts.kids.forEach(function (kid) {\n          if (kid !== null && kid !== undefined &'
+    '& kid !== "") { node.appendChild(typeof kid === "object" ? kid : D.createTextNode(String(kid))); }\n '
+    '       });\n      }\n    }\n    return node;\n  }\n  var NF = window.Intl && Intl.NumberFormat ? new Intl'
+    '.NumberFormat("en-US") : null;\n  function num(v) { var n = Number(v) || 0; return NF ? NF.format(n) '
+    ': String(n); }\n  function pl(n, one, many) { return num(n) + " " + (Number(n) === 1 ? one : many); }'
+    '\n  function utc(v) {\n    if (!v) { return "—"; }\n    var m = /^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2})/.ex'
+    'ec(String(v));\n    return m ? m[1] + " " + m[2] : String(v);\n  }\n  function day(v) { return v ? Stri'
+    'ng(v).slice(0, 10) : "—"; }\n  function breakable(text) {\n    var frag = D.createDocumentFragment();\n'
+    '    String(text === null || text === undefined ? "—" : text).split(/(\\s+|[\\/\\\\])/).forEach(function '
+    '(part) {\n      if (!part) { return; }\n      if (part === "/" || part === "\\\\") {\n        frag.append'
+    'Child(D.createTextNode(part));\n        frag.appendChild(D.createElement("wbr"));\n      } else if (/^'
+    '\\s+$/.test(part)) {\n        frag.appendChild(D.createTextNode(" "));\n      } else {\n        frag.app'
+    'endChild(el("span", { className: "seg", text: part }));\n      }\n    });\n    return frag;\n  }\n  funct'
+    'ion code(text, cls) {\n    var c = el("code", { className: cls || "" });\n    c.appendChild(breakable('
+    'text));\n    return c;\n  }\n  function csvCell(v) {\n    if (v === null || v === undefined) { return \'"'
+    '"\'; }\n    var s = typeof v === "object" ? JSON.stringify(v) : String(v);\n    if (/^[=+\\-@\\t\\r\\n]/.te'
+    'st(s.trimLeft ? s.trimLeft() : s)) { s = "\'" + s; }\n    return \'"\' + s.replace(/"/g, \'""\') + \'"\';\n  '
+    '}\n  function downloadBlob(filename, mime, content) {\n    var blob = new Blob([content], { type: mime'
+    ' });\n    var url = URL.createObjectURL(blob);\n    var a = D.createElement("a");\n    a.href = url;\n  '
+    '  a.download = filename;\n    D.body.appendChild(a);\n    a.click();\n    D.body.removeChild(a);\n    se'
+    'tTimeout(function () { URL.revokeObjectURL(url); }, 250);\n  }\n\n  var SEV = {\n    critical: ["crit", '
+    '"Critical", "critical", "critical"],\n    high: ["high", "High", "high", "high"],\n    medium: ["med",'
+    ' "Medium", "medium", "medium"],\n    low: ["low", "Low", "low", "low"],\n    info: ["ok", "Passed", "p'
+    'assed", "passed"]\n  };\n  var SEV_RANK = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };\n  var '
+    'TONE = {\n    Failed: "crit", ShutdownOrUnresponsive: "crit", Expired: "crit", Disconnected: "crit", '
+    'error: "crit", denied: "crit",\n    InProgress: "med", UnableToDetermine: "med", Warning: "med", Pend'
+    'ingAssessment: "med", Pending: "med", partial: "med",\n    Succeeded: "ok", UpdateSuccessfullyApplied'
+    ': "ok", Installed: "ok", Connected: "ok", Ready: "ok", Supported: "ok", complete: "ok", running: "ok'
+    '"\n  };\n  var KIND = {\n    "microsoft.maintenance/applyupdates": "Window run",\n    "microsoft.mainten'
+    'ance/configurationassignments": "Configuration assignment",\n    "microsoft.maintenance/maintenanceco'
+    'nfigurations/applyupdates": "Configuration run",\n    "patchinstallationresources": "Patch installati'
+    'on"\n  };\n  var SOURCE_STATUS = { complete: "Complete", partial: "Partial", denied: "Denied", error: '
+    '"Error" };\n  var CATS = [\n    ["maintenance_window_unresponsive", "Maintenance window unresponsive ('
+    'ShutdownOrUnresponsive)", "critical"],\n    ["arc_agent_expired_or_disconnected", "Azure Arc agent ex'
+    'pired or disconnected", "critical"],\n    ["assessment_stuck_or_readiness_undetermined", "Assessment '
+    'in progress (InProgress) / support UnableToDetermine", "high"],\n    ["hotpatch_or_patch_extension_er'
+    'ror", "Hotpatch or guest extension error", "high"],\n    ["pending_security_patches_unscheduled", "Pe'
+    'nding security/rollup patches with no assigned window", "medium"],\n    ["unassessed_no_update_manage'
+    'r_telemetry", "No Update Manager assessment telemetry (stopped VMs)", "low"],\n    ["healthy", "Patch'
+    'ing verified, no active blockers", "info"]\n  ];\n  function sevPill(sev, label) {\n    var s = SEV[sev'
+    '] || ["neutral", sev || "—"];\n    return el("span", { className: "pill sev " + s[0], text: label || '
+    's[1] });\n  }\n  function statusPill(value) {\n    var raw = value === null || value === undefined || v'
+    'alue === "" ? "—" : String(value);\n    var shown = raw.replace(/^PowerState\\//, "");\n    return el("'
+    'span", { className: "pill " + (TONE[shown] || "neutral"), text: shown, title: raw !== shown ? raw : '
+    'null });\n  }\n  function classPill(c) {\n    var tone = c === "Critical" ? "crit" : c === "Security" ?'
+    ' "high" : c === "UpdateRollUp" ? "med" : "neutral";\n    return el("span", { className: "pill " + ton'
+    'e, text: c || "—" });\n  }\n  function yesNo(v) { return v === true ? "Yes" : v === false ? "No" : "—"'
+    '; }\n  function portal(id) { return "https://portal.azure.com/#resource" + id; }\n  function portalLin'
+    'k(id, text) {\n    return el("a", { className: "dlink", text: text || "Azure portal", attrs: { href: '
+    'portal(id), target: "_blank", rel: "noopener noreferrer" } });\n  }\n  function armCell(id) {\n    var '
+    's = String(id || "");\n    var m = /^\\/subscriptions\\/([^\\/]+)(?:\\/resourceGroups\\/([^\\/]+))?(?:\\/pro'
+    'viders\\/(.+))?$/i.exec(s);\n    if (!m) { return code(s || "—", "ref"); }\n    var rest = m[3] ? m[3].'
+    'split("/") : [];\n    var shown = rest.length > 3 ? rest.slice(2).filter(function (seg) { return seg.'
+    'toLowerCase() !== "providers" && !/^microsoft\\.[a-z]+$/i.test(seg); }).join("/") : (rest.length ? re'
+    'st[rest.length - 1] : (m[2] || m[1]));\n    var top = "/subscriptions/" + m[1] + (m[2] ? "/resourceGr'
+    'oups/" + m[2] : "") + (rest.length >= 3 ? "/providers/" + rest.slice(0, 3).join("/") : "");\n    var '
+    'box = el("span", { className: "arm" });\n    var main = el("span", { className: "mono", title: s });\n'
+    '    main.appendChild(breakable(shown));\n    box.appendChild(main);\n    box.appendChild(el("span", { '
+    'className: "sm", kids: [m[2] || ("subscription " + m[1]), el("span", { className: "dlink", kids: [" '
+    '· ", portalLink(top, "Portal")] })] }));\n    return box;\n  }\n  function refBlock(text) {\n    var box'
+    ' = el("span", { className: "refs" });\n    String(text || "—").split(" :: ").forEach(function (part) '
+    '{\n      var m = /^([A-Za-z]+)=(\\/subscriptions\\/\\S+)$/.exec(part.trim()) || /^()(\\/subscriptions\\/\\S'
+    '+)$/.exec(part.trim());\n      box.appendChild(m ? el("span", { className: "ref-arm", kids: [m[1] ? e'
+    'l("span", { className: "sm", text: m[1] }) : null, armCell(m[2])] }) : code(part, /^arg_[a-z_]+$/.te'
+    'st(part.trim()) ? "ref src" : "ref"));\n    });\n    return box;\n  }\n\n  var rawJson = $("report-data")'
+    '.textContent;\n  var snap = null;\n  try {\n    snap = JSON.parse(rawJson);\n  } catch (err) {\n    var e'
+    'rrBox = $("error-box");\n    errBox.hidden = false;\n    errBox.textContent = "Could not decode the em'
+    'bedded JSON snapshot: " + String(err);\n    return;\n  }\n  var S = snap.summary || {};\n  var reduceMot'
+    'ion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;\n  function'
+    ' goTo(id) {\n    var target = $(id);\n    if (target) { target.scrollIntoView({ behavior: reduceMotion'
+    ' ? "auto" : "smooth", block: "start" }); }\n  }\n\n  var MACHINE_COLS = [\n    "machine_name", "hosting"'
+    ', "resource_group", "location", "os_type", "os_name",\n    "power_or_arc_state", "assessment_status",'
+    ' "vm_guest_patch_readiness",\n    "pending_security_or_critical", "pending_update_rollup", "pending_t'
+    'otal",\n    "cycles_succeeded", "cycles_unresponsive", "install_runs_in_window",\n    "failure_categor'
+    'y", "severity", "investigation_headline", "root_cause_evidence",\n    "log_or_source_reference", "rec'
+    'ommended_human_action", "resource_id"\n  ];\n  function machinesCsv(list) {\n    var lines = [MACHINE_C'
+    'OLS.join(",")];\n    list.forEach(function (m) {\n      var row = [\n        m.name, m.hosting, m.resou'
+    'rce_group, m.location, m.os_type, m.os_name,\n        m.power_or_arc_state, m.assessment_status, m.vm'
+    '_guest_patch_readiness,\n        m.pending_counts ? m.pending_counts.security_or_critical : 0,\n      '
+    '  m.pending_counts ? m.pending_counts.update_rollup : 0,\n        m.pending_counts ? m.pending_counts'
+    '.total : 0,\n        m.maintenance_cycles_summary ? m.maintenance_cycles_summary.succeeded : 0,\n     '
+    '   m.maintenance_cycles_summary ? m.maintenance_cycles_summary.unresponsive : 0,\n        m.installat'
+    'ions_summary ? m.installations_summary.runs_in_window : 0,\n        m.failure_category, m.severity, m'
+    '.investigation_headline, m.root_cause_evidence,\n        m.log_or_source_reference, m.recommended_hum'
+    'an_action, m.resource_id\n      ];\n      lines.push(row.map(csvCell).join(","));\n    });\n    return "'
+    '\\uFEFF" + lines.join("\\r\\n");\n  }\n\n  var root = D.documentElement;\n  $("theme-toggle").addEventListe'
+    'ner("click", function () {\n    var dark = root.getAttribute("data-theme") !== "dark";\n    if (dark) '
+    '{ root.setAttribute("data-theme", "dark"); } else { root.removeAttribute("data-theme"); }\n    $("the'
+    'me-label").textContent = dark ? "Light mode" : "Dark mode";\n  });\n  var menuBtn = $("export-menu-btn'
+    '");\n  var menu = $("export-menu");\n  function setMenu(open) {\n    menu.hidden = !open;\n    menuBtn.s'
+    'etAttribute("aria-expanded", open ? "true" : "false");\n  }\n  menuBtn.addEventListener("click", funct'
+    'ion (e) {\n    e.stopPropagation();\n    setMenu(menu.hidden);\n    if (!menu.hidden) { menu.querySelec'
+    'tor("button").focus(); }\n  });\n  menu.addEventListener("click", function (e) { if (e.target.closest('
+    '"button")) { setMenu(false); } });\n  D.addEventListener("click", function (e) { if (!menu.hidden && '
+    '!menu.contains(e.target)) { setMenu(false); } });\n  D.addEventListener("keydown", function (e) {\n   '
+    ' if (e.key === "Escape" && !menu.hidden) { setMenu(false); menuBtn.focus(); }\n  });\n  $("print-btn")'
+    '.addEventListener("click", function () { window.print(); });\n  $("export-json-btn").addEventListener'
+    '("click", function () {\n    downloadBlob("patching-investigation-snapshot.json", "application/json;c'
+    'harset=utf-8", JSON.stringify(snap, null, 2));\n  });\n  $("export-machines-csv-btn").addEventListener'
+    '("click", function () {\n    downloadBlob("patching-investigation-machines.csv", "text/csv;charset=ut'
+    'f-8", machinesCsv(snap.machines || []));\n  });\n  $("export-patches-csv-btn").addEventListener("click'
+    '", function () {\n    var cols = ["record_kind", "machine_name", "status_or_state", "classification",'
+    ' "kb_id", "name", "version", "timestamp_utc", "reference_id"];\n    var lines = [cols.join(",")];\n   '
+    ' ((snap.cycles && snap.cycles.maintenance_cycles) || []).forEach(function (c) {\n      lines.push([c.'
+    'type, c.machine_name, c.status, c.maintenance_scope || "MaintenanceCycle", "", c.maintenance_configu'
+    'ration_name || c.name, "", c.start_utc || "", c.correlation_id || c.resource_id].map(csvCell).join("'
+    ',"));\n    });\n    ((snap.patches && snap.patches.combined) || []).forEach(function (p) {\n      lines'
+    '.push([p.record_kind, p.machine_name, p.installation_state, p.primary_classification, p.kb_id, p.pat'
+    'ch_name, p.version, p.last_modified_utc || "", p.resource_id].map(csvCell).join(","));\n    });\n    d'
+    'ownloadBlob("patching-investigation-patches.csv", "text/csv;charset=utf-8", "\\uFEFF" + lines.join("\\'
+    'r\\n"));\n  });\n\n  function rich(node, parts) {\n    clear(node);\n    parts.forEach(function (p) { node'
+    '.appendChild(typeof p === "string" ? D.createTextNode(p) : el("b", { text: p.b })); });\n  }\n\n  funct'
+    'ion renderCover() {\n    var client = snap.client || {};\n    var name = client.name || "Customer";\n  '
+    '  var plaque = $("brand-plaque");\n    var label = $("client-name-label");\n    clear(plaque);\n    lab'
+    'el.textContent = name;\n    if (client.logo_data_uri && /^data:image\\/(png|jpeg);base64,[A-Za-z0-9+/='
+    ']+$/.test(client.logo_data_uri)) {\n      plaque.appendChild(el("img", { src: client.logo_data_uri, a'
+    'lt: client.logo_alt || name }));\n      label.className = "client sr-only";\n    }\n\n    var win = snap'
+    '.window || {};\n    var total = S.machines_total || 0;\n    var blockers = S.machines_with_blockers_to'
+    'tal || 0;\n    var crit = S.critical_machines_total || 0;\n    var high = S.high_machines_total || 0;\n'
+    '    var med = S.medium_machines_total || 0;\n    var low = S.low_machines_total || 0;\n    var ok = S.'
+    'healthy_machines_total || 0;\n    var parts = ["Of ", { b: pl(total, "machine", "machines") }, " (" +'
+    ' pl(S.azure_vms_total || 0, "Azure VM", "Azure VMs") + " and " + pl(S.arc_machines_total || 0, "Azur'
+    'e Arc server", "Azure Arc servers") + "), "];\n    if (!blockers) {\n      parts.push("none have activ'
+    'e patching blockers.");\n    } else {\n      var sevBits = [];\n      if (crit) { sevBits.push(pl(crit,'
+    ' "critical", "critical")); }\n      if (high) { sevBits.push(pl(high, "high", "high")); }\n      if (b'
+    'lockers === 1) {\n        parts.push({ b: "1" }, " has a patching blocker" + (crit ? " of critical se'
+    'verity" : high ? " of high severity" : "") + ".");\n      } else {\n        parts.push({ b: num(blocke'
+    'rs) }, " have patching blockers");\n        if (sevBits.length) { parts.push(", including ", { b: sev'
+    'Bits.join(" and ") }); }\n        parts.push(".");\n      }\n    }\n    var cycles = S.maintenance_cycle'
+    's_in_window || 0;\n    var unresp = S.maintenance_cycles_unresponsive || 0;\n    var sec = S.pending_s'
+    'ecurity_or_critical_patches || 0;\n    if (!cycles) {\n      parts.push(" There were no maintenance wi'
+    'ndow runs in the period");\n    } else if (!unresp) {\n      parts.push(" " + (cycles === 1 ? "The win'
+    'dow run was applied" : "All " + num(cycles) + " window runs were applied") + " without ShutdownOrUnr'
+    'esponsive");\n    } else {\n      parts.push(" ", { b: num(unresp) + " of " + num(cycles) + " window r'
+    'uns" }, " ended in ShutdownOrUnresponsive");\n    }\n    if (sec) {\n      parts.push(", and ", { b: pl'
+    '(sec, "security or critical patch", "security or critical patches") }, sec === 1 ? " is pending." : '
+    '" are pending.");\n    } else {\n      parts.push(", and no security or critical patches are pending."'
+    ');\n    }\n    rich($("cover-subtitle"), parts);\n\n    var sources = snap.sources || [];\n    var comple'
+    'te = sources.filter(function (s) { return s.status === "complete"; }).length;\n    var prov = snap.pr'
+    'ovenance || "LIVE";\n    var tags = $("cover-tags");\n    clear(tags);\n    [\n      ["Generated " + utc'
+    '(snap.reference_utc) + " UTC"],\n      ["Window " + (win.period || "—") + ": " + day(win.start_utc) +'
+    ' " to " + day(win.end_utc) + " (" + num(win.hours || 0) + " h)"],\n      ["Provenance " + prov + " · '
+    'environment " + (snap.environment || "—"), "on"],\n      ["Subscription " + (snap.subscription_id || '
+    '"—")],\n      ["Azure Resource Graph 2022-10-01 · " + complete + "/" + sources.length + " sources com'
+    'plete"],\n      ["Monthly schedule " + ((snap.methodology && snap.methodology.scheduled_cadence_cron)'
+    ' || "0 8 1 * *")]\n    ].forEach(function (t) { tags.appendChild(el("li", { className: t[1] || "", te'
+    'xt: t[0] })); });\n\n    var v = crit ? ["crit", "Action required"] : high ? ["high", "Needs attention'
+    '"] : (med || low) ? ["med", "Review"] : ["ok", "No blockers"];\n    $("verdict-card").className = "ve'
+    'rdict v-" + v[0];\n    $("verdict-label").textContent = v[1];\n    var counts = [["critical", crit], ['
+    '"high", high], ["medium", med], ["low", low], ["info", ok]];\n    var detail = counts.filter(function'
+    ' (c) { return c[1]; }).map(function (c) { return num(c[1]) + " " + (c[1] === 1 ? SEV[c[0]][2] : SEV['
+    'c[0]][3]); }).join(" · ");\n    if (complete < sources.length) { detail += (detail ? ". " : "") + "Pa'
+    'rtial coverage: " + complete + " of " + sources.length + " sources complete."; }\n    $("verdict-deta'
+    'il").textContent = detail || "No machines in the inventory.";\n    var first = (snap.actions || [])[0'
+    '];\n    if (first) {\n      var next = $("verdict-next");\n      next.hidden = false;\n      next.append'
+    'Child(D.createTextNode("Start with: "));\n      next.appendChild(el("a", { text: first.failure_catego'
+    'ry_label || first.failure_category, attrs: { href: "#sec-actions" } }));\n      next.appendChild(D.cr'
+    'eateTextNode(" · " + pl(first.affected_machines_count || 0, "machine", "machines") + "."));\n    }\n\n '
+    '   $("dist-total").textContent = pl(total, "machine", "machines");\n    var track = $("severity-track'
+    '");\n    var legend = $("severity-legend");\n    clear(track);\n    clear(legend);\n    var aria = [];\n '
+    '   counts.forEach(function (c) {\n      if (!c[1]) { return; }\n      var s = SEV[c[0]];\n      var seg'
+    ' = el("i", { className: "s-" + s[0], title: s[1] + ": " + c[1] });\n      seg.style.width = (c[1] * 1'
+    '00 / Math.max(1, total)) + "%";\n      track.appendChild(seg);\n      legend.appendChild(el("li", { ki'
+    'ds: [el("span", { className: "dot s-" + s[0] }), s[1] + " ", el("b", { text: num(c[1]) })] }));\n    '
+    '  aria.push(num(c[1]) + " " + (c[1] === 1 ? s[2] : s[3]));\n    });\n    track.setAttribute("aria-labe'
+    'l", "Machines by severity: " + (aria.join(", ") || "none"));\n\n    var prv = snap.provenance === "SIM'
+    'ULATED";\n    $("sim-note").hidden = !prv;\n    $("sim-text").textContent = "Simulated data (" + prov '
+    '+ " · " + (snap.environment || "—") + "): demonstration figures, not read from a real tenant.";\n\n   '
+    ' var cName = name;\n    $("foot-left").textContent = "Azure SRE Agent · Post-patching report and fail'
+    'ure investigation · " + cName;\n    $("foot-right").textContent = "Generated " + utc(snap.reference_u'
+    'tc) + " UTC · read-only tool";\n    var pageTitle = "Post-patching report · Azure Update Manager · " '
+    '+ cName + " · " + utc(snap.reference_utc) + " UTC";\n    var pageStyle = D.createElement("style");\n  '
+    '  pageStyle.textContent = \'@page { @bottom-left { content: "\' + pageTitle.replace(/[\\\\"]/g, "\\\\$&").'
+    'replace(/[\\r\\n\\f]/g, " ") + \'"; font: 9px/1.2 \\\'Outfit\\\', \\\'Segoe UI\\\', system-ui, sans-serif; color'
+    ": #475569; } }';\n    D.head.appendChild(pageStyle);\n  }\n\n  function renderKpis() {\n    var blockers "
+    '= S.machines_with_blockers_total || 0;\n    var unresp = S.maintenance_cycles_unresponsive || 0;\n    '
+    'var sec = S.pending_security_or_critical_patches || 0;\n    var failedExt = S.guest_extensions_failed'
+    ' || 0;\n    var failedRuns = S.installation_runs_failed || 0;\n    var blockTone = S.critical_machines'
+    '_total ? "crit" : S.high_machines_total ? "high" : blockers ? "med" : "ok";\n    var kpis = [\n      ['
+    'num(S.machines_total || 0), "Machines evaluated", pl(S.azure_vms_total || 0, "Azure VM", "Azure VMs"'
+    ') + " · " + pl(S.arc_machines_total || 0, "Arc server", "Arc servers"), ""],\n      [num(blockers), "'
+    'Machines with blockers", num(S.critical_machines_total || 0) + " critical · " + num(S.high_machines_'
+    'total || 0) + " high", blockTone],\n      [num(S.maintenance_cycles_succeeded || 0) + " / " + num(S.m'
+    'aintenance_cycles_in_window || 0), "Window cycles applied", num(unresp) + " ShutdownOrUnresponsive",'
+    ' unresp ? "crit" : ""],\n      [num(S.installation_runs_in_window || 0), "Installation runs", pl(S.in'
+    'stalled_patches_in_window || 0, "patch installed", "patches installed") + (failedRuns ? " · " + num('
+    'failedRuns) + " with failures" : ""), failedRuns ? "high" : ""],\n      [num(sec), "Pending security '
+    'or critical patches", num(S.pending_rollup_patches || 0) + " UpdateRollUp · " + num(S.pending_total_'
+    'patches || 0) + " in total", sec ? "med" : ""],\n      [num(failedExt), "Extensions in Failed state",'
+    ' "of " + pl(S.guest_extensions_total || 0, "guest extension", "guest extensions"), failedExt ? "high'
+    '" : ""]\n    ];\n    var strip = $("kpi-strip");\n    clear(strip);\n    kpis.forEach(function (k) {\n   '
+    '   strip.appendChild(el("div", { className: "kpi", kids: [\n        el("span", { className: "kv" + (k'
+    '[3] ? " tone-" + k[3] : ""), text: k[0] }),\n        el("span", { className: "kl", text: k[1] }),\n   '
+    '     el("span", { className: "ks", text: k[2] })\n      ] }));\n    });\n  }\n\n  function renderExecutiv'
+    'e() {\n    var msgList = $("executive-messages");\n    clear(msgList);\n    (snap.executive_messages ||'
+    ' []).forEach(function (m) { msgList.appendChild(el("li", { text: m })); });\n    var box = $("categor'
+    'y-breakdown");\n    clear(box);\n    var catCounts = S.category_counts || {};\n    var total = Math.max'
+    '(1, S.machines_total || 0);\n    CATS.forEach(function (info) {\n      var count = catCounts[info[0]] '
+    '|| 0;\n      var pct = Math.round((count * 100) / total);\n      var row = el("button", { className: "'
+    'crow", attrs: { type: "button", "data-cat": info[0] } });\n      row.appendChild(el("span", { text: i'
+    'nfo[1] }));\n      var track = el("span", { className: "ct" });\n      var fill = el("i", { className:'
+    ' "s-" + SEV[info[2]][0] });\n      fill.style.width = (count ? Math.max(pct, 2) : 0) + "%";\n      tra'
+    'ck.appendChild(fill);\n      row.appendChild(track);\n      row.appendChild(el("span", { className: "c'
+    'v", kids: [el("b", { text: num(count) }), " · " + pct + "%"] }));\n      row.setAttribute("aria-label'
+    '", info[1] + ": " + pl(count, "machine", "machines") + ". Filter the investigation");\n      if (!cou'
+    'nt) { row.disabled = true; }\n      box.appendChild(row);\n    });\n  }\n  $("category-breakdown").addEv'
+    'entListener("click", function (e) {\n    var row = e.target.closest("button[data-cat]");\n    if (!row'
+    ') { return; }\n    resetMachineFilters();\n    $("filter-category").value = row.getAttribute("data-cat'
+    '");\n    applyMachineFilters();\n    goTo("sec-investigation");\n  });\n\n  function renderActions() {\n  '
+    '  var list = $("actions-table");\n    clear(list);\n    var acts = snap.actions || [];\n    if (!acts.l'
+    'ength) {\n      list.appendChild(el("li", { className: "empty-state", text: "No pending actions: no m'
+    'achine has patching blockers in this window." }));\n      return;\n    }\n    acts.forEach(function (a,'
+    ' i) {\n      var ms = el("div", { className: "plan-ms", kids: [el("span", { className: "lab", text: "'
+    'Machines" })] });\n      (a.affected_machines || []).forEach(function (name) {\n        ms.appendChild'
+    '(el("button", { className: "mchip", text: name, attrs: { type: "button", "data-machine": name, "aria'
+    '-label": "Show " + name + " in the per-machine investigation" } }));\n      });\n      var body = el("'
+    'div", { className: "plan-body", kids: [\n        el("div", { className: "plan-head", kids: [\n        '
+    '  sevPill(a.severity, a.severity_label),\n          el("h3", { text: a.failure_category_label || a.fa'
+    'ilure_category }),\n          el("span", { className: "plan-c", text: pl(a.affected_machines_count ||'
+    ' 0, "affected machine", "affected machines") })\n        ] }),\n        el("div", { kids: [\n          '
+    'el("p", { className: "plan-act", text: a.recommended_human_action }),\n          el("p", { className:'
+    ' "plan-dx", kids: [el("span", { className: "lab", text: "Diagnosis" }), a.investigation_summary] })\n'
+    '        ] }),\n        el("div", { kids: [\n          ms,\n          el("div", { className: "plan-ref",'
+    ' kids: [el("span", { className: "lab", text: "Technical reference" }), refBlock(a.sample_source_refe'
+    'rence)] }),\n          el("p", { className: "plan-ref", kids: [el("span", { className: "lab", text: "'
+    'Category" }), el("code", { text: a.failure_category })] })\n        ] })\n      ] });\n      list.appen'
+    'dChild(el("li", { className: "plan-item", kids: [el("span", { className: "plan-n", text: String(i + '
+    '1), attrs: { "aria-hidden": "true" } }), body] }));\n    });\n  }\n  $("actions-table").addEventListene'
+    'r("click", function (e) {\n    var chip = e.target.closest("button[data-machine]");\n    if (!chip) { '
+    'return; }\n    resetMachineFilters();\n    $("filter-search").value = chip.getAttribute("data-machine"'
+    ');\n    applyMachineFilters();\n    goTo("sec-investigation");\n  });\n\n  var drawersExpanded = true;\n  '
+    'var sortKey = "severity";\n  var sortAsc = false;\n  var SORT_ASC = { severity: false, name: true, pen'
+    'ding: false, cycles: false };\n  var currentMachines = [];\n  function sortValue(m, key) {\n    if (key'
+    ' === "name") { return String(m.name || "").toLowerCase(); }\n    if (key === "pending") { return (m.p'
+    'ending_counts || {}).security_or_critical || 0; }\n    if (key === "cycles") { return (m.maintenance_'
+    'cycles_summary || {}).unresponsive || 0; }\n    return SEV_RANK[m.severity] !== undefined ? 4 - SEV_R'
+    'ANK[m.severity] : -1;\n  }\n  function sortHead(label, key, cls) {\n    var th = el("th", { className: '
+    'cls || "", attrs: { scope: "col" } });\n    if (sortKey === key) { th.setAttribute("aria-sort", sortA'
+    'sc ? "ascending" : "descending"); }\n    var b = el("button", { className: "sort", text: label, attrs'
+    ': { type: "button", "data-sort": key } });\n    b.insertAdjacentHTML("beforeend", \'<svg viewBox="0 0 '
+    '12 12" aria-hidden="true"><path d="M6 2v8M3 7l3 3 3-3"/></svg>\');\n    th.appendChild(b);\n    return '
+    'th;\n  }\n  function setToggle(btn, open) {\n    clear(btn);\n    btn.appendChild(D.createTextNode(open '
+    '? "Hide root cause" : "Show root cause"));\n    btn.appendChild(el("span", { className: "sr-only", te'
+    'xt: " for " + btn.getAttribute("data-name") }));\n    btn.setAttribute("aria-expanded", open ? "true"'
+    ' : "false");\n  }\n  function resetMachineFilters() {\n    $("filter-category").value = "all";\n    $("f'
+    'ilter-hosting").value = "all";\n    $("filter-severity").value = "all";\n    $("filter-search").value '
+    '= "";\n  }\n\n  function applyMachineFilters() {\n    var cat = $("filter-category").value;\n    var host'
+    ' = $("filter-hosting").value;\n    var sev = $("filter-severity").value;\n    var q = ($("filter-searc'
+    'h").value || "").toLowerCase().trim();\n    var allMachines = snap.machines || [];\n    var filtered ='
+    ' allMachines.filter(function (m) {\n      if (cat !== "all" && m.failure_category !== cat && (m.match'
+    'ed_categories || []).indexOf(cat) === -1) { return false; }\n      if (host !== "all" && m.hosting !='
+    '= host) { return false; }\n      if (sev !== "all" && m.severity !== sev) { return false; }\n      if '
+    '(q && JSON.stringify(m).toLowerCase().indexOf(q) === -1) { return false; }\n      return true;\n    })'
+    ';\n    filtered = filtered.map(function (m, i) { return [m, i]; }).sort(function (a, b) {\n      var x'
+    ' = sortValue(a[0], sortKey);\n      var y = sortValue(b[0], sortKey);\n      var d = typeof x === "num'
+    'ber" ? x - y : x.localeCompare(y, "en", { numeric: true });\n      return (sortAsc ? d : -d) || a[1] '
+    '- b[1];\n    }).map(function (pair) { return pair[0]; });\n    currentMachines = filtered;\n\n    $("mac'
+    'hines-count-label").textContent = "Showing " + filtered.length + " of " + allMachines.length + " mac'
+    'hines.";\n\n    var table = $("machines-table");\n    clear(table);\n    var thead = el("thead");\n    va'
+    'r trH = el("tr");\n    trH.appendChild(sortHead("Severity", "severity", "nw"));\n    trH.appendChild(s'
+    'ortHead("Machine", "name"));\n    trH.appendChild(el("th", { text: "Automated root-cause diagnosis", '
+    'attrs: { scope: "col" } }));\n    trH.appendChild(el("th", { text: "Host and assessment", attrs: { sc'
+    'ope: "col" } }));\n    trH.appendChild(sortHead("Pending", "pending", "n"));\n    trH.appendChild(sort'
+    'Head("Cycles", "cycles", "n"));\n    thead.appendChild(trH);\n    table.appendChild(thead);\n\n    var t'
+    'body = el("tbody");\n    if (!filtered.length) {\n      var emptyTr = el("tr");\n      emptyTr.appendCh'
+    'ild(el("td", { colspan: 6, className: "empty", text: "No machines match the selected filters. Select'
+    ' Reset filters to show all machines." }));\n      tbody.appendChild(emptyTr);\n      table.appendChild'
+    '(tbody);\n      return;\n    }\n\n    filtered.forEach(function (m, idx) {\n      var drawerId = "drawer-'
+    'machine-" + idx;\n      var tr = el("tr", { className: "machine-row" });\n      tr.appendChild(el("td"'
+    ', { className: "nw", kids: [sevPill(m.severity, m.severity_label)] }));\n      tr.appendChild(el("td"'
+    ', { kids: [\n        el("span", { className: "nm", text: m.name }),\n        el("span", { className: "'
+    'sm nw", text: m.resource_group || "—" }),\n        el("span", { className: "sm nw", text: (m.hosting '
+    '=== "arc" ? "Azure Arc" : "Azure VM") + " · " + (m.location || "—") })\n      ] }));\n      var extra '
+    '= (m.matched_categories || []).length - 1;\n      var btn = el("button", { className: "btn sm tgl", a'
+    'ttrs: { type: "button", "aria-controls": drawerId, "data-drawer": drawerId, "data-name": m.name } })'
+    ';\n      setToggle(btn, drawersExpanded);\n      tr.appendChild(el("td", { className: "dx", kids: [\n  '
+    '      el("span", { className: "dx-t", text: m.failure_category_label || m.failure_category }),\n     '
+    '   el("span", { className: "dx-h", text: m.investigation_headline }),\n        extra > 0 ? el("span",'
+    ' { className: "sm", text: "+ " + pl(extra, "additional blocker", "additional blockers") + " in the d'
+    'etails" }) : null,\n        btn\n      ] }));\n      tr.appendChild(el("td", { className: "host", kids:'
+    ' [\n        statusPill(m.power_or_arc_state),\n        el("span", { className: "sm", text: (m.os_name '
+    '|| m.os_type || "—") + (m.agent_version ? " · agent " + m.agent_version : "") }),\n        el("span",'
+    ' { className: "sm nw", text: "Assessment: " + (m.assessment_status || "—") }),\n        el("span", { '
+    'className: "sm nw", text: "Readiness: " + (m.vm_guest_patch_readiness || "—") })\n      ] }));\n      '
+    'var pc = m.pending_counts || {};\n      tr.appendChild(el("td", { className: "n", kids: [\n        el('
+    '"span", { className: "big", text: num(pc.security_or_critical || 0) }),\n        el("span", { classNa'
+    'me: "sm nw", text: "sec./crit." }),\n        el("span", { className: "sm nw", text: num(pc.update_rol'
+    'lup || 0) + " RollUp · " + num(pc.total || 0) + " total" })\n      ] }));\n      var mc = m.maintenanc'
+    'e_cycles_summary || {};\n      var ic = m.installations_summary || {};\n      tr.appendChild(el("td", '
+    '{ className: "n", kids: [\n        el("span", { className: "nw", text: num(mc.succeeded || 0) + " OK '
+    '· " + num(mc.unresponsive || 0) + " unresponsive" }),\n        el("span", { className: "sm nw", text:'
+    ' pl(ic.runs_in_window || 0, "installation", "installations") })\n      ] }));\n      tbody.appendChild'
+    '(tr);\n\n      var dTr = el("tr", { className: "drawer-row", id: drawerId });\n      dTr.hidden = !draw'
+    'ersExpanded;\n      var c1 = el("div", { kids: [\n        el("p", { className: "dk", text: "Correlated'
+    ' technical evidence (no host sign-in)" }),\n        el("p", { text: m.root_cause_evidence })\n      ] '
+    '});\n      var issues = m.all_detected_issues || [];\n      if (issues.length > 1) {\n        c1.append'
+    'Child(el("p", { className: "dk", text: "Blockers detected on this machine (" + issues.length + ")" }'
+    '));\n        var ul = el("ul", { className: "issues" });\n        issues.forEach(function (iss) { ul.a'
+    'ppendChild(el("li", { kids: [sevPill(iss.severity), el("span", { text: iss.investigation_headline })'
+    '] })); });\n        c1.appendChild(ul);\n      }\n      var c2 = el("div", { kids: [\n        el("p", { '
+    'className: "dk", text: "Recommended action" }),\n        el("p", { className: "act", text: m.recommen'
+    'ded_human_action }),\n        el("p", { className: "dk", text: "ARG source reference or log path" }),'
+    '\n        el("div", { kids: [refBlock(m.log_or_source_reference || m.resource_id)] })\n      ] });\n   '
+    '   if ((m.pending_security_patches || []).length) {\n        c2.appendChild(el("p", { className: "dk"'
+    ', text: "Pending Security/RollUp patches" }));\n        var kbs = el("ul", { className: "kbs" });\n   '
+    '     m.pending_security_patches.forEach(function (p) {\n          kbs.appendChild(el("li", { kids: [p'
+    '.kb_id ? el("code", { text: "KB" + p.kb_id }) : null, p.kb_id ? " " : null, p.patch_name] }));\n     '
+    '   });\n        c2.appendChild(kbs);\n      }\n      c2.appendChild(el("p", { className: "sm", kids: ["'
+    'Category ", el("code", { text: m.failure_category }), m.resource_id ? el("span", { className: "dlink'
+    '", kids: [" · ", portalLink(m.resource_id, "Open in Azure portal")] }) : null] }));\n      var dTd = '
+    'el("td", { colspan: 6 });\n      dTd.appendChild(el("div", { className: "drawer", kids: [c1, c2] }));'
+    '\n      dTr.appendChild(dTd);\n      tbody.appendChild(dTr);\n    });\n    table.appendChild(tbody);\n  }'
+    '\n  $("machines-table").addEventListener("click", function (e) {\n    var sortBtn = e.target.closest("'
+    'button[data-sort]");\n    if (sortBtn) {\n      var key = sortBtn.getAttribute("data-sort");\n      if '
+    '(key === sortKey) { sortAsc = !sortAsc; } else { sortKey = key; sortAsc = SORT_ASC[key]; }\n      app'
+    'lyMachineFilters();\n      var again = $("machines-table").querySelector(\'button[data-sort="\' + key +'
+    ' \'"]\');\n      if (again) { again.focus(); }\n      return;\n    }\n    var tgl = e.target.closest("butt'
+    'on[data-drawer]");\n    if (tgl) {\n      var row = $(tgl.getAttribute("data-drawer"));\n      row.hidd'
+    'en = !row.hidden;\n      setToggle(tgl, !row.hidden);\n    }\n  });\n\n  function renderTable(tableNode, '
+    'cols, rows, emptyText) {\n    clear(tableNode);\n    var thead = el("thead");\n    var trHead = el("tr"'
+    ');\n    cols.forEach(function (c) { trHead.appendChild(el("th", { text: c[0], className: c[1] || "", '
+    'attrs: { scope: "col" } })); });\n    thead.appendChild(trHead);\n    tableNode.appendChild(thead);\n  '
+    '  var tbody = el("tbody");\n    if (!rows.length) {\n      var emptyRow = el("tr");\n      emptyRow.app'
+    'endChild(el("td", { colspan: cols.length, className: "empty", text: emptyText || "No records match t'
+    'he current criteria." }));\n      tbody.appendChild(emptyRow);\n    }\n    rows.forEach(function (r) {\n'
+    '      var tr = el("tr");\n      r.forEach(function (cell, i) {\n        var td = el("td", { className:'
+    ' cols[i][1] || "" });\n        if (cell && cell.nodeType) {\n          td.appendChild(cell);\n        }'
+    ' else {\n          td.textContent = cell === null || cell === undefined || cell === "" ? "—" : String'
+    '(cell);\n        }\n        tr.appendChild(td);\n      });\n      tbody.appendChild(tr);\n    });\n    tab'
+    'leNode.appendChild(tbody);\n  }\n\n  var PAGE = 80;\n  var cycleLimit = PAGE;\n  var patchLimit = PAGE;\n '
+    ' function applyCycleFilters(keepLimit) {\n    if (!keepLimit) { cycleLimit = PAGE; }\n    var st = $("'
+    'cycle-status-filter").value;\n    var q = ($("cycle-search-filter").value || "").toLowerCase().trim()'
+    ';\n    var combined = [];\n    ((snap.cycles && snap.cycles.maintenance_cycles) || []).forEach(functio'
+    'n (c) {\n      combined.push({\n        kind: c.type,\n        machine: c.machine_name || "Global confi'
+    'guration",\n        status: c.status,\n        start: c.start_utc || "",\n        end: c.end_utc || "",'
+    '\n        config: c.maintenance_configuration_name || c.name || "—",\n        recur: c.schedule_recur_'
+    'every || "",\n        ref: c.correlation_id || c.resource_id\n      });\n    });\n    ((snap.cycles && s'
+    'nap.cycles.installation_runs) || []).forEach(function (i) {\n      combined.push({\n        kind: "pat'
+    'chinstallationresources",\n        machine: i.machine_name,\n        status: i.status,\n        start: '
+    'i.start_utc || "",\n        end: i.last_modified_utc || "",\n        detail: "Installed " + i.installe'
+    'd_patch_count + " · failed " + i.failed_patch_count + " · not selected " + i.not_selected_patch_coun'
+    't + " · reboot " + i.reboot_status,\n        ref: i.maintenance_run_id || i.resource_id\n      });\n   '
+    ' });\n    combined.sort(function (a, b) { return (b.start || "").localeCompare(a.start || ""); });\n  '
+    '  var filtered = combined.filter(function (r) {\n      if (st !== "all" && r.status !== st) { return '
+    'false; }\n      if (q && JSON.stringify(r).toLowerCase().indexOf(q) === -1) { return false; }\n      r'
+    'eturn true;\n    });\n    var shown = filtered.slice(0, cycleLimit);\n    $("cycles-count-label").textC'
+    'ontent = "Showing " + shown.length + " of " + filtered.length + " cycle and installation records (co'
+    'mbined total: " + combined.length + ").";\n    $("cycles-more-row").hidden = filtered.length <= cycle'
+    'Limit;\n    $("toc-n-cycles").textContent = num(combined.length);\n    renderTable(\n      $("cycles-ta'
+    'ble"),\n      [["Record"], ["Machine or scope", "nw"], ["Status", "nw"], ["Start and end (UTC)", "nw"'
+    '], ["Run details"], ["Reference (correlation or resource)"]],\n      shown.map(function (r) {\n       '
+    ' return [\n          el("span", { className: "kind", title: r.kind, kids: [el("b", { text: KIND[r.kin'
+    'd] || r.kind }), el("span", { className: "sm", text: r.kind === "patchinstallationresources" ? "patc'
+    'hinstallationresources" : "maintenanceresources" })] }),\n          r.machine,\n          statusPill(r'
+    '.status),\n          el("span", { kids: [utc(r.start), el("span", { className: "sm", text: r.end ? "t'
+    'o " + utc(r.end) : "" })] }),\n          r.config ? el("span", { kids: ["Configuration ", el("span", '
+    '{ className: "seg", text: r.config }), r.recur ? " (" + r.recur + ")" : null] }) : r.detail,\n       '
+    '   armCell(r.ref)\n        ];\n      })\n    );\n  }\n\n  function applyPatchFilters(keepLimit) {\n    if ('
+    '!keepLimit) { patchLimit = PAGE; }\n    var st = $("patch-state-filter").value;\n    var cl = $("patch'
+    '-class-filter").value;\n    var q = ($("patch-search-filter").value || "").toLowerCase().trim();\n    '
+    'var allPatches = (snap.patches && snap.patches.combined) || [];\n    var filtered = allPatches.filter'
+    '(function (p) {\n      if (st !== "all" && p.installation_state !== st) { return false; }\n      if (c'
+    'l !== "all") {\n        if (cl === "Security") {\n          if (p.primary_classification !== "Security'
+    '" && p.primary_classification !== "Critical") { return false; }\n        } else if (p.primary_classif'
+    'ication !== cl) {\n          return false;\n        }\n      }\n      if (q && JSON.stringify(p).toLower'
+    'Case().indexOf(q) === -1) { return false; }\n      return true;\n    });\n    var shown = filtered.slic'
+    'e(0, patchLimit);\n    $("patches-count-label").textContent = "Showing " + shown.length + " of " + fi'
+    'ltered.length + " softwarePatches records (total collected: " + allPatches.length + ").";\n    $("pat'
+    'ches-more-row").hidden = filtered.length <= patchLimit;\n    renderTable(\n      $("patches-table"),\n '
+    '     [["Machine", "nw"], ["State and classification", "nw"], ["KB / ID"], ["Package or update", "wid'
+    'e"], ["Date (UTC)", "nw"]],\n      shown.map(function (p) {\n        var sub = [p.version ? "version "'
+    ' + p.version : "", p.reboot_behavior ? "reboot " + p.reboot_behavior : ""].filter(Boolean).join(" · '
+    '");\n        return [\n          p.machine_name,\n          el("span", { className: "stack", kids: [sta'
+    'tusPill(p.installation_state), classPill(p.primary_classification)] }),\n          code(p.kb_id ? "KB'
+    '" + p.kb_id : (p.patch_id || "—"), "ref"),\n          el("span", { kids: [p.patch_name || "—", sub ? '
+    'el("span", { className: "sm", text: sub }) : null] }),\n          utc(p.last_modified_utc)\n        ];'
+    '\n      })\n    );\n  }\n\n  function renderExtensionsAndSources() {\n    var exts = snap.extensions || []'
+    ';\n    renderTable(\n      $("extensions-table"),\n      [["Machine", "nw"], ["Hosting", "nw"], ["Exten'
+    'sion"], ["Publisher / type"], ["Version", "nw"], ["State", "nw"], ["AutoUpgrade minor / auto", "nw"]'
     '],\n      exts.map(function (e) {\n        return [\n          e.machine_name,\n          e.hosting === '
     '"arc" ? "Azure Arc" : e.hosting === "azure" ? "Azure VM" : e.hosting,\n          code(e.name, "ref"),'
     '\n          el("span", { kids: [e.publisher || "—", el("span", { className: "sm", text: e.extension_t'
     'ype || "" })] }),\n          code(e.type_handler_version || "—", "ref"),\n          statusPill(e.provi'
     'sioning_state),\n          yesNo(e.auto_upgrade_minor_version) + " / " + yesNo(e.enable_automatic_upg'
-    'rade)\n        ];\n      }),\n      "No se encontraron extensiones de huésped en las máquinas inventari'
-    'adas."\n    );\n\n    var sources = snap.sources || [];\n    renderTable(\n      $("sources-table"),\n    '
-    '  [["Fuente"], ["Estado", "nw"], ["Páginas", "n"], ["Registros", "n"], ["Observado (UTC)", "nw"], ["'
-    'Endpoint o nota"]],\n      sources.map(function (s) {\n        return [\n          el("code", { text: s'
-    '.id }),\n          el("span", { className: "pill " + (TONE[s.status] || "neutral"), text: SOURCE_STAT'
-    'US[s.status] || s.status }),\n          num(s.pages),\n          num(s.records),\n          utc(s.obser'
-    'ved_at),\n          (s.note || "") + (s.errors && s.errors.length ? " Errores: " + JSON.stringify(s.e'
-    'rrors) : "")\n        ];\n      })\n    );\n    var complete = sources.filter(function (s) { return s.st'
-    'atus === "complete"; }).length;\n    $("toc-n-sources").textContent = complete + "/" + sources.length'
-    ';\n    $("toc-n-extensions").textContent = num(exts.length);\n    $("toc-n-patches").textContent = num'
-    '(((snap.patches && snap.patches.combined) || []).length);\n    $("toc-n-actions").textContent = num(('
-    'snap.actions || []).length);\n    $("toc-n-machines").textContent = num((snap.machines || []).length)'
-    ';\n\n    var method = snap.methodology || {};\n    var mList = $("methodology-list");\n    clear(mList);'
-    '\n    (method.limitations || []).forEach(function (item) { mList.appendChild(el("li", { text: item })'
-    '); });\n    var tList = $("method-tables");\n    clear(tList);\n    (method.arg_tables || []).forEach(f'
-    'unction (item) { tList.appendChild(el("li", { text: item })); });\n    if (method.scheduled_cadence_d'
-    'escription) {\n      tList.appendChild(el("li", { kids: ["Cadencia: " + method.scheduled_cadence_desc'
-    'ription + " Cron ", el("code", { text: method.scheduled_cadence_cron || "0 8 1 * *" }), "."] }));\n  '
-    '  }\n  }\n\n  ["filter-category", "filter-hosting", "filter-severity", "filter-search"].forEach(functio'
-    'n (id) {\n    var node = $(id);\n    node.addEventListener("input", applyMachineFilters);\n    node.add'
-    'EventListener("change", applyMachineFilters);\n  });\n  $("filter-reset-btn").addEventListener("click"'
-    ', function () {\n    resetMachineFilters();\n    applyMachineFilters();\n  });\n  $("machines-view-csv-b'
-    'tn").addEventListener("click", function () {\n    downloadBlob("patching-investigation-machines-vista'
-    '.csv", "text/csv;charset=utf-8", machinesCsv(currentMachines));\n  });\n  $("toggle-all-drawers-btn").'
-    'addEventListener("click", function () {\n    drawersExpanded = !drawersExpanded;\n    this.textContent'
-    ' = drawersExpanded ? "Contraer todos los detalles" : "Expandir todos los detalles";\n    applyMachine'
-    'Filters();\n  });\n  ["cycle-status-filter", "cycle-search-filter"].forEach(function (id) {\n    var no'
-    'de = $(id);\n    node.addEventListener("input", function () { applyCycleFilters(false); });\n    node.'
-    'addEventListener("change", function () { applyCycleFilters(false); });\n  });\n  ["patch-state-filter"'
-    ', "patch-class-filter", "patch-search-filter"].forEach(function (id) {\n    var node = $(id);\n    nod'
-    'e.addEventListener("input", function () { applyPatchFilters(false); });\n    node.addEventListener("c'
-    'hange", function () { applyPatchFilters(false); });\n  });\n  $("cycles-more-btn").addEventListener("c'
-    'lick", function () { cycleLimit += PAGE; applyCycleFilters(true); });\n  $("patches-more-btn").addEve'
-    'ntListener("click", function () { patchLimit += PAGE; applyPatchFilters(true); });\n\n  function track'
-    'Sections() {\n    var links = Array.prototype.slice.call(D.querySelectorAll(".toc a"));\n    var targe'
-    'ts = links.map(function (a) { return $(a.getAttribute("href").slice(1)); });\n    var current = null;'
-    '\n    var queued = false;\n    function update() {\n      queued = false;\n      var line = window.inner'
-    'Height * 0.3;\n      var index = 0;\n      targets.forEach(function (t, i) { if (t && t.getBoundingCli'
-    'entRect().top <= line) { index = i; } });\n      if (window.innerHeight + window.scrollY >= D.documen'
-    'tElement.scrollHeight - 2) { index = targets.length - 1; }\n      if (links[index] !== current) {\n   '
-    '     if (current) { current.removeAttribute("aria-current"); }\n        current = links[index];\n     '
-    '   current.setAttribute("aria-current", "true");\n      }\n    }\n    window.addEventListener("scroll",'
-    ' function () {\n      if (!queued) { queued = true; window.requestAnimationFrame(update); }\n    }, { '
-    'passive: true });\n    update();\n  }\n\n  function sizeDrawers() {\n    var wrap = $("machines-table").p'
-    'arentNode;\n    wrap.style.setProperty("--wrap-w", wrap.clientWidth + "px");\n  }\n  window.addEventLis'
-    'tener("resize", sizeDrawers);\n\n  $("report-content").hidden = false;\n  renderCover();\n  renderKpis()'
-    ';\n  renderExecutive();\n  renderActions();\n  applyMachineFilters();\n  applyCycleFilters(false);\n  app'
-    'lyPatchFilters(false);\n  renderExtensionsAndSources();\n  trackSections();\n  sizeDrawers();\n})();\n</s'
-    'cript>\n</body>\n</html>\n'
+    'rade)\n        ];\n      }),\n      "No guest extensions were found on the inventoried machines."\n    )'
+    ';\n\n    var sources = snap.sources || [];\n    renderTable(\n      $("sources-table"),\n      [["Source"'
+    '], ["Status", "nw"], ["Pages", "n"], ["Records", "n"], ["Observed (UTC)", "nw"], ["Endpoint or note"'
+    ']],\n      sources.map(function (s) {\n        return [\n          el("code", { text: s.id }),\n        '
+    '  el("span", { className: "pill " + (TONE[s.status] || "neutral"), text: SOURCE_STATUS[s.status] || '
+    's.status }),\n          num(s.pages),\n          num(s.records),\n          utc(s.observed_at),\n       '
+    '   (s.note || "") + (s.errors && s.errors.length ? " Errors: " + JSON.stringify(s.errors) : "")\n    '
+    '    ];\n      })\n    );\n    var complete = sources.filter(function (s) { return s.status === "complet'
+    'e"; }).length;\n    $("toc-n-sources").textContent = complete + "/" + sources.length;\n    $("toc-n-ex'
+    'tensions").textContent = num(exts.length);\n    $("toc-n-patches").textContent = num(((snap.patches &'
+    '& snap.patches.combined) || []).length);\n    $("toc-n-actions").textContent = num((snap.actions || ['
+    ']).length);\n    $("toc-n-machines").textContent = num((snap.machines || []).length);\n\n    var method'
+    ' = snap.methodology || {};\n    var mList = $("methodology-list");\n    clear(mList);\n    (method.limi'
+    'tations || []).forEach(function (item) { mList.appendChild(el("li", { text: item })); });\n    var tL'
+    'ist = $("method-tables");\n    clear(tList);\n    (method.arg_tables || []).forEach(function (item) { '
+    'tList.appendChild(el("li", { text: item })); });\n    if (method.scheduled_cadence_description) {\n   '
+    '   tList.appendChild(el("li", { kids: ["Cadence: " + method.scheduled_cadence_description + " Cron "'
+    ', el("code", { text: method.scheduled_cadence_cron || "0 8 1 * *" }), "."] }));\n    }\n  }\n\n  ["filte'
+    'r-category", "filter-hosting", "filter-severity", "filter-search"].forEach(function (id) {\n    var n'
+    'ode = $(id);\n    node.addEventListener("input", applyMachineFilters);\n    node.addEventListener("cha'
+    'nge", applyMachineFilters);\n  });\n  $("filter-reset-btn").addEventListener("click", function () {\n  '
+    '  resetMachineFilters();\n    applyMachineFilters();\n  });\n  $("machines-view-csv-btn").addEventListe'
+    'ner("click", function () {\n    downloadBlob("patching-investigation-machines-view.csv", "text/csv;ch'
+    'arset=utf-8", machinesCsv(currentMachines));\n  });\n  $("toggle-all-drawers-btn").addEventListener("c'
+    'lick", function () {\n    drawersExpanded = !drawersExpanded;\n    this.textContent = drawersExpanded '
+    '? "Collapse all details" : "Expand all details";\n    applyMachineFilters();\n  });\n  ["cycle-status-f'
+    'ilter", "cycle-search-filter"].forEach(function (id) {\n    var node = $(id);\n    node.addEventListen'
+    'er("input", function () { applyCycleFilters(false); });\n    node.addEventListener("change", function'
+    ' () { applyCycleFilters(false); });\n  });\n  ["patch-state-filter", "patch-class-filter", "patch-sear'
+    'ch-filter"].forEach(function (id) {\n    var node = $(id);\n    node.addEventListener("input", functio'
+    'n () { applyPatchFilters(false); });\n    node.addEventListener("change", function () { applyPatchFil'
+    'ters(false); });\n  });\n  $("cycles-more-btn").addEventListener("click", function () { cycleLimit += '
+    'PAGE; applyCycleFilters(true); });\n  $("patches-more-btn").addEventListener("click", function () { p'
+    'atchLimit += PAGE; applyPatchFilters(true); });\n\n  function trackSections() {\n    var links = Array.'
+    'prototype.slice.call(D.querySelectorAll(".toc a"));\n    var targets = links.map(function (a) { retur'
+    'n $(a.getAttribute("href").slice(1)); });\n    var current = null;\n    var queued = false;\n    functi'
+    'on update() {\n      queued = false;\n      var line = window.innerHeight * 0.3;\n      var index = 0;\n'
+    '      targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top <= line) { index = i;'
+    ' } });\n      if (window.innerHeight + window.scrollY >= D.documentElement.scrollHeight - 2) { index '
+    '= targets.length - 1; }\n      if (links[index] !== current) {\n        if (current) { current.removeA'
+    'ttribute("aria-current"); }\n        current = links[index];\n        current.setAttribute("aria-curre'
+    'nt", "true");\n      }\n    }\n    window.addEventListener("scroll", function () {\n      if (!queued) {'
+    ' queued = true; window.requestAnimationFrame(update); }\n    }, { passive: true });\n    update();\n  }'
+    '\n\n  function sizeDrawers() {\n    var wrap = $("machines-table").parentNode;\n    wrap.style.setProper'
+    'ty("--wrap-w", wrap.clientWidth + "px");\n  }\n  window.addEventListener("resize", sizeDrawers);\n\n  $('
+    '"report-content").hidden = false;\n  renderCover();\n  renderKpis();\n  renderExecutive();\n  renderActi'
+    'ons();\n  applyMachineFilters();\n  applyCycleFilters(false);\n  applyPatchFilters(false);\n  renderExte'
+    'nsionsAndSources();\n  trackSections();\n  sizeDrawers();\n})();\n</script>\n</body>\n</html>\n'
 )
 # END BUILD-TIME ASSETS
 
@@ -1050,6 +1043,10 @@ def format_utc(dt):
     if dt is None:
         return None
     return dt.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def plural(count, one, many):
+    return format(count, ",") + " " + (one if count == 1 else many)
 
 
 def obj(value, source="normalization"):
@@ -1969,14 +1966,14 @@ def investigate_machines(raw, window, reference_utc):
                 "failure_category": "arc_agent_expired_or_disconnected",
                 "severity": "critical",
                 "investigation_headline": (
-                    "Agente Azure Connected Machine (azcmagent) en estado '" + str(m.get("arc_status"))
-                    + "' desde " + str(m.get("last_status_change_utc") or "fecha no disponible")
-                    + " (versión " + str(m.get("agent_version") or "desconocida") + ")."
+                    "Azure Connected Machine agent (azcmagent) in state '" + str(m.get("arc_status"))
+                    + "' since " + str(m.get("last_status_change_utc") or "an unknown date")
+                    + " (version " + str(m.get("agent_version") or "unknown") + ")."
                 ),
                 "root_cause_evidence": (
-                    "El servidor híbrido Azure Arc no envía latidos al plano de control Microsoft.HybridCompute. "
-                    "Al estar el agente en estado '" + str(m.get("arc_status")) + "', Azure Update Manager no puede "
-                    "desplegar la extensión de evaluación ni ejecutar ventanas de mantenimiento programadas."
+                    "The hybrid Azure Arc server sends no heartbeat to the Microsoft.HybridCompute control plane. "
+                    "With the agent in state '" + str(m.get("arc_status")) + "', Azure Update Manager cannot "
+                    "deploy the assessment extension or run scheduled maintenance windows."
                 ),
                 "log_or_source_reference": (
                     "arg_compute_machines :: " + m["resource_id"]
@@ -1984,9 +1981,9 @@ def investigate_machines(raw, window, reference_utc):
                     + ", lastStatusChange=" + str(m.get("last_status_change_utc"))
                 ),
                 "recommended_human_action": (
-                    "Verificar si el servidor físico/virtual sigue activo o debe darse de baja en Azure Arc. "
-                    "Si el host sigue operativo, reconectar o renovar el certificado de azcmagent ('azcmagent check' / 'azcmagent connect') "
-                    "y actualizar el agente antes del siguiente ciclo mensual."
+                    "Check whether the physical or virtual server is still in service or should be removed from Azure Arc. "
+                    "If the host is still in service, reconnect it or renew the azcmagent certificate ('azcmagent check' / 'azcmagent connect') "
+                    "and update the agent before the next monthly cycle."
                 ),
             })
 
@@ -1996,29 +1993,29 @@ def investigate_machines(raw, window, reference_utc):
             latest_inst_fail = failed_insts[0] if failed_insts else None
             if latest_unresp:
                 corr = latest_unresp.get("correlation_id") or latest_unresp["resource_id"]
-                conf_name = latest_unresp.get("maintenance_configuration_name") or "configuración asignada"
+                conf_name = latest_unresp.get("maintenance_configuration_name") or "assigned configuration"
                 detected_issues.append({
                     "failure_category": "maintenance_window_unresponsive",
                     "severity": "critical",
                     "investigation_headline": (
-                        str(len(unresponsive_cycles)) + " de " + str(len(apply_cycles))
-                        + " ejecuciones de ventana de mantenimiento finalizaron en 'ShutdownOrUnresponsive' ("
+                        str(len(unresponsive_cycles)) + " of " + str(len(apply_cycles))
+                        + " maintenance window runs ended in 'ShutdownOrUnresponsive' ("
                         + str(len(applied_cycles)) + " 'UpdateSuccessfullyApplied')."
                     ),
                     "root_cause_evidence": (
-                        "Azure Update Manager registró estado 'ShutdownOrUnresponsive' en la configuración '" + conf_name
-                        + "' (último ciclo fallido: " + str(latest_unresp.get("start_utc")) + " -> "
-                        + str(latest_unresp.get("end_utc")) + "). La máquina se encontraba apagada/desasignada o el agente "
-                        "invitado no respondió durante la ventana programada, aunque sí "
-                        "completó " + str(len(succeeded_insts)) + " instalaciones cuando estuvo encendida."
+                        "Azure Update Manager recorded status 'ShutdownOrUnresponsive' for configuration '" + conf_name
+                        + "' (last failed cycle: " + str(latest_unresp.get("start_utc")) + " -> "
+                        + str(latest_unresp.get("end_utc")) + "). The machine was stopped or deallocated, or the guest "
+                        "agent did not respond during the scheduled window. Successful installation runs while "
+                        "it was running: " + str(len(succeeded_insts)) + "."
                     ),
                     "log_or_source_reference": (
                         "arg_maintenance_cycles :: " + latest_unresp["resource_id"]
                         + " :: correlationId=" + str(corr)
                     ),
                     "recommended_human_action": (
-                        "Alinear el horario de la Maintenance Configuration ('" + conf_name + "') con el horario real de "
-                        "encendido de la máquina o habilitar la pre-tarea de encendido automático antes de la ventana de parcheo."
+                        "Align the schedule of the maintenance configuration ('" + conf_name + "') with the hours when "
+                        "the machine is actually running, or add a pre-maintenance event that starts it before the patching window."
                     ),
                 })
             elif latest_inst_fail:
@@ -2026,19 +2023,19 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "maintenance_window_unresponsive",
                     "severity": "critical",
                     "investigation_headline": (
-                        "Fallo en ejecución de instalación de parches (" + str(latest_inst_fail["status"])
-                        + ", parches fallidos=" + str(latest_inst_fail["failed_patch_count"])
-                        + ", ventana excedida=" + str(latest_inst_fail["maintenance_window_exceeded"]) + ")."
+                        "Patch installation run failed (" + str(latest_inst_fail["status"])
+                        + ", failed patches=" + str(latest_inst_fail["failed_patch_count"])
+                        + ", window exceeded=" + str(latest_inst_fail["maintenance_window_exceeded"]) + ")."
                     ),
                     "root_cause_evidence": (
-                        "La ejecución patchInstallationResults del " + str(latest_inst_fail.get("start_utc"))
-                        + " reportó código '" + str(latest_inst_fail.get("error_code") or "Error")
-                        + "': " + str(latest_inst_fail.get("error_message") or "Fallo o exceso de tiempo en ventana.")
+                        "The patchInstallationResults run that started at " + str(latest_inst_fail.get("start_utc"))
+                        + " reported code '" + str(latest_inst_fail.get("error_code") or "Error")
+                        + "': " + str(latest_inst_fail.get("error_message") or "Failure or maintenance window exceeded.")
                     ),
                     "log_or_source_reference": "arg_patch_installations :: " + latest_inst_fail["resource_id"],
                     "recommended_human_action": (
-                        "Ampliar la duración de la ventana de mantenimiento y revisar los paquetes con installationState='Failed' "
-                        "en patchinstallationresources."
+                        "Extend the maintenance window and review the packages with installationState='Failed' "
+                        "in patchinstallationresources."
                     ),
                 })
 
@@ -2050,33 +2047,33 @@ def investigate_machines(raw, window, reference_utc):
             sec_names = ", ".join(
                 (p["patch_name"] + (" (" + p["version"] + ")" if p["version"] else ""))
                 for p in sec_patches[:5]
-            ) or "ninguno listado"
+            ) or "not listed individually"
             detected_issues.append({
                 "failure_category": "assessment_stuck_or_readiness_undetermined",
                 "severity": "high",
                 "investigation_headline": (
-                    "Evaluación de parches en estado '" + str(ass["status"])
-                    + "' y soporte de huésped '" + str(readiness) + "' con "
-                    + str(counts["security_or_critical"]) + " actualizaciones de seguridad pendientes ("
-                    + str(counts["total"]) + " paquetes totales)."
+                    "Patch assessment in state '" + str(ass["status"])
+                    + "' and guest patch support '" + str(readiness) + "'; pending security updates: "
+                    + str(counts["security_or_critical"]) + " of "
+                    + str(counts["total"]) + " pending packages."
                 ),
                 "root_cause_evidence": (
-                    "patchassessmentresources reporta status='" + str(ass["status"])
+                    "patchassessmentresources reports status='" + str(ass["status"])
                     + "', detectedVMGuestPatchSupportState='" + str(readiness)
-                    + "' y patchModeConfiguration.status='" + str(patch_mode_status)
-                    + "' (última modificación de configuración: "
+                    + "' and patchModeConfiguration.status='" + str(patch_mode_status)
+                    + "' (configuration last modified: "
                     + str(pick(ass, "configuration_status", "last_modified_utc") or ass.get("last_modified_utc"))
-                    + "). Existen " + str(counts["security"]) + " parches Security pendientes (" + sec_names
-                    + ") y " + str(counts["other"]) + " paquetes adicionales sin ventana de instalación activa."
+                    + "). Pending Security patches: " + str(counts["security"]) + " (" + sec_names
+                    + "); other packages with no active installation window: " + str(counts["other"]) + "."
                 ),
                 "log_or_source_reference": (
                     "arg_patch_assessments :: " + ass["resource_id"]
                     + " :: vmGuestPatchReadiness=" + str(readiness)
                 ),
                 "recommended_human_action": (
-                    "Desbloquear el proceso apt/dpkg o gestor de paquetes en el host Linux Arc, verificar soporte de "
-                    "distribución en Azure Update Manager (Ubuntu 24.04 + azcmagent) y vincular la máquina a una "
-                    "Maintenance Configuration activa."
+                    "Unblock the apt/dpkg process or the package manager on the Linux Arc host, confirm that "
+                    "Azure Update Manager supports the distribution (Ubuntu 24.04 + azcmagent) and assign the machine to an "
+                    "active maintenance configuration."
                 ),
             })
 
@@ -2097,22 +2094,22 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "hotpatch_or_patch_extension_error",
                     "severity": "high",
                     "investigation_headline": (
-                        "Error de preparación Hotpatch '" + str(detail_code)
-                        + "' en WindowsPatchExtension (hotpatchEnablementStatus='"
+                        "Hotpatch readiness error '" + str(detail_code)
+                        + "' in WindowsPatchExtension (hotpatchEnablementStatus='"
                         + str(hotpatch.get("enablement_status")) + "')."
                     ),
                     "root_cause_evidence": (
-                        "El objeto hotpatchStatus de patchassessmentresources reporta código '" + str(detail_code)
-                        + "' (" + str(detail_msg) + "). Además, el paquete '"
+                        "The hotpatchStatus object in patchassessmentresources reports code '" + str(detail_code)
+                        + "' (" + str(detail_msg) + "). In addition, package '"
                         + ", ".join(p["patch_name"] for p in pend if "RollUp" in (p["primary_classification"] or ""))
-                        + "' quedó en estado 'NotSelected' durante las ejecuciones programadas porque no estaba incluido en "
-                        "las clasificaciones seleccionadas de la ventana."
+                        + "' stayed 'NotSelected' during the scheduled runs because its classification was not "
+                        "selected in the window."
                     ),
                     "log_or_source_reference": str(log_ref),
                     "recommended_human_action": (
-                        "Habilitar Hotpatching en la VM Windows Server 2025 si se requiere parcheo sin reinicio, o excluir "
-                        "la validación de Hotpatch e incluir la clasificación 'UpdateRollUp' en la configuración de mantenimiento "
-                        "para instalar KB890830. Revisar el log local " + str(log_ref) + " solo si persiste el código de extensión."
+                        "Enable hotpatching on the Windows Server 2025 VM if patching without reboots is required, or skip "
+                        "the hotpatch check and add the 'UpdateRollUp' classification to the maintenance configuration "
+                        "so that KB890830 is installed. Review the local log " + str(log_ref) + " only if the extension code persists."
                     ),
                 })
             if failed_exts:
@@ -2121,16 +2118,16 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "hotpatch_or_patch_extension_error",
                     "severity": "high",
                     "investigation_headline": (
-                        str(len(failed_exts)) + " extensión(es) de máquina en estado fallido: " + ext_summary + "."
+                        str(len(failed_exts)) + " of this machine's extensions failed: " + ext_summary + "."
                     ),
                     "root_cause_evidence": (
-                        "arg_patch_extensions detectó provisioningState='Failed' en " + ext_summary
-                        + " sobre la máquina '" + m["name"] + "' (estado de energía: " + str(m.get("power_state") or "desconocido") + ")."
+                        "arg_patch_extensions found provisioningState='Failed' in " + ext_summary
+                        + " on machine '" + m["name"] + "' (power state: " + str(m.get("power_state") or "unknown") + ")."
                     ),
                     "log_or_source_reference": "arg_patch_extensions :: " + failed_exts[0]["resource_id"],
                     "recommended_human_action": (
-                        "Iniciar la máquina virtual durante una ventana controlada y reprovisionar o actualizar las extensiones "
-                        "en estado Failed (" + ext_summary + ")."
+                        "Start the virtual machine during a controlled window and reprovision or update every extension "
+                        "in the Failed state (" + ext_summary + ")."
                     ),
                 })
 
@@ -2146,22 +2143,22 @@ def investigate_machines(raw, window, reference_utc):
                 "failure_category": "pending_security_patches_unscheduled",
                 "severity": "medium",
                 "investigation_headline": (
-                    str(counts["security"]) + " parches Security y " + str(counts["update_rollup"])
-                    + " UpdateRollUp pendientes" + kb_text
-                    + " sin configuración de mantenimiento asignada ni ejecuciones en el periodo."
+                    str(counts["security"]) + " Security and " + str(counts["update_rollup"])
+                    + " UpdateRollUp patches pending" + kb_text
+                    + ", with no maintenance configuration assigned and no runs in the period."
                 ),
                 "root_cause_evidence": (
-                    "La evaluación automática en '" + m["name"] + "' finalizó correctamente el "
-                    + str(ass.get("last_modified_utc")) + " detectando " + str(counts["total"])
-                    + " actualizaciones disponibles (" + str(counts["security"]) + " Security, "
+                    "The automatic assessment on '" + m["name"] + "' completed successfully on "
+                    + str(ass.get("last_modified_utc")) + "; available updates: " + str(counts["total"])
+                    + " (" + str(counts["security"]) + " Security, "
                     + str(counts["update_rollup"]) + " UpdateRollUp, " + str(counts["updates"])
-                    + " Updates, " + str(counts["definition"]) + " Definition), pero patchModeConfiguration.status es '"
-                    + str(patch_mode_status) + "' y existen 0 asignaciones en microsoft.maintenance/configurationassignments."
+                    + " Updates, " + str(counts["definition"]) + " Definition), but patchModeConfiguration.status is '"
+                    + str(patch_mode_status) + "' and there are 0 assignments in microsoft.maintenance/configurationassignments."
                 ),
                 "log_or_source_reference": "arg_patch_assessments :: " + ass["resource_id"],
                 "recommended_human_action": (
-                    "Crear el vínculo microsoft.maintenance/configurationAssignments hacia la ventana de mantenimiento "
-                    "aprobada para instalar los KBs pendientes" + kb_text + "."
+                    "Create the microsoft.maintenance/configurationAssignments link to the approved maintenance "
+                    "window to install the pending KBs" + kb_text + "."
                 ),
             })
 
@@ -2172,21 +2169,21 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "unassessed_no_update_manager_telemetry",
                     "severity": "low",
                     "investigation_headline": (
-                        "Sin registros de evaluación ni instalación en Azure Update Manager (estado='"
+                        "No assessment or installation records in Azure Update Manager (state='"
                         + str(m.get("power_state") or m.get("arc_status") or "Unknown")
                         + "', assessmentMode='" + str(m.get("assessment_mode") or "ImageDefault") + "')."
                     ),
                     "root_cause_evidence": (
-                        "La máquina '" + m["name"] + "' figura en el inventario de cómputo (" + m["type"]
-                        + "), pero no tiene ningún documento en patchassessmentresources ni en patchinstallationresources. "
-                        "Su estado actual es '" + str(m.get("power_state") or m.get("arc_status") or "Unknown")
-                        + "' con assessmentMode='" + str(m.get("assessment_mode") or "None")
-                        + "' y patchMode='" + str(m.get("patch_mode") or "None") + "'."
+                        "Machine '" + m["name"] + "' is in the compute inventory (" + m["type"]
+                        + "), but has no record in patchassessmentresources or patchinstallationresources. "
+                        "Its current state is '" + str(m.get("power_state") or m.get("arc_status") or "Unknown")
+                        + "' with assessmentMode='" + str(m.get("assessment_mode") or "None")
+                        + "' and patchMode='" + str(m.get("patch_mode") or "None") + "'."
                     ),
                     "log_or_source_reference": "arg_compute_machines :: " + m["resource_id"],
                     "recommended_human_action": (
-                        "Si la VM forma parte del alcance operativo, configurar assessmentMode='AutomaticByPlatform' "
-                        "y programar evaluaciones periódicas cuando la instancia esté encendida."
+                        "If the VM is in operational scope, set assessmentMode='AutomaticByPlatform' "
+                        "and schedule periodic assessments while the instance is running."
                     ),
                 })
 
@@ -2225,12 +2222,12 @@ def investigate_machines(raw, window, reference_utc):
             primary = {
                 "failure_category": "healthy",
                 "severity": "info",
-                "investigation_headline": "Evaluación y ciclos de parcheo completados sin errores ni parches críticos pendientes.",
+                "investigation_headline": "Assessment and patching cycles completed with no errors and no pending critical patches.",
                 "root_cause_evidence": (
-                    "Evaluación en estado 'Succeeded' sin reinicio pendiente ni errores en extensiones o ventanas de mantenimiento."
+                    "Assessment in state 'Succeeded' with no pending reboot and no errors in extensions or maintenance windows."
                 ),
                 "log_or_source_reference": (ass["resource_id"] if ass else m["resource_id"]),
-                "recommended_human_action": "Mantener la cadencia programada en Azure Update Manager.",
+                "recommended_human_action": "Keep the scheduled cadence in Azure Update Manager.",
             }
             matched_cats = ["healthy"]
 
@@ -2467,32 +2464,32 @@ def finish_snapshot(raw, reference_utc, provenance="LIVE", environment="PRODUCTI
 
     executive_messages = [
         (
-            str(summary_kpis["machines_total"]) + " máquinas inventariadas ("
-            + str(summary_kpis["azure_vms_total"]) + " Azure VMs y "
-            + str(summary_kpis["arc_machines_total"]) + " servidores híbridos Azure Arc): "
-            + str(summary_kpis["assessed_machines_total"]) + " con evaluación en Update Manager y "
-            + str(summary_kpis["unassessed_machines_total"]) + " sin telemetría de evaluación."
+            plural(summary_kpis["machines_total"], "machine", "machines") + " in inventory ("
+            + plural(summary_kpis["azure_vms_total"], "Azure VM", "Azure VMs") + " and "
+            + plural(summary_kpis["arc_machines_total"], "hybrid Azure Arc server", "hybrid Azure Arc servers") + "): "
+            + str(summary_kpis["assessed_machines_total"]) + " assessed by Update Manager and "
+            + str(summary_kpis["unassessed_machines_total"]) + " with no assessment telemetry."
         ),
         (
-            str(summary_kpis["maintenance_cycles_in_window"]) + " ciclos de mantenimiento por máquina registrados en la ventana ("
-            + str(applied_count) + " 'UpdateSuccessfullyApplied' frente a "
-            + str(unresp_count) + " 'ShutdownOrUnresponsive') y "
-            + str(summary_kpis["installation_runs_in_window"]) + " ejecuciones de patchInstallationResults."
+            plural(summary_kpis["maintenance_cycles_in_window"], "per-machine maintenance cycle", "per-machine maintenance cycles") + " recorded in the window ("
+            + str(applied_count) + " 'UpdateSuccessfullyApplied' versus "
+            + str(unresp_count) + " 'ShutdownOrUnresponsive') and "
+            + plural(summary_kpis["installation_runs_in_window"], "patchInstallationResults run", "patchInstallationResults runs") + "."
         ),
         (
-            str(cat_counts.get("arc_agent_expired_or_disconnected", 0))
-            + " servidores Azure Arc presentan agente en estado 'Expired'/'Disconnected', impidiendo la evaluación y el despliegue de parches."
+            plural(cat_counts.get("arc_agent_expired_or_disconnected", 0), "Azure Arc server has", "Azure Arc servers have")
+            + " the agent in state 'Expired'/'Disconnected', which blocks assessment and patch deployment."
         ),
         (
-            str(cat_counts.get("assessment_stuck_or_readiness_undetermined", 0))
-            + " máquinas tienen evaluaciones atascadas en 'InProgress' con vmGuestPatchReadiness='UnableToDetermine', y "
-            + str(cat_counts.get("pending_security_patches_unscheduled", 0))
-            + " servidores acumulan parches Security/UpdateRollUp pendientes sin ventana de mantenimiento asignada."
+            plural(cat_counts.get("assessment_stuck_or_readiness_undetermined", 0), "machine has an assessment", "machines have assessments")
+            + " stuck in 'InProgress' with vmGuestPatchReadiness='UnableToDetermine', and "
+            + plural(cat_counts.get("pending_security_patches_unscheduled", 0), "server has", "servers have")
+            + " pending Security/UpdateRollUp patches with no maintenance window assigned."
         ),
         (
-            "Diagnóstico automático de causa raíz generado para las " + str(len(machines))
-            + " máquinas (" + str(len(failures)) + " hallazgos técnicos correlacionados entre ARG, extensiones, Hotpatch y ventanas) "
-            "sin necesidad de iniciar sesión máquina por máquina."
+            "Automated root-cause diagnosis generated for " + plural(len(machines), "machine", "machines")
+            + " (" + plural(len(failures), "technical finding", "technical findings") + " correlated across ARG, extensions, Hotpatch and maintenance windows), "
+            "without signing in to any machine."
         ),
     ]
 
@@ -2543,17 +2540,17 @@ def finish_snapshot(raw, reference_utc, provenance="LIVE", environment="PRODUCTI
         "methodology": {
             "read_only": True,
             "scheduled_cadence_cron": "0 8 1 * *",
-            "scheduled_cadence_description": "Día 1 de cada mes a las 08:00 UTC (más ejecución bajo demanda tras ventana de parcheo).",
+            "scheduled_cadence_description": "Day 1 of every month at 08:00 UTC (plus on-demand runs after a patching window).",
             "arg_tables": [
                 "resources (microsoft.compute/virtualmachines, microsoft.hybridcompute/machines, extensions)",
-                "patchassessmentresources (patchAssessmentResults/latest y softwarePatches)",
-                "patchinstallationresources (patchInstallationResults y softwarePatches)",
+                "patchassessmentresources (patchAssessmentResults/latest and softwarePatches)",
+                "patchinstallationresources (patchInstallationResults and softwarePatches)",
                 "maintenanceresources (applyupdates, configurationassignments, maintenanceconfigurations/applyupdates, updates)",
             ],
             "limitations": [
-                "Recolección 100% read-only mediante Azure Resource Graph API (2022-10-01); nunca ejecuta comandos en huésped (runCommand) ni inicia/detiene máquinas.",
-                "Los bloques de configuración sensible o privada de las extensiones nunca se solicitan ni exportan.",
-                "Las rutas de logs locales indicadas por Azure Update Manager (por ejemplo WindowsPatchExtension) provienen del mensaje de error reportado al plano de control ARM.",
+                "100% read-only collection through the Azure Resource Graph API (2022-10-01); the tool never runs guest commands (runCommand) and never starts or stops machines.",
+                "Sensitive or private extension configuration blocks are never requested or exported.",
+                "Local log paths shown by Azure Update Manager (for example WindowsPatchExtension) come from the error message reported to the ARM control plane.",
             ],
         },
     }

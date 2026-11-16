@@ -90,7 +90,7 @@ def fixture(module, period="previous_month"):
                 "targetResourceType": "microsoft.compute/virtualmachines",
                 "startDateTime": "2026-09-18T14:20:00Z",
                 "lastModifiedDateTime": "2026-09-18T14:35:00Z",
-                "description": "Percentage CPU superó el umbral del 90% durante 15 minutos en vm-obs-app-01.",
+                "description": "Percentage CPU exceeded the 90% threshold for 15 minutes on vm-obs-app-01.",
             },
             SUBSCRIPTION,
             window,
@@ -111,7 +111,7 @@ def fixture(module, period="previous_month"):
                 "targetResourceType": "microsoft.hybridcompute/machines",
                 "startDateTime": "2026-09-22T09:10:00Z",
                 "lastModifiedDateTime": "2026-09-22T09:25:00Z",
-                "description": "Fallo recurrente de aprovisionamiento en extensión de seguridad MDE.Windows sobre arc-win2k25-01.",
+                "description": "Recurring provisioning failure of the MDE.Windows security extension on arc-win2k25-01.",
             },
             SUBSCRIPTION,
             window,
@@ -128,11 +128,11 @@ def fixture(module, period="previous_month"):
                 "properties": {
                     "eventType": "PlannedMaintenance",
                     "status": "Active",
-                    "title": "Mantenimiento planificado de red en West Europe",
+                    "title": "Planned network maintenance in West Europe",
                     "level": "Informational",
                     "impactStartTime": "2026-09-25T01:00:00Z",
                     "lastUpdateTime": "2026-09-25T05:00:00Z",
-                    "summary": "Actualización programada del plano de red regional en West Europe sin interrupción prevista.",
+                    "summary": "Scheduled update of the regional network plane in West Europe, with no interruption expected.",
                     "impact": [
                         {
                             "impactedService": "Virtual Machines",
@@ -351,8 +351,8 @@ def fixture(module, period="previous_month"):
                     "lastUpdated": "2026-09-29T08:00:00Z",
                     "resourceMetadata": {"resourceId": vm_id},
                     "shortDescription": {
-                        "problem": "Habilitar redundancia zonal o Azure Backup para proteger máquinas virtuales críticas.",
-                        "solution": "Configurar copias de seguridad periódicas en Recovery Services Vault y evaluar disponibilidad multi-zona.",
+                        "problem": "Enable zone redundancy or Azure Backup to protect critical virtual machines.",
+                        "solution": "Configure regular backups in a Recovery Services vault and evaluate multi-zone availability.",
                     },
                 },
             },

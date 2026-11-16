@@ -24,11 +24,11 @@ from uuid import UUID, uuid4
 
 SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_MANAGED_IDENTITY_CLIENT_ID>"
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 CLIENT_LOGO_DATA_URI = ""
-CLIENT_LOGO_ALT = "Logotipo autorizado del cliente"
+CLIENT_LOGO_ALT = "Authorized customer logo"
 OUTPUT_DIRECTORY = "patching-investigation-reports"
 
 ARM_ORIGIN = "https://management.azure.com"
@@ -86,20 +86,20 @@ CATEGORY_SEVERITY = {
     "healthy": "info",
 }
 CATEGORY_LABELS = {
-    "maintenance_window_unresponsive": "Ventana de mantenimiento sin respuesta o fallo de ejecución",
-    "arc_agent_expired_or_disconnected": "Agente Azure Arc expirado o desconectado",
-    "assessment_stuck_or_readiness_undetermined": "Evaluación en curso atascada o soporte de parcheo indeterminado",
-    "hotpatch_or_patch_extension_error": "Error en Hotpatch o extensión de gestión/parcheo en huésped",
-    "pending_security_patches_unscheduled": "Actualizaciones de seguridad/rollup pendientes sin ventana asignada",
-    "unassessed_no_update_manager_telemetry": "Sin telemetría de evaluación ni instalación en Update Manager",
-    "healthy": "Parcheo verificado y sin bloqueos activos",
+    "maintenance_window_unresponsive": "Maintenance window unresponsive or run failed",
+    "arc_agent_expired_or_disconnected": "Azure Arc agent expired or disconnected",
+    "assessment_stuck_or_readiness_undetermined": "Assessment stuck in progress or patch support undetermined",
+    "hotpatch_or_patch_extension_error": "Hotpatch or guest management/patch extension error",
+    "pending_security_patches_unscheduled": "Pending security/rollup updates with no assigned window",
+    "unassessed_no_update_manager_telemetry": "No assessment or installation telemetry in Update Manager",
+    "healthy": "Patching verified, no active blockers",
 }
 SEVERITY_LABELS = {
-    "critical": "Crítica",
-    "high": "Alta",
-    "medium": "Media",
-    "low": "Baja",
-    "info": "Correcto",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "info": "Passed",
 }
 SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
 SOURCE_IDS = (
@@ -189,6 +189,10 @@ def format_utc(dt):
     if dt is None:
         return None
     return dt.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def plural(count, one, many):
+    return format(count, ",") + " " + (one if count == 1 else many)
 
 
 def obj(value, source="normalization"):
@@ -1108,14 +1112,14 @@ def investigate_machines(raw, window, reference_utc):
                 "failure_category": "arc_agent_expired_or_disconnected",
                 "severity": "critical",
                 "investigation_headline": (
-                    "Agente Azure Connected Machine (azcmagent) en estado '" + str(m.get("arc_status"))
-                    + "' desde " + str(m.get("last_status_change_utc") or "fecha no disponible")
-                    + " (versión " + str(m.get("agent_version") or "desconocida") + ")."
+                    "Azure Connected Machine agent (azcmagent) in state '" + str(m.get("arc_status"))
+                    + "' since " + str(m.get("last_status_change_utc") or "an unknown date")
+                    + " (version " + str(m.get("agent_version") or "unknown") + ")."
                 ),
                 "root_cause_evidence": (
-                    "El servidor híbrido Azure Arc no envía latidos al plano de control Microsoft.HybridCompute. "
-                    "Al estar el agente en estado '" + str(m.get("arc_status")) + "', Azure Update Manager no puede "
-                    "desplegar la extensión de evaluación ni ejecutar ventanas de mantenimiento programadas."
+                    "The hybrid Azure Arc server sends no heartbeat to the Microsoft.HybridCompute control plane. "
+                    "With the agent in state '" + str(m.get("arc_status")) + "', Azure Update Manager cannot "
+                    "deploy the assessment extension or run scheduled maintenance windows."
                 ),
                 "log_or_source_reference": (
                     "arg_compute_machines :: " + m["resource_id"]
@@ -1123,9 +1127,9 @@ def investigate_machines(raw, window, reference_utc):
                     + ", lastStatusChange=" + str(m.get("last_status_change_utc"))
                 ),
                 "recommended_human_action": (
-                    "Verificar si el servidor físico/virtual sigue activo o debe darse de baja en Azure Arc. "
-                    "Si el host sigue operativo, reconectar o renovar el certificado de azcmagent ('azcmagent check' / 'azcmagent connect') "
-                    "y actualizar el agente antes del siguiente ciclo mensual."
+                    "Check whether the physical or virtual server is still in service or should be removed from Azure Arc. "
+                    "If the host is still in service, reconnect it or renew the azcmagent certificate ('azcmagent check' / 'azcmagent connect') "
+                    "and update the agent before the next monthly cycle."
                 ),
             })
 
@@ -1135,29 +1139,29 @@ def investigate_machines(raw, window, reference_utc):
             latest_inst_fail = failed_insts[0] if failed_insts else None
             if latest_unresp:
                 corr = latest_unresp.get("correlation_id") or latest_unresp["resource_id"]
-                conf_name = latest_unresp.get("maintenance_configuration_name") or "configuración asignada"
+                conf_name = latest_unresp.get("maintenance_configuration_name") or "assigned configuration"
                 detected_issues.append({
                     "failure_category": "maintenance_window_unresponsive",
                     "severity": "critical",
                     "investigation_headline": (
-                        str(len(unresponsive_cycles)) + " de " + str(len(apply_cycles))
-                        + " ejecuciones de ventana de mantenimiento finalizaron en 'ShutdownOrUnresponsive' ("
+                        str(len(unresponsive_cycles)) + " of " + str(len(apply_cycles))
+                        + " maintenance window runs ended in 'ShutdownOrUnresponsive' ("
                         + str(len(applied_cycles)) + " 'UpdateSuccessfullyApplied')."
                     ),
                     "root_cause_evidence": (
-                        "Azure Update Manager registró estado 'ShutdownOrUnresponsive' en la configuración '" + conf_name
-                        + "' (último ciclo fallido: " + str(latest_unresp.get("start_utc")) + " -> "
-                        + str(latest_unresp.get("end_utc")) + "). La máquina se encontraba apagada/desasignada o el agente "
-                        "invitado no respondió durante la ventana programada, aunque sí "
-                        "completó " + str(len(succeeded_insts)) + " instalaciones cuando estuvo encendida."
+                        "Azure Update Manager recorded status 'ShutdownOrUnresponsive' for configuration '" + conf_name
+                        + "' (last failed cycle: " + str(latest_unresp.get("start_utc")) + " -> "
+                        + str(latest_unresp.get("end_utc")) + "). The machine was stopped or deallocated, or the guest "
+                        "agent did not respond during the scheduled window. Successful installation runs while "
+                        "it was running: " + str(len(succeeded_insts)) + "."
                     ),
                     "log_or_source_reference": (
                         "arg_maintenance_cycles :: " + latest_unresp["resource_id"]
                         + " :: correlationId=" + str(corr)
                     ),
                     "recommended_human_action": (
-                        "Alinear el horario de la Maintenance Configuration ('" + conf_name + "') con el horario real de "
-                        "encendido de la máquina o habilitar la pre-tarea de encendido automático antes de la ventana de parcheo."
+                        "Align the schedule of the maintenance configuration ('" + conf_name + "') with the hours when "
+                        "the machine is actually running, or add a pre-maintenance event that starts it before the patching window."
                     ),
                 })
             elif latest_inst_fail:
@@ -1165,19 +1169,19 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "maintenance_window_unresponsive",
                     "severity": "critical",
                     "investigation_headline": (
-                        "Fallo en ejecución de instalación de parches (" + str(latest_inst_fail["status"])
-                        + ", parches fallidos=" + str(latest_inst_fail["failed_patch_count"])
-                        + ", ventana excedida=" + str(latest_inst_fail["maintenance_window_exceeded"]) + ")."
+                        "Patch installation run failed (" + str(latest_inst_fail["status"])
+                        + ", failed patches=" + str(latest_inst_fail["failed_patch_count"])
+                        + ", window exceeded=" + str(latest_inst_fail["maintenance_window_exceeded"]) + ")."
                     ),
                     "root_cause_evidence": (
-                        "La ejecución patchInstallationResults del " + str(latest_inst_fail.get("start_utc"))
-                        + " reportó código '" + str(latest_inst_fail.get("error_code") or "Error")
-                        + "': " + str(latest_inst_fail.get("error_message") or "Fallo o exceso de tiempo en ventana.")
+                        "The patchInstallationResults run that started at " + str(latest_inst_fail.get("start_utc"))
+                        + " reported code '" + str(latest_inst_fail.get("error_code") or "Error")
+                        + "': " + str(latest_inst_fail.get("error_message") or "Failure or maintenance window exceeded.")
                     ),
                     "log_or_source_reference": "arg_patch_installations :: " + latest_inst_fail["resource_id"],
                     "recommended_human_action": (
-                        "Ampliar la duración de la ventana de mantenimiento y revisar los paquetes con installationState='Failed' "
-                        "en patchinstallationresources."
+                        "Extend the maintenance window and review the packages with installationState='Failed' "
+                        "in patchinstallationresources."
                     ),
                 })
 
@@ -1189,33 +1193,33 @@ def investigate_machines(raw, window, reference_utc):
             sec_names = ", ".join(
                 (p["patch_name"] + (" (" + p["version"] + ")" if p["version"] else ""))
                 for p in sec_patches[:5]
-            ) or "ninguno listado"
+            ) or "not listed individually"
             detected_issues.append({
                 "failure_category": "assessment_stuck_or_readiness_undetermined",
                 "severity": "high",
                 "investigation_headline": (
-                    "Evaluación de parches en estado '" + str(ass["status"])
-                    + "' y soporte de huésped '" + str(readiness) + "' con "
-                    + str(counts["security_or_critical"]) + " actualizaciones de seguridad pendientes ("
-                    + str(counts["total"]) + " paquetes totales)."
+                    "Patch assessment in state '" + str(ass["status"])
+                    + "' and guest patch support '" + str(readiness) + "'; pending security updates: "
+                    + str(counts["security_or_critical"]) + " of "
+                    + str(counts["total"]) + " pending packages."
                 ),
                 "root_cause_evidence": (
-                    "patchassessmentresources reporta status='" + str(ass["status"])
+                    "patchassessmentresources reports status='" + str(ass["status"])
                     + "', detectedVMGuestPatchSupportState='" + str(readiness)
-                    + "' y patchModeConfiguration.status='" + str(patch_mode_status)
-                    + "' (última modificación de configuración: "
+                    + "' and patchModeConfiguration.status='" + str(patch_mode_status)
+                    + "' (configuration last modified: "
                     + str(pick(ass, "configuration_status", "last_modified_utc") or ass.get("last_modified_utc"))
-                    + "). Existen " + str(counts["security"]) + " parches Security pendientes (" + sec_names
-                    + ") y " + str(counts["other"]) + " paquetes adicionales sin ventana de instalación activa."
+                    + "). Pending Security patches: " + str(counts["security"]) + " (" + sec_names
+                    + "); other packages with no active installation window: " + str(counts["other"]) + "."
                 ),
                 "log_or_source_reference": (
                     "arg_patch_assessments :: " + ass["resource_id"]
                     + " :: vmGuestPatchReadiness=" + str(readiness)
                 ),
                 "recommended_human_action": (
-                    "Desbloquear el proceso apt/dpkg o gestor de paquetes en el host Linux Arc, verificar soporte de "
-                    "distribución en Azure Update Manager (Ubuntu 24.04 + azcmagent) y vincular la máquina a una "
-                    "Maintenance Configuration activa."
+                    "Unblock the apt/dpkg process or the package manager on the Linux Arc host, confirm that "
+                    "Azure Update Manager supports the distribution (Ubuntu 24.04 + azcmagent) and assign the machine to an "
+                    "active maintenance configuration."
                 ),
             })
 
@@ -1236,22 +1240,22 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "hotpatch_or_patch_extension_error",
                     "severity": "high",
                     "investigation_headline": (
-                        "Error de preparación Hotpatch '" + str(detail_code)
-                        + "' en WindowsPatchExtension (hotpatchEnablementStatus='"
+                        "Hotpatch readiness error '" + str(detail_code)
+                        + "' in WindowsPatchExtension (hotpatchEnablementStatus='"
                         + str(hotpatch.get("enablement_status")) + "')."
                     ),
                     "root_cause_evidence": (
-                        "El objeto hotpatchStatus de patchassessmentresources reporta código '" + str(detail_code)
-                        + "' (" + str(detail_msg) + "). Además, el paquete '"
+                        "The hotpatchStatus object in patchassessmentresources reports code '" + str(detail_code)
+                        + "' (" + str(detail_msg) + "). In addition, package '"
                         + ", ".join(p["patch_name"] for p in pend if "RollUp" in (p["primary_classification"] or ""))
-                        + "' quedó en estado 'NotSelected' durante las ejecuciones programadas porque no estaba incluido en "
-                        "las clasificaciones seleccionadas de la ventana."
+                        + "' stayed 'NotSelected' during the scheduled runs because its classification was not "
+                        "selected in the window."
                     ),
                     "log_or_source_reference": str(log_ref),
                     "recommended_human_action": (
-                        "Habilitar Hotpatching en la VM Windows Server 2025 si se requiere parcheo sin reinicio, o excluir "
-                        "la validación de Hotpatch e incluir la clasificación 'UpdateRollUp' en la configuración de mantenimiento "
-                        "para instalar KB890830. Revisar el log local " + str(log_ref) + " solo si persiste el código de extensión."
+                        "Enable hotpatching on the Windows Server 2025 VM if patching without reboots is required, or skip "
+                        "the hotpatch check and add the 'UpdateRollUp' classification to the maintenance configuration "
+                        "so that KB890830 is installed. Review the local log " + str(log_ref) + " only if the extension code persists."
                     ),
                 })
             if failed_exts:
@@ -1260,16 +1264,16 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "hotpatch_or_patch_extension_error",
                     "severity": "high",
                     "investigation_headline": (
-                        str(len(failed_exts)) + " extensión(es) de máquina en estado fallido: " + ext_summary + "."
+                        str(len(failed_exts)) + " of this machine's extensions failed: " + ext_summary + "."
                     ),
                     "root_cause_evidence": (
-                        "arg_patch_extensions detectó provisioningState='Failed' en " + ext_summary
-                        + " sobre la máquina '" + m["name"] + "' (estado de energía: " + str(m.get("power_state") or "desconocido") + ")."
+                        "arg_patch_extensions found provisioningState='Failed' in " + ext_summary
+                        + " on machine '" + m["name"] + "' (power state: " + str(m.get("power_state") or "unknown") + ")."
                     ),
                     "log_or_source_reference": "arg_patch_extensions :: " + failed_exts[0]["resource_id"],
                     "recommended_human_action": (
-                        "Iniciar la máquina virtual durante una ventana controlada y reprovisionar o actualizar las extensiones "
-                        "en estado Failed (" + ext_summary + ")."
+                        "Start the virtual machine during a controlled window and reprovision or update every extension "
+                        "in the Failed state (" + ext_summary + ")."
                     ),
                 })
 
@@ -1285,22 +1289,22 @@ def investigate_machines(raw, window, reference_utc):
                 "failure_category": "pending_security_patches_unscheduled",
                 "severity": "medium",
                 "investigation_headline": (
-                    str(counts["security"]) + " parches Security y " + str(counts["update_rollup"])
-                    + " UpdateRollUp pendientes" + kb_text
-                    + " sin configuración de mantenimiento asignada ni ejecuciones en el periodo."
+                    str(counts["security"]) + " Security and " + str(counts["update_rollup"])
+                    + " UpdateRollUp patches pending" + kb_text
+                    + ", with no maintenance configuration assigned and no runs in the period."
                 ),
                 "root_cause_evidence": (
-                    "La evaluación automática en '" + m["name"] + "' finalizó correctamente el "
-                    + str(ass.get("last_modified_utc")) + " detectando " + str(counts["total"])
-                    + " actualizaciones disponibles (" + str(counts["security"]) + " Security, "
+                    "The automatic assessment on '" + m["name"] + "' completed successfully on "
+                    + str(ass.get("last_modified_utc")) + "; available updates: " + str(counts["total"])
+                    + " (" + str(counts["security"]) + " Security, "
                     + str(counts["update_rollup"]) + " UpdateRollUp, " + str(counts["updates"])
-                    + " Updates, " + str(counts["definition"]) + " Definition), pero patchModeConfiguration.status es '"
-                    + str(patch_mode_status) + "' y existen 0 asignaciones en microsoft.maintenance/configurationassignments."
+                    + " Updates, " + str(counts["definition"]) + " Definition), but patchModeConfiguration.status is '"
+                    + str(patch_mode_status) + "' and there are 0 assignments in microsoft.maintenance/configurationassignments."
                 ),
                 "log_or_source_reference": "arg_patch_assessments :: " + ass["resource_id"],
                 "recommended_human_action": (
-                    "Crear el vínculo microsoft.maintenance/configurationAssignments hacia la ventana de mantenimiento "
-                    "aprobada para instalar los KBs pendientes" + kb_text + "."
+                    "Create the microsoft.maintenance/configurationAssignments link to the approved maintenance "
+                    "window to install the pending KBs" + kb_text + "."
                 ),
             })
 
@@ -1311,21 +1315,21 @@ def investigate_machines(raw, window, reference_utc):
                     "failure_category": "unassessed_no_update_manager_telemetry",
                     "severity": "low",
                     "investigation_headline": (
-                        "Sin registros de evaluación ni instalación en Azure Update Manager (estado='"
+                        "No assessment or installation records in Azure Update Manager (state='"
                         + str(m.get("power_state") or m.get("arc_status") or "Unknown")
                         + "', assessmentMode='" + str(m.get("assessment_mode") or "ImageDefault") + "')."
                     ),
                     "root_cause_evidence": (
-                        "La máquina '" + m["name"] + "' figura en el inventario de cómputo (" + m["type"]
-                        + "), pero no tiene ningún documento en patchassessmentresources ni en patchinstallationresources. "
-                        "Su estado actual es '" + str(m.get("power_state") or m.get("arc_status") or "Unknown")
-                        + "' con assessmentMode='" + str(m.get("assessment_mode") or "None")
-                        + "' y patchMode='" + str(m.get("patch_mode") or "None") + "'."
+                        "Machine '" + m["name"] + "' is in the compute inventory (" + m["type"]
+                        + "), but has no record in patchassessmentresources or patchinstallationresources. "
+                        "Its current state is '" + str(m.get("power_state") or m.get("arc_status") or "Unknown")
+                        + "' with assessmentMode='" + str(m.get("assessment_mode") or "None")
+                        + "' and patchMode='" + str(m.get("patch_mode") or "None") + "'."
                     ),
                     "log_or_source_reference": "arg_compute_machines :: " + m["resource_id"],
                     "recommended_human_action": (
-                        "Si la VM forma parte del alcance operativo, configurar assessmentMode='AutomaticByPlatform' "
-                        "y programar evaluaciones periódicas cuando la instancia esté encendida."
+                        "If the VM is in operational scope, set assessmentMode='AutomaticByPlatform' "
+                        "and schedule periodic assessments while the instance is running."
                     ),
                 })
 
@@ -1364,12 +1368,12 @@ def investigate_machines(raw, window, reference_utc):
             primary = {
                 "failure_category": "healthy",
                 "severity": "info",
-                "investigation_headline": "Evaluación y ciclos de parcheo completados sin errores ni parches críticos pendientes.",
+                "investigation_headline": "Assessment and patching cycles completed with no errors and no pending critical patches.",
                 "root_cause_evidence": (
-                    "Evaluación en estado 'Succeeded' sin reinicio pendiente ni errores en extensiones o ventanas de mantenimiento."
+                    "Assessment in state 'Succeeded' with no pending reboot and no errors in extensions or maintenance windows."
                 ),
                 "log_or_source_reference": (ass["resource_id"] if ass else m["resource_id"]),
-                "recommended_human_action": "Mantener la cadencia programada en Azure Update Manager.",
+                "recommended_human_action": "Keep the scheduled cadence in Azure Update Manager.",
             }
             matched_cats = ["healthy"]
 
@@ -1606,32 +1610,32 @@ def finish_snapshot(raw, reference_utc, provenance="LIVE", environment="PRODUCTI
 
     executive_messages = [
         (
-            str(summary_kpis["machines_total"]) + " máquinas inventariadas ("
-            + str(summary_kpis["azure_vms_total"]) + " Azure VMs y "
-            + str(summary_kpis["arc_machines_total"]) + " servidores híbridos Azure Arc): "
-            + str(summary_kpis["assessed_machines_total"]) + " con evaluación en Update Manager y "
-            + str(summary_kpis["unassessed_machines_total"]) + " sin telemetría de evaluación."
+            plural(summary_kpis["machines_total"], "machine", "machines") + " in inventory ("
+            + plural(summary_kpis["azure_vms_total"], "Azure VM", "Azure VMs") + " and "
+            + plural(summary_kpis["arc_machines_total"], "hybrid Azure Arc server", "hybrid Azure Arc servers") + "): "
+            + str(summary_kpis["assessed_machines_total"]) + " assessed by Update Manager and "
+            + str(summary_kpis["unassessed_machines_total"]) + " with no assessment telemetry."
         ),
         (
-            str(summary_kpis["maintenance_cycles_in_window"]) + " ciclos de mantenimiento por máquina registrados en la ventana ("
-            + str(applied_count) + " 'UpdateSuccessfullyApplied' frente a "
-            + str(unresp_count) + " 'ShutdownOrUnresponsive') y "
-            + str(summary_kpis["installation_runs_in_window"]) + " ejecuciones de patchInstallationResults."
+            plural(summary_kpis["maintenance_cycles_in_window"], "per-machine maintenance cycle", "per-machine maintenance cycles") + " recorded in the window ("
+            + str(applied_count) + " 'UpdateSuccessfullyApplied' versus "
+            + str(unresp_count) + " 'ShutdownOrUnresponsive') and "
+            + plural(summary_kpis["installation_runs_in_window"], "patchInstallationResults run", "patchInstallationResults runs") + "."
         ),
         (
-            str(cat_counts.get("arc_agent_expired_or_disconnected", 0))
-            + " servidores Azure Arc presentan agente en estado 'Expired'/'Disconnected', impidiendo la evaluación y el despliegue de parches."
+            plural(cat_counts.get("arc_agent_expired_or_disconnected", 0), "Azure Arc server has", "Azure Arc servers have")
+            + " the agent in state 'Expired'/'Disconnected', which blocks assessment and patch deployment."
         ),
         (
-            str(cat_counts.get("assessment_stuck_or_readiness_undetermined", 0))
-            + " máquinas tienen evaluaciones atascadas en 'InProgress' con vmGuestPatchReadiness='UnableToDetermine', y "
-            + str(cat_counts.get("pending_security_patches_unscheduled", 0))
-            + " servidores acumulan parches Security/UpdateRollUp pendientes sin ventana de mantenimiento asignada."
+            plural(cat_counts.get("assessment_stuck_or_readiness_undetermined", 0), "machine has an assessment", "machines have assessments")
+            + " stuck in 'InProgress' with vmGuestPatchReadiness='UnableToDetermine', and "
+            + plural(cat_counts.get("pending_security_patches_unscheduled", 0), "server has", "servers have")
+            + " pending Security/UpdateRollUp patches with no maintenance window assigned."
         ),
         (
-            "Diagnóstico automático de causa raíz generado para las " + str(len(machines))
-            + " máquinas (" + str(len(failures)) + " hallazgos técnicos correlacionados entre ARG, extensiones, Hotpatch y ventanas) "
-            "sin necesidad de iniciar sesión máquina por máquina."
+            "Automated root-cause diagnosis generated for " + plural(len(machines), "machine", "machines")
+            + " (" + plural(len(failures), "technical finding", "technical findings") + " correlated across ARG, extensions, Hotpatch and maintenance windows), "
+            "without signing in to any machine."
         ),
     ]
 
@@ -1682,17 +1686,17 @@ def finish_snapshot(raw, reference_utc, provenance="LIVE", environment="PRODUCTI
         "methodology": {
             "read_only": True,
             "scheduled_cadence_cron": "0 8 1 * *",
-            "scheduled_cadence_description": "Día 1 de cada mes a las 08:00 UTC (más ejecución bajo demanda tras ventana de parcheo).",
+            "scheduled_cadence_description": "Day 1 of every month at 08:00 UTC (plus on-demand runs after a patching window).",
             "arg_tables": [
                 "resources (microsoft.compute/virtualmachines, microsoft.hybridcompute/machines, extensions)",
-                "patchassessmentresources (patchAssessmentResults/latest y softwarePatches)",
-                "patchinstallationresources (patchInstallationResults y softwarePatches)",
+                "patchassessmentresources (patchAssessmentResults/latest and softwarePatches)",
+                "patchinstallationresources (patchInstallationResults and softwarePatches)",
                 "maintenanceresources (applyupdates, configurationassignments, maintenanceconfigurations/applyupdates, updates)",
             ],
             "limitations": [
-                "Recolección 100% read-only mediante Azure Resource Graph API (2022-10-01); nunca ejecuta comandos en huésped (runCommand) ni inicia/detiene máquinas.",
-                "Los bloques de configuración sensible o privada de las extensiones nunca se solicitan ni exportan.",
-                "Las rutas de logs locales indicadas por Azure Update Manager (por ejemplo WindowsPatchExtension) provienen del mensaje de error reportado al plano de control ARM.",
+                "100% read-only collection through the Azure Resource Graph API (2022-10-01); the tool never runs guest commands (runCommand) and never starts or stops machines.",
+                "Sensitive or private extension configuration blocks are never requested or exported.",
+                "Local log paths shown by Azure Update Manager (for example WindowsPatchExtension) come from the error message reported to the ARM control plane.",
             ],
         },
     }

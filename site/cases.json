@@ -181,7 +181,7 @@
       "image": "site/img/plates/09.webp",
       "thumb": "site/img/plates/09-thumb.webp",
       "full": "09-update-manager-patching-failure-investigation/images/04-report-cover-and-cycle-summary.png",
-      "caption": "Lab run, report in Spanish. Field marks: 1 exports · 2 report cover and scope · 3 summary of the patching cycle.",
+      "caption": "Sample run with simulated data. Field marks: 1 read-only chip, exports and print · 2 verdict-first cover and scope · 3 summary of the patching cycle.",
       "compare": [
         "03-infrastructure-operations-health"
       ]
@@ -199,7 +199,7 @@
       "image": "site/img/plates/10.webp",
       "thumb": "site/img/plates/10-thumb.webp",
       "full": "10-operations-incidents-anomalies-digest/images/04-report-cover-and-executive-synthesis.png",
-      "caption": "Lab run, report in Spanish. Field marks: 1 report header · 2 exports and sections · 3 executive synthesis with the counts.",
+      "caption": "Sample run with simulated data. Field marks: 1 sections, read-only and print · 2 executive synthesis and verdict · 3 counts by source.",
       "compare": [
         "03-infrastructure-operations-health",
         "05-service-health-events-review"
@@ -217,8 +217,8 @@
       "delivers": "HTML report, two CSVs and JSON",
       "image": "site/img/plates/12.webp",
       "thumb": "site/img/plates/12-thumb.webp",
-      "full": "12-sqlmi-maintenance-resilience/sample-run/sqlmi-mantenimiento-20261030T094210Z.html",
-      "caption": "Sample report in demo mode (simulated data), in Spanish.",
+      "full": "12-sqlmi-maintenance-resilience/sample-run/sqlmi-maintenance-20261030T094210Z.html",
+      "caption": "Sample report in demo mode (simulated data).",
       "compare": [
         "05-service-health-events-review"
       ]
@@ -255,7 +255,7 @@
       "image": "site/img/plates/04.webp",
       "thumb": "site/img/plates/04-thumb.webp",
       "full": "04-aks-well-architected-review/images/aks04-report-00-cover.png",
-      "caption": "Lab run, report in Spanish. Field marks: 1 report cover · 2 evidence labels (observed, lab) · 3 cluster facts: region, AKS version, state.",
+      "caption": "Sample run with simulated data. Field marks: 1 verdict · 2 evidence labels (simulated, declared production) · 3 findings, local index, coverage, cost and workloads.",
       "compare": [
         "08-databricks-dependency-configuration-review"
       ]
@@ -273,7 +273,7 @@
       "image": "site/img/plates/08.webp",
       "thumb": "site/img/plates/08-thumb.webp",
       "full": "08-databricks-dependency-configuration-review/images/13-report-overview-and-pillars.png",
-      "caption": "Lab run, report in Spanish. Field marks: 1 exports (JSON, dependencies, findings) · 2 workspace cover and scope · 3 executive reading and coverage.",
+      "caption": "Sample run with simulated data. Field marks: 1 sections, export and print · 2 verdict-first summary and provenance · 3 findings, index, coverage and relationships.",
       "compare": [
         "04-aks-well-architected-review",
         "15-azure-finops-monthly-review"
