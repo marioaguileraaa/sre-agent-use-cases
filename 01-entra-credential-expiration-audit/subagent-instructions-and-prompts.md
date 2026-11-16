@@ -8,12 +8,12 @@ Reopen the saved Python tool, skill, and custom agent in the SRE Agent portal af
 
 | Component / field | Expected value | Post-save readback check |
 |---|---|---|
-| **Subagent name** | `credential-monitor-full` | Exact match in **Builder > Agent Canvas** |
+| **Subagent name** | `credential-monitor-full` | Exact match in **Build + configure > Agent Canvas** |
 | **Attached skill** | `entra-full-credential-inventory` | Verify the exact selected skill **name** in the reopened saved form and effective policy (`allowedSkills: ["entra-full-credential-inventory"]`, `addSystemSkills=false`); never leave empty or rely on the list summary badge |
 | **Selected tool** | `generate-entra-credential-expiration` | Verify the exact selected tool **name** in the reopened saved form and effective policy (`tools: ["generate-entra-credential-expiration"]`, `disableDocumentRetrieval=true`); never leave empty or rely on the list summary badge |
 | **Tool parameters** | `0` (`{}`) | `def main() -> dict:` takes no arguments |
-| **Portal Identity tab** | `Enable Azure Identity = On`, Scope = `https://graph.microsoft.com/.default` only | Default ARM scope removed; code also authenticates explicitly with `ManagedIdentityCredential(client_id=...)` |
-| **Output** | `1 HTML file with embedded CSV export` | Self-contained `/mnt/data/entra-credential-expiration-audit-<UTC-DATE>.html` plus chat summary |
+| **Portal Identity tab** | `Enable Azure Identity = Off` (the default) | The code authenticates explicitly with `ManagedIdentityCredential(client_id=...)`; the saved code has no inserted `# Azure Identity Authentication` lines at the top |
+| **Output** | `1 HTML file with embedded CSV export` | Self-contained `entra-credential-expiration-audit-<UTC-DATE>.html`, delivered through the `report_url` download link, plus chat summary |
 | **Remediation authority** | `None` | Read-only (`Application.Read.All`); never rotates, creates, or deletes credentials |
 
 > [!NOTE]
@@ -33,7 +33,7 @@ or run any remediation.
 
 ## Test prompt (from chat, before you automate)
 
-Select `credential-monitor-full` explicitly in **New chat** (`/agent` where supported) before sending the prompt.
+In **New chat**, select `credential-monitor-full` with **/agent** before sending the prompt (typing `@` no longer opens a picker).
 
 ### English (EN) – Full audit report
 ```
@@ -89,7 +89,7 @@ Run the full Microsoft Entra credential expiration audit. Deliver the HTML repor
 | **Task name** | `Monthly Microsoft Entra credential expiration audit` | Search **Automation** first and reuse an existing customer-owned task if already created |
 | **Response subagent** | `credential-monitor-full` | Do not leave empty (empty falls back to the main agent) |
 | **Task details** | Copy-ready task prompt above | Calls `generate-entra-credential-expiration` once with `{}` |
-| **Frequency** | `Custom cron` | Prefer explicit UTC cron over browser-local time pickers |
+| **Frequency** | `Custom cron` | The list starts at **Daily**; prefer explicit UTC cron over browser-local time pickers |
 | **Cron expression (UTC)** | `0 9 1 * *` | Runs on day 1 of every month at `09:00 UTC` |
 | **Message grouping** | `New chat thread for each run` | Keeps each monthly snapshot isolated in its own execution thread |
 | **Agent autonomy level** | `Autonomous` (when approved for unattended read-only execution) | `Review` pauses for human approval before running |
@@ -100,5 +100,5 @@ Run the full Microsoft Entra credential expiration audit. Deliver the HTML repor
 1. Reopen the saved scheduled task and confirm **Response subagent = `credential-monitor-full`**, the exact task prompt, `0 9 1 * *`, and the next scheduled UTC run time.
 2. With customer approval for an acceptance test, select only this task in **Automation** and click **Run now** (or **Run task now**) once.
 3. Open the task's **Run history** and click into the actual **execution thread** (`Success` on the list view only confirms thread handoff, not file delivery).
-4. Verify that `generate-entra-credential-expiration` ran with `{}` (no arguments), returned `coverage.status == "complete"` and `coverage.pagination_completed == true`, and attached a downloadable HTML report.
+4. Verify that `generate-entra-credential-expiration` ran with `{}` (no arguments), returned `coverage.status == "complete"` and `coverage.pagination_completed == true`, and that the answer shows the `report_url` download link of the HTML report.
 5. Download the HTML report, open it in a browser, verify the `Reference UTC` banner and status counts, and test **Export visible rows as CSV**.

@@ -924,7 +924,7 @@ td{padding:5px 6px;}
             report_file.write(html_document)
     except Exception as exc:
         return fail(f"Failed to write report: {exc}")
-    return {
+    result = {
         "report_path": report_path,
         "coverage": coverage,
         "application_count": application_count,
@@ -932,3 +932,22 @@ td{padding:5px 6px;}
         "managed_identity_excluded_count": managed_identity_excluded_count,
         "counts_by_status": counts_by_status,
     }
+    # The SRE Agent files API serves the chat thread folder (the tool's working
+    # directory), not /mnt/data: keep a copy there and return its download link.
+    try:
+        import re
+        from urllib.parse import quote
+        cwd = os.getcwd()
+        thread = re.fullmatch(
+            r"/(?:root/sreagent|usr)/terminalRoot/tmp/ThreadFiles/([0-9a-fA-F-]{36})", cwd
+        )
+        if thread:
+            report_name = os.path.basename(report_path)
+            with open(os.path.join(cwd, report_name), "w", encoding="utf-8") as report_copy:
+                report_copy.write(html_document)
+            result["report_url"] = (
+                f"/api/files/tmp/ThreadFiles/{thread.group(1)}/{quote(report_name, safe='')}"
+            )
+    except Exception:
+        pass
+    return result

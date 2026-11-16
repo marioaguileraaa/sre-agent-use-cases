@@ -85,7 +85,7 @@ time or findings into a promised saving or SLA.
 ```mermaid
 flowchart LR
     T["Scheduled task<br/>0 9 1 * * (UTC)"] --> S["Subagent<br/>credential-monitor-full"]
-    C["Chat<br/>@credential-monitor-full"] --> S
+    C["Chat<br/>/agent credential-monitor-full"] --> S
     S --> K["Skill<br/>entra-full-credential-inventory"]
     S --> P["Python tool<br/>generate-entra-credential-expiration"]
     K -.->|uses only| P
@@ -182,10 +182,12 @@ and reads that identity's Graph tenant. A different monitored Azure
 subscription is not a way to select another Graph tenant. Step 1 must use the
 tenant containing the intended UAMI service principal.
 
-**Builder** in the screenshots is a portal navigation label, not a named role.
-Author alone cannot chat or create scheduled tasks; Standard User alone cannot
-create custom agents. Azure Owner/Contributor are not substitutes for these
-SRE Agent data-action roles, even when the portal shows an enabled button.
+**Build + configure** (labelled **Builder** in the earlier screenshots) is a
+portal navigation menu, not a named role. The menu paths in this guide were
+checked against the portal on 16 November 2026; some screenshots show earlier
+labels. Author alone cannot chat or create scheduled tasks; Standard User alone
+cannot create custom agents. Azure Owner/Contributor are not substitutes for
+these SRE Agent data-action roles, even when the portal shows an enabled button.
 
 ---
 
@@ -214,26 +216,30 @@ pasting. Access to this private repository is still required.
 
 The Python tool and the permission script use the **user-assigned managed identity (UAMI)** of the Azure SRE Agent. Every agent has its own, so the Client ID is different in every environment. A Client ID is **not** a secret.
 
-### Option A – From the SRE Agent portal (recommended)
+Use **Option B** (recommended) or **Option C**. The agent menu in today's SRE Agent portal no longer has **Settings** (checked on 16 November 2026), so Option A only applies to earlier portal versions.
+
+### Option A – From the SRE Agent portal (earlier portal versions)
+
+Historical note, kept for portal versions whose agent menu still shows **Settings**:
 
 1. In the [SRE Agent portal](https://sre.azure.com), open the approved agent and select **Settings > Azure settings**.
-2. Under **Managed Identity**, select **Go to Identity**. Open the user-assigned identity in the Azure portal. Older layouts use **Settings** (1) > **Basics** (2) > **Managed identity** (3), as in the real screenshot below; these are historical labels for the same discovery goal.
+2. Under **Managed Identity**, select **Go to Identity** to open the user-assigned identity in the Azure portal. Older layouts use **Settings** (1) > **Basics** (2) > **Managed identity** (3), as in the screenshot below (earlier portal version).
 
-   ![Settings > Basics > Managed identity](images/step0-01-agent-settings-managed-identity.png)
+   ![Settings > Basics > Managed identity (earlier portal version)](images/step0-01-agent-settings-managed-identity.png)
 
-3. On the identity **Overview** page, copy the **Client ID** value (1).
+3. On the identity **Overview** page, copy the **Client ID**, as in step 3 of Option B.
 
-   ![Managed identity overview – Client ID](images/step0-02-portal-identity-client-id.png)
-
-> [!TIP]
-> [Full-resolution historical discovery image](images/step0-01-agent-settings-managed-identity.png) · [Client ID image](images/step0-02-portal-identity-client-id.png).
-> If an Identity blade lists multiple identities, confirm the **user-assigned** identity actually attached to this SRE Agent; do not substitute its internal system-assigned identity.
-
-### Option B – From the Azure portal
+### Option B – From the Azure portal (recommended)
 
 1. Open the resource group of the agent.
 2. Open the **Managed Identity** resource whose name starts with `id-`.
 3. On **Overview**, copy the **Client ID**.
+
+   ![Managed identity overview – Client ID](images/step0-02-portal-identity-client-id.png)
+
+> [!TIP]
+> [Full-resolution Client ID image](images/step0-02-portal-identity-client-id.png) · [Historical discovery image](images/step0-01-agent-settings-managed-identity.png).
+> If you find more than one identity, confirm the **user-assigned** identity actually attached to this SRE Agent; do not substitute its internal system-assigned identity.
 
 ### Option C – With Azure CLI
 
@@ -335,9 +341,9 @@ Once sign-in succeeds, disconnect is attempted even if a later step fails.
 
 ### 2.1 Open the Python tool dialog
 
-In the SRE Agent portal select **Builder** (1) > **Agent Canvas** (2) > the **Create** drop-down arrow (3) > **Tool** (4) > **Python tool** (5).
+In the SRE Agent portal select **Build + configure** (1) > **Agent Canvas** (2, under **Workflows**) > the **Create ▾** drop-down arrow (3) > **Tool ›** (4) > **Python tool** (5). The screenshot shows the earlier label **Builder** for (1). Use the arrow: the **Create** button itself opens the custom agent dialog.
 
-![Builder > Agent Canvas > Create > Tool > Python tool](images/step2-01-create-python-tool-menu.png)
+![Build + configure (earlier label: Builder) > Agent Canvas > Create > Tool > Python tool](images/step2-01-create-python-tool-menu.png)
 
 ### 2.2 Code tab
 
@@ -348,7 +354,7 @@ You don't need the *Describe what the function should do / Generate* box on the 
 | 1 | **Tool Name** | `generate-entra-credential-expiration` |
 | 2 | **Description** | `Use this tool to audit Microsoft Entra application and service principal credential expirations when you need to identify expiring secrets and certificates, exclude managed identity service principals, and generate a self-contained HTML report. Returns report path, scan coverage, and credential status counts.` |
 | 3 | **Code** | The full content of [`generate-entra-credential-expiration.py`](generate-entra-credential-expiration.py), with your Client ID already set. Replace any existing code in the editor. |
-| – | **Timeout (seconds)** | Keep `120` (the default). Raise it only for very large tenants. |
+| – | **Timeout (seconds)** | Keep `120` (the default). Raise it only for very large tenants (the portal maximum is `900`). |
 
 The reviewed tool exposes **`main() -> dict` with no input parameters**; the
 playground parameter object is `{}`. There is no separate schema file or
@@ -367,43 +373,55 @@ retry/backoff policy or configurable collection cap. Have the operator assess
 large-tenant/throttling failures without claiming complete coverage.
 
 > [!NOTE]
-> The **historical pictured portal version** enforced a **36-character** tool-name constraint. Keep the exact working Case01 name, `generate-entra-credential-expiration`, which the skill below references. This is not a global current tool-name maximum; other portal versions and published cases can use longer names.
+> **Tool Name** accepts at most **36 characters** in today's portal (checked on 16 November 2026: a longer name is cut at 36 characters as you type). `generate-entra-credential-expiration` is exactly 36 characters, so it fits. Keep this exact name: the skill and the subagent below reference it.
 
 ![Python tool – Code tab](images/step2-02-python-tool-code-tab.png)
 
 ### 2.3 Identity tab
 
-1. Open the **Identity** tab (1).
-2. Turn on **Enable Azure Identity** (2).
-3. In the scope box, enter `https://graph.microsoft.com/.default` and select **Add** (3).
-4. Remove the default **ARM** scope (the **X** on its card), so that only the Microsoft Graph scope remains (4).
-
-![Python tool – Identity tab with the Microsoft Graph scope](images/step2-03-python-tool-identity-tab.png)
+Leave **Enable Azure Identity** **Off** (the default) on the **Identity** tab. This tool doesn't need it.
 
 > [!IMPORTANT]
-> Even though the Identity tab declares the Graph scope, the tool code gets its token **explicitly** with `ManagedIdentityCredential(client_id=…)`. This way it doesn't depend on environment variables injected by the editor, and it always uses the agent identity that has the Graph permission.
+> The tool code gets its Microsoft Graph token **explicitly** with `ManagedIdentityCredential(client_id=…)`, using the agent identity that has the Graph permission. It doesn't depend on the Identity tab or on variables injected by the editor. Checked on 16 November 2026: with no Identity configuration, the tool returned complete Graph coverage, and the lab's saved Case01 tool runs with **Enable Azure Identity** Off.
+
+If you turn **Enable Azure Identity** on, the portal inserts these four lines at the top of the code. They request an Azure Resource Manager token that this tool never uses, and they **stay in the code even if you turn the switch off again**:
+
+```python
+# Azure Identity Authentication
+from azure.identity import DefaultAzureCredential
+credential = DefaultAzureCredential()
+AZURE_ARM_TOKEN = credential.get_token("https://management.azure.com/.default").token
+```
+
+If that happens, turn the switch off, go back to the **Code** tab and delete those four lines, so that the code starts again with the `# generate-entra-credential-expiration` comment.
+
+> [!NOTE]
+> **Earlier versions of this guide** turned on **Enable Azure Identity** (2) on the **Identity** tab (1), added the `https://graph.microsoft.com/.default` scope (3) and removed the default **ARM** scope (4). The screenshot below shows that earlier, optional configuration. It isn't needed, because the code authenticates on its own.
+>
+> ![Python tool – Identity tab with the Microsoft Graph scope (earlier optional configuration)](images/step2-03-python-tool-identity-tab.png)
 
 ### 2.4 Test playground tab and create
 
-1. Open the **Test playground** tab (1). The tool has no input parameters.
-2. Select **Test** (2).
+1. Open the **Test playground** tab (1). The tool has no input parameters (`{}`), so no parameter boxes appear.
+2. Select **Test** (2). **Create tool** stays grey until you have run **Test** on this tab (the dialog says *Test the tool before creating*); a grey **Create tool** is not a missing role.
 3. Check the result (3): **Function test succeeded** and a JSON with `report_path`, `"coverage": {"status": "complete", "pagination_completed": true, …}`, the number of applications, service principals and excluded managed identities, and `counts_by_status`.
 4. Select **Create tool** (4).
 
 ![Python tool – Test playground](images/step2-04-python-tool-test-playground.png)
 
 [Full-resolution Code](images/step2-02-python-tool-code-tab.png) ·
-[Identity](images/step2-03-python-tool-identity-tab.png) ·
+[Identity (earlier optional configuration)](images/step2-03-python-tool-identity-tab.png) ·
 [Playground](images/step2-04-python-tool-test-playground.png).
 
 **Expected results of the test**
 
-- An object with `report_path`, complete coverage, application and service principal counts, excluded Managed Identities and counts by status.
+- An object with `report_path`, complete coverage, application and service principal counts, excluded Managed Identities and counts by status. Inside the SRE Agent runtime it also returns `report_url`, the chat download link of the same HTML.
 - On any authentication, authorization or pagination failure, the tool returns `coverage: partial` and **does not** produce an incomplete report as if it were valid.
 - If the placeholder was not replaced, the tool returns `Configuration required: set MANAGED_IDENTITY_CLIENT_ID …` with `coverage: partial`. Go back to Step 0.
 
 **Checkpoint:** reopen the saved tool and compare its complete configured
-source, name, zero inputs, Graph Identity scope and timeout. Do not use
+source (with no inserted `# Azure Identity Authentication` lines at the top),
+name, zero inputs, **Enable Azure Identity** Off and timeout. Do not use
 Generate/Refine or a clipped code/image transcription in place of the supplied
 file. A green function-test wrapper can still contain the tool's `error`;
 inspect the returned object.
@@ -416,16 +434,16 @@ The skill fixes **what** the agent must do and **how**: scope, validation, class
 
 ### 3.1 Open the skill dialog
 
-**Builder > Agent Canvas** (1) > the **Create** drop-down arrow (2) > **Skill** (3).
-*(You can also use **Builder > Skill builder > Create skill**.)*
+**Build + configure > Agent Canvas** (1) > the **Create ▾** drop-down arrow (2) > **Skill** (3). The screenshot shows the earlier label **Builder**.
+*(You can also use **Build + configure > Extensions > Skill builder > Create skill**.)*
 
-![Builder > Agent Canvas > Create > Skill](images/step3-01-create-skill-menu.png)
+![Build + configure (earlier label: Builder) > Agent Canvas > Create > Skill](images/step3-01-create-skill-menu.png)
 
 ### 3.2 Attach the tool
 
 1. Select **Choose tools** (1).
 2. Search for `generate-entra` (2).
-3. Select **generate-entra-credential-expiration** (3) and close the panel.
+3. Expand the **PythonFunctionTool (n)** group, tick only **generate-entra-credential-expiration** (3) and select **Close panel**. Don't tick the group checkbox or *Select all*: that selects every tool in the group.
 
 ![Create skill – Choose tools](images/step3-02-skill-choose-tools.png)
 
@@ -438,8 +456,10 @@ Associate **only** this tool to the skill.
 | 1 | **Name** | `entra-full-credential-inventory` |
 | 2 | **Description** (select **Edit**, type, then **Save**) | `Safe, read-only procedure to audit Microsoft Entra credential expiration for Applications and non-managed Service Principals.` |
 | 3 | **Tools** | `generate-entra-credential-expiration` (from 3.2) |
-| 4 | **SKILL.md** | The portal generates the front matter (`name`, `description`, `tools`) from the form. Paste the full content of [`SKILL.md`](SKILL.md) **below** the front matter, replacing the `<!-- Add your skill instructions here -->` line. |
+| 4 | **SKILL.md** | The editor already contains front matter (`name`, `description`, `tools`) generated from the form. Paste the content of [`SKILL.md`](SKILL.md) **below** it, replacing the `<!-- Add your skill instructions here -->` line. Case01's `SKILL.md` has no front matter of its own, so `tools:` and the tool chip from 3.2 are kept. Don't select all and paste over the front matter: that removes `tools:` and the chip. |
 | 5 | **Create** | |
+
+If the tool chip disappears, select the tool again with **Choose tools** (3.2) and check that `tools:` is back in the front matter before you select **Create**.
 
 ![Create skill – completed form](images/step3-03-skill-form-completed.png)
 
@@ -458,9 +478,9 @@ Create the subagent **after** the tool has been tested successfully.
 
 ### 4.1 Open the custom agent dialog
 
-**Builder > Agent Canvas** (1) > the **Create** drop-down arrow (2) > **Custom Agent** (3).
+**Build + configure > Agent Canvas** (1) > the **Create ▾** drop-down arrow (2) > **Custom Agent** (3). The **Create** button itself opens the same **Create a custom agent** dialog. The screenshot shows the earlier label **Builder**.
 
-![Builder > Agent Canvas > Create > Custom Agent](images/step4-01-create-custom-agent-menu.png)
+![Build + configure (earlier label: Builder) > Agent Canvas > Create > Custom Agent](images/step4-01-create-custom-agent-menu.png)
 
 ### 4.2 Name and instructions
 
@@ -486,7 +506,7 @@ Select **Choose skills** (1), filter by `entra-full` (2) and select **entra-full
 
 ### 4.4 Tools
 
-Select **Choose tools** (1), search for `generate-entra` (2) and select **generate-entra-credential-expiration** (3). Close the panel.
+Select **Choose tools** (1), search for `generate-entra` (2), expand **PythonFunctionTool (n)** and tick only **generate-entra-credential-expiration** (3). Close the panel.
 
 ![Create a custom agent – Choose tools](images/step4-04-custom-agent-choose-tools.png)
 
@@ -522,11 +542,11 @@ Before automating, test the subagent from a chat. The copy-ready test prompt is
 also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
 
 1. Select **New chat** (1).
-2. Explicitly select **`credential-monitor-full`** in the normal chat's agent picker (`/agent` where supported). The historical UI below uses `@credential-monitor-full:` (2); confirm the selected specialist in your portal version rather than treating an ordinary mention as proof.
+2. Type **/** in the message box, choose **/agent** (*Pick a subagent to assist you with tasks*) and select **`credential-monitor-full`**. The chip **Agent: credential-monitor-full** appears next to **+**. Typing `@` no longer opens a picker; the screenshot below shows the earlier `@credential-monitor-full:` mention (2). Skills also appear as commands in the **/** list: choose the subagent through **/agent**, not a skill command.
 3. Paste the test prompt:
 
    ```text
-   @credential-monitor-full: Run the full Microsoft Entra credential expiration audit and deliver the HTML report with the coverage and risk summary.
+   Run the full Microsoft Entra credential expiration audit and deliver the HTML report with the coverage and risk summary.
    ```
 
 4. Send it (3 in the historical image). Confirm the trace calls only
@@ -535,7 +555,7 @@ also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-promp
    **Spanish (ES) copy-ready prompt** (same single parameterless call):
 
    ```text
-   @credential-monitor-full: Ejecuta la auditoría completa de caducidad de credenciales de Microsoft Entra y entrega el informe HTML junto con el resumen de cobertura y niveles de riesgo.
+   Ejecuta la auditoría completa de caducidad de credenciales de Microsoft Entra y entrega el informe HTML junto con el resumen de cobertura y niveles de riesgo.
    ```
 
    **Grounded follow-up questions in chat (EN / ES):** because `generate-entra-credential-expiration` takes zero parameters (`{}`), follow-up questions in the thread interpret the returned summary or guide local filtering/CSV export inside the downloaded HTML snapshot rather than passing filter arguments to the tool:
@@ -549,7 +569,7 @@ also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-promp
      A partir del resultado de la auditoría en este hilo, resume los campos de cobertura (reference_utc, pagination_completed, applications_scanned, service_principals_scanned, managed_identities_excluded, credential_rows), indica si aplica Action required y explica qué filtros de estado debo seleccionar en el informe HTML descargado para revisar las prioridades inmediatas de rotación y las fechas UNKNOWN.
      ```
 
-![New chat – test prompt](images/step5-01-chat-test-prompt.png)
+![New chat – test prompt (earlier @ mention)](images/step5-01-chat-test-prompt.png)
 
 In the original lab run, the answer arrived in about a minute with the
 **coverage and counts by status** (1) and an actual **HTML download** (2).
@@ -557,18 +577,24 @@ That timing is historical, not a customer timeout or delivery guarantee:
 
 ![Chat – audit result with coverage, counts and report link](images/step5-02-chat-test-result.png)
 
+The HTML reaches the chat through `report_url`: inside the SRE Agent runtime
+the tool returns it, and the subagent shows it unchanged as the download link
+of the report. `report_path` (under `/mnt/data`) can't be downloaded from the
+chat.
+
 ### 5.1 Acceptance criteria
 
-- The answer attaches or links the HTML report and shows **complete coverage**.
+- The answer links the HTML report through the tool's `report_url` (a download link in the chat), the link downloads the HTML, and the answer shows **complete coverage**.
 - The result reports Applications, Service Principals, excluded Managed Identities and the count by status.
 - It contains **no** secrets, tokens, certificate content or unfiltered Graph responses.
 - It shows **Action required** when there are `EXPIRED` or `CRITICAL` credentials, or partial coverage.
 
 Read `coverage.reference_utc`, `coverage.status` and
 `coverage.pagination_completed` **before** interpreting counts. On success the
-tool returns `report_path`, the coverage object, `application_count`,
-`service_principal_count`, `managed_identity_excluded_count` and
-`counts_by_status`. On failure it returns **`error` plus `coverage: "partial"`**,
+tool returns `report_path`, `report_url` (inside the SRE Agent runtime), the
+coverage object, `application_count`, `service_principal_count`,
+`managed_identity_excluded_count` and `counts_by_status`. On failure it returns
+**`error` plus `coverage: "partial"`**,
 not the successful coverage-object shape; there is no valid inventory/report
 to invent from it.
 
@@ -583,10 +609,13 @@ collected.
 
 The actual contract is **one HTML file** with embedded inventory and a
 browser-side **Export visible rows as CSV** button. It does not return separate
-JSON/CSV downloads or the native `*_url` fields of later cases. The source
-writes `/mnt/data/entra-credential-expiration-audit-<UTC-DATE>.html`; this is its
-historical runtime path, not a universal SRE root. Verify the real attachment
-opens/downloads in the same chat. A returned path is not a download receipt.
+JSON/CSV downloads. The source writes
+`/mnt/data/entra-credential-expiration-audit-<UTC-DATE>.html`; the SRE Agent
+files API does not serve `/mnt/data` (checked on 16 November 2026: HTTP 400
+`invalid artifact path`), so inside the SRE runtime the tool also writes the
+same HTML in the chat thread folder and returns its link as `report_url`.
+Deliver `report_url` unchanged and verify the real attachment opens/downloads
+in the same chat. A returned path is not a download receipt.
 Save approved private copies with their UTC reference if retaining multiple
 runs on the same date; the source filename is date-based, not run-unique.
 
@@ -690,8 +719,9 @@ The canonical instructions, cron and monthly prompt are in
 | 1 | **Task name** | `Monthly Microsoft Entra credential expiration audit` |
 | 2 | **Response subagent** | `credential-monitor-full` |
 | 3 | **Task details** | `Run the full Microsoft Entra credential expiration audit. Deliver the HTML report, coverage, risk counters and Action required when applicable.` |
-| 4 | **Frequency** | `Custom cron` |
+| 4 | **Frequency** | `Custom cron` (the list starts at **Daily**) |
 | 5 | **Cron expression (UTC)** | `0 9 1 * *` → day 1 of every month at 09:00 UTC |
+| – | **Message grouping for updates** | **New chat thread for each run** (the default is *Use same chat thread*) |
 | 6 | **Create task** | |
 
 Copy-ready **Task details**, unchanged from the linked canonical prompt:
@@ -706,11 +736,16 @@ month**, not a reconstruction of the previous month's credential history.
 On a tool error, disclose partial coverage and the error; do not invent files
 or successful zero counts.
 
-Set **Start on** and **Model tier** under customer activation/usage policy;
-General Purpose was the illustrated lab choice, not a requirement. Use
-**Autonomous** only when unattended execution of this restricted read-only
-workflow is approved; **Review** can pause for human approval. Keep runs in
-their own execution thread where the portal offers that option. Do not attach
+Set **Start on** and **Model tier** under customer activation/usage policy.
+**Model tier** has four options (**General Purpose**, the default,
+**Reasoning**, **Fast Reasoning** and **Fast**); General Purpose was the
+illustrated lab choice, not a requirement. **Repeat until** (an optional end
+date) and **Set a run limit** (blank means no limit) can stay empty unless the
+customer wants the schedule to stop. The screenshot shows the default
+**Message grouping for updates**, *Use same chat thread*: choose **New chat
+thread for each run** instead, so that each monthly run has its own thread.
+Use **Autonomous** only when unattended execution of this restricted read-only
+workflow is approved; **Review** can pause for human approval. Do not attach
 notification/remediation tools to this task.
 
 ![Create scheduled task – completed form](images/step6-02-scheduled-task-form.png)
@@ -724,10 +759,10 @@ Reopen the task and verify its enabled state, responder, complete prompt,
 cron and next UTC run. A schedule definition is not proof it fired.
 
 With separate approval for the acceptance run, select only this task's
-checkbox in **Automation > Run now**. Older UI uses **Run task now** (2 in
-the image). Open run history (1) and the actual **thread** (4), inspect the
-audit call, UTC reference, coverage/counts and download the HTML. Do not run it
-merely to reproduce a screenshot.
+checkbox in **Automation > Run now**, or open the task and select
+**Run task now** (2 in the image). Open run history (1) and the actual
+**thread** (4), inspect the audit call, UTC reference, coverage/counts and
+download the HTML. Do not run it merely to reproduce a screenshot.
 
 **Success** (3) can mean the execution was handed to a thread, not that Python
 and file delivery completed. **No thread found**, a paused Review run or a
@@ -756,7 +791,7 @@ Manual acceptance proves that execution, not a future calendar trigger.
 | Symptom | Cause / fix |
 |---|---|
 | Tool returns `Configuration required: set MANAGED_IDENTITY_CLIENT_ID …` (`coverage: partial`) | The placeholder `<YOUR_AGENT_CLIENT_ID>` was not replaced in the tool code. See Step 0. |
-| Portal creation/chat/task operation returns 403 | Check the **user's** SRE Agent Author + Standard User roles on the agent resource. An enabled Builder button or Azure Owner/Contributor is not proof of SRE data-action access. |
+| Portal creation/chat/task operation returns 403 | Check the **user's** SRE Agent Author + Standard User roles on the agent resource. An enabled button in **Build + configure** or Azure Owner/Contributor is not proof of SRE data-action access. |
 | Permission script pauses during setup | Read its current phase; installation/import and interactive sign-in can be slow. Use `-Verbose` for extra context. A phase completion is printed only after success. |
 | Script stops with `Managed identity service principal not found. Verify the Client ID.` | Check **Client ID**, the selected UAMI and the Graph sign-in tenant; Object ID or a different tenant can produce this symptom. Azure subscription context does not fix Graph tenant selection. |
 | `AADSTS53003`, unregistered device or Conditional Access denial | Stop before consent/grant. Have the identity/policy team provide its approved compliant sign-in flow; do not disable CA, bypass device/trust policy or grant Azure Owner. |
@@ -764,13 +799,15 @@ Manual acceptance proves that execution, not a future calendar trigger.
 | Tool returns `Failed to acquire Microsoft Graph token` | Wrong Client ID, or it isn't the identity assigned to this agent. |
 | Tool returns `Microsoft Graph authorization failed: HTTP 403` | `Application.Read.All` isn't granted yet, or the token was cached before the grant. Check Step 1 and retry after a few minutes. |
 | Import error / disabled Test / syntax error | Check runtime `requests`/`azure-identity`, complete whole-file paste, quotes/indentation and parameterless `main()`. Do not use Generate to replace the reader or add a shell installer. |
+| **Create tool** is grey (or **Save** when you edit the tool) | Run **Test** on the **Test playground** tab first: the button stays grey until the tool has been tested. It is not a missing role; check roles only if the button stays grey after a test. |
+| The code starts with `# Azure Identity Authentication` and `DefaultAzureCredential` lines | **Enable Azure Identity** was turned on: the portal inserted four lines at the top of the code, and they stay even after you turn it off. Turn it off, delete the four lines in **Code**, run **Test** again and save. The tool doesn't need them: it gets its Graph token with `ManagedIdentityCredential(client_id=…)`. See [2.3](#23-identity-tab). |
 | HTTP 429 / timeout / failed later page | Preserve the actual partial failure; the source has no retry/backoff implementation. Ask the maintainer/operator to assess throttling, approved timeout and complete-tenant collection, not a fabricated first-page success. |
-| The tool name is cut when you type it | The pictured legacy UI had a 36-character constraint; check the actual portal version rather than apply that as a global current maximum. Keep Case01's exact working name `generate-entra-credential-expiration`; do not rename other cases' tools based on this historical note. |
-| The trace shows `ReadFile failed: Path must be within sandbox root` for `/mnt/data/…html` | This occurred in the historical sandbox flow; accept only if the **actual final HTML attachment** downloads. If not, report a runtime-sharing incompatibility for the maintainer. Do not invent an alias or assume another case's path fixes it. |
+| The tool name is cut when you type it | Today's portal limits **Tool Name** to 36 characters (checked on 16 November 2026); a longer name is cut at 36 as you type. `generate-entra-credential-expiration` is exactly 36 characters and fits: check that it is complete, with no extra spaces. Keep this exact name, because the skill and the subagent reference it. |
+| The answer has a summary but no HTML download link, the trace shows `ReadFile failed: Path must be within sandbox root` for `/mnt/data/…html`, or a `/mnt/data` link returns HTTP 400 `invalid artifact path` | The chat cannot read or serve `/mnt/data`. Use the `report_url` the tool returns (a copy of the same HTML in the thread folder). If your tool copy returns no `report_url`, paste the current `.py` from this folder; if it returns one but the answer doesn't show it, update the skill with the current [`SKILL.md`](SKILL.md). Do not invent an alias. |
 | No separate JSON / CSV link | Expected output is one HTML. CSV is generated by **Export visible rows as CSV** inside it; no independent JSON export exists. |
 | Complete pagination but `UNKNOWN` dates / surprising same-day expiry | Read the rows and UTC-date policy. Collection completeness is not metadata completeness, active credential use or owner resolution. |
 | CSV contains fewer rows than expected | Clear local report filters; the button exports visible matches only. Compare with credential rows, not the count of applications/SPs. |
-| Task shows Success, no thread or no file | Inspect the actual execution thread/call and HTML download. Check responder, human Standard User access, activation and run mode; a handoff badge is not delivery. |
+| Task shows Success, no thread or no file | Inspect the actual execution thread/call and the `report_url` download link. Check responder, human Standard User access, activation and run mode; a handoff badge is not delivery. |
 | The report is downloaded but you see `coverage: partial` | Don't treat it as a valid inventory: an authentication, permission or pagination error is **not** an empty inventory. Fix the cause and run again. |
 
 ### Offline maintainer validation
@@ -812,64 +849,64 @@ Review the current documentation for your tenant before making privilege changes
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent credential-monitor-full` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent credential-monitor-full` in **New chat** (typing `@` no longer opens a picker) and use any of these prompts in **Spanish (Castellano)** or **English**:
 
 ### 1. Full Report & Executive Summary / Informe Completo y Resumen Ejecutivo
 - **Castellano:**
   ```text
-  @credential-monitor-full Ejecuta la auditoria completa de caducidad de credenciales y certificados en Microsoft Entra ID y entregame el informe HTML descargable junto con la cobertura, el desglose por estado de riesgo y las acciones requeridas.
+  Ejecuta la auditoria completa de caducidad de credenciales y certificados en Microsoft Entra ID y entregame el informe HTML descargable junto con la cobertura, el desglose por estado de riesgo y las acciones requeridas.
   ```
 - **English:**
   ```text
-  @credential-monitor-full Run the full Microsoft Entra credential and certificate expiration audit and deliver the downloadable HTML report with coverage, counts by risk status, and required actions.
+  Run the full Microsoft Entra credential and certificate expiration audit and deliver the downloadable HTML report with coverage, counts by risk status, and required actions.
   ```
 
 ### 2. Expired & Critical Credentials Triage / Triaje de Credenciales Caducadas y Criticas (`<= 7d`)
 - **Castellano:**
   ```text
-  @credential-monitor-full Del inventario que acabas de auditar, listame unicamente las credenciales en estado EXPIRED y CRITICAL (<= 7 dias), indicando nombre de la aplicacion o Service Principal, App ID, tipo (passwordCredential vs keyCredential), fecha exacta de expiracion UTC y dias restantes.
+  Del inventario que acabas de auditar, listame unicamente las credenciales en estado EXPIRED y CRITICAL (<= 7 dias), indicando nombre de la aplicacion o Service Principal, App ID, tipo (passwordCredential vs keyCredential), fecha exacta de expiracion UTC y dias restantes.
   ```
 - **English:**
   ```text
-  @credential-monitor-full From the audited inventory, list only the credentials in EXPIRED and CRITICAL (<= 7 days) status, showing the Application or Service Principal name, App ID, credential type (passwordCredential vs keyCredential), exact UTC expiration timestamp, and days remaining.
+  From the audited inventory, list only the credentials in EXPIRED and CRITICAL (<= 7 days) status, showing the Application or Service Principal name, App ID, credential type (passwordCredential vs keyCredential), exact UTC expiration timestamp, and days remaining.
   ```
 
 ### 3. Certificates vs. Client Secrets Breakdown / Comparativa de Certificados frente a Secretos
 - **Castellano:**
   ```text
-  @credential-monitor-full Separa los resultados entre secretos (passwordCredential) y certificados (keyCredential): cuantos hay de cada tipo, cuales caducan en los proximos 30 y 90 dias, y que aplicaciones tienen tanto secretos como certificados activos o caducados?
+  Separa los resultados entre secretos (passwordCredential) y certificados (keyCredential): cuantos hay de cada tipo, cuales caducan en los proximos 30 y 90 dias, y que aplicaciones tienen tanto secretos como certificados activos o caducados?
   ```
 - **English:**
   ```text
-  @credential-monitor-full Break down the results between client secrets (passwordCredential) and certificates (keyCredential): how many of each exist, which ones expire within the next 30 and 90 days, and which applications hold both active and expired credentials?
+  Break down the results between client secrets (passwordCredential) and certificates (keyCredential): how many of each exist, which ones expire within the next 30 and 90 days, and which applications hold both active and expired credentials?
   ```
 
 ### 4. Next 30–90 Day Maintenance Window Planning / Planificacion de Ventana de Renovacion (30 a 90 dias)
 - **Castellano:**
   ```text
-  @credential-monitor-full Que credenciales estan en EXPIRING SOON (8 a 30 dias) y EXPIRING (31 a 90 dias) para programar su rotacion en el proximo ciclo de mantenimiento sin esperar a que entren en alerta critica?
+  Que credenciales estan en EXPIRING SOON (8 a 30 dias) y EXPIRING (31 a 90 dias) para programar su rotacion en el proximo ciclo de mantenimiento sin esperar a que entren en alerta critica?
   ```
 - **English:**
   ```text
-  @credential-monitor-full Which credentials are in EXPIRING SOON (8 to 30 days) and EXPIRING (31 to 90 days) so we can schedule their rotation in the next maintenance window before they become critical?
+  Which credentials are in EXPIRING SOON (8 to 30 days) and EXPIRING (31 to 90 days) so we can schedule their rotation in the next maintenance window before they become critical?
   ```
 
 ### 5. Scope, Managed Identities Exclusion & Graph Pagination Verification / Verificacion de Alcance, Identidades Administradas y Paginacion
 - **Castellano:**
   ```text
-  @credential-monitor-full Confirma cuantas App Registrations y Service Principals se han escaneado en total, cuantas Managed Identities se han excluido del alcance y si la paginacion de Microsoft Graph ha finalizado al 100% sin errores de permisos.
+  Confirma cuantas App Registrations y Service Principals se han escaneado en total, cuantas Managed Identities se han excluido del alcance y si la paginacion de Microsoft Graph ha finalizado al 100% sin errores de permisos.
   ```
 - **English:**
   ```text
-  @credential-monitor-full Confirm how many Application Registrations and Service Principals were scanned in total, how many Managed Identities were excluded from scope, and whether Microsoft Graph pagination completed 100% without permission errors.
+  Confirm how many Application Registrations and Service Principals were scanned in total, how many Managed Identities were excluded from scope, and whether Microsoft Graph pagination completed 100% without permission errors.
   ```
 
 ### 6. Top Applications Accumulating Multiple Expired Credentials / Aplicaciones con Mayor Deuda de Credenciales Caducadas
 - **Castellano:**
   ```text
-  @credential-monitor-full Que aplicaciones o Service Principals acumulan mas de una credencial caducada sin limpiar y que pasos de higiene en solo lectura recomiendas para que sus propietarios las retiren en Entra Portal?
+  Que aplicaciones o Service Principals acumulan mas de una credencial caducada sin limpiar y que pasos de higiene en solo lectura recomiendas para que sus propietarios las retiren en Entra Portal?
   ```
 - **English:**
   ```text
-  @credential-monitor-full Which Applications or Service Principals accumulate multiple uncleaned expired credentials, and what read-only hygiene steps do you recommend for their owners in the Entra portal?
+  Which Applications or Service Principals accumulate multiple uncleaned expired credentials, and what read-only hygiene steps do you recommend for their owners in the Entra portal?
   ```
