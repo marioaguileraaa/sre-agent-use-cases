@@ -22,7 +22,11 @@ handler.
 | Timeout | `150` |
 | Identity tab | Leave the switch **Off**. The tool authenticates with the agent managed identity itself (`MANAGED_IDENTITY_CLIENT_ID`) |
 
-| Parameter | Type | Required | Description (paste as is) |
+Today's portal has no parameter editor: the parameters, their types and defaults come from `def main(...)` when you
+paste the code, and the **Test playground** shows one empty box per parameter. The descriptions below are the reference
+that the Option B deploy script registers.
+
+| Parameter | Type | Required | Description |
 |---|---|---|---|
 | `operation` | string | No | `report (default: HTML + JSON + changes CSV + property diffs CSV) or query (bounded chat view, no files).` |
 | `period` | string | No | `Rolling window: last_24h (default), last_7d or last_14d (Change Analysis retention).` |
@@ -48,7 +52,7 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 |---|---|
 | Name | `change-digest-reviewer` |
 | Instructions | Paste [`subagent-instructions.txt`](subagent-instructions.txt) (copy below) |
-| Handoff description | `Read-only reviewer of relevant Azure changes (Change Analysis in Azure Resource Graph): daily digest, deletes, exposure and security changes, new role assignments, locks and diagnostic settings, who changed what and unusual activity.` |
+| Handoff description (Option B deploy script; today's portal form has no such field) | `Read-only reviewer of relevant Azure changes (Change Analysis in Azure Resource Graph): daily digest, deletes, exposure and security changes, new role assignments, locks and diagnostic settings, who changed what and unusual activity.` |
 | Skills | Only `azure-change-digest` |
 | Tools | Only `generate-azure-change-digest` |
 
@@ -87,7 +91,7 @@ Run it every day, weekends included: weekend changes are a signal in themselves.
 
 ## Copy-ready chat prompts
 
-Open **New chat** and start the prompt with `@change-digest-reviewer`.
+Open **New chat**, type `/agent` and pick `change-digest-reviewer` (chip **Agent: change-digest-reviewer**; typing `@` no longer opens a picker), then paste the prompt without the leading `@change-digest-reviewer`.
 
 | Question | Prompt | Tool call the agent makes |
 |---|---|---|

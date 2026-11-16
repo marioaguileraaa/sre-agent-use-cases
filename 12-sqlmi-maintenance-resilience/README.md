@@ -183,7 +183,7 @@ No write role is granted.
 
 - [ ] **Azure SRE Agent** deployed, with access to the portal [sre.azure.com](https://sre.azure.com).
 - [ ] The agent has a **user-assigned managed identity** (the default configuration).
-- [ ] **Python tools** available: **Build + setup → Agent Canvas → Create → Tool** shows **Python tool** (step 1 also checks it).
+- [ ] **Python tools** available: **Build + configure → Agent Canvas → Create ▾ → Tool ›** shows **Python tool** (step 1 also checks it).
 - [ ] Sandbox egress allowed to `login.microsoftonline.com`, `management.azure.com` and `api.loganalytics.io` (unrestricted by default).
 - [ ] To measure impact per application: applications instrumented with **workspace-based Application Insights** with SQL dependency tracking on (the default for the .NET, Java and OpenTelemetry SDKs). Without it the report is still generated, but applications show as "Sin telemetría" (no telemetry).
 - [ ] **Azure Cloud Shell (PowerShell)** - recommended, it already has Azure CLI and Python - or a machine with Azure CLI 2.50+, PowerShell 7 and Python 3.9+.
@@ -353,36 +353,48 @@ Choose **one** of the two options. The result is identical.
 
 ### Option A - From the portal (recommended the first time)
 
-Open [sre.azure.com](https://sre.azure.com) and select your agent. The numbered red boxes in each screenshot show, in order, where to click or what to fill in.
+Open [sre.azure.com](https://sre.azure.com) and select your agent. The numbered red boxes in each screenshot show, in order, where to click or what to fill in. The form screenshots were taken in today's portal (16 November 2026); the test result (⑥) and the chat answers (⑬, ⑭) come from an earlier run.
 
 #### 5.A.1 Python tool
 
-**① Build + setup → Agent Canvas → arrow next to Create → Tool → Python tool.**
+**① Build + configure → Agent Canvas → Create ▾ (the arrow next to Create) → Tool › → Python tool.** The **Create** button itself opens **Create a custom agent**.
 
-![Create a Python tool from Build + setup, Agent Canvas](images/b01-builder-create-python-tool.png)
+![Create a Python tool from Build + configure, Agent Canvas](images/newui-menu.png)
+
+*(1) **Build + configure** (left menu, formerly Build + setup / Builder); (2) **Agent Canvas**; (3) the arrow next to **Create**; (4) **Tool ›**; (5) **Python tool**.*
 
 **② Fill in the Code tab:**
 
 | Field | Value |
 |---|---|
-| Tool Name | `generate-sqlmi-maintenance-report` |
+| Tool Name | `generate-sqlmi-maintenance-report` (33 characters; the field accepts 36 at most) |
 | Description | Copy the tool `description` from [`deploy/sre-agent-components.json`](deploy/sre-agent-components.json) (also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)) |
-| Timeout (seconds) | `180` |
-| Code editor | Delete the sample and paste **all** of `generate-sqlmi-maintenance-report.py` (already configured in step 4) |
+| Timeout (seconds) | `180` (the default is 120) |
+| Code editor | Click in the editor, `Ctrl+A` and paste **all** of `generate-sqlmi-maintenance-report.py` (already configured in step 4) |
 
-![Code tab: name, description, timeout and code](images/b02-python-tool-form.png)
+There is no *Requirements* field and no parameter editor: the portal reads the 3 parameters from `main()`.
+
+![Code tab: name, description, timeout and code](images/newui-code.png)
+
+*(1) **Tool Name** (the narrow field cuts it on screen); (2) **Timeout (seconds)** `180`; (3) **Description**; (4) the pasted file (top shown); (5) **Create tool**, grey until a **Test** has run.*
 
 **③ Check lines 33 to 40 in the editor.** With real data they must hold your values and no `<...>` may remain. For demo mode leave them as they are. (The screenshot shows the unconfigured file so you can see where they are.)
 
-![The CONFIGURE block in the code editor](images/b03-python-tool-configuration.png)
+![The CONFIGURE block in the code editor](images/newui-code-config.png)
 
-**④ Identity tab: leave "Enable Azure Identity" off.** The tool gets its own tokens (ARM and Log Analytics) with the identity set in `MANAGED_IDENTITY_CLIENT_ID`.
+*(1) line 33, `MANAGED_IDENTITY_CLIENT_ID`; (2) line 35, `SUBSCRIPTION_IDS`; (3) line 38, `LOG_ANALYTICS_WORKSPACE_IDS` (Workspace ID GUIDs); (4) line 40, `LOCAL_TIMEZONE`.*
 
-![Identity tab switched off](images/b04-python-tool-identity-off.png)
+**④ Identity tab: leave "Enable Azure Identity" off.** The tool gets its own tokens (ARM and Log Analytics) with the identity set in `MANAGED_IDENTITY_CLIENT_ID`. Do not switch it on to look: it inserts four lines at the top of the code, and they stay there.
 
-**⑤ Test playground tab.** The portal detects the 3 parameters. Enter `operation` = `upcoming`, `period` = `last_30d`, `data_source` = `demo` and click **Test**.
+![Identity tab switched off](images/newui-identity.png)
 
-![Test playground with the 3 parameters](images/b05-python-tool-test-playground.png)
+*(1) **Identity** tab; (2) **Enable Azure Identity** **Off**.*
+
+**⑤ Test playground tab.** The portal detects the 3 parameters and shows an empty box for each. Enter `operation` = `upcoming`, `period` = `last_30d`, `data_source` = `demo` and click **Test**. **Create tool** stays grey until the test has run.
+
+![Test playground with the 3 parameters](images/newui-playground.png)
+
+*(1) **Test playground**; (2) **Test**; (3) `operation` = `upcoming`; (4) `period` = `last_30d`; (5) `data_source` = `demo`; (6) **Create tool**, grey until the test has run.*
 
 > Use `upcoming` for this test. With `report` or `summary` the playground shows `null` even though it says "Function test succeeded": the output is larger than the playground can display. Both work correctly in the chat.
 
@@ -390,25 +402,39 @@ Open [sre.azure.com](https://sre.azure.com) and select your agent. The numbered 
 
 ![Test result and Create tool](images/b06-python-tool-test-result.png)
 
+*Test result from an earlier run; today's portal labels may differ.*
+
 #### 5.A.2 Skill
 
-**⑦ Create → Skill.** Fill in **Name** = `sqlmi-maintenance-resilience`, **Description** (copy it from the deployment JSON), paste the full content of [`skills/sqlmi-maintenance-resilience/SKILL.md`](skills/sqlmi-maintenance-resilience/SKILL.md) in the editor and click **Choose tools**.
+**⑦ Create ▾ → Skill.** Paste the full content of [`skills/sqlmi-maintenance-resilience/SKILL.md`](skills/sqlmi-maintenance-resilience/SKILL.md) in the editor **first**: **Name** (`sqlmi-maintenance-resilience`) and **Description** are filled in from its front matter. Then click **Choose tools**.
 
-![Skill form](images/b07-skill-form.png)
+![Skill form](images/newui-skill.png)
 
-**⑧ Search for `generate-sqlmi-maintenance-report`, tick it, close the panel and click Create.**
+*(1) paste SKILL.md first; (2) **Name** and (3) **Description**, filled in from the front matter; (4) **Choose tools**, after pasting.*
 
-![Choose the tool for the skill](images/b08-skill-choose-tool.png)
+**⑧ Search for `generate-sqlmi-maintenance-report`, expand the PythonFunctionTool group, tick only this tool, click Close panel, check the chip and the `tools:` line, then click Create.** If you choose the tool before pasting the SKILL.md, the paste replaces the front matter and the tool is lost.
+
+![Choose the tool for the skill](images/newui-skill-tools.png)
+
+*(1) search box; (2) expand the **PythonFunctionTool** group (do not tick the group); (3) tick only `generate-sqlmi-maintenance-report`; (4) **Close panel**.*
+
+![Skill ready: tool chip and tools line](images/newui-skill-chip.png)
+
+*(1) tool chip; (2) `tools:` with the tool in the front matter; (3) **Create**.*
 
 #### 5.A.3 Subagent
 
-**⑨ Create → Custom Agent** (dialog "Create a custom agent"). **Name:** `sqlmi-maintenance-advisor`. **Instructions:** paste the full content of [`subagent-instructions.txt`](subagent-instructions.txt).
+**⑨ Create** button (or **Create ▾ → Custom agent**): dialog **Create a custom agent**. **Custom agent name:** `sqlmi-maintenance-advisor`. **Instructions:** paste the full content of [`subagent-instructions.txt`](subagent-instructions.txt).
 
-![Subagent name and instructions](images/b09-subagent-name-instructions.png)
+![Subagent name and instructions](images/newui-agent.png)
 
-**⑩ Choose skills:** tick **only** `sqlmi-maintenance-resilience`. **Choose tools:** tick **only** `generate-sqlmi-maintenance-report`. Click **Create**.
+*(1) **Custom agent name**; (2) the pasted instructions; (3) **Choose skills**; (4) **Choose tools**.*
 
-![Skill, tool and Create](images/b10-subagent-skill-tool-create.png)
+**⑩ Choose skills:** tick **only** `sqlmi-maintenance-resilience`. **Choose tools:** tick **only** `generate-sqlmi-maintenance-report` (search, expand **PythonFunctionTool**, tick, **Close panel**). Click **Create**.
+
+![Skill, tool and Create](images/newui-agent-chips.png)
+
+*(1) skill chip; (2) tool chip; (3) **Create**.*
 
 > Ticking only this skill stops the subagent from inheriting every global skill and keeps its answers focused on this case.
 
@@ -449,9 +475,11 @@ Done.
 
 ## Step 6 - First run in the chat
 
-**⑪ Open New chat, type `/agent sqlmi` and choose `sqlmi-maintenance-advisor`.**
+**⑪ Open New chat, type `/agent sqlmi` and choose `sqlmi-maintenance-advisor`.** The composer shows the chip **Agent: sqlmi-maintenance-advisor** (typing `@` no longer opens a picker).
 
-![Choose the subagent](images/b11-chat-choose-subagent.png)
+![Choose the subagent](images/newui-chat-pick.png)
+
+*(1) `/agent` and the subagent name (`sqlmi` is enough to filter the list); (2) choose `sqlmi-maintenance-advisor`.*
 
 **⑫ Type the prompt and send it:**
 
@@ -461,15 +489,21 @@ Users see errors when SQL Managed Instance maintenance happens. Generate the res
 
 For the demo add `Use demo data.` at the end.
 
-![Prompt in the chat](images/b12-chat-prompt.png)
+![Prompt in the chat](images/newui-chat-ready.png)
+
+*(1) chip **Agent: sqlmi-maintenance-advisor**; (2) the prompt; (3) send.*
 
 **⑬ In 1-2 minutes** the agent answers with **4 download links** (HTML report, JSON, instances CSV and impact CSV) and the short answer with the KPIs of the period.
 
 ![Answer with the 4 download links](images/b13-chat-answer-links.png)
 
+*Answer from an earlier run; today's portal labels may differ.*
+
 **⑭ At the end of the answer** you get the **prioritized actions with their command** and the confirmation that the agent **has not changed anything**: the team validates and runs them.
 
 ![Prioritized actions and read-only confirmation](images/b14-chat-answer-actions.png)
+
+*Answer from an earlier run; today's portal labels may differ.*
 
 ### What the HTML report contains
 
@@ -496,23 +530,25 @@ A complete example is in [`sample-run/`](sample-run/).
 
 > If you used option B with `--schedule`, the task already exists: check it in **Automation** and go to step 8.
 
-**⑮ Automation → Create scheduled task** and fill in (the numbers match the boxes in the screenshot):
+**⑮ Automation → Create ▾ → Scheduled task** and fill in (the numbers match the boxes in the screenshot):
 
 | Box | Field | Value |
 |---|---|---|
 | 1 | Task name | `SQL MI - Weekly maintenance resilience report` |
 | 2 | Response subagent | `sqlmi-maintenance-advisor` |
-| 3 | Task instructions | The prompt below |
-| 4 | Frequency | **Weekly**, **Monday**, **8:00** (portal local time) |
-| - | Agent autonomy level | **Autonomous** (the tool is read-only). Click **Create task**. |
+| 3 | Task details | The prompt below |
+| 4 | Frequency | **Weekly**, **Day of week** **Monday**, **Time of day** **8:00** (portal local time) |
+| 5 | Message grouping for updates | **New chat thread for each run** (recommended: one thread per weekly report; the default, *Use same chat thread*, keeps every run in one thread) |
+| 6 | Agent autonomy level | **Autonomous (Default)** (the tool is read-only) |
+| 7 | Create task | Click it to save the task |
 
 ```text
 @sqlmi-maintenance-advisor Generate the weekly SQL Managed Instance maintenance resilience report (operation=report, period=last_7d). Deliver the 4 download links (HTML, JSON, instances CSV and impact CSV), the short answer, the next maintenance with the applications at risk and the High priority actions.
 ```
 
-![Create scheduled task](images/b15-scheduled-task.png)
+![Create scheduled task](images/newui-task.png)
 
-> The script schedules `0 7 * * 1` in **UTC**. The portal shows the time in your local zone: in Central European Time that is 08:00 in winter and 09:00 in summer.
+> The script schedules `0 7 * * 1` in **UTC**. The portal shows the time in your local zone (the label reads *Time of day (GMT+1)* in Central European winter time): 07:00 UTC is 08:00 in winter and 09:00 in summer. To enter the UTC cron exactly, choose **Frequency** = **Custom cron** and type `0 7 * * 1`.
 
 ---
 
@@ -626,7 +662,7 @@ A manual failover reproduces what happens during maintenance. It requires **SQL 
 - [ ] `grant-sqlmi-permissions.ps1` ends with "Done" and writes `sqlmi-tool-config.txt`.
 - [ ] Lines 33, 35 and 38 of the tool hold your values (or you used option B with `--config`).
 - [ ] The Test playground with `operation=upcoming` returns `status: ok`.
-- [ ] **Build + setup → Agent Canvas** shows the tool, the skill `sqlmi-maintenance-resilience` and the subagent `sqlmi-maintenance-advisor`.
+- [ ] **Build + configure → Agent Canvas → Table view** shows the tool (card **Tools & skills → Python tools**), the skill `sqlmi-maintenance-resilience` (**Skills**) and the subagent `sqlmi-maintenance-advisor` (card **Agents → Custom agents**).
 - [ ] The step 6 prompt returns the 4 links and the HTML report opens.
 - [ ] With real data, the answer does **not** start with "MODO DEMO" and the report lists your instances.
 - [ ] The **Fuentes y cobertura** (sources) section of the HTML shows every source as `ok` (or explains why not).
@@ -647,8 +683,9 @@ A manual failover reproduces what happens during maintenance. It requires **SQL 
 | Every application shows "Sin telemetría" (no telemetry) | The workspace is missing on line 38, Log Analytics Reader is missing, or the apps use classic Application Insights. | Steps 3.1 and 3.2; migrate Application Insights to a workspace. |
 | An application shows "Sin reintentos" although it retries | Retries are not visible in telemetry or do not cover opening the connection. | Log every retry (step 8.4, rule 4) and validate with the drill in step 8.5. |
 | No recommended window | There are no CPU metrics for the instance, or it is in an instance pool (no window support). | Check Monitoring Reader in step 3 and the "Azure Monitor" row of **Fuentes y cobertura**. |
-| The subagent does not appear when typing `/agent sqlmi` | Not created yet, or the portal has not refreshed. | Reload the page and check in **Build + setup → Agent Canvas** that it exists. |
-| You cannot find **Builder** in the portal | The portal navigation was renamed. | Use **Build + setup** in the left menu, then **Agent Canvas**. |
+| The subagent does not appear when typing `/agent sqlmi` | Not created yet, or the portal has not refreshed. | Reload the page and check in **Build + configure → Agent Canvas → Table view → Custom agents** that it exists. |
+| You cannot find **Builder** or **Build + setup** in the portal | The portal navigation was renamed. | Use **Build + configure** in the left menu, then **Agent Canvas** (its first item). |
+| **Create tool** or **Save** stays grey | The dialog has not run a test yet. | Run the **Test** of ⑤ first; it is not a role problem. |
 | The deployment script returns HTTP 401/403 | Your user does not have **SRE Agent Administrator** on the agent. | Request the role. Azure Owner or Contributor do not work. |
 | The deployment script rejects `--endpoint` | It is not the agent URL. | Copy `endpoint` from step 1 (it ends in `.azuresre.ai`). |
 | The scheduled task runs at a different time | The cron is UTC and the portal shows local time. | Expected (step 7). Adjust it in the portal if needed. |

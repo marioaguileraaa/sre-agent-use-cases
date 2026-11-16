@@ -9,7 +9,7 @@ merely because its saved pictures appear in the guide.
 | Task field | Copy-ready value |
 |---|---|
 | Name | `Monthly Service Health events review` |
-| Response custom agent / subagent | `service-health-live` |
+| Response subagent | `service-health-live` |
 | Frequency | Monthly, day 1; equivalent custom cron below |
 | Cron / timezone | `0 10 1 * *` / UTC |
 | Meaning | First day of each month at 10:00 UTC |
@@ -25,19 +25,25 @@ merely because its saved pictures appear in the guide.
 1. In the customer's **Automation** page, filter by the exact task name above.
    Inspect ownership, responder, complete prompt and UTC schedule. Reuse a
    matching owned task; do not duplicate it or modify unrelated automations.
-2. If absent, select `service-health-live` in **Agent Canvas**, then its
-   **+ > Trigger > Add scheduled task**. Verify **Response custom agent** is
-   `service-health-live`. Enter **Task name** and paste the entire prompt below
-   into **Task details**; do not use **Refine with AI**.
-3. Set **day 1, 10:00 UTC**. The saved lab picture says **Time of day (UTC)**.
-   Your portal may label that picker with the **browser's time zone** instead.
-   Unless explicitly UTC, choose **Frequency > Custom cron** and enter
-   `0 10 1 * *` in **Cron expression (UTC)**. Do not assume 10:00 local is
-   10:00 UTC. The stored UTC time is fixed; local display shifts with DST.
+2. If absent, open **Automation > Create ▾ > Scheduled task** (or **Build +
+   configure > Agent Canvas > Create ▾ > Trigger › > Scheduled tasks**) and
+   select **Response subagent** `service-health-live`. Enter **Task name** and
+   paste the entire prompt below into **Task details**; do not use **Refine
+   with AI**.
+3. Set **day 1, 10:00 UTC**: choose **Frequency > Custom cron** (the list starts
+   at **Daily**) and enter `0 10 1 * *` in **Cron expression (UTC)**. The
+   **Monthly** picker's **Time of day** uses the **browser's time zone** in
+   today's portal (it shows the saved 10:00 UTC as 11:00 with the label
+   *GMT+1* in a UTC+1 browser); the October lab picture said **Time of day
+   (UTC)**. Do not assume 10:00 local is 10:00 UTC. The stored UTC time is
+   fixed; local display shifts with DST.
 4. Set **Agent autonomy level > Autonomous** and **Message grouping for
-   updates > New chat thread for each run**. Review the approved activation
+   updates > New chat thread for each run** (the default is *Use same chat
+   thread*). Review the approved activation
    date, model tier and usage/end limits without changing global settings.
-5. **Create task**, reopen and read back every field, **On/Active** status and
+5. **Create task**, reopen it (**Automation** > search > tick only this task >
+   **Edit**; **Cancel** if nothing changes) and read back every field,
+   **On/Active** status and
    the next execution **in UTC**. A reused matching task needs no needless
    Save. Then, only if separately authorized, perform one manual acceptance
    below. The schedule itself does not prove that a report ran.

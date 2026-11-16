@@ -118,7 +118,7 @@ Users, subscriptions, resource names and every GUID were replaced with fictitiou
 ```mermaid
 flowchart LR
     S[Scheduled task<br/>daily 18:00 UTC] --> A
-    U[Operator in chat<br/>@change-digest-reviewer] --> A
+    U[Operator in chat<br/>/agent change-digest-reviewer] --> A
     A[Subagent<br/>change-digest-reviewer] -->|skill rules| K[Skill<br/>azure-change-digest]
     A -->|"report or query"| T[Python tool<br/>generate-azure-change-digest]
     T -->|"Reader (read)"| ARG[Azure Resource Graph<br/>resourcechanges, resourcecontainerchanges,<br/>resourcecontainers, authorizationresources]
@@ -253,35 +253,49 @@ There are two equivalent options. Use **Option A** the first time, to understand
 
 ### Option A - From the portal (recommended the first time)
 
+The screenshots show today's portal (16 November 2026) with the files of this folder; nothing was saved, tested or sent while taking them. Red numbered boxes show where to click.
+
 #### 4.1 Python tool
 
-**①** In the SRE Agent portal, open **Build + setup → Agent Canvas** and select **Create → Tool → Python tool**.
+**①** In the SRE Agent portal, open **Build + configure → Agent Canvas** (its first option). Open the **▾ arrow** next to **Create** (the **Create** button itself opens *Create a custom agent*) and select **Tool › → Python tool**.
 
-![Create a Python tool from Build + setup](images/01-builder-create-python-tool.png)
+![Build + configure → Agent Canvas → Create ▾ → Tool › → Python tool](images/newui-menu.png)
 
-**②** In the **Code** tab:
-- set **Tool Name** to `generate-azure-change-digest`;
-- set **Timeout (seconds)** to `150`;
+**1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow next to **Create** (not the button) · **4** Tool › · **5** **Python tool**.
+
+**②** The dialog has three tabs: **Code**, **Test playground** and **Identity**. In the **Code** tab:
+- set **Tool Name** to `generate-azure-change-digest` (36 characters at most);
+- set **Timeout (seconds)** to `150` (the default is 120);
 - paste the **Description** below;
-- paste the full content of `generate-azure-change-digest.py` in the editor.
+- click the code editor, press `Ctrl+A` and paste the full content of `generate-azure-change-digest.py`.
+
+There is no *Requirements* field and no parameter editor: the parameters come from `def main(...)`. Do not use **Generate**.
 
 ```text
 Read-only daily digest of relevant Azure control-plane changes (Change Analysis in Azure Resource Graph, Reader): filters platform noise, scores deletes, exposure and security settings, SKU changes, new role assignments and Activity Log gap events (locks, diagnostic settings, policy, RBAC deletes), shows who / when / client and old -> new values, flags after-hours, first-time-actor and burst activity, and writes an offline HTML report, a JSON snapshot and two CSV files. Never changes anything.
 ```
 
-![Tool name, timeout, description and code](images/02-python-tool-code.png)
+![Create a Python tool, Code tab: name, timeout, description and code](images/newui-code.png)
+
+**1** *Tool Name* (the field is narrow and does not show the whole name) · **2** *Timeout (seconds)* `150` · **3** *Description* · **4** code editor: `Ctrl+A` and paste the whole file · **5** *Create tool*, grey until you run **Test**.
 
 **③** Scroll the editor to lines 32-33 and replace the two `<YOUR_...>` values with your Client ID and subscriptions (step 3).
 
-![Configuration lines 32-33 in the editor](images/03-python-tool-config-placeholders.png)
+![Code tab: CONFIGURE lines 32-33 in the editor](images/newui-config-lines.png)
 
-**④** In the **Identity** tab, leave **Enable Azure Identity** **Off**. The tool gets its own token with the agent managed identity (the Client ID of line 32).
+**1** lines 32-33, shown with the `<YOUR_...>` placeholders of the repository file (your copy has your Client ID and subscriptions) · **2** *Create tool*, still grey.
 
-![Identity tab: Enable Azure Identity Off](images/04-python-tool-identity-off.png)
+**④** In the **Identity** tab, leave **Enable Azure Identity** **Off** (the default). The tool gets its own token with the agent managed identity (the Client ID of line 32).
 
-**⑤** Open **Test playground**. The 6 optional parameters are detected from the code. Enter `operation` = `query`, `period` = `last_24h` and `view` = `summary`, then select **Test**. In about 20-25 seconds it returns the counts, the headline and the coverage, without writing files.
+![Identity tab: Enable Azure Identity Off](images/newui-identity.png)
 
-![Test playground with the 6 optional parameters](images/05-python-tool-test-playground.png)
+**1** Identity tab · **2** *Enable Azure Identity* Off.
+
+**⑤** Open **Test playground**. It shows one empty box for each of the 6 optional parameters, detected from the code. Type `operation` = `query`, `period` = `last_24h` and `view` = `summary`, leave the other boxes empty, then select **Test**. In about 20-25 seconds it returns the counts, the headline and the coverage, without writing files.
+
+![Test playground with the 6 optional parameters](images/newui-playground.png)
+
+**1** Test playground tab · **2** **Test** · **3** `operation` = `query` · **4** `period` = `last_24h` · **5** `view` = `summary` · **6** *Create tool*, grey until you run the test.
 
 | Parameter | Values | Default | Meaning |
 |---|---|---|---|
@@ -292,55 +306,73 @@ Read-only daily digest of relevant Azure control-plane changes (Change Analysis 
 | `resource_group` | Name or part of one | `""` | Focus on one resource group |
 | `limit` | 1-100 | 25 | Only with `query`: maximum rows (answers are capped at 3,500 bytes) |
 
-**⑥** Select **Create tool**.
+**⑥** **Create tool** stays grey until you run **Test**. When the test has run, select **Create tool**.
 
-![Create tool](images/06-python-tool-create.png)
-
-*In this screenshot **Create tool** is disabled only because the tool already exists in the lab agent. In a new agent it is enabled once the test passes.*
+*The screenshots never run **Test**, so **Create tool** is grey in all of them.*
 
 #### 4.2 Skill
 
-**⑦** Select **Create → Skill**.
+**⑦** Back in **Agent Canvas**, open the **▾ arrow** next to **Create** and select **Skill**.
 
-![Create a skill](images/07-builder-create-skill.png)
+![Agent Canvas → Create ▾ → Skill](images/newui-skill-menu.png)
 
-**⑧** Paste the full content of [`skills/azure-change-digest/SKILL.md`](skills/azure-change-digest/SKILL.md). The portal fills **Name** (`azure-change-digest`) and **Description** from the header of the file.
+**1** the ▾ arrow next to **Create** · **2** **Skill**.
 
-![Skill form with name, description and content](images/08-skill-form.png)
+**⑧** The order matters: **first** paste the full content of [`skills/azure-change-digest/SKILL.md`](skills/azure-change-digest/SKILL.md) in the **SKILL.md** editor on the right. The portal fills **Name** (`azure-change-digest`) and **Description** from the header of the file; its `tools:` line already names the tool, so the tool chip appears under **Tools**.
 
-**⑨** In **Choose tools**, search for `generate-azure-change-digest` (type *PythonFunctionTool*) and select it.
+![Create skill: SKILL.md pasted first, name and description filled in](images/newui-skill.png)
 
-![Choose the Python tool for the skill](images/09-skill-choose-tools.png)
+**1** SKILL.md editor: paste the whole file first · **2** *Name* and **3** *Description*, filled in from the header · **4** *Choose tools* (next).
 
-**⑩** Select **Create**.
+**⑨** Then select **Choose tools**, search `generate-azure-change-digest`, expand the **PythonFunctionTool (n)** group and make sure that only this tool is ticked (here the `tools:` line already ticked it; never tick the group checkbox), then **Close panel**. Choose the tool **after** pasting: pasting the whole file again replaces the header and can drop a tool chosen before.
 
-![Create the skill](images/10-skill-create.png)
+![Choose tools: search, expand PythonFunctionTool, tick only the tool](images/newui-skill-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only `generate-azure-change-digest` · **4** *Close panel*.
+
+**⑩** Check the tool chip and the `tools:` line in the editor, then select **Create**.
+
+![Create skill ready: tool chip and tools: line](images/newui-skill-chip.png)
+
+**1** tool chip · **2** `tools:` line in the header · **3** *Create*.
 
 #### 4.3 Subagent
 
-**⑪** Select **Create → Custom Agent**.
+**⑪** Select the **Create** button itself (or **Create ▾ → Custom agent**): both open **Create a custom agent**.
 
-![Create a subagent](images/11-builder-create-agent.png)
+![Agent Canvas: the Create button opens Create a custom agent](images/newui-agent-menu.png)
 
-**⑫** Set **Name** to `change-digest-reviewer`. Paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**, and this **Handoff description**:
+**1** **Create** button (opens the form directly) · **2** the ▾ arrow · **3** *Custom agent* (same form).
+
+**⑫** Set **Custom agent name** to `change-digest-reviewer` and paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**. Do not use *Refine with AI* or *View AI suggestions*. Today's form has no *Handoff description* field; the deploy script of Option B still sets this one through the API:
 
 ```text
 Read-only reviewer of relevant Azure changes (Change Analysis in Azure Resource Graph): daily digest, deletes, exposure and security changes, new role assignments, locks and diagnostic settings, who changed what and unusual activity.
 ```
 
-![Subagent name and instructions](images/12-agent-name-instructions.png)
+![Create a custom agent: name and instructions](images/newui-agent.png)
 
-**⑬** In **Choose skills**, select only `azure-change-digest` (it appears under the *User* group).
+**1** *Custom agent name* · **2** *Instructions* · **3** *Choose skills* · **4** *Choose tools*.
 
-![Choose the skill](images/13-agent-choose-skills.png)
+**⑬** In **Choose skills**, filter `azure-change-digest`, tick only that skill (it appears under the *User* group) and select **Close panel**.
 
-**⑭** In **Choose tools**, select only `generate-azure-change-digest`.
+![Choose skills: only azure-change-digest](images/newui-agent-skills.png)
 
-![Choose the tool](images/14-agent-choose-tools.png)
+**1** filter · **2** tick only `azure-change-digest` · **3** *Close panel*.
 
-**⑮** Select **Create**.
+**⑭** In **Choose tools**, search `generate-azure-change-digest`, expand **PythonFunctionTool**, tick only that tool and select **Close panel**.
 
-![Create the subagent](images/15-agent-create.png)
+![Choose tools: only generate-azure-change-digest](images/newui-agent-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only `generate-azure-change-digest` · **4** *Close panel*.
+
+**⑮** Check the two chips and select **Create**. Choosing a skill and a tool here replaces the global defaults that the subagent would otherwise inherit.
+
+![Create a custom agent ready: skill and tool chips](images/newui-agent-chips.png)
+
+**1** skill chip · **2** tool chip · **3** *Create*.
+
+After saving, the three objects are listed in **Agent Canvas → Table view**: the subagent in the **Agents** card (**Custom agents**, formerly *Sub Agents*), the skill and the tool in the **Tools & skills** card (**Skills** and **Python tools**).
 
 ### Option B - By script (2 minutes)
 
@@ -372,13 +404,19 @@ The output shows `1/4 Python tool`, `2/4 Skill`, `3/4 Subagent` and `4/4 Schedul
 
 ## Step 5 - First run in the chat
 
-**⑯** Open **New chat** and send:
+**⑯** Open **New chat**, type `/agent` and pick **change-digest-reviewer** (typing `@` no longer opens a picker). The chip **Agent: change-digest-reviewer** appears next to **+**. Then send:
 
 ```text
-@change-digest-reviewer Run the daily relevant Azure changes digest for the last 24 hours and give me the report.
+Run the daily relevant Azure changes digest for the last 24 hours and give me the report.
 ```
 
-![Run the subagent from the chat](images/16-chat-run-agent.png)
+![/agent: pick change-digest-reviewer](images/newui-chat-pick.png)
+
+**1** `/agent` + the subagent name · **2** pick `change-digest-reviewer`.
+
+![Agent: change-digest-reviewer chip and the prompt, ready to send](images/newui-chat-ready.png)
+
+**1** the **Agent: change-digest-reviewer** chip · **2** the prompt · **3** send.
 
 **⑰** About a minute later the agent answers. It starts with the high items in a table (when, what, where, who and why). Then come the medium items, deletes, security-relevant changes, new role assignments, Activity Log events, unusual activity, coverage, and suggested actions for a person to approve.
 
@@ -388,7 +426,7 @@ Under **Artifacts & links** it gives the four files. Click to download them.
 
 ![Agent answer with the download links](images/17-chat-result-downloads.png)
 
-*Users and identifiers are redacted in these screenshots. The full pseudonymized answer is in [`sample-run/agent-answer.md`](sample-run/agent-answer.md).*
+*These two answers come from an earlier run; today's portal labels may differ. Users and identifiers are redacted in these screenshots. The full pseudonymized answer is in [`sample-run/agent-answer.md`](sample-run/agent-answer.md).*
 
 For follow-up questions the agent calls the tool with `operation=query` and the matching view, without generating files. For example: *"Who deleted resources this week?"*, *"Was anything opened to the Internet today?"*, *"What changed in rg-app-prod-weu in the last 14 days?"*. See [Copy-ready prompts](#copy-ready-prompts).
 
@@ -470,9 +508,11 @@ CSV cells are protected against formula injection.
 
 ## Step 7 - Schedule the daily digest
 
-**⑱** Open **Automation → Create → Scheduled task**.
+**⑱** Open **Automation** (left menu) → **Create ▾** → **Scheduled task** (the other option is *HTTP trigger*).
 
-![Create a scheduled task](images/18-automation-create-scheduled-task.png)
+![Automation → Create ▾ → Scheduled task](images/newui-task-menu.png)
+
+**1** Automation · **2** Create ▾ · **3** **Scheduled task**.
 
 **⑲** Fill in the form:
 
@@ -481,15 +521,18 @@ CSV cells are protected against formula injection.
 | Task name | `Azure Changes - Daily relevant changes digest` |
 | Response subagent | `change-digest-reviewer` |
 | Task details | The daily prompt below |
-| Frequency | **Daily**, at the end of your business day. The form shows your browser time zone: 19:00 in Madrid is 18:00 UTC in winter (`0 18 * * *`) and 17:00 UTC in summer (`0 17 * * *`) |
-| Message grouping for updates | **Use same chat thread** (every day in one thread shows the history) |
-| Agent autonomy | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
+| Frequency | **Daily**, with **Time of day** at the end of your business day. The time list uses your browser time zone: 19:00 in Madrid is 18:00 UTC in winter (`0 18 * * *`) and 17:00 UTC in summer (`0 17 * * *`). For an exact UTC time, choose **Custom cron** and type the expression in **Cron expression (UTC)** |
+| Start on, Repeat until, Model tier, Set a run limit | Leave the defaults (today, no end date, *General Purpose*, no limit) |
+| Message grouping for updates | **Use same chat thread** (the default; every day in one thread shows the history) |
+| Agent autonomy level | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
 
 ```text
 @change-digest-reviewer Run the daily relevant Azure changes digest (operation=report, period=last_24h). Give me the links to the HTML report, the JSON snapshot and the two CSV files first, then the headline, the high and medium changes, deletes, security-relevant changes, new role assignments, Activity Log gap events, unusual activity and the coverage.
 ```
 
-![Scheduled task form](images/19-scheduled-task-form.png)
+![Create scheduled task filled in](images/newui-task.png)
+
+**1** *Task name* · **2** *Response subagent* · **3** *Task details* · **4** *Frequency* = *Daily* · **5** *Time of day* `19:00` in the browser time zone (GMT+1) = 18:00 UTC · **6** *Message grouping for updates* = *Use same chat thread* · **7** *Create task*.
 
 Select **Create task**. Run it every day, weekends included: weekend changes are a signal in themselves.
 
@@ -567,9 +610,11 @@ Azure records Azure Arc agent inventory updates under the user who onboarded the
   - anything outside the configured scope.
 - **Latency.** Changes appear in Azure Resource Graph a few minutes after they happen.
 - **Data handling.** The files contain user principal names, resource names and IDs. Treat them as internal confidential data.
-- **Screenshots** in this guide come from a Microsoft lab tenant; users, subscriptions and identifiers are pseudonymized or redacted.
+- **Screenshots** in this guide come from a Microsoft lab tenant; users, subscriptions and identifiers are pseudonymized or redacted. The portal screenshots of steps 4, 5 and 7 were refreshed on 16 November 2026 without saving anything; the chat answers come from an earlier run.
 
 ## Copy-ready prompts
+
+In the chat, select the subagent first (**New chat** → `/agent` → `change-digest-reviewer`) and paste the prompt without the leading `@change-digest-reviewer`. In a scheduled task, paste it as it is: the **Response subagent** field selects the subagent.
 
 | Goal | Prompt |
 |---|---|

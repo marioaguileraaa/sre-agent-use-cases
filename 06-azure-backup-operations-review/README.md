@@ -39,12 +39,16 @@ follows from these accepted execution/delivery gates.
 [5. First chat/four files](#5-run-in-chat-and-verify-all-four-actual-downloads) |
 [6. Monthly task](#6-create-and-validate-the-monthly-task) |
 [Troubleshooting](#troubleshooting).
-The [full evidence guide](report-evidence.md) contains all **14 actual annotated
-captures**. Pictures embedded below are saved lab objects/reports, **not**
-creation forms or values to copy into a new customer.
+The [full evidence guide](report-evidence.md) contains the **14 actual annotated
+October captures**. The setup pictures embedded below are captures of
+**today's portal (16 November 2026)**, taken read-only on the lab agent:
+creation forms with this guide's values (nothing saved, tested, sent or run)
+and readbacks of the saved lab objects. They are **not** values to copy into a
+new customer.
 
-Portal versions may say **Builder** or **Build + setup**, **Skills** or
-**Skill builder**, and **Custom Agent** or **subagent**. Use the verified
+Earlier portal versions said **Builder** or **Build + setup** (today: **Build +
+configure**), **Skills** or **Skill builder**, and **Custom Agent** or
+**subagent** (today's *Agents* card lists **Custom agents**). Use the verified
 object/field and saved readback when wording differs. The generic RBAC banner
 visible in some lab captures, including **Assign yourself ... Admin**, is not
 a setup instruction, permission receipt or authorization to bypass a warning.
@@ -295,8 +299,14 @@ permissions an existing identity has. See the
 
 Collect the private configuration values:
 
-1. In the customer's SRE Agent, open **Settings > Azure settings > Managed
-   Identity > Go to Identity**. On that UAMI's Azure page copy **Client ID**
+1. In the [Azure portal](https://portal.azure.com), open the customer agent's
+   resource group and its **Managed Identity** resource whose name starts with
+   `id-` (the user-assigned identity attached to the agent). Today's SRE Agent
+   portal has no **Settings** entry in the agent menu (checked on 16 November
+   2026); older versions of this guide used **Settings > Azure settings >
+   Managed Identity > Go to Identity**. With Azure CLI:
+   `az identity show --name <IDENTITY_NAME> --resource-group <RESOURCE_GROUP> --query clientId -o tsv`.
+   On that UAMI's **Overview** copy **Client ID**
    for the code and **Object (principal) ID** for the administrator's IAM
    checks. Do not exchange them or use the internal system-assigned identity.
 2. Confirm this identity is associated with and available to the intended SRE
@@ -470,35 +480,70 @@ If a tool, skill or specialist already has the exact case name, verify customer
 ownership and its complete saved contract before reusing it. Do not overwrite
 an unrelated name collision or create duplicate case objects.
 
-1. In the customer's agent, open **Builder > Agent Canvas > Create > Tool >
-   Python tool**. Choose the existing-code **Code** tab; do not **Generate**
-   replacement code or refine it with AI.
-2. Set the exact name **`generate-azure-backup-report`**. Use this description:
+1. In the customer's agent, open **Build + configure > Agent Canvas > Create ▾**
+   (the arrow next to **Create**; the button itself opens the custom agent
+   dialog) **> Tool › > Python tool**. Choose the existing-code **Code** tab; do
+   not **Generate** replacement code or refine it with AI.
+
+   ![Build + configure > Agent Canvas > Create ▾ > Tool > Python tool](images/newui-menu.png)
+
+   **1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow next to
+   **Create** (not the button) · **4** Tool › · **5** **Python tool**.
+
+2. Set the exact **Tool Name** (36 characters max.)
+   **`generate-azure-backup-report`**. Use this description:
    `Read-only Azure Backup jobs, JobDetails, protected items and source/history
    coverage for fixed approved Recovery Services vaults. Produces complete
    HTML, JSON, jobs CSV and items/coverage CSV; no Azure or incident writes.`
-3. Paste the **entire privately configured standalone file**, including the
+   Set **Timeout (seconds)** to `900` (default 120).
+3. Paste the **entire privately configured standalone file** (`Ctrl+A` in the
+   editor, then paste), including the
    embedded report template, without Markdown fences. A paste of just
    `main()` or a code screenshot is not a working tool.
-4. Review the runtime settings below and create/match the **single** parameter
-   from [tool-parameters.schema.json](tool-parameters.schema.json).
-5. Select **Create tool**, then reopen the saved tool. If this portal version
-   requires a **Test playground** execution first, obtain customer approval:
-   it is an additional live source read, not a syntax-only check. Do not run
-   repeated tests for screenshots; normal-chat/file acceptance remains step 5.
+
+   ![Create a Python tool, Code tab](images/newui-code.png)
+
+   **1** *Tool Name* (the narrow field doesn't show the whole name) ·
+   **2** *Timeout (seconds)* `900` · **3** *Description* · **4** the pasted
+   standalone file (top shown; this read-only capture used the repository file,
+   not a configured copy) · **5** *Create tool*, grey until **Test**.
+
+4. Review the runtime settings below. There is no parameter editor and no
+   *Requirements* field: the **single** `period` input is read from
+   `def main(period: str = "last_14d")` and must match
+   [tool-parameters.schema.json](tool-parameters.schema.json). On the
+   **Identity** tab, leave **Enable Azure Identity** **Off**.
+5. **Create tool** stays grey until you run **Test** on the **Test
+   playground** tab. That execution is an additional live source read, not a
+   syntax-only check: obtain customer approval, type `last_14d` in the
+   **period** box, run **Test** once, inspect the result, then select **Create
+   tool** and reopen the saved tool. Do not run repeated tests for screenshots;
+   normal-chat/file acceptance remains step 5.
+
+   ![Test playground: period = last_14d, Test not run](images/newui-playground.png)
+
+   **1** *Test playground* tab · **2** **Test** (not clicked in the capture) ·
+   **3** `period` = `last_14d` · **4** *Create tool*, grey until **Test**.
+
+   ![Create a Python tool, Identity tab](images/newui-identity.png)
+
+   **1** *Identity* tab · **2** *Enable Azure Identity*, left **Off**: the code
+   acquires its own ARM token. In today's portal turning it on inserts four
+   `# Azure Identity Authentication` lines (`DefaultAzureCredential`) at the
+   top of the code that stay after switching it off; delete them if that happens.
 
 | Setting | Customer setup / accepted lab reference |
 |---|---|
 | Timeout (`timeoutSeconds`) | **900 seconds**, the saved lab setting, within the documented 5-900 second range. Keep the code's own 240-second collection guard; the platform default 120 seconds is not the accepted setting. |
 | Runtime packages | [requirements.txt](requirements.txt): `azure-identity>=1.19,<2`, `Pillow>=11,<13`. Explicit UAMI auth uses `azure-identity`; a nonempty logo requires Pillow. No HTML/template package is needed. |
-| Dependencies/packages field, if exposed | The lab saved `dependencies=[]` because both packages were already installed. Verify availability in the customer runtime. Only if missing, the runtime administrator uses its supported dependency configuration with compatible manifest versions; field syntax/availability varies. Do not insert `pip install` into the collector or add a shell tool. |
-| Identity / platform authentication | Saved lab values: `authEnabled=false`, `authScopes=null`, `toolMode=Auto`. Authentication is **disabled** at this platform layer because the code acquires its own ARM token using the fixed UAMI Client ID. Do not enable generic preset scopes or replace this with the generic Identity-tab tutorial flow. |
+| Dependencies/packages field, if exposed | Today's dialog has no *Requirements*/dependencies field (checked on 16 November 2026). The lab saved `dependencies=[]` because both packages were already installed. Verify availability in the customer runtime. Only if missing, the runtime administrator uses its supported dependency configuration with compatible manifest versions. Do not insert `pip install` into the collector or add a shell tool. |
+| Identity / platform authentication | Saved lab values: `authEnabled=false`, `authScopes=null`, `toolMode=Auto`: **Enable Azure Identity** is **Off**. Authentication is **disabled** at this platform layer because the code acquires its own ARM token using the fixed UAMI Client ID. Do not enable generic preset scopes or replace this with the generic Identity-tab tutorial flow. |
 
 These are saved configuration fields, **not extra tool parameters**. If an
 advanced field is not exposed in your portal, use the customer's approved
 administrator configuration/readback route, not an invented wizard field.
-The code enforces the enum even if a row editor only exposes name/type/value;
-retain the documented Python default.
+The code enforces the enum; the portal only shows the name and type read from
+`main()`, so retain the documented Python default.
 
 | Parameter | Runtime type | Python type/default | Allowed values |
 |---|---|---|---|
@@ -506,8 +551,9 @@ retain the documented Python default.
 
 There is no `operation`, `query`, integer, scope, URL, path, task or logo input.
 Read back the saved whole code and enum/default; do not substitute a partial
-editor paste. The JSON schema uses the matching standard JSON type. In a
-row-based editor set runtime type **string**, not `int`; do not add Case05's
+editor paste. The JSON schema uses the matching standard JSON type. The saved
+tool's **Query parameters** list must show `period` as runtime type
+**string**, not `int`; do not add Case05's
 11 report/query parameters to this different tool.
 
 The runtime asset is **definition-only**: importing or executing its definitions,
@@ -515,15 +561,21 @@ even with `__name__="__main__"`, never calls `main`, collects data, writes files
 prints a result. The SRE runtime explicitly invokes `main` once. Use the separate
 existing `tests/offline_demo.py` for a local synthetic demonstration.
 
-**Checkpoint:** in **Agent Canvas > Table view > Python tools**, filter by the
-exact tool name and reopen its detail. Verify complete code with only the eight
+**Checkpoint:** in **Agent Canvas > Table view** > *Tools & skills* card >
+**Python tools**, filter by the
+exact tool name and open its detail (the pencil opens **Edit Python tool**).
+Verify complete code with only the eight
 private edits, one definition-only `main`, the one `period` type/default/enum,
 timeout and runtime/dependency settings.
 
-![Actual saved lab Python tool with main and its one period string parameter; not a creation dialog](images/step3-01-saved-python-tool-main.png)
+![Saved Python tool readback: code and the one period string parameter](images/newui-tool-readback.png)
 
-The [full tool caption](report-evidence.md#saved-python-tool-and-one-typed-parameter)
-explains callouts **1-4**: Builder, saved tool, `main` and the one string row.
+Today's readback of the saved lab tool (16 November 2026, nothing edited):
+**1** *Python tools* in the *Tools & skills* card · **2** search · **3** click
+the name · **4** the saved **Python Code** (top of the file) · **5** **Query
+parameters** read from `main()`: the one `period` row, type **string**.
+The [full October caption](report-evidence.md#saved-python-tool-and-one-typed-parameter)
+explains the earlier capture, which showed `main` itself.
 The saved table's blank **Value** cell is not an instruction to delete the
 default: use `last_14d` from `main` and the schema.
 Private configuration and embedded logo bytes are deliberately off-screen;
@@ -531,28 +583,63 @@ do not replace them with guessed values in a screenshot.
 
 ### 4. Attach the runtime skill and restricted subagent
 
-1. Open **Builder > Skills** (called **Skill builder** in the lab) and
-   **Create skill**; some versions expose **+ Create skill** in Agent Canvas.
-   Set the exact name **`azure-backup-live`**. For its description use:
+1. Open **Build + configure > Agent Canvas > Create ▾** (the arrow) **> Skill**
+   (**Build + configure > Extensions > Skill builder > Create skill** opens the
+   same dialog). Type the exact **Name** **`azure-backup-live`** and fill the
+   **Description** (select **Edit**, type, then **Save**) with:
    `Read-only Azure Backup operations evidence for fixed approved Recovery
    Services vaults, with native job details and honest source/history coverage.`
-2. Replace the default **Files > SKILL.md** content with the entire
-   [case runtime file](skills/azure-backup-live/SKILL.md). This is a runtime
-   skill, not a knowledge upload, repository connector or this README. If the portal synchronizes form fields
-   and frontmatter, verify the saved name and complete instruction body.
-3. In the skill's **Tools > Choose tools**, select **only**
-   `generate-azure-backup-report`; **Create**, reopen and inspect `SKILL.md`
+   The `SKILL.md` editor shows a front matter generated from these fields.
+2. In the **SKILL.md** editor, replace the placeholder line
+   (`<!-- Add your skill instructions here -->`) with the entire
+   [case runtime file](skills/azure-backup-live/SKILL.md). The file has no front
+   matter of its own, so keep the generated one; do not select all and paste
+   over it. This is a runtime
+   skill, not a knowledge upload, repository connector or this README. Verify the saved name and complete instruction body.
+3. **Then** select **Choose tools**, search for `generate-azure-backup-report`,
+   expand **PythonFunctionTool (n)**, tick **only** that tool (never the group
+   checkbox) and **Close panel**. Check the chip and the `tools:` line added to
+   the front matter; **Create**, reopen and inspect `SKILL.md`
    and the one bound tool.
-4. Open **Agent Canvas > Create > Custom Agent > Form**
-   (older versions say **+ Create subagent**). Name it
+
+   ![Create skill: name, description and SKILL.md below the front matter](images/newui-skill.png)
+
+   **1** *Name* · **2** *Description* (**Edit**, type, **Save**) · **3** the
+   runtime `SKILL.md` below the generated front matter · **4** *Choose tools*,
+   next.
+
+   ![Create skill: Choose tools](images/newui-skill-tools.png)
+
+   **1** search · **2** expand the *PythonFunctionTool* group · **3** tick only
+   `generate-azure-backup-report` · **4** *Close panel*.
+
+   ![Create skill: ready to create](images/newui-skill-chip.png)
+
+   **1** tool chip · **2** `tools:` in the front matter · **3** **Create** (not
+   clicked in this read-only capture).
+
+4. In **Agent Canvas**, select **Create**: it opens **Create a custom agent**
+   (tabs *Form / YAML*; **Create ▾ > Custom agent** is the same dialog; older
+   versions said **+ Create subagent**). Name it
    **`azure-backup-live`**. Paste the complete **Copy-ready subagent
    instructions** from [the specialist guide](subagent-instructions-and-prompts.md).
    Do not refine the restrictions with AI.
-5. In **Choose tools**, explicitly select **only**
-   `generate-azure-backup-report`. In **Choose Skills** / **Allowed Skills**,
-   enable skills if required and select **only** `azure-backup-live`.
-   Leave handoff agents, extra/system skills and unrelated execution tools
-   unselected. **Create**, then reopen the saved detail/allowlists.
+5. In **Choose skills**, filter and tick **only** `azure-backup-live`, then
+   **Close panel**. In **Choose tools**, search, expand **PythonFunctionTool
+   (n)** and tick **only** `generate-azure-backup-report`, then **Close
+   panel**. Leave handoff agents, extra/system skills and unrelated execution
+   tools unselected. **Create**, then reopen the saved detail/allowlists.
+
+   ![Create a custom agent: name and instructions](images/newui-agent.png)
+
+   **1** *Custom agent name* · **2** pasted *Instructions* · **3** *Choose
+   skills* · **4** *Choose tools*.
+
+   ![Create a custom agent: ready to create](images/newui-agent-chips.png)
+
+   **1** skill chip `azure-backup-live` · **2** tool chip
+   `generate-azure-backup-report` · **3** **Create** (not clicked in this
+   read-only capture).
 
 An empty tool selection inherits global tools; an empty allowed-skills
 selection can allow all skills. Neither means a restricted zero-access agent.
@@ -563,14 +650,14 @@ notification/ticket connector or operator/load asset belongs here.
 
 | Portal surface | Exact field / control | Required value / post-save readback check |
 |---|---|---|
-| **Python tool** (`Builder > Agent Canvas > Create > Tool > Python tool`) | **Tool Name** | `generate-azure-backup-report` |
+| **Python tool** (`Build + configure > Agent Canvas > Create ▾ > Tool › > Python tool`) | **Tool Name** | `generate-azure-backup-report` |
 | **Python tool** | **Description** | `Read-only Azure Backup jobs, JobDetails, protected items and source/history coverage for fixed approved Recovery Services vaults. Produces complete HTML, JSON, jobs CSV and items/coverage CSV; no Azure or incident writes.` |
 | **Python tool** | **Code** tab | Complete standalone `generate-azure-backup-report.py` with only the 8 private fields edited; definitions-only on load (no `if __name__ == "__main__":` autorun) |
-| **Python tool** | **Timeout** (`timeoutSeconds`) | `900` seconds (not the 120-second platform default) |
-| **Python tool** | **Query parameters** | **1 parameter** only: `period` (runtime type `string`, default `last_14d`, allowed values `last_14d`, `last_24h`); do not add Case 05's 11 parameters |
-| **Python tool** | **Identity / Authentication** | **Off** (`authEnabled=false`, `authScopes=null`, `toolMode=Auto`) |
-| **Skill** (`Builder > Skills > Create skill`) | **Skill Name** / **SKILL.md** / **Choose tools** | Name `azure-backup-live`; complete `skills/azure-backup-live/SKILL.md` body; verify the exact selected tool **name** `generate-azure-backup-report` |
-| **Custom Agent** (`Agent Canvas > Create > Custom Agent > Form`) | **Name** / **Instructions** / **Choose tools** / **Allowed Skills** | Name `azure-backup-live`; complete copy-ready instructions from `subagent-instructions-and-prompts.md`; verify the exact selected tool and skill **names** in the saved form and effective supported policy (`tools: ["generate-azure-backup-report"]`, `allowedSkills: ["azure-backup-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`); never leave allowlists empty or rely on the list summary badge |
+| **Python tool** | **Timeout (seconds)** (`timeoutSeconds`) | `900` seconds (not the 120-second platform default) |
+| **Python tool** | **Query parameters** (read from `main()`; no parameter editor) | **1 parameter** only: `period` (runtime type `string`, default `last_14d`, allowed values `last_14d`, `last_24h`); do not add Case 05's 11 parameters |
+| **Python tool** | **Identity** tab | **Enable Azure Identity** **Off** (`authEnabled=false`, `authScopes=null`, `toolMode=Auto`) |
+| **Skill** (`Build + configure > Agent Canvas > Create ▾ > Skill`) | **Name** / **Description** / **SKILL.md** / **Choose tools** (after pasting) | Name `azure-backup-live`; complete `skills/azure-backup-live/SKILL.md` body below the generated front matter; verify the exact selected tool **name** `generate-azure-backup-report` |
+| **Custom agent** (`Agent Canvas > Create` → **Create a custom agent** > Form) | **Custom agent name** / **Instructions** / **Choose skills** / **Choose tools** | Name `azure-backup-live`; complete copy-ready instructions from `subagent-instructions-and-prompts.md`; verify the exact selected tool and skill **names** in the saved form and effective supported policy (`tools: ["generate-azure-backup-report"]`, `allowedSkills: ["azure-backup-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`); never leave allowlists empty or rely on the list summary badge |
 
 > [!NOTE]
 > **Dated SRE UI badge caveat:** In the live SRE Agent UI, Agent Canvas list/card summary badges can display inherited global rollups (for example, `131 tools` / `52 skills`) even when both native APIs, selected chips and the saved form policy enforce one explicit tool and skill (`tools`, `allowedSkills`, `addSystemSkills=false`, `disableDocumentRetrieval=true`). Verify the exact selected tool and skill **names** in the saved form and effective supported policy; the list summary badge is not authoritative restriction proof, and you must not modify globals to change it.
@@ -579,26 +666,31 @@ notification/ticket connector or operator/load asset belongs here.
 bound tool; the specialist has the exact name/instructions, **one explicit
 selected tool and one selected skill**, without inherited execution tools.
 
-![Actual saved lab runtime skill, single bound tool and SKILL.md](images/step4-01-saved-runtime-skill.png)
+![Saved runtime skill: one bound tool and SKILL.md](images/newui-skill-readback.png)
 
-Callouts **1-4** show the filtered skill, saved profile, bound tool and
-instruction file; this is a saved readback, not a creation form.
+Today's skill readback (16 November 2026, saved lab skill): **1** *Skills* in
+the *Tools & skills* card · **2** filter by name · **3** click the name ·
+**4** the single bound tool · **5** the `SKILL.md` instruction file. This is a
+saved readback, not a creation form.
 
-![Actual saved lab restricted specialist with one selected tool and one matching skill](images/step4-02-restricted-agent-profile.png)
+![Saved restricted specialist: Tools · 1, one tool and one matching skill](images/newui-agent-readback.png)
 
-The [saved skill and responder
+Specialist readback: **1** *Custom agents* in the *Agents* card · **2** filter ·
+**3** click the name · **4** **Tools · 1** · **5** its only tool · **6** the
+selected runtime skill. The [October saved skill and responder
 captures](report-evidence.md#saved-runtime-skill-and-restricted-responder) show
-`SKILL.md`, its one bound report tool, the responder's **Tools · 1** detail and
-the selected runtime skill. Inspect the actual detail/readback, not a summary
+the same `SKILL.md`, bound report tool, **Tools · 1** detail and selected
+runtime skill. Inspect the actual detail/readback, not a summary
 table's inheritance rollup. No role assignment or permissions button was used
 during documentation.
 
 ### 5. Run in chat and verify all four actual downloads
 
-After customer approval for a source read, select **New chat thread** in the
-intended customer agent. Choose **`azure-backup-live`** in the agent picker or
-the portal's `/agent` selection and verify the selected responder; merely
-typing its name does not prove routing. Paste this natural-language prompt:
+After customer approval for a source read, select **New chat** in the
+intended customer agent. Type `/agent`, type `azure-backup-live` and pick
+**`azure-backup-live`**; the chip **Agent: azure-backup-live** appears next to
+**+** (typing `@` no longer opens a picker). Verify the selected responder;
+merely typing its name does not prove routing. Paste this natural-language prompt:
 
 ```text
 Use azure-backup-live and only generate-azure-backup-report. Generate exactly
@@ -616,6 +708,14 @@ scope or credential belongs in this chat. The optional
 [24-hour prompt](subagent-instructions-and-prompts.md#report-prompts) is a
 separate explicitly requested fresh collection, **not** a required second call
 or a hidden monthly retry.
+
+![New chat: /agent and the specialist name](images/newui-chat-pick.png)
+
+![New chat: Agent chip and the report prompt](images/newui-chat-ready.png)
+
+Today's portal, nothing sent: **1** `/agent` and the specialist name ·
+**2** pick `azure-backup-live`; then (second image) **1** chip *Agent:
+azure-backup-live* · **2** the prompt above · **3** send.
 
 Optional **Spanish (ES)** equivalent natural-language prompts (for `period="last_14d"`,
 for an explicit `period="last_24h"` run, and for a grounded follow-up question
@@ -660,7 +760,7 @@ Unknown. `status="error"` means stop with the sanitized source/code; do not
 invent links or a healthier replacement report. Counts and native states in a
 new customer's data need not match either historical lab run.
 
-![Actual normal lab thread with four native files and its own dated counts](images/step5-07-normal-chat-four-files.png)
+![Actual normal lab thread with four native files and its own dated counts (earlier run; today's portal labels may differ)](images/step5-07-normal-chat-four-files.png)
 
 Callouts **1-5** identify the accepted **2026-10-14T19:55:26Z** normal thread
 and its four files. This existing response is not a newly submitted customer
@@ -742,35 +842,53 @@ task in the reference pictures.
    Inspect any match's ownership, responder, prompt and schedule.
    Reuse an already matching customer-owned task rather than duplicate it;
    do not edit an unrelated task or treat a name match as ownership proof.
-2. If there is no matching owned task, select **`azure-backup-live`** on
-   **Agent Canvas**, then its **+ > Trigger > Add scheduled task**.
-   Verify **Response custom agent = azure-backup-live**, normally preselected.
+2. If there is no matching owned task, open **Automation > Create ▾ >
+   Scheduled task** (or **Build + configure > Agent Canvas > Create ▾ >
+   Trigger › > Scheduled tasks**) and select **Response subagent**
+   `azure-backup-live`; verify it.
 3. Set **Task name** to **`Monthly Azure Backup operations review`**. Paste
    the **entire Task details prompt** from
    [monthly-task-prompt.md](monthly-task-prompt.md). It makes **one**
    `period="last_14d"` call for the complete fixed vault scope, not two calls
    for "today" and "monthly".
-4. The intended slot is **day 1, 10:30 UTC**, equivalent to **`30 10 1 * *`**.
-   Check the picker's time-zone label: the actual lab screenshot says
-   **Time of day (UTC)**, but current portal documentation also describes
-   browser-local time labels. If not explicitly UTC, select **Frequency >
-   Custom cron** and put `30 10 1 * *` in **Cron expression (UTC)**.
+4. The intended slot is **day 1, 10:30 UTC**, equivalent to **`30 10 1 * *`**:
+   select **Frequency > Custom cron** (the list starts at **Daily**) and put
+   `30 10 1 * *` in **Cron expression (UTC)**. The **Monthly > Day of month >
+   Time of day** picker uses the browser's zone: today's portal labels it
+   **Time of day (GMT+1)** in a UTC+1 browser and shows the saved 10:30 UTC as
+   11:30 (the October lab screenshot said **Time of day (UTC)**).
    Do not enter 10:30 local and assume UTC. The stored UTC recurrence is
    fixed; the corresponding local hour can change with daylight saving.
 5. Set **Agent autonomy level > Autonomous** and **Message grouping for
-   updates > New chat thread for each run**. Choose the customer's approved
+   updates > New chat thread for each run** (the default is *Use same chat
+   thread*). Choose the customer's approved
    **Start on** date and any run limit/end date; do not copy the lab dates.
    Review the customer-approved model tier/usage policy without changing
    global defaults.
-6. Select **Create task**, reopen it and read back the complete prompt,
+
+   ![Create scheduled task: completed form](images/newui-task.png)
+
+   Today's form, filled in without selecting **Create task**: **1** *Task name* ·
+   **2** *Response subagent* · **3** *Task details* (the monthly prompt) ·
+   **4** *Frequency* = *Custom cron* · **5** *Cron expression (UTC)*
+   `30 10 1 * *` · **6** *New chat thread for each run* · **7** **Create task**.
+
+6. Select **Create task**, reopen it (**Automation** > search > tick only this
+   task > **Edit**; **Cancel** if nothing changes) and read back the complete prompt,
    responder, grouping, autonomy, **On/Active** status and **next execution in
    UTC**. For an existing matching task, no unnecessary Save is needed.
 7. With separate explicit customer authorization for one manual acceptance,
-   select **only this task's checkbox > Run now** in **Automation**
-   (the detail view may say **Run task now**). Open its history **Thread name**
+   search **Automation** for the task, select **only this task's checkbox >
+   Run now** (the task's own page, opened by clicking its name, says **Run
+   task now**). Open its history **Thread name**
    link, or locate the matching execution in **Chats**. Check the exact one
    tool call, final result and **four actual downloads** as in step 5.
    Do not repeat a run merely to obtain a screenshot or success badge.
+
+   ![Automation: search, tick only this task, Run now](images/newui-automation-list.png)
+
+   Today's Automation list, captured without clicking **Run now**: **1** search
+   by the task name · **2** tick only this task · **3** **Run now**.
 
 The restricted tool remains GET-only; autonomy does not add recovery or write
 capabilities. It also does not remove any existing wider permissions from the
@@ -793,11 +911,18 @@ timer-fired execution needs a later receipt and is not proven by Run now.
 
 ### Historical lab task and its one manual acceptance
 
-![Actual saved lab task configuration with day one at 10:30 UTC, new-thread grouping and Autonomous](images/step6-02-saved-monthly-task-config.png)
+![Saved lab task read back in today's portal: Monthly, day 1, 11:30 in a GMT+1 browser (10:30 UTC)](images/newui-task-readback.png)
 
-Callouts **1-4** mark the saved name, one-call prompt, genuinely UTC time field
-and Autonomous mode. This is an unchanged saved-detail dialog, not a new-task
-wizard. The pictured Start on date belongs only to the lab.
+**Readback in today's portal (16 November 2026)** of the same saved lab task,
+opened with **Edit** and closed with **Cancel** (nothing saved): **1** *Task
+name* · **2** *Response subagent* · **3** the one-call prompt · **4**
+*Frequency* **Monthly**, day **1**, *Time of day (GMT+1)* **11:30**, the
+browser-zone display of the saved 10:30 UTC · **5** *New chat thread for each
+run* · **6** **Autonomous** · **7** *Save* (not clicked). The pictured Start on
+date belongs only to the lab. The October capture, whose callouts **1-4**
+marked the saved name, one-call prompt, genuinely UTC time field and Autonomous
+mode in an unchanged saved-detail dialog, is
+[kept for reference](images/step6-02-saved-monthly-task-config.png).
 
 The operator's single manual execution began at
 `2026-10-14T22:02:57.614316Z`; its distinct report reference is
@@ -809,12 +934,12 @@ shows the real filtered list, unchanged configuration, history row and four
 delivered artifacts. This is a manual validation of the saved scheduled-task
 path, not proof that the future calendar occurrence has already fired.
 
-![Actual lab task history with one manual execution, not a future timer receipt](images/step6-03-monthly-execution-history.png)
+![Actual lab task history with one manual execution, not a future timer receipt (earlier run; today's portal labels may differ)](images/step6-03-monthly-execution-history.png)
 
 Callouts **1-3** identify the owned task, monthly slot and single historical
 Success row. That row alone is not a completed-report or download receipt.
 
-![Actual lab monthly execution thread and four native files from the separate 22:03 snapshot](images/step6-04-monthly-thread-four-files.png)
+![Actual lab monthly execution thread and four native files from the separate 22:03 snapshot (earlier run; today's portal labels may differ)](images/step6-04-monthly-thread-four-files.png)
 
 Callouts **1-5** identify the actual execution thread and its four files.
 These later **56 Completed** counts must not replace the earlier normal
@@ -981,7 +1106,7 @@ normal costs; read-only is not a zero-cost promise.
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent azure-backup-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent azure-backup-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. Typing `@` no longer opens a picker: with the **Agent: azure-backup-live** chip selected, the leading `@azure-backup-live` below is plain text and can be left out.
 
 ### 1. Full 14-Day Azure Backup Operations Report (4 Files) / Informe Completo de Azure Backup de 14 Dias (4 Archivos)
 - **Castellano:**

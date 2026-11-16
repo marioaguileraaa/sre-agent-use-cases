@@ -9,9 +9,12 @@ into the earlier InProgress screenshots.
 
 **For a new customer, start with the [numbered implementation guide](README.md#numbered-setup-and-validation-guide).**
 Create and read back the customer's own tool, skill, specialist and task there
-before comparing with these saved-detail references. All **14 existing PNGs**
-are historical lab evidence; their counts, dates, private values and object
-names do not prove acceptance in another environment. The generic package and
+before comparing with these saved-detail references. The **14 October PNGs**
+(`step*.png`) are historical lab evidence; their counts, dates, private values
+and object names do not prove acceptance in another environment. The five
+`newui-*` setup pictures embedded below are read-only captures of **today's
+portal (16 November 2026)** showing the same saved lab objects; each section
+links the October capture it replaces and keeps its original description. The generic package and
 masked captures are already published in the private repository; approved
 access or an approved offline guide copy is needed to read them.
 
@@ -82,9 +85,16 @@ in [README step 1](README.md#1-confirm-scope-identity-and-operator-boundaries).
 
 ### Saved Python tool and one typed parameter
 
-![Actual SRE Builder saved Python tool at main with one period string parameter and numbered callouts](images/step3-01-saved-python-tool-main.png)
+![Saved Python tool readback in today's portal: code and the one period string parameter](images/newui-tool-readback.png)
 
-**1** locates **Builder > Agent Canvas**; use **Table view > Python tools** and
+**Today's portal (16 November 2026)**, same saved lab tool, nothing edited:
+**1** *Python tools* in the *Tools & skills* card of **Agent Canvas > Table
+view** · **2** search by the exact name · **3** click the name · **4** the saved
+**Python Code** · **5** **Query parameters**: one `period` row, type **string**.
+
+In the [October capture](images/step3-01-saved-python-tool-main.png),
+**1** located **Builder > Agent Canvas** (today **Build + configure > Agent
+Canvas**); use **Table view > Python tools** and
 filter by the exact new name. **2** identifies the saved
 `generate-azure-backup-report` detail, not a new-tool dialog. **3** shows the
 actual `main(period: str = "last_14d") -> dict` definition. **4** shows its one
@@ -101,16 +111,24 @@ regression are documented separately from live execution.
 
 ### Saved runtime skill and restricted responder
 
-![Actual filtered saved azure-backup-live skill with the one bound report tool and SKILL.md file](images/step4-01-saved-runtime-skill.png)
+![Saved azure-backup-live skill readback in today's portal: one bound report tool and SKILL.md](images/newui-skill-readback.png)
 
-**1** filters the list to `azure-backup-live`; **2** identifies its saved skill
-profile. **3** shows the single bound report tool and **4** the default
+**Today's portal**, same saved lab skill: **1** *Skills* in the *Tools &
+skills* card · **2** filter by name · **3** click the name · **4** the single
+bound report tool · **5** the `SKILL.md` file. In the
+[October capture](images/step4-01-saved-runtime-skill.png),
+**1** filtered the list to `azure-backup-live`; **2** identified its saved skill
+profile. **3** showed the single bound report tool and **4** the default
 `SKILL.md` instruction file. The full reusable instructions are in
 [skills/azure-backup-live/SKILL.md](skills/azure-backup-live/SKILL.md).
 
-![Actual filtered restricted subagent detail showing Tools 1, the report tool and the selected runtime skill](images/step4-02-restricted-agent-profile.png)
+![Saved restricted responder readback in today's portal: Tools · 1, the report tool and the selected skill](images/newui-agent-readback.png)
 
-**1** filters the Sub Agents list to the owned responder. **2** is the saved
+**Today's portal**, same saved responder: **1** *Custom agents* in the *Agents*
+card · **2** filter · **3** click the name · **4** **Tools · 1** · **5** its only
+tool · **6** the selected runtime skill. In the
+[October capture](images/step4-02-restricted-agent-profile.png),
+**1** filtered the Sub Agents list (today **Custom agents**) to the owned responder. **2** is the saved
 detail's **Tools · 1** count, **3** is its only listed tool and **4** is the
 selected runtime skill. Saved readback also confirmed the explicit tool and
 `allowedSkills` allowlists, no added system skills and no parallel tool calls.
@@ -121,7 +139,7 @@ responder's authorization.
 
 ### Actual normal-thread file delivery
 
-![Actual accepted normal SRE thread with four delivered file links and dated 54 Completed and 2 InProgress counts](images/step5-07-normal-chat-four-files.png)
+![Actual accepted normal SRE thread with four delivered file links and dated 54 Completed and 2 InProgress counts (earlier run; today's portal labels may differ)](images/step5-07-normal-chat-four-files.png)
 
 **1** identifies the accepted normal thread. **2-5** are its actual HTML, full
 JSON, jobs CSV and items/coverage CSV links. The message preserves the
@@ -274,8 +292,14 @@ tasks may change the total shown in the platform's global counters.
 
 ### 1. Filter to the owned task, not unrelated customer automations
 
-![Actual Automation name filter showing only the active Monthly Azure Backup operations review and one completed run](images/step6-01-filtered-monthly-automation.png)
+![Automation in today's portal: exact-name search, only this task ticked, Run now not clicked](images/newui-automation-list.png)
 
+**Today's portal (16 November 2026):** **1** the exact-name search · **2** only
+this task ticked · **3** **Run now** (not clicked). The list shows one matching
+automation with its On status, last run and completed runs as of today; these
+are lab values, not a receipt for a customer task or for a downloaded report.
+
+In the [October capture](images/step6-01-filtered-monthly-automation.png),
 **1** identifies Automation. **2** is the applied exact-name search; the list
 explicitly shows **one matching automation**, not a mock or a cropped unfiltered
 customer list. **3** preserves the actual task's On status, last-run time and
@@ -284,22 +308,30 @@ proof that the returned files can be downloaded.
 
 ### 2. Inspect the actual saved monthly configuration
 
-![Actual unchanged task dialog with the one-call prompt, monthly day 1 at 10:30 UTC and Autonomous selected](images/step6-02-saved-monthly-task-config.png)
+![Saved task dialog read back in today's portal: one-call prompt, Monthly day 1 at 11:30 GMT+1 (10:30 UTC), Autonomous](images/newui-task-readback.png)
 
+**Today's portal**, the same saved task opened with **Edit** and closed with
+**Cancel**: **1** *Task name* · **2** *Response subagent* · **3** the one-call
+`last_14d` prompt · **4** **Monthly**, day **1**, *Time of day (GMT+1)*
+**11:30**, the browser-zone display of the saved 10:30 UTC · **5** *New chat
+thread for each run* · **6** **Autonomous** · **7** *Save*, not clicked.
+
+In the [October capture](images/step6-02-saved-monthly-task-config.png),
 **1** identifies the existing task, **2** shows the one-call `last_14d` prompt,
 **3** identifies **Time of day (UTC): 10:30**, alongside Monthly and day 1, and
 **4** shows the saved Autonomous mode. New-thread grouping is also visible.
 The dialog was opened only for inspection: no field was changed, Save remained
 disabled and Cancel closed it. Autonomous scheduling does not enlarge the
-responder's read-only scope. The pictured **UTC** label belongs to this actual
-lab browser; a customer whose picker shows a local zone must use the explicit
+responder's read-only scope. The pictured **UTC** label belonged to that
+lab browser; today's capture shows the browser's local zone. A customer whose
+picker shows a local zone must use the explicit
 **Custom cron > Cron expression (UTC)** route in the
 [monthly setup instructions](monthly-task-prompt.md#create-or-reuse-the-task),
 then verify the next execution in UTC.
 
 ### 3. Keep the existing manual execution receipt separate from its schedule
 
-![Actual monthly task execution history with one successful manual run beginning at 22:02 UTC](images/step6-03-monthly-execution-history.png)
+![Actual monthly task execution history with one successful manual run beginning at 22:02 UTC (earlier run; today's portal labels may differ)](images/step6-03-monthly-execution-history.png)
 
 **1** identifies the task, **2** preserves its monthly slot and **3** is the
 single actual successful history row, displayed at minute precision in the
@@ -310,7 +342,7 @@ Saved readback retained `executionCount=1` and the future November schedule.
 
 ### 4. Read the task's actual response and all four delivered files
 
-![Actual monthly execution thread with four file links and a separate 56 Completed snapshot at 22:03 UTC](images/step6-04-monthly-thread-four-files.png)
+![Actual monthly execution thread with four file links and a separate 56 Completed snapshot at 22:03 UTC (earlier run; today's portal labels may differ)](images/step6-04-monthly-thread-four-files.png)
 
 **1** is the actual scheduled-task execution thread; **2-5** are its HTML, full
 JSON, jobs CSV and items/coverage CSV. This is the **22:03:00Z** snapshot:

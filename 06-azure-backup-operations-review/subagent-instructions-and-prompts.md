@@ -28,23 +28,28 @@ There are no integer parameters, hidden scopes or optional URLs.
 1. Follow [README step 3](README.md#3-create-the-python-tool) to create the
    complete privately configured standalone tool and its one `period` string
    parameter. Match timeout, explicit-UAMI flow and runtime dependencies too.
-2. In **Builder > Skills** (**Skill builder** in the lab), use **Create skill**
-   or the portal's **+ Create skill** entry. Name it `azure-backup-live`;
-   describe it as read-only Azure Backup operations evidence for fixed approved
-   Recovery Services vaults, with native details and source/history coverage.
-   Replace the default **SKILL.md** with the entire
+2. In **Build + configure > Agent Canvas > Create ▾ > Skill** (or **Extensions >
+   Skill builder > Create skill**), type the name `azure-backup-live` and fill
+   **Description** (**Edit**, type, **Save**) as read-only Azure Backup
+   operations evidence for fixed approved Recovery Services vaults, with
+   native details and source/history coverage. The runtime file has no front
+   matter: in **SKILL.md**, replace only the placeholder line below the
+   generated front matter with the entire
    [case runtime file](skills/azure-backup-live/SKILL.md), not this setup guide.
-3. Bind **only** `generate-azure-backup-report` through the skill's
-   **Choose tools**, create and inspect the saved file/tool binding.
-4. In **Agent Canvas > Create > Custom Agent > Form**
-   (older label **+ Create subagent**), name it `azure-backup-live` and paste
+3. **Then** bind **only** `generate-azure-backup-report` through the skill's
+   **Choose tools** (search, expand **PythonFunctionTool (n)**, tick the tool,
+   **Close panel**), create and inspect the saved file/tool binding.
+4. In **Agent Canvas**, select **Create** (it opens **Create a custom agent**,
+   tabs *Form / YAML*; **Create ▾ > Custom agent** is the same dialog; older
+   label **+ Create subagent**), name it `azure-backup-live` and paste
    the **complete subagent instructions block below**, without its fence.
    Explicitly select only `generate-azure-backup-report` in **Choose tools**
-   and only `azure-backup-live` in **Choose Skills / Allowed Skills**,
-   enabling skills if required. Empty tools inherit global tools; empty
+   and only `azure-backup-live` in **Choose skills** (filter, tick, **Close
+   panel**). Empty tools inherit global tools; empty
    allowed skills can allow all skills.
 5. Leave handoff agents and extra/system skills unselected. **Create**, reopen
-   and confirm exact name/instructions plus one explicit tool and one skill.
+   (**Table view** > *Agents* card > **Custom agents** > search > click the
+   name) and confirm exact name/instructions plus one explicit tool and one skill.
    Do not rely on an inheritance rollup. Then use a new selected-specialist
    chat for [one-report/four-download acceptance](README.md#5-run-in-chat-and-verify-all-four-actual-downloads).
 
@@ -83,8 +88,9 @@ changes, CLI/shell/load, schedule changes, Jira/Helix writes or any other tool.
 
 ## Report prompts
 
-First select **`azure-backup-live`** in the chat's agent picker or `/agent`
-selection. The JSON below is the expected call to inspect, not a command to
+First select **`azure-backup-live`** in **New chat** with `/agent` (chip **Agent:
+azure-backup-live**; typing `@` no longer opens a picker). The JSON below is the
+expected call to inspect, not a command to
 execute manually. No CLI, token, subscription or credential is needed in chat.
 
 ```text

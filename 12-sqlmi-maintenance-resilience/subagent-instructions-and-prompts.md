@@ -22,7 +22,9 @@ handler.
 | Timeout | `180` |
 | Identity tab | Leave **Enable Azure Identity** **Off**. The tool gets its own ARM and Log Analytics tokens with the agent managed identity (`MANAGED_IDENTITY_CLIENT_ID`) |
 
-| Parameter | Type | Required | Description (paste as is) |
+The portal reads these parameters from the `main()` signature: there is no parameter editor, and **Test playground** shows one empty box per parameter.
+
+| Parameter | Type | Required | Description |
 |---|---|---|---|
 | `operation` | string | No | `report (HTML+JSON+2 CSV, default), summary (KPIs, findings, apps) or upcoming (next planned maintenance and at-risk apps).` |
 | `period` | string | No | `History window: last_30d (default), last_14d or last_7d.` |
@@ -90,6 +92,7 @@ Rules:
 | Response subagent | `sqlmi-maintenance-advisor` |
 | Frequency | Weekly, Monday, time of day = 07:00 UTC in your local zone (08:00 in GMT+1, 09:00 in GMT+2) |
 | Cron (UTC) | `0 7 * * 1` |
+| Message grouping for updates | New chat thread for each run (recommended) |
 | Agent autonomy level | Autonomous (the tool is read-only) |
 
 ### Scheduled task prompt

@@ -9,7 +9,7 @@ first, and keep unrelated existing tasks unchanged.
 | Task field | Customer value, matching the verified lab contract |
 |---|---|
 | Name | `Monthly Azure Backup operations review` |
-| Responder / custom subagent | `azure-backup-live` |
+| Response subagent | `azure-backup-live` |
 | Frequency | Monthly, day 1; use Custom cron for the explicit UTC field when needed |
 | Cron / timezone | `30 10 1 * *`, **UTC** |
 | Meaning | First day of each month at 10:30 UTC |
@@ -32,19 +32,24 @@ workspaces contain Backup Logs. Do not silently substitute a 24-hour report.
    Check ownership, responder, complete prompt and UTC slot; reuse a matching
    owned task rather than duplicate it. Do not modify unrelated automations
    or operate the lab reference task.
-2. If absent, select `azure-backup-live` in **Agent Canvas**, then
-   **+ > Trigger > Add scheduled task**. Verify **Response custom agent =
-   azure-backup-live**. Enter **Task name** and paste the entire prompt below
-   into **Task details**, without AI refinement.
-3. Set **day 1, 10:30 UTC**. The lab image genuinely shows **Time of day (UTC)**;
-   other portal versions label the picker with the **browser's zone**.
-   If it is not explicitly UTC, select **Frequency > Custom cron** and enter
-   `30 10 1 * *` in **Cron expression (UTC)**. Do not assume 10:30 local means
+2. If absent, open **Automation > Create ▾ > Scheduled task** (or **Build +
+   configure > Agent Canvas > Create ▾ > Trigger › > Scheduled tasks**) and
+   select **Response subagent** `azure-backup-live`. Enter **Task name** and
+   paste the entire prompt below into **Task details**, without AI refinement.
+3. Set **day 1, 10:30 UTC**: select **Frequency > Custom cron** (the list
+   starts at **Daily**) and enter `30 10 1 * *` in **Cron expression (UTC)**.
+   The **Monthly** picker's **Time of day** uses the **browser's zone** in
+   today's portal (it shows the saved 10:30 UTC as 11:30 with the label
+   *GMT+1* in a UTC+1 browser); the October lab image showed **Time of day
+   (UTC)**. Do not assume 10:30 local means
    UTC. Stored UTC is fixed; local time can shift after daylight saving.
 4. Set **Agent autonomy level > Autonomous** and **Message grouping for
-   updates > New chat thread for each run**. Review approved activation date,
+   updates > New chat thread for each run** (the default is *Use same chat
+   thread*). Review approved activation date,
    model tier and end/run limits without changing global defaults.
-5. **Create task**, reopen and verify all fields, **On/Active** status and the
+5. **Create task**, reopen it (**Automation** > search > tick only this task >
+   **Edit**; **Cancel** if nothing changes) and verify all fields,
+   **On/Active** status and the
    next execution **in UTC**. No unnecessary Save is needed for an existing
    matching task. Manual acceptance is a separate customer authorization
    and source read, not an automatic extra invocation.

@@ -23,22 +23,27 @@ generic Python, HTTP tooling, write connectors, deployment or another agent.
 1. First create/read back the complete privately configured
    `generate-service-health-report` tool with its **11** matching parameters
    and runtime settings from [README step 2](README.md#2-configure-a-private-copy-and-install-the-actual-tool).
-2. In **Builder > Skills** (**Skill builder** in the lab), use **Create skill**
-   or the portal's **+ Create skill** entry. Set name `service-health-live`,
-   use the description from [the runtime file](skills/service-health-live/SKILL.md)
-   and paste that entire file into **SKILL.md**, replacing the default template.
-   Bind **only** `generate-service-health-report` through **Choose tools**.
-   Create and inspect the saved file/tool binding.
-3. In **Agent Canvas > Create > Custom Agent > Form**
-   (older label **+ Create subagent**), set name `service-health-live`.
+2. In **Build + configure > Agent Canvas > Create ▾ > Skill** (or **Extensions >
+   Skill builder > Create skill**), paste the entire
+   [runtime file](skills/service-health-live/SKILL.md) into **SKILL.md**
+   **first**, replacing the default template; its front matter fills the name
+   `service-health-live` and the description.
+   **Then** bind **only** `generate-service-health-report` through **Choose
+   tools** (search, expand **PythonFunctionTool (n)**, tick the tool, **Close
+   panel**). Create and inspect the saved file/tool binding.
+3. In **Agent Canvas**, select **Create** (it opens **Create a custom agent**,
+   tabs *Form / YAML*; **Create ▾ > Custom agent** is the same dialog; older
+   label **+ Create subagent**), set **Custom agent name** `service-health-live`.
    Paste the **complete instructions block below**, without its Markdown fence.
 4. Explicitly select only the named tool in **Choose tools** and only the named
-   skill in **Choose Skills / Allowed Skills**, enabling skills if required.
+   skill in **Choose skills** (filter, tick, **Close panel**).
    Empty tools inherit global tools; empty allowed skills can allow all skills.
    Leave handoff agents and extra/system skills unselected.
-5. **Create**, reopen and confirm the exact name, instructions and one-tool/
+5. **Create**, reopen (**Table view** > *Agents* card > **Custom agents** >
+   search > click the name) and confirm the exact name, instructions and one-tool/
    one-skill allowlists. A visible canvas node or inherited overview count is
-   not enough. Then use a new normal chat for [four-file acceptance](README.md#4-generate-a-report-and-ask-grounded-questions).
+   not enough. Then use a new normal chat (**New chat** > `/agent` >
+   `service-health-live`) for [four-file acceptance](README.md#4-generate-a-report-and-ask-grounded-questions).
 
 > [!NOTE]
 > **Dated SRE UI badge caveat:** In the live SRE Agent UI, Agent Canvas list/card summary badges can display inherited global rollups (for example, `131 tools` / `52 skills`) even when both native APIs, selected chips and the saved form policy enforce one explicit tool and skill (`tools`, `allowedSkills`, `addSystemSkills=false`, `disableDocumentRetrieval=true`). Verify the exact selected tool and skill **names** in the saved form and effective supported policy; the list summary badge is not authoritative restriction proof, and you must not modify globals to change it.

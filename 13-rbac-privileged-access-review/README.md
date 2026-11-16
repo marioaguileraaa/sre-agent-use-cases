@@ -92,7 +92,7 @@ A sanitized copy of that run is in [`sample-run/`](sample-run/): [HTML report](s
 ```mermaid
 flowchart LR
     S[Scheduled task<br/>day 1, monthly] --> A
-    U[Operator in chat<br/>@rbac-access-reviewer] --> A
+    U[Operator in chat<br/>/agent rbac-access-reviewer] --> A
     A[Subagent<br/>rbac-access-reviewer] -->|skill rules| K[Skill<br/>rbac-privileged-access-review]
     A -->|"call with {}"| T[Python tool<br/>generate-rbac-privileged-review]
     T -->|"Reader (read)"| ARM[Azure Resource Manager<br/>role assignments, role definitions,<br/>PIM eligibilities, Management Groups]
@@ -176,7 +176,7 @@ If your organization uses PIM, activate those roles before step 3.
 
 ## Step 1 - Check the SRE Agent and get its identity
 
-You need the **Client ID** of the managed identity the SRE Agent uses. In the Azure portal: SRE Agent resource → **Identity**, or with Azure CLI:
+You need the **Client ID** of the managed identity the SRE Agent uses. The SRE Agent portal no longer has a *Settings* page for it. In the Azure portal, open the agent's user-assigned managed identity (`id-…`, in the agent's resource group, also listed under SRE Agent resource → **Identity**) → **Overview** → **Client ID**, or use Azure CLI:
 
 ```bash
 az resource show -g <agent-resource-group> -n <agent-name> \
@@ -273,83 +273,111 @@ Two equivalent options. Use **Option A** the first time to understand each block
 
 ### Option A - From the portal (recommended the first time)
 
-All the field values are also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
+All the field values are also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md). The screenshots show today's portal (16 November 2026) with the files of this folder; nothing was saved, tested or sent while taking them. Red numbered boxes show where to click.
 
 #### 5.1 Python tool
 
-**①** In the SRE Agent portal, open **Build + setup → Agent Canvas**, select **Create → Tool → Python tool**.
+**①** In the SRE Agent portal, open **Build + configure → Agent Canvas** (its first option). Open the **▾ arrow** next to **Create** (the **Create** button itself opens *Create a custom agent*) and select **Tool › → Python tool**.
 
-![Create a Python tool from Build + setup](images/01-builder-create-python-tool.png)
+![Build + configure → Agent Canvas → Create ▾ → Tool › → Python tool](images/newui-menu.png)
 
-**②** In the **Code** tab, set **Tool Name** `generate-rbac-privileged-review`, **Timeout (seconds)** `300`, paste the **Description** below, and paste the full content of `generate-rbac-privileged-review.py` in the editor.
+**1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow next to **Create** (not the button) · **4** Tool › · **5** **Python tool**.
+
+**②** The dialog has three tabs: **Code**, **Test playground** and **Identity**. In **Code**, set **Tool Name** `generate-rbac-privileged-review` (36 characters at most), **Timeout (seconds)** `300` (the default is 120; 900 is the maximum) and paste the **Description** below. Then click the code editor, press `Ctrl+A` and paste the full content of `generate-rbac-privileged-review.py`. There is no *Requirements* field and no parameter editor: parameters come from `def main(...)`, and this tool has none. Do not use **Generate**.
 
 ```text
 Read-only Azure RBAC privileged access review (Reader + Microsoft Graph read) that classifies Owner, User Access Administrator, Contributor and administrative role assignments as orphaned, redundant, individual review or compliant, and writes an HTML report plus CSV and JSON. Never changes anything.
 ```
 
-![Tool name, timeout, description and code](images/02-python-tool-code.png)
+![Create a Python tool, Code tab: name, timeout, description and code](images/newui-code.png)
+
+**1** *Tool Name* (the field is narrow and does not show the whole name) · **2** *Timeout (seconds)* `300` · **3** *Description* · **4** code editor: `Ctrl+A` and paste the whole file · **5** *Create tool*, grey until you run **Test**.
 
 **③** Scroll the editor to lines 34-35 and check that the two placeholders are replaced with your Client ID and subscriptions (step 4). If you paste the code without changing them, the tool returns a clear configuration error.
 
-![Configuration lines 34-35 in the editor](images/03-python-tool-config-placeholders.png)
+![Code tab: CONFIGURE lines 34-35 in the editor](images/newui-config-lines.png)
 
-**④** In the **Identity** tab, leave **Enable Azure Identity** **Off**. The tool gets its own Azure Resource Manager and Microsoft Graph tokens with the agent managed identity (the Client ID of line 34).
+**1** lines 34-35, shown with the `<YOUR_...>` placeholders of the repository file (your copy has your Client ID and subscriptions) · **2** *Create tool*, still grey.
 
-![Identity tab: Enable Azure Identity Off](images/04-python-tool-identity-off.png)
+**④** In the **Identity** tab, leave **Enable Azure Identity** **Off** (the default). The tool gets its own Azure Resource Manager and Microsoft Graph tokens with the agent managed identity (the Client ID of line 34).
 
-**⑤** Open **Test playground** and select **Test**. The tool has no parameters, so it runs with `{}`. A correct test returns `status`, the KPIs and the `report_url`, `csv_url` and `json_url` of the three files (it can take 1-3 minutes on large estates).
+![Identity tab: Enable Azure Identity Off](images/newui-identity.png)
 
-![Test playground](images/05-python-tool-test-playground.png)
+**1** Identity tab · **2** *Enable Azure Identity* Off.
 
-**⑥** Select **Create tool**.
+**⑤** Open **Test playground** and select **Test**. The tool has no parameters (it runs with `{}`), so the tab shows only the **Test** button, with no input boxes. A correct test returns `status`, the KPIs and the `report_url`, `csv_url` and `json_url` of the three files (it can take 1-3 minutes on large estates).
 
-![Create tool](images/06-python-tool-create.png)
+![Test playground: no parameters, only the Test button](images/newui-playground.png)
 
-*In this screenshot **Create tool** is disabled only because the tool already exists in the lab agent; in a new agent it is enabled once the test passes.*
+**1** Test playground tab · **2** **Test** · **3** *Create tool*, grey until you run the test.
+
+**⑥** **Create tool** stays grey until you run **Test**. When the test has run, select **Create tool**.
+
+*The screenshots never run **Test**, so **Create tool** is grey in all of them.*
 
 #### 5.2 Skill
 
-**⑦** **Create → Skill**.
+**⑦** Back in **Agent Canvas**, open the **▾ arrow** next to **Create** and select **Skill**.
 
-![Create a skill](images/07-builder-create-skill.png)
+![Agent Canvas → Create ▾ → Skill](images/newui-skill-menu.png)
 
-**⑧** Paste the full content of [`skills/rbac-privileged-access-review/SKILL.md`](skills/rbac-privileged-access-review/SKILL.md). The portal fills **Name** (`rbac-privileged-access-review`) and **Description** from the header of the file.
+**1** the ▾ arrow next to **Create** · **2** **Skill**.
 
-![Skill form with name, description and content](images/08-skill-form.png)
+**⑧** The order matters: **first** paste the full content of [`skills/rbac-privileged-access-review/SKILL.md`](skills/rbac-privileged-access-review/SKILL.md) in the **SKILL.md** editor on the right. The portal fills **Name** (`rbac-privileged-access-review`) and **Description** from the header of the file; its `tools:` line already names the tool, so the tool chip appears under **Tools**.
 
-**⑨** **Choose tools** → search and select `generate-rbac-privileged-review` (type *PythonFunctionTool*).
+![Create skill: SKILL.md pasted first, name and description filled in](images/newui-skill.png)
 
-![Choose the Python tool for the skill](images/09-skill-choose-tools.png)
+**1** SKILL.md editor: paste the whole file first · **2** *Name* and **3** *Description*, filled in from the header · **4** *Choose tools* (next).
 
-**⑩** Select **Create**.
+**⑨** Then select **Choose tools**, search `generate-rbac-privileged-review`, expand the **PythonFunctionTool (n)** group and make sure that only this tool is ticked (here the `tools:` line already ticked it; never tick the group checkbox), then **Close panel**. Choose the tool **after** pasting: pasting the whole file again replaces the header and can drop a tool chosen before.
 
-![Create the skill](images/10-skill-create.png)
+![Choose tools: search, expand PythonFunctionTool, tick only the tool](images/newui-skill-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only `generate-rbac-privileged-review` · **4** *Close panel*.
+
+**⑩** Check the tool chip and the `tools:` line in the editor, then select **Create**.
+
+![Create skill ready: tool chip and tools: line](images/newui-skill-chip.png)
+
+**1** tool chip · **2** `tools:` line in the header · **3** *Create*.
 
 #### 5.3 Subagent
 
-**⑪** **Create → Agent**.
+**⑪** Select the **Create** button itself (or **Create ▾ → Custom agent**): both open **Create a custom agent**.
 
-![Create a subagent](images/11-builder-create-agent.png)
+![Agent Canvas: the Create button opens Create a custom agent](images/newui-agent-menu.png)
 
-**⑫** **Name** `rbac-access-reviewer`; paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**, and this **Handoff description**:
+**1** **Create** button (opens the form directly) · **2** the ▾ arrow · **3** *Custom agent* (same form).
+
+**⑫** Set **Custom agent name** `rbac-access-reviewer` and paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**. Do not use *Refine with AI* or *View AI suggestions*. Today's form has no *Handoff description* field; the deploy script of Option B still sets this one through the API:
 
 ```text
 Read-only Azure RBAC privileged access reviewer (Owner, User Access Administrator, Contributor and administrative roles): orphaned, redundant and individual-review assignments.
 ```
 
-![Subagent name and instructions](images/12-agent-name-instructions.png)
+![Create a custom agent: name and instructions](images/newui-agent.png)
 
-**⑬** **Choose skills** → select only `rbac-privileged-access-review` (it appears under the *User* group).
+**1** *Custom agent name* · **2** *Instructions* · **3** *Choose skills* · **4** *Choose tools*.
 
-![Choose the skill](images/13-agent-choose-skills.png)
+**⑬** **Choose skills** → filter `rbac-privileged-access-review` → tick only that skill (it appears under the *User* group) → **Close panel**.
 
-**⑭** **Choose tools** → select only `generate-rbac-privileged-review`.
+![Choose skills: only rbac-privileged-access-review](images/newui-agent-skills.png)
 
-![Choose the tool](images/14-agent-choose-tools.png)
+**1** filter · **2** tick only `rbac-privileged-access-review` · **3** *Close panel*.
 
-**⑮** Select **Create**.
+**⑭** **Choose tools** → search `generate-rbac-privileged-review` → expand **PythonFunctionTool** → tick only that tool → **Close panel**.
 
-![Create the subagent](images/15-agent-create.png)
+![Choose tools: only generate-rbac-privileged-review](images/newui-agent-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only `generate-rbac-privileged-review` · **4** *Close panel*.
+
+**⑮** Check the two chips and select **Create**. Choosing a skill and a tool here replaces the global defaults that the subagent would otherwise inherit.
+
+![Create a custom agent ready: skill and tool chips](images/newui-agent-chips.png)
+
+**1** skill chip · **2** tool chip · **3** *Create*.
+
+After saving, the three objects are listed in **Agent Canvas → Table view**: the subagent in the **Agents** card (**Custom agents**, formerly *Sub Agents*), the skill and the tool in the **Tools & skills** card (**Skills** and **Python tools**).
 
 ### Option B - By script (2 minutes)
 
@@ -381,19 +409,25 @@ The output shows `1/4 Python tool`, `2/4 Skill`, `3/4 Subagent` and `4/4 Schedul
 
 ## Step 6 - First run in the chat
 
-**⑯** Open **New chat** and send:
+**⑯** Open **New chat**, type `/agent` and pick **rbac-access-reviewer** (typing `@` no longer opens a picker). The chip **Agent: rbac-access-reviewer** appears next to **+**. Then send:
 
 ```text
-@rbac-access-reviewer Run the Azure RBAC privileged access review and give me the report.
+Run the Azure RBAC privileged access review and give me the report.
 ```
 
-![Run the subagent from the chat](images/16-chat-run-agent.png)
+![/agent: pick rbac-access-reviewer](images/newui-chat-pick.png)
+
+**1** `/agent` + the subagent name · **2** pick `rbac-access-reviewer`.
+
+![Agent: rbac-access-reviewer chip and the prompt, ready to send](images/newui-chat-ready.png)
+
+**1** the **Agent: rbac-access-reviewer** chip · **2** the prompt · **3** send.
 
 **⑰** The answer includes the executive summary, the Owner decisions, the main signals, the first assignments to review, the coverage with the **required actions**, and under **Artifacts & links** the three files. Click to download the HTML, CSV and JSON.
 
 ![Agent answer with coverage, required actions and download links](images/17-chat-result-downloads.png)
 
-*In this lab run the identity did not have `GroupMember.Read.All`, so the agent declared partial coverage and told exactly which permission to add. That is the expected behavior: it never hides a failed read.*
+*Answer of an earlier run; today's portal labels may differ. In this lab run the identity did not have `GroupMember.Read.All`, so the agent declared partial coverage and told exactly which permission to add. That is the expected behavior: it never hides a failed read.*
 
 ### What the HTML report contains
 
@@ -423,9 +457,11 @@ The **CSV** has one row per privileged assignment (for spreadsheets and change r
 
 ## Step 7 - Schedule the monthly review
 
-**⑱** Open **Automation → Create → Scheduled task**.
+**⑱** Open **Automation** (left menu) → **Create ▾** → **Scheduled task** (the other option is *HTTP trigger*).
 
-![Create a scheduled task](images/18-automation-create-scheduled-task.png)
+![Automation → Create ▾ → Scheduled task](images/newui-task-menu.png)
+
+**1** Automation · **2** Create ▾ · **3** **Scheduled task**.
 
 **⑲** Fill in the form:
 
@@ -434,17 +470,20 @@ The **CSV** has one row per privileged assignment (for spreadsheets and change r
 | Task name | `Azure RBAC - Monthly privileged access review` |
 | Response subagent | `rbac-access-reviewer` |
 | Task details | The monthly prompt below |
-| Frequency | **Monthly**, day of month **1**, the time you prefer (08:00 UTC = `0 8 1 * *`) |
-| Message grouping for updates | **Use same chat thread** (every month in one thread shows the trend) |
-| Agent autonomy | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
+| Frequency | **Monthly**, **Day of month** `1`, **Time of day** the time you prefer. The time list uses your browser time zone: 09:00 in Madrid in winter is 08:00 UTC (`0 8 1 * *`). For an exact UTC time, choose **Custom cron** and type `0 8 1 * *` in **Cron expression (UTC)** |
+| Start on, Repeat until, Model tier, Set a run limit | Leave the defaults (today, no end date, *General Purpose*, no limit) |
+| Message grouping for updates | **Use same chat thread** (the default; every month in one thread shows the trend) |
+| Agent autonomy level | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
 
 ```text
 @rbac-access-reviewer Run the monthly Azure RBAC privileged access review and give me the links to the HTML report, CSV and JSON with the executive summary, Owner decisions, coverage and required actions.
 ```
 
-![Scheduled task form](images/19-scheduled-task-form.png)
+![Create scheduled task filled in](images/newui-task.png)
 
-Select **Create task**. The time is shown in your browser time zone.
+**1** *Task name* · **2** *Response subagent* · **3** *Task details* · **4** *Frequency* = *Monthly* · **5** *Day of month* `1` · **6** *Time of day* `9:00` in the browser time zone (GMT+1) = 08:00 UTC · **7** *Message grouping for updates* = *Use same chat thread* · **8** *Create task*.
+
+Select **Create task**.
 
 ## Customize: organization name and logo
 
@@ -484,7 +523,7 @@ Keep the logo small (under 200 KB; a 300-600 px wide PNG or an SVG is ideal), be
 | "N groups could not be read", "Unresolved identity" | Missing `GroupMember.Read.All` (or `Group.Read.All`) | Grant it (grant script without `-SkipGraph`) and run again |
 | Last sign-in empty for all identities | Missing `AuditLog.Read.All`, or the tenant has no Entra ID P1/P2 | Grant it; sign-in activity requires Entra ID P1 or P2 |
 | PIM eligibilities always 0 | No PIM for Azure resources in use, or not readable | Expected if PIM is not used; that is the roadmap item |
-| Tool timeout | Very large estate | Increase the timeout (max allowed by the portal) or split the subscriptions between two tools |
+| Tool timeout | Very large estate | Increase **Timeout (seconds)** (900 is the portal maximum) or split the subscriptions between two tools |
 | HTTP 401/403 in the deploy script | Your user lacks **SRE Agent Administrator** | Assign that role on the agent; Azure Owner does not replace it |
 | The agent rewrites the report or does not show links | Subagent without the skill, or other tools selected | Check steps ⑬-⑭: only that skill and that tool |
 
@@ -496,9 +535,11 @@ Keep the logo small (under 200 KB; a 300-600 px wide PNG or an SVG is ideal), be
 - **Scope**: Azure RBAC on the configured subscriptions, including assignments inherited from Management Groups. It does **not** review Microsoft Entra ID directory roles, Microsoft 365 admin roles or data-plane permissions (Key Vault access policies, SQL users, storage SAS).
 - **Point-in-time snapshot**: each run reflects the state at that moment; the monthly thread shows the trend.
 - **Data handling**: the files contain names, UPNs and object IDs. Treat them as internal confidential data and share them only with the access reviewers.
-- **Screenshots** in this guide come from a Microsoft lab tenant; tenant, subscription and personal identifiers are redacted.
+- **Screenshots** in this guide come from a Microsoft lab tenant; tenant, subscription and personal identifiers are redacted. The portal screenshots of steps 5-7 were refreshed on 16 November 2026 without saving anything; the chat answer comes from an earlier run.
 
 ## Copy-ready prompts
+
+In the chat, select the subagent first (**New chat** → `/agent` → `rbac-access-reviewer`) and paste the prompt without the leading `@rbac-access-reviewer`. In a scheduled task, paste it as it is: the **Response subagent** field selects the subagent.
 
 | Goal | Prompt |
 |---|---|

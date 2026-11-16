@@ -3,10 +3,11 @@
 | Field | Value |
 |---|---|
 | Task name | `Monthly infrastructure operations review` |
-| Response custom agent / subagent | `infra-ops-live` |
+| Response subagent | `infra-ops-live` |
 | Frequency | Custom cron |
-| Cron (UTC) | `0 9 1 * *` |
+| Cron expression (UTC) | `0 9 1 * *` |
 | Meaning | First day of each month at 09:00 UTC |
+| Message grouping for updates | New chat thread for each run |
 | Evidence period | Previous complete UTC calendar month |
 | Behavior | Read-only collection and actual file sharing |
 

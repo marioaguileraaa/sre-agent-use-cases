@@ -128,7 +128,10 @@ unsupported and from missing data; every follow-up action remains human-owned.
 
 These prompts are intentionally in Spanish for customer demonstrations. Replace
 the placeholders with real, confirmed lab resource identities. Querying is
-read-only; permission to query is **not** permission to apply load.
+read-only; permission to query is **not** permission to apply load. In **New
+chat**, select the specialist with `/agent` > `infra-ops-live` (chip **Agent:
+infra-ops-live**); typing `@` no longer opens a picker, so the leading
+`@infra-ops-live:` in these prompts is plain text and can be left out.
 
 ```text
 @infra-ops-live: Genera el informe real de infraestructura de las ultimas

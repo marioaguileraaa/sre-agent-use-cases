@@ -16,6 +16,20 @@ Contenido:
 > mediante la API. Si el tool ya se creó con un nombre cortado, usar exactamente el nombre
 > guardado en el skill, en las instrucciones del subagente y en **Choose tools**.
 
+> **El portal ha cambiado (16 de noviembre de 2026).** Los pasos de abajo y las capturas de las
+> guías de cada carpeta ya son los del portal de hoy:
+>
+> | Antes | Portal de hoy |
+> |---|---|
+> | *Builder* | **Build + configure** (menú izquierdo) **→ Agent Canvas** |
+> | *Settings → Azure settings → Managed Identity* | Ya no existe: portal de Azure → identidad administrada `id-…` del agente → **Overview → Client ID** |
+> | Campo *Requirements* | No existe: el entorno del SRE Agent ya trae los paquetes (`requirements.txt` es informativo) |
+> | Editor de parámetros / enum | No existe: los parámetros salen solos de `def main(...)` al pegar el código |
+> | *Create tool* | En gris hasta pulsar **Test** en *Test playground* (cajas vacías: escribir los valores) |
+> | Skill: elegir el tool y pegar el `SKILL.md` | **Primero** pegar el `SKILL.md`, **después** *Choose tools* |
+> | *Sub Agents* | **Custom agents** (Table view → tarjeta *Agents*) |
+> | `@subagente …` en el chat | **New chat → /agent** → elegir el subagente → chip **Agent: …** → pegar el prompt |
+
 ---
 
 ## Caso AKS: paso a paso
@@ -24,7 +38,7 @@ Contenido:
 
 Lo ejecuta alguien con **Owner** o **User Access Administrator** en la suscripción.
 
-1. [sre.azure.com](https://sre.azure.com) → su agente → **Settings → Azure settings → Managed Identity → Go to Identity** → en **Overview** copiar el **Client ID** (no el Object ID).
+1. [Portal de Azure](https://portal.azure.com) → grupo de recursos del agente → su identidad administrada (`id-…`) → en **Overview** copiar el **Client ID** (no el Object ID). En el portal del agente ya no hay *Settings*.
 2. En PowerShell, dentro de la carpeta `01-aks-well-architected-review`:
 
 ```powershell
@@ -58,39 +72,39 @@ pegar lo que mostró el script (`SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTIT
 
 ### Paso 3. Crear el tool (portal)
 
-Ir a **Builder → Agent Canvas → Create → Tool → Python tool**.
+Ir a **Build + configure → Agent Canvas → Create ▾** (la flecha, no el botón) **→ Tool › → Python tool**.
 
-- **Name:** `generate-aks-waf-report`
+- **Tool Name:** `generate-aks-waf-report` (máximo 36 caracteres)
 - **Description:**
   `Read-only AKS architecture/configuration review for the fixed approved clusters and associated resources. Collect source-qualified ARM, Kubernetes and optional ActualCost evidence; return offline HTML, complete JSON, failed-findings CSV and inventory CSV, or bounded typed queries. No remediation.`
 - **Code:** pegar el `.py` completo, ya editado.
-- **Requirements:** el contenido de `requirements.txt`.
-- **Timeout:** `900`.
-- **Parameters:** los 12 de `tool-parameters.schema.json`. En el enum de `cluster_name`, poner `""` más los nombres de vuestros AKS.
+- **Timeout (seconds):** `900`.
+- No hay campo *Requirements* ni editor de parámetros: los 12 parámetros salen de `def main(...)` al pegar el código, y el código solo acepta los nombres de `APPROVED_CLUSTERS`.
 - **Identity:** **Off**, porque el código ya usa el Client ID.
-- Para terminar: **Test** con `operation=list_clusters` y después **Create**.
+- Para terminar: en **Test playground** (cajas vacías) escribir `operation` = `list_clusters` y pulsar **Test**; **Create tool** sigue en gris hasta entonces. Después, **Create tool**.
 
 ### Paso 4. Crear el skill
 
-Ir a **Create → Skill**.
+Ir a **Create ▾ → Skill**.
 
-- **Name:** `aks-waf-live`
-- **Body:** pegar `skills/aks-waf-live/SKILL.md`.
-- **Tool adjunto:** solo `generate-aks-waf-report`.
+- **Primero** pegar `skills/aks-waf-live/SKILL.md` en el editor: rellena **Name** (`aks-waf-live`) y **Description**.
+- **Después**, **Choose tools** → buscar → desplegar **PythonFunctionTool** → marcar solo `generate-aks-waf-report` → **Close panel**.
 
 ### Paso 5. Crear el subagente
 
-Ir a **Create → Custom Agent**.
+Pulsar el botón **Create** (o **Create ▾ → Custom agent**).
 
-- **Name:** `aks-waf-live`
+- **Custom agent name:** `aks-waf-live`
 - **Instructions:** la sección de instrucciones de `subagent-instructions-and-prompts.md`.
 - **Tools:** solo `generate-aks-waf-report`.
 - **Skills:** solo `aks-waf-live`.
 
 ### Paso 6. Probar en un chat nuevo
 
+**New chat** → escribir `/agent` → elegir `aks-waf-live` (aparece el chip **Agent: aks-waf-live**) → pegar:
+
 ```
-@aks-waf-live Genera la revisión completa de arquitectura y configuración de AKS para <nombre-aks-1> con operation=report.
+Genera la revisión completa de arquitectura y configuración de AKS para <nombre-aks-1> con operation=report.
 ```
 
 Varios clusters a la vez: `cluster_names="<aks-1>,<aks-2>"` (sin espacios).
@@ -139,34 +153,38 @@ pegar lo que mostró el script. Debe quedar `auth_mode: "same_tenant_uami"`, `SR
 
 ### Paso 3. Crear el tool
 
-Ir a **Create → Tool → Python tool**.
+Ir a **Build + configure → Agent Canvas → Create ▾ → Tool › → Python tool**.
 
-- **Name:** `databricks-dependency-report`
+- **Tool Name:** `databricks-dependency-report` (máximo 36 caracteres)
 - **Description:**
   `Read-only Azure Databricks dependency, configuration, security and FinOps review for the fixed approved workspaces. Collect source-qualified ARM, Databricks workspace and Unity Catalog evidence; return offline HTML, complete JSON, findings CSV and inventory CSV, or bounded typed queries. No remediation.`
 - **Code:** pegar el `.py` editado.
-- **Requirements:** el contenido de `requirements.txt`.
-- **Timeout:** `900`.
-- **Parameters:** los 12 de `tool-parameters.schema.json`. En el enum de `workspace_name`, poner `""` más el nombre del workspace.
+- **Timeout (seconds):** `900`.
+- No hay campo *Requirements* ni editor de parámetros: los 12 parámetros salen de `def main(...)` al pegar el código, y el código solo acepta los nombres de `APPROVED_WORKSPACES`.
 - **Identity:** **Off**.
-- **Test** con `operation=list_workspaces` y después **Create**.
+- En **Test playground** (cajas vacías) escribir `operation` = `list_workspaces` y pulsar **Test**; después, **Create tool**.
 
 ### Paso 4. Crear el skill
 
-- **Name:** `databricks-dependency-live`
-- **Body:** pegar `skills/databricks-dependency-live/SKILL.md`.
-- **Tool adjunto:** solo `databricks-dependency-report`.
+**Create ▾ → Skill**:
+
+- **Primero** pegar `skills/databricks-dependency-live/SKILL.md`: rellena **Name** (`databricks-dependency-live`) y **Description**.
+- **Después**, **Choose tools** → solo `databricks-dependency-report`.
 
 ### Paso 5. Crear el subagente
 
-- **Name:** `databricks-dependency-live`
+Botón **Create** (o **Create ▾ → Custom agent**):
+
+- **Custom agent name:** `databricks-dependency-live`
 - **Instructions:** las de `subagent-instructions-and-prompts.md`.
 - **Tool y skill:** solo los dos anteriores.
 
 ### Paso 6. Probar en un chat nuevo
 
+**New chat** → `/agent` → `databricks-dependency-live` (chip **Agent: databricks-dependency-live**) → pegar:
+
 ```
-@databricks-dependency-live Genera el informe completo de dependencias y configuración de Databricks para <workspace> con operation=report.
+Genera el informe completo de dependencias y configuración de Databricks para <workspace> con operation=report.
 ```
 
 ### Problemas frecuentes
@@ -184,11 +202,12 @@ Ir a **Create → Tool → Python tool**.
 
 No necesita permisos. Ver su `README.md`. En resumen:
 
-1. **Tool** Python `sre-usecase-builder-kit`:
+1. **Tool** Python `sre-usecase-builder-kit` (**Create ▾ → Tool › → Python tool**):
    - **Code:** pegar `sre-usecase-builder-kit.py` sin editarlo.
-   - **Timeout:** `300`.
+   - **Timeout (seconds):** `300`.
    - **Identity:** **Off**.
-2. **Skill** `sre-usecase-builder`: pegar `skills/sre-usecase-builder/SKILL.md` y adjuntar ese tool.
+   - **Test** con `operation` = `catalog` antes de **Create tool**.
+2. **Skill** `sre-usecase-builder`: pegar `skills/sre-usecase-builder/SKILL.md` y **después** adjuntar ese tool.
 3. **Subagente** `sre-usecase-builder`:
    - **Instructions:** las de `skills/subagent-instructions.md`.
    - **Tool y skill:** solo los dos anteriores.

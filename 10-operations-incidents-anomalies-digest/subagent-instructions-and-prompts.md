@@ -50,6 +50,8 @@ Summarize in Spanish the window evaluated, native alerts vs. Service Health comm
 
 ## Copy-ready chat prompts (Spanish & English)
 
+Open **New chat**, type `/agent`, select `operations-digest-live` (chip **Agent: operations-digest-live**), then paste a prompt without its leading `@operations-digest-live` mention: typing `@` no longer opens a picker.
+
 ### 1. Monthly Executive & Technical Operations Digest (`period="previous_month"`)
 
 ```text

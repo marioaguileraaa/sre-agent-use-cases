@@ -22,7 +22,9 @@ handler.
 | Timeout | `150` |
 | Identity tab | Leave the switch **Off**. The tool authenticates with the agent managed identity itself (`MANAGED_IDENTITY_CLIENT_ID`) |
 
-| Parameter | Type | Required | Description (paste as is) |
+The portal reads these parameters from the `main()` signature: there is no parameter editor, and **Test playground** shows one empty box per parameter.
+
+| Parameter | Type | Required | Description |
 |---|---|---|---|
 | `operation` | string | No | `report (writes 4 files) or summary (JSON only, faster)` |
 | `period` | string | No | `last_30d (default), last_14d or last_7d` |
@@ -71,6 +73,7 @@ Day 2 instead of day 1 because Azure Cost Management publishes cost with a 24-48
 | Response subagent | `fabric-chargeback-live` |
 | Frequency | Monthly, day of month `2`, time of day = 07:00 UTC in your local zone (08:00 in GMT+1) |
 | Cron (UTC) | `0 7 2 * *` |
+| Message grouping for updates | New chat thread for each run |
 
 ### Scheduled task prompt
 

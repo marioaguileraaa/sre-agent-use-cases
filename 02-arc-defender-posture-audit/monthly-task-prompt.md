@@ -29,24 +29,25 @@ display name is not proof of those bindings.
 
 ## 2. Fill the task form
 
-For a new approved task, use **Automation > Create > Scheduled task**.
-Alternatively, on the saved LIVE specialist's canvas node select **+ > Trigger >
-Add scheduled task**, which preselects the responder. Older portal navigation
-may call Automation **Scheduled tasks**.
+For a new approved task, use **Automation > Create ▾ > Scheduled task** (the
+other option is *HTTP trigger*). **Build + configure > Agent Canvas > Create ▾ >
+Trigger › > Scheduled tasks** is another entry point; check the selected
+responder either way. The [README](README.md#52-fill-all-relevant-fields) shows
+today's form (checked on 16 November 2026).
 
 | Field | Value |
 |---|---|
 | Task name | `Monthly Defender for Cloud live evidence audit` |
-| Response custom agent / Response subagent | `defender-cloud-live`; do not leave empty (empty uses the main agent) |
+| Response subagent | `defender-cloud-live`; do not leave empty (empty uses the main agent) |
 | Task details | Complete prompt in the next section |
 | Start on | Customer-approved activation date; do not copy a historical lab date |
-| Frequency | Custom cron |
-| Cron (UTC) | `0 9 1 * *` |
+| Frequency | Custom cron (the list starts at **Daily**) |
+| Cron expression (UTC) | `0 9 1 * *` |
 | Meaning | Day 1 of each month at 09:00 UTC |
-| Message grouping for updates | A **new/separate thread per run**, not reuse of the previous run's conversation; select the equivalent wording in your portal |
+| Message grouping for updates | **New chat thread for each run** (the default is *Use same chat thread*), not reuse of the previous run's conversation |
 | Model tier | General Purpose, subject to the customer's approved model policy |
 | Agent autonomy level | **Autonomous** only after the bounded read-only reporter and effective allowlists have passed manual acceptance |
-| Repeat until / Run limit, if shown | Customer-approved lifetime/limit; recurring execution continues consuming usage while enabled |
+| Repeat until / Set a run limit | Customer-approved lifetime/limit (blank means no end/limit); recurring execution continues consuming usage while enabled |
 
 Do not inherit all global tools to make Autonomous work. Review mode can pause
 for approval and is not equivalent to unattended monthly execution. Neither
@@ -94,8 +95,10 @@ or a promised structured `action_required` field.
 
 ## 4. Save, reopen and check UTC / DST
 
-Select **Create task** or **Save** only for the approved owned task. Reopen its
-edit form and confirm the exact responder, full prompt, cron, new-thread
+Select **Create task** only for the approved owned task. Reopen it
+(**Automation** > search > tick only this task > **Edit**, which opens **Edit
+scheduled task**; **Cancel** if nothing changes) and confirm the exact
+responder, full prompt, cron, new-thread
 grouping, autonomy and status. Check **Next run time**, and `nextUTCtime` if the
 service exposes it, against the intended UTC occurrence.
 
@@ -113,9 +116,9 @@ and verify the saved next UTC occurrence after any DST/local-time change.
 ## 5. Separate manual acceptance from timer evidence
 
 After customer approval, perform **one** manual acceptance run from the
-**Automation list**: select the owned row's checkbox, then the enabled toolbar
-**Run now**. Do not run an unrelated row or submit again merely because the
-history page has a disabled button.
+**Automation list**: search for the task name, select only the owned row's
+checkbox, then the enabled toolbar **Run now**. Do not run an unrelated row or
+submit again merely because the history page has a disabled button.
 
 Open the actual execution thread and verify the selected responder, exactly
 one report call, its UTC reference and honest partial-source result, and all

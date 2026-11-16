@@ -55,14 +55,17 @@ implementation and cross-tenant onboarding guide is in English.
 > unconfigured or failed live run.
 
 > [!NOTE]
-> **Update 16 November 2026 — tool name.** Today's portal limits **Tool Name**
-> to 36 characters, so this guide's tool is now named
+> **Update 16 November 2026 — tool name and today's portal.** Today's portal
+> limits **Tool Name** to 36 characters, so this guide's tool is now named
 > `databricks-dependency-report`; the file you paste keeps its name,
-> `generate-databricks-dependency-report.py`. Screenshots and evidence from
-> earlier runs show the previous name `generate-databricks-dependency-report`,
-> created through the API. If you already created the tool with a cut name, use
-> exactly the saved name in the skill, the subagent instructions and
-> **Choose tools**.
+> `generate-databricks-dependency-report.py`. The portal screenshots of
+> Steps 2 to 5 were recaptured on 2026-11-16 in today's portal (**Build +
+> configure → Agent Canvas**, **Custom agents**, `/agent` in chat) and show the
+> new name. The October test result, readiness chat and evidence (receipt,
+> connected-run card) keep the previous name
+> `generate-databricks-dependency-report`, created through the API. If you
+> already created the tool with a cut name, use exactly the saved name in the
+> skill, the subagent instructions and **Choose tools**.
 
 ## Contents
 
@@ -172,7 +175,7 @@ place.
 | Constant / Field | Who provides it | How to find it |
 |---|---|---|
 | `SRE_TENANT_ID` | You (Tenant A) | Azure Portal (Tenant A) > **Microsoft Entra ID > Overview > Tenant ID** |
-| `MANAGED_IDENTITY_CLIENT_ID` | You (Tenant A) | SRE Agent > **Settings > Azure settings > Managed Identity > Go to Identity > Client ID** (also record **Object (principal) ID** for FIC `subject` / Lighthouse RBAC) |
+| `MANAGED_IDENTITY_CLIENT_ID` | You (Tenant A) | Azure Portal (Tenant A) > **Managed Identities** > the user-assigned identity attached to the SRE Agent (`id-…`) > **Overview > Client ID** (also record **Object (principal) ID** for FIC `subject` / Lighthouse RBAC). Today's SRE Agent menu has no **Settings** page. |
 | `TARGET_TENANT_ID` | Colleague (Tenant B) | Azure Portal (Tenant B) > **Microsoft Entra ID > Overview > Tenant ID** |
 | `SUBSCRIPTION_ID` | Colleague (Tenant B) | Azure Portal (Tenant B) > **Azure Databricks workspace > Overview > Subscription ID** |
 | `<APPROVED_DATABRICKS_WORKSPACE_NAME>` | Colleague (Tenant B) | Exact ARM resource name of `Microsoft.Databricks/workspaces` |
@@ -425,14 +428,16 @@ Markdown files (never an HTML sign-in wrapper):
 - Specialist instructions and EN/ES prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (current LF SHA-256: `557924fd4645d5c6dea63b109f8be51b48c3edb80072537d1445b7082fda2b64`; LF copy-ready instruction block SHA-256: `5f282acc196de910a8aea89179fa18b62c050a5bac01740e7b7e3b74ae88d8ef`)
 - Pinned rule catalog (already embedded in the standalone tool): [`rules_catalog.json`](rules_catalog.json)
 - Public native-readiness validation receipt: [`native-readiness-validation.json`](native-readiness-validation.json)
-- Public visual evidence manifest (18 annotated PNGs): [`visual-evidence.json`](visual-evidence.json)
+- Public visual evidence manifest (32 annotated PNGs: the 18 images of the October and November 2026 evidence plus 14 portal screenshots recaptured on 2026-11-16): [`visual-evidence.json`](visual-evidence.json)
 
 ## Step 0 - Identify the reporting identity and approve cross-tenant or same-tenant scope
 
-1. In the SRE portal, open **Settings > Azure settings > Managed Identity > Go
-   to Identity** and record both **Client ID** (for
+1. Today's SRE Agent menu has no **Settings** page. In the Azure portal, open
+   **Managed Identities** > the user-assigned identity attached to the SRE Agent
+   (`id-…`) > **Overview** and record both **Client ID** (for
    `MANAGED_IDENTITY_CLIENT_ID`) and **Object (principal) ID** (for Entra FIC
-   `subject` or Azure RBAC assignments).
+   `subject` or Azure RBAC assignments), or run
+   `az identity show --name <IDENTITY_NAME> --resource-group <IDENTITY_RG> --query "{clientId:clientId, principalId:principalId}" -o table`.
 2. Confirm your SRE Agent's tenant GUID (`SRE_TENANT_ID`).
 3. If your colleague's Azure Databricks workspace is in another tenant, follow
    the [Colleague session handoff checklist](#colleague-session-handoff-checklist-cross-tenant-connection)
@@ -463,37 +468,49 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
 
 ## Step 2 - Create the Python tool and verify its 12 typed inputs
 
-1. In the SRE Agent portal, open **Builder > Agent Canvas**, click the
-   drop-down arrow beside **Create**, and choose **Tool > Python tool**
-   (clicking the **Create** button body opens the custom-agent form instead).
-   Select the **Code** tab (never **Generate** or **Refine with AI**).
+1. In the SRE Agent portal, open **Build + configure → Agent Canvas**, click the
+   drop-down arrow beside **Create** (**Create ▾**), and choose
+   **Tool › Python tool** (clicking the **Create** button body opens **Create a
+   custom agent** instead). Work in the **Code** tab (never **Generate** or
+   **Refine with AI**).
 
-   ![Builder Canvas Create drop-down arrow for Tool > Python tool](images/08-create-drop-down-arrow.png)
+   ![Build + configure > Agent Canvas > Create ▾ > Tool > Python tool](images/newui-menu.png)
 
-   *Real Builder navigation excerpt in Canvas view (`08-create-drop-down-arrow.png`): **(1)** use the **Create** drop-down arrow, not its custom-agent button body; **(2)** choose **Tool**, then **Python tool** in its submenu. This navigation-only crop is not Databricks deployment evidence.*
+   *Agent Canvas in today's portal (`newui-menu.png`, captured 2026-11-16): **(1)** **Build + configure** (left menu, formerly Builder); **(2)** **Agent Canvas**, its first item; **(3)** the **Create ▾** arrow, not the **Create** button body; **(4)** **Tool ›**; **(5)** **Python tool**. The canvas behind the menu is blurred.*
 
-2. Name the tool **`databricks-dependency-report`**, set timeout to
-   **900 seconds** (`timeoutSeconds=900`, `dependencies=[]`, `toolMode="Auto"`),
-   and paste the entire standalone file
-   `generate-databricks-dependency-report.py`.
+2. Name the tool **`databricks-dependency-report`** (**Tool Name** accepts at
+   most 36 characters), set **Timeout (seconds)** to **900** (the default is
+   120; 900 is the maximum; saved as `timeoutSeconds=900`, `dependencies=[]`,
+   `toolMode="Auto"`), paste this **Description**:
 
-   ![Saved Python tool edit view with 900-second timeout and masked private code editor](images/02-private-code-and-timeout.png)
+   ```text
+   Read-only Azure Databricks dependency mapping, configuration, security, FinOps and optimization for a fixed workspace allowlist. Four complete artifacts or bounded source-qualified queries. Fails closed before authentication when source setup is missing. No SQL, compute starts, source writes, IAM or tasks.
+   ```
 
-   *Actual saved-tool edit view (`02-private-code-and-timeout.png`): **(1)** keep the dedicated saved name `generate-databricks-dependency-report` and `900`-second timeout; **(2)** paste the complete reviewed file—the entire private configuration/logo/identity editor region is deliberately masked in this capture, not shown as visible whole public source or replaced with invented code.*
+   and paste the entire standalone file `generate-databricks-dependency-report.py`
+   into the code editor (`Ctrl+A`, then paste). There is no *Requirements*
+   field: the SRE Agent Python runtime already provides the packages in
+   [`requirements.txt`](requirements.txt).
+
+   ![Create a Python tool, Code tab with name, 900-second timeout, description and pasted code](images/newui-code.png)
+
+   *Create a Python tool, **Code** tab (`newui-code.png`): **(1)** **Tool Name** `databricks-dependency-report` (the narrow field cuts it on screen); **(2)** **Timeout (seconds)** `900`; **(3)** **Description**; **(4)** the complete repository file pasted, with its `<PLACEHOLDER>` constants (top of the file shown); **(5)** **Create tool** stays grey until a **Test** has run.*
 
 3. Open the **Identity** tab and keep **Enable Azure Identity** `OFF`
    (`authEnabled=false`, `authScopes=null`), because the collector acquires and
    verifies its own tokens through the fixed `MANAGED_IDENTITY_CLIENT_ID` after
-   valid configuration. This toggle does not grant cross-tenant access.
+   valid configuration. This toggle does not grant cross-tenant access. Do not
+   switch it on to look: it inserts four `azure.identity` lines at the top of
+   the code, and they stay there.
 
-   ![Saved Python tool Identity tab with Enable Azure Identity OFF](images/03-identity-access-off.png)
+   ![Create a Python tool, Identity tab with Enable Azure Identity OFF](images/newui-identity.png)
 
-   *Actual **Identity** tab (`03-identity-access-off.png`): **(1)** open the native **Identity** tab; **(2)** **Enable Azure Identity** is `OFF` (`authEnabled=false`)—source authorization is separate.*
+   ***Identity** tab (`newui-identity.png`): **(1)** open the **Identity** tab; **(2)** **Enable Azure Identity** stays `OFF` (`authEnabled=false`)—source authorization is separate.*
 
-4. Configure all **12** typed parameters matching
-   [`tool-parameters.schema.json`](tool-parameters.schema.json), then save and
-   reopen the tool profile to verify the definition-only `main` signature and
-   all 12 native parameter rows (`limit` and `offset` use `int`):
+4. There is no parameter editor: the portal reads the **12** typed inputs from
+   the `def main(...)` signature of the pasted file, matching
+   [`tool-parameters.schema.json`](tool-parameters.schema.json) (`limit` and
+   `offset` are `int`):
 
 | Parameter | Runtime type | Default | Allowed values / constraint |
 |---|---|---|---|
@@ -510,12 +527,22 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
 | `limit` | `int` | `25` | `1..100` |
 | `offset` | `int` | `0` | `0..500000` |
 
-   ![Saved Python tool profile and all 12 native parameter rows](images/01-saved-tool-and-12-parameters.png)
+   Open the **Test playground** tab: every input has an empty box (no defaults
+   and no drop-down lists). Type the *Default* column in every box (`report`,
+   `summary`, `all` for the five filters, `25` and `0`) and leave
+   `workspace_name`, `workspace_names` and `workload_name` empty: an empty enum
+   box is rejected with `invalid_parameter`, and `limit` / `offset` take numbers.
 
-   *Real saved Python tool profile (`01-saved-tool-and-12-parameters.png`): **(1)** the exact saved dedicated tool name `generate-databricks-dependency-report`; **(2)** actual `main` signature excerpt (full saved source is verified separately); **(3)** all 12 native parameter rows, including integer `limit` and `offset`.*
+   ![Test playground with the 12 parameter boxes, top](images/newui-playground.png)
+
+   ![Test playground with the 12 parameter boxes, bottom](images/newui-playground-b.png)
+
+   ***Test playground** tab (`newui-playground.png`, `newui-playground-b.png`): top **(1)** the tab; **(2)** **Test**; **(3)** `operation` = `report`; **(4)** `view` = `summary`; **(5)** **Create tool**, grey until a test has run. Bottom: **(2)** `limit` = `25` and **(3)** `offset` = `0` (number boxes); `classification`, `area`, `level`, `severity` and `status` = `all` are typed above them.*
 
 5. **Native unconfigured test boundary (`Function test succeeded` vs
-   `configuration_required`):** Before the colleague session populates the
+   `configuration_required`):** Click **Test**; **Create tool** (and **Save**
+   when you edit the tool later) stays grey until a test has run. Before the
+   colleague session populates the
    target Tenant-B constants, running **Test** in the native playground returns
    green **Function test succeeded** because the Python function returned a
    structured dictionary normally (`harness_returned_normally=true`,
@@ -524,62 +551,115 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
    `artifact_status="not_written"`, and `provenance="LIVE"`. Here `LIVE`
    identifies the live collector code path (as opposed to an offline
    `SIMULATED` test fixture), **not** that a live Databricks source was
-   connected or queried.
+   connected or queried. With a configured file, a full `report` can stop the
+   playground at about 100 seconds with HTTP 504 even with the 900-second
+   timeout; that is not a tool failure, so run it from chat (Step 5).
 
    ![Native Test playground showing Function test succeeded with domain result configuration_required](images/04-native-unconfigured-test.png)
 
-   *Actual native **Test** playground (`04-native-unconfigured-test.png`): **(1)** the actual native **Test** action; **(2)** harness execution success (**Function test succeeded**) is not source-access success; **(3)** read the real `configuration_required` / `artifact_status="not_written"` result—no Tenant-B authentication, source read, report or simulated graph occurred.*
+   *Actual native **Test** playground (`04-native-unconfigured-test.png`, 2026-10-16 run of the API-saved `generate-databricks-dependency-report`; today's portal labels may differ): **(1)** the actual native **Test** action; **(2)** harness execution success (**Function test succeeded**) is not source-access success; **(3)** read the real `configuration_required` / `artifact_status="not_written"` result—no Tenant-B authentication, source read, report or simulated graph occurred.*
+
+6. Click **Create tool**, then verify the saved tool: **Agent Canvas → Table
+   view →** card **Tools & skills → Python tools →** search
+   `databricks-dependency-report` **→** click its name. The details panel lists
+   the 12 **Query parameters** read from `main`, with `limit` and `offset`
+   typed `int`; the pencil reopens **Edit Python tool**.
+
+   ![Saved Python tool details with the 12 typed query parameters](images/newui-edit-tool-params.png)
+
+   *Saved tool details (`newui-edit-tool-params.png`): **(1)** the saved tool `databricks-dependency-report`; **(2)** the 12 parameters the portal read from `def main(...)`; **(3)** `limit` and `offset` typed `int`.*
 
 ## Step 3 - Create the runtime skill
 
-In **Builder > Skills > Create skill**, create **`databricks-dependency-live`**
-using the exact content of
+In **Build + configure → Agent Canvas → Create ▾ → Skill**, create
+**`databricks-dependency-live`** from the exact content of
 [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md)
 (current LF SHA-256:
 `a6c5dca83feb5f203f1ae4d4bc7665714970326c2ff9b14c3ec819ecb2858d42`) and bind
-only `databricks-dependency-report`.
+only `databricks-dependency-report`. The order matters:
 
-![Saved databricks-dependency-live runtime skill profile](images/05-saved-runtime-skill.png)
+1. Paste the whole `SKILL.md` into the editor **first**: **Name**
+   `databricks-dependency-live` and **Description** are filled in from its
+   front matter.
 
-*Actual saved `databricks-dependency-live` skill (`05-saved-runtime-skill.png`): **(1)** exact saved runtime skill name; **(2)** bind only the dedicated Databricks Python tool `generate-databricks-dependency-report`; **(3)** the complete `SKILL.md` is saved and independently matched to committed bytes.*
+   ![Create skill with SKILL.md pasted first](images/newui-skill.png)
+
+   ***Create skill** (`newui-skill.png`): **(1)** paste `SKILL.md` into the editor first; **(2)** **Name** and **(3)** **Description**, filled in from its front matter; **(4)** **Choose tools**, afterwards.*
+
+2. **Then** click **Choose tools**, search `databricks-dependency-report`,
+   expand the **PythonFunctionTool (n)** group, tick **only** that tool (never
+   the group checkbox) and click **Close panel**.
+
+   ![Choose tools: search, expand the group and tick only the Databricks tool](images/newui-skill-tools.png)
+
+   ***Choose tools** (`newui-skill-tools.png`): **(1)** search box; **(2)** expand the **PythonFunctionTool** group; **(3)** tick only `databricks-dependency-report`; **(4)** **Close panel**.*
+
+3. Check the tool chip and the `tools:` line the portal adds to the front
+   matter, then **Create**. If you choose the tool before pasting, the paste
+   replaces the front matter and the tool is lost.
+
+   ![Create skill ready with the tool chip and the tools line](images/newui-skill-chip.png)
+
+   *Ready to create (`newui-skill-chip.png`): **(1)** tool chip `databricks-dependency-report`; **(2)** `tools:` with `databricks-dependency-report` in the front matter; **(3)** **Create** (not clicked in the capture). The saved skill therefore contains the committed `SKILL.md` plus that `tools:` line.*
 
 ## Step 4 - Create the restricted specialist
 
-In **Builder > Custom agents / Subagents > Create**, configure:
+In **Build + configure → Agent Canvas**, click the **Create** button (it opens
+**Create a custom agent** directly; **Create ▾ → Custom agent** opens the same
+form) and configure:
 
-- **Name:** `databricks-dependency-live`
-- **Model:** Platform-supported default (`llmModelName=null`; do not invent custom model/reasoning/context fields in the SRE runtime configuration)
-- **Skill:** Only `databricks-dependency-live`
-- **Selected tools:** Only `databricks-dependency-report`
+- **Custom agent name:** `databricks-dependency-live`
+- **Model:** Platform-supported default (`llmModelName=null`; the form has no model field; do not invent custom model/reasoning/context fields in the SRE runtime configuration)
+- **Choose skills:** Only `databricks-dependency-live`
+- **Choose tools:** Only `databricks-dependency-report` (same panel as in Step 3: search, expand **PythonFunctionTool**, tick the tool, **Close panel**; never leave it empty)
 - **Instructions:** Paste the copy-ready block from
   [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)
   (LF instruction block SHA-256:
   `5f282acc196de910a8aea89179fa18b62c050a5bac01740e7b7e3b74ae88d8ef`).
+- Do not use *Refine with AI* or *View AI suggestions*. Then **Create**.
 
-Read back the saved specialist profile and form to confirm that the single
-skill, single tool and instruction block are persisted.
+![Create a custom agent with name and pasted instructions](images/newui-agent.png)
 
-![Saved restricted specialist profile](images/06-saved-restricted-specialist.png)
+***Create a custom agent** (`newui-agent.png`): **(1)** **Custom agent name** `databricks-dependency-live`; **(2)** **Instructions** with the pasted copy-ready block; **(3)** **Choose skills**; **(4)** **Choose tools**.*
 
-*Actual specialist profile (`06-saved-restricted-specialist.png`): **(1)** saved specialist `databricks-dependency-live` and complete instruction body; **(2)** only the dedicated Databricks tool `generate-databricks-dependency-report`; **(3)** the exact matching runtime skill `databricks-dependency-live`.*
+![Create a custom agent with explicit skill and tool chips](images/newui-agent-chips.png)
 
-![Saved specialist form with explicit skill and tool allowlist chips](images/07-saved-explicit-allowlists.png)
+*Ready to create (`newui-agent-chips.png`): **(1)** skill chip `databricks-dependency-live`; **(2)** tool chip `databricks-dependency-report`; **(3)** **Create** (not clicked in the capture). The form notes that an agent inherits the global skills and tools by default and that selecting them overrides the defaults: only the chips count.*
 
-*Actual saved form (`07-saved-explicit-allowlists.png`): **(1)** the exact selected runtime skill `databricks-dependency-live` overrides an empty/default selection; **(2)** the exact selected dedicated tool `generate-databricks-dependency-report`, not global inheritance; **(3)** **Save** and **Discard** are disabled because the saved state is unchanged. Note that the form's summary badges still display the workspace defaults (`133` global tools / `54` skills) despite the explicit saved chips: the selected chip names plus the independently read-back CamelCase API policy in [`native-readiness-validation.json`](native-readiness-validation.json) (`tools=["generate-databricks-dependency-report"]`, `allowedSkills=["databricks-dependency-live"]`, `enableSkills=true`, `addSystemSkills=false`, `disableDocumentRetrieval=true`, `commonTools=[]`, `mcpTools=[]`, `connectors=[]`, `handoffs=[]`, `agentsAsTools=[]`, `commonPrompts=[]`, `allowParallelToolCalls=false`, `maxReflectionCount=0`, `llmModelName=null`, `hooks=null`) establish the configured restriction. Do not modify Global Settings.*
+Read back the saved specialist: **Agent Canvas → Table view →** card **Agents →
+Custom agents →** search `databricks-dependency-live` **→** click its name. The
+details panel must show the instruction block, **Tools** with only
+`databricks-dependency-report` and **Skills** with only
+`databricks-dependency-live`; the pencil reopens the form.
+
+![Saved restricted specialist in Table view > Custom agents](images/newui-edit-agent-open.png)
+
+*Saved specialist read back (`newui-edit-agent-open.png`): **(1)** **Custom agents**, in the **Agents** card; **(2)** search box; **(3)** click the name to open the details panel (instructions, one tool, one skill); **(4)** the pencil opens the form again.*
+
+On 2026-10-16 the form's summary badges still displayed the workspace defaults
+(`133` global tools / `54` skills) despite the explicit saved chips (today the
+form only notes how many global skills and tools an agent inherits until you
+select some): the selected chip names plus the independently read-back CamelCase API
+policy in [`native-readiness-validation.json`](native-readiness-validation.json)
+(`tools=["generate-databricks-dependency-report"]`, `allowedSkills=["databricks-dependency-live"]`, `enableSkills=true`, `addSystemSkills=false`, `disableDocumentRetrieval=true`, `commonTools=[]`, `mcpTools=[]`, `connectors=[]`, `handoffs=[]`, `agentsAsTools=[]`, `commonPrompts=[]`, `allowParallelToolCalls=false`, `maxReflectionCount=0`, `llmModelName=null`, `hooks=null`)
+establish the configured restriction. Do not modify Global Settings.
 
 ## Step 5 - Run one report in normal chat and download its four files
 
-1. Open normal SRE chat, invoke the `/agent` picker, and select the registered
-   specialist **`databricks-dependency-live`** (do not rely on a free-text
-   `@name` mention without selecting the specialist).
+1. Open **New chat**, type `/agent` followed by the specialist name and pick
+   the registered specialist **`databricks-dependency-live`** in the list: the
+   composer shows the chip **Agent: databricks-dependency-live**. Typing `@` no
+   longer opens a picker, so do not rely on a free-text `@name` mention; with
+   the chip selected, leave the leading `@databricks-dependency-live` out of
+   the prompts of this guide.
 
-   ![Select registered databricks-dependency-live specialist in the /agent picker](images/10-select-registered-specialist.png)
+   ![/agent picker with the registered databricks-dependency-live specialist](images/newui-chat-pick.png)
 
-   *Actual `/agent` picker excerpt (`10-select-registered-specialist.png`): **(1)** choose the real registered `databricks-dependency-live` specialist (unrelated specialists are excluded by the crop).*
+   ***New chat** (`newui-chat-pick.png`): **(1)** `/agent` and the specialist name; **(2)** pick the registered `databricks-dependency-live` specialist (other specialists are hidden by the filter).*
 
-   ![Selected specialist chip in the New chat composer before sending a prompt](images/11-selected-specialist-composer.png)
+   ![Agent chip and report prompt in the New chat composer before sending](images/newui-chat-ready.png)
 
-   *Actual **New chat** composer after selecting the saved specialist (`11-selected-specialist-composer.png`): **(1)** the composer now targets the saved specialist (the visible chip can be ellipsized, so verify the full registered name in the `/agent` picker above); **(2)** enter the approved readiness or report prompt only after selecting the specialist. No message is sent by this capture.*
+   *Composer after selecting the specialist (`newui-chat-ready.png`): **(1)** chip **Agent: databricks-dependency-live** (it can be ellipsized; the full name is in the picker above); **(2)** the report prompt of item 3 without the `@` mention; **(3)** send. No message is sent by this capture.*
 
 2. **Pre-session unconfigured readiness check:** Before the colleague's
    Tenant-B workspace constants are configured, asking the selected specialist
@@ -590,7 +670,7 @@ skill, single tool and instruction block are persisted.
 
    ![Selected specialist unconfigured readiness conversation returning configuration_required and no files](images/09-native-no-source-no-files.png)
 
-   *Actual selected-specialist readiness conversation (`09-native-no-source-no-files.png`): **(1)** actual returned `configuration_required` / `not_written` result (`provenance="LIVE"` is the collector-path label, not evidence of a connected source run); **(2)** the specialist explicitly states that no source read occurred; **(3)** no dependency graph, score, cost figure or report files were fabricated.*
+   *Actual selected-specialist readiness conversation (`09-native-no-source-no-files.png`, 2026-10-16 run; today's portal labels may differ): **(1)** actual returned `configuration_required` / `not_written` result (`provenance="LIVE"` is the collector-path label, not evidence of a connected source run); **(2)** the specialist explicitly states that no source read occurred; **(3)** no dependency graph, score, cost figure or report files were fabricated.*
 
 3. **Post-session live report & four-file delivery:** Once privately configured
    after the colleague session, run the report prompt from
@@ -601,7 +681,7 @@ skill, single tool and instruction block are persisted.
 
    ![Connected cross-tenant report turn delivering all four native files and source/dependency disclosures](images/12-live-chat-four-files.png)
 
-   *Connected cross-tenant report turn (`12-live-chat-four-files.png`, `auth_mode="cross_tenant_multitenant_fic"`): **(1)** all four native files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) are delivered in one turn and verified with HTTP 200; **(2)** source coverage (`14 complete`, `6 denied`, `4 not_configured`) and the local score (`100.0%` over `4` evaluated vs `31` `No evaluado`) are disclosed together; **(3)** `9 OBSERVED` joins, `2 INFERRED` ADLS Gen2 URI edges and `12 UNKNOWN` blind spots are reported with zero compute started. The workspace name and thread ID are masked and the ADLS account name is pseudonymized.*
+   *Connected cross-tenant report turn (`12-live-chat-four-files.png`, `auth_mode="cross_tenant_multitenant_fic"`; evidence card rendered from the 2026-10-19 run, not a portal screenshot; today's portal labels may differ): **(1)** all four native files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) are delivered in one turn and verified with HTTP 200; **(2)** source coverage (`14 complete`, `6 denied`, `4 not_configured`) and the local score (`100.0%` over `4` evaluated vs `31` `No evaluado`) are disclosed together; **(3)** `9 OBSERVED` joins, `2 INFERRED` ADLS Gen2 URI edges and `12 UNKNOWN` blind spots are reported with zero compute started. The workspace name and thread ID are masked and the ADLS account name is pseudonymized.*
 
 ## Step 6 - Read and explore the HTML dependency and configuration dossier
 
@@ -662,6 +742,8 @@ catches always-on clusters and warehouses sooner.
 | Symptom / Error code | Meaning | Safe resolution |
 |---|---|---|
 | The tool name is cut when you type it | Today's portal limits **Tool Name** to 36 characters, so the previous name `generate-databricks-dependency-report` (37 characters) becomes `generate-databricks-dependency-repor` | Name the tool `databricks-dependency-report`. If you already saved a cut name, use exactly that saved name in the skill, the subagent instructions and **Choose tools**. |
+| **Create tool** or **Save** stays grey | The tool dialog has not run a test yet | Open **Test playground**, type the values of Step 2 and click **Test**. It is not a role problem. |
+| `invalid_parameter` in **Test playground** | A box was left empty or mistyped | Type every value of the *Default* column (only `workspace_name`, `workspace_names` and `workload_name` stay empty); `limit` and `offset` are numbers. |
 | `configuration_required` | Committed `<PLACEHOLDER>` GUIDs or workspace host are still present | Expected before the colleague session. Fill the fixed constants in your private deployment copy during the session. |
 | `cross_tenant_configuration_required` | `SRE_TENANT_ID != TARGET_TENANT_ID` while `auth_mode == "same_tenant_uami"` | Switch `auth_mode` to `cross_tenant_multitenant_fic`, `cross_tenant_lighthouse_plus_databricks_oidc` or `cross_tenant_lighthouse_plus_keyvault_oauth_m2m` after completing cross-tenant setup. |
 | `identity_mismatch` on every source, with no HTTP status | Tool code older than November 2026: it does not recognize the SRE Agent sandbox placeholder tokens (`iss` = `adc-msi-sidecar`) | Update `generate-databricks-dependency-report.py` from this folder; `normalize_sidecar_claims` maps their tenant, client and scope before the same checks. |
@@ -697,6 +779,7 @@ completed, colleague-tenant source captures remain **Not collected
 | Databricks dependency map & configuration dossier (report design) | Verdict-first summary (`CLIENTE`), `OBSERVED`/`INFERRED`/`UNKNOWN` dependency graph, undeployed reference tab and source ledger | **Regenerated (`2026-11-12`) from the sanitized synthetic test fixture after the report redesign** (connected-run delivery evidence of `2026-10-19` stays in [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png)): [`13-report-overview-and-pillars.png`](images/13-report-overview-and-pillars.png), [`14-report-dependency-graph.png`](images/14-report-dependency-graph.png), [`15-report-controls-and-reference.png`](images/15-report-controls-and-reference.png), [`16-report-source-coverage-ledger.png`](images/16-report-source-coverage-ledger.png) |
 | Databricks costs (report section 6) | Month cost, DBU vs infrastructure, who consumes it and optimisation signals | **Rendered (`2026-11-12`) from `operation="self_test"` (`SIMULATED`, no customer data)**; Cost Management query shapes validated read-only against a lab subscription without Databricks: [`17-report-databricks-costs.png`](images/17-report-databricks-costs.png), [`18-report-databricks-cost-signals.png`](images/18-report-databricks-cost-signals.png) |
 | Live four-file native delivery | Actual `report_url`, `snapshot_url`, `findings_csv_url`, `dependencies_csv_url` HTTP 200 downloads from a connected workspace run | **Collected (`2026-10-19`):** [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png), [`visual-evidence.json`](visual-evidence.json) |
+| Portal screenshots in today's UI | Steps 2-5 recaptured read-only in a lab agent (nothing saved, tested or sent): Agent Canvas menu, **Code**, **Test playground** and **Identity** tabs, saved-tool parameters, skill, custom agent and `/agent` chat, with the new tool name `databricks-dependency-report` | **Captured (`2026-11-16`):** 14 `newui-*.png` files listed in [`visual-evidence.json`](visual-evidence.json). The October images above stay in `images/` as evidence of the `2026-10-16` bootstrap. |
 
 ## Technical boundaries and maintainer checks
 
@@ -714,7 +797,7 @@ python -m unittest discover -s 08-databricks-dependency-configuration-review\tes
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent databricks-dependency-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent databricks-dependency-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. With the **Agent: databricks-dependency-live** chip selected, leave out the leading `@databricks-dependency-live` mention (typing `@` no longer opens a picker):
 
 ### 1. Discover Configured Databricks Workspaces / Listar los Workspaces de Databricks Configurados (`list_workspaces`)
 - **Castellano:**

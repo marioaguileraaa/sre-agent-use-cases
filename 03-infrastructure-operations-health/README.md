@@ -183,7 +183,9 @@ customer consent.
 This presentation sequence assumes Steps 0-4 have already been configured and
 accepted. It is not a shortcut around source/access approval.
 
-1. In a fresh chat, invoke **`@infra-ops-live`** and request the real report for
+1. In a fresh chat (**New chat**), type `/agent`, pick **`infra-ops-live`**
+   (the chip **Agent: infra-ops-live** appears; typing `@` no longer opens a
+   picker) and request the real report for
    `period=last_24h`, both hosting types. Open the actual HTML download.
 2. Show Arc CPU, physical available memory and volume capacity. Explain why
    **Connected** is not guest health, and why empty Perf does not invalidate
@@ -193,7 +195,7 @@ accepted. It is not a shortcut around source/access approval.
 4. Ask one scoped source-grounded question, then inspect the owner review and
    coverage evidence. The downloaded report does not poll for newer data.
 5. If monthly scheduling and a manual acceptance run are approved, use
-   **Automation -> checkbox -> Run now** for that customer-owned task and
+   **Automation -> search the task -> its checkbox -> Run now** for that customer-owned task and
    verify the real thread and all four files. Otherwise keep reporting on demand.
 6. Only for a separately requested exercise, after the user approves the **exact dedicated Arc host and Azure VM**
    and any required start/restore operation, use the separate operator CPU
@@ -405,7 +407,7 @@ a local copy for configuration/pasting. Private repository access is required.
 | [`tests/test_package_contract.py`](tests/test_package_contract.py) | Offline package contract checks: zero-side-effect `__main__` tool hydration, 16-parameter schema parity, relative link/anchor/image resolution and bilingual EN/ES prompt coverage. |
 | [`PRODUCT.md`](PRODUCT.md) | Scenario-local, confirmed product boundaries; no changes to earlier cases. |
 | [`DESIGN.md`](DESIGN.md) | Report visual contract (Azure SRE Agent report family in this scenario's petrol palette), tokens, responsive and print behavior. |
-| [`images/`](images/) | Captures with red callouts. Report screenshots re-render dated lab snapshots with pseudonymized names and identifiers; portal captures are actual and reviewed; identifiers are masked and visible lab names use the same pseudonyms. Historical UI examples are dated in their captions. |
+| [`images/`](images/) | Captures with red callouts. Report screenshots re-render dated lab snapshots with pseudonymized names and identifiers; portal captures are actual and reviewed; identifiers are masked and visible lab names use the same pseudonyms. Historical UI examples are dated in their captions; `newui-automation-list.png` is today's portal (16 November 2026, read-only, **Run now** not clicked). |
 
 Raw API handoffs are ignored, private validation inputs. They are not a
 committed dataset, deployed fixture or sample report.
@@ -414,12 +416,17 @@ committed dataset, deployed fixture or sample report.
 
 ### 0.1 Find the identity and prepare the private constants
 
-In the existing agent, open **Settings > Azure settings > Managed Identity >
-Go to Identity**. In the Azure portal open the attached **user-assigned**
-identity, then copy **Client ID** from Overview for the code. Record **Object
-(principal) ID** separately for the access administrator. Older **Settings >
-Basics** screenshots are label variants, not a reason to choose another
-identity. Do not use the internal system-assigned identity or your own user.
+In the [Azure portal](https://portal.azure.com), open the agent's resource
+group and the **Managed Identity** resource whose name starts with `id-` (the
+**user-assigned** identity attached to this agent), then copy **Client ID** from
+its **Overview** for the code (Azure CLI: `az identity show --name
+<IDENTITY_NAME> --resource-group <RESOURCE_GROUP> --query clientId -o tsv`).
+Record **Object (principal) ID** separately for the access administrator.
+Today's SRE Agent portal has no **Settings** entry in the agent menu (checked on
+16 November 2026); older versions of this guide used **Settings > Azure
+settings > Managed Identity > Go to Identity** or **Settings > Basics**, which
+are not a reason to choose another identity. Do not use the internal
+system-assigned identity or your own user.
 
 Configure the constants at the top of
 [`generate-infrastructure-operations-report.py`](generate-infrastructure-operations-report.py)
@@ -462,7 +469,7 @@ are deliberately out of scope and disclose that limitation.
 | User: **SRE Agent Standard User** on the same agent resource | Chat/run diagnostics, upload knowledge and create/manage scheduled tasks. Combine with Author for the full portal workflow. |
 
 **SRE Agent Administrator** is the full-management alternative to **Author +
-Standard User**. **Builder** is a portal navigation label, not a named role.
+Standard User**. **Build + configure** (formerly **Builder**) is a portal navigation menu, not a named role.
 Author alone cannot chat/create tasks; Standard User alone cannot create custom
 agents. Azure Owner/Contributor do not replace SRE Agent data-action roles, and
 a visible button can still return 403. See [User roles and permissions](https://learn.microsoft.com/azure/sre-agent/user-roles).
@@ -551,7 +558,7 @@ promise that SRE runs or log queries are free.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |---|---|---|---|
-| `0.1` | **SRE Agent > Settings > Azure settings > Managed Identity > Go to Identity > Overview** | Copy **Client ID** for code; record **Object (principal) ID** separately for IAM | Client ID is a GUID distinct from Object (principal) ID and is the attached user-assigned identity, never the user's browser login |
+| `0.1` | **Azure portal > the agent's resource group > Managed Identity `id-…` > Overview** (no **Settings** in today's SRE Agent menu) | Copy **Client ID** for code; record **Object (principal) ID** separately for IAM | Client ID is a GUID distinct from Object (principal) ID and is the attached user-assigned identity, never the user's browser login |
 | `0.2` | Private copy of `generate-infrastructure-operations-report.py` top constants | Set `SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `LOG_WORKSPACE_IDS` (`0..5` distinct GUIDs), and `ARC_ADMIN_BASELINES` (`[]` unless owner-approved) | All 5 constants are configured in the private deployment copy outside Git; subscription is `Enabled`, tenant matches, and total supported inventory across all 15 resource types is `<= 500` before local filters |
 | `0.3` | **SRE Agent resource > Access control (IAM)** and monitored **Subscription / Log Analytics workspaces > IAM** | Human: **SRE Agent Author + SRE Agent Standard User** (or **Administrator**); UAMI principal: subscription **Reader** + approved workspace/table query read | Active (non-eligible PIM) assignments verified on the exact scopes; no Owner, Contributor, or write connector granted |
 
@@ -652,9 +659,11 @@ inventory or unidentifiable returned metadata prevents even that conclusion.
 ## Step 1 - Create and test the Python tool
 
 1. Open the approved agent in [SRE Agent](https://sre.azure.com), then
-   **Build + setup / Builder > Agent Canvas > Create > Tool > Python tool**.
+   **Build + configure** (formerly **Builder**) **> Agent Canvas > Create ▾**
+   (the arrow next to **Create**; the button itself opens the custom agent
+   dialog) **> Tool › > Python tool**.
    The dialog has **Code**, **Test playground** and **Identity** tabs.
-2. On **Code**, set **Tool name** to
+2. On **Code**, set **Tool Name** (36 characters max.) to
    **`infrastructure-operations-report`** and **Description** to:
 
    ```text
@@ -665,44 +674,58 @@ inventory or unidentifiable returned metadata prevents even that conclusion.
    ```
 
 3. Paste the **entire privately configured**
-   [`generate-infrastructure-operations-report.py`](generate-infrastructure-operations-report.py).
+   [`generate-infrastructure-operations-report.py`](generate-infrastructure-operations-report.py)
+   into the code editor (`Ctrl+A`, then paste).
    Do not use **Generate / Refine** or paste only `main()`: its helpers,
    policy, renderer and lossless codec are part of the standalone file.
-   Use the typed `main()` signature
-   and [`tool-parameters.schema.json`](tool-parameters.schema.json); do not add
+   The dialog has no parameter editor: the 16 inputs come from the typed
+   `main()` signature, which matches
+   [`tool-parameters.schema.json`](tool-parameters.schema.json); do not add
    arbitrary paths, KQL, URLs, token or subscription parameters.
 4. Ensure the dependencies in [`requirements.txt`](requirements.txt) are
    available: **`requests>=2.31,<3`**, **`azure-identity>=1.16,<2`** and
    **`Pillow>=10.4,<13`** (Pillow is needed only for a configured logo).
-   Dependency provisioning is an approved runtime setup activity, not a shell
-   tool for the restricted subagent. Set a bounded tool
-   timeout appropriate to the estate; the SRE preview maximum is 900 seconds.
+   The dialog has no *Requirements* field: dependency provisioning is an
+   approved runtime setup activity, not a shell
+   tool for the restricted subagent. Set **Timeout (seconds)** (default 120)
+   to a bounded value appropriate to the estate; the portal maximum is 900 seconds.
    The fixed source/row/bin/page and plain-artifact limits remain enforced.
-5. In **Identity**, do not copy Case01's Graph preset or another case's saved
-   `authEnabled` metadata. This code explicitly requests
+5. In **Identity**, leave **Enable Azure Identity** **Off** (the default). This
+   code explicitly requests
    `https://management.azure.com/.default` and
    `https://api.loganalytics.io/.default` through its fixed
    `ManagedIdentityCredential`. It does not consume a pasted/injected token.
-   A verified saved Case03 Identity-tab setting is **not recorded** in this
-   guide; validate/read back the actual target runtime's setting with the
-   operator rather than claim a historical preset.
-6. In **Test playground**, test a short, focused `query` first, then a real report.
+   In today's portal (checked on 16 November 2026) turning the switch on
+   inserts four `# Azure Identity Authentication` lines (`DefaultAzureCredential`
+   and an ARM token) at the top of the code, which this tool doesn't use and
+   which stay after you switch it off again: delete them if that happens.
+   Do not copy Case01's earlier Graph preset or another case's saved
+   `authEnabled` metadata. A verified saved Case03 Identity-tab setting is
+   **not recorded** in this guide; read back the actual target runtime's
+   setting with the operator rather than claim a historical preset.
+6. In **Test playground** (one empty box per input; `limit` and `offset` say
+   *Enter int value*), test a short, focused `query` first, then a real report:
+   type the values of the JSON examples below in the matching boxes and leave
+   the other boxes empty (their defaults apply).
    Confirm source status, units, missing values, exact counts and complete JSON.
    **Test runs the collector**, not just a syntax check: with a configured
    identity it makes the documented read requests and can incur normal
    SRE/query usage. Placeholders fail before authentication; 403/empty/partial
    evidence does not grant permission to change monitoring or IAM.
-7. Select **Create tool** only after the approved test, then reopen it and
+7. **Create tool** stays grey until you run **Test**. Select it only after the
+   approved test, then reopen the tool (**Agent Canvas > Table view** > in the
+   *Tools & skills* card, **Python tools** > search > click the name; the pencil
+   opens **Edit Python tool**) and
    read back complete code, **all 16 inputs**, types/defaults, timeout and
    actual Identity configuration. A syntax check alone
    does not verify access or file publication.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |---|---|---|---|
-| `1.1` | **Builder > Agent Canvas > Create > Tool > Python tool > Code** (`Tool name` & `Description`) | Name: `infrastructure-operations-report`; paste the read-only description | Saved tool name is exact; **Generate / Refine** was not used to rewrite the collector |
-| `1.2` | **Code** editor & **Timeout** | Paste the **entire** privately configured `generate-infrastructure-operations-report.py` (`SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `LOG_WORKSPACE_IDS`, `ARC_ADMIN_BASELINES`); set timeout `900` | Whole-file paste (including `REPORT_HTML` and Codec 2.0) and `900` second timeout persist on reopen; subscription has `<= 500` total resources across the 15 supported types before local filters |
-| `1.3` | **Parameters** (16 rows matching `tool-parameters.schema.json`) | Configure all 16 inputs (`operation`..`offset`); select `int` in the SRE row editor for `limit` (`20`) and `offset` (`0`) while keeping `"integer"` in JSON Schema | Reopened tool lists all 16 typed parameters, exact enums, and defaults (`report`, `summary`, `all`, `auto`, `20`, `0`) |
-| `1.4` | **Identity** tab & **Test playground** -> **Create tool** | Keep explicit `ManagedIdentityCredential(client_id=...)` in code; run the focused `query` and `report` test payloads, then click **Create tool** and reopen | Test returns structured JSON (`<= 3500` bytes) without `configuration_required` or `scope_too_large`; reopened tool matches the saved private file |
+| `1.1` | **Build + configure > Agent Canvas > Create ▾ > Tool › > Python tool > Code** (`Tool Name` & `Description`) | Name: `infrastructure-operations-report`; paste the read-only description | Saved tool name is exact; **Generate / Refine** was not used to rewrite the collector |
+| `1.2` | **Code** editor & **Timeout (seconds)** | Paste the **entire** privately configured `generate-infrastructure-operations-report.py` (`SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `LOG_WORKSPACE_IDS`, `ARC_ADMIN_BASELINES`); set timeout `900` | Whole-file paste (including `REPORT_HTML` and Codec 2.0) and `900` second timeout persist on reopen; subscription has `<= 500` total resources across the 15 supported types before local filters |
+| `1.3` | **Parameters** (16 inputs read from `main()`; no parameter editor) | Nothing to configure: check the 16 boxes in **Test playground** (`operation`..`offset`) and, after saving, the tool's **Query parameters** list; `limit` (`20`) and `offset` (`0`) are `int` there while JSON Schema keeps `"integer"` | Reopened tool lists all 16 typed parameters; enums and defaults (`report`, `summary`, `all`, `auto`, `20`, `0`) are enforced by `main()` |
+| `1.4` | **Identity** tab & **Test playground** -> **Create tool** | **Enable Azure Identity** Off; keep explicit `ManagedIdentityCredential(client_id=...)` in code; run the focused `query` and `report` test payloads, then click **Create tool** (grey until **Test**) and reopen | Test returns structured JSON (`<= 3500` bytes) without `configuration_required` or `scope_too_large`; reopened tool matches the saved private file |
 
 ```json
 {"operation":"query","view":"metrics","hosting":"arc","resource_name":"<ARC_RESOURCE_NAME>","period":"last_2h"}
@@ -735,9 +758,12 @@ The authoritative [schema](tool-parameters.schema.json) and `main()` agree:
 | `offset` | `integer` (schema), `int` (Python) / `0` | 0..50,000 inclusive; fresh-collection offset, not a stable stored cursor |
 
 **Editor type mapping:** keep standard JSON Schema **`integer`** in the file.
-In a row-based SRE parameter editor that uses Python/runtime type labels,
-select **`int`** for `limit` and `offset`. Supply numeric JSON values such as
-`20` and `0`, not quoted strings; do not rewrite the schema type to `int`.
+Today's dialog has no parameter editor: the types come from the `int`
+annotations in `main()`, and the saved tool's **Query parameters** list shows
+**`int`** for `limit` and `offset`. Earlier portal versions with a row-based
+parameter editor used the same Python/runtime labels: select **`int`** there.
+Supply numeric JSON values such as `20` and `0`, not quoted strings; do not
+rewrite the schema type to `int`.
 
 Supported `metric` values, in addition to `all`:
 
@@ -977,19 +1003,26 @@ to verify the header and actual downloads.
 
 ## Step 2 - Create the skill
 
-1. Open **Build + setup / Builder > Agent Canvas > Create > Skill**.
-2. Name it **`infra-ops-live`**. Use a description such as
+1. Open **Build + configure > Agent Canvas > Create ▾** (the arrow) **> Skill**.
+2. Type the **Name** **`infra-ops-live`** and fill the **Description** (select
+   **Edit**, type, then **Save**) with a description such as
    `Read-only, source-qualified infrastructure reports and bounded questions
    for the fixed approved Arc/Azure scope. No execution or remediation.`
-3. In **Choose tools**, search for and attach **only**
-   `infrastructure-operations-report`.
-4. Open/download
+   The `SKILL.md` editor shows a front matter generated from these fields.
+3. Open/download
    [`skills/infra-ops-live/SKILL.md`](skills/infra-ops-live/SKILL.md) and paste its
-   **complete content** into the skill body. Preserve portal-generated
-   name/description/tool front matter if present; replace only the body
-   placeholder, not the reviewed instructions with generated prose.
-5. Select **Create**, reopen the saved skill and verify its actual complete
-   file and one attached tool.
+   **complete content** into the skill body. The file has no front matter of
+   its own: preserve the portal-generated name/description front matter and
+   replace only the body placeholder (`<!-- Add your skill instructions here -->`),
+   not the reviewed instructions with generated prose.
+4. **Then** select **Choose tools**, search for
+   `infrastructure-operations-report`, expand **PythonFunctionTool (n)** and
+   tick **only** that tool (never the group checkbox), then **Close panel**.
+   Check its chip and the `tools:` line added to the front matter. Pasting over
+   the whole editor after this step removes `tools:` and the chip.
+5. Select **Create**, reopen the saved skill (**Agent Canvas > Table view** > in
+   the *Tools & skills* card, **Skills** > search > click the name) and verify
+   its actual complete file and one attached tool.
 
 The operator load script is not a skill asset or a tool. Preserve the skill's
 distinctions between native alerts, local flags, current health, windowed
@@ -1000,21 +1033,25 @@ A saved document alone is not evidence that the specialist selected it.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |---|---|---|---|
-| `2.1` | **Builder > Agent Canvas > Create > Skill** (`Name` & `Description`) | Name: `infra-ops-live`; enter the read-only Arc/Azure description | Skill appears under **Skills** as `infra-ops-live` |
-| `2.2` | **Choose tools** picker | Attach **only** `infrastructure-operations-report` | Reopened skill shows exactly 1 attached tool (`infrastructure-operations-report`) and never `controlled-cpu-load.py` or a shell tool |
-| `2.3` | **Skill body (`SKILL.md`)** -> **Create** | Paste the complete body of [`skills/infra-ops-live/SKILL.md`](skills/infra-ops-live/SKILL.md) below the portal-generated YAML frontmatter | Reopened `SKILL.md` retains both the frontmatter and the full 18-rule interpretation contract intact |
+| `2.1` | **Build + configure > Agent Canvas > Create ▾ > Skill** (`Name` & `Description`) | Name: `infra-ops-live`; enter the read-only Arc/Azure description | Skill appears under **Table view > Skills** as `infra-ops-live` |
+| `2.2` | **Skill body (`SKILL.md`)** | Paste the complete body of [`skills/infra-ops-live/SKILL.md`](skills/infra-ops-live/SKILL.md) below the portal-generated YAML frontmatter | Reopened `SKILL.md` retains both the frontmatter and the full 18-rule interpretation contract intact |
+| `2.3` | **Choose tools** picker -> **Create** | **After** pasting: attach **only** `infrastructure-operations-report` (expand **PythonFunctionTool (n)**, tick the tool, **Close panel**), then **Create** | Reopened skill shows exactly 1 attached tool (`infrastructure-operations-report`) and never `controlled-cpu-load.py` or a shell tool |
 
 ## Step 3 - Restrict the subagent
 
-1. Open **Agent Canvas > Create > Custom Agent** and set **Custom agent name**
-   to **`infra-ops-live`**.
+1. In **Agent Canvas**, select **Create** (the button opens **Create a custom
+   agent**; **Create ▾ > Custom agent** is the same dialog) and set **Custom
+   agent name** to **`infra-ops-live`**.
 2. For **Instructions**, paste the complete **`infra-ops-live`: copy-ready
    instructions** block from
    [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md),
    not the later demonstration questions.
-3. In **Choose skills**, select **only `infra-ops-live`**. In **Choose tools**,
-   select **only `infrastructure-operations-report`**.
-4. Review, select **Create**, then reopen the saved specialist and verify
+3. In **Choose skills**, filter and tick **only `infra-ops-live`**, then
+   **Close panel**. In **Choose tools**, search, expand **PythonFunctionTool
+   (n)** and tick **only `infrastructure-operations-report`**, then **Close panel**.
+4. Review the two chips, select **Create**, then reopen the saved specialist
+   (**Table view** > in the *Agents* card, **Custom agents** > search > click
+   the name; the panel shows *Tools · 1*, the tool and the skill) and verify
    instructions plus both explicit selections.
 
 Do not leave **Choose tools** empty: some portal versions then inherit all
@@ -1027,7 +1064,7 @@ operator CPU script, inherited shell or hidden remedial capability.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |---|---|---|---|
-| `3.1` | **Builder > Agent Canvas > Create > Custom Agent** (`Custom agent name` & `Instructions`) | Name: `infra-ops-live`; paste the complete **`infra-ops-live`: copy-ready instructions** block from [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Reopened specialist preserves the full restricted instruction text without demonstration prompts mixed in |
+| `3.1` | **Build + configure > Agent Canvas > Create** (or **Create ▾ > Custom agent**) (`Custom agent name` & `Instructions`) | Name: `infra-ops-live`; paste the complete **`infra-ops-live`: copy-ready instructions** block from [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Reopened specialist preserves the full restricted instruction text without demonstration prompts mixed in |
 | `3.2` | **Choose skills** picker | Explicitly select **only** `infra-ops-live` | Verify the exact selected skill **name** in the reopened saved form and effective policy (`allowedSkills: ["infra-ops-live"]`, `addSystemSkills=false`); never rely on the list summary badge |
 | `3.3` | **Choose tools** picker -> **Create** | Explicitly select **only** `infrastructure-operations-report` (never leave the picker empty) | Verify the exact selected tool **name** in the reopened saved form and effective policy (`tools: ["infrastructure-operations-report"]`, `disableDocumentRetrieval=true`); never rely on the list summary badge |
 
@@ -1039,8 +1076,9 @@ operator CPU script, inherited shell or hidden remedial capability.
 Copy-ready prompts and scoped JSON examples are in
 [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
 
-Open **New chat**, explicitly select **`infra-ops-live`** in the normal
-agent picker (`/agent` where supported), then paste:
+Open **New chat**, type `/agent`, pick **`infra-ops-live`** and check the chip
+**Agent: infra-ops-live** next to **+** (typing `@` no longer opens a picker),
+then paste:
 
 ```text
 Generate the real read-only infrastructure report for the last 24 hours,
@@ -1096,7 +1134,9 @@ The corresponding extension call is:
 ```
 
 Spanish (ES) copy-ready equivalents for the three normal-chat prompts above
-(matching [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)):
+(matching [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)).
+Select `infra-ops-live` with `/agent` first: typing `@` no longer opens a
+picker, so the leading `@infra-ops-live:` below is plain text and can be left out.
 
 - **24-hour full report (ES):**
 
@@ -1241,19 +1281,19 @@ day of that month. This distinction should remain visible when presenting the
 monthly report.
 
 Use [`monthly-task-prompt.md`](monthly-task-prompt.md). In **Automation >
-Create > Scheduled task**, or **Agent Canvas > Create > Trigger > Scheduled
-tasks**, enter:
+Create ▾ > Scheduled task**, or **Build + configure > Agent Canvas > Create ▾ >
+Trigger › > Scheduled tasks**, enter:
 
 | Field | Value |
 |---|---|
 | Task name | `Monthly infrastructure operations review` |
-| Response custom agent / subagent | `infra-ops-live` |
-| Frequency | **Custom cron** |
+| Response subagent | `infra-ops-live` |
+| Frequency | **Custom cron** (the list starts at **Daily**) |
 | Cron expression (UTC) | `0 9 1 * *` |
 | Evidence | One **previous complete UTC calendar month**, both Arc and Azure |
 | Start on / model tier | Customer-approved activation date and usage policy; not a universal lab default |
-| Agent autonomy | Autonomous only for an approved unattended restricted read-only task; Review can pause |
-| Thread | A separate execution thread where offered; not a continuation that adds hidden queries |
+| Agent autonomy level | Autonomous only for an approved unattended restricted read-only task; Review can pause |
+| Message grouping for updates | **New chat thread for each run** (the default is *Use same chat thread*); not a continuation that adds hidden queries |
 
 Copy the **whole Task details** block from the linked file. Its complete
 one-call/file/error contract is reproduced here:
@@ -1293,11 +1333,15 @@ start/stop/resize, remediation, instrumentation, permissions or other workflows.
 
 This means day 1 at 09:00 UTC, not a local-time schedule that follows daylight
 saving changes. The normal time picker can display browser-local time but saves
-a fixed UTC schedule. Reopen the saved task and verify enabled state, responder,
-complete prompt, activation date, **next UTC run** and customer model/run mode.
+a fixed UTC schedule. Reopen the saved task (**Automation** > search > tick
+only this task > **Edit**; **Cancel** if nothing changes) and verify enabled
+state, responder, complete prompt, activation date, **next UTC run** and
+customer model/run mode.
 
-For a **separately approved manual acceptance run**, select only this task's checkbox in **Automation** and the enabled
-toolbar **Run now**. Open the real execution thread and verify the Python
+For a **separately approved manual acceptance run**, search **Automation** for the
+task name, select only this task's checkbox and the enabled
+toolbar **Run now** (clicking the task name opens its run history, where **Run
+task now** does the same). Open the real execution thread and verify the Python
 result, all four actual downloads, report interactions and one grounded
 question. **Success** on the automation row is not proof of completed Python or
 published files. A **No thread found** view also needs an explicit thread/file
@@ -1320,25 +1364,32 @@ running or connected machines. The screenshot re-renders that snapshot with the
 current report design; names and identifiers are pseudonymized.
 Current platform state and missing portions of that month remain qualified.
 
-![Actual Automation controls: select this task only (1), then Run now (2)](images/infra03-monthly-run-now.png)
+![Automation in today's portal: search, tick only this task, Run now](images/newui-automation-list.png)
 
-Select only the scenario's checkbox (1), then **Run now** (2). This cropped
-actual UI example is from the earlier **11:39 UTC** run and shows three history
-entries; unrelated tasks are excluded from the image. The final verified
+Today's portal (16 November 2026), captured without clicking **Run now**:
+search by the task name (1), tick only this task (2), then **Run now** (3).
+Other automations are hidden by the search. The lab task shown keeps the
+guide's name; its local-time *Details* and run counts are lab state, not values
+to copy. The earlier cropped capture of the same controls, from the
+**11:39 UTC** run with three history entries, is
+[kept for reference](images/infra03-monthly-run-now.png); the final verified
 11:54:38 execution is the **fourth** retained entry, not a replacement of the
 earlier failures/retries.
 
-![Actual monthly native downloads, lab names pseudonymized: HTML (1), resources CSV (2), signals CSV (3) and complete JSON (4)](images/infra03-monthly-four-downloads.png)
+![Actual monthly native downloads, lab names pseudonymized: HTML (1), resources CSV (2), signals CSV (3) and complete JSON (4) (earlier run; today's portal labels may differ)](images/infra03-monthly-four-downloads.png)
 
 This real native-widget example is from the **11:39:54 UTC** run after the
-sharing-contract fix, before the final package-image/mobile corrections.
+sharing-contract fix, before the final package-image/mobile corrections
+(earlier run; today's portal labels may differ; a read-only capture cannot
+reproduce a run's downloads).
 The final implementation independently delivered the same four formats in
 **50.618 seconds** with HTTP 200 downloads; its exact final sizes and
 source/coverage facts are recorded in [Verified lab outcomes](#verified-lab-outcomes).
 The screenshot is not used as proof of the later source version.
 
 [Full-resolution monthly window](images/infra03-monthly-overview.png) ·
-[Run now controls](images/infra03-monthly-run-now.png) ·
+[Run now controls (today)](images/newui-automation-list.png) ·
+[Run now controls (October)](images/infra03-monthly-run-now.png) ·
 [Four native downloads](images/infra03-monthly-four-downloads.png).
 
 ## Step 6 - Real alert to subagent demonstration
@@ -1527,15 +1578,17 @@ to make a demo more dramatic.
 7. Generate a fresh report/query for the demonstration window and show the
    actual chronology. A manual report or replayed JSON is not automatic proof.
 
-![Actual native automatic incident, lab names pseudonymized: the generated Sev3 thread (1) and completed read-only investigation (2)](images/infra03-native-automatic-investigation.png)
+![Actual native automatic incident, lab names pseudonymized: the generated Sev3 thread (1) and completed read-only investigation (2) (earlier run; today's portal labels may differ)](images/infra03-native-automatic-investigation.png)
 
 The native rule's real fire created this incident thread (1); its response plan
 selected the infrastructure specialist. The completed response (2) cites actual
 CPU above the 65% teaching threshold and states that **no remediation was
 performed**. It also distinguishes a completed investigation from an external
 incident update. Native alert resolution and restoration were verified later.
+*(October incident thread produced by a real alert, kept as dated evidence;
+today's portal labels may differ. A read-only capture cannot reproduce it.)*
 
-![Actual Arc automatic incident, lab names pseudonymized: generated Sev3 thread (1), source-qualified read-only completion (2)](images/infra03-arc-automatic-investigation.png)
+![Actual Arc automatic incident, lab names pseudonymized: generated Sev3 thread (1), source-qualified read-only completion (2) (earlier run; today's portal labels may differ)](images/infra03-arc-automatic-investigation.png)
 
 The Arc rule separately created this genuine automatic incident (1), and the
 same specialist completed its source-qualified investigation (2). It does not
@@ -1694,7 +1747,7 @@ download receipts.
 | Observation | Interpretation / next check |
 |---|---|
 | `configuration_required` / `subscription_scope_mismatch` | Check the monitored Enabled subscription/tenant and attached UAMI **Client ID**, not Object ID, hosting-subscription assumption or cached CLI context. Never substitute another identity. |
-| Portal creation/chat/task operation returns 403 | Verify the **user's** Author + Standard User roles on the SRE Agent resource. Builder/Owner/Contributor are not SRE data-action roles; do not broaden the reporting UAMI to fix portal access. |
+| Portal creation/chat/task operation returns 403 | Verify the **user's** Author + Standard User roles on the SRE Agent resource. An enabled **Build + configure** button, Owner or Contributor are not SRE data-action roles; do not broaden the reporting UAMI to fix portal access. |
 | The tool name is cut when you type it | Today's portal limits **Tool Name** to 36 characters, so the previous name `generate-infrastructure-operations-report` (41 characters) is cut to `generate-infrastructure-operations-r`. Name the tool `infrastructure-operations-report`. If you already saved a cut name, use exactly that saved name in the skill, the subagent instructions, **Choose tools** and the monthly task's **Task details**. |
 | `dependency_missing` / syntax error / disabled Test | Check declared packages, complete standalone paste, indentation, all 16 input types/defaults and saved code. No generated replacement or shell/install capability in the specialist. |
 | `invalid_parameter` / `unsupported_filter` / `invalid_window` | Use the exact schema and compatible view/state/severity/metric combination; custom dates require explicit offsets, a past positive interval and at most 31 days. |
@@ -1792,7 +1845,7 @@ configuration and each customer's still-required acceptance.
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent infra-ops-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent infra-ops-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. Typing `@` no longer opens a picker: with the **Agent: infra-ops-live** chip selected, the leading `@infra-ops-live` below is plain text and can be left out.
 
 ### 1. Full 24-Hour Infrastructure Operations Report (4 Files) / Informe Completo de Operaciones de 24h (4 Archivos)
 - **Castellano:**

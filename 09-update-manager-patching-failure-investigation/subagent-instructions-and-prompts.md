@@ -56,6 +56,8 @@ Do not run a second tool call or modify any Azure resource.
 
 ## Copy-ready on-demand chat prompts (Spanish & English)
 
+Open **New chat**, type `/agent`, select `patching-investigation-live` (chip **Agent: patching-investigation-live**), then paste a prompt without its leading `@patching-investigation-live` mention: typing `@` no longer opens a picker.
+
 ### 1. Full 30-day post-patching & failure investigation report (Spanish)
 
 ```text

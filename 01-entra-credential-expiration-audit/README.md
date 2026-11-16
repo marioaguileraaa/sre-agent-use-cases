@@ -182,10 +182,13 @@ and reads that identity's Graph tenant. A different monitored Azure
 subscription is not a way to select another Graph tenant. Step 1 must use the
 tenant containing the intended UAMI service principal.
 
-**Build + configure** (labelled **Builder** in the earlier screenshots) is a
-portal navigation menu, not a named role. The menu paths in this guide were
-checked against the portal on 16 November 2026; some screenshots show earlier
-labels. Author alone cannot chat or create scheduled tasks; Standard User alone
+**Build + configure** (labelled **Builder** in earlier portal versions) is a
+portal navigation menu, not a named role. The menu paths and the portal
+screenshots of the setup steps (`images/newui-*.png`) were checked and captured
+against the portal on 16 November 2026, without saving anything. Screenshots of
+real run results (Test result, chat answer, task run history) and the
+**Settings** image in Step 0 come from earlier runs; their labels can differ
+from today's portal. Author alone cannot chat or create scheduled tasks; Standard User alone
 cannot create custom agents. Azure Owner/Contributor are not substitutes for
 these SRE Agent data-action roles, even when the portal shows an enabled button.
 
@@ -341,9 +344,11 @@ Once sign-in succeeds, disconnect is attempted even if a later step fails.
 
 ### 2.1 Open the Python tool dialog
 
-In the SRE Agent portal select **Build + configure** (1) > **Agent Canvas** (2, under **Workflows**) > the **Create ▾** drop-down arrow (3) > **Tool ›** (4) > **Python tool** (5). The screenshot shows the earlier label **Builder** for (1). Use the arrow: the **Create** button itself opens the custom agent dialog.
+In the SRE Agent portal select **Build + configure** (1) > **Agent Canvas** (2, its first option) > the **Create ▾** drop-down arrow (3) > **Tool ›** (4) > **Python tool** (5). Use the arrow: the **Create** button itself opens the custom agent dialog.
 
-![Build + configure (earlier label: Builder) > Agent Canvas > Create > Tool > Python tool](images/step2-01-create-python-tool-menu.png)
+![Build + configure > Agent Canvas > Create ▾ > Tool > Python tool](images/newui-menu.png)
+
+**1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow next to **Create** (not the button) · **4** Tool › · **5** **Python tool**.
 
 ### 2.2 Code tab
 
@@ -352,9 +357,13 @@ You don't need the *Describe what the function should do / Generate* box on the 
 | # | Field | Value |
 |:---:|---|---|
 | 1 | **Tool Name** | `generate-entra-credential-expiration` |
-| 2 | **Description** | `Use this tool to audit Microsoft Entra application and service principal credential expirations when you need to identify expiring secrets and certificates, exclude managed identity service principals, and generate a self-contained HTML report. Returns report path, scan coverage, and credential status counts.` |
-| 3 | **Code** | The full content of [`generate-entra-credential-expiration.py`](generate-entra-credential-expiration.py), with your Client ID already set. Replace any existing code in the editor. |
-| – | **Timeout (seconds)** | Keep `120` (the default). Raise it only for very large tenants (the portal maximum is `900`). |
+| 2 | **Timeout (seconds)** | Keep `120` (the default). Raise it only for very large tenants (the portal maximum is `900`). |
+| 3 | **Description** | `Use this tool to audit Microsoft Entra application and service principal credential expirations when you need to identify expiring secrets and certificates, exclude managed identity service principals, and generate a self-contained HTML report. Returns report path, scan coverage, and credential status counts.` |
+| 4 | **Code** | The full content of [`generate-entra-credential-expiration.py`](generate-entra-credential-expiration.py), with your Client ID already set. Click in the editor, select all (`Ctrl+A`) and paste, so that it replaces any existing code. |
+| 5 | **Create tool** | Stays grey until you run **Test** on the **Test playground** tab (2.4). |
+
+There is no *Requirements* field and no parameter editor: the dialog reads the
+tool's inputs from `def main(...)` when you paste the code.
 
 The reviewed tool exposes **`main() -> dict` with no input parameters**; the
 playground parameter object is `{}`. There is no separate schema file or
@@ -375,11 +384,17 @@ large-tenant/throttling failures without claiming complete coverage.
 > [!NOTE]
 > **Tool Name** accepts at most **36 characters** in today's portal (checked on 16 November 2026: a longer name is cut at 36 characters as you type). `generate-entra-credential-expiration` is exactly 36 characters, so it fits. Keep this exact name: the skill and the subagent below reference it.
 
-![Python tool – Code tab](images/step2-02-python-tool-code-tab.png)
+![Create a Python tool, Code tab](images/newui-code.png)
+
+**1** *Tool Name* `generate-entra-credential-expiration` (36 characters max.; the field is narrow and doesn't show the whole name) · **2** *Timeout (seconds)* `120` · **3** *Description* · **4** editor: `Ctrl+A` and paste the whole `.py` (the top of the file is shown) · **5** *Create tool*, grey until you run **Test**.
 
 ### 2.3 Identity tab
 
 Leave **Enable Azure Identity** **Off** (the default) on the **Identity** tab. This tool doesn't need it.
+
+![Create a Python tool, Identity tab](images/newui-identity.png)
+
+**1** *Identity* tab · **2** *Enable Azure Identity*: leave it **Off**.
 
 > [!IMPORTANT]
 > The tool code gets its Microsoft Graph token **explicitly** with `ManagedIdentityCredential(client_id=…)`, using the agent identity that has the Graph permission. It doesn't depend on the Identity tab or on variables injected by the editor. Checked on 16 November 2026: with no Identity configuration, the tool returned complete Graph coverage, and the lab's saved Case01 tool runs with **Enable Azure Identity** Off.
@@ -396,22 +411,27 @@ AZURE_ARM_TOKEN = credential.get_token("https://management.azure.com/.default").
 If that happens, turn the switch off, go back to the **Code** tab and delete those four lines, so that the code starts again with the `# generate-entra-credential-expiration` comment.
 
 > [!NOTE]
-> **Earlier versions of this guide** turned on **Enable Azure Identity** (2) on the **Identity** tab (1), added the `https://graph.microsoft.com/.default` scope (3) and removed the default **ARM** scope (4). The screenshot below shows that earlier, optional configuration. It isn't needed, because the code authenticates on its own.
->
-> ![Python tool – Identity tab with the Microsoft Graph scope (earlier optional configuration)](images/step2-03-python-tool-identity-tab.png)
+> **Earlier versions of this guide** turned on **Enable Azure Identity** on the **Identity** tab, added the `https://graph.microsoft.com/.default` scope and removed the default **ARM** scope ([historical screenshot of that earlier, optional configuration](images/step2-03-python-tool-identity-tab.png)). It isn't needed, because the code authenticates on its own, and today's tab only has the **Enable Azure Identity** switch shown above.
 
 ### 2.4 Test playground tab and create
 
-1. Open the **Test playground** tab (1). The tool has no input parameters (`{}`), so no parameter boxes appear.
-2. Select **Test** (2). **Create tool** stays grey until you have run **Test** on this tab (the dialog says *Test the tool before creating*); a grey **Create tool** is not a missing role.
-3. Check the result (3): **Function test succeeded** and a JSON with `report_path`, `"coverage": {"status": "complete", "pagination_completed": true, …}`, the number of applications, service principals and excluded managed identities, and `counts_by_status`.
-4. Select **Create tool** (4).
+1. Open the **Test playground** tab (1). The tool has no input parameters (`{}`), so no parameter boxes appear: there is only the **Test** button (2).
+2. Select **Test** (2). **Create tool** (3) stays grey until you have run **Test** on this tab (the tab says *Test the tool before creating*); a grey **Create tool** is not a missing role.
+3. Check the result: **Function test succeeded** and a JSON with `report_path`, `"coverage": {"status": "complete", "pagination_completed": true, …}`, the number of applications, service principals and excluded managed identities, and `counts_by_status`.
+4. Select **Create tool** (3).
 
-![Python tool – Test playground](images/step2-04-python-tool-test-playground.png)
+![Create a Python tool, Test playground tab](images/newui-playground.png)
 
-[Full-resolution Code](images/step2-02-python-tool-code-tab.png) ·
-[Identity (earlier optional configuration)](images/step2-03-python-tool-identity-tab.png) ·
-[Playground](images/step2-04-python-tool-test-playground.png).
+**1** *Test playground* tab · **2** **Test** (not clicked in the screenshot) · **3** *Create tool*, grey until you run **Test**.
+
+The result of a real **Test** looks like this (earlier run; today's portal labels may differ). Its callouts follow the earlier version of this step: (1) tab, (2) **Test**, (3) result, (4) **Create tool**.
+
+![Python tool – Test playground with the result of a real Test (earlier run; today's portal labels may differ)](images/step2-04-python-tool-test-playground.png)
+
+[Full-resolution Code](images/newui-code.png) ·
+[Identity](images/newui-identity.png) ·
+[Test playground](images/newui-playground.png) ·
+[Earlier Test result](images/step2-04-python-tool-test-playground.png).
 
 **Expected results of the test**
 
@@ -419,7 +439,9 @@ If that happens, turn the switch off, go back to the **Code** tab and delete tho
 - On any authentication, authorization or pagination failure, the tool returns `coverage: partial` and **does not** produce an incomplete report as if it were valid.
 - If the placeholder was not replaced, the tool returns `Configuration required: set MANAGED_IDENTITY_CLIENT_ID …` with `coverage: partial`. Go back to Step 0.
 
-**Checkpoint:** reopen the saved tool and compare its complete configured
+**Checkpoint:** reopen the saved tool (**Agent Canvas > Table view** > in the
+*Tools & skills* card, **Python tools** > search for the name > click it; the
+pencil opens **Edit Python tool**) and compare its complete configured
 source (with no inserted `# Azure Identity Authentication` lines at the top),
 name, zero inputs, **Enable Azure Identity** Off and timeout. Do not use
 Generate/Refine or a clipped code/image transcription in place of the supplied
@@ -434,34 +456,52 @@ The skill fixes **what** the agent must do and **how**: scope, validation, class
 
 ### 3.1 Open the skill dialog
 
-**Build + configure > Agent Canvas** (1) > the **Create ▾** drop-down arrow (2) > **Skill** (3). The screenshot shows the earlier label **Builder**.
+**Build + configure > Agent Canvas** > the **Create ▾** drop-down arrow (1) > **Skill** (2).
 *(You can also use **Build + configure > Extensions > Skill builder > Create skill**.)*
 
-![Build + configure (earlier label: Builder) > Agent Canvas > Create > Skill](images/step3-01-create-skill-menu.png)
+![Agent Canvas > Create ▾ > Skill](images/newui-skill-menu.png)
 
-### 3.2 Attach the tool
+**1** the ▾ arrow next to **Create** (not the button) · **2** **Skill**.
 
-1. Select **Choose tools** (1).
-2. Search for `generate-entra` (2).
-3. Expand the **PythonFunctionTool (n)** group, tick only **generate-entra-credential-expiration** (3) and select **Close panel**. Don't tick the group checkbox or *Select all*: that selects every tool in the group.
+### 3.2 Name, description and SKILL.md
 
-![Create skill – Choose tools](images/step3-02-skill-choose-tools.png)
-
-Associate **only** this tool to the skill.
-
-### 3.3 Name, description and SKILL.md
+The **SKILL.md** editor starts with a front matter generated from the form
+(`name:`, `description:`) and the line `<!-- Add your skill instructions here -->`.
+Case01's `SKILL.md` has no front matter of its own, so fill in the form first
+and paste the file **below** the front matter:
 
 | # | Field | Value |
 |:---:|---|---|
 | 1 | **Name** | `entra-full-credential-inventory` |
 | 2 | **Description** (select **Edit**, type, then **Save**) | `Safe, read-only procedure to audit Microsoft Entra credential expiration for Applications and non-managed Service Principals.` |
-| 3 | **Tools** | `generate-entra-credential-expiration` (from 3.2) |
-| 4 | **SKILL.md** | The editor already contains front matter (`name`, `description`, `tools`) generated from the form. Paste the content of [`SKILL.md`](SKILL.md) **below** it, replacing the `<!-- Add your skill instructions here -->` line. Case01's `SKILL.md` has no front matter of its own, so `tools:` and the tool chip from 3.2 are kept. Don't select all and paste over the front matter: that removes `tools:` and the chip. |
-| 5 | **Create** | |
+| 3 | **SKILL.md** | In the editor, replace the `<!-- Add your skill instructions here -->` line with the content of [`SKILL.md`](SKILL.md). Don't select all and paste over the editor: that removes the `name:` and `description:` lines. |
+| 4 | **Choose tools** | Next step (3.3). |
 
-If the tool chip disappears, select the tool again with **Choose tools** (3.2) and check that `tools:` is back in the front matter before you select **Create**.
+![Create skill: name, description and SKILL.md below the front matter](images/newui-skill.png)
 
-![Create skill – completed form](images/step3-03-skill-form-completed.png)
+**1** *Name* · **2** *Description* (**Edit**, type, **Save**) · **3** `SKILL.md`
+below the front matter · **4** *Choose tools*.
+
+### 3.3 Attach the tool
+
+1. Select **Choose tools** (4 in the previous image).
+2. Search for `generate-entra-credential-expiration` (1).
+3. Expand the **PythonFunctionTool (n)** group (2), tick only **generate-entra-credential-expiration** (3) and select **Close panel** (4). Don't tick the group checkbox or *Select all*: that selects every tool in the group.
+
+![Create skill – Choose tools](images/newui-skill-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only
+`generate-entra-credential-expiration` · **4** *Close panel*.
+
+Associate **only** this tool to the skill. Check the tool chip and the `tools:`
+line that **Choose tools** adds to the front matter, then select **Create**:
+
+![Create skill – ready to create](images/newui-skill-chip.png)
+
+**1** chip of `generate-entra-credential-expiration` · **2** `tools:` in the
+front matter · **3** **Create**.
+
+If the tool chip disappears (for example after pasting over the whole editor), select the tool again with **Choose tools** and check that `tools:` is back in the front matter before you select **Create**.
 
 **What the skill enforces**
 
@@ -478,9 +518,11 @@ Create the subagent **after** the tool has been tested successfully.
 
 ### 4.1 Open the custom agent dialog
 
-**Build + configure > Agent Canvas** (1) > the **Create ▾** drop-down arrow (2) > **Custom Agent** (3). The **Create** button itself opens the same **Create a custom agent** dialog. The screenshot shows the earlier label **Builder**.
+**Build + configure > Agent Canvas** > **Create** (1): the button itself opens **Create a custom agent**. The **Create ▾** drop-down arrow (2) > **Custom agent** (3) opens the same dialog.
 
-![Build + configure (earlier label: Builder) > Agent Canvas > Create > Custom Agent](images/step4-01-create-custom-agent-menu.png)
+![Agent Canvas > Create (or Create ▾ > Custom agent)](images/newui-agent-menu.png)
+
+**1** **Create** button: opens *Create a custom agent* · **2** the ▾ arrow · **3** *Custom agent* (same dialog).
 
 ### 4.2 Name and instructions
 
@@ -496,28 +538,36 @@ Create the subagent **after** the tool has been tested successfully.
    or run any remediation.
    ```
 
-![Create a custom agent – name and instructions](images/step4-02-custom-agent-name-instructions.png)
+![Create a custom agent – name and instructions](images/newui-agent.png)
+
+**1** *Custom agent name* · **2** *Instructions* (pasted) · **3** *Choose skills* · **4** *Choose tools*. Don't use *Refine with AI* or *View AI suggestions*.
 
 ### 4.3 Skills
 
-Select **Choose skills** (1), filter by `entra-full` (2) and select **entra-full-credential-inventory** (3). Close the panel.
+Select **Choose skills** (3 in the previous image), filter by `entra-full-credential-inventory` (1), tick only **entra-full-credential-inventory** (2) and select **Close panel** (3).
 
-![Create a custom agent – Choose skills](images/step4-03-custom-agent-choose-skills.png)
+![Create a custom agent – Choose skills](images/newui-agent-skills.png)
+
+**1** filter · **2** tick only this skill · **3** *Close panel*.
 
 ### 4.4 Tools
 
-Select **Choose tools** (1), search for `generate-entra` (2), expand **PythonFunctionTool (n)** and tick only **generate-entra-credential-expiration** (3). Close the panel.
+Select **Choose tools** (4 in the 4.2 image), search for `generate-entra-credential-expiration` (1), expand **PythonFunctionTool (n)** (2), tick only **generate-entra-credential-expiration** (3) and select **Close panel** (4).
 
-![Create a custom agent – Choose tools](images/step4-04-custom-agent-choose-tools.png)
+![Create a custom agent – Choose tools](images/newui-agent-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only this tool · **4** *Close panel*.
 
 > [!TIP]
 > By default a custom agent inherits all global skills and tools. Selecting them explicitly **overrides** the defaults, so this subagent can only use the read-only audit tool. That's least privilege by design.
 
 ### 4.5 Review and create
 
-Check that the skill (1) and the tool (2) are listed, and select **Create** (3).
+Check the skill chip (1) and the tool chip (2), and select **Create** (3).
 
-![Create a custom agent – review and Create](images/step4-05-custom-agent-create.png)
+![Create a custom agent – review and Create](images/newui-agent-chips.png)
+
+**1** chip of the skill `entra-full-credential-inventory` · **2** chip of the tool `generate-entra-credential-expiration` · **3** **Create**.
 
 | Field | Value |
 |---|---|
@@ -525,7 +575,9 @@ Check that the skill (1) and the tool (2) are listed, and select **Create** (3).
 | Skill | `entra-full-credential-inventory` |
 | Tool | `generate-entra-credential-expiration` |
 
-**Checkpoint:** reopen the saved subagent and verify the complete instructions,
+**Checkpoint:** reopen the saved subagent (**Agent Canvas > Table view** > in
+the *Agents* card, **Custom agents** > search for the name > click it; the
+panel shows *Tools · 1*, the tool and the skill) and verify the complete instructions,
 one selected skill and one selected tool. Neither an empty picker nor an
 existing-object screenshot is evidence that your newly created object has the
 right restriction. Do not add Graph grant, shell, generic Python or remediation
@@ -541,15 +593,24 @@ tools to make a failed audit pass.
 Before automating, test the subagent from a chat. The copy-ready test prompt is
 also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
 
-1. Select **New chat** (1).
-2. Type **/** in the message box, choose **/agent** (*Pick a subagent to assist you with tasks*) and select **`credential-monitor-full`**. The chip **Agent: credential-monitor-full** appears next to **+**. Typing `@` no longer opens a picker; the screenshot below shows the earlier `@credential-monitor-full:` mention (2). Skills also appear as commands in the **/** list: choose the subagent through **/agent**, not a skill command.
+1. Select **New chat**.
+2. Type **/** in the message box, choose **/agent** (*Pick a subagent to assist you with tasks*), type `credential-monitor-full` (1) and select **`credential-monitor-full`** in the list (2). The chip **Agent: credential-monitor-full** appears next to **+**. Typing `@` no longer opens a picker. Skills also appear as commands in the **/** list: choose the subagent through **/agent**, not a skill command.
+
+   ![New chat – /agent and the subagent name](images/newui-chat-pick.png)
+
+   **1** `/agent` and the subagent name in the message box · **2** pick `credential-monitor-full`.
+
 3. Paste the test prompt:
 
    ```text
    Run the full Microsoft Entra credential expiration audit and deliver the HTML report with the coverage and risk summary.
    ```
 
-4. Send it (3 in the historical image). Confirm the trace calls only
+   ![New chat – Agent chip and test prompt](images/newui-chat-ready.png)
+
+   **1** chip *Agent: credential-monitor-full* · **2** the prompt · **3** send (not clicked in the screenshot).
+
+4. Send it (3). Confirm the trace calls only
    `generate-entra-credential-expiration` with **no arguments**.
 
    **Spanish (ES) copy-ready prompt** (same single parameterless call):
@@ -569,13 +630,12 @@ also in [`subagent-instructions-and-prompts.md`](subagent-instructions-and-promp
      A partir del resultado de la auditoría en este hilo, resume los campos de cobertura (reference_utc, pagination_completed, applications_scanned, service_principals_scanned, managed_identities_excluded, credential_rows), indica si aplica Action required y explica qué filtros de estado debo seleccionar en el informe HTML descargado para revisar las prioridades inmediatas de rotación y las fechas UNKNOWN.
      ```
 
-![New chat – test prompt (earlier @ mention)](images/step5-01-chat-test-prompt.png)
-
 In the original lab run, the answer arrived in about a minute with the
 **coverage and counts by status** (1) and an actual **HTML download** (2).
-That timing is historical, not a customer timeout or delivery guarantee:
+That timing is historical, not a customer timeout or delivery guarantee
+(earlier run; today's portal labels may differ):
 
-![Chat – audit result with coverage, counts and report link](images/step5-02-chat-test-result.png)
+![Chat – audit result with coverage, counts and report link (earlier run; today's portal labels may differ)](images/step5-02-chat-test-result.png)
 
 The HTML reaches the chat through `report_url`: inside the SRE Agent runtime
 the tool returns it, and the subagent shows it unchanged as the download link
@@ -705,9 +765,11 @@ First search **Automation** for the customer's own
 match's owner, responder, prompt and schedule and reuse it if approved. Do not
 create a duplicate or edit another customer's/owner's task.
 
-Select **Automation** (1) > **Create** (2) > **Scheduled task** (3).
+Select **Automation** (1) > **Create ▾** (2) > **Scheduled task** (3).
 
-![Automation > Create > Scheduled task](images/step6-01-automation-create-scheduled-task.png)
+![Automation > Create ▾ > Scheduled task](images/newui-task-menu.png)
+
+**1** *Automation* (left menu) · **2** **Create ▾** · **3** *Scheduled task* (the other option is *HTTP trigger*).
 
 ### 6.2 Fill in the task
 
@@ -721,8 +783,8 @@ The canonical instructions, cron and monthly prompt are in
 | 3 | **Task details** | `Run the full Microsoft Entra credential expiration audit. Deliver the HTML report, coverage, risk counters and Action required when applicable.` |
 | 4 | **Frequency** | `Custom cron` (the list starts at **Daily**) |
 | 5 | **Cron expression (UTC)** | `0 9 1 * *` → day 1 of every month at 09:00 UTC |
-| – | **Message grouping for updates** | **New chat thread for each run** (the default is *Use same chat thread*) |
-| 6 | **Create task** | |
+| 6 | **Message grouping for updates** | **New chat thread for each run** (the default is *Use same chat thread*) |
+| 7 | **Create task** | |
 
 Copy-ready **Task details**, unchanged from the linked canonical prompt:
 
@@ -741,14 +803,19 @@ Set **Start on** and **Model tier** under customer activation/usage policy.
 **Reasoning**, **Fast Reasoning** and **Fast**); General Purpose was the
 illustrated lab choice, not a requirement. **Repeat until** (an optional end
 date) and **Set a run limit** (blank means no limit) can stay empty unless the
-customer wants the schedule to stop. The screenshot shows the default
-**Message grouping for updates**, *Use same chat thread*: choose **New chat
-thread for each run** instead, so that each monthly run has its own thread.
+customer wants the schedule to stop. Choose **New chat thread for each run** in
+**Message grouping for updates** (6) instead of the default *Use same chat
+thread*, so that each monthly run has its own thread.
 Use **Autonomous** only when unattended execution of this restricted read-only
 workflow is approved; **Review** can pause for human approval. Do not attach
 notification/remediation tools to this task.
 
-![Create scheduled task – completed form](images/step6-02-scheduled-task-form.png)
+![Create scheduled task – completed form](images/newui-task.png)
+
+**1** *Task name* · **2** *Response subagent* · **3** *Task details* ·
+**4** *Frequency* = *Custom cron* · **5** *Cron expression (UTC)* `0 9 1 * *` ·
+**6** *New chat thread for each run* · **7** **Create task** (not clicked in the
+screenshot).
 
 > [!TIP]
 > Instead of *Custom cron* you can choose **Monthly**, *Day of month* `1` and a *Time of day*. That picker displays the browser's time zone but the schedule is stored at a fixed UTC time; local wall-clock time can shift after DST. Prefer the explicit **Custom cron (UTC)** above and verify the saved **next UTC run** and activation date.
@@ -756,11 +823,14 @@ notification/remediation tools to this task.
 ### 6.3 Validate the task
 
 Reopen the task and verify its enabled state, responder, complete prompt,
-cron and next UTC run. A schedule definition is not proof it fired.
+cron and next UTC run (**Automation** > search for the name > tick only its
+checkbox > **Edit** opens **Edit scheduled task** with the saved values; close
+it with **Cancel** if you change nothing). A schedule definition is not proof it fired.
 
 With separate approval for the acceptance run, select only this task's
-checkbox in **Automation > Run now**, or open the task and select
-**Run task now** (2 in the image). Open run history (1) and the actual
+checkbox in **Automation > Run now**, or open the task (click its name) and select
+**Run task now** (2 in the earlier screenshot below). The same page shows the
+run history (1); open the actual
 **thread** (4), inspect the audit call, UTC reference, coverage/counts and
 download the HTML. Do not run it merely to reproduce a screenshot.
 
@@ -769,9 +839,9 @@ and file delivery completed. **No thread found**, a paused Review run or a
 missing/broken HTML link remains unaccepted until the real outcome is checked.
 Manual acceptance proves that execution, not a future calendar trigger.
 
-![Scheduled task – run history](images/step6-03-scheduled-task-runs.png)
+![Scheduled task – run history (earlier run; today's portal labels may differ)](images/step6-03-scheduled-task-runs.png)
 
-[Full-resolution task form](images/step6-02-scheduled-task-form.png) ·
+[Full-resolution task form](images/newui-task.png) ·
 [Historical run history](images/step6-03-scheduled-task-runs.png).
 
 ---

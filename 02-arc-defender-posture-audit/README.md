@@ -222,7 +222,7 @@ score, remediation execution or unverified mitigation is invented.
 
 ## Prerequisites
 
-These are **separate permission and readiness checks**, not one "Builder"
+These are **separate permission and readiness checks**, not one "Build + configure"
 permission. Have their owners confirm them before the session.
 
 | Requirement | Who / scope | What must be ready |
@@ -237,7 +237,7 @@ permission. Have their owners confirm them before the session.
 | Runtime packages/network/storage | Customer's SRE execution environment | `requests>=2.31,<3` and `azure-identity>=1.16,<2` for LIVE, runtime-available UAMI authentication, outbound public ARM access and a writable guarded artifact directory. SIMULATED uses the standard library only. |
 | Download review | Customer's operator | Permission to download/open security evidence, a current browser that can execute the self-contained report locally, and an approved evidence retention location. |
 
-**Builder** is a portal navigation label, not a named role. Author alone cannot
+**Build + configure** (formerly **Builder**) is a portal navigation menu, not a named role. Author alone cannot
 chat or create tasks; Standard User alone cannot create custom agents. Azure
 Owner/Contributor do not replace SRE Agent data-action roles. These user roles
 are separate from the reporting UAMI's subscription reads; no case 01 Graph
@@ -289,7 +289,7 @@ controlled installation instead of mixing files downloaded on different dates.
 | [`monthly-task-prompt.md`](monthly-task-prompt.md) | Canonical task name, responder, cron and prompt. |
 | [`requirements.txt`](requirements.txt) | LIVE dependencies: requests and azure-identity. |
 | [`tests/`](tests/) | Offline source, schema, scope, risk, graph, encoding and exact transport-budget tests. |
-| [`images/`](images/) | 25 portal/report captures: historical portal/chat captures with neutralized names and sanitized report renders. The [catalogue](#screenshot-catalogue) identifies general LIVE, older Arc-only LIVE and SIMULATED images separately. |
+| [`images/`](images/) | 49 portal/report captures: 24 `newui-*` captures of today's portal (16 November 2026, read-only), 17 historical portal/chat captures with neutralized names and 8 sanitized report renders. The [catalogue](#screenshot-catalogue) identifies today's portal, general LIVE, older Arc-only LIVE and SIMULATED images separately. |
 | [`evidence/linux-mde-verification.json`](evidence/linux-mde-verification.json) | Historical supplementary checks of two lab Linux hosts, not a live fleet-health API. |
 
 The stable scenario folder/README URL is retained. The old Python filename
@@ -314,11 +314,15 @@ green logo theme. No external script/font/logo is fetched by either report.
    Do not infer the target from your last CLI login or the agent's host
    subscription. This tool monitors **one fixed subscription**, not a tenant,
    management group, cross-subscription estate or arbitrary chat-selected scope.
-2. Open the customer's agent in the [SRE Agent portal](https://sre.azure.com).
-   Go to **Settings > Azure settings**. In **Managed Identity**, select
-   **Go to Identity**, then open the assigned user-assigned identity in the
-   Azure portal. Older portal screenshots may instead show **Settings > Basics**;
-   use the current identity page, not an unrelated similarly named `id-*` resource.
+2. Find the runtime identity in the [Azure portal](https://portal.azure.com):
+   open the agent's resource group and the **Managed Identity** resource whose
+   name starts with `id-` (the user-assigned identity created with the agent),
+   or search **Managed Identities** for it. Today's SRE Agent portal has no
+   **Settings** entry in the agent menu (checked on 16 November 2026); older
+   versions of this guide opened **Settings > Azure settings > Managed
+   Identity > Go to Identity** instead. Use the identity attached to this
+   agent, not an unrelated similarly named `id-*` resource. With Azure CLI:
+   `az identity show --name <IDENTITY_NAME> --resource-group <RESOURCE_GROUP> --query clientId -o tsv`.
 3. On that managed identity's **Overview**, record the **Client ID** and the
    **Object (principal) ID** privately. Cross-check the identity's resource
    name, host subscription/resource group and assignment to this exact agent.
@@ -519,15 +523,18 @@ LIVE file, need the private inspiration PDF, or require any Azure dependency.
 
 ### 1.2 Open the creation dialog and fill the Code tab
 
-Select **Builder** (1), or **Build + setup** in newer navigation, >
-**Agent Canvas** (2) > **Create** drop-down (3) > **Tool** (4) >
-**Python tool** (5). Use the creation flow even if no objects exist yet.
+Select **Build + configure** (1, called **Builder** in earlier portal versions)
+> **Agent Canvas** (2, its first option) > the **Create ▾** drop-down arrow (3)
+> **Tool ›** (4) > **Python tool** (5). Use the arrow: the **Create** button
+itself opens the custom agent dialog. Use the creation flow even if no objects
+exist yet.
 
-![Actual Python creation menu, unchanged by the scope revision](images/step1-01-create-python-tool-menu.png)
+![Build + configure > Agent Canvas > Create ▾ > Tool > Python tool](images/newui-menu.png)
 
-*Historical portal menu: the numbered path opens a new Python tool. The
-background's unrelated agent/global tools and auto-assignment banner are not
-part of this setup. [Open full resolution](images/step1-01-create-python-tool-menu.png).*
+*Today's portal (16 November 2026): **1** Build + configure · **2** Agent Canvas ·
+**3** the ▾ arrow next to **Create** (not the button) · **4** Tool › ·
+**5** **Python tool**. The blurred background objects are not part of this setup.
+[Open full resolution](images/newui-menu.png).*
 
 Use **Code**, not the description-to-code **Generate** action: the reviewed
 implementation already exists. Replace the starter editor contents with the
@@ -543,13 +550,26 @@ Generating/refining it with AI would create a different implementation.
 
 Keep these exact names because they match the runtime bindings. Today's portal
 limits **Tool Name** to **36 characters** (checked on 16 November 2026; a longer
-name is cut as you type). Both names fit: 30 and 28 characters.
+name is cut as you type). Both names fit: 30 and 28 characters. There is no
+*Requirements* field and no parameter editor: the dialog reads the 15 inputs
+from the typed `def main(...)` when you paste the code.
 
-![Actual Python dialog: Code, Test playground and Identity tabs](images/step1-02-python-tool-tabs.png)
+![Create a Python tool, Code tab with the LIVE tool](images/newui-code.png)
 
-*Historical empty creation form: (1) Code, (2) Test playground, (3) Identity.
-It shows the portal's `120`-second default, not a saved LIVE configuration.
-[Open full resolution](images/step1-02-python-tool-tabs.png).*
+*LIVE tool, Code tab: **1** *Tool Name* `generate-defender-cloud-report` (36
+characters max.; the narrow field doesn't show the whole name) · **2** *Timeout
+(seconds)* `240` (default 120) · **3** *Description* · **4** editor: `Ctrl+A` and
+paste the whole `.py` (top of the file shown, with the three configuration
+placeholders still unset in this read-only capture) · **5** *Create tool*, grey
+until you run **Test** on the Test playground tab.
+[Open full resolution](images/newui-code.png).*
+
+![Create a Python tool, Code tab with the optional SIMULATED tool](images/newui-code-simulate-arc-defender-retail.png)
+
+*Optional SIMULATED tool: **1** `simulate-arc-defender-retail` · **2** `120` ·
+**3** its description · **4** the unchanged `simulate-arc-defender-retail.py` ·
+**5** *Create tool*, grey until **Test**.
+[Open full resolution](images/newui-code-simulate-arc-defender-retail.png).*
 
 **Timeout is an editor setting, not a `main` parameter.** The retained
 13 October LIVE configuration used `240` seconds; that is a historical saved
@@ -579,43 +599,70 @@ LIVE explicitly uses `ManagedIdentityCredential(client_id=...)` and requests
 `https://management.azure.com/.default`. Its prerequisites are the assigned
 runtime-available identity, correct Client ID, approved read access and a
 successful real SDK-backed test. It does not rely on injected token globals.
-For a new tool, review **Identity > Enable Azure Identity** and the **ARM**
-scope against the customer's approved runtime setup. If the form is enabled,
-keep only ARM for this case, not Graph, Key Vault or Storage data scopes.
+On the **Identity** tab, leave **Enable Azure Identity** **Off** (the default)
+for both tools: the LIVE code obtains its own ARM token and SIMULATED needs none.
+
+![Create a Python tool, Identity tab](images/newui-identity.png)
+
+*Today's Identity tab: **1** *Identity* tab · **2** *Enable Azure Identity*,
+left **Off**. [Open full resolution](images/newui-identity.png).*
+
+In today's portal (checked on 16 November 2026) the tab has only this switch.
+Turning it on inserts four lines at the top of the code (`# Azure Identity
+Authentication`, `DefaultAzureCredential` and an `AZURE_ARM_TOKEN` request) that
+this tool never uses and that **stay in the code even if you turn the switch
+off again**. If that happens, turn it off, delete those four lines in **Code**
+and test again. Older portal versions showed scope settings on this tab; if
+yours does, keep only ARM for this case, not Graph, Key Vault or Storage data
+scopes.
 
 The retained 13 October service configuration stored `authEnabled=false` /
 `authScopes=null`; its codec deployment preserved these fields, and explicit
 SDK authentication still worked in the accepted normal chat. This is
-**case-specific historical evidence**, not a prescription that every runtime
-must disable identity or that a toggle enables an arbitrary UAMI. Do not infer
-access from that tab alone, copy another case's auth settings, inject a token,
-or change identity settings just to match the screenshot. Reopen and record
-what the target actually saved, then validate the SDK-backed call.
-SIMULATED has Azure Identity disabled and no credential code.
+**case-specific historical evidence** that the explicit SDK call does not need
+the toggle; it does not mean a toggle enables an arbitrary UAMI. Do not infer
+access from that tab alone, copy another case's auth settings or inject a token.
+Reopen and record what the target actually saved, then validate the SDK-backed
+call. SIMULATED has Azure Identity disabled and no credential code.
 
 ### 1.4 Test playground, save and reopen
 
-1. Open **Test playground**. Confirm that the parameters inferred from `main`
-   match the schema below; every parameter has a default. If the portal exposes
-   a parameter/schema editor, review the same names, types, defaults and
-   allowed values. For a saved SRE parameter list, `limit` and `offset` use
+1. Open **Test playground**. It shows one empty box per parameter inferred
+   from `main` (15 boxes; `limit` and `offset` say *Enter int value*); every
+   parameter has a default, so empty boxes keep the defaults. There is no
+   parameter/schema editor: names, types and defaults come from the code.
+   In the saved tool's **Query parameters** list, `limit` and `offset` use
    **`int`**, not the JSON Schema spelling `integer`; see the format distinction
    below. Source-side validation also rejects invalid combinations.
-2. For the **first authorized LIVE test**, use the report input below and keep
-   every other field at its default. This **does collect from Azure** and
-   creates the four report artifacts; do not run it before scope/access approval.
-3. Select **Test** once. Inspect the JSON, not just **Function test succeeded**.
+2. For the **first authorized LIVE test**, type `report` in **operation** and
+   leave every other box empty (the defaults). This **does collect from Azure**
+   and creates the four report artifacts; do not run it before scope/access approval.
+3. Select **Test** once. **Create tool** stays grey until you have run **Test**
+   on this tab (*Test the tool before creating*); a grey button is not a missing
+   role. Inspect the JSON, not just **Function test succeeded**.
    `status`, `provenance`, `reference_utc`, source availability and returned paths
    determine whether the case produced usable evidence.
 4. If the result is usable and its limits are understood, select **Create tool**.
-   On **Agent Canvas**, open the exact newly created tool, select **Edit**,
-   and reopen its source, inferred parameters/defaults, timeout, dependencies
-   and identity settings. Compare with your configured copy and the schema.
+   Reopen the exact newly created tool: **Agent Canvas > Table view** > in the
+   *Tools & skills* card, **Python tools** > search for the name > click it. The
+   panel shows the saved **Python Code** and **Query parameters**; the pencil
+   opens **Edit Python tool** with its source, timeout and **Identity** setting.
+   Compare with your configured copy and the schema.
    A downloaded file, generated form or another pre-existing lab object is not
    a saved-customer-configuration check.
 5. Check that there is exactly one intended LIVE tool with the canonical name.
    If it already existed, review ownership/revision before updating it rather
    than creating an unreviewed duplicate or deleting another user's object.
+
+![Test playground: operation = report, top of the 15 boxes](images/newui-playground.png)
+
+![Test playground: bottom of the 15 boxes, left empty](images/newui-playground-b.png)
+
+*Today's Test playground with the first LIVE test input, captured without
+clicking **Test**: **1** *Test playground* tab · **2** **Test** · **3**
+`operation` = `report` · **4** (second image: **2**) *Create tool*, grey until
+**Test**. The other 14 boxes stay empty, so their defaults apply.
+[Top](images/newui-playground.png) / [bottom](images/newui-playground-b.png) at full resolution.*
 
 ```json
 {"operation": "report"}
@@ -637,9 +684,10 @@ Section-specific CSV downloads are generated locally inside HTML.
 | SIMULATED success, if installed | Expect `provenance="SIMULATED"` and 200 fictional hosts. It validates only the offline fixture, not LIVE permissions or source readiness. |
 
 The following older playground image is **Arc-only LIVE V1**, not the current
-general tool's saved parameters or counts:
+general tool's saved parameters or counts (earlier run; today's portal labels
+may differ):
 
-![Historical LIVE V1 playground: successful function execution with deliberately partial MDE evidence](images/generate-arc-defender-report-test-playground.png)
+![Historical LIVE V1 playground: successful function execution with deliberately partial MDE evidence (earlier run; today's portal labels may differ)](images/generate-arc-defender-report-test-playground.png)
 
 *(1) Test playground; (2) execution banner. The visible JSON still says
 `partial`. Its old tool filename and eight-host scope must not be copied as
@@ -652,9 +700,9 @@ coverage. Normal-chat native file delivery is checked separately in Step 4.
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |:---:|---|---|---|
 | 1.1 | **Local private copy** of [`generate-defender-cloud-report.py`](generate-defender-cloud-report.py) | Set `SUBSCRIPTION_ID`, `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` to your 3 approved GUIDs | All 3 placeholders replaced; no `if __name__ == "__main__"` runner added |
-| 1.2 | **Builder > Agent Canvas > Create > Tool > Python tool > Code tab** | **Tool Name:** `generate-defender-cloud-report`<br>**Description:** see table above<br>**Code:** full configured `.py` file<br>**Timeout:** `240` | Reopen **Edit** and verify the complete file and 15 inferred parameters (`limit` and `offset` use `int` in the SRE portal row editor vs `integer` in JSON Schema) |
-| 1.3 | **Identity tab** | Review **Enable Azure Identity** and keep **ARM** (`https://management.azure.com/.default`) only when enabled (`Off` for SIMULATED) | Code explicitly authenticates with `ManagedIdentityCredential(client_id=...)`; no Graph/Key Vault/Storage scopes attached |
-| 1.4 | **Test playground tab > Create tool** | Input: `{ "operation": "report" }` → click **Test**, inspect JSON (`status`, `provenance`, 4 paths), then **Create tool** | Reopen the saved tool on **Agent Canvas** and confirm no duplicate tool name exists |
+| 1.2 | **Build + configure > Agent Canvas > Create ▾ > Tool › > Python tool > Code tab** | **Tool Name:** `generate-defender-cloud-report`<br>**Description:** see table above<br>**Code:** full configured `.py` file<br>**Timeout:** `240` | Reopen the saved tool (**Table view > Python tools**) and verify the complete file and 15 inferred parameters (`limit` and `offset` use `int` in the saved **Query parameters** list vs `integer` in JSON Schema) |
+| 1.3 | **Identity tab** | **Enable Azure Identity** **Off** (the default) for both tools | Code explicitly authenticates with `ManagedIdentityCredential(client_id=...)`; the saved code has no inserted `# Azure Identity Authentication` lines at the top |
+| 1.4 | **Test playground tab > Create tool** | Type `report` in **operation**, leave the other 14 boxes empty → click **Test**, inspect JSON (`status`, `provenance`, 4 paths), then **Create tool** (grey until **Test**) | Reopen the saved tool on **Agent Canvas > Table view** and confirm no duplicate tool name exists |
 
 ### Query parameters
 
@@ -948,29 +996,57 @@ tasks.
 1. Open [the LIVE runtime SKILL.md file view](skills/defender-cloud-live/SKILL.md)
    at the same approved revision, then use **Raw / Download raw file** to
    save the entire file.
-2. In **Builder / Build + setup > Agent Canvas > Create** (1), select
-   **Skill** (2). Some portal versions also offer **Builder > Skills** or
-   **Skill builder > Create skill**.
-3. Fill in the fields below. In **Choose tools**, search for and select **only**
-   `generate-defender-cloud-report`; close the picker and verify its chip/list.
-4. In the `SKILL.md` editor, retain the portal-generated front matter matching
-   the form's name/description/tools. Replace the placeholder instruction with
-   the **entire downloaded file**, including its heading and every section.
-   The repository runtime file is Markdown without YAML front matter; do not
-   omit its safety/failure sections or nest a second YAML header inside it.
-5. Select **Create**, then reopen the **exact new skill > Edit**. Check the
-   saved name, description, full runtime instructions and single bound tool.
+2. In **Build + configure > Agent Canvas**, select the **Create ▾** drop-down
+   arrow (1) > **Skill** (2). **Build + configure > Extensions > Skill builder >
+   Create skill** opens the same dialog.
+3. Type the **Name** and fill the **Description** (select **Edit**, type, then
+   **Save**) from the table below. The `SKILL.md` editor shows a front matter
+   generated from these fields (`name:`, `description:`) and the line
+   `<!-- Add your skill instructions here -->`.
+4. In the `SKILL.md` editor, replace that placeholder line with the **entire
+   downloaded file**, including its heading and every section. The repository
+   runtime file is Markdown without YAML front matter, so paste it **below** the
+   generated front matter; do not select all and paste over it, do not omit its
+   safety/failure sections or nest a second YAML header inside it.
+5. **Then** select **Choose tools**, search for `generate-defender-cloud-report`,
+   expand the **PythonFunctionTool (n)** group and tick **only**
+   `generate-defender-cloud-report` (never the group checkbox), then **Close
+   panel**. Verify its chip and the `tools:` line that is added to the front
+   matter. Pasting over the whole editor after this step would remove `tools:`
+   and the chip; if that happens, choose the tool again.
+6. Select **Create**, then reopen the **exact new skill**: **Agent Canvas >
+   Table view** > in the *Tools & skills* card, **Skills** > search > click the
+   name (the pencil opens **Edit Skill**). Check the saved name, description,
+   full runtime instructions and single bound tool.
 
-![Actual skill creation menu](images/step2-01-create-skill-menu.png)
+![Agent Canvas > Create ▾ > Skill](images/newui-skill-menu.png)
 
-*Historical creation menu, not a completed skill form:
-(1) Create, (2) Skill. [Open full resolution](images/step2-01-create-skill-menu.png).*
+*Today's portal: **1** the ▾ arrow next to **Create** (not the button) ·
+**2** **Skill**. [Open full resolution](images/newui-skill-menu.png).*
+
+![Create skill: name, description and the SKILL.md below the front matter](images/newui-skill.png)
+
+*Create skill before **Choose tools**: **1** *Name* · **2** *Description*
+(**Edit**, type, **Save**) · **3** the full `SKILL.md` pasted below the front
+matter · **4** *Choose tools*, next. [Open full resolution](images/newui-skill.png).*
+
+![Create skill: Choose tools with only generate-defender-cloud-report](images/newui-skill-tools.png)
+
+*Choose tools: **1** search · **2** expand the *PythonFunctionTool* group ·
+**3** tick only `generate-defender-cloud-report` · **4** *Close panel*.
+[Open full resolution](images/newui-skill-tools.png).*
+
+![Create skill ready: tool chip and tools: line](images/newui-skill-chip.png)
+
+*Ready to create (not created in this read-only capture): **1** tool chip ·
+**2** `tools:` with `generate-defender-cloud-report` in the front matter ·
+**3** **Create**. [Open full resolution](images/newui-skill-chip.png).*
 
 | Field | LIVE value |
 |---|---|
 | Name | `defender-cloud-live` |
 | Description | `Read-only Defender for Cloud evidence for one configured subscription. Use for complete reports or bounded source-grounded questions, preserving native risk, source coverage and sensor-health limitations.` |
-| Tools | `generate-defender-cloud-report` only |
+| Tools | `generate-defender-cloud-report` only (**Choose tools**, after pasting `SKILL.md`) |
 | SKILL.md | Entire [`skills/defender-cloud-live/SKILL.md`](skills/defender-cloud-live/SKILL.md) below the generated front matter |
 
 ### 2.2 Optional separate SIMULATED skill
@@ -982,6 +1058,12 @@ the [entire SIMULATED runtime SKILL.md](skills/arc-defender-retail/SKILL.md)
 (open the same-revision file view, then **Raw / Download raw file**),
 and **only** `simulate-arc-defender-retail`.
 
+![Create skill ready for the optional SIMULATED skill](images/newui-skill-chip-arc-defender-retail.png)
+
+*SIMULATED skill ready to create: **1** chip of `simulate-arc-defender-retail` ·
+**2** `tools:` in the front matter · **3** **Create**.
+[Open full resolution](images/newui-skill-chip-arc-defender-retail.png).*
+
 **Checkpoint 2:** one matching runtime skill and bound Python tool are saved
 for each chosen path. No CLI, generic Python/shell executor, filesystem tool,
 MCP connector, IAM operation, task-management tool or unrelated skill is added.
@@ -990,9 +1072,9 @@ product model; skill selection is not permission escalation.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |:---:|---|---|---|
-| 2.1 | **Builder > Agent Canvas > Create > Skill** | **Name:** `defender-cloud-live`<br>**Description:** `Read-only Defender for Cloud evidence for one configured subscription. Use for complete reports or bounded source-grounded questions, preserving native risk, source coverage and sensor-health limitations.` | Reopen the saved skill and verify exact name and description |
-| 2.2 | **Choose tools** | Search for `generate-defender` and select **only** `generate-defender-cloud-report` | Tool chip shows `generate-defender-cloud-report` only (no shell, CLI or SIMULATED tool) |
-| 2.3 | **SKILL.md editor > Create** | Keep the portal-generated YAML frontmatter (`name`, `description`, `tools`) at the top and paste the full [`skills/defender-cloud-live/SKILL.md`](skills/defender-cloud-live/SKILL.md) **below** it | Reopen **Edit** and verify the complete Markdown body is saved without a second nested YAML header |
+| 2.1 | **Build + configure > Agent Canvas > Create ▾ > Skill** | **Name:** `defender-cloud-live`<br>**Description** (**Edit**, type, **Save**): `Read-only Defender for Cloud evidence for one configured subscription. Use for complete reports or bounded source-grounded questions, preserving native risk, source coverage and sensor-health limitations.` | Reopen the saved skill (**Table view > Skills**) and verify exact name and description |
+| 2.2 | **SKILL.md editor** | Keep the portal-generated YAML front matter (`name`, `description`) at the top and paste the full [`skills/defender-cloud-live/SKILL.md`](skills/defender-cloud-live/SKILL.md) **below** it, replacing the placeholder line | Reopen **Edit Skill** and verify the complete Markdown body is saved without a second nested YAML header |
+| 2.3 | **Choose tools > Create** | **After** pasting: search for `generate-defender-cloud-report`, expand **PythonFunctionTool (n)**, tick **only** `generate-defender-cloud-report`, **Close panel**, check the chip and `tools:`, then **Create** | Tool chip shows `generate-defender-cloud-report` only (no shell, CLI or SIMULATED tool) |
 
 ## Step 3 - Restrict the subagents
 
@@ -1002,35 +1084,61 @@ not remediate resources or manage its own setup.
 
 ### 3.1 Create and configure the LIVE specialist
 
-1. Open **Builder / Build + setup > Agent Canvas > Create** (1) >
-   **Custom Agent** (2). Some current forms label the action
-   **Create subagent**. They represent the same specialist concept.
-2. Set **Custom agent name / Subagent name** to `defender-cloud-live`.
+1. In **Build + configure > Agent Canvas**, select **Create** (1): the button
+   itself opens **Create a custom agent** (tabs *Form / YAML*). The **Create ▾**
+   arrow (2) > **Custom agent** (3) opens the same dialog. Earlier portal
+   versions called these objects *Sub Agents* or *subagents*; they represent the
+   same specialist concept.
+2. Set **Custom agent name** to `defender-cloud-live`.
    Open [the copy-ready instructions](subagent-instructions-and-prompts.md#defender-cloud-live-instructions)
    from this approved revision. For a private local copy, open its
    [file view](subagent-instructions-and-prompts.md) and select
-   **Raw / Download raw file**. Paste its complete LIVE instruction block,
-   not the whole two-agent document. Do not use **Refine with AI** to replace
-   the reviewed boundaries.
-3. Under **Skills**, enable skills and explicitly select **only**
-   `defender-cloud-live` in **Choose skills / Allowed Skills**.
+   **Raw / Download raw file**. Paste its complete LIVE instruction block into
+   **Instructions**, not the whole two-agent document. Do not use **Refine with
+   AI** or **View AI suggestions** to replace the reviewed boundaries.
+3. Select **Choose skills**, filter by `defender-cloud-live`, tick **only**
+   `defender-cloud-live` and **Close panel**.
    An empty "allowed" list can mean **all**, not none.
-4. Under **Tools / Advanced settings > Choose tools**, explicitly select
-   **only** `generate-defender-cloud-report`. Close the picker and verify the
-   one selected tool.
-5. Leave unrelated handoff agents and knowledge-base access off/unselected for
+4. Select **Choose tools**, search for `generate-defender-cloud-report`, expand
+   **PythonFunctionTool (n)**, tick **only** `generate-defender-cloud-report`
+   (never the group checkbox) and **Close panel**. Verify the one tool chip.
+5. Leave unrelated handoff agents, hooks and knowledge-base access off/unselected for
    this standalone case. No incident trigger, connector, guest command, role
    grant or task-creation capability is needed. Do not alter organization-owned
    hooks or other agents as part of this installation.
-6. Review both explicit selections, then select **Create**. Reopen this exact
-   agent's **Edit** form (and effective detail/YAML if available) to confirm
-   the full instructions, enabled single-skill allowlist and one-tool allowlist.
-   A canvas node, label or generated source file alone is not the check.
+6. Review both chips, then select **Create**. Reopen this exact agent:
+   **Agent Canvas > Table view** > in the *Agents* card, **Custom agents** >
+   search > click the name; the panel shows *Tools · 1*, the tool and the skill,
+   and the pencil opens **Edit custom agent** (*Form / YAML*) to confirm the full
+   instructions. A canvas node, label or generated source file alone is not the check.
 
-![Actual custom-agent creation menu](images/step3-01-create-subagent-menu.png)
+![Agent Canvas > Create (or Create ▾ > Custom agent)](images/newui-agent-menu.png)
 
-*Historical menu: (1) Create, (2) Custom Agent. It does not show a completed
-new-customer specialist. [Open full resolution](images/step3-01-create-subagent-menu.png).*
+*Today's portal: **1** **Create** button, which opens *Create a custom agent* ·
+**2** the ▾ arrow · **3** *Custom agent* (same dialog).
+[Open full resolution](images/newui-agent-menu.png).*
+
+![Create a custom agent: name and instructions](images/newui-agent.png)
+
+*Step 2: **1** *Custom agent name* · **2** pasted *Instructions* · **3** *Choose
+skills* · **4** *Choose tools*. [Open full resolution](images/newui-agent.png).*
+
+![Choose skills: only defender-cloud-live](images/newui-agent-skills.png)
+
+*Step 3: **1** filter · **2** tick only `defender-cloud-live` · **3** *Close
+panel*. [Open full resolution](images/newui-agent-skills.png).*
+
+![Choose tools: only generate-defender-cloud-report](images/newui-agent-tools.png)
+
+*Step 4: **1** search · **2** expand the *PythonFunctionTool* group · **3** tick
+only `generate-defender-cloud-report` · **4** *Close panel*.
+[Open full resolution](images/newui-agent-tools.png).*
+
+![Create a custom agent ready: one skill chip and one tool chip](images/newui-agent-chips.png)
+
+*Step 6, before **Create** (not created in this read-only capture): **1** skill
+chip `defender-cloud-live` · **2** tool chip `generate-defender-cloud-report` ·
+**3** **Create**. [Open full resolution](images/newui-agent-chips.png).*
 
 ### 3.2 Check the effective restriction, not just the name
 
@@ -1052,18 +1160,34 @@ separate [SIMULATED instruction block](subagent-instructions-and-prompts.md#arc-
 and the matching selections above. Never attach both tools or both skills to
 one specialist.
 
-![Historical Arc-only LIVE V1 detail pane with one selected tool and skill](images/step3-02-live-subagent-restrictions.png)
+![Create a custom agent ready for the optional SIMULATED specialist](images/newui-agent-chips-arc-defender-retail.png)
 
-*Historical LIVE V1: (1) one tool, (2) the old
-`generate-arc-defender-report` name, (3) the old skill. This demonstrates the
-restriction pattern, **not** the canonical names for a new installation.
-Use the table above. [Open full resolution](images/step3-02-live-subagent-restrictions.png).*
+*SIMULATED specialist before **Create**: **1** skill chip `arc-defender-retail` ·
+**2** tool chip `simulate-arc-defender-retail` · **3** **Create**.
+[Open full resolution](images/newui-agent-chips-arc-defender-retail.png).*
 
-![Historical SIMULATED specialist detail pane with its separate selected tool and skill](images/step3-03-simulated-subagent-restrictions.png)
+After **Create**, the saved readback is the check. The two screenshots below
+are today's portal (16 November 2026), showing the existing lab specialists
+with the guide's names:
 
-*SIMULATED only: (1) one tool, (2) `simulate-arc-defender-retail`,
-(3) `arc-defender-retail`. It is not a live connector.
-[Open full resolution](images/step3-03-simulated-subagent-restrictions.png).*
+![Saved LIVE specialist: Tools · 1, one tool and one skill](images/newui-agent-readback.png)
+
+*Saved LIVE readback (**Agent Canvas > Table view**): **1** *Custom agents* in
+the *Agents* card · **2** search · **3** click the name · **4** *Tools · 1* ·
+**5** only `generate-defender-cloud-report` · **6** only the
+`defender-cloud-live` skill. [Open full resolution](images/newui-agent-readback.png).*
+
+![Saved SIMULATED specialist: Tools · 1, one tool and one skill](images/newui-agent-readback-arc-defender-retail.png)
+
+*SIMULATED only: **1-3** the same path · **4** *Tools · 1* · **5** only
+`simulate-arc-defender-retail` · **6** only `arc-defender-retail`. It is not a
+live connector. [Open full resolution](images/newui-agent-readback-arc-defender-retail.png).*
+
+The October detail panes that this guide used before
+([historical Arc-only LIVE V1](images/step3-02-live-subagent-restrictions.png)
+with the old `generate-arc-defender-report` name, and
+[SIMULATED](images/step3-03-simulated-subagent-restrictions.png)) are kept for
+reference only.
 
 An existing customer-owned `arc-defender-live` **alias** is acceptable only
 after its owner verifies that it resolves to the same canonical general LIVE
@@ -1079,9 +1203,9 @@ and [Automate workflows](https://learn.microsoft.com/azure/sre-agent/automate-wo
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |:---:|---|---|---|
-| 3.1 | **Builder > Agent Canvas > Create > Custom Agent** | **Name:** `defender-cloud-live`<br>**Instructions:** paste the [`defender-cloud-live` block](subagent-instructions-and-prompts.md#defender-cloud-live-instructions) verbatim | Reopen **Edit** and confirm the instructions were not altered by *Refine with AI* |
-| 3.2 | **Skills > Allowed Skills / Choose skills** | Enable skills and select **only** `defender-cloud-live` | Verify the exact selected skill **name** in the reopened saved form and effective policy (`allowedSkills: ["defender-cloud-live"]`, `addSystemSkills=false`); never leave empty or rely on the list summary badge |
-| 3.3 | **Tools > Choose tools > Create** | Explicitly select **only** `generate-defender-cloud-report`, then click **Create** | Verify the exact selected tool **name** in the reopened saved form and effective policy (`tools: ["generate-defender-cloud-report"]`, `disableDocumentRetrieval=true`); never leave empty or rely on the list summary badge |
+| 3.1 | **Build + configure > Agent Canvas > Create** (or **Create ▾ > Custom agent**) | **Custom agent name:** `defender-cloud-live`<br>**Instructions:** paste the [`defender-cloud-live` block](subagent-instructions-and-prompts.md#defender-cloud-live-instructions) verbatim | Reopen **Table view > Custom agents** and confirm the instructions were not altered by *Refine with AI* |
+| 3.2 | **Skills > Choose skills** | Filter and tick **only** `defender-cloud-live`, then **Close panel** | Verify the exact selected skill **name** in the reopened saved form and effective policy (`allowedSkills: ["defender-cloud-live"]`, `addSystemSkills=false`); never leave empty or rely on the list summary badge |
+| 3.3 | **Tools > Choose tools > Create** | Search, expand **PythonFunctionTool (n)**, tick **only** `generate-defender-cloud-report`, **Close panel**, then click **Create** | Verify the exact selected tool **name** in the reopened saved form and effective policy (`tools: ["generate-defender-cloud-report"]`, `disableDocumentRetrieval=true`); never leave empty or rely on the list summary badge |
 
 > [!NOTE]
 > **Dated SRE UI badge caveat:** In the live SRE Agent UI, Agent Canvas list/card summary badges can display inherited global rollups (for example, `131 tools` / `52 skills`) even when both native APIs, selected chips and the saved form policy enforce one explicit tool and skill (`tools`, `allowedSkills`, `addSystemSkills=false`, `disableDocumentRetrieval=true`). Verify the exact selected tool and skill **names** in the saved form and effective supported policy; the list summary badge is not authoritative restriction proof, and you must not modify globals to change it.
@@ -1093,8 +1217,11 @@ Copy-ready report prompts and focused questions are also in
 Use **ordinary chat after explicitly selecting the saved specialist**; the
 Python test playground alone does not validate specialist routing or downloads.
 
-1. Select **New chat**. Type `/agent`, choose **`defender-cloud-live`**, and
-   confirm that the selected specialist is the one saved in Step 3.
+1. Select **New chat**. Type `/agent` (choose **/agent**, *Pick a subagent to
+   assist you with tasks*), type `defender-cloud-live`, choose
+   **`defender-cloud-live`** in the list and confirm the chip
+   **Agent: defender-cloud-live** next to **+**. Typing `@` no longer opens a
+   picker. Confirm that the selected specialist is the one saved in Step 3.
 2. Paste the normal-language report prompt below. Do not paste configured
    GUIDs, access tokens, source code or an old report link into the message.
 3. Inspect the actual tool call/trace: it must invoke
@@ -1104,6 +1231,17 @@ Python test playground alone does not validate specialist routing or downloads.
 4. Open/download each of the four actual files, then review the report and
    source interpretation. Ask separate focused questions only when wanted,
    not as hidden follow-ups required to finish a report.
+
+![New chat: /agent and the specialist name](images/newui-chat-pick.png)
+
+*Step 1: **1** `/agent` and the specialist name in the message box · **2** pick
+`defender-cloud-live`. [Open full resolution](images/newui-chat-pick.png).*
+
+![New chat: Agent chip and the LIVE report prompt](images/newui-chat-ready.png)
+
+*Step 2, before sending (not sent in this capture): **1** chip *Agent:
+defender-cloud-live* · **2** the prompt below · **3** send.
+[Open full resolution](images/newui-chat-ready.png).*
 
 ### LIVE general report
 
@@ -1184,7 +1322,8 @@ independent-sensor evidence explicit:
 ![Actual V2 LIVE conversation with four authenticated downloadable artifacts](images/v2-live-four-downloads.png)
 
 *Historical general LIVE delivery, not a new customer run or the later
-13 October codec acceptance. [Open full resolution](images/v2-live-four-downloads.png).*
+13 October codec acceptance (earlier run; today's portal labels may differ).
+[Open full resolution](images/v2-live-four-downloads.png).*
 
 In HTML, verify **Posture, Attack paths, Resources, Recommendations,
 Software / CVEs, Compliance and Sources**. Select an actually observed resource,
@@ -1239,7 +1378,8 @@ the screenshot; the source labels and scope distinction remain visible.
 
 ![Actual V2 graph question: real node types/labels, connections and explicit Azure VM—not Arc—scope](images/v2-live-graph-conversation.png)
 
-*Historical LIVE graph answer: (1) native risk and no Arc association,
+*Historical LIVE graph answer (earlier run; today's portal labels may differ):
+(1) native risk and no Arc association,
 (2) the three source node identities/types. It is contextual path evidence,
 not a confirmed exploit, incident or root cause.
 [Open full resolution](images/v2-live-graph-conversation.png).*
@@ -1398,9 +1538,16 @@ does not create or run a task, and no email/Teams connector is needed.
    place with approval. Do not create a duplicate or update an unrelated task
    merely because its name looks similar.
 3. If no owned task exists and recurring execution is approved, select
-   **Automation > Create > Scheduled task**. Alternatively, use **+ > Trigger >
-   Add scheduled task** on the saved LIVE specialist's canvas node; verify the
-   preselected responder. Older navigation may say **Scheduled tasks**.
+   **Automation > Create ▾ > Scheduled task** (the other option is *HTTP
+   trigger*). **Build + configure > Agent Canvas > Create ▾ > Trigger › >
+   Scheduled tasks** is another entry point; verify the selected responder
+   either way.
+
+![Automation > Create ▾ > Scheduled task](images/newui-task-menu.png)
+
+*Today's portal: **1** *Automation* (left menu) · **2** **Create ▾** ·
+**3** *Scheduled task*. Other automations in the list are blurred and are not
+part of this case. [Open full resolution](images/newui-task-menu.png).*
 
 Use the canonical [task guide file view](monthly-task-prompt.md) from the same
 approved revision. Select **Raw / Download raw file** if saving a private copy;
@@ -1411,15 +1558,23 @@ the relative link opens the file view, not a one-click raw download.
 | Field | Value |
 |---|---|
 | Task name | `Monthly Defender for Cloud live evidence audit` |
-| Response custom agent / Response subagent | `defender-cloud-live`; do not leave empty and fall back to the main agent |
+| Response subagent | `defender-cloud-live`; do not leave empty and fall back to the main agent |
 | Task details | Entire copy-ready prompt below |
 | Start on | Customer-approved activation date, not a historical lab date |
-| Frequency | Custom cron |
+| Frequency | Custom cron (the list starts at **Daily**) |
 | Cron expression (UTC) | `0 9 1 * *` |
-| Message grouping for updates | **New/separate thread per run**, not reuse of the previous snapshot conversation |
+| Message grouping for updates | **New chat thread for each run** (the default is *Use same chat thread*), not reuse of the previous snapshot conversation |
 | Model tier | General Purpose, subject to the customer's approved policy |
 | Agent autonomy level | **Autonomous**, only after the exact bounded reporter/allowlists have passed manual acceptance |
-| Repeat until / Run limit, if shown | Customer-approved lifetime/limit; enabling a recurring task continues consuming usage |
+| Repeat until / Set a run limit | Customer-approved lifetime/limit (blank means no end/limit); enabling a recurring task continues consuming usage |
+
+![Create scheduled task: completed form](images/newui-task.png)
+
+*Create scheduled task, filled in without selecting **Create task**: **1** *Task
+name* · **2** *Response subagent* · **3** *Task details* (the block below) ·
+**4** *Frequency* = *Custom cron* · **5** *Cron expression (UTC)* `0 9 1 * *` ·
+**6** *New chat thread for each run* · **7** **Create task**.
+[Open full resolution](images/newui-task.png).*
 
 Do not enable inherited global tools to make automation work. Review mode can
 pause for approval; it is not unattended execution. Autonomous is appropriate
@@ -1464,9 +1619,11 @@ tool parameter or a claimed structured `action_required` output field.
 
 ### 5.3 Save, reopen and check UTC / DST
 
-Select **Create task / Save** only for the approved task. Reopen its edit form
-and check the exact saved responder, full prompt, five-field cron, new-thread
-grouping, autonomy and status. Verify **Next run time**, and `nextUTCtime` when
+Select **Create task** only for the approved task. Reopen it (**Automation** >
+search for the name > tick only its checkbox > **Edit**, which opens **Edit
+scheduled task**; close it with **Cancel** if nothing changes) and check the
+exact saved responder, full prompt, five-field cron, new-thread grouping,
+autonomy and status. Verify **Next run time**, and `nextUTCtime` when
 the service exposes it, rather than inferring the schedule from a friendly
 monthly label.
 
@@ -1483,8 +1640,17 @@ occurrence after any DST/local-time change. See
 
 ### 5.4 Accept one manual run, then verify the timer separately
 
-After customer authorization, select the owned row's checkbox in the
-**Automation list**, then the enabled toolbar **Run now** **once**.
+After customer authorization, search the **Automation** list for the task name,
+select only the owned row's checkbox, then the enabled toolbar **Run now**
+**once**. (Clicking the task name opens its run history, where **Run task now**
+does the same.)
+
+![Automation: search, tick only this task, Run now](images/newui-automation-list.png)
+
+*Today's Automation list, captured without clicking **Run now**: **1** search by
+the task name · **2** tick only this task · **3** **Run now**.
+[Open full resolution](images/newui-automation-list.png).*
+
 Inspect its actual thread, selected responder, one report call, UTC reference,
 partial sources and all four native nonempty downloads. A completed execution
 row or **Success** status can mean work was handed to a thread; it is not
@@ -1540,7 +1706,8 @@ verified 15:37 UTC execution.
 
 ![Actual V2 migrated task: row selection, enabled Run now and preserved execution history](images/v2-monthly-run-now-and-count.png)
 
-*Historical 9 October task list: (1) the owned row selected, (2) enabled Run now,
+*Historical 9 October task list (earlier run; today's portal labels may differ):
+(1) the owned row selected, (2) enabled Run now,
 (3) three completed executions. Other rows are unrelated and must not be
 copied, changed or treated as this case's dependencies.
 [Open full resolution](images/v2-monthly-run-now-and-count.png).*
@@ -1982,7 +2149,7 @@ performed by this documentation-only revision.
 
 | Symptom | Action |
 |---|---|
-| Portal creation/chat/task operation returns 403 | Check the **user's** SRE Agent Author + Standard User roles on the agent resource; Builder/Owner/Contributor are not substitutes. Keep this separate from source-read 403s. |
+| Portal creation/chat/task operation returns 403 | Check the **user's** SRE Agent Author + Standard User roles on the agent resource; an enabled **Build + configure** button, Owner or Contributor are not substitutes. Keep this separate from source-read 403s. |
 | Configuration / authentication / scope error | Correct fixed GUIDs, assigned Client ID, Enabled subscription and read access; no fallback identity/subscription. |
 | `authentication_failed` although the identity exists | Verify the Client ID belongs to the agent's assigned, runtime-available UAMI. Object/principal ID is for RBAC, not this `client_id` argument. A portal assignment or enabled Identity tab alone is insufficient. |
 | `dependency_missing` | Review the linked requirements and approved runtime package availability. Historical `dependencies=[]` reflected preinstalled packages, not a dependency-free LIVE tool. Do not add shell/pip/MCP access to the specialist. |
@@ -2011,9 +2178,38 @@ performed by this documentation-only revision.
 
 ## Screenshot catalogue
 
-The **17 portal and chat PNGs are actual historical captures**; in six of
+**Today's portal (16 November 2026).** The 24 `newui-*.png` images are real
+captures of the current SRE Agent portal on the lab agent, taken read-only:
+the guide's names, values and files were typed or pasted into the forms, but
+nothing was saved, tested, sent or run (**Create tool**, **Create**, **Create
+task**, **Test**, send and **Run now** were not clicked). The readback panels
+show the existing lab objects under the guide's names; background objects are
+blurred or hidden. They replace the six October captures marked *replaced*
+below, which stay in `images/` for reference.
+
+| Full-resolution capture | What it shows (numbered callouts) |
+|---|---|
+| [Python tool menu](images/newui-menu.png) | (1) Build + configure, (2) Agent Canvas, (3) Create ▾ arrow, (4) Tool ›, (5) Python tool. |
+| [LIVE Code tab](images/newui-code.png) / [SIMULATED Code tab](images/newui-code-simulate-arc-defender-retail.png) | (1) Tool Name, (2) Timeout (seconds) `240` / `120`, (3) Description, (4) pasted source with unset placeholders, (5) grey Create tool. |
+| [Identity tab](images/newui-identity.png) | (1) Identity tab, (2) Enable Azure Identity Off. |
+| [Test playground top](images/newui-playground.png) / [bottom](images/newui-playground-b.png) | 15 empty boxes; `operation` = `report`, Test not clicked, Create tool grey. |
+| [Skill menu](images/newui-skill-menu.png) | (1) Create ▾ arrow, (2) Skill. |
+| [Skill form](images/newui-skill.png) | (1) Name, (2) Description, (3) full SKILL.md below the front matter, (4) Choose tools next. |
+| [Skill Choose tools](images/newui-skill-tools.png) | (1) search, (2) PythonFunctionTool group, (3) only the LIVE tool, (4) Close panel. |
+| [LIVE skill ready](images/newui-skill-chip.png) / [SIMULATED skill ready](images/newui-skill-chip-arc-defender-retail.png) | (1) tool chip, (2) `tools:` in the front matter, (3) Create. |
+| [Custom agent menu](images/newui-agent-menu.png) | (1) Create button, (2) Create ▾ arrow, (3) Custom agent. |
+| [Custom agent form](images/newui-agent.png) | (1) name, (2) instructions, (3) Choose skills, (4) Choose tools. |
+| [Choose skills](images/newui-agent-skills.png) / [Choose tools](images/newui-agent-tools.png) | Filter/search, the single tick and Close panel. |
+| [LIVE agent ready](images/newui-agent-chips.png) / [SIMULATED agent ready](images/newui-agent-chips-arc-defender-retail.png) | (1) skill chip, (2) tool chip, (3) Create. |
+| [LIVE saved readback](images/newui-agent-readback.png) / [SIMULATED saved readback](images/newui-agent-readback-arc-defender-retail.png) | Table view > Custom agents: Tools · 1, the only tool and the only skill. |
+| [/agent picker](images/newui-chat-pick.png) / [Agent chip and prompt](images/newui-chat-ready.png) | New chat with `/agent`, the Agent chip and the unsent LIVE prompt. |
+| [Scheduled task menu](images/newui-task-menu.png) / [task form](images/newui-task.png) | Automation > Create ▾ > Scheduled task, and the filled form before Create task. |
+| [Automation list](images/newui-automation-list.png) | (1) search by name, (2) only this task ticked, (3) Run now (not clicked). |
+
+**Earlier captures.** The **17 portal and chat PNGs below are actual historical captures**; in six of
 them, visible customer and lab names were re-lettered on 12 November 2026 to
-the neutral names used in this guide. The **8 report images**
+the neutral names used in this guide. Their portal labels can differ from
+today's portal. The **8 report images**
 (`report-*-overview.png`, `v2-live-overview.png`, `v2-live-resource-sql*.png`
 and `v2-simulated-overview.png`) were regenerated on 12 November 2026 with the
 current report design from **sanitized sample data**: a fictional subscription
@@ -2027,14 +2223,14 @@ not color alone.
 
 | Full-resolution capture | Provenance / what the image demonstrates |
 |---|---|
-| [Python creation menu](images/step1-01-create-python-tool-menu.png) | Historical portal: (1) Builder, (2) Agent Canvas, (3) Create, (4) Tool, (5) Python tool. Unrelated global tools in the background are not this specialist's allowlist. |
-| [Python tabs](images/step1-02-python-tool-tabs.png) | Empty creation dialog: (1) Code, (2) Test playground, (3) Identity; visible default timeout 120, not a configured LIVE readback. |
+| [Python creation menu](images/step1-01-create-python-tool-menu.png) | *Replaced by the Python tool menu above.* Historical portal: (1) Builder, (2) Agent Canvas, (3) Create, (4) Tool, (5) Python tool. Unrelated global tools in the background are not this specialist's allowlist. |
+| [Python tabs](images/step1-02-python-tool-tabs.png) | *Replaced by the Code tab above.* Empty creation dialog: (1) Code, (2) Test playground, (3) Identity; visible default timeout 120, not a configured LIVE readback. |
 | [LIVE V1 playground](images/generate-arc-defender-report-test-playground.png) | Older **Arc-only LIVE** function execution; successful banner but partial JSON and eight-host scope. Old filename/counts are not the current generic tool. |
 | [SIMULATED V1 playground](images/simulate-arc-defender-retail-test-playground.png) | Offline fixture execution with SIMULATED provenance. Older finding counts precede the expanded baseline/context fixture; not Azure access evidence. |
-| [Skill menu](images/step2-01-create-skill-menu.png) | Historical (1) Create > (2) Skill menu, not a completed skill or proof that the full SKILL.md was saved. |
-| [Custom-agent menu](images/step3-01-create-subagent-menu.png) | Historical (1) Create > (2) Custom Agent entry point, not a new-customer form capture. |
-| [LIVE V1 restrictions](images/step3-02-live-subagent-restrictions.png) | Older `arc-defender-live` detail: one tool and one skill under historical names. Use the canonical current LIVE names in Step 3. |
-| [SIMULATED restrictions](images/step3-03-simulated-subagent-restrictions.png) | One `simulate-arc-defender-retail` tool and one `arc-defender-retail` skill, separate from LIVE. |
+| [Skill menu](images/step2-01-create-skill-menu.png) | *Replaced by the skill menu above.* Historical (1) Create > (2) Skill menu, not a completed skill or proof that the full SKILL.md was saved. |
+| [Custom-agent menu](images/step3-01-create-subagent-menu.png) | *Replaced by the custom agent menu above.* Historical (1) Create > (2) Custom Agent entry point, not a new-customer form capture. |
+| [LIVE V1 restrictions](images/step3-02-live-subagent-restrictions.png) | *Replaced by the LIVE saved readback above.* Older `arc-defender-live` detail: one tool and one skill under historical names. Use the canonical current LIVE names in Step 3. |
+| [SIMULATED restrictions](images/step3-03-simulated-subagent-restrictions.png) | *Replaced by the SIMULATED saved readback above.* One `simulate-arc-defender-retail` tool and one `arc-defender-retail` skill, separate from LIVE. |
 | [LIVE V1 downloads](images/step4-01-live-report-downloads.png) | Earlier **Arc-only LIVE** chat: four file links and honest partial sensor evidence. Does not prove general-subscription or later codec acceptance. |
 | [SIMULATED V1 downloads](images/step4-02-simulated-report-downloads.png) | Four explicitly SIMULATED fixture files, not a customer inventory. Older recommendation counts are revision-specific. |
 | [LIVE V1 question](images/step4-03-live-conversational-question.png) | Three historical Expired Arc hosts across bounded query pages; extension Succeeded is not current sensor telemetry. |
@@ -2053,11 +2249,12 @@ not color alone.
 | [LIVE V1 task history after](images/step5-02-monthly-task-executed.png) | Historical Success row with No thread found; a UI state, not self-sufficient report/download evidence. |
 | [LIVE V2 Automation list](images/v2-monthly-run-now-and-count.png) | 9 October selected owned task, enabled list-toolbar Run now and three completed runs. Proves that dated manual UI state, not a current timer firing. |
 
-No completed new-customer IAM, skill-content, task-settings or identity-toggle
-forms were fabricated for this guide. Follow the text/checkpoints and reopen
-the customer's actual saved objects. The existing banner, background objects,
-masked metadata and historical example brand do not grant permission to copy
-an environment, assign Administrator or reuse private identifiers.
+No completed new-customer IAM forms or saved new-customer objects were
+fabricated for this guide: the `newui-*` forms are unsaved captures with the
+guide's values, and the readbacks show existing lab objects. Follow the
+text/checkpoints and reopen the customer's actual saved objects. Background
+objects, masked metadata and historical example brands do not grant permission
+to copy an environment, assign Administrator or reuse private identifiers.
 
 ## References
 
@@ -2096,7 +2293,7 @@ an environment, assign Administrator or reuse private identifiers.
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent defender-cloud-live` (or `/agent arc-defender-live`) in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent defender-cloud-live` (or `/agent arc-defender-live`) in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. Typing `@` no longer opens a picker: with the **Agent: defender-cloud-live** chip selected, the leading `@defender-cloud-live` below is plain text and can be left out.
 
 ### 1. Full 4-File Security Posture & Vulnerability Report / Informe Completo con los 4 Archivos
 - **Castellano:**

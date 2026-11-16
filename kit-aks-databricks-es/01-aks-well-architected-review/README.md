@@ -16,6 +16,11 @@ file from a locally rendered, dated source replay. Customer branding is burned
 over with **client NAME**; identifiers, private addresses and configured code
 are masked only in the image, never removed from the original evidence.
 See the [capture manifest](images/capture-manifest.json).
+The Builder screenshots of steps 1-5 and 7 were refreshed on **2026-11-16** in
+today's portal (**Build + configure**). They show this folder's files, with
+their placeholders, typed into the real dialogs; nothing was saved, tested or
+sent while taking them. The 2026-10-13 Builder captures stay listed as dated
+receipts in [Dated evidence and release state](#dated-evidence-and-release-state).
 
 | What you get | What it does not claim |
 |---|---|
@@ -243,7 +248,7 @@ acceptance; no branch in this setup authorizes IAM, a paid cluster or recovery.
 
 ## Prerequisites
 
-Before opening Builder, confirm these separately:
+Before opening **Build + configure** (formerly *Builder*), confirm these separately:
 
 | Requirement | Why it matters |
 |---|---|
@@ -254,7 +259,7 @@ Before opening Builder, confirm these separately:
 | An authorized operator who can verify each source read | Reader, clusterUser credentials, Kubernetes data reads and billing access are separate boundaries |
 | A private working copy and a browser | Configured source, real snapshots and customer logos must remain outside Git |
 
-**Builder is a UI label, not a role.** Azure Owner/Contributor are not
+**Build + configure (formerly Builder) is a UI label, not a role.** Azure Owner/Contributor are not
 substitutes for the SRE Agent data-action roles. The actual screenshots may
 show the portal's broad RBAC warning: do not select **Assign yourself the SRE
 Agent Admin role** just to match a screenshot. Have an authorized administrator
@@ -282,10 +287,11 @@ so you do not have to scroll back here.
 
 ## Step 0 - Identify the reporting identity and approve scope
 
-1. In [Azure SRE Agent](https://sre.azure.com), open the approved agent. Open
-   **Settings > Azure settings > Managed Identity > Go to Identity**, or find
-   the attached user-assigned identity in the agent's Azure resource group.
-   Older **Settings > Basics** screenshots are historical label variants.
+1. In the [Azure portal](https://portal.azure.com), open the approved agent's
+   resource group and its attached user-assigned managed identity (`id-…`).
+   Today's [Azure SRE Agent](https://sre.azure.com) portal has no *Settings*
+   page for it; the older **Settings > Azure settings > Managed Identity** and
+   **Settings > Basics** paths are historical label variants.
 2. On the identity's Azure portal **Overview**, copy **Client ID**. Do not copy
    **Object (principal) ID** into code: they are different GUIDs. Record the
    principal separately for source RBAC checks, and do not select the internal
@@ -443,12 +449,14 @@ Privately update `cluster_name.enum` in the linked schema to `""` plus the
 **same exact approved names** as `APPROVED_CLUSTERS`; preserve all other
 types/defaults/bounds. There is no `period` or arbitrary snapshot-path input.
 
-![Actual Builder preview of operation, view and exact masked cluster choice](images/aks04-step01-cluster-choice.png)
+![Actual Test playground preview of operation, view and the fixed cluster choice](images/newui-playground.png)
 
-**1** opens the real Test playground; **2** is `report`, **3** is `summary`,
-and **4** is the exact fixed cluster name, privacy-masked in the image. This
-is an **unsaved preview of the verified 11-input deployment baseline**, not a
-new execution or proof of the newer multi-cluster deployment.
+**1** Test playground tab · **2** **Test** · **3** `operation` = `report` ·
+**4** `view` = `summary` · **5** `cluster_name` = the exact fixed name (here the
+`<APPROVED_AKS_NAME>` placeholder) · **6** *Create tool*, grey until a test
+runs. Real portal, 2026-11-16: an **unsaved preview** of the current 12-input
+tool with the empty boxes filled in by hand, not a new execution or proof of a
+deployment.
 
 **Checkpoint:** the code and the schema contain the **same fixed allowlist**.
 Unreplaced placeholders must fail before authentication.
@@ -497,13 +505,16 @@ source dates or file-delivery contract to add branding.
 **Download here:** [`generate-aks-waf-report.py`](generate-aks-waf-report.py),
 [`tool-parameters.schema.json`](tool-parameters.schema.json).
 
-1. Open **Builder > Agent Canvas**.
-2. Open the arrow beside **Create**, then **Tool > Python tool**.
-3. Select **Code**. Set the tool name to **`generate-aks-waf-report`**, enter a
-   clear read-only description and paste the **entire privately configured
-   canonical Python file**. Do not select Generate, paste a fragment, or paste
-   unbuilt `engine.py`.
-4. Use the approved timeout. The verified deployment used **900 seconds**;
+1. Open **Build + configure > Agent Canvas** (formerly *Builder*).
+2. Open the **▾ arrow** beside **Create** (the **Create** button itself opens
+   *Create a custom agent*), then **Tool › Python tool**. The dialog has three
+   tabs: **Code**, **Test playground** and **Identity**.
+3. Select **Code**. Set **Tool Name** to **`generate-aks-waf-report`** (36
+   characters at most), enter a clear read-only description and paste the
+   **entire privately configured canonical Python file**. Do not select
+   Generate, paste a fragment, or paste unbuilt `engine.py`.
+4. Use the approved **Timeout (seconds)** (the default is 120). The verified
+   deployment used **900 seconds**, the maximum;
    the collector's separate shared budget bounds new reads to 240 seconds /
    300 HTTP attempts across selected clusters, with a bounded in-flight read
    allowed to finish.
@@ -517,25 +528,28 @@ and optional ActualCost evidence; return offline HTML, complete JSON,
 failed-findings CSV and inventory CSV, or bounded typed queries. No remediation.
 ```
 
-Ensure the approved runtime supplies
-[`requirements.txt`](requirements.txt): **`azure-identity>=1.19,<2`**,
-**`PyYAML>=6.0.2,<7`**, and **`Pillow>=12.2,<13`** only when a logo is configured.
+Today's dialog has no *Requirements* field, so the approved runtime must
+already supply [`requirements.txt`](requirements.txt): **`azure-identity>=1.19,<2`**,
+**`PyYAML>=6.0.2,<7`**, and **`Pillow>=12.2,<13`** only when a logo is configured
+(the Azure SRE Agent Python runtime provides them; the file is informative).
 HTTP/TLS uses Python's standard library. The reporting tool does not require
 your local Azure CLI/kubectl login or an operator kubeconfig file, and it has
 no fallback to those identities. Do not add a package-install/shell tool to
 the specialist to solve a runtime import error.
 
-![Actual Create > Tool > Python tool navigation](images/aks04-step02-01-python-menu.png)
+![Actual Build + configure > Agent Canvas > Create ▾ > Tool › Python tool navigation](images/newui-menu.png)
 
-**1-2** identify Builder and Agent Canvas; **3** is the Create arrow and
-**4** the Python tool entry. This is the real portal, not a recreated diagram.
+**1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow beside
+**Create** (not the button) · **4** Tool › · **5** **Python tool**. This is the
+real portal (2026-11-16), not a recreated diagram; no tool was created.
 
-![Actual Code tab with private configured source obscured](images/aks04-step02-02-code.png)
+![Actual Code tab with the repository file pasted](images/newui-code.png)
 
-**1** is the exact tool name, **2** the Code tab and **3** the whole-file editor.
-The private configured source is deliberately obscured; the real dialog and
-controls remain visible. This capture previews the read-back baseline
-`3aefbd5f0246...`; **Create tool/Test was not clicked during capture**.
+**1** *Tool Name* `generate-aks-waf-report` (36 characters at most; the field
+is narrow) · **2** *Timeout (seconds)* `900` · **3** *Description* · **4** the
+whole-file editor (top of the file) · **5** *Create tool*, grey until a test
+runs. The editor shows the generic repository file with its placeholders, never
+a configured private copy; **Create tool/Test was not clicked during capture**.
 
 ### Verify the current typed schema
 
@@ -558,10 +572,11 @@ not inferred from an older screenshot.
 | `limit` | `integer` (schema), `int` (Python) / `25` | 1..100; the transport budget can return fewer **whole** rows |
 | `offset` | `integer` (schema), `int` (Python) / `0` | 0..500000 within this fresh collection, not a persistent cursor |
 
-**Editor type mapping:** keep standard JSON Schema **`integer`** in the file.
-In a row-based SRE parameter editor that uses Python/runtime type labels,
-select **`int`** for `limit` and `offset`. Supply numeric JSON values such as
-`25` and `0`, not quoted strings; do not rewrite the schema type to `int`.
+**Types:** today's portal has no parameter editor: the 12 inputs and their
+types come from `def main(...)` when you paste the code (`limit` and `offset`
+are `int`). Keep standard JSON Schema **`integer`** in the schema file; do not
+rewrite it to `int`. Supply numeric JSON values such as `25` and `0`, not
+quoted strings. In **Test playground** every box starts empty: type each value.
 
 Do not supply both selectors. For `report`, leave `view=summary`, filters empty/
 `all`, `limit=25`, `offset=0`; otherwise the report is rejected instead of
@@ -574,11 +589,14 @@ filters; `status` belongs only to findings/actions or coverage. Booleans and
 floats are not integers. Query calls recollect: `next_offset` is not a stable
 cursor into the last downloaded report. A filtered page is not its exact total.
 
-![Actual typed paging preview in the baseline Builder](images/aks04-step02-03-typed-parameters.png)
+![Actual Test playground preview of the paging inputs](images/newui-playground-b.png)
 
-**1** shows `status=all`; **2-3** show integer paging defaults **25 / 0**.
-This real 11-input preview was not run. Use the linked current schema for all
-12 inputs, exact enums, defaults and bounds; read them back after saving.
+**1** Test playground tab · **2** `status` = `all` · **3** `limit` = `25` ·
+**4** `offset` = `0` · **5** *Create tool*, still grey. With the first capture
+of [Step 1](#step-1---configure-the-private-standalone-file) it shows all 12
+current inputs (`cluster_names` is the last box). This preview was not run.
+Use the linked schema for the exact enums, defaults and bounds; read them back
+after saving.
 
 ### Identity tab: preserve the actual authentication design
 
@@ -588,18 +606,21 @@ through `ManagedIdentityCredential` with the fixed UAMI Client ID and fixed
 tenant/subscription. That is not DefaultAzureCredential, your browser account,
 an Azure CLI login or an alternate-identity fallback.
 
-![Actual Identity tab with the verified preset Off](images/aks04-step02-04-identity.png)
+![Actual Identity tab with the preset Off](images/newui-identity.png)
 
-**1** is the Identity tab; **2** is the actual Off switch. Do not enable broad
+**1** is the Identity tab; **2** is the actual Off switch (the default). Do not enable broad
 Key Vault/Storage/token presets simply to resemble another case. Step 0's
 four read boundaries still require explicit approval and verification.
 
 5. In Test playground, enter an explicit approved cluster and report defaults.
+   **Create tool** stays grey until **Test** has run.
    An authorized operator tests the code before creation. If a source fails,
    inspect the sanitized error and its **No evaluado** result; do not broaden
    access or fabricate a smaller successful scope.
 6. Select **Create tool** only after the approved test. Reopen/read back the
-   saved source hash, parameter definitions, identity setting and timeout.
+   saved source hash, parameter definitions, identity setting and timeout
+   (**Agent Canvas > Table view** → card **Tools & skills** → **Python tools**
+   → search → click the name → pencil).
 
 **Checkpoint:** the saved tool is Python, its code matches the configured
 whole-file hash, and every current input/default/enum/bound is correct. Merely
@@ -609,24 +630,56 @@ opening or filling a Builder dialog is not deployment evidence.
 
 **Download here:** [`skills/aks-waf-live/SKILL.md`](skills/aks-waf-live/SKILL.md).
 
-1. In **Builder > Agent Canvas**, select **Create > Skill**.
-2. Use the name **`aks-waf-live`**.
-3. Use a description such as `Read-only AKS evidence review for the fixed
-   approved cluster scope; preserve source coverage and deliver actual files.`
-   Copy/upload the complete runtime `SKILL.md` into the skill body. Preserve
-   portal-generated name/description/tool front matter if present, replacing
-   its body placeholder with the reviewed content.
-4. Attach **only `generate-aks-waf-report`**, save through the approved process
-   and reopen the skill.
-5. Confirm both its actual file and attached tool.
+1. In **Build + configure > Agent Canvas**, open the **▾ arrow** beside
+   **Create** and select **Skill**.
 
-![Actual saved runtime skill, attached tool and SKILL.md](images/aks04-step03-skill-readback.png)
+   ![Actual Create ▾ > Skill navigation](images/newui-skill-menu.png)
 
-**1** is the Skills tab; **2** is the single attached report tool; **3** is the
-saved `SKILL.md`. This is actual saved-component readback, not an empty form.
+   **1** the ▾ arrow beside **Create** · **2** **Skill**.
 
-[Full-resolution Python creation menu](images/aks04-step02-01-python-menu.png) ·
-[Saved skill](images/aks04-step03-skill-readback.png).
+2. **First** paste the complete runtime `SKILL.md` in the **SKILL.md** editor
+   on the right. Its front matter fills **Name** (`aks-waf-live`) and
+   **Description** (*Read-only, evidence-qualified AKS single/multi-cluster
+   configuration and Well-Architected review using the single fixed-scope
+   tool.*).
+
+   ![Actual Create skill dialog with SKILL.md pasted first](images/newui-skill.png)
+
+   **1** SKILL.md editor: paste the whole file first · **2** *Name* and
+   **3** *Description*, filled in from the front matter · **4** *Choose tools*.
+
+3. **Then** select **Choose tools**, search `generate-aks-waf-report`, expand
+   the **PythonFunctionTool** group, tick **only `generate-aks-waf-report`**
+   (never the group checkbox) and select **Close panel**. Do not choose the
+   tool before pasting: pasting the whole file replaces the front matter and
+   drops the tool.
+
+   ![Actual Choose tools panel with only the report tool ticked](images/newui-skill-tools.png)
+
+   **1** search · **2** expand the *PythonFunctionTool* group · **3** tick only
+   `generate-aks-waf-report` · **4** *Close panel*.
+
+4. Check the tool chip and the `tools:` line, then save (**Create**) through
+   the approved process.
+
+   ![Actual Create skill dialog with the tool chip and tools: line](images/newui-skill-chip.png)
+
+   **1** tool chip · **2** `tools:` line in the front matter · **3** *Create*
+   (not clicked during capture).
+
+5. Reopen the skill and confirm both its actual file and attached tool:
+   **Agent Canvas > Table view** → card **Tools & skills** → **Skills** →
+   search → click the name.
+
+   ![Actual saved runtime skill, attached tool and SKILL.md](images/newui-edit-skill-open.png)
+
+   **1** Skills (card *Tools & skills*) · **2** search · **3** click the name ·
+   **4** pencil (opens *Edit Skill*). The panel is the actual saved skill: one
+   attached tool, `generate-aks-waf-report`, and its `SKILL.md`. This is
+   saved-component readback, not an empty form.
+
+[Full-resolution Python creation menu](images/newui-menu.png) ·
+[Saved skill](images/newui-edit-skill-open.png).
 These images identify real controls/readback; they do not replace the
 creation steps for the customer's new objects.
 
@@ -638,21 +691,58 @@ one attached tool. It cannot grant roles, run shell commands or remediate.
 **Download here:** [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)
 and [`skills/aks-waf-live/SKILL.md`](skills/aks-waf-live/SKILL.md).
 
-1. In **Builder > Agent Canvas**, select **Create > Custom Agent**.
-2. Name it **`aks-waf-live`** and copy the complete restricted instructions.
-3. In **Choose tools**, select **exactly one**:
-   `generate-aks-waf-report`. Do not leave the picker empty: an empty selection
-   can inherit global tools.
-4. Enable skills and allow **only `aks-waf-live`**. Do not add system skills,
-   other agents, connectors, shell/exec/write tools, handoffs or knowledge
-   retrieval that could expand this scenario.
-5. Save through the approved process, reopen the actual specialist and verify
-   its selected tools/skills rather than trusting the creation form.
+1. In **Build + configure > Agent Canvas**, select the **Create** button itself
+   (or **Create ▾ > Custom agent**): both open **Create a custom agent**.
 
-![Actual saved specialist with one selected tool and one runtime skill](images/aks04-step04-agent-readback.png)
+   ![Actual Create button and Create ▾ > Custom agent](images/newui-agent-menu.png)
 
-**1** is Sub Agents; **2** is **Tools · 1**; **3** is the exact selected Python
-tool; **4** shows the allowed runtime skill. The existing global tools are not
+   **1** **Create** button (opens the form directly) · **2** the ▾ arrow ·
+   **3** *Custom agent* (same form).
+
+2. Set **Custom agent name** to **`aks-waf-live`** and paste the complete
+   restricted instructions in **Instructions**. Do not use *Refine with AI* or
+   *View AI suggestions*.
+
+   ![Actual Create a custom agent form with name and instructions](images/newui-agent.png)
+
+   **1** *Custom agent name* · **2** *Instructions* · **3** *Choose skills* ·
+   **4** *Choose tools*.
+
+3. In **Choose tools**, search, expand **PythonFunctionTool** and select
+   **exactly one**: `generate-aks-waf-report`. Do not leave the picker empty:
+   an empty selection can inherit global tools.
+
+   ![Actual Choose tools panel with only the report tool ticked](images/newui-agent-tools.png)
+
+   **1** search · **2** expand the *PythonFunctionTool* group · **3** tick only
+   `generate-aks-waf-report` · **4** *Close panel*.
+
+4. In **Choose skills**, filter and allow **only `aks-waf-live`** (group
+   *User*). Do not add system skills, other agents, connectors,
+   shell/exec/write tools, handoffs or knowledge retrieval that could expand
+   this scenario.
+
+   ![Actual Choose skills panel with only aks-waf-live ticked](images/newui-agent-skills.png)
+
+   **1** filter · **2** tick only `aks-waf-live` · **3** *Close panel*.
+
+5. Check the two chips, then save (**Create**) through the approved process.
+   Reopen the actual specialist (**Agent Canvas > Table view** → card
+   **Agents** → **Custom agents**, formerly *Sub Agents* → search → click the
+   name) and verify its selected tools/skills rather than trusting the
+   creation form.
+
+   ![Actual Create a custom agent form with one skill chip and one tool chip](images/newui-agent-chips.png)
+
+   **1** skill chip · **2** tool chip · **3** *Create* (not clicked during
+   capture).
+
+![Actual saved specialist with one selected tool and one runtime skill](images/newui-edit-agent-open.png)
+
+**1** is Custom agents (card *Agents*); **2** the search; **3** click the name;
+**4** the pencil opens *Edit custom agent*. The panel shows **Tools · 1**, the
+saved instructions, the exact selected Python tool `generate-aks-waf-report`
+and the allowed runtime skill `aks-waf-live`. The existing global tools are not
 changed by this specialist.
 
 **Checkpoint:** one specialist, one runtime skill, one selected tool, no
@@ -667,9 +757,19 @@ permission.
 **Copy-ready prompts here:** [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
 
 1. Open **New chat** in the approved SRE Agent.
-2. Type **`/agent`** and select **`aks-waf-live`**. The deployment baseline also
-   used the named specialist via `@aks-waf-live`; confirm the selected agent in
-   your portal version rather than assuming a plain mention selects it.
+2. Type **`/agent`**, then `aks-waf-live`, and pick it: the chip
+   **Agent: aks-waf-live** appears next to **+**. The deployment baseline used
+   the named specialist via `@aks-waf-live`; today typing `@` no longer opens a
+   picker, so select the specialist with `/agent` and check the chip.
+
+   ![Actual /agent picker with aks-waf-live](images/newui-chat-pick.png)
+
+   **1** `/agent` + the specialist name · **2** pick `aks-waf-live`.
+
+   ![Actual New chat composer with the Agent: aks-waf-live chip and the report prompt, not sent](images/newui-chat-ready.png)
+
+   **1** the **Agent: aks-waf-live** chip · **2** the report prompt of item 4
+   (not sent during capture) · **3** send.
 3. Ask for the fixed roster first when needed:
 
    ```json
@@ -745,7 +845,8 @@ merely to discover totals already returned. No follow-up is hidden inside the
 report call or its scheduled run.
 
 Spanish (ES) copy-ready equivalents for the normal-chat report and coverage
-follow-up above (matching [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)):
+follow-up above (matching [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)).
+With the **Agent: aks-waf-live** chip selected, leave out the leading `@aks-waf-live`:
 
 - **Single-cluster full report (ES):**
 
@@ -889,15 +990,18 @@ schedule was created for the captured baseline.**
 ![Actual scheduling readback, with no Case04 task](images/aks04-step07-scheduling.png)
 
 **1** is Scheduled tasks, **2** the AKS filter, **3** the actual no-results
-state. This is not a successful schedule/next-run receipt.
+state. This is not a successful schedule/next-run receipt. (Dated 2026-10-13
+capture; today's portal labels may differ: the task list is under
+**Automation**.)
 
 Only after an explicit customer request and an accepted ordinary-chat run:
 
 1. Search **Automation** for a matching **customer-owned** task. Inspect its
    owner, approved fixed scope, responder, prompt and cadence; reuse an
    approved match rather than duplicate it or modify another owner's task.
-   To create a new one, open **Automation > Create > Scheduled task**, or
-   **Builder > Agent Canvas > Create > Trigger > Scheduled tasks**.
+   To create a new one, open **Automation > Create ▾ > Scheduled task**, or
+   **Build + configure > Agent Canvas > Create ▾ > Trigger › Scheduled tasks**;
+   both open **Create scheduled task**.
 2. Choose `aks-waf-live` as the response specialist and specify the approved
    cadence/time zone and exact fixed cluster selection.
 3. Use a prompt for **one complete report call** and immediate four-file
@@ -917,12 +1021,12 @@ snapshot**, the following is a complete proposed template to approve:
 | Field | Proposed value / gate |
 |---|---|
 | Task name | `Monthly AKS configuration review` |
-| Response custom agent | `aks-waf-live` |
-| Frequency / cron | **Custom cron (UTC)** / `0 9 1 * *` = first day at 09:00 UTC, only if chosen |
+| Response subagent | `aks-waf-live` |
+| Frequency / Cron expression (UTC) | **Custom cron** / `0 9 1 * *` = first day at 09:00 UTC, only if chosen |
 | Scope | One exact fixed `cluster_name`, or the distinct approved comma-separated `cluster_names`; never both |
 | Evidence meaning | Configuration/current Kubernetes samples at execution time, plus the **privately configured** billing timeframe; not a previous-month telemetry report |
 | Start on / model tier | Customer-approved activation date and usage policy |
-| Run mode / thread | Autonomous only for approved unattended read-only execution; Review can pause. Use a separate execution thread where offered. |
+| Agent autonomy level / Message grouping for updates | **Autonomous (Default)** only for approved unattended read-only execution; **Review** can pause. **New chat thread for each run** gives each execution its own thread. |
 
 Replace `<APPROVED_AKS_NAME>` with the actual fixed approved name before
 saving **Task details**:
@@ -961,7 +1065,18 @@ tool call and all four real downloads. **Success** may mean handoff to a
 thread, not completed collection; **No thread found** is not acceptance.
 Manual acceptance does not prove a future calendar trigger fired.
 
-![Actual Builder scheduling entry, not a created task](images/aks04-step07-create-menu.png)
+![Actual Agent Canvas > Create ▾ > Trigger › Scheduled tasks entry, not a created task](images/newui-trigger-menu.png)
+
+**1** the ▾ arrow beside **Create** · **2** Trigger › · **3** **Scheduled tasks**.
+Real portal, 2026-11-16; no task was created.
+
+![Actual Create scheduled task form with the proposed template, not created](images/newui-task.png)
+
+**1** *Task name* · **2** *Response subagent* · **3** *Task details* (the
+template above, with its placeholder) · **4** *Frequency* = *Custom cron* ·
+**5** *Cron expression (UTC)* `0 9 1 * *` · **6** *Message grouping for
+updates* = *New chat thread for each run* · **7** *Create task*, **not
+clicked**: this is an unsaved form, not a deployed task or a next-run receipt.
 
 Do not confuse **reporting cadence** with a demo cluster's **power schedule**.
 Any Azure Automation identity/runbook that starts or stops a new demo cluster
@@ -1000,8 +1115,19 @@ New-cloud captures remain **Not collected** until that deployment happens.
 | Current baseline billing | **295.82358809701833 USD**, MonthToDate **2026-10-01 to 2026-10-13T18:17:15Z**, **53** billed ResourceId rows; estimated savings `null` |
 | Earlier source **2026-10-13T14:41:50Z** | **53 workloads / 77 pods** were captured then; Nodes/PVs/StorageClasses had HTTP 403. Historical source plus later replay, not present Kubernetes recovery |
 | Real Builder captures, 2026-10-13 | Actual saved one-tool/one-skill specialist and current UI controls; unsaved code/parameter/identity previews are identified as previews |
+| Builder captures refreshed, 2026-11-16 | Today's portal (**Build + configure**, **Custom agents**, `/agent`): unsaved previews of the create dialogs with this folder's files and placeholders, readbacks of the saved skill and specialist, and the scheduled-task template form; nothing was saved, tested or sent |
 | Corrected two-scope package, **2026-10-14T09:25:00Z / 09:26:26Z** | Actual saved/read-back 12-input deployment; four automatic HTTP 200 downloads; both selectors, full JSON/CSV, observed/reference views, light/dark/mobile and print passed. First cluster: 19 Kubernetes 502s; second: stopped ARM configuration read without starting it |
 | New demo cluster / power scheduler | Not deployed or collected; no new paid cluster, roles or scheduler approval is implied by an existing-tool update |
+
+The 2026-10-13 Builder captures that the steps showed before the refresh are
+kept as dated receipts: [cluster choice](images/aks04-step01-cluster-choice.png) ·
+[Python tool menu](images/aks04-step02-01-python-menu.png) ·
+[Code tab](images/aks04-step02-02-code.png) ·
+[typed paging](images/aks04-step02-03-typed-parameters.png) ·
+[Identity tab](images/aks04-step02-04-identity.png) ·
+[saved skill](images/aks04-step03-skill-readback.png) ·
+[saved specialist](images/aks04-step04-agent-readback.png) ·
+[Create > Trigger entry](images/aks04-step07-create-menu.png).
 
 The verified baseline generic canonical source was
 `b1df6c82582018735e75771efa32d8d1d40a9ef0b9b74cf3e58811d3e4befee0`
@@ -1201,7 +1327,7 @@ wayfinding only; neither is installed or presented as the scoring authority.
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent aks-waf-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent aks-waf-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English** (with the **Agent: aks-waf-live** chip selected, leave out the leading `@aks-waf-live`):
 
 ### 1. Discover Configured AKS Clusters Roster / Listar los Clusteres AKS Configurados (`list_clusters`)
 - **Castellano:**

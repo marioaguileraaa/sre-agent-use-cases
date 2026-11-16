@@ -113,7 +113,7 @@ Subscriptions, resource groups, resource names and every GUID were replaced with
 ```mermaid
 flowchart LR
     S[Scheduled task<br/>monthly, day 3, 07:00 UTC] --> A
-    U[Cost owner in chat<br/>@finops-reviewer] --> A
+    U[Cost owner in chat<br/>/agent finops-reviewer] --> A
     A[Subagent<br/>finops-reviewer] -->|skill rules| K[Skill<br/>azure-finops-review]
     A -->|"report or query"| T[Python tool<br/>generate-azure-finops-review]
     T -->|"Reader: 3 queries per subscription<br/>+ 1 for the project tag"| CM[Cost Management<br/>Query API]
@@ -302,35 +302,49 @@ There are two equivalent options. Use **Option A** the first time, to understand
 
 ### Option A - From the portal (recommended the first time)
 
+The screenshots show today's portal (16 November 2026) with the files of this folder; nothing was saved, tested or sent while taking them. Red numbered boxes show where to click.
+
 #### 5.1 Python tool
 
-**①** In the SRE Agent portal, open **Build + setup → Agent Canvas** and select **Create → Tool → Python tool**.
+**①** In the SRE Agent portal, open **Build + configure → Agent Canvas** (its first option). Open the **▾ arrow** next to **Create** (the **Create** button itself opens *Create a custom agent*) and select **Tool › → Python tool**.
 
-![Create a Python tool from Build + setup](images/01-builder-create-python-tool.png)
+![Build + configure → Agent Canvas → Create ▾ → Tool › → Python tool](images/newui-menu.png)
 
-**②** In the **Code** tab:
-- set **Tool Name** to `generate-azure-finops-review`;
-- set **Timeout (seconds)** to `600`;
+**1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow next to **Create** (not the button) · **4** Tool › · **5** **Python tool**.
+
+**②** The dialog has three tabs: **Code**, **Test playground** and **Identity**. In the **Code** tab:
+- set **Tool Name** to `generate-azure-finops-review` (36 characters at most);
+- set **Timeout (seconds)** to `600` (the default is 120; 900 is the maximum);
 - paste the **Description** below;
-- paste the full content of `generate-azure-finops-review.py` in the editor.
+- click the code editor, press `Ctrl+A` and paste the full content of `generate-azure-finops-review.py`.
+
+There is no *Requirements* field and no parameter editor: the parameters come from `def main(...)`. Do not use **Generate**.
 
 ```text
 Read-only monthly Azure FinOps review of the configured subscriptions (Cost Management Query API, budgets, Azure Advisor and Azure Resource Graph, Reader only): last month's cost and change, month to date and forecast against the budget, where the money goes, cost per project (from a project tag it detects or you set), unusual days and month-over-month jumps, idle and orphaned resources, Advisor savings, commitment coverage and allocation readiness, with a prioritised action list. Writes an offline HTML report with a project filter, a JSON snapshot and three CSV files. Never changes anything.
 ```
 
-![Tool name, timeout, description and code](images/02-python-tool-code.png)
+![Create a Python tool, Code tab: name, timeout, description and code](images/newui-code.png)
+
+**1** *Tool Name* (the field is narrow and does not show the whole name) · **2** *Timeout (seconds)* `600` · **3** *Description* · **4** code editor: `Ctrl+A` and paste the whole file · **5** *Create tool*, grey until you run **Test**.
 
 **③** Scroll the editor to lines 36-37 and replace the two `<YOUR_...>` values with your Client ID and subscriptions (step 4).
 
-![Configuration lines 36-37 in the editor](images/03-python-tool-config-placeholders.png)
+![Code tab: CONFIGURE lines 36-37 in the editor](images/newui-config-lines.png)
 
-**④** In the **Identity** tab, leave **Enable Azure Identity** **Off**. The tool gets its own token with the agent managed identity (the Client ID of line 36).
+**1** lines 36-37, shown with the `<YOUR_...>` placeholders of the repository file (your copy has your Client ID and subscriptions) · **2** *Create tool*, still grey.
 
-![Identity tab: Enable Azure Identity Off](images/04-python-tool-identity-off.png)
+**④** In the **Identity** tab, leave **Enable Azure Identity** **Off** (the default). The tool gets its own token with the agent managed identity (the Client ID of line 36).
 
-**⑤** Open **Test playground**. The 5 optional parameters are detected from the code. Enter `operation` = `query` and `view` = `summary`, then select **Test**. In 10-40 seconds it returns the key numbers, the headline and the coverage, without writing files.
+![Identity tab: Enable Azure Identity Off](images/newui-identity.png)
 
-![Test playground with the 5 optional parameters](images/05-python-tool-test-playground.png)
+**1** Identity tab · **2** *Enable Azure Identity* Off.
+
+**⑤** Open **Test playground**. It shows one empty box for each of the 5 optional parameters, detected from the code. Type `operation` = `query` and `view` = `summary`, leave the other boxes empty, then select **Test**. In 10-40 seconds it returns the key numbers, the headline and the coverage, without writing files.
+
+![Test playground with the 5 optional parameters](images/newui-playground.png)
+
+**1** Test playground tab · **2** **Test** · **3** `operation` = `query` · **4** `view` = `summary` · **5** *Create tool*, grey until you run the test.
 
 | Parameter | Values | Default | Meaning |
 |---|---|---|---|
@@ -340,55 +354,73 @@ Read-only monthly Azure FinOps review of the configured subscriptions (Cost Mana
 | `project` | A project name | empty | Only with `query`: `summary`, `actions`, `savings`, `resources` and `projects` show that project only (`Unallocated` works too) |
 | `project_tag` | A tag name, or up to 5 separated by commas | empty | The tag that names the projects for this run (for example `Proyecto`); it overrides `PROJECT_TAG_KEYS` and the detection |
 
-**⑥** Select **Create tool**.
+**⑥** **Create tool** stays grey until you run **Test**. When the test has run, select **Create tool**.
 
-![Create tool](images/06-python-tool-create.png)
-
-*In this screenshot **Create tool** is disabled only because the tool already exists in the lab agent. In a new agent it is enabled once the test passes.*
+*The screenshots never run **Test**, so **Create tool** is grey in all of them.*
 
 #### 5.2 Skill
 
-**⑦** Select **Create → Skill**.
+**⑦** Back in **Agent Canvas**, open the **▾ arrow** next to **Create** and select **Skill**.
 
-![Create a skill](images/07-builder-create-skill.png)
+![Agent Canvas → Create ▾ → Skill](images/newui-skill-menu.png)
 
-**⑧** Paste the full content of [`skills/azure-finops-review/SKILL.md`](skills/azure-finops-review/SKILL.md). The portal fills **Name** (`azure-finops-review`) and **Description** from the header of the file.
+**1** the ▾ arrow next to **Create** · **2** **Skill**.
 
-![Skill form with name, description and content](images/08-skill-form.png)
+**⑧** The order matters: **first** paste the full content of [`skills/azure-finops-review/SKILL.md`](skills/azure-finops-review/SKILL.md) in the **SKILL.md** editor on the right. The portal fills **Name** (`azure-finops-review`) and **Description** from the header of the file; its `tools:` line already names the tool, so the tool chip appears under **Tools**.
 
-**⑨** In **Choose tools**, search for `generate-azure-finops-review` (type *PythonFunctionTool*) and select it.
+![Create skill: SKILL.md pasted first, name and description filled in](images/newui-skill.png)
 
-![Choose the Python tool for the skill](images/09-skill-choose-tools.png)
+**1** SKILL.md editor: paste the whole file first · **2** *Name* and **3** *Description*, filled in from the header · **4** *Choose tools* (next).
 
-**⑩** Select **Create**.
+**⑨** Then select **Choose tools**, search `generate-azure-finops-review`, expand the **PythonFunctionTool (n)** group and make sure that only this tool is ticked (here the `tools:` line already ticked it; never tick the group checkbox), then **Close panel**. Choose the tool **after** pasting: pasting the whole file again replaces the header and can drop a tool chosen before.
 
-![Create the skill](images/10-skill-create.png)
+![Choose tools: search, expand PythonFunctionTool, tick only the tool](images/newui-skill-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only `generate-azure-finops-review` · **4** *Close panel*.
+
+**⑩** Check the tool chip and the `tools:` line in the editor, then select **Create**.
+
+![Create skill ready: tool chip and tools: line](images/newui-skill-chip.png)
+
+**1** tool chip · **2** `tools:` line in the header · **3** *Create*.
 
 #### 5.3 Subagent
 
-**⑪** Select **Create → Custom Agent**.
+**⑪** Select the **Create** button itself (or **Create ▾ → Custom agent**): both open **Create a custom agent**.
 
-![Create a subagent](images/11-builder-create-agent.png)
+![Agent Canvas: the Create button opens Create a custom agent](images/newui-agent-menu.png)
 
-**⑫** Set **Name** to `finops-reviewer`. Paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**, and this **Handoff description**:
+**1** **Create** button (opens the form directly) · **2** the ▾ arrow · **3** *Custom agent* (same form).
+
+**⑫** Set **Custom agent name** to `finops-reviewer` and paste [`subagent-instructions.txt`](subagent-instructions.txt) in **Instructions**. Do not use *Refine with AI* or *View AI suggestions*. Today's form has no *Handoff description* field; the deploy script of Option B still sets this one through the API:
 
 ```text
 Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, cost per project, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.
 ```
 
-![Subagent name and instructions](images/12-agent-name-instructions.png)
+![Create a custom agent: name and instructions](images/newui-agent.png)
 
-**⑬** In **Choose skills**, select only `azure-finops-review` (it appears under the *User* group).
+**1** *Custom agent name* · **2** *Instructions* · **3** *Choose skills* · **4** *Choose tools*.
 
-![Choose the skill](images/13-agent-choose-skills.png)
+**⑬** In **Choose skills**, filter `azure-finops-review`, tick only that skill (it appears under the *User* group) and select **Close panel**.
 
-**⑭** In **Choose tools**, select only `generate-azure-finops-review`.
+![Choose skills: only azure-finops-review](images/newui-agent-skills.png)
 
-![Choose the tool](images/14-agent-choose-tools.png)
+**1** filter · **2** tick only `azure-finops-review` · **3** *Close panel*.
 
-**⑮** Select **Create**.
+**⑭** In **Choose tools**, search `generate-azure-finops-review`, expand **PythonFunctionTool**, tick only that tool and select **Close panel**.
 
-![Create the subagent](images/15-agent-create.png)
+![Choose tools: only generate-azure-finops-review](images/newui-agent-tools.png)
+
+**1** search · **2** expand the *PythonFunctionTool* group · **3** tick only `generate-azure-finops-review` · **4** *Close panel*.
+
+**⑮** Check the two chips and select **Create**. Choosing a skill and a tool here replaces the global defaults that the subagent would otherwise inherit.
+
+![Create a custom agent ready: skill and tool chips](images/newui-agent-chips.png)
+
+**1** skill chip · **2** tool chip · **3** *Create*.
+
+After saving, the three objects are listed in **Agent Canvas → Table view**: the subagent in the **Agents** card (**Custom agents**, formerly *Sub Agents*), the skill and the tool in the **Tools & skills** card (**Skills** and **Python tools**).
 
 ### Option B - By script (2 minutes)
 
@@ -421,13 +453,19 @@ The output shows `1/4 Python tool`, `2/4 Skill`, `3/4 Subagent` and `4/4 Schedul
 
 ## Step 6 - First run and the report
 
-**⑯** Open **New chat** and send:
+**⑯** Open **New chat**, type `/agent` and pick **finops-reviewer** (typing `@` no longer opens a picker). The chip **Agent: finops-reviewer** appears next to **+**. Then send:
 
 ```text
-@finops-reviewer Run the monthly Azure FinOps review and give me the report.
+Run the monthly Azure FinOps review and give me the report.
 ```
 
-![Run the subagent from the chat](images/16-chat-run-agent.png)
+![/agent: pick finops-reviewer](images/newui-chat-pick.png)
+
+**1** `/agent` + the subagent name · **2** pick `finops-reviewer`.
+
+![Agent: finops-reviewer chip and the prompt, ready to send](images/newui-chat-ready.png)
+
+**1** the **Agent: finops-reviewer** chip · **2** the prompt · **3** send.
 
 **⑰** About a minute later the agent answers with the five files first. Click to download them.
 
@@ -441,7 +479,7 @@ It also gives the cost per project, says which tag identified the projects and w
 
 ![The agent's cost per project and the tag it detected](images/17c-chat-result-projects.png)
 
-*Identifiers are redacted in these screenshots. The full pseudonymized answer is in [`sample-run/agent-answer.md`](sample-run/agent-answer.md).*
+*These three answers come from an earlier run; today's portal labels may differ. Identifiers are redacted in these screenshots. The full pseudonymized answer is in [`sample-run/agent-answer.md`](sample-run/agent-answer.md).*
 
 For follow-up questions the agent calls the tool with `operation=query` and the matching view, without generating files. For example: *"Why did the cost go up?"*, *"Are we within budget?"*, *"Where can we save?"*, *"How much does each project cost?"*, *"What can the E-commerce web project save?"*. If your projects use a tag the tool did not pick, say so (*"our projects are in the tag Proyecto"*) and the agent runs the review again with that tag. See [Copy-ready prompts](#copy-ready-prompts).
 
@@ -517,9 +555,11 @@ CSV cells are protected against formula injection.
 
 ## Step 7 - Schedule the monthly review
 
-**⑱** Open **Automation → Create → Scheduled task**.
+**⑱** Open **Automation** (left menu) → **Create ▾** → **Scheduled task** (the other option is *HTTP trigger*).
 
-![Create a scheduled task](images/18-automation-create-scheduled-task.png)
+![Automation → Create ▾ → Scheduled task](images/newui-task-menu.png)
+
+**1** Automation · **2** Create ▾ · **3** **Scheduled task**.
 
 **⑲** Fill in the form:
 
@@ -528,15 +568,18 @@ CSV cells are protected against formula injection.
 | Task name | `Azure FinOps - Monthly cost review` |
 | Response subagent | `finops-reviewer` |
 | Task details | The monthly prompt below |
-| Frequency | **Monthly**, **day 3**, at **07:00 UTC** (the form shows your browser time zone: 08:00 in Madrid in winter, 09:00 in summer). Cron: `0 7 3 * *` |
-| Message grouping for updates | **Use same chat thread** (every month in one thread shows the history) |
-| Agent autonomy | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
+| Frequency | **Monthly**, **Day of month** `3`, **Time of day** for **07:00 UTC**. The time list uses your browser time zone: 08:00 in Madrid in winter, 09:00 in summer. Or choose **Custom cron** and type `0 7 3 * *` in **Cron expression (UTC)** |
+| Start on, Repeat until, Model tier, Set a run limit | Leave the defaults (today, no end date, *General Purpose*, no limit) |
+| Message grouping for updates | **Use same chat thread** (the default; every month in one thread shows the history) |
+| Agent autonomy level | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
 
 ```text
 @finops-reviewer Run the monthly Azure FinOps review (operation=report). Give me the links to the HTML report, the JSON snapshot and the three CSV files first, then the verdict, the headline numbers, the cost per project and which tag identifies the projects, the prioritised actions with their estimated monthly savings, the budgets at risk, the unusual days and jumps, the allocation readiness and the coverage.
 ```
 
-![Scheduled task form](images/19-scheduled-task-form.png)
+![Create scheduled task filled in](images/newui-task.png)
+
+**1** *Task name* · **2** *Response subagent* · **3** *Task details* · **4** *Frequency* = *Monthly* · **5** *Day of month* `3` · **6** *Time of day* `8:00` in the browser time zone (GMT+1) = 07:00 UTC · **7** *Message grouping for updates* = *Use same chat thread* · **8** *Create task*.
 
 Select **Create task**. Why the 3rd: the cost of a day keeps changing in Cost Management for one to three days, so on the 1st the last days of the month are still incomplete.
 
@@ -619,9 +662,11 @@ The analysis is deterministic and explainable; every rule is covered by unit tes
   - Marketplace invoices outside Cost Management, and credits or refunds at billing-account level;
   - usage inside resources (idle databases, oversized clusters) beyond what Azure Advisor reports.
 - **Data handling.** The files contain costs, resource names and IDs. Treat them as internal confidential data.
-- **Screenshots** in this guide come from a Microsoft lab tenant; subscriptions, resource names and identifiers are pseudonymized or redacted.
+- **Screenshots** in this guide come from a Microsoft lab tenant; subscriptions, resource names and identifiers are pseudonymized or redacted. The portal screenshots of steps 5-7 were refreshed on 16 November 2026 without saving anything; the chat answers come from an earlier run.
 
 ## Copy-ready prompts
+
+In the chat, select the subagent first (**New chat** → `/agent` → `finops-reviewer`) and paste the prompt without the leading `@finops-reviewer`. In a scheduled task, paste it as it is: the **Response subagent** field selects the subagent.
 
 | Goal | Prompt |
 |---|---|

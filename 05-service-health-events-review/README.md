@@ -34,13 +34,17 @@ is claimed.
 [6. Monthly task](#6-configure-and-verify-the-monthly-task) |
 [Troubleshooting](#troubleshooting-and-boundaries).
 
-The annotated setup pictures show **actual saved lab objects**, not creation
-wizards or customer-specific values to copy. The annotated report pictures are
-**SIMULATED renders of the current report design** from sanitized sample data;
-they contain no customer, tenant or lab identifiers. Portal releases can
-call the authoring area **Builder** or **Build + setup**, and **Skills** or
-**Skill builder**. Use the named object/field and saved readback when a label
-differs; do not infer access or successful deployment from a visible button.
+The setup pictures are captures of **today's portal (16 November 2026)**,
+taken read-only on the lab agent: the creation forms show this guide's names,
+values and files typed or pasted but nothing saved, tested, sent or run, and
+the readback panels show the **actual saved lab objects** under this guide's
+names. They are not customer-specific values to copy. The annotated report
+pictures are **SIMULATED renders of the current report design** from sanitized
+sample data; they contain no customer, tenant or lab identifiers. Earlier
+portal releases called the authoring area **Builder** or **Build + setup**
+(today: **Build + configure**), and **Skills** or **Skill builder**. Use the
+named object/field and saved readback when a label differs; do not infer
+access or successful deployment from a visible button.
 
 ![Simulated Service Health report overview rendered from sanitized sample data](images/report-01-overview.png)
 
@@ -211,9 +215,14 @@ separate and are not required by this case.
 
 Collect the values without putting them in chat or generic Git:
 
-1. Open the customer's existing agent in the SRE portal. Go to
-   **Settings > Azure settings > Managed Identity > Go to Identity**.
-   On the user-assigned identity's Azure page, copy **Client ID** for
+1. In the [Azure portal](https://portal.azure.com), open the customer agent's
+   resource group and its **Managed Identity** resource whose name starts with
+   `id-` (the user-assigned identity attached to the agent). Today's SRE Agent
+   portal has no **Settings** entry in the agent menu (checked on 16 November
+   2026); older versions of this guide used **Settings > Azure settings >
+   Managed Identity > Go to Identity**. With Azure CLI:
+   `az identity show --name <IDENTITY_NAME> --resource-group <RESOURCE_GROUP> --query clientId -o tsv`.
+   On the user-assigned identity's **Overview**, copy **Client ID** for
    `MANAGED_IDENTITY_CLIENT_ID` and **Object (principal) ID** for the
    administrator's IAM checks. These two GUIDs are not interchangeable.
 2. Confirm this is the UAMI associated with and available to the intended
@@ -371,37 +380,77 @@ If a tool, skill or specialist with the exact case name already exists, verify
 customer ownership and the complete saved contract before reusing it. Do not
 overwrite an unrelated name collision or create duplicate case objects.
 
-1. In the intended agent, open **Builder > Agent Canvas > Create > Tool >
-   Python tool**. Use the existing-code **Code** tab, not **Generate** or
-   **Refine with AI**: the complete reviewed implementation already exists.
-2. Set the exact name **`generate-service-health-report`**. For its description
+1. In the intended agent, open **Build + configure > Agent Canvas > Create ▾**
+   (the arrow next to **Create**; the button itself opens the custom agent
+   dialog) **> Tool › > Python tool**. Use the existing-code **Code** tab, not
+   **Generate** or **Refine with AI**: the complete reviewed implementation already exists.
+
+   ![Build + configure > Agent Canvas > Create ▾ > Tool > Python tool](images/newui-menu.png)
+
+   **1** Build + configure · **2** Agent Canvas · **3** the ▾ arrow next to
+   **Create** (not the button) · **4** Tool › · **5** **Python tool**.
+
+2. Set the exact **Tool Name** (36 characters max.)
+   **`generate-service-health-report`**. For its description
    use: `Read-only ServiceIssue and PlannedMaintenance review for the fixed
    approved subscription; complete HTML, JSON and two CSV files, or bounded
-   source-qualified queries. No Azure writes.`
+   source-qualified queries. No Azure writes.` Set **Timeout (seconds)** to
+   `900` (default 120).
 3. Paste the **entire privately configured standalone file** into the code
-   editor, without Markdown fences. Do not paste just `main()` or import
+   editor (`Ctrl+A`, then paste), without Markdown fences. Do not paste just `main()` or import
    `engine.py`; the standalone file already embeds its HTML template.
-4. Review the runtime settings below, then match **all 11** parameter rows
-   in the following table to [tool-parameters.schema.json](tool-parameters.schema.json).
-   Do not let a generated schema rename or drop fields.
-5. Select **Create tool** when the form is complete, then reopen the saved tool.
-   If this portal version requires a playground test before creation, treat
-   that as an additional customer-authorized live read, not a harmless syntax
-   check. Do not repeatedly press **Test** or use tests to collect screenshots.
+
+   ![Create a Python tool, Code tab](images/newui-code.png)
+
+   **1** *Tool Name* (the narrow field doesn't show the whole name) ·
+   **2** *Timeout (seconds)* `900` · **3** *Description* · **4** the pasted
+   standalone file (top shown; this read-only capture used the repository file,
+   not a configured copy) · **5** *Create tool*, grey until **Test**.
+
+4. Review the runtime settings below. There is no parameter editor and no
+   *Requirements* field: the **11** inputs are read from the typed
+   `def main(...)`, and must match the table below and
+   [tool-parameters.schema.json](tool-parameters.schema.json). Do not let a
+   generated rewrite rename or drop fields. On the **Identity** tab, leave
+   **Enable Azure Identity** **Off**.
+5. **Create tool** stays grey until you run **Test** on the **Test
+   playground** tab (one empty box per input). That test is an additional
+   customer-authorized live read, not a harmless syntax check: with approval,
+   type `report` in **operation** and `previous_month` in **period**, leave the
+   other boxes empty, run **Test** once, inspect the result, then select
+   **Create tool** and reopen the saved tool. Do not repeatedly press **Test**
+   or use tests to collect screenshots.
    The first normal-chat acceptance in step 4 is still a separate delivery gate.
+
+   ![Test playground: operation and period typed, Test not run](images/newui-playground.png)
+
+   ![Test playground: bottom of the 11 boxes, limit and offset take int values](images/newui-playground-b.png)
+
+   **1** *Test playground* tab · **2** **Test** (not clicked in the capture) ·
+   **3** `operation` = `report` · **4** `period` = `previous_month` · **5**
+   (second image: **2**) *Create tool*, grey until **Test**. The other boxes
+   stay empty so their defaults apply; `limit` and `offset` say *Enter int value*.
+
+   ![Create a Python tool, Identity tab](images/newui-identity.png)
+
+   **1** *Identity* tab · **2** *Enable Azure Identity*, left **Off**: the code
+   acquires its own ARM token. In today's portal turning it on inserts four
+   `# Azure Identity Authentication` lines (`DefaultAzureCredential`) at the top
+   of the code that stay after switching it off; delete them if that happens.
 
 | Setting | Customer setup / accepted lab reference |
 |---|---|
 | Timeout (`timeoutSeconds`) | **900 seconds**, matching the saved lab setting, within the documented 5-900 second range. The code retains its own 180-second collection guard; the platform default 120 seconds is not the accepted setting. |
 | Runtime packages | [requirements.txt](requirements.txt): `azure-identity>=1.19,<2` and `Pillow>=12.2,<13`. `azure-identity` supplies explicit UAMI auth; Pillow validates a nonempty logo. No extra runtime template/library is needed. |
-| Dependencies/packages field, if exposed | The accepted lab had `dependencies=[]`: the packages were already installed. Verify availability in the customer's runtime. Only if missing, have the runtime administrator use the supported dependency configuration and the manifest's compatible versions; field syntax/availability varies. Do not add `pip install` to the tool or give this specialist a shell. |
-| Identity / platform authentication | Saved lab values: `authEnabled=false`, `authScopes=null`, `toolMode=Auto`. Authentication is **disabled** at this platform layer because the code acquires its own ARM token through the fixed UAMI Client ID. Do not enable generic preset scopes or replace this flow with the product tutorial's separate Identity-tab example. |
+| Dependencies/packages field, if exposed | Today's dialog has no *Requirements*/dependencies field (checked on 16 November 2026). The accepted lab had `dependencies=[]`: the packages were already installed. Verify availability in the customer's runtime. Only if missing, have the runtime administrator use the supported dependency configuration and the manifest's compatible versions. Do not add `pip install` to the tool or give this specialist a shell. |
+| Identity / platform authentication | Saved lab values: `authEnabled=false`, `authScopes=null`, `toolMode=Auto`: **Enable Azure Identity** is **Off**. Authentication is **disabled** at this platform layer because the code acquires its own ARM token through the fixed UAMI Client ID. Do not enable generic preset scopes or replace this flow with the product tutorial's separate Identity-tab example. |
 
 These are saved configuration fields, **not additional `main()` parameters**.
 If an advanced setting is not exposed in your portal, use the customer's
 approved administrator configuration/readback route rather than inventing a
-wizard field. Source code enforces enum/bound constraints even when a parameter
-editor exposes only name/type/value; retain the documented Python defaults.
+wizard field. Source code enforces enum/bound constraints; the portal only
+shows the parameter names and types read from `main()`, so retain the
+documented Python defaults.
 
 This case's schema is an Azure SRE runtime schema, not standards-compliant JSON
 Schema: the runtime numeric type is **`int`**, not `integer` or a quoted number.
@@ -436,22 +485,29 @@ explicitly SIMULATED offline helper below for a local demonstration. Preserve
 this pure-load contract when editing or deploying the code: an autorun guard
 can collect once during hydration and again during normal invocation.
 
-**Checkpoint:** reopen the newly saved `generate-service-health-report` in
-**Agent Canvas** (or **Table view > Python tools**). Inspect **Python Code**,
+**Checkpoint:** reopen the newly saved `generate-service-health-report`:
+**Agent Canvas > Table view** > in the *Tools & skills* card, **Python
+tools** > search for the name > click it (the pencil opens **Edit Python
+tool**). Inspect **Python Code**,
 **Query parameters** and runtime settings: complete source, only the six
 private configuration edits, one `main`, all 11 types/defaults, timeout and
 dependencies. Search for the tool itself; the specialist does not exist yet.
 After step 3 you can also find it by filtering to `service-health-live`.
 
-![Actual saved Python tool, main entry point and eleven typed parameters](images/setup-01-saved-tool-main-parameters.png)
+![Saved Python tool readback: code and parameters read from main()](images/newui-tool-readback.png)
 
-Callout **1** is the saved tool. **2** shows its actual `main()` entry point;
-the separately verified full source has no CLI autorun block. **3** shows all
-11 runtime parameters, including `limit` and `offset` as `int`. Private
+![Saved Python tool readback: limit and offset typed int](images/newui-tool-readback-b.png)
+
+Today's readback of the saved lab tool (16 November 2026, nothing edited):
+**1** *Python tools* in the *Tools & skills* card · **2** search · **3** click
+the name · **4** the saved **Python Code** (top of the standalone file) ·
+**5** **Query parameters**, read from `main()`; the second image scrolls to the
+end of that list (**1**): `limit` and `offset` are `int`. Private
 configuration and logo Base64 are outside the captured code viewport and
 are not included in this repository. Blank **Value** cells in this saved-detail
 table are not instructions to delete defaults: use the schema/main defaults
-listed above.
+listed above. The October readback that showed `main()` and all 11 rows is
+[kept for reference](images/setup-01-saved-tool-main-parameters.png).
 
 ### Bounded native reads
 
@@ -491,28 +547,58 @@ zero cost. No savings, cost forecast or extra-resource deployment is promised.
 
 Create the **runtime skill first**, then its separate restricted specialist:
 
-1. Open **Builder > Skills** (called **Skill builder** in the lab captures).
-   Select **Create skill**; some portal versions expose **+ Create skill**
-   from Agent Canvas. Name it **`service-health-live`**. Use the description
-   from the linked [runtime `SKILL.md`](skills/service-health-live/SKILL.md).
-2. In **Files > SKILL.md**, replace the default instruction template with the
-   **entire case runtime file**. Do not paste this README or a knowledge
-   document instead. If the portal
-   synchronizes frontmatter and form fields, verify the resulting name,
-   description and instruction body after saving.
-3. In the skill's **Tools > Choose tools**, select **only**
-   `generate-service-health-report`, then **Create**. Reopen it and verify
+1. Open **Build + configure > Agent Canvas > Create ▾** (the arrow) **> Skill**
+   (**Build + configure > Extensions > Skill builder > Create skill** opens the
+   same dialog).
+2. In the **SKILL.md** editor, select all (`Ctrl+A`) and paste the **entire
+   case runtime file** [`skills/service-health-live/SKILL.md`](skills/service-health-live/SKILL.md)
+   **first**. Its front matter fills **Name** (`service-health-live`) and
+   **Description**. Do not paste this README or a knowledge document instead;
+   verify the resulting name, description and instruction body.
+3. **Then** select **Choose tools**, search for
+   `generate-service-health-report`, expand **PythonFunctionTool (n)**, tick
+   **only** that tool (never the group checkbox) and **Close panel**. Check
+   the chip and the `tools:` line added to the front matter (pasting the file
+   again after this step removes them), then **Create**. Reopen it and verify
    the saved `SKILL.md` and single bound tool.
-4. In **Agent Canvas > Create > Custom Agent**, open **Form**
-   (older versions say **+ Create subagent**). Name the specialist
+
+   ![Create skill: SKILL.md pasted first](images/newui-skill.png)
+
+   **1** paste the whole `SKILL.md` first · **2** *Name* and **3** *Description*,
+   filled in from its front matter · **4** *Choose tools*, next.
+
+   ![Create skill: Choose tools](images/newui-skill-tools.png)
+
+   **1** search · **2** expand the *PythonFunctionTool* group · **3** tick only
+   `generate-service-health-report` · **4** *Close panel*.
+
+   ![Create skill: ready to create](images/newui-skill-chip.png)
+
+   **1** tool chip · **2** `tools:` in the front matter · **3** **Create** (not
+   clicked in this read-only capture).
+
+4. In **Agent Canvas**, select **Create**: the button opens **Create a custom
+   agent** (tabs *Form / YAML*; **Create ▾ > Custom agent** is the same dialog;
+   older versions said **+ Create subagent**). Name the specialist
    **`service-health-live`** and paste the complete **Copy-ready instructions**
    block from [subagent-instructions-and-prompts.md](subagent-instructions-and-prompts.md).
    Do not ask AI to rewrite the restrictions.
-5. In **Choose tools**, explicitly select **only**
-   `generate-service-health-report`. In **Choose Skills** / **Allowed Skills**,
-   enable skills if required and select **only** `service-health-live`.
-   Leave handoff agents, extra/system skills and unrelated execution tools
-   unselected. **Create**, reopen and read back the saved detail/allowlists.
+5. In **Choose skills**, filter and tick **only** `service-health-live`, then
+   **Close panel**. In **Choose tools**, search, expand **PythonFunctionTool
+   (n)** and tick **only** `generate-service-health-report`, then **Close
+   panel**. Leave handoff agents, extra/system skills and unrelated execution
+   tools unselected. **Create**, reopen and read back the saved detail/allowlists.
+
+   ![Create a custom agent: name and instructions](images/newui-agent.png)
+
+   **1** *Custom agent name* · **2** pasted *Instructions* · **3** *Choose
+   skills* · **4** *Choose tools*.
+
+   ![Create a custom agent: ready to create](images/newui-agent-chips.png)
+
+   **1** skill chip `service-health-live` · **2** tool chip
+   `generate-service-health-report` · **3** **Create** (not clicked in this
+   read-only capture).
 
 An empty tool selection **inherits global tools**; an empty allowed-skills
 selection can allow all skills. Neither is the intended one-tool/one-skill
@@ -525,14 +611,14 @@ administrator's job.
 
 | Portal surface | Exact field / control | Required value / post-save readback check |
 |---|---|---|
-| **Python tool** (`Builder > Agent Canvas > Create > Tool > Python tool`) | **Tool Name** | `generate-service-health-report` |
+| **Python tool** (`Build + configure > Agent Canvas > Create ▾ > Tool › > Python tool`) | **Tool Name** | `generate-service-health-report` |
 | **Python tool** | **Description** | `Read-only ServiceIssue and PlannedMaintenance review for the fixed approved subscription; complete HTML, JSON and two CSV files, or bounded source-qualified queries. No Azure writes.` |
 | **Python tool** | **Code** tab | Complete standalone `generate-service-health-report.py` with only the 6 private constants edited; definitions-only on load (no `if __name__ == "__main__":` autorun) |
-| **Python tool** | **Timeout** (`timeoutSeconds`) | `900` seconds (not the 120-second platform default) |
-| **Python tool** | **Query parameters** | All **11 parameters** matching `tool-parameters.schema.json`; verify `limit` (`10`) and `offset` (`0`) use runtime type **`int`** (not `integer` or `string`) |
-| **Python tool** | **Identity / Authentication** | **Off** (`authEnabled=false`, `authScopes=null`, `toolMode=Auto`) |
-| **Skill** (`Builder > Skills > Create skill`) | **Skill Name** / **SKILL.md** / **Choose tools** | Name `service-health-live`; complete `skills/service-health-live/SKILL.md` body; verify the exact selected tool **name** `generate-service-health-report` |
-| **Custom Agent** (`Agent Canvas > Create > Custom Agent > Form`) | **Name** / **Instructions** / **Choose tools** / **Allowed Skills** | Name `service-health-live`; complete copy-ready instructions from `subagent-instructions-and-prompts.md`; verify the exact selected tool and skill **names** in the saved form and effective supported policy (`tools: ["generate-service-health-report"]`, `allowedSkills: ["service-health-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`); never leave allowlists empty or rely on the list summary badge |
+| **Python tool** | **Timeout (seconds)** (`timeoutSeconds`) | `900` seconds (not the 120-second platform default) |
+| **Python tool** | **Query parameters** (read from `main()`; no parameter editor) | All **11 parameters** matching `tool-parameters.schema.json`; verify `limit` (`10`) and `offset` (`0`) use runtime type **`int`** (not `integer` or `string`) |
+| **Python tool** | **Identity** tab | **Enable Azure Identity** **Off** (`authEnabled=false`, `authScopes=null`, `toolMode=Auto`) |
+| **Skill** (`Build + configure > Agent Canvas > Create ▾ > Skill`) | **SKILL.md** (pasted first) / **Name** / **Choose tools** | Name `service-health-live` (from the front matter); complete `skills/service-health-live/SKILL.md` body; verify the exact selected tool **name** `generate-service-health-report` |
+| **Custom agent** (`Agent Canvas > Create` → **Create a custom agent** > Form) | **Custom agent name** / **Instructions** / **Choose skills** / **Choose tools** | Name `service-health-live`; complete copy-ready instructions from `subagent-instructions-and-prompts.md`; verify the exact selected tool and skill **names** in the saved form and effective supported policy (`tools: ["generate-service-health-report"]`, `allowedSkills: ["service-health-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`); never leave allowlists empty or rely on the list summary badge |
 
 > [!NOTE]
 > **Dated SRE UI badge caveat:** In the live SRE Agent UI, Agent Canvas list/card summary badges can display inherited global rollups (for example, `131 tools` / `52 skills`) even when both native APIs, selected chips and the saved form policy enforce one explicit tool and skill (`tools`, `allowedSkills`, `addSystemSkills=false`, `disableDocumentRetrieval=true`). Verify the exact selected tool and skill **names** in the saved form and effective supported policy; the list summary badge is not authoritative restriction proof, and you must not modify globals to change it.
@@ -540,27 +626,32 @@ administrator's job.
 **Checkpoint:** the saved skill contains the correct complete `SKILL.md` and
 one bound tool; the saved specialist has the exact name/instructions, **one
 explicit selected tool and one selected skill**, with no inherited execution
-tools. The pictures below are historical readbacks, not new-object forms.
+tools. The pictures below are readbacks of the saved lab objects in today's
+portal (16 November 2026), not new-object forms.
 
-![Actual saved runtime skill and its single reporting tool](images/setup-03-saved-runtime-skill.png)
+![Saved runtime skill and its single reporting tool](images/newui-skill-readback.png)
 
-Callouts **1-3** identify the saved skill, its single case05 tool and its
-`SKILL.md` file. The reusable instruction content is linked in the package
-table above.
+Skill readback (**Agent Canvas > Table view**): **1** *Skills* in the *Tools &
+skills* card · **2** search · **3** click the name · **4** its single case05
+tool · **5** its `SKILL.md` file. The reusable instruction content is linked in
+the package table above. The October readback is
+[kept for reference](images/setup-03-saved-runtime-skill.png).
 
-![Actual restricted Service Health specialist with one selected tool and matching skill](images/setup-02-restricted-agent.png)
+![Restricted Service Health specialist with one selected tool and matching skill](images/newui-agent-readback.png)
 
-Callout **1** shows **Tools - 1**. **2** identifies the selected
-`generate-service-health-report`; **3** identifies the attached
-`service-health-live` skill. No global execution/remediation tools were
-added to this specialist.
+Specialist readback: **1** *Custom agents* in the *Agents* card · **2** search ·
+**3** click the name · **4** **Tools · 1** · **5** the selected
+`generate-service-health-report` · **6** the attached `service-health-live`
+skill. No global execution/remediation tools were added to this specialist.
+The October readback is [kept for reference](images/setup-02-restricted-agent.png).
 
 ## 4. Generate a report and ask grounded questions
 
-After customer approval for a source read, select **New chat thread** in the
-customer's agent. Select the **`service-health-live`** specialist using the
-agent picker or the portal's `/agent` selection. Verify the selected responder,
-not just a typed name in the message. Paste this **natural-language prompt**:
+After customer approval for a source read, select **New chat** in the
+customer's agent. Type `/agent`, type `service-health-live` and pick the
+**`service-health-live`** specialist; the chip **Agent: service-health-live**
+appears next to **+** (typing `@` no longer opens a picker). Verify the selected
+responder, not just a typed name in the message. Paste this **natural-language prompt**:
 
 ```text
 Use service-health-live and only generate-service-health-report. Generate one
@@ -579,6 +670,14 @@ This is the call to inspect in the thread, not JSON you must run manually.
 No CLI, token, subscription or credential belongs in the chat.
 Reports retain all collected in-scope evidence, including records outside the
 requested-update view.
+
+![New chat: /agent and the specialist name](images/newui-chat-pick.png)
+
+![New chat: Agent chip and the report prompt](images/newui-chat-ready.png)
+
+Today's portal, nothing sent: **1** `/agent` and the specialist name ·
+**2** pick `service-health-live`; then (second image) **1** chip *Agent:
+service-health-live* · **2** the prompt above · **3** send.
 
 Optional **Spanish (ES)** equivalent natural-language prompt for the same single
 `previous_month` report call:
@@ -615,7 +714,7 @@ other defaults. Here `auto` resolves to the same previous UTC month as the
 explicit report example above. It collected once at **22:14:58 UTC**; opening
 its downloaded report later did not recollect data.
 
-![Actual normal execution thread and its four native file links](images/setup-04-normal-files.png)
+![Actual normal execution thread and its four native file links (earlier run; today's portal labels may differ)](images/setup-04-normal-files.png)
 
 Callouts **1-3** mark the actual HTML, complete JSON and ordinary CSV delivery
 in that thread. The reporting assistant correctly left HTTP verification to
@@ -820,34 +919,46 @@ approved agent. This is a reporting schedule, not an incident/alert workflow.
    responder, prompt and UTC schedule. Reuse a matching customer-owned task;
    do not duplicate it, edit an unrelated task or operate the historical lab
    task shown below. A name match alone is not ownership/configuration proof.
-2. If no matching owned task exists, select the **`service-health-live`**
-   node in **Agent Canvas**, then its **+ > Trigger > Add scheduled task**.
-   **Response custom agent** should already be `service-health-live`; verify
-   it explicitly.
+2. If no matching owned task exists, open **Automation > Create ▾ > Scheduled
+   task** (or **Build + configure > Agent Canvas > Create ▾ > Trigger › >
+   Scheduled tasks**) and set **Response subagent** to `service-health-live`;
+   verify it explicitly.
 3. Set **Task name** to the exact name above. Paste the **entire Task details
    prompt** from [monthly-task-prompt.md](monthly-task-prompt.md), not just its
    opening lines. It calls `operation="report", period="previous_month"`
    exactly once with every other parameter at its default.
-4. Set the schedule to **day 1, 10:00 UTC**, equivalent to **`0 10 1 * *`**.
-   Check the displayed time-zone label. The lab picture genuinely says
-   **Time of day (UTC)**; other portal versions use the **browser's zone**.
-   If the picker is not explicitly UTC, choose **Frequency > Custom cron**
-   and enter `0 10 1 * *` in **Cron expression (UTC)**. Do not enter 10:00
-   local and assume UTC. Stored UTC is fixed; local display time can shift
-   with daylight saving.
+4. Set the schedule to **day 1, 10:00 UTC**, equivalent to **`0 10 1 * *`**:
+   choose **Frequency > Custom cron** (the list starts at **Daily**) and enter
+   `0 10 1 * *` in **Cron expression (UTC)**. The **Monthly > Day of month >
+   Time of day** picker shows the **browser's zone**: today's portal labels it
+   **Time of day (GMT+1)** in a UTC+1 browser and displays the saved 10:00 UTC
+   as 11:00 (the October lab picture said **Time of day (UTC)**). Do not enter
+   10:00 local and assume UTC. Stored UTC is fixed; local display time can
+   shift with daylight saving.
 5. Set **Agent autonomy level > Autonomous** and **Message grouping for
-   updates > New chat thread for each run**. Choose the customer's approved
+   updates > New chat thread for each run** (the default is *Use same chat
+   thread*). Choose the customer's approved
    **Start on** date and any run limit/end date; do not copy the lab's dates.
    Review the customer-approved model tier/usage policy without changing
    global defaults. The one-tool/code boundary, not the autonomy label,
    restricts actions to reads.
-6. Select **Create task**, reopen it and confirm name, responder, complete
+
+   ![Create scheduled task: completed form](images/newui-task.png)
+
+   Today's form, filled in without selecting **Create task**: **1** *Task name* ·
+   **2** *Response subagent* · **3** *Task details* (the monthly prompt) ·
+   **4** *Frequency* = *Custom cron* · **5** *Cron expression (UTC)*
+   `0 10 1 * *` · **6** *New chat thread for each run* · **7** **Create task**.
+
+6. Select **Create task**, reopen it (**Automation** > search > tick only this
+   task > **Edit**; **Cancel** if nothing changes) and confirm name, responder, complete
    prompt, grouping, autonomy, **On/Active** status and the next execution
    converted to UTC. For a reused matching task, inspect it without saving
    unnecessary changes.
 7. Only with separate customer authorization for a manual acceptance, select
    just this task's checkbox in **Automation > Run now**
-   (some detail views say **Run task now**). Open its history **Thread name**
+   (the task's own page, opened by clicking its name, says **Run task now**).
+   Open its history **Thread name**
    link, or find the matching thread in **Chats**. Verify one exact report
    call and all four downloads as in steps 4-5. Do not run it again merely to
    obtain a history badge or screenshot.
@@ -870,14 +981,20 @@ In the saved UI this equivalent schedule is displayed as **Monthly**, **day 1**,
 earlier proposed 09:00 example; the actual task is Active and its recorded next
 execution is **2026-11-01T10:00:00Z**.
 
-![Actual saved monthly task configuration showing day one at ten UTC](images/setup-06-monthly-configuration.png)
+![Saved monthly task read back in today's portal: Monthly, day 1, 11:00 in a GMT+1 browser (10:00 UTC)](images/newui-task-readback.png)
 
-Callout **1** shows the one-report task prompt. **2** shows the actual monthly
-day/time controls, equivalent to the configured cron above; it is not a
-fabricated raw-cron form. **3** shows Autonomous. The dialog was opened only
-for readback and closed with **Cancel**; neither Save nor Run was clicked
-during documentation capture. This is the saved lab configuration, not a
-customer task-creation screenshot.
+**Readback in today's portal (16 November 2026)** of the same saved lab task,
+opened with **Edit** and closed with **Cancel** (nothing saved): **1** *Task
+name* · **2** *Response subagent* · **3** the one-report task prompt ·
+**4** *Frequency* **Monthly**, day **1**, *Time of day (GMT+1)* **11:00**, the
+browser-zone display of the saved 10:00 UTC · **5** *New chat thread for each
+run* · **6** **Autonomous** · **7** *Save* (not clicked). The October readback,
+whose time control was labelled UTC, is
+[kept for reference](images/setup-06-monthly-configuration.png); its callouts
+were **1** the prompt, **2** the monthly day/time controls and **3** Autonomous.
+It was opened only for readback and closed with **Cancel**; neither Save nor
+Run was clicked during documentation capture. These are the saved lab
+configuration, not a customer task-creation screenshot.
 
 The authorized operator started **one** manual execution at
 **2026-10-14T22:21:05.2073321Z**. Its actual report reference is
@@ -885,14 +1002,14 @@ The authorized operator started **one** manual execution at
 The task execution count was **1**, and all four resulting native downloads
 were independently verified as HTTP 200 with exact file hashes.
 
-![Actual monthly task history with its single manual execution](images/setup-05-monthly-history.png)
+![Actual monthly task history with its single manual execution (earlier run; today's portal labels may differ)](images/setup-05-monthly-history.png)
 
 The history readback showed a Success row at 22:21. One readback temporarily
 displayed **No thread found**; task success or that missing link was not used
 as completion proof. The actual execution thread and its files were checked
 separately.
 
-![Actual completed monthly execution thread and four file links](images/setup-07-monthly-files.png)
+![Actual completed monthly execution thread and four file links (earlier run; today's portal labels may differ)](images/setup-07-monthly-files.png)
 
 Callouts **1-3** show the real monthly execution's HTML, complete JSON and
 ordinary CSV delivery. The thread's initial **Active** badge and the scheduler
@@ -1052,7 +1169,7 @@ No synthetic or recreated setup screen is presented as actual evidence.
 | `dependency_missing` | `azure-identity`; Pillow for a nonempty logo; compatible manifest versions | Runtime administrator checks preinstalled packages or the supported dependency field; no in-tool package installation |
 | Paste/syntax/type/default error or `invalid_combination` | Complete standalone source, no Markdown fences/ellipsis; 11 rows; `int` limit/offset; report filters at defaults | Restore the complete approved file, reapply only fixed private config and match the table/schema; do not regenerate code with AI |
 | Two collections / extra stdout | Appended `print(main())`, `main()` call or `if __name__ == "__main__"` guard | Restore definition-only code; loading is inert and the platform makes the one explicit call |
-| Portal 403, expired sign-in or Conditional Access prompt | Human SRE roles and approved interactive session, not merely visible Builder buttons | Customer follows normal sign-in/access policy with their administrator; do not bypass authentication/security warnings or auto-assign Admin |
+| Portal 403, expired sign-in or Conditional Access prompt | Human SRE roles and approved interactive session, not merely visible **Build + configure** buttons | Customer follows normal sign-in/access policy with their administrator; do not bypass authentication/security warnings or auto-assign Admin |
 | ARM receipt 401/403 | Which source failed, UAMI identity, approved scope and read assignments | Preserve denied coverage and have the authorized access administrator investigate; do not prescribe Owner/Contributor or Graph grants |
 | HTTP 400 `InvalidODataQueryOptions` | Copied code still uses the native no-filter feed | Restore the canonical source's local category selection; this is a query problem, not a permission denial |
 | 404 / malformed list / timeout / unfinished continuation | Exact source receipt, source API version, retained prior pages and bounds | Disclose unavailable/partial evidence; preserve accepted pages, never replace them with empty success |
@@ -1090,7 +1207,7 @@ is part of this case.
 
 ## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
 
-Select `/agent service-health-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**:
+Select `/agent service-health-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. Typing `@` no longer opens a picker: with the **Agent: service-health-live** chip selected, the leading `@service-health-live` below is plain text and can be left out.
 
 ### 1. Full Service Health Report (Previous UTC Month + Active Now + Planned Maintenance) / Informe Completo de Service Health (4 Archivos)
 - **Castellano:**

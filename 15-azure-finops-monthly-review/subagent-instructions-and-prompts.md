@@ -22,7 +22,11 @@ handler.
 | Timeout | `600` |
 | Identity tab | Leave the switch **Off**. The tool authenticates with the agent managed identity itself (`MANAGED_IDENTITY_CLIENT_ID`) |
 
-| Parameter | Type | Required | Description (paste as is) |
+Today's portal has no parameter editor: the parameters, their types and defaults come from `def main(...)` when you
+paste the code, and the **Test playground** shows one empty box per parameter. The descriptions below are the reference
+that the Option B deploy script registers.
+
+| Parameter | Type | Required | Description |
 |---|---|---|---|
 | `operation` | string | No | `report (default: HTML + JSON + findings CSV + cost-by-resource CSV + cost-by-project CSV), query (bounded chat view, no files) or self_test (complete report from built-in SIMULATED data, no network).` |
 | `view` | string | No | `Only with operation=query: summary (default), actions, anomalies, budgets, savings, resources, projects, allocation or coverage.` |
@@ -47,7 +51,7 @@ The same contract as JSON Schema: [`tool-parameters.schema.json`](tool-parameter
 |---|---|
 | Name | `finops-reviewer` |
 | Instructions | Paste [`subagent-instructions.txt`](subagent-instructions.txt) (copy below) |
-| Handoff description | `Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, cost per project, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.` |
+| Handoff description (Option B deploy script; today's portal form has no such field) | `Read-only Azure FinOps reviewer: monthly cost review of the whole environment with trend, where the money goes, cost per project, unusual days and jumps, budgets and forecast, savings (Advisor, idle and orphaned resources, commitments), allocation readiness and prioritised actions.` |
 | Skills | Only `azure-finops-review` |
 | Tools | Only `generate-azure-finops-review` |
 
@@ -88,6 +92,8 @@ Optional higher cadence (see the README, *Choosing the cadence*):
 | `Azure FinOps - Daily cost anomalies` | `0 7 * * *` | `@finops-reviewer Run operation=query view=anomalies and tell me only about unusual days of this month, with their drivers.` |
 
 ## Chat prompts
+
+Open **New chat**, type `/agent` and pick `finops-reviewer` (chip **Agent: finops-reviewer**), then paste the prompt without the leading `@finops-reviewer`.
 
 | Goal | Prompt | Tool call |
 |---|---|---|

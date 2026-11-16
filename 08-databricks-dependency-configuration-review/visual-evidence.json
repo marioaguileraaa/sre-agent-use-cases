@@ -979,6 +979,726 @@
       "PNG_metadata_absent": true,
       "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
       "regenerated_at_utc": "2026-11-12"
+    },
+    {
+      "filename": "newui-menu.png",
+      "bytes": 209549,
+      "sha256": "2fdb8f099127b741a1d122f0479f695d296ded86fbe003c7e2878f1dbc38cdd3",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Build + configure → Agent Canvas → Create ▾ (the arrow) → Tool › → Python tool. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Build + configure (left menu; formerly Builder)",
+          "box": [
+            4,
+            8,
+            201,
+            48
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Agent Canvas (first item of Build + configure)",
+          "box": [
+            4,
+            49,
+            265,
+            89
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "The ▾ arrow next to Create (the Create button opens the subagent form)",
+          "box": [
+            381,
+            0,
+            413,
+            40
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Tool › (submenu)",
+          "box": [
+            289,
+            165,
+            425,
+            205
+          ]
+        },
+        {
+          "number": 5,
+          "meaning": "Python tool",
+          "box": [
+            422,
+            202,
+            558,
+            242
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:14:53Z"
+    },
+    {
+      "filename": "newui-code.png",
+      "bytes": 134865,
+      "sha256": "607a9b87f0a0c9847842f20b4fea98e579cecb7d9ec67e873e7791d41e08c918",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create a Python tool, Code tab: Tool Name, Timeout (seconds), Description and the .py pasted in the editor (top of the file shown). Create tool stays grey until you click Test. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Tool Name: databricks-dependency-report (36 characters max.)",
+          "box": [
+            820,
+            259,
+            1028,
+            309
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Timeout (seconds) = 900 (default 120; max. 900)",
+          "box": [
+            1032,
+            259,
+            1168,
+            309
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Description: the text from the guide",
+          "box": [
+            820,
+            343,
+            1462,
+            411
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Editor: Ctrl+A and paste the whole .py (top shown)",
+          "box": [
+            822,
+            416,
+            1462,
+            830
+          ]
+        },
+        {
+          "number": 5,
+          "meaning": "Create tool: grey until you click Test in Test playground",
+          "box": [
+            1273,
+            872,
+            1382,
+            912
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:15:21Z"
+    },
+    {
+      "filename": "newui-identity.png",
+      "bytes": 83125,
+      "sha256": "94465c6d181128d7ff61bcc2d059508c881c09e1585be31d745b72c6f738da0a",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Identity tab: leave Enable Azure Identity Off. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Identity tab",
+          "box": [
+            1008,
+            173,
+            1087,
+            225
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Enable Azure Identity Off (leave it)",
+          "box": [
+            818,
+            273,
+            1043,
+            325
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:15:36Z"
+    },
+    {
+      "filename": "newui-playground.png",
+      "bytes": 107025,
+      "sha256": "63b3c073fedb46447a982343336686617563bba0f2f28d94b80373e098d1d1b7",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create a Python tool, Test playground tab, Test playground: empty boxes filled in by hand (top). Test is not clicked in the capture. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Test playground tab of the tool dialog",
+          "box": [
+            878,
+            173,
+            1016,
+            225
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Test: runs the test (not clicked in the capture)",
+          "box": [
+            820,
+            321,
+            907,
+            361
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "operation = report",
+          "box": [
+            820,
+            396,
+            1464,
+            464
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "view = summary",
+          "box": [
+            820,
+            462,
+            1464,
+            530
+          ]
+        },
+        {
+          "number": 5,
+          "meaning": "Create tool: grey until you click Test in Test playground",
+          "box": [
+            1273,
+            872,
+            1382,
+            912
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:15:30Z"
+    },
+    {
+      "filename": "newui-playground-b.png",
+      "bytes": 96992,
+      "sha256": "ed2815ad55339cc5962c7dd82dc141c69dbed34cc7cd3e40756e442fe5d53d5c",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create a Python tool, Test playground tab, Test playground: empty boxes filled in by hand (bottom). Test is not clicked in the capture. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Test playground tab of the tool dialog",
+          "box": [
+            878,
+            173,
+            1016,
+            225
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "limit = 25",
+          "box": [
+            820,
+            710,
+            1464,
+            778
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "offset = 0",
+          "box": [
+            820,
+            776,
+            1464,
+            844
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Create tool: grey until you click Test in Test playground",
+          "box": [
+            1273,
+            872,
+            1382,
+            912
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:15:33Z"
+    },
+    {
+      "filename": "newui-edit-tool-params.png",
+      "bytes": 125407,
+      "sha256": "9ce1ad45b541788488610c1f7f040a1d7c6e32e8eb610015995f128dee0aef4e",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Agent Canvas → Table view → Tools & skills card → Python tools → search the tool → click its name: the details panel lists the parameters read from main() with their types (Query parameters). Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Saved tool: databricks-dependency-report",
+          "box": [
+            1080,
+            68,
+            1360,
+            104
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Query parameters: the 12 parameters the portal read from def main(...), with their types",
+          "box": [
+            1026,
+            325,
+            1590,
+            942
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "limit and offset are typed int",
+          "box": [
+            1027,
+            840,
+            1589,
+            940
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:26:50Z"
+    },
+    {
+      "filename": "newui-skill.png",
+      "bytes": 170499,
+      "sha256": "b96823e1884e376e53c12cc12234543eec2db09db67562be14b79f2a2859d1c6",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create skill: paste SKILL.md in the editor first; Name and Description are filled in from its front matter. Then Choose tools. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "SKILL.md editor: paste the whole file (first)",
+          "box": [
+            570,
+            165,
+            1539,
+            885
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Name: filled in from the SKILL.md front matter (databricks-dependency-live)",
+          "box": [
+            59,
+            153,
+            553,
+            203
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Description: filled in from the front matter",
+          "box": [
+            57,
+            211,
+            555,
+            291
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Choose tools (after pasting)",
+          "box": [
+            59,
+            813,
+            147,
+            838
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:16:26Z"
+    },
+    {
+      "filename": "newui-skill-tools.png",
+      "bytes": 183421,
+      "sha256": "9285bdb2e8ade9f412f73204f5f5fa44ad0dd389f72e6008d6c3eeb68e897b9b",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Choose tools: search the tool, expand the PythonFunctionTool group and tick only that tool; then Close panel. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Search box: databricks-dependency-report",
+          "box": [
+            1246,
+            171,
+            1359,
+            219
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "PythonFunctionTool (n) group: expand it (do not tick the group)",
+          "box": [
+            1195,
+            278,
+            1323,
+            306
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Checkbox of databricks-dependency-report: tick only this one",
+          "box": [
+            1159,
+            447,
+            1199,
+            487
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Close panel",
+          "box": [
+            1401,
+            123,
+            1541,
+            163
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:16:33Z"
+    },
+    {
+      "filename": "newui-skill-chip.png",
+      "bytes": 165085,
+      "sha256": "9a59e4b834facc248a055329df4233c1da2abb85e188a9a4393248e90534d1eb",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create skill ready: tool chip and the tools: line in the SKILL.md front matter. Then Create (not clicked in the capture). Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Chip of the tool databricks-dependency-report",
+          "box": [
+            59,
+            810,
+            260,
+            838
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "tools: line with databricks-dependency-report in the SKILL.md front matter",
+          "box": [
+            632,
+            237,
+            869,
+            281
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Create (not clicked in the capture)",
+          "box": [
+            142,
+            918,
+            221,
+            958
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:16:37Z"
+    },
+    {
+      "filename": "newui-agent.png",
+      "bytes": 180290,
+      "sha256": "5fa66c2db4e22fb2bed0148c21624747ba68c1d8316340baa6031c66406a7d74",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create a custom agent: Custom agent name and the pasted Instructions; then Choose skills and Choose tools. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Custom agent name: databricks-dependency-live",
+          "box": [
+            217,
+            224,
+            925,
+            274
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Instructions: the subagent instructions",
+          "box": [
+            217,
+            390,
+            925,
+            538
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Choose skills: only databricks-dependency-live",
+          "box": [
+            217,
+            608,
+            367,
+            648
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Choose tools: only databricks-dependency-report",
+          "box": [
+            217,
+            718,
+            365,
+            758
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:16:49Z"
+    },
+    {
+      "filename": "newui-agent-chips.png",
+      "bytes": 182521,
+      "sha256": "786cc5f13f49dac6f613e6b0d7459c66c01309c4003f05a94bfb2b128ae6607c",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Create a custom agent ready: one skill chip and one tool chip. Then Create (not clicked in the capture). Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Chip of the skill databricks-dependency-live",
+          "box": [
+            217,
+            652,
+            404,
+            680
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Chip of the tool databricks-dependency-report",
+          "box": [
+            217,
+            794,
+            418,
+            822
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Create (not clicked in the capture)",
+          "box": [
+            1225,
+            847,
+            1304,
+            887
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:17:08Z"
+    },
+    {
+      "filename": "newui-edit-agent-open.png",
+      "bytes": 140131,
+      "sha256": "491ea2d1fe09da16cca1215f88cea0e3b54ea0a25904ce980682bf239be274bf",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Agent Canvas → Table view → Agents card → Custom agents → search the subagent → click its name → pencil. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Custom agents, in the Agents card",
+          "box": [
+            310,
+            133,
+            605,
+            173
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Search box: databricks-dependency-live",
+          "box": [
+            417,
+            312,
+            695,
+            352
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Click the name: databricks-dependency-live",
+          "box": [
+            349,
+            408,
+            542,
+            438
+          ]
+        },
+        {
+          "number": 4,
+          "meaning": "Pencil (tooltip says Edit YAML, it opens the form)",
+          "box": [
+            1500,
+            68,
+            1532,
+            100
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:17:25Z"
+    },
+    {
+      "filename": "newui-chat-pick.png",
+      "bytes": 66507,
+      "sha256": "11f6c2ef56a74be311172511df00deb5fa4c1d02d9420c69412169cac850d7d3",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "/agent → type the subagent name → pick it in the list. Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "/agent + subagent name",
+          "box": [
+            565,
+            477,
+            1315,
+            513
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Pick the subagent databricks-dependency-live in the list",
+          "box": [
+            552,
+            360,
+            1088,
+            452
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:17:44Z"
+    },
+    {
+      "filename": "newui-chat-ready.png",
+      "bytes": 93181,
+      "sha256": "41b11aabb71919dc9e84948bc2331602d02aa53d4b19861b81b9c8ffcfabea7b",
+      "width": 1600,
+      "height": 1000,
+      "evidence_kind": "current_portal_ui_read_only_capture",
+      "caption": "Agent: databricks-dependency-live chip next to + and the prompt pasted (not sent in the capture). Read-only capture of today's SRE Agent portal in a lab agent: nothing was saved, tested or sent; the lab objects are shown with this guide's names.",
+      "callouts": [
+        {
+          "number": 1,
+          "meaning": "Agent: databricks-dependency-live chip (selected subagent)",
+          "box": [
+            597,
+            575,
+            765,
+            623
+          ]
+        },
+        {
+          "number": 2,
+          "meaning": "Prompt pasted in the box (not sent in the capture)",
+          "box": [
+            565,
+            419,
+            1315,
+            571
+          ]
+        },
+        {
+          "number": 3,
+          "meaning": "Send (not clicked in the capture)",
+          "box": [
+            1279,
+            579,
+            1319,
+            619
+          ]
+        }
+      ],
+      "privacy_and_annotation_pixel_proof": true,
+      "PNG_metadata_absent": true,
+      "customer_source_assessment": "NOT_CONFIGURED_NOT_RUN",
+      "captured_at_utc": "2026-11-16T16:17:49Z"
     }
   ]
 }

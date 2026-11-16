@@ -32,7 +32,7 @@ Every figure comes from the tenant. **Nothing is simulated.**
 
 In the anonymized sample run below, the report found **472 USD/month** of direct savings from pausing the capacity after the last job, avoided **19,570 USD/year** of reservation overspend, flagged an **8,294 USD/month** risk (a paused, empty F64), and showed that the members of one group (*Finance Analysts*) generated **239 USD** on the items shared with that group. It runs every month with no human effort.
 
-**Contents:** [How it fits together](#how-the-pieces-fit-together) · [17 sources](#17-read-only-sources-and-the-permission-each-needs) · [Choose your option](#choose-your-option-same-tenant-or-cross-tenant) · [Prerequisites](#prerequisites--files-to-download) · [Option A - same tenant](#option-a---same-tenant-recommended-for-customers) · [Option B - cross-tenant](#option-b---cross-tenant-sre-agent-in-tenant-a-fabric-in-tenant-b) · [Group members (optional)](#step-2b---optional-let-the-report-read-group-members-both-options) · [Build in SRE Agent](#step-3---configure-the-tool-the-3-constants) · [Report tour](#step-9---read-the-report-section-by-section) · [Formulas](#how-each-figure-is-calculated) · [Troubleshooting](#troubleshooting) · [Prompts](#copy-ready-bilingual-qa-prompt-pack-castellano--english)
+**Contents:** [How it fits together](#how-the-pieces-fit-together) · [17 sources](#17-read-only-sources-and-the-permission-each-needs) · [Choose your option](#choose-your-option-same-tenant-or-cross-tenant) · [Prerequisites](#prerequisites--files-to-download) · [Option A - same tenant](#option-a---same-tenant-recommended-for-customers) · [Option B - cross-tenant](#option-b---cross-tenant-sre-agent-in-tenant-a-fabric-in-tenant-b) · [Group members (optional)](#step-2b---optional-let-the-report-read-group-members-both-options) · [Build in SRE Agent](#step-3---configure-the-tool-the-constants) · [Report tour](#step-9---read-the-report-section-by-section) · [Formulas](#how-each-figure-is-calculated) · [Troubleshooting](#troubleshooting) · [Prompts](#copy-ready-bilingual-qa-prompt-pack-castellano--english)
 
 ## How the pieces fit together
 
@@ -98,7 +98,7 @@ The **identity** is the SRE Agent UAMI (Option A) or the multi-tenant app servic
 | People involved | 1 Fabric / Azure admin | Tenant A app registrant **and** tenant B Fabric / Azure admin |
 | Time | 15-20 min + 15 min propagation | 30-45 min + 15 min propagation |
 
-Steps 3 to 9 (configure the tool, Builder, first run, schedule, report) are **identical** for both options.
+Steps 3 to 9 (configure the tool, Agent Canvas, first run, schedule, report) are **identical** for both options.
 
 ## Prerequisites & Files to Download
 
@@ -177,7 +177,7 @@ Prefer the portal? Do the same by hand:
 
 > ⏱️ **Wait about 15 minutes** after changing tenant settings before the first run. Before that, admin APIs return 401/403.
 
-Continue with [step 3](#step-3---configure-the-tool-the-3-constants).
+Continue with [step 3](#step-3---configure-the-tool-the-constants).
 
 ---
 
@@ -263,7 +263,7 @@ Alternative to create the service principal: a Global Administrator of tenant B 
 
 - **Tenant B > Entra ID > Enterprise applications** > `sre-agent-fabric-cross-tenant-bridge` exists; **Groups** > `sg-sre-agent-fabric` > Members contains it.
 - **Tenant B > subscription > Access control (IAM) > Role assignments**: the app has *Reader* and *Cost Management Reader*.
-- After step 3 and 4, the **Test playground** of the tool (step 4, screenshot `b05`) with `operation=summary` returns `"auth_mode": "cross_tenant"`, a `cross_tenant_auth` source with status OK (*Bridge app certificate read from Key Vault*) and the other sources with status OK.
+- After step 3 and 4, the **Test playground** of the tool (step 4, screenshot `newui-playground.png`) with `operation=summary` returns `"auth_mode": "cross_tenant"`, a `cross_tenant_auth` source with status OK (*Bridge app certificate read from Key Vault*) and the other sources with status OK.
 
 ---
 
@@ -312,38 +312,40 @@ LOCAL_TIMEZONE = "Europe/Madrid"      # both options: time zone shown next to UT
 | `CROSS_TENANT_CERT_NAME` | Leave `""` | Certificate name from step B1 (`sre-agent-fabric-cross-tenant`) |
 | `LOCAL_TIMEZONE` | Your IANA time zone, e.g. `Europe/Berlin` | Same |
 
-![Configure block: the 3 constants and which ones each option fills in](images/b03-python-tool-configure-block.png)
+![The CONFIGURE block in the Code tab: the constants and which ones each option fills in](images/newui-code-config.png)
 
-*Inside the Builder code editor: **(1)** UAMI Client ID, required in both options; **(2)** the app client ID and Fabric tenant ID, only for cross-tenant - leave the placeholders for same tenant. The two certificate constants (Option B) sit right below them; the screenshot predates them. Keep these values in your private deployment copy, never in a public repository.*
+*The `CONFIGURE` block in today's **Code** tab (`newui-code-config.png`, the guide file with its placeholders): **(1)** `MANAGED_IDENTITY_CLIENT_ID`, the UAMI Client ID, required in both options; **(2)** `FEDERATED_APP_CLIENT_ID` and `TARGET_FABRIC_TENANT_ID`, only for cross-tenant (Option B) - leave the placeholders for same tenant; **(3)** `CROSS_TENANT_CERT_KEYVAULT_URL` and `CROSS_TENANT_CERT_NAME`, the Key Vault certificate of Option B - leave them `""` for same tenant. Keep these values in your private deployment copy, never in a public repository.*
 
 ## Step 4 - Create the Python tool
 
-**Builder > Agent Canvas > Create** (drop-down arrow) **> Tool > Python tool**.
+**Build + configure → Agent Canvas → Create ▾** (the drop-down arrow next to **Create**; the button itself opens **Create a custom agent**) **→ Tool › → Python tool**.
 
-![Builder: Create > Tool > Python tool](images/b01-builder-create-python-tool.png)
+![Build + configure > Agent Canvas > Create ▾ > Tool > Python tool](images/newui-menu.png)
 
-*(1) **Builder**; (2) **Agent Canvas**; (3) the arrow beside **Create**; (4) **Tool**; (5) **Python tool**.*
+*(1) **Build + configure** (left menu, formerly Builder); (2) **Agent Canvas**; (3) the arrow beside **Create**; (4) **Tool ›**; (5) **Python tool**.*
 
-Fill in the form with the values from [`subagent-instructions-and-prompts.md` > Python tool settings](subagent-instructions-and-prompts.md#python-tool-settings):
+Fill in the **Code** tab with the values from [`subagent-instructions-and-prompts.md` > Python tool settings](subagent-instructions-and-prompts.md#python-tool-settings):
 
 | Field | Value |
 |---|---|
-| Tool name | `generate-fabric-chargeback-report` |
+| Tool Name | `generate-fabric-chargeback-report` (33 characters; the field accepts 36 at most) |
 | Description | Copy from the settings table |
-| Timeout (seconds) | **150** |
-| Code | The whole `.py` file, with the constants from step 3 |
+| Timeout (seconds) | **150** (the default is 120) |
+| Code | The whole `.py` file, with the constants from step 3: click in the editor, `Ctrl+A`, paste |
 
-![Python tool form: name, description, timeout and code](images/b02-python-tool-form.png)
+There is no *Requirements* field: the packages in [`requirements.txt`](requirements.txt) are already in the SRE Agent Python runtime.
 
-*(1) Tool name; (2) description; (3) timeout 150 s; (4) paste the complete file in the **Code** tab.*
+![Create a Python tool, Code tab: name, timeout, description and code](images/newui-code.png)
 
-Open the **Identity** tab and leave **Enable Azure Identity** **OFF**: the tool authenticates itself with the constant `MANAGED_IDENTITY_CLIENT_ID` (`ManagedIdentityCredential`), in both options.
+*(1) **Tool Name** (the narrow field cuts it on screen); (2) **Timeout (seconds)** 150; (3) **Description**; (4) the complete file pasted in the **Code** tab (top shown); (5) **Create tool**, grey until a **Test** has run.*
 
-![Identity tab: leave Enable Azure Identity off](images/b04-python-tool-identity-off.png)
+Open the **Identity** tab and leave **Enable Azure Identity** **OFF**: the tool authenticates itself with the constant `MANAGED_IDENTITY_CLIENT_ID` (`ManagedIdentityCredential`), in both options. Do not switch it on to look: it inserts four lines at the top of the code, and they stay there.
 
-*(1) **Identity** tab; (2) switch **off**.*
+![Identity tab: leave Enable Azure Identity off](images/newui-identity.png)
 
-The 3 parameters are detected from the `main()` signature. All are optional `string`s ([`tool-parameters.schema.json`](tool-parameters.schema.json)):
+*(1) **Identity** tab; (2) **Enable Azure Identity** **Off**.*
+
+The 3 parameters are detected from the `main()` signature; there is no parameter editor. All are optional `string`s ([`tool-parameters.schema.json`](tool-parameters.schema.json)):
 
 | Parameter | Default | Allowed values | Meaning |
 |---|---|---|---|
@@ -351,47 +353,51 @@ The 3 parameters are detected from the `main()` signature. All are optional `str
 | `period` | `last_30d` | `last_30d`, `last_14d`, `last_7d` | Analysis window |
 | `identities` | `masked` | `masked`, `visible` | `visible` only when the user explicitly asks and the recipient is authorized |
 
-In **Test playground**, run `operation=summary`, `period=last_30d`, `identities=masked` and click **Test**. A JSON with `auth_mode` and the source statuses confirms permissions before you go further. Then **Create tool**.
+In **Test playground** the three boxes start empty: type `operation=summary`, `period=last_30d`, `identities=masked` and click **Test**. A JSON with `auth_mode` and the source statuses confirms permissions before you go further. Then **Create tool**: it stays grey until a test has run.
 
-![Test playground: 3 parameters and Test](images/b05-python-tool-test-playground.png)
+![Test playground: the 3 parameters typed and Test](images/newui-playground.png)
 
-*(1) **Test playground**; (2) the 3 parameters; (3) **Test**. Check `auth_mode` and that sources are OK; then **Create tool**.*
+*(1) **Test playground**; (2) **Test**; (3) `operation` = `summary`; (4) `period` = `last_30d`; (5) `identities` = `masked`; (6) **Create tool**, grey until the test has run. In the result, check `auth_mode` and that sources are OK; then **Create tool**.*
 
 ## Step 5 - Create the skill
 
-**Builder > Agent Canvas > Create > Skill**. Name `fabric-chargeback-live`, description from [Skill settings](subagent-instructions-and-prompts.md#skill-settings), paste [`SKILL.md`](skills/fabric-chargeback-live/SKILL.md), then **Choose tools**.
+**Build + configure → Agent Canvas → Create ▾ → Skill**. Paste [`SKILL.md`](skills/fabric-chargeback-live/SKILL.md) into the editor **first**: **Name** `fabric-chargeback-live` and **Description** are filled in from its front matter (the same values as [Skill settings](subagent-instructions-and-prompts.md#skill-settings)). This `SKILL.md` already lists the tool under `tools:`, so the tool chip appears as soon as you paste.
 
-![Skill form: name, description, SKILL.md and Choose tools](images/b06-skill-form.png)
+![Create skill: SKILL.md pasted, Name and Description filled in](images/newui-skill.png)
 
-*(1) Skill name; (2) description; (3) SKILL.md content; (4) **Choose tools**.*
+*(1) paste SKILL.md first; (2) **Name** and (3) **Description**, filled in from the front matter; (4) **Choose tools**, next to the tool chip.*
 
-Search `generate-fabric-chargeback-report`, tick it, and save the skill.
+Then open **Choose tools** to check the selection: search `generate-fabric-chargeback-report`, expand the **PythonFunctionTool (n)** group and leave **only** this tool ticked; **Close panel**.
 
-![Choose tools: search and select the Fabric tool](images/b07-skill-choose-tools.png)
+![Choose tools: search and select the Fabric tool](images/newui-skill-tools.png)
 
-*(1) Search the tool; (2) tick **only** this tool, close the panel and click **Create**.*
+*(1) Search the tool; (2) expand the **PythonFunctionTool** group (do not tick the group); (3) **only** this tool ticked; (4) **Close panel**.*
+
+![Create skill ready: tool chip and tools line](images/newui-skill-chip.png)
+
+*(1) Tool chip; (2) `tools:` with `generate-fabric-chargeback-report` in the front matter; (3) **Create**.*
 
 ## Step 6 - Create the restricted subagent
 
-**Builder > Agent Canvas > Create > Subagent** (custom agent). Name `fabric-chargeback-live`; paste the block from [Copy-ready subagent instructions](subagent-instructions-and-prompts.md#copy-ready-subagent-instructions).
+**Build + configure → Agent Canvas →** the **Create** button (it opens **Create a custom agent**; **Create ▾ → Custom agent** opens the same form). **Custom agent name** `fabric-chargeback-live`; paste the block from [Copy-ready subagent instructions](subagent-instructions-and-prompts.md#copy-ready-subagent-instructions) into **Instructions**.
 
-![Subagent: name and instructions](images/b08-agent-name-instructions.png)
+![Create a custom agent: name and instructions](images/newui-agent.png)
 
-*(1) Agent name; (2) paste the instructions block.*
+*(1) **Custom agent name**; (2) paste the instructions block; (3) **Choose skills**; (4) **Choose tools**.*
 
-**Choose skills** > only `fabric-chargeback-live`; **Choose tools** > only `generate-fabric-chargeback-report`. Selecting them overrides the global defaults, so the subagent cannot use anything else. **Create**.
+**Choose skills** > only `fabric-chargeback-live`; **Choose tools** > only `generate-fabric-chargeback-report` (search, expand **PythonFunctionTool**, tick the tool, **Close panel**). Selecting them overrides the global defaults, so the subagent cannot use anything else. **Create**.
 
-![Subagent: only this skill, only this tool, Create](images/b09-agent-skill-tool-create.png)
+![Create a custom agent: only this skill, only this tool, Create](images/newui-agent-chips.png)
 
 *(1) Only this skill; (2) only this tool; (3) **Create**.*
 
 ## Step 7 - First run in chat
 
-**New chat** > type `/agent fabric` > pick **fabric-chargeback-live**.
+**New chat** > type `/agent fabric` > pick **fabric-chargeback-live**: the composer shows the chip **Agent: fabric-chargeback-live** (typing `@` no longer opens a picker).
 
-![Chat: pick the subagent with /agent](images/b10-chat-pick-subagent.png)
+![Chat: pick the subagent with /agent](images/newui-chat-pick.png)
 
-*(1) Type `/agent fabric`; (2) select **fabric-chargeback-live**.*
+*(1) `/agent` and the subagent name (`fabric` is enough to filter the list); (2) select **fabric-chargeback-live**.*
 
 Ask (the agent answers in English unless you write in another language; the report is always in English):
 
@@ -403,9 +409,9 @@ Genera el informe FinOps de Fabric de los últimos 30 días.
 Generate the Fabric FinOps report for the last 30 days.
 ```
 
-![Chat: prompt and Send](images/b11-chat-prompt.png)
+![Chat: Agent chip, prompt and Send](images/newui-chat-ready.png)
 
-*(1) Prompt; (2) **Send**.*
+*(1) Chip **Agent: fabric-chargeback-live**; (2) prompt; (3) **Send**.*
 
 After 1-2 minutes the agent replies with an executive summary and **4 files** in the thread:
 
@@ -424,20 +430,22 @@ Open the HTML and go to the **Sources** section: every source should be **OK**. 
 
 ## Step 8 - Schedule the monthly report
 
-**Builder > Scheduled tasks > Create** with the values from [Scheduled monthly automation](subagent-instructions-and-prompts.md#scheduled-monthly-automation-0-7-2---utc):
+**Automation → Create ▾ → Scheduled task** with the values from [Scheduled monthly automation](subagent-instructions-and-prompts.md#scheduled-monthly-automation-0-7-2---utc):
 
 | Field | Value |
 |---|---|
-| Name | `Monthly Fabric FinOps and chargeback report` |
+| Task name | `Monthly Fabric FinOps and chargeback report` |
 | Response subagent | `fabric-chargeback-live` |
-| Frequency | **Monthly**, day **2**, 07:00 UTC (the UI shows local time, e.g. 08:00 GMT+1). Cron `0 7 2 * *` |
-| Prompt | The [scheduled task prompt](subagent-instructions-and-prompts.md#scheduled-task-prompt) |
+| Task details | The [scheduled task prompt](subagent-instructions-and-prompts.md#scheduled-task-prompt) |
+| Frequency | **Monthly**, **Day of month** **2**, **Time of day** = 07:00 UTC in the portal's local zone (the label shows it, e.g. *Time of day (GMT+1)* → 8:00). Cron `0 7 2 * *`; to enter it exactly in UTC, choose **Custom cron** instead |
+| Message grouping for updates | **New chat thread for each run** |
+| Agent autonomy level | **Autonomous (Default)** (the tool is read-only) |
 
 Day 2 gives Cost Management the 24-48 h it needs to publish the last days of the previous month. A weekly variant (`0 7 * * 1`) is in the same file.
 
-![Scheduled task: monthly, day 2, 08:00 local](images/b12-scheduled-task.png)
+![Create scheduled task: monthly, day 2, 8:00 local = 07:00 UTC](images/newui-task.png)
 
-*(1) Task name; (2) response subagent `fabric-chargeback-live`; (3) the scheduled task prompt; (4) **Monthly**, day **2**, and the local time that equals 07:00 UTC (08:00 in GMT+1). Then **Create task**.*
+*(1) **Task name**; (2) **Response subagent** `fabric-chargeback-live`; (3) **Task details** with the scheduled task prompt; (4) **Monthly**, **Day of month** **2** and **Time of day** 8:00 in GMT+1, which equals 07:00 UTC; (5) **New chat thread for each run**; (6) **Create task**.*
 
 ## Step 9 - Read the report, section by section
 

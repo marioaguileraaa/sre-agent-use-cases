@@ -38,7 +38,7 @@ handler.
 |---|---|
 | Name | `rbac-access-reviewer` |
 | Instructions | Paste [`subagent-instructions.txt`](subagent-instructions.txt) (copy-ready block below) |
-| Handoff description | `Read-only Azure RBAC privileged access reviewer (Owner, User Access Administrator, Contributor and administrative roles): orphaned, redundant and individual-review assignments.` |
+| Handoff description (Option B deploy script; today's portal form has no such field) | `Read-only Azure RBAC privileged access reviewer (Owner, User Access Administrator, Contributor and administrative roles): orphaned, redundant and individual-review assignments.` |
 | Choose skills | Only `rbac-privileged-access-review` |
 | Choose tools | Only `generate-rbac-privileged-review` |
 
@@ -68,6 +68,8 @@ Answer in the user's language.
 | Agent autonomy | **Autonomous (Default)**: the agent only reads, there is nothing to approve |
 
 ## Prompts
+
+In the chat, select the subagent first (**New chat** → `/agent` → `rbac-access-reviewer`, chip **Agent: rbac-access-reviewer**) and paste the prompt without the leading `@rbac-access-reviewer`. In the scheduled task, keep it: the **Response subagent** field selects the subagent.
 
 **Monthly review (EN):**
 
