@@ -189,7 +189,7 @@ az resource show -g <agent-resource-group> -n <agent-name> \
 ## Step 2 - Download the package
 
 ```bash
-git clone https://github.com/marioalcalde_microsoft/sre-agent-use-cases.git
+git clone https://github.com/marioaguileraaa/sre-agent-use-cases.git
 cd sre-agent-use-cases/13-rbac-privileged-access-review
 ```
 

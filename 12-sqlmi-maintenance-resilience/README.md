@@ -244,7 +244,7 @@ If `pythonTools` is not `true`, or **Python tool** does not appear in the portal
 ## Step 2 - Download the package
 
 ```powershell
-git clone https://github.com/marioalcalde_microsoft/sre-agent-use-cases.git
+git clone https://github.com/marioaguileraaa/sre-agent-use-cases.git
 cd sre-agent-use-cases/12-sqlmi-maintenance-resilience
 ```
 

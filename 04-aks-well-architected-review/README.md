@@ -143,7 +143,7 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 | Stage | Your guided action | What you should see before proceeding |
 |---|---|---|
 | Watch the demonstration | Walk through [Step 6](#step-6---read-and-explore-the-html-report) and the [scope matrix](#customer-scope-coverage-and-checklist-limits) with the customer. | Four real files, dated source receipts and separate score/coverage. The demonstrated 19 Kubernetes 502s and stopped second cluster remain limitations, not a completed customer workload review. |
-| Configure your own approved scope | Download the actual [standalone tool](generate-aks-waf-report.py), [schema](tool-parameters.schema.json), [requirements](requirements.txt), [runtime skill](skills/aks-waf-live/SKILL.md) and [specialist instructions](subagent-instructions-and-prompts.md). Complete Steps 0-1 privately. | Valid Python/JSON/Markdown downloads, not GitHub sign-in HTML; confirmed IDs/permissions, matching code/schema cluster allowlists and authorized branding only. No collector edits or rebuild are needed for customer configuration. |
+| Configure your own approved scope | Download the actual [standalone tool](generate-aks-waf-report.py), [schema](tool-parameters.schema.json), [requirements](requirements.txt), [runtime skill](skills/aks-waf-live/SKILL.md), [specialist instructions](subagent-instructions-and-prompts.md) and the optional [permissions script](grant-aks-permissions.ps1). Complete Steps 0-1 privately. | Valid Python/JSON/Markdown downloads, not GitHub sign-in HTML; confirmed IDs/permissions, matching code/schema cluster allowlists and authorized branding only. No collector edits or rebuild are needed for customer configuration. |
 | Create and read back the components | Follow the actual portal steps in [Step 2](#step-2---create-the-python-tool-and-verify-its-inputs), [Step 3](#step-3---create-the-runtime-skill) and [Step 4](#step-4---create-the-restricted-specialist). Use all [12 current typed inputs](#verify-the-current-typed-schema), not an old screenshot's 11. | Saved whole-file code, correct defaults/enums/bounds and the documented identity design; then exactly one tool and one skill on the specialist. A filled but unsaved form is not deployment. |
 | Accept your first customer run | In normal chat, explicitly select the specialist and follow [Step 5](#step-5---run-one-report-in-normal-chat-and-download-its-files), then inspect each selected cluster as in Step 6. | Four actual downloads for the requested scope and matching run references. `No evaluado` means evidence/applicability is missing, not passed; an empty workload table after failed GETs means unknown, not no workloads. Use [Troubleshooting](#troubleshooting) without broadening access or starting a stopped cluster. |
 | Decide on repetition later | Only after acceptance and a separate customer request, use [Step 7](#step-7---keep-reporting-cadence-optional). | Approved owner/scope/cadence/cost and an actual saved/read-back task plus any separately authorized run receipt; no schedule is required for an on-demand implementation. |
@@ -284,6 +284,7 @@ so you do not have to scroll back here.
 | [`requirements.txt`](requirements.txt) | Declared runtime dependencies; optional Pillow is needed only for a configured raster logo |
 | [`skills/aks-waf-live/SKILL.md`](skills/aks-waf-live/SKILL.md) | Separate SRE runtime skill, not the repository's authoring skill |
 | [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Restricted specialist instructions and copy-ready report/query prompts |
+| [`grant-aks-permissions.ps1`](grant-aks-permissions.ps1) | Optional: grants the read-only roles to the reporting UAMI and writes `approved-clusters.generated.py`; see [Multi-subscription fleet](#multi-subscription-fleet-tens-of-subscriptions-hundreds-of-clusters) |
 | [`report_template.html`](report_template.html) | Development source for the offline UI; **do not paste it as a Python tool** |
 | [`rules_catalog.json`](rules_catalog.json) and [`references/`](references/) | Source-qualified local-rule mappings, pinned checklist and licenses |
 
@@ -515,9 +516,28 @@ APPROVED_CLUSTERS = {
 }
 ```
 
-- `grant-aks-permissions.ps1 -ManagementGroupId <mg>` (or `-AllSubscriptions` /
-  `-SubscriptionIds a,b,c`) assigns the read roles once per scope, enumerates
-  every AKS and writes this block to `approved-clusters.generated.py`.
+- [grant-aks-permissions.ps1](grant-aks-permissions.ps1) can write this block
+  for you. Once the access is approved, an administrator with **Owner**, **User
+  Access Administrator** or **Role Based Access Control Administrator** on the
+  chosen scope runs it with Azure CLI signed in (`az login`) and the reporting
+  UAMI **Client ID**:
+
+  ```powershell
+  .\grant-aks-permissions.ps1 -IdentityClientId "<client-id>" -ManagementGroupId "<mg-id>"
+  ```
+
+  It grants **Reader** once per scope (the management group, or each
+  subscription with `-AllSubscriptions` / `-SubscriptionIds a,b,c`), **Azure
+  Kubernetes Service Cluster User Role** and **Azure Kubernetes Service RBAC
+  Reader** on each AKS (once per scope with `-AksRolesAtScope`) and, only with
+  `-IncludeCost`, **Cost Management Reader** plus
+  `cost_scope="node_resource_group"`. It then lists every AKS in scope (more
+  than 500 is an error), saves each cluster's authentication mode to
+  `aks-auth-modes.csv` (Kubernetes reads need Entra ID + Azure RBAC) and writes
+  `SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`,
+  `CLUSTER_DEFAULTS` and `APPROVED_CLUSTERS` to `approved-clusters.generated.py`;
+  replace the same five variables in your private copy. Re-running it does not
+  duplicate assignments.
 - Remove any `cluster_name` enum in the portal for large fleets.
 - `list_clusters` is paged: `{"operation":"list_clusters","limit":100,"offset":0}`
   returns `total`, `subscription_count`, `returned` and `next_offset`.
