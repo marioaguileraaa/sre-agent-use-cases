@@ -42,6 +42,15 @@ implementation and cross-tenant onboarding guide is in English.
 > resource-group `Reader` assignment ([`native-readiness-validation.json`](native-readiness-validation.json),
 > [`visual-evidence.json`](visual-evidence.json)).
 
+> [!NOTE]
+> **Actualización 16 de noviembre de 2026 — nombre del tool.** El portal limita hoy
+> **Tool Name** a 36 caracteres, así que el tool de esta guía se llama ahora
+> `databricks-dependency-report`; el fichero que se pega conserva su nombre,
+> `generate-databricks-dependency-report.py`. Las capturas y evidencias de ejecuciones
+> anteriores muestran el nombre anterior `generate-databricks-dependency-report`, creado
+> mediante la API. Si el tool ya se creó con un nombre cortado, usar exactamente el nombre
+> guardado en el skill, en las instrucciones del subagente y en **Choose tools**.
+
 ## Contents
 
 - [Brief and validation state](#brief-and-validation-state)
@@ -237,7 +246,7 @@ with the exact workspace name.
 flowchart LR
     H["Human selects<br/>approved workspace(s)"] --> C["Normal SRE chat<br/>databricks-dependency-live"]
     C --> S["Runtime skill<br/>databricks-dependency-live"]
-    C --> T["Only selected tool<br/>generate-databricks-dependency-report"]
+    C --> T["Only selected tool<br/>databricks-dependency-report"]
     S -.->|"uses only"| T
     T --> I["Explicit SRE UAMI<br/>+ verified cross-tenant / same-tenant auth"]
     I --> A["Plane 1: ARM GETs<br/>Workspace + VNet/NSG/PE/Storage/KV/AccessConnector"]
@@ -302,8 +311,8 @@ Markdown files (never an HTML sign-in wrapper):
 - Standalone Python tool: [`generate-databricks-dependency-report.py`](generate-databricks-dependency-report.py) (committed Git blob SHA-256: `dc2d82068e27286b14f9cc0bc8b05c887f92ba62f94cbfec6056aee816e799f8`)
 - Typed parameter schema: [`tool-parameters.schema.json`](tool-parameters.schema.json) (committed Git blob SHA-256: `d538cd8e1a86b1c388c1e6821505d601fa78a15c870164e780f8a167db272f95`)
 - Runtime dependencies reference: [`requirements.txt`](requirements.txt)
-- Runtime skill: [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md) (committed Git blob SHA-256: `84567687bb41484db594981466daf4eadd9c4b43a8e590a94e67538e841cad9a`)
-- Specialist instructions and EN/ES prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (committed Git blob SHA-256: `c54673596441a475db869c9ce083f5083ce02e6bb5b670f66db96f988909a79a`; LF copy-ready instruction block SHA-256: `4a9465000397e01316211bb998303c5faedb78738267f55f1faff5cd2d44de87`)
+- Runtime skill: [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md) (committed Git blob SHA-256: `5efd25fd91d81b970a0f79b4099be8ecf60bd009c75d1888dad7be0d61d523d5`)
+- Specialist instructions and EN/ES prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (committed Git blob SHA-256: `da18549898b91c633c017be598628b4afbdfcc9bab3c6596912bb276f3fc17fc`; LF copy-ready instruction block SHA-256: `efb8354b3f543b6d6b309c5ad6d4e18deb9d9875064197d899bf5258771b12af`)
 - Pinned rule catalog (already embedded in the standalone tool): [`rules_catalog.json`](rules_catalog.json)
 - Public native-readiness validation receipt: [`native-readiness-validation.json`](native-readiness-validation.json)
 - Public visual evidence manifest (16 annotated PNGs): [`visual-evidence.json`](visual-evidence.json)
@@ -350,7 +359,7 @@ staging copy outside Git**, edit only the administrator constants at the top of
 
    *Real Builder navigation excerpt in Canvas view (`08-create-drop-down-arrow.png`): **(1)** use the **Create** drop-down arrow, not its custom-agent button body; **(2)** choose **Tool**, then **Python tool** in its submenu. This navigation-only crop is not Databricks deployment evidence.*
 
-2. Name the tool **`generate-databricks-dependency-report`**, set timeout to
+2. Name the tool **`databricks-dependency-report`**, set timeout to
    **900 seconds** (`timeoutSeconds=900`, `dependencies=[]`, `toolMode="Auto"`),
    and paste the entire standalone file
    `generate-databricks-dependency-report.py`.
@@ -414,8 +423,8 @@ In **Builder > Skills > Create skill**, create **`databricks-dependency-live`**
 using the exact content of
 [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md)
 (committed Git blob SHA-256:
-`84567687bb41484db594981466daf4eadd9c4b43a8e590a94e67538e841cad9a`) and bind
-only `generate-databricks-dependency-report`.
+`5efd25fd91d81b970a0f79b4099be8ecf60bd009c75d1888dad7be0d61d523d5`) and bind
+only `databricks-dependency-report`.
 
 ![Saved databricks-dependency-live runtime skill profile](images/05-saved-runtime-skill.png)
 
@@ -428,11 +437,11 @@ In **Builder > Custom agents / Subagents > Create**, configure:
 - **Name:** `databricks-dependency-live`
 - **Model:** Platform-supported default (`llmModelName=null`; do not invent custom model/reasoning/context fields in the SRE runtime configuration)
 - **Skill:** Only `databricks-dependency-live`
-- **Selected tools:** Only `generate-databricks-dependency-report`
+- **Selected tools:** Only `databricks-dependency-report`
 - **Instructions:** Paste the copy-ready block from
   [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)
   (LF instruction block SHA-256:
-  `4a9465000397e01316211bb998303c5faedb78738267f55f1faff5cd2d44de87`).
+  `efb8354b3f543b6d6b309c5ad6d4e18deb9d9875064197d899bf5258771b12af`).
 
 Read back the saved specialist profile and form to confirm that the single
 skill, single tool and instruction block are persisted.
@@ -461,7 +470,7 @@ skill, single tool and instruction block are persisted.
 
 2. **Pre-session unconfigured readiness check:** Before the colleague's
    Tenant-B workspace constants are configured, asking the selected specialist
-   for a readiness/report check invokes `generate-databricks-dependency-report`,
+   for a readiness/report check invokes `databricks-dependency-report`,
    stops before authentication, returns `configuration_required` /
    `artifact_status="not_written"`, and confirms that no source data,
    dependency graph or four-file bundle was fabricated.
@@ -523,6 +532,7 @@ first report.
 
 | Symptom / Error code | Meaning | Safe resolution |
 |---|---|---|
+| El nombre del tool se corta al escribirlo | El portal limita hoy **Tool Name** a 36 caracteres y el nombre anterior `generate-databricks-dependency-report` (37 caracteres) se queda en `generate-databricks-dependency-repor` | Usar `databricks-dependency-report`. Si el tool ya se guardó con un nombre cortado, usar exactamente ese nombre guardado en el skill, en las instrucciones del subagente y en **Choose tools**. |
 | `configuration_required` | Committed `<PLACEHOLDER>` GUIDs or workspace host are still present | Expected before the colleague session. Fill the fixed constants in your private deployment copy during the session. |
 | `cross_tenant_configuration_required` | `SRE_TENANT_ID != TARGET_TENANT_ID` while `auth_mode == "same_tenant_uami"` | Switch `auth_mode` to `cross_tenant_multitenant_fic`, `cross_tenant_lighthouse_plus_databricks_oidc` or `cross_tenant_lighthouse_plus_keyvault_oauth_m2m` after completing cross-tenant setup. |
 | `cross_tenant_auth_failed` | Entra FIC token exchange at `login.microsoftonline.com/<TARGET_TENANT_ID>/oauth2/v2.0/token` failed | Verify the multi-tenant App Registration in Tenant A has the UAMI's **Object (principal) ID** as `subject`, `issuer = https://login.microsoftonline.com/<SRE_TENANT_ID>/v2.0`, `audience = api://AzureADTokenExchange`, and is provisioned in Tenant B. |

@@ -4,7 +4,7 @@
 
 ```text
 You are the customer-neutral, read-only infrastructure operations specialist.
-Use skill infra-ops-live and ONLY generate-infrastructure-operations-report.
+Use skill infra-ops-live and ONLY infrastructure-operations-report.
 Observe the one fixed Enabled subscription and allowed log workspaces.
 For a monthly task, make EXACTLY ONE report call: operation=report,
 period=previous_month, hosting=all, metric=all, other defaults.
@@ -89,7 +89,7 @@ objetivo de fuera de soporte y de ausencia de datos; toda accion es humana.
 ```
 
 Attach **only** the `infra-ops-live` skill and
-`generate-infrastructure-operations-report` tool. Do not leave **Choose tools**
+`infrastructure-operations-report` tool. Do not leave **Choose tools**
 empty: an empty selection can inherit global tools. Do not attach a shell,
 run-command, stress tool, write-capable connector or generic remediation tool.
 Keep unrelated existing agents and incident response plans unchanged.

@@ -11,13 +11,16 @@ Automate **post-patching cycle verification** and **per-machine root-cause failu
 | Monthly scheduled automation (`0 8 1 * *`) plus on-demand full reports and bounded `query` views (`summary`, `machines`, `failures`, `cycles`, `patches`, `extensions`, `coverage`, `actions`) under the 3,500-byte JSON transport budget | Reading extension `settings` or `protectedSettings` |
 | Four native downloadable files (`patch-<ts>-<hash>.html`, `-snapshot.json`, `-machines.csv`, `-patches.csv`) rendered in a Swiss Architectural Industrial Operations Ledger (`es-ES`) | Customer branding in public Git source (`CLIENT_NAME = "CLIENTE"` and `CLIENT_LOGO_DATA_URI = ""` by default) |
 
+> [!NOTE]
+> **Update 16 November 2026 — tool name.** Today's portal limits **Tool Name** to 36 characters, so this guide's tool is now named `patching-investigation-report`; the file you paste keeps its name, `generate-patching-investigation-report.py`. Screenshots and evidence from earlier runs show the previous name `generate-patching-investigation-report`, created through the API. If you already created the tool with a cut name, use exactly the saved name in the skill, the subagent instructions, **Choose tools** and the scheduled task prompt.
+
 ## How the pieces fit together
 
 ```mermaid
 flowchart LR
     H["Monthly task (0 8 1 * *)<br/>or on-demand chat"] --> C["Restricted specialist<br/>patching-investigation-live"]
     C --> S["Runtime skill<br/>patching-investigation-live"]
-    C --> T["Only selected tool<br/>generate-patching-investigation-report"]
+    C --> T["Only selected tool<br/>patching-investigation-report"]
     T --> U["Explicit SRE UAMI<br/>ManagedIdentityCredential"]
     U --> A1["ARG: Compute VMs & Arc Machines<br/>+ Guest Extensions"]
     U --> A2["ARG: patchassessmentresources<br/>Results + Pending SoftwarePatches"]
@@ -58,7 +61,7 @@ In your private deployment copy outside Git, set `SUBSCRIPTION_ID` and `MANAGED_
 
 ## Step 2 - Create the Python tool and verify its 8 typed parameters
 
-In **Builder > Agent Canvas**, click the drop-down arrow beside **Create > Tool > Python tool**, paste the standalone file, set timeout to **900 seconds**, keep **Enable Azure Identity** `OFF` (`authEnabled=false`), and configure all **8** parameters (`limit` and `offset` as `int`):
+In **Builder > Agent Canvas**, click the drop-down arrow beside **Create > Tool > Python tool**, name the tool **`patching-investigation-report`**, paste the standalone file, set timeout to **900 seconds**, keep **Enable Azure Identity** `OFF` (`authEnabled=false`), and configure all **8** parameters (`limit` and `offset` as `int`):
 
 | Parameter | Runtime type | Default | Allowed values |
 |---|---|---|---|
@@ -77,7 +80,7 @@ In **Builder > Agent Canvas**, click the drop-down arrow beside **Create > Tool 
 
 ## Step 3 & Step 4 - Create the runtime skill and restricted specialist
 
-1. In **Builder > Skills > Create skill**, create `patching-investigation-live` (or your customer-specific clone) using [`skills/patching-investigation-live/SKILL.md`](skills/patching-investigation-live/SKILL.md) and bind **only** `generate-patching-investigation-report`.
+1. In **Builder > Skills > Create skill**, create `patching-investigation-live` (or your customer-specific clone) using [`skills/patching-investigation-live/SKILL.md`](skills/patching-investigation-live/SKILL.md) and bind **only** `patching-investigation-report`.
 2. In **Builder > Subagent builder > Create**, create `patching-investigation-live`, paste the instructions from [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md), and select **explicitly** 1 skill and 1 tool (never leave **Choose tools** empty).
 
 ![Saved skill and restricted specialist allowlists](images/02-saved-skill-and-specialist.png)
@@ -113,6 +116,12 @@ In **Builder > Triggers / Scheduled tasks**, create the monthly task with cron `
 ![Monthly scheduled task configuration](images/07-monthly-scheduled-task.png)
 
 *Monthly scheduled task (`07-monthly-scheduled-task.png`): **(1)** active monthly automation header; **(2)** cron `0 8 1 * *` and specialist binding; **(3)** single-call 4-file prompt.*
+
+## Troubleshooting
+
+| Symptom | Safe resolution |
+|---|---|
+| The tool name is cut when you type it | Today's portal limits **Tool Name** to 36 characters, so the previous name `generate-patching-investigation-report` (38 characters) becomes `generate-patching-investigation-repo`. Name the tool `patching-investigation-report`. If you already saved a cut name, use exactly that saved name in the skill, the subagent instructions, **Choose tools** and the scheduled task prompt. |
 
 ## Build & Maintainer Verification
 

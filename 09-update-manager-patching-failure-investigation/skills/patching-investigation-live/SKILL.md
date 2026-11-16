@@ -5,7 +5,7 @@ description: Read-only Azure Update Manager post-patching cycle reporting and au
 
 # Azure Update Manager patching & failure investigation
 
-Use ONLY `generate-patching-investigation-report`. The specialist must explicitly select only this tool and this skill; never enable shell, exec, generic Python, write connectors, VM start/stop, or `installPatches` / `assessPatches` actions.
+Use ONLY `patching-investigation-report`. The specialist must explicitly select only this tool and this skill; never enable shell, exec, generic Python, write connectors, VM start/stop, or `installPatches` / `assessPatches` actions.
 
 ## Scope, identity and read-only guarantees
 

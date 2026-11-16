@@ -541,9 +541,9 @@ Generating/refining it with AI would create a different implementation.
 | Code | Full [`generate-defender-cloud-report.py`](generate-defender-cloud-report.py); replace three configuration placeholders | Full [`simulate-arc-defender-retail.py`](simulate-arc-defender-retail.py), unchanged |
 | Timeout (seconds) | `240` as an initial setting, then measure the approved complete scope | `120` |
 
-Keep these exact names because they match the runtime bindings. The pictured
-legacy UI used a **36-character** name constraint; that was version-specific,
-not a global current maximum or a reason to rename these tools.
+Keep these exact names because they match the runtime bindings. Today's portal
+limits **Tool Name** to **36 characters** (checked on 16 November 2026; a longer
+name is cut as you type). Both names fit: 30 and 28 characters.
 
 ![Actual Python dialog: Code, Test playground and Identity tabs](images/step1-02-python-tool-tabs.png)
 

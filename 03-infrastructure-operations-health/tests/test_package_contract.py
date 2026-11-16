@@ -139,9 +139,12 @@ class PackageContractTests(unittest.TestCase):
         monthly_doc = (ROOT / "monthly-task-prompt.md").read_text(encoding="utf-8")
         readme_doc = (ROOT / "README.md").read_text(encoding="utf-8")
 
+        tool_name = re.compile(r"(?<![\w-])infrastructure-operations-report(?![\w-])")
         for text in (subagent_doc, monthly_doc, readme_doc):
-            self.assertIn("generate-infrastructure-operations-report", text)
+            self.assertRegex(text, tool_name)
             self.assertIn("infra-ops-live", text)
+        for text in (subagent_doc, monthly_doc):
+            self.assertNotIn("generate-infrastructure-operations-report", text)
 
         self.assertIn("0 9 1 * *", monthly_doc)
         self.assertIn("0 9 1 * *", readme_doc)

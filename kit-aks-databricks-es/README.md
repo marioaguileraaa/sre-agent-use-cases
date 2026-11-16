@@ -8,6 +8,14 @@ Contenido:
 | `02-databricks-dependency-review/` | Caso Databricks: dependencias, configuración, seguridad y FinOps (solo lectura), modo **un solo tenant** |
 | `00-sre-usecase-builder-v3/` | Subagente *builder* para crear nuevos casos de uso |
 
+> **Actualización 16 de noviembre de 2026 — nombre del tool.** El portal limita hoy
+> **Tool Name** a 36 caracteres, así que el tool de Databricks se llama ahora
+> `databricks-dependency-report`; el fichero `.py` conserva su nombre,
+> `generate-databricks-dependency-report.py`. Las capturas y evidencias de ejecuciones
+> anteriores muestran el nombre anterior `generate-databricks-dependency-report`, creado
+> mediante la API. Si el tool ya se creó con un nombre cortado, usar exactamente el nombre
+> guardado en el skill, en las instrucciones del subagente y en **Choose tools**.
+
 ---
 
 ## Caso AKS: paso a paso
@@ -133,7 +141,7 @@ pegar lo que mostró el script. Debe quedar `auth_mode: "same_tenant_uami"`, `SR
 
 Ir a **Create → Tool → Python tool**.
 
-- **Name:** `generate-databricks-dependency-report`
+- **Name:** `databricks-dependency-report`
 - **Description:**
   `Read-only Azure Databricks dependency, configuration, security and FinOps review for the fixed approved workspaces. Collect source-qualified ARM, Databricks workspace and Unity Catalog evidence; return offline HTML, complete JSON, findings CSV and inventory CSV, or bounded typed queries. No remediation.`
 - **Code:** pegar el `.py` editado.
@@ -147,7 +155,7 @@ Ir a **Create → Tool → Python tool**.
 
 - **Name:** `databricks-dependency-live`
 - **Body:** pegar `skills/databricks-dependency-live/SKILL.md`.
-- **Tool adjunto:** solo `generate-databricks-dependency-report`.
+- **Tool adjunto:** solo `databricks-dependency-report`.
 
 ### Paso 5. Crear el subagente
 
@@ -160,6 +168,12 @@ Ir a **Create → Tool → Python tool**.
 ```
 @databricks-dependency-live Genera el informe completo de dependencias y configuración de Databricks para <workspace> con operation=report.
 ```
+
+### Problemas frecuentes
+
+| Síntoma | Solución |
+|---|---|
+| El nombre del tool se corta al escribirlo | El portal limita hoy **Tool Name** a 36 caracteres y el nombre anterior `generate-databricks-dependency-report` (37 caracteres) se queda en `generate-databricks-dependency-repor`. Usar `databricks-dependency-report`. Si el tool ya se guardó con un nombre cortado, usar exactamente ese nombre guardado en el skill, en las instrucciones del subagente y en **Choose tools**. |
 
 > El `README.md` de la carpeta es la guía técnica completa en inglés, con capturas. Explica
 > también el modo *cross-tenant*, que aquí **no** se necesita.

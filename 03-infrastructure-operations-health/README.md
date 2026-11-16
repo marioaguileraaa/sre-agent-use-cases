@@ -25,6 +25,16 @@ customer policy. The October 10 outcomes/screenshots below remain historical
 evidence of the earlier telemetry implementation. Reaccept the actual scope,
 UAMI reads and all four downloads in each approved customer environment.
 
+> [!NOTE]
+> **Update 16 November 2026 — tool name.** Today's portal limits **Tool Name**
+> to 36 characters, so this guide's tool is now named
+> `infrastructure-operations-report`; the file you paste keeps its name,
+> `generate-infrastructure-operations-report.py`. The lab runs in this guide
+> used the previous name `generate-infrastructure-operations-report`, created
+> through the API. If you already created the tool with a cut name, use exactly
+> the saved name in the skill, the subagent instructions, **Choose tools** and
+> the monthly task's **Task details**.
+
 ## Contents
 
 - [Business value](#business-value)
@@ -112,7 +122,7 @@ resource ID, baseline or old permission grant into a customer environment.
 | Component | What it is | What you create for this case |
 |---|---|---|
 | Azure SRE Agent | The existing Azure service hosting chat, tools, specialists and automation. It has its own resource, identity, permissions and cost. | Use an approved existing agent. This repository does not provision one. |
-| Python tool | The executable read-only collector and report renderer. Its typed inputs control report/query behavior, not cloud scope or credentials. | `generate-infrastructure-operations-report`, using the **whole** configured Python file and all 16 schema inputs. |
+| Python tool | The executable read-only collector and report renderer. Its typed inputs control report/query behavior, not cloud scope or credentials. | `infrastructure-operations-report`, using the **whole** configured Python file and all 16 schema inputs. |
 | Runtime skill | Instructions telling the specialist which tool to use and how to interpret sources, missingness and files. It is not another Python program. | `infra-ops-live`, with this case's complete runtime `SKILL.md` and exactly one tool. |
 | Custom agent / specialist / subagent | The chat responder using that skill and explicitly selected tool. Portal terminology can vary. | `infra-ops-live`; verify one skill and one tool, without inherited execution tools. |
 | Scheduled task | An optional clock-triggered request to that same specialist. It is not a new permission boundary or an update job. | Reuse an approved matching task, or create one only after normal chat/download acceptance. |
@@ -645,7 +655,7 @@ inventory or unidentifiable returned metadata prevents even that conclusion.
    **Build + setup / Builder > Agent Canvas > Create > Tool > Python tool**.
    The dialog has **Code**, **Test playground** and **Identity** tabs.
 2. On **Code**, set **Tool name** to
-   **`generate-infrastructure-operations-report`** and **Description** to:
+   **`infrastructure-operations-report`** and **Description** to:
 
    ```text
    Collect read-only infrastructure evidence from the fixed approved Azure
@@ -689,7 +699,7 @@ inventory or unidentifiable returned metadata prevents even that conclusion.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |---|---|---|---|
-| `1.1` | **Builder > Agent Canvas > Create > Tool > Python tool > Code** (`Tool name` & `Description`) | Name: `generate-infrastructure-operations-report`; paste the read-only description | Saved tool name is exact; **Generate / Refine** was not used to rewrite the collector |
+| `1.1` | **Builder > Agent Canvas > Create > Tool > Python tool > Code** (`Tool name` & `Description`) | Name: `infrastructure-operations-report`; paste the read-only description | Saved tool name is exact; **Generate / Refine** was not used to rewrite the collector |
 | `1.2` | **Code** editor & **Timeout** | Paste the **entire** privately configured `generate-infrastructure-operations-report.py` (`SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `LOG_WORKSPACE_IDS`, `ARC_ADMIN_BASELINES`); set timeout `900` | Whole-file paste (including `REPORT_HTML` and Codec 2.0) and `900` second timeout persist on reopen; subscription has `<= 500` total resources across the 15 supported types before local filters |
 | `1.3` | **Parameters** (16 rows matching `tool-parameters.schema.json`) | Configure all 16 inputs (`operation`..`offset`); select `int` in the SRE row editor for `limit` (`20`) and `offset` (`0`) while keeping `"integer"` in JSON Schema | Reopened tool lists all 16 typed parameters, exact enums, and defaults (`report`, `summary`, `all`, `auto`, `20`, `0`) |
 | `1.4` | **Identity** tab & **Test playground** -> **Create tool** | Keep explicit `ManagedIdentityCredential(client_id=...)` in code; run the focused `query` and `report` test payloads, then click **Create tool** and reopen | Test returns structured JSON (`<= 3500` bytes) without `configuration_required` or `scope_too_large`; reopened tool matches the saved private file |
@@ -972,7 +982,7 @@ to verify the header and actual downloads.
    `Read-only, source-qualified infrastructure reports and bounded questions
    for the fixed approved Arc/Azure scope. No execution or remediation.`
 3. In **Choose tools**, search for and attach **only**
-   `generate-infrastructure-operations-report`.
+   `infrastructure-operations-report`.
 4. Open/download
    [`skills/infra-ops-live/SKILL.md`](skills/infra-ops-live/SKILL.md) and paste its
    **complete content** into the skill body. Preserve portal-generated
@@ -985,13 +995,13 @@ The operator load script is not a skill asset or a tool. Preserve the skill's
 distinctions between native alerts, local flags, current health, windowed
 measurements and incomplete monitoring.
 **You should see:** a saved skill named `infra-ops-live`, its full updated
-instructions and exactly `generate-infrastructure-operations-report` attached.
+instructions and exactly `infrastructure-operations-report` attached.
 A saved document alone is not evidence that the specialist selected it.
 
 | Step | Portal surface & field | Value to enter / select | Readback checkpoint |
 |---|---|---|---|
 | `2.1` | **Builder > Agent Canvas > Create > Skill** (`Name` & `Description`) | Name: `infra-ops-live`; enter the read-only Arc/Azure description | Skill appears under **Skills** as `infra-ops-live` |
-| `2.2` | **Choose tools** picker | Attach **only** `generate-infrastructure-operations-report` | Reopened skill shows exactly 1 attached tool (`generate-infrastructure-operations-report`) and never `controlled-cpu-load.py` or a shell tool |
+| `2.2` | **Choose tools** picker | Attach **only** `infrastructure-operations-report` | Reopened skill shows exactly 1 attached tool (`infrastructure-operations-report`) and never `controlled-cpu-load.py` or a shell tool |
 | `2.3` | **Skill body (`SKILL.md`)** -> **Create** | Paste the complete body of [`skills/infra-ops-live/SKILL.md`](skills/infra-ops-live/SKILL.md) below the portal-generated YAML frontmatter | Reopened `SKILL.md` retains both the frontmatter and the full 18-rule interpretation contract intact |
 
 ## Step 3 - Restrict the subagent
@@ -1003,7 +1013,7 @@ A saved document alone is not evidence that the specialist selected it.
    [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md),
    not the later demonstration questions.
 3. In **Choose skills**, select **only `infra-ops-live`**. In **Choose tools**,
-   select **only `generate-infrastructure-operations-report`**.
+   select **only `infrastructure-operations-report`**.
 4. Review, select **Create**, then reopen the saved specialist and verify
    instructions plus both explicit selections.
 
@@ -1019,7 +1029,7 @@ operator CPU script, inherited shell or hidden remedial capability.
 |---|---|---|---|
 | `3.1` | **Builder > Agent Canvas > Create > Custom Agent** (`Custom agent name` & `Instructions`) | Name: `infra-ops-live`; paste the complete **`infra-ops-live`: copy-ready instructions** block from [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Reopened specialist preserves the full restricted instruction text without demonstration prompts mixed in |
 | `3.2` | **Choose skills** picker | Explicitly select **only** `infra-ops-live` | Verify the exact selected skill **name** in the reopened saved form and effective policy (`allowedSkills: ["infra-ops-live"]`, `addSystemSkills=false`); never rely on the list summary badge |
-| `3.3` | **Choose tools** picker -> **Create** | Explicitly select **only** `generate-infrastructure-operations-report` (never leave the picker empty) | Verify the exact selected tool **name** in the reopened saved form and effective policy (`tools: ["generate-infrastructure-operations-report"]`, `disableDocumentRetrieval=true`); never rely on the list summary badge |
+| `3.3` | **Choose tools** picker -> **Create** | Explicitly select **only** `infrastructure-operations-report` (never leave the picker empty) | Verify the exact selected tool **name** in the reopened saved form and effective policy (`tools: ["infrastructure-operations-report"]`, `disableDocumentRetrieval=true`); never rely on the list summary badge |
 
 > [!NOTE]
 > **Dated SRE UI badge caveat:** In the live SRE Agent UI, Agent Canvas list/card summary badges can display inherited global rollups (for example, `131 tools` / `52 skills`) even when both native APIs, selected chips and the saved form policy enforce one explicit tool and skill (`tools`, `allowedSkills`, `addSystemSkills=false`, `disableDocumentRetrieval=true`). Verify the exact selected tool and skill **names** in the saved form and effective supported policy; the list summary badge is not authoritative restriction proof, and you must not modify globals to change it.
@@ -1249,7 +1259,7 @@ Copy the **whole Task details** block from the linked file. Its complete
 one-call/file/error contract is reproduced here:
 
 ```text
-Use infra-ops-live and generate-infrastructure-operations-report only.
+Use infra-ops-live and infrastructure-operations-report only.
 Make EXACTLY ONE tool call: operation="report", period="previous_month",
 grain="auto", hosting="all", metric="all", other defaults. The fixed full scope
 includes both Arc and Azure. Do not call operation="query", collect another
@@ -1685,6 +1695,7 @@ download receipts.
 |---|---|
 | `configuration_required` / `subscription_scope_mismatch` | Check the monitored Enabled subscription/tenant and attached UAMI **Client ID**, not Object ID, hosting-subscription assumption or cached CLI context. Never substitute another identity. |
 | Portal creation/chat/task operation returns 403 | Verify the **user's** Author + Standard User roles on the SRE Agent resource. Builder/Owner/Contributor are not SRE data-action roles; do not broaden the reporting UAMI to fix portal access. |
+| The tool name is cut when you type it | Today's portal limits **Tool Name** to 36 characters, so the previous name `generate-infrastructure-operations-report` (41 characters) is cut to `generate-infrastructure-operations-r`. Name the tool `infrastructure-operations-report`. If you already saved a cut name, use exactly that saved name in the skill, the subagent instructions, **Choose tools** and the monthly task's **Task details**. |
 | `dependency_missing` / syntax error / disabled Test | Check declared packages, complete standalone paste, indentation, all 16 input types/defaults and saved code. No generated replacement or shell/install capability in the specialist. |
 | `invalid_parameter` / `unsupported_filter` / `invalid_window` | Use the exact schema and compatible view/state/severity/metric combination; custom dates require explicit offsets, a past positive interval and at most 31 days. |
 | `window_too_dense` | The 800-bin bound is explicit. Use the contract's approved hourly grain for the agreed long window; do not secretly shorten a failed monthly report. |

@@ -20,7 +20,7 @@ unchanged. Validate normal chat/downloads before approving monthly recurrence.
 Paste into **Task details**:
 
 ```text
-Use infra-ops-live and generate-infrastructure-operations-report only.
+Use infra-ops-live and infrastructure-operations-report only.
 Make EXACTLY ONE tool call: operation="report", period="previous_month",
 grain="auto", hosting="all", metric="all", other defaults. The fixed full scope
 includes both Arc and Azure. Do not call operation="query", collect another

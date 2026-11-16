@@ -2,7 +2,7 @@
 
 ## Purpose and mandatory tool
 
-Use only `generate-infrastructure-operations-report`. Observe the one configured
+Use only `infrastructure-operations-report`. Observe the one configured
 Enabled subscription and explicitly allowed Log Analytics workspaces. Report
 real infrastructure evidence across Arc machines, Azure VM/VMSS, AKS, Container
 Apps, App Service apps/plans, Key Vault, Storage, ACR and supported databases.
