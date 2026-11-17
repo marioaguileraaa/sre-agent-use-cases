@@ -50,7 +50,7 @@ def replay(document):
     config = {
         "subscription_id": tool.configured_guid(document["subscription_id"], "private replay subscription"),
         "tenant_id": document["identity"]["tid"], "client_id": "not_authenticated_in_private_replay",
-        "client_name": "CLIENTE",
+        "client_name": "Customer",
     }
     event_path = "/subscriptions/" + config["subscription_id"] + "/providers/Microsoft.ResourceHealth/events"
     original = next(source for source in document["sources"] if source.get("http") == 200 and urlsplit(source["path"]).path == event_path and "$filter" not in source.get("parameters", {}))

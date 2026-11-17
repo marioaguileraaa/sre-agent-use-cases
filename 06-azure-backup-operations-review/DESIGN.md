@@ -106,7 +106,7 @@ brand and evidence rules. It is an operating surface, not a score dashboard.
 Literal dates, native states and readable source disclosure carry its authority.
 
 The palette is binding user direction, not a claim of an official brand guide.
-The default customer plaque is deliberately CLIENTE, never a copied real logo.
+The default customer plaque deliberately reads `Customer`, never a copied real logo.
 No visual tournament, generated illustration or delegated agents were used for
 this precisely bounded, already-pinned identity.
 
@@ -146,7 +146,7 @@ Prose is constrained to 75ch. Data ledgers may be wider.
 
 ## Layout
 
-A slim charcoal bar carries the CLIENTE plaque (or the customer logo), the
+A slim charcoal bar carries the `Customer` plaque (or the customer logo), the
 "Azure SRE Agent" mark, section links, a Read-only chip and Print / PDF; it is
 sticky from 1000px. The verdict band follows: H1, one key-numbers sentence,
 provenance/reference/window/scope chips, a verdict card and the human-review

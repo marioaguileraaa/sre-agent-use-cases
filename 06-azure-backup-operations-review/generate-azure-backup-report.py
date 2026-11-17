@@ -27,7 +27,7 @@ SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
 TENANT_ID = "<YOUR_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
 APPROVED_VAULT_IDS = ["<APPROVED_RECOVERY_SERVICES_VAULT_RESOURCE_ID>"]
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # The customer's authorized logo goes HERE, privately, as short adjacent Python
 # string literals containing one data:image/png;base64,... or JPEG data URI.
 # Keep generic Git source empty. Never paste a real customer logo into Git.

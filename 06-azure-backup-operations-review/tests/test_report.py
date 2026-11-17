@@ -600,12 +600,12 @@ class BrandingTests(unittest.TestCase):
             image.save(stream, format="PNG")
         return stream.getvalue()
 
-    def test_empty_branding_has_explicit_cliente_placeholder(self):
+    def test_empty_branding_has_explicit_customer_placeholder(self):
         branding = TOOL.validate_branding()
         self.assertEqual(branding, BRANDING)
         snapshot, _ = simulated_snapshot()
         rendered = TOOL.prepare_artifacts(snapshot, branding)["report_path"].decode("utf-8")
-        self.assertIn('<span class="placeholder">CLIENTE<small>Customer logo</small></span>', rendered)
+        self.assertIn('<span class="placeholder">Customer<small>Customer logo</small></span>', rendered)
         self.assertIn("#FBC807", rendered)
         self.assertIn("#1E1C18", rendered)
 

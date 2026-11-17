@@ -24,7 +24,7 @@ is claimed.
 | Approved source scope | Record the **monitored** tenant/subscription, existing SRE UAMI Client ID and separate Object/Principal ID privately. The monitored subscription is not automatically the subscription hosting the SRE Agent. |
 | Source-read access and an access administrator | Existing assignments cover the two ARM reads below, or the customer's authorized administrator has approved the required scoped access. No Graph/Global Administrator step from another case applies. |
 | Deployment files and editor | Download the complete standalone Python file, parameter schema, runtime `SKILL.md`, specialist instructions and monthly prompt. Use private staging outside the generic Git checkout; cloning/building is optional. |
-| Branding and acceptance owner | Blank logo/`CLIENTE` is acceptable. If desired, prepare an authorized small PNG/JPEG privately. Agree who may submit the first chat and, separately, one manual task acceptance, download the files and review blind spots. |
+| Branding and acceptance owner | Blank logo/`Customer` is acceptable. If desired, prepare an authorized small PNG/JPEG privately. Agree who may submit the first chat and, separately, one manual task acceptance, download the files and review blind spots. |
 
 **Walkthrough:** [1. Permissions](#1-confirm-scope-and-separate-permissions) |
 [2. Configure/create tool](#2-configure-a-private-copy-and-install-the-actual-tool) |
@@ -48,7 +48,8 @@ access or successful deployment from a visible button.
 
 ![Simulated Service Health report overview rendered from sanitized sample data](images/report-01-overview.png)
 
-**SIMULATED sample render.** Callout **1** keeps the dated reference, the
+**SIMULATED sample render.** The hero names the fictitious client `Contoso`;
+the tool default is `Customer`. Callout **1** keeps the dated reference, the
 requested last-update window, the retained lookback and the coverage state in
 view. Callout **2** shows the separate review counts; the temporal views overlap
 and are not additive. The hero's review status, the "Review next" steps and the
@@ -329,7 +330,7 @@ fields** in a separate private deployment copy:
 SUBSCRIPTION_ID = "<APPROVED_SUBSCRIPTION_ID>"
 TENANT_ID = "<APPROVED_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<APPROVED_UAMI_CLIENT_ID>"
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 COMPANY_LOGO_DATA_URI = ""
 COMPANY_LOGO_ALT_TEXT = "Customer logo"
 ```
@@ -339,7 +340,7 @@ COMPANY_LOGO_ALT_TEXT = "Customer logo"
 | `SUBSCRIPTION_ID` | Approved **monitored** subscription GUID from step 1, not its display name or automatically the SRE-host subscription |
 | `TENANT_ID` | That subscription's tenant GUID |
 | `MANAGED_IDENTITY_CLIENT_ID` | The existing SRE UAMI **Client ID**, not Object/Principal ID |
-| `CLIENT_NAME` | `CLIENTE` is valid; an authorized private customer label must be 1-120 plain characters |
+| `CLIENT_NAME` | `Customer` (the default) is valid; an authorized private customer label must be 1-120 plain characters |
 | `COMPANY_LOGO_DATA_URI` | Leave `""` for the default Azure SRE Agent wordmark, or one authorized embedded PNG/JPEG data URI |
 | `COMPANY_LOGO_ALT_TEXT` | Descriptive plain text, 1-120 characters; keep `Customer logo` when blank |
 
@@ -354,7 +355,7 @@ raster, matching its MIME, one frame, at most **100,000 bytes** and
 **2048 x 2048 pixels**. Invalid branding fails before collection. No remote logo
 fetch or SVG is accepted. Use adjacent short Base64 strings, **less than 10,000
 characters per line**, for the target editor. With an empty logo the report's
-top bar shows the Azure SRE Agent wordmark and the hero shows `CLIENTE`; no
+top bar shows the Azure SRE Agent wordmark and the hero shows `Customer`; no
 empty logo frame is drawn. A configured logo replaces the wordmark.
 
 For an optional logo, prepare the data URI locally in approved private tooling:
@@ -887,7 +888,7 @@ sources is not a complete-history or healthy-workload claim.
 <details>
 <summary>Mobile: retain UTC context and coverage</summary>
 
-![Simulated narrow-screen report with CLIENTE, dated UTC context and review status](images/report-06-mobile.png)
+![Simulated narrow-screen report with the fictitious Contoso client name, dated UTC context and review status](images/report-06-mobile.png)
 
 Callouts **1-2** preserve the dated snapshot, requested window, retained
 lookback, coverage and review status on a 430-pixel viewport. Selecting an

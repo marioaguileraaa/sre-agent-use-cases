@@ -50,8 +50,8 @@ The user explicitly selected the same distinctive yellow/charcoal identity for
 generic source and private runtime. Supplied-asset pixel colors are `#FBC807` and
 `#1E1C18`; these are not asserted to be an official brand guide. Dark text goes
 on yellow; neutral sheets carry evidence. Error, warning and Unknown have
-independent named semantics. Generic source says CLIENTE with an empty customer
-logo placeholder. Real customer branding and data are private deployment only.
+independent named semantics. Generic source says `Customer` with an empty
+customer logo placeholder. Real customer branding and data are private deployment only.
 
 ## Evidence on Hand
 

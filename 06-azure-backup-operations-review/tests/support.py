@@ -28,7 +28,7 @@ ITEM_A = VAULT_A + "/backupFabrics/Azure/protectionContainers/IaasVMContainer;sy
 ITEM_B = VAULT_B + "/backupFabrics/Azure/protectionContainers/IaasVMContainer;synthetic;rg;same-name/protectedItems/VM;synthetic;rg;same-name"
 ITEM_SQL_A = VAULT_A + "/backupFabrics/Azure/protectionContainers/VMAppContainer;synthetic/protectedItems/SQLDataBase;synthetic;database-a"
 ITEM_SQL_B = VAULT_A + "/backupFabrics/Azure/protectionContainers/VMAppContainer;synthetic/protectedItems/SQLDataBase;synthetic;database-b"
-BRANDING = {"name": "CLIENTE", "logo": "", "alt": "Customer logo"}
+BRANDING = {"name": "Customer", "logo": "", "alt": "Customer logo"}
 PRECISE_INTEGER = 900719925474099312345
 HOSTILE_TEXT = '</script><img src="https://invalid.example/pixel" onerror="window.__injected=1"> & SIMULATED'
 

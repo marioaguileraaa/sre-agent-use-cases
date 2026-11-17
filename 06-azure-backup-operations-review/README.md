@@ -29,7 +29,7 @@ follows from these accepted execution/delivery gates.
 | Approved monitored scope and identity | Record the monitored subscription/tenant, runtime-available UAMI **Client ID**, separate **Object/Principal ID** and one to ten full existing **Recovery Services vault IDs**. The monitored subscription is not automatically the SRE-host subscription. |
 | Customer access administrator | Existing access covers subscription metadata and every allowed vault's reads, or the authorized administrator has approved the needed scoped access. No Microsoft Graph or Global Administrator step applies. |
 | Complete deployment files and text editor | Stage the standalone `.py`, schema, runtime `SKILL.md`, specialist instructions and monthly prompt privately outside generic Git. No clone, source build or authoring test environment is required. |
-| Optional branding/history evidence | Blank logo/`CLIENTE` and `VERIFIED_HISTORY = {}` are valid. Prepare a private authorized PNG/JPEG only if wanted; supply history intervals only with genuine receipts, never guessed retention. |
+| Optional branding/history evidence | Blank logo/`Customer` and `VERIFIED_HISTORY = {}` are valid. Prepare a private authorized PNG/JPEG only if wanted; supply history intervals only with genuine receipts, never guessed retention. |
 | Acceptance owner | Agree who may run the first customer chat, download all four files, accept disclosed Unknown history and separately authorize one manual task acceptance if required. |
 
 **Walkthrough:** [1. Permissions](#1-confirm-scope-identity-and-operator-boundaries) |
@@ -409,7 +409,7 @@ SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
 TENANT_ID = "<YOUR_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
 APPROVED_VAULT_IDS = ["<APPROVED_RECOVERY_SERVICES_VAULT_RESOURCE_ID>"]
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 COMPANY_LOGO_DATA_URI = ""
 COMPANY_LOGO_ALT_TEXT = "Customer logo"
 VERIFIED_HISTORY = {}
@@ -421,7 +421,7 @@ VERIFIED_HISTORY = {}
 | `TENANT_ID` | Tenant GUID for that monitored subscription |
 | `MANAGED_IDENTITY_CLIENT_ID` | Existing SRE UAMI **Client ID**; the `<YOUR_AGENT_CLIENT_ID>` placeholder does not mean Principal ID or SRE resource ID |
 | `APPROVED_VAULT_IDS` | One to ten unique full existing Recovery Services vault IDs in that subscription, not a list of names or discovery query |
-| `CLIENT_NAME` | `CLIENTE` is acceptable; an authorized private customer label must be 1-120 plain characters |
+| `CLIENT_NAME` | `Customer` (the neutral default) is acceptable; an authorized private customer label must be 1-120 plain characters |
 | `COMPANY_LOGO_DATA_URI` | `""` is acceptable; otherwise one authorized embedded PNG/JPEG data URI |
 | `COMPANY_LOGO_ALT_TEXT` | Descriptive plain text, 1-120 characters; `Customer logo` is valid for the placeholder |
 | `VERIFIED_HISTORY` | Keep `{}` unless actual historical-availability receipts exist; it is fixed administrator evidence, not a tool input or inferred job span |
@@ -443,7 +443,7 @@ invent a retention guarantee or extend old evidence to a new run.
 
 The user selected the **same** yellow `#FBC807` / charcoal `#1E1C18` look in Git
 and private runtime, sampled from supplied pixels, not asserted as an official
-brand guide. Generic Git uses CLIENTE and an empty customer-logo frame.
+brand guide. Generic Git uses `Customer` and an empty customer-logo frame.
 The Python block explicitly marks where the customer's authorized logo goes.
 Privately use adjacent short Python string literals, each line **under 10,000
 characters**, not one huge Base64 editor line.
@@ -452,7 +452,7 @@ Nonempty branding requires a real Pillow-decoded single-frame PNG/JPEG with
 matching MIME, at most **100,000 decoded bytes** and **2048px per dimension**.
 SVG, remote URLs, animated/truncated/corrupt rasters, unsafe decoder settings or
 bad alt text fail **before collection**, never silently fall back. Empty generic
-branding renders the CLIENTE placeholder.
+branding renders the `Customer` placeholder.
 
 Prepare any logo in approved **local private tooling**: the data URI is
 `data:image/png;base64,` plus Base64 of the **complete PNG bytes**, or
@@ -782,6 +782,7 @@ Read back native list/detail transitions rather than infer success from HTTP.
 Callouts **1-4** mark the actual UTC window, qualified scope/history, complete
 exports and Unknown denominator. Use the corresponding fields in your own
 report; the lab's 56 jobs/four items are **not** expected customer counts.
+The plaque shows the fictitious name `Contoso`; the tool default is `Customer`.
 See [all six actual report views](report-evidence.md#real-report-walkthrough)
 for native details, distinct items and the separate history/source ledgers.
 
@@ -964,7 +965,8 @@ The existing generic package/masked captures are already published privately;
 customer deployment and any sharing of its evidence remain customer-owned.
 
 If separately authorized to share real captures, irreversibly replace the
-actual customer name and logo with **CLIENTE**, and redact genuine secrets/
+actual customer name and logo with **Customer** or a fictitious name such as
+**Contoso**, and redact genuine secrets/
 identifiers before committing. Preserve actual rows, dates, native states and the distinctive
 yellow style; do not invent failures, hide coverage errors or fabricate incident
 links. Use a flattened/redacted raster, not removable overlays or metadata.

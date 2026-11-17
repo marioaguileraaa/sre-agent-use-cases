@@ -81,7 +81,7 @@ class PackageTests(unittest.TestCase):
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom):
                 self.assertFalse((node.module or "").startswith(("case03", "case04", "engine", "support")))
-        self.assertIn('CLIENT_NAME = "CLIENTE"', source)
+        self.assertIn('CLIENT_NAME = "Customer"', source)
         self.assertIn('COMPANY_LOGO_DATA_URI = ""', source)
         self.assertNotIn("DefaultAzureCredential", source)
         self.assertNotIn("AzureCliCredential", source)

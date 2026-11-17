@@ -24,7 +24,7 @@ from uuid import UUID, uuid4
 SUBSCRIPTION_ID = "<APPROVED_SUBSCRIPTION_ID>"
 TENANT_ID = "<APPROVED_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<APPROVED_UAMI_CLIENT_ID>"
-CLIENT_NAME = "CLIENTE"
+CLIENT_NAME = "Customer"
 # Here goes the customer's logo, privately configured as a validated PNG/JPEG
 # data URI. Keep generic Git source empty. Use adjacent strings <10K per line.
 COMPANY_LOGO_DATA_URI = ""

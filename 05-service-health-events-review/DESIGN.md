@@ -1,5 +1,5 @@
 ---
-name: "CLIENTE Service Health review"
+name: "Service Health review"
 description: "A charcoal and yellow review hero over white evidence cards, in the Azure SRE Agent report family."
 colors:
   yellow: "#fbc807"
@@ -143,7 +143,7 @@ components:
     padding: "16px 18px"
 ---
 
-# Design System: CLIENTE Service Health review
+# Design System: Service Health review
 
 ## Overview
 
@@ -151,7 +151,7 @@ components:
 
 The report shares the structure of the Azure SRE Agent report family (slim top bar, verdict-first hero, KPI cards overlapping the hero, white cards on a light ground, a register, then sources and method) and keeps this case's own identity: a charcoal hero with yellow accents, yellow for selection, and named evidence colours that never come from the brand.
 
-Without a configured logo the top bar shows the **Azure SRE Agent** wordmark and the hero kicker carries the configured client name (`CLIENTE` in generic source). A configured, validated customer raster replaces the wordmark, and the Read-only chip then reads "Azure SRE Agent · Read-only". No empty logo frame is drawn. The source-sampled yellow and charcoal are visual authority, not an official customer brand specification. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` keeps the local task sequence.
+Without a configured logo the top bar shows the **Azure SRE Agent** wordmark and the hero kicker carries the configured client name (`Customer` in generic source; the README pictures use the fictitious `Contoso`). A configured, validated customer raster replaces the wordmark, and the Read-only chip then reads "Azure SRE Agent · Read-only". No empty logo frame is drawn. The source-sampled yellow and charcoal are visual authority, not an official customer brand specification. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` keeps the local task sequence.
 
 **Key characteristics:**
 - Charcoal hero with a 4 px yellow top rule, yellow kicker and yellow review status; white type on charcoal.

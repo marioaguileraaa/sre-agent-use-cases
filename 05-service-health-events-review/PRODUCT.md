@@ -47,7 +47,8 @@ observation times, source retention qualification and pagination receipts.
 
 The supplied direction is binding: a distinctive readable yellow/charcoal
 identity, sparse yellow navigation/branding, neutral evidence sheets and named
-independent risk/Unknown colors. Generic source says `CLIENTE` in the hero and
+independent risk/Unknown colors. Generic source says `Customer` in the hero
+(the README pictures use the fictitious `Contoso`) and
 shows the Azure SRE Agent wordmark instead of a logo; no logo is embedded and
 no empty logo frame is drawn. Private configured deployment may
 use an authorized validated customer raster. Source-sampled colors are not

@@ -24,7 +24,8 @@ end-exclusive. The report completed collection at **2026-10-14T19:55:53Z**.
 Local browser inspection and these screenshots preserve that dated snapshot.
 
 The original customer logo and all visible customer-name pixels were
-irreversibly replaced with **CLIENTE**. In the SRE UI captures, opaque gray
+irreversibly replaced; the report views show the fictitious name **Contoso**
+(the tool default is **Customer**). In the SRE UI captures, opaque gray
 pixels redact private resource/job/scope IDs, vault/account names and URLs
 where visible. The images are flattened RGB PNGs without metadata or removable
 overlays. Original files, masked baselines, raw captures, full provenance and
@@ -40,7 +41,9 @@ replaced with neutral placeholders such as `00000000-0000-4000-8000-000000000001
 task evidence, item names and source receipts are unchanged, and the same
 numbered callouts were re-applied. The redesign changed only the report's
 presentation; collection, model, review logic, exports and file names are
-those of the accepted run.
+those of the accepted run. On 2026-11-17 the overview (`step5-01`) was
+re-rendered from the same JSON with **Contoso** on the plaque and name chip;
+no other pixel changed.
 Red numbered callouts on report and SRE captures explain real controls/evidence;
 red is an annotation style, not an Azure Backup failure or severity. Apart from
 those placeholders, no underlying content was fabricated or changed. Read-only inspection used an isolated UTC

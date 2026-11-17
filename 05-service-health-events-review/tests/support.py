@@ -20,7 +20,7 @@ CONFIG = {
     "subscription_id": "11111111-1111-4111-8111-111111111111",
     "tenant_id": "22222222-2222-4222-8222-222222222222",
     "client_id": "33333333-3333-4333-8333-333333333333",
-    "client_name": "CLIENTE",
+    "client_name": "Customer",
 }
 BIG_INTEGER = 900719925474099312345678901234567890
 PREFIX = "/subscriptions/" + CONFIG["subscription_id"] + "/providers/Microsoft.ResourceHealth/events/"

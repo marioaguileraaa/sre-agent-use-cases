@@ -459,7 +459,7 @@ class ArtifactTests(unittest.TestCase):
         self.assertNotIn("new Blob", markup)
         self.assertNotIn("createObjectURL", markup)
         self.assertNotIn("http://", markup)
-        self.assertIn("CLIENTE", markup)
+        self.assertIn("<span>Customer</span>", markup)
         self.assertIn("Customer logo", markup)
         for data in files.values():
             self.assertLessEqual(len(data), 4_800_000)

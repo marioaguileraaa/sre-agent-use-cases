@@ -58,7 +58,7 @@ Use only `generate-fabric-chargeback-report`:
    - Daily cost per meter CSV -> `meters_csv_url`
 
 ## Example questions
-- "Generate the Fabric FinOps report for the last 30 days." / "Genera el informe FinOps de Fabric de los últimos 30 días."
+- "Generate the Fabric FinOps report for the last 30 days."
 - "How much did Fabric cost this month and which meters drive it?"
 - "How many hours was the capacity on without work, and what did it cost?"
 - "When should I pause the capacity and how much would I save?"

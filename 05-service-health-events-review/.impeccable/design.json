@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-10-14T19:25:05.359Z",
-  "title": "Design System: CLIENTE Service Health review",
+  "title": "Design System: Service Health review",
   "extensions": {
     "colorMeta": {
       "yellow": { "role": "primary", "displayName": "Client Yellow" },
@@ -118,7 +118,7 @@
   ],
   "narrative": {
     "northStar": "The Evidence Workpaper",
-    "overview": "The built system is a readable yellow/charcoal customer frame around flat neutral evidence sheets. Its character is compact, practical and restrained: branding establishes identity, typography organizes reading, and independently named evidence colors distinguish states without painting the whole workpaper yellow.\n\nThe generic presentation keeps CLIENTE and an empty Customer logo frame. The supplied, source-sampled identity colors are visual authority, not an official customer brand specification; the same readable identity applies to generic Git and authorized private rendering. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` retains the local task sequence and composition decisions; those are not global design tokens.",
+    "overview": "The built system is a readable yellow/charcoal customer frame around flat neutral evidence sheets. Its character is compact, practical and restrained: branding establishes identity, typography organizes reading, and independently named evidence colors distinguish states without painting the whole workpaper yellow.\n\nThe generic presentation keeps the default Customer name and an empty Customer logo frame. The supplied, source-sampled identity colors are visual authority, not an official customer brand specification; the same readable identity applies to generic Git and authorized private rendering. This document records the built `report_template.html`, not a live capture or source-acceptance result. `SURFACE.md` retains the local task sequence and composition decisions; those are not global design tokens.",
     "keyCharacteristics": [
       "Sparse yellow branding and selected navigation; charcoal text on yellow.",
       "White, thin-bordered sheets on a pale neutral field; no shadows.",
@@ -142,7 +142,7 @@
     "donts": [
       "Don't put white lettering on yellow.",
       "Don't recolor all evidence yellow or replace Unknown with a reassuring success color.",
-      "Don't embed real customer branding in the generic CLIENTE name or empty Customer logo frame.",
+      "Don't embed real customer branding in the generic Customer name or empty Customer logo frame.",
       "Don't promote the local temporal strategy, composition choice or surface seed into global design tokens.",
       "Don't describe these source-sampled colors as an official customer brand specification or this template as live evidence."
     ]
