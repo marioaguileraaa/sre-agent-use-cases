@@ -1,390 +1,118 @@
 {
   "capture_policy": "Real SRE UI or actual dated source; burned-in privacy masks; no private original/config/source data included.",
-  "report_source_note": "Native cover is the actual 2026-10-13T18:17:15Z download. Updated UI examples are HISTORICAL_SOURCE_REPLAY of 2026-10-13T14:41:50Z; added graph derives only original admitted fields, without reevaluating scores or recollecting data.",
+  "report_source_note": "Report images (aks04-report-00..06) are rendered from the English fleet sample run in sample-run/ (simulated-20261010T120000Z-4596adfa1b2c.html): seven fictitious Contoso AKS clusters in three subscriptions, one of them with a SIMULATED primary-read error, written by the standalone tool from the permanently SIMULATED public test fixture (tests/support.py + tests/multicluster_fixture.py, with documented demo variations) renamed to fictitious Contoso names and 00000000-0000-0000-0000-0000000000NN GUIDs. Images 00-05 show the detailed view of contoso-aks-prod-01; image 06 shows the fleet overview with the Subscription/Cluster filters. The sample sets CLIENT_NAME to Contoso and the optional client logo to a plain CONTOSO wordmark; the tool default remains Customer with no logo. They show no customer, tenant or lab data and are not a live collection.",
   "captures": [
     {
       "filename": "aks04-report-00-cover.png",
-      "capture_utc": "2026-10-14T08:52:23.223074+00:00",
-      "source_type": "ACTUAL_DOWNLOADED_HTML",
-      "published_image_sha256": "9fdeff05a5bbf5e6aa61ad539a067c1dd5e842d6a01d88460cf74f385a8cba03",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "34d0b48c6fc8748fa0d451671e143dbe1cdbc0718aa38e0bfb8ae506d55bd676",
       "pixels": [
         1600,
         1196
       ],
-      "caption": "ACTUAL downloaded HTML | Source 2026-10-13 18:17:15 UTC / b7f6e8aab4a2 | client NAME mask | Current source-partial baseline",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Detailed view: contoso-aks-prod-01",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "burned_in_masks": [
-        {
-          "kind": "client NAME",
-          "box": [
-            1225,
-            242,
-            1282.34,
-            269
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            345,
-            472,
-            440.28,
-            496
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            729.33,
-            472,
-            1029.72,
-            496
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            511.94,
-            680,
-            754.44,
-            700
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1235.33,
-            680,
-            1312.17,
-            700
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            449.36,
-            715.5,
-            691.84,
-            735.5
-          ]
-        },
-        {
-          "kind": "private-logo / client NAME",
-          "box": [
-            1228,
-            155,
-            1446,
-            229
-          ]
-        }
-      ],
-      "source_reference_utc": "2026-10-13T18:17:15Z",
-      "source_sha256": "b7f6e8aab4a25daab442adf38ed43e4ef94733805ff1b5bd1af7c08463ffbc50"
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
     },
     {
       "filename": "aks04-report-01-assessment.png",
-      "capture_utc": "2026-10-14T08:52:24.292185+00:00",
-      "source_type": "HISTORICAL_SOURCE_REPLAY",
-      "published_image_sha256": "1eea78dd9d8d11daee9d9d8194b13e98fcffd90749136ae4e9a521094131f519",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "422a0c202ffd7242715e66c4cefeb71d559810a8f861a2666d7c8c2987b9f970",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "HISTORICAL SOURCE REPLAY | Source 2026-10-13 14:41:50 UTC / 420f4c9e0927 | UI bd98bdd | NOT a fresh collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Detailed view: contoso-aks-prod-01",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "source_reference_utc": "2026-10-13T14:41:50Z",
-      "source_sha256": "420f4c9e0927f68e7d551e1545abf30c06b27ac0079dbe5eaea1de6d773bc8d9",
-      "ui_commit": "bd98bddd804399a9666cac66eeec7fccfc78f901",
-      "original_source_unchanged": true,
-      "derived_graph_only": true,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
     },
     {
       "filename": "aks04-report-02-drilldown.png",
-      "capture_utc": "2026-10-14T08:52:25.351256+00:00",
-      "source_type": "HISTORICAL_SOURCE_REPLAY",
-      "published_image_sha256": "131fa2003656a099e9985e806a1748b6898024b9d738f7f2ce1c8bfb53c412ee",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "ab80db59988d12b8df8996a8462833ab6297e15a920c05fe3a9865013e0ff0ed",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "HISTORICAL SOURCE REPLAY | Source 2026-10-13 14:41:50 UTC / 420f4c9e0927 | UI bd98bdd | NOT a fresh collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Detailed view: contoso-aks-prod-01",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "source_reference_utc": "2026-10-13T14:41:50Z",
-      "source_sha256": "420f4c9e0927f68e7d551e1545abf30c06b27ac0079dbe5eaea1de6d773bc8d9",
-      "ui_commit": "bd98bddd804399a9666cac66eeec7fccfc78f901",
-      "original_source_unchanged": true,
-      "derived_graph_only": true,
-      "burned_in_masks": [
-        {
-          "kind": "private-field",
-          "box": [
-            353,
-            369.39,
-            436.88,
-            391.39
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1106.8,
-            1035.78,
-            1281.27,
-            1057.78
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1014.7,
-            1056.78,
-            1105.08,
-            1078.78
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1385.34,
-            1077.78,
-            1449.05,
-            1099.78
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1014.7,
-            1098.78,
-            1037.45,
-            1120.78
-          ]
-        }
-      ]
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
     },
     {
       "filename": "aks04-report-03-observed-architecture.png",
-      "capture_utc": "2026-10-14T08:52:26.691598+00:00",
-      "source_type": "HISTORICAL_SOURCE_REPLAY",
-      "published_image_sha256": "9b0e6dd5581635ccafff7d98f1eb8602734a36d6701dd836e519c7882388a834",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "a4565ba48804436b9e38e27e6528315f8471155e1601b67c3490bb2b0707e9d6",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "HISTORICAL SOURCE REPLAY | Source 2026-10-13 14:41:50 UTC / 420f4c9e0927 | UI bd98bdd | NOT a fresh collection | Graph derived only from original admitted IDs/fields",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Graph from sample IDs and fields",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "source_reference_utc": "2026-10-13T14:41:50Z",
-      "source_sha256": "420f4c9e0927f68e7d551e1545abf30c06b27ac0079dbe5eaea1de6d773bc8d9",
-      "ui_commit": "bd98bddd804399a9666cac66eeec7fccfc78f901",
-      "original_source_unchanged": true,
-      "derived_graph_only": true,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
     },
     {
       "filename": "aks04-report-04-reference.png",
-      "capture_utc": "2026-10-14T08:52:28.180740+00:00",
-      "source_type": "HISTORICAL_SOURCE_REPLAY",
-      "published_image_sha256": "2745e6e7eef8ea33c9341a95469ec15970f676c0cf4db0c9ded20241d69090d8",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "a57815a1b416fdf51b3d3ed54d80d455cde8251998bd57905ccf793fcf736f58",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "HISTORICAL SOURCE REPLAY | Source 2026-10-13 14:41:50 UTC / 420f4c9e0927 | UI bd98bdd | NOT a fresh collection | Reference proposal NOT deployed",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Reference proposal NOT deployed",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "source_reference_utc": "2026-10-13T14:41:50Z",
-      "source_sha256": "420f4c9e0927f68e7d551e1545abf30c06b27ac0079dbe5eaea1de6d773bc8d9",
-      "ui_commit": "bd98bddd804399a9666cac66eeec7fccfc78f901",
-      "original_source_unchanged": true,
-      "derived_graph_only": true,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
     },
     {
       "filename": "aks04-report-05-finops.png",
-      "capture_utc": "2026-10-14T08:52:30.219994+00:00",
-      "source_type": "HISTORICAL_SOURCE_REPLAY",
-      "published_image_sha256": "d13884665e70dad8f325285f4ed2816163876f46467b64f8b41e569500820e2b",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "d72d4912aa1e98c3be41a22befb8d9d0f7f9dda25ca7bdfedca65f74f36fd1fa",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "HISTORICAL SOURCE REPLAY | Source 2026-10-13 14:41:50 UTC / 420f4c9e0927 | UI bd98bdd | NOT a fresh collection | Observed billing currency; savings uncalculated",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Observed billing currency; savings not calculated",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "source_reference_utc": "2026-10-13T14:41:50Z",
-      "source_sha256": "420f4c9e0927f68e7d551e1545abf30c06b27ac0079dbe5eaea1de6d773bc8d9",
-      "ui_commit": "bd98bddd804399a9666cac66eeec7fccfc78f901",
-      "original_source_unchanged": true,
-      "derived_graph_only": true,
-      "burned_in_masks": [
-        {
-          "kind": "private-field",
-          "box": [
-            755.61,
-            460.75,
-            1016.45,
-            482.75
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1121.03,
-            460.75,
-            1393.92,
-            482.75
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            1261.83,
-            491.75,
-            1421.47,
-            513.75
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            663.52,
-            512.75,
-            780.78,
-            534.75
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            485.5,
-            1390.25,
-            636.27,
-            1409.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            360,
-            1408.25,
-            432.58,
-            1427.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            518.75,
-            1408.25,
-            641.28,
-            1427.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            360,
-            1426.25,
-            465.62,
-            1445.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            396.16,
-            1462.25,
-            467.41,
-            1481.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            485.5,
-            1591.25,
-            638.69,
-            1610.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            360,
-            1609.25,
-            439.91,
-            1628.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            526.09,
-            1609.25,
-            648.61,
-            1628.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            360,
-            1627.25,
-            465.62,
-            1646.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            396.16,
-            1663.25,
-            467.41,
-            1682.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            485.5,
-            1792.25,
-            638.94,
-            1811.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            360,
-            1810.25,
-            440.67,
-            1829.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            526.86,
-            1810.25,
-            649.38,
-            1829.25
-          ]
-        },
-        {
-          "kind": "private-field",
-          "box": [
-            360,
-            1828.25,
-            465.62,
-            1847.25
-          ]
-        }
-      ]
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
+    },
+    {
+      "filename": "aks04-report-06-fleet-filters.png",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "6e20f32dcb68e41cdb81ab805b24ab65048ca42f043be3caa2146be7cc77fec5",
+      "pixels": [
+        1600,
+        1896
+      ],
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Fleet overview: 7 clusters, 3 subscriptions",
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
     },
     {
       "filename": "aks04-step01-cluster-choice.png",
@@ -408,7 +136,8 @@
             410.5
           ]
         }
-      ]
+      ],
+      "superseded_by": "newui-playground.png"
     },
     {
       "filename": "aks04-step02-01-python-menu.png",
@@ -422,7 +151,8 @@
       "caption": "ACTUAL SRE UI | 2026-10-13 | Read-only navigation; no tool created",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "superseded_by": "newui-menu.png"
     },
     {
       "filename": "aks04-step02-02-code.png",
@@ -455,7 +185,8 @@
             917.5
           ]
         }
-      ]
+      ],
+      "superseded_by": "newui-code.png"
     },
     {
       "filename": "aks04-step02-03-typed-parameters.png",
@@ -479,7 +210,8 @@
             405.5
           ]
         }
-      ]
+      ],
+      "superseded_by": "newui-playground-b.png"
     },
     {
       "filename": "aks04-step02-04-identity.png",
@@ -493,7 +225,8 @@
       "caption": "ACTUAL SRE Identity tab | 2026-10-13 | Verified baseline: preset Off; Python uses explicit UAMI | No save/test",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "superseded_by": "newui-identity.png"
     },
     {
       "filename": "aks04-step03-skill-readback.png",
@@ -526,7 +259,8 @@
             283
           ]
         }
-      ]
+      ],
+      "superseded_by": "newui-skill-readback.png"
     },
     {
       "filename": "aks04-step04-agent-readback.png",
@@ -540,7 +274,8 @@
       "caption": "ACTUAL SRE saved specialist | 2026-10-13 | One selected tool + one skill; no changes",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "superseded_by": "newui-agent-readback.png"
     },
     {
       "filename": "aks04-step07-create-menu.png",
@@ -554,7 +289,8 @@
       "caption": "ACTUAL Builder > Create > Trigger | 2026-10-13 | Scheduled-task entry; no task created",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "superseded_by": "newui-trigger-menu.png"
     },
     {
       "filename": "aks04-step07-scheduling.png",
@@ -568,7 +304,473 @@
       "caption": "ACTUAL SRE scheduling view | 2026-10-13 | No Case04 scheduled task created; cadence remains optional",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
-      "burned_in_masks": []
+      "burned_in_masks": [],
+      "superseded_by": "newui-automation-list.png"
+    },
+    {
+      "filename": "newui-menu.png",
+      "capture_utc": "2026-11-16T16:26:30+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "1cf322c0b88e4d8361c3093db12ee7e5fd6cd4bc6a93f787b69b0b9cb0fff598",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Build + configure > Agent Canvas > Create ▾ (the arrow) > Tool › > Python tool. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Build + configure (left menu; formerly Builder)",
+        "Agent Canvas (first item of Build + configure)",
+        "The ▾ arrow next to Create (the Create button opens the subagent form)",
+        "Tool › (submenu)",
+        "Python tool"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step02-01-python-menu.png"
+      ]
+    },
+    {
+      "filename": "newui-code.png",
+      "capture_utc": "2026-11-16T16:26:56+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "a6bf0d5873bc75531af02f1e28c92ea5709974d3405220ce0411344dd0819512",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create a Python tool, Code tab: Tool Name, Timeout (seconds), Description and the .py pasted in the editor (top of the file shown). Create tool stays grey until you click Test. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Tool Name: generate-aks-waf-report (36 characters max.)",
+        "Timeout (seconds) = 900 (default 120; max. 900)",
+        "Description: the text from the guide",
+        "Editor: Ctrl+A and paste the whole .py (top shown)",
+        "Create tool: grey until you click Test in Test playground"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step02-02-code.png"
+      ]
+    },
+    {
+      "filename": "newui-playground.png",
+      "capture_utc": "2026-11-16T17:00:30+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "4326656669be75655c792867a8186a7b89762e67abcd45d03356b5635eee4f47",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create a Python tool, Test playground tab, report for one approved cluster: empty boxes filled in by hand (top). Test is not clicked in the capture. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Test playground tab of the tool dialog",
+        "Test: runs the test (not clicked in the capture)",
+        "operation = report",
+        "view = summary",
+        "cluster_name = <APPROVED_AKS_NAME>",
+        "Create tool: grey until you click Test in Test playground"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step01-cluster-choice.png"
+      ]
+    },
+    {
+      "filename": "newui-playground-b.png",
+      "capture_utc": "2026-11-16T17:00:36+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "a81987b1769535b60a9a867be0cbf76f996f3316401db5d1f06b6fa3ecbd0aaa",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create a Python tool, Test playground tab, report for one approved cluster: empty boxes filled in by hand (bottom). Test is not clicked in the capture. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Test playground tab of the tool dialog",
+        "status = all",
+        "limit = 25",
+        "offset = 0",
+        "Create tool: grey until you click Test in Test playground"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step02-03-typed-parameters.png"
+      ]
+    },
+    {
+      "filename": "newui-identity.png",
+      "capture_utc": "2026-11-16T16:27:07+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "e2f6f210467ba9afc98298e6a70af971549e4ac6605544944bd6c3e20084480f",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Identity tab: leave Enable Azure Identity Off. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Identity tab",
+        "Enable Azure Identity Off (leave it)"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step02-04-identity.png"
+      ]
+    },
+    {
+      "filename": "newui-skill-menu.png",
+      "capture_utc": "2026-11-16T16:27:18+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "531549d54898d3bdc38f1b10b8b34ccb71424252ac15134c10bff366f46be825",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Agent Canvas > Create ▾ (the arrow) > Skill. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "The ▾ arrow next to Create (the Create button opens the subagent form)",
+        "Skill"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-skill.png",
+      "capture_utc": "2026-11-16T16:27:39+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "5fdcfb869bfedc7b359b466f9a72893b33652963f334f8cd35be643ddddf6dff",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create skill: paste SKILL.md in the editor first; Name and Description are filled in from its front matter. Then Choose tools. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "SKILL.md editor: paste the whole file (first)",
+        "Name: filled in from the SKILL.md front matter (aks-waf-live)",
+        "Description: filled in from the front matter",
+        "Choose tools (after pasting)"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-skill-tools.png",
+      "capture_utc": "2026-11-16T16:27:46+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "52ecd1035483598d9d572751c2b40f36b03e9b4a4a36407044c845d55289a96d",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Choose tools: search the tool, expand the PythonFunctionTool group and tick only that tool; then Close panel. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Search box: generate-aks-waf-report",
+        "PythonFunctionTool (n) group: expand it (do not tick the group)",
+        "Checkbox of generate-aks-waf-report: tick only this one",
+        "Close panel"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-skill-chip.png",
+      "capture_utc": "2026-11-16T16:27:50+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "839255684278e795ea7f10859e9f1cb4baa12b323cecfa2c876b382f89b9f744",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create skill ready: tool chip and the tools: line in the SKILL.md front matter. Then Create (not clicked in the capture). | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Chip of the tool generate-aks-waf-report",
+        "tools: line with generate-aks-waf-report in the SKILL.md front matter",
+        "Create (not clicked in the capture)"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-skill-readback.png",
+      "capture_utc": "2026-11-16T16:29:34+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "64203d8acbdeb7afdd6d005fb0f2d819a94ba9d8b8597ad6defe0075afd494d5",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Readback of the saved skill: Agent Canvas > Table view > Tools & skills card > Skills > search > click the name. The panel shows its only tool and the SKILL.md file. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Skills, in the Tools & skills card",
+        "Search box: aks-waf-live",
+        "Click the name: aks-waf-live",
+        "Tools: only generate-aks-waf-report",
+        "Files: SKILL.md"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": false,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step03-skill-readback.png"
+      ]
+    },
+    {
+      "filename": "newui-agent-menu.png",
+      "capture_utc": "2026-11-16T16:28:01+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "7093ca1dbae24bfcb19241c9f4d2f49ae6dd6a69f561e8f9bb2dba01fb661341",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Agent Canvas: the Create button opens Create a custom agent directly (also Create ▾ > Custom agent). | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Create button: opens Create a custom agent directly",
+        "The ▾ arrow next to Create (the Create button opens the subagent form)",
+        "Create ▾ → Custom agent (same form)"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-agent.png",
+      "capture_utc": "2026-11-16T16:28:17+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "cff1e14b416578ed1e6a4fe8cb75e440f0aae0108789525da76e24e70c211373",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create a custom agent: Custom agent name and the pasted Instructions; then Choose skills and Choose tools. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Custom agent name: aks-waf-live",
+        "Instructions: the subagent instructions",
+        "Choose skills: only aks-waf-live",
+        "Choose tools: only generate-aks-waf-report"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-agent-skills.png",
+      "capture_utc": "2026-11-16T16:28:23+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "092a2dd2ae0e789a032eaa167e69816617a8f051114b2893bf26dd916737db05",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Choose skills: filter and tick only the skill; then Close panel. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Filter skills: aks-waf-live",
+        "Checkbox of aks-waf-live: tick only this one",
+        "Close panel"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-agent-tools.png",
+      "capture_utc": "2026-11-16T16:28:32+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "9e241f3882430f6bec2b6407cd47d5777b339c45593cb15840f528481f8f8463",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Choose tools: search, expand PythonFunctionTool and tick only the tool; then Close panel. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Search box: generate-aks-waf-report",
+        "PythonFunctionTool (n) group: expand it (do not tick the group)",
+        "Checkbox of generate-aks-waf-report: tick only this one",
+        "Close panel"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-agent-chips.png",
+      "capture_utc": "2026-11-16T16:28:35+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "0add37964de0d64a0e60b1abc565b79eb3f745d6a53b6ab26b5dd8f3f342e848",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Create a custom agent ready: one skill chip and one tool chip. Then Create (not clicked in the capture). | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Chip of the skill aks-waf-live",
+        "Chip of the tool generate-aks-waf-report",
+        "Create (not clicked in the capture)"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-agent-readback.png",
+      "capture_utc": "2026-11-16T16:42:57+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "58462c32030fa82005e143186b942a1da16568d59c3c0a7c7bedbd2017f89763",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Readback of the saved custom agent: Agent Canvas > Table view > Agents card > Custom agents > search > click the name. The panel shows Tools · 1, the selected tool and the selected skill. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Custom agents, in the Agents card",
+        "Search box: aks-waf-live",
+        "Click the name: aks-waf-live",
+        "Tools · 1: one selected tool",
+        "Tools: only generate-aks-waf-report",
+        "Skills: only aks-waf-live"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": false,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step04-agent-readback.png"
+      ]
+    },
+    {
+      "filename": "newui-chat-pick.png",
+      "capture_utc": "2026-11-16T16:28:47+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "d554b6887c23861ae97b179d84184e7628db7be49dedbe010490018ca5a16f4b",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | /agent > type the subagent name > pick it in the list. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "/agent + subagent name",
+        "Pick the subagent aks-waf-live in the list"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": false,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-chat-ready.png",
+      "capture_utc": "2026-11-16T16:28:51+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "44ecfd09cf5615639e9f5c83f0f16263ca60794c9c0a4d611f9847b0062ca1b0",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Agent: aks-waf-live chip next to + and the prompt pasted (not sent in the capture). | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Agent: aks-waf-live chip (selected subagent)",
+        "Prompt pasted in the box (not sent in the capture)",
+        "Send (not clicked in the capture)"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": false,
+      "privacy_check": "passed"
+    },
+    {
+      "filename": "newui-automation-list.png",
+      "capture_utc": "2026-11-16T16:29:00+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "14e34b9497cab816bee9ba0a20742f4bdecd97ee010bcb4c0a9c8a32ffb74ec9",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Automation, searched by the task name: no matching task (No automations match the filters). | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Automation (left menu)",
+        "Search by name: Monthly AKS configuration review",
+        "No automations match the filters: there is no task with this name"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": false,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step07-scheduling.png"
+      ]
+    },
+    {
+      "filename": "newui-trigger-menu.png",
+      "capture_utc": "2026-11-16T16:29:12+00:00",
+      "source_type": "ACTUAL_SRE_UI",
+      "published_image_sha256": "e394f2fa37730eecdf63b9439f8dddda4e8c97a2041bc368b5a75ebe431f64f9",
+      "pixels": [
+        1600,
+        1000
+      ],
+      "caption": "ACTUAL SRE UI | 2026-11-16 | Build + configure > Agent Canvas > Create ▾ (the arrow) > Trigger › > Scheduled tasks. | Read-only capture: nothing saved, tested, sent or run",
+      "callouts": [
+        "Build + configure (left menu; formerly Builder)",
+        "Agent Canvas (first item of Build + configure)",
+        "The ▾ arrow next to Create (the Create button opens the subagent form)",
+        "Trigger › (submenu)",
+        "Scheduled tasks"
+      ],
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "background_blurred": true,
+      "privacy_check": "passed",
+      "supersedes": [
+        "aks04-step07-create-menu.png"
+      ]
     }
-  ]
+  ],
+  "portal_capture_note": "newui-* images: today's SRE Agent portal (2026-11-16), captured read-only on the lab agent with the guide's values; readbacks show existing lab objects under the guide's names. Superseded October captures are kept and referenced from the README's dated evidence."
 }

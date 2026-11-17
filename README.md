@@ -34,7 +34,7 @@ The workload guides preserve **real annotated screenshots** where collected: red
 
 ### Ready-to-deploy kit (Spanish)
 
-[**`kit-aks-databricks-es/`**](kit-aks-databricks-es/) bundles cases 04 (AKS) and 08 (Databricks, single tenant) with the builder in one folder. It includes a Spanish step-by-step guide and one-command permission scripts (`grant-aks-permissions.ps1`, `grant-databricks-permissions.ps1`). Download it as a ZIP from the [Releases](https://github.com/marioaguileraaa/sre-agent-use-cases/releases/tag/kit-aks-databricks-es) page.
+[**`kit-aks-databricks-es/`**](kit-aks-databricks-es/) bundles cases 04 (AKS) and 08 (Databricks, single tenant) with the builder in one folder, using the same tools as those cases. It includes a Spanish step-by-step guide, Spanish chat prompts and one-command permission scripts (`grant-aks-permissions.ps1`, `grant-databricks-permissions.ps1`) that grant read access once at the management group; the tools then review every cluster and workspace the agent can read. Download it as a ZIP from the [Releases](https://github.com/marioaguileraaa/sre-agent-use-cases/releases/tag/kit-aks-databricks-es) page.
 
 ## Before the workshop
 

@@ -1,0 +1,3 @@
+*.py text eol=lf
+tool-parameters.schema.json text eol=lf
+*.png binary
