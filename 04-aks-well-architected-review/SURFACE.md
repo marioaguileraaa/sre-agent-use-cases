@@ -39,13 +39,14 @@ records. On mobile the graph scrolls locally rather than shrinking labels to
 unreadable pixels. Namespace/workload topology context uses Kubernetes
 namespace/kind/name/UID evidence, never a shared cluster ARM ID.
 
-The multi-cluster wrapper keeps a supplied aggregate overview separate from
-the selected cluster's detailed snapshot. Switching clusters resets local
-filters. A failed primary read shows its actual error, with no score/workload/
-cost/topology fallback. A fixed roster is configuration, not presence or
-health. Full JSON keeps the original wrapper; scope JSON filters only the
-selected snapshot and explicitly retains all other run snapshots/errors and
-the original aggregate.
+The multi-cluster wrapper opens on a fleet overview (Subscription and Cluster
+filters, search, KPI cards, one row per cluster) kept separate from the selected
+cluster's detailed snapshot. Switching clusters resets local filters. A failed
+primary read shows its actual error, with no score/workload/cost/topology
+fallback, and counts as an error in the fleet. The fleet shows the discovered
+selection, not health. Full JSON keeps the original wrapper; scope JSON filters
+only the selected snapshot and explicitly retains all other run
+snapshots/errors and the original aggregate.
 
 The pinned direction is a consulting document in the Azure SRE Agent report
 family: slim Microsoft-blue top bar with section links, a "Read-only" chip

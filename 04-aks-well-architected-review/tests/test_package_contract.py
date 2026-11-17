@@ -1,4 +1,4 @@
-"""Offline package, link/anchor/manifest, branding one-liner and bilingual prompt tests."""
+"""Offline package, link/anchor/manifest, branding one-liner and documented prompt tests."""
 
 import base64
 import inspect
@@ -128,14 +128,14 @@ class PackageContractTests(unittest.TestCase):
         engine = load_engine(standalone=True)
         engine.validate_logo(namespace["CLIENT_LOGO_DATA_URI"], "CLIENTE")
 
-    def test_schema_matches_standalone_signature_and_prompts_are_bilingual(self):
+    def test_schema_matches_standalone_signature_and_prompts_are_documented(self):
         schema = json.loads((ROOT / "tool-parameters.schema.json").read_text(encoding="utf-8"))
         standalone = load_engine(standalone=True)
         signature = inspect.signature(standalone.main)
         properties = schema["properties"]
 
-        self.assertEqual(len(properties), 12)
-        self.assertEqual(len(signature.parameters), 12)
+        self.assertEqual(len(properties), 13)
+        self.assertEqual(len(signature.parameters), 13)
         self.assertEqual(set(signature.parameters), set(properties))
         for name, parameter in signature.parameters.items():
             prop = properties[name]
@@ -156,13 +156,13 @@ class PackageContractTests(unittest.TestCase):
         subagent_doc = (ROOT / "subagent-instructions-and-prompts.md").read_text(encoding="utf-8")
         readme_doc = (ROOT / "README.md").read_text(encoding="utf-8")
 
-        self.assertIn("## Spanish chat prompts", subagent_doc)
         self.assertIn("## English chat prompts", subagent_doc)
         for token in (
-            "Genera la revision de configuracion de AKS",
             "Generate the complete read-only AKS configuration review",
             '"operation":"list_clusters"',
-            '"cluster_names":"<APPROVED_AKS_NAME>,<APPROVED_SECOND_AKS_NAME>"',
+            '"cluster_names":"all"',
+            '"subscription":"<SUBSCRIPTION_NAME_OR_ID>"',
+            '"cluster_names":"<AKS_NAME_1>,<AKS_NAME_2>,<AKS_NAME_3>"',
             "query/coverage",
             "query/findings",
             "query/workloads",
@@ -172,11 +172,12 @@ class PackageContractTests(unittest.TestCase):
             self.assertIn(token, subagent_doc, f"Missing {token!r} in subagent-instructions-and-prompts.md")
 
         for token in (
-            "Genera la revision de configuracion de AKS",
             "Generate the complete read-only AKS configuration review",
             "listClusterUserCredential",
             "APPROVED_CLUSTERS",
-            "cluster_name.enum",
+            '"cluster_names":"all"',
+            "-ManagementGroupId",
+            "aks04-report-06-fleet-filters.png",
             "aks-prod-01,aks-prod-02",
             "4d367ae72e6829f4b2eaed41d37e65edfa263ca83acca5dd7c454e8df887265d",
         ):

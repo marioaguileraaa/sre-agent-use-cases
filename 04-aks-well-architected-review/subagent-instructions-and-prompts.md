@@ -9,7 +9,7 @@ and incident handlers are not changed by these files.
 | Skill | Only `aks-waf-live` |
 | Selected tool | Only `generate-aks-waf-report` |
 | Default cadence | On demand; no scheduled task is created |
-| Remediation authority | None |
+| Remediation authority | None (read-only) |
 
 Do not leave **Choose tools** empty: an empty selection can inherit global
 tools. Read back the deployed skill and selected-tool list. Do not add shell,
@@ -21,68 +21,37 @@ exec, generic Python, write connectors, another agent or a deployment tool.
 ## Copy-ready instructions
 
 ```text
-You are the read-only AKS architecture/configuration review specialist.
+You are the read-only AKS architecture/configuration review specialist for the whole AKS fleet.
 Follow skill aks-waf-live and use ONLY generate-aks-waf-report.
-Observe only its fixed approved cluster allowlist and explicit managed identity.
-For a multi-subscription fleet, page list_clusters with limit=100 and the
-returned next_offset until null, use only returned cluster_name keys, and
-review in report batches of at most five cluster_names, then summarize the
-fleet per subscription/environment without extrapolating unreported clusters.
-Report all three levels, four areas and five pillars with source/time/value
-evidence, coverage, conditional applicability and concrete linked recommendations.
-Scores are local assessment indicators, never official Azure WAF/Polaris/WARA
-grades or certification. No evaluated checks means null/Not evaluated.
-Keep LAB/PRODUCTION separate from LIVE/SIMULATED. ARM Running and enabled addons
-do not demonstrate application health, enforcement, measurements or license.
-No IaC supplied does not mean portal-created infrastructure or drift.
-No Kubernetes access means unknown manifests, not no workloads. Honor per-kind
-403/502/partial lists and do not use admin config, OBO, another identity or
-command invoke to bypass them. Only strict CA/FQDN TLS GETs are allowed.
-For a report make one complete report call and immediately deliver its four
-actual files. For native_ui, immediately render all four provided *_url values
-as native Markdown links/file widgets in this response, unchanged; the tool
-derives the fresh thread UUID from its guarded runtime cwd. Do not request
-manual publication, invent/reuse a thread prefix or call another HTTP tool.
-http_verified=false does not suppress provided links; written is not download
-verification. For local_files_only, expose unchanged actual paths and the
-unsupported native-runtime-root limitation. Show partial source evidence
-explicitly without hiding files. A current Kubernetes 502 is Not evaluated,
-not old workload data, empty-health success or a reason to broaden access.
-For questions use typed local filters and exact paging totals. A new call is a
-fresh collection, not the previous report. No hidden paging just to learn totals.
-Do not pad critical risks, infer owners or promise effort/delivery/savings.
-FinOps keeps actual currency/window/ResourceId and current usage units/samples;
-requests are not usage, current metrics are not historical underutilization,
-node costs are not workload billing and nodeRG names do not prove orphan assets.
-On error show the sanitized code/source and stop, with no fabricated files,
-zero/healthy fallback, narrower success retry, ZIP or Storage workaround.
-Never grant roles, enable plans, install tools/metrics, patch/delete/scale/upgrade,
-start/stop clusters, execute commands, reveal credentials or create issues/tasks.
+The tool auto-discovers every AKS cluster the agent identity can read (any subscription it has read access to); there is no approved list.
+Map the user's request to ONE call:
+- all clusters / full fleet: operation=report, cluster_names=all
+- all clusters of one subscription: operation=report, subscription=<subscription display name or ID>
+- one cluster: operation=report, cluster_name=<exact name>
+- several clusters: operation=report, cluster_names=<exact names comma-separated without spaces>
+- which clusters exist: operation=list_clusters (optionally subscription), limit=100, then offset=next_offset until null.
+Never guess names: if the user gives approximate names, call list_clusters first and use only returned cluster_name values (the same name in two subscriptions comes prefixed with 8 characters of the subscription ID).
+On too_many_clusters, unknown_cluster, unknown_subscription or ambiguous_cluster_name, show the tool message and ask the user to narrow or choose; one report covers up to 100 clusters, so propose one report per subscription. Warn that a large report can take several minutes.
+Each report is one set of files for the whole selection; the HTML has Subscription and Cluster drop-downs and a search box to filter the fleet overview, and a detailed view per cluster. Immediately render the four provided *_url values unchanged as native links/file widgets; never invent links or call another HTTP tool. http_verified=false does not hide provided links; for local_files_only show the actual paths.
+In chat summarize: clusters and subscriptions selected, ok/partial/error, findings by severity, the most important findings, cost per currency and the links. A failed or timed-out cluster is reported as failed, never as healthy, and never borrows data from another cluster.
+Kubernetes reads are disabled by default: workload checks are Not evaluated, not healthy. A Kubernetes 403/502 is a blind spot, never a reason to use admin credentials, OBO, another identity or command invoke. Cost API throttling (429) means unknown cost, not zero.
+Scores are local indicators, never official Azure WAF/Polaris/WARA grades; always show evaluated/Not evaluated/Not applicable counts and coverage. Requests are not usage, current metrics are not historical underutilization, node resource group costs are not workload billing, and savings are not calculated.
+For questions about one cluster use operation=query with its cluster_name and the documented views; a new call is a fresh collection, not the previous report.
+On error show the sanitized code/source and stop; no fabricated files, healthy fallbacks, narrower retries, ZIP or Storage workarounds.
+Never grant roles, enable plans, install anything, patch/delete/scale/upgrade, start/stop clusters, execute commands, reveal credentials or create issues/tasks.
 ```
 
-## Spanish chat prompts
+## English chat prompts
 
-Use the actual approved cluster name privately. The public default customer
-name remains **Customer**. None of these prompts authorizes changing Azure.
+In **New chat**, type `/agent`, select `aks-waf-live` (the chip **Agent:
+aks-waf-live** appears) and use one of these prompts. Each prompt is followed
+by the call it maps to. None of them authorizes changing Azure.
 
-List the fixed roster before choosing a scope. It is configuration metadata,
-not observed cluster health. Multi-cluster selection uses exact approved
-names; reports retain all selected snapshots and disclose failed cluster
-collections instead of replacing them with another cluster's data.
-
-```json
-{"operation":"list_clusters"}
-```
-
-Flota multi-suscripcion (decenas de suscripciones): pagina el roster y
-revisa por lotes de hasta cinco clusteres.
+List the visible clusters, grouped by subscription (inventory, not health):
 
 ```text
-@aks-waf-live Lista todos los clusteres AKS aprobados con operation=list_clusters,
-limit=100, siguiendo next_offset hasta que sea null. Resume cuantos hay por
-suscripcion y entorno. Despues genera informes por lotes de hasta 5 clusteres
-(cluster_names) empezando por PRODUCTION y termina con un resumen de flota con
-puntuacion y cobertura por lote. No extrapoles clusteres no revisados.
+List every AKS cluster you can see, grouped by subscription, with resource
+group and region. Page with next_offset until it is null.
 ```
 
 ```json
@@ -90,170 +59,110 @@ puntuacion y cobertura por lote. No extrapoles clusteres no revisados.
 ```
 
 ```json
-{"operation":"report","cluster_names":"<APPROVED_AKS_NAME>,<APPROVED_SECOND_AKS_NAME>"}
+{"operation":"list_clusters","subscription":"<SUBSCRIPTION_NAME_OR_ID>","limit":100,"offset":0}
+```
+
+One report for every cluster in every subscription:
+
+```text
+Generate the complete read-only AKS configuration review for every cluster in
+every subscription. Deliver the HTML, complete JSON, findings CSV and
+inventory CSV, and summarize collected/partial/failed clusters, the main
+findings and cost per currency. Change nothing.
 ```
 
 ```json
-{"operation":"query","view":"architecture","cluster_name":"<APPROVED_AKS_NAME>","limit":5}
+{"operation":"report","cluster_names":"all"}
+```
+
+One subscription (display name or ID):
+
+```text
+Generate the AKS configuration review for all clusters in subscription
+<SUBSCRIPTION_NAME_OR_ID>.
+```
+
+```json
+{"operation":"report","subscription":"<SUBSCRIPTION_NAME_OR_ID>"}
+```
+
+One cluster:
+
+```text
+Generate the complete read-only AKS configuration review for <AKS_NAME>.
+Cover cluster, workloads and associated resources across best practices,
+security, FinOps and optimization and the five WAF pillars. Show coverage,
+sources and Not evaluated/Not applicable. Change nothing.
+```
+
+```json
+{"operation":"report","cluster_name":"<AKS_NAME>"}
+```
+
+Several named clusters in one report:
+
+```text
+Generate one AKS configuration review for <AKS_NAME_1>, <AKS_NAME_2> and
+<AKS_NAME_3>.
+```
+
+```json
+{"operation":"report","cluster_names":"<AKS_NAME_1>,<AKS_NAME_2>,<AKS_NAME_3>"}
+```
+
+Follow-up questions about one cluster:
+
+```text
+Use query/coverage for <AKS_NAME>. Which sources failed or were partial, with
+which HTTP/error code, and which checks cannot be evaluated? A 502/429 is not
+permission denied, and a 403 does not mean zero objects.
+```
+
+```json
+{"operation":"query","view":"coverage","cluster_name":"<AKS_NAME>","status":"denied","limit":10}
 ```
 
 ```text
-@aks-waf-live Genera la revision de configuracion de AKS para
-<APPROVED_AKS_NAME> con operation=report. Cubre cluster, workloads y recursos
-asociados: buenas practicas, seguridad, FinOps y optimizacion, con los cinco
-pilares WAF. Entrega HTML, JSON completo, CSV de hallazgos y CSV de inventario.
-Muestra cobertura, fuentes, Not evaluated/Not applicable y limites. No cambies nada.
+Use query/findings for <AKS_NAME> with area=security and status=failed.
+Prioritize only observed risks with resource, configuration, source, UTC time,
+qualified impact and Microsoft recommendation. Do not invent critical findings.
 ```
 
 ```json
-{"operation":"report","cluster_name":"<APPROVED_AKS_NAME>"}
+{"operation":"query","view":"findings","cluster_name":"<AKS_NAME>","area":"security","status":"failed","limit":10}
 ```
 
 ```text
-@aks-waf-live Usa query/coverage para <APPROVED_AKS_NAME>. Que fuentes
-fallaron o fueron parciales, con que codigo HTTP y que campos no podemos
-evaluar? Un 502/429 no es permiso denegado, y un 403 no significa cero objetos.
+Use query/workloads for <AKS_NAME> and namespace <NAMESPACE>. Distinguish
+desired and ready replicas, probes and requests, and data that is Not
+evaluated. Do not infer Kubernetes configuration from ARM Running.
 ```
 
 ```json
-{"operation":"query","view":"coverage","cluster_name":"<APPROVED_AKS_NAME>","status":"denied","limit":10}
+{"operation":"query","view":"workloads","cluster_name":"<AKS_NAME>","namespace":"<NAMESPACE>","limit":10}
 ```
 
 ```text
-@aks-waf-live Usa query/findings con area=security y status=failed.
-Prioriza solo riesgos observados con recurso, configuracion, fuente, hora,
-impacto cualificado y recomendacion Microsoft. No inventes hallazgos criticos.
+Use query/finops for <AKS_NAME>. Which measurements have timestamp, window,
+unit and sample count, and which costs have an actual ResourceId and currency?
+Keep candidates separate from calculated savings. Do not buy plans, change
+SKUs or delete assets.
 ```
 
 ```json
-{"operation":"query","view":"findings","area":"security","status":"failed","limit":10}
+{"operation":"query","view":"finops","cluster_name":"<AKS_NAME>","limit":5}
 ```
 
 ```text
-@aks-waf-live Usa query/workloads y query/findings para namespace=client-apps
-y workload_name=frontend. Distingue replicas deseadas, probes, requests,
-PDB/HPA/NetworkPolicy seleccionados y datos en estado Not evaluated. No infieras la
-configuracion de Kubernetes a partir de telemetria o del estado Running de ARM.
+Use query/summary for <AKS_NAME> and explain score and coverage together: how
+many checks were evaluated, Not evaluated and Not applicable, and why this
+local index is not an official Azure assessment.
 ```
 
 ```json
-{"operation":"query","view":"findings","namespace":"client-apps","workload_name":"frontend","limit":5}
+{"operation":"query","view":"summary","cluster_name":"<AKS_NAME>"}
 ```
 
-```text
-@aks-waf-live Usa query/finops. Que mediciones tienen timestamp, ventana,
-unidad, muestra y denominador? Que costes tienen ResourceId y moneda reales?
-Separa candidatos de capacidad actual de infrautilizacion sostenida y de
-ahorro calculado. No compres planes, cambies SKU o elimines activos.
-```
-
-```json
-{"operation":"query","view":"finops","limit":5}
-```
-
-```text
-@aks-waf-live Usa query/summary y explica puntuacion y cobertura juntas.
-Cuantos indicadores se evaluaron, cuantos estan en Not evaluated y Not applicable?
-Explica por que esta puntuacion local no certifica la salud del cluster ni
-constituye el Azure Architecture Review oficial.
-```
-
-```json
-{"operation":"query","view":"summary"}
-```
-
-## English chat prompts
-
-Use the same private approved cluster names. The public default customer name
-remains **Customer**, and every prompt below is strictly read-only.
-
-```text
-@aks-waf-live Use operation=list_clusters to list the fixed configured cluster
-roster before choosing a scope. Explain why this roster is configuration
-metadata rather than observed cluster presence or health.
-```
-
-```json
-{"operation":"list_clusters"}
-```
-
-```text
-@aks-waf-live Generate the complete read-only AKS configuration review for
-<APPROVED_AKS_NAME> with operation=report. Cover cluster, workloads and
-associated resources across best practices, security, FinOps and optimization,
-including all five WAF pillars. Immediately deliver the HTML, complete JSON,
-findings CSV and inventory CSV. Show coverage, sources, Not evaluated/Not applicable
-and limits; do not change anything.
-```
-
-```json
-{"operation":"report","cluster_name":"<APPROVED_AKS_NAME>"}
-```
-
-```text
-@aks-waf-live Generate the combined read-only AKS configuration review for
-<APPROVED_AKS_NAME>,<APPROVED_SECOND_AKS_NAME> with operation=report and
-cluster_names (exact comma-separated names, no spaces). Deliver all four files,
-preserve every per-cluster snapshot and disclose any failed cluster read
-without borrowing another cluster's score, workloads or cost.
-```
-
-```json
-{"operation":"report","cluster_names":"<APPROVED_AKS_NAME>,<APPROVED_SECOND_AKS_NAME>"}
-```
-
-```text
-@aks-waf-live Use query/coverage for <APPROVED_AKS_NAME>. Which sources failed
-or were partial, with what HTTP/error code, and which checks cannot be
-evaluated? Explain why HTTP 502/429 is not permission denied and why HTTP 403
-does not mean zero Kubernetes objects.
-```
-
-```json
-{"operation":"query","view":"coverage","cluster_name":"<APPROVED_AKS_NAME>","status":"denied","limit":10}
-```
-
-```text
-@aks-waf-live Use query/findings with area=security and status=failed.
-Prioritize only observed risks with their resource, configuration, source,
-UTC timestamp, qualified impact and Microsoft recommendation. Do not invent
-critical findings.
-```
-
-```json
-{"operation":"query","view":"findings","area":"security","status":"failed","limit":10}
-```
-
-```text
-@aks-waf-live Use query/workloads and query/findings for namespace=client-apps
-and workload_name=frontend. Distinguish desired replicas, probes, requests,
-matched PDB/HPA/NetworkPolicy and Not evaluated items. Do not infer Kubernetes
-manifests from telemetry or from ARM Running state.
-```
-
-```json
-{"operation":"query","view":"findings","namespace":"client-apps","workload_name":"frontend","limit":5}
-```
-
-```text
-@aks-waf-live Use query/finops. Which measurements include timestamp, window,
-unit, sample count and denominator? Which costs have real ResourceId and
-currency? Separate current capacity-review candidates from sustained
-underutilization and from calculated monetary savings. Do not buy plans,
-change SKUs or delete assets.
-```
-
-```json
-{"operation":"query","view":"finops","limit":5}
-```
-
-```text
-@aks-waf-live Use query/summary and explain score and coverage together.
-How many checks were evaluated, and how many are Not evaluated or Not applicable?
-Explain why this local pass indicator neither certifies cluster health nor
-constitutes the official Azure Architecture Review.
-```
-
-```json
-{"operation":"query","view":"summary"}
-```
+In the report, the **Subscription** and **Cluster** drop-downs and the search
+box at the top filter the fleet table, the KPI cards and the findings;
+choosing a cluster opens its complete detailed review.

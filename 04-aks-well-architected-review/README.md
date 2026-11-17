@@ -2,23 +2,26 @@
 
 > **Azure SRE Agent** · Read-only Python tool · Runtime skill · Restricted specialist · Offline HTML, full JSON and CSV
 
-Turn a fixed, approved AKS scope into a dated review of **best practices,
-security, FinOps and optimization**. Start with the executive reading, follow a
-namespace or workload into its evidence, inspect confirmed resource
-relationships, and compare them with a clearly **undeployed Azure reference
-proposal**.
+Turn every AKS cluster the reporting identity can read, in any number of
+subscriptions, into one dated review of **best practices, security, FinOps and
+optimization**. Ask from chat for all clusters, one subscription or named
+clusters; the report opens on a fleet overview with **Subscription** and
+**Cluster** filters. Then follow one cluster's executive reading, a namespace or
+workload into its evidence, confirmed resource relationships and a clearly
+**undeployed Azure reference proposal**.
 
 ![Report cover from the English SIMULATED sample run: verdict, provenance chips and KPI cards](images/aks04-report-00-cover.png)
 
 **English sample run:** [`sample-run/`](sample-run/) holds the four files that
-the standalone tool wrote for one two-cluster report: the
+the standalone tool wrote for one fleet report of **seven clusters in three
+subscriptions** (one with a simulated access error): the
 [HTML report](sample-run/simulated-20261010T120000Z-4596adfa1b2c.html)
 (download it and open it in a browser), the
 [JSON snapshot](sample-run/simulated-20261010T120000Z-4596adfa1b2c-snapshot.json),
 the [findings CSV](sample-run/simulated-20261010T120000Z-4596adfa1b2c-findings.csv)
 and the [inventory CSV](sample-run/simulated-20261010T120000Z-4596adfa1b2c-inventory.csv).
 It uses **simulated data**: the public test fixture with fictitious Contoso
-names (`contoso-aks-prod-01`, `contoso-aks-prod-02`) and placeholder GUIDs.
+names (`contoso-aks-prod-01` ... `contoso-aks-sandbox-01`) and placeholder GUIDs.
 Nothing in it was read from Azure.
 
 **Portal screenshots are evidence, not mockups**: they show the real Azure
@@ -42,6 +45,7 @@ evidence. See the [capture manifest](images/capture-manifest.json).
 | Observed architecture with exact IDs and join-field receipts | Verified traffic, effective authorization, actual mounts or invented dependencies |
 | A conditional Microsoft reference design with official Azure icons | A customer architecture that has already been deployed |
 | Actual billing currency, period, scope and complete billed-resource rows | Workload invoices, guaranteed savings or prices inferred from a CPU sample |
+| One report for all readable clusters, one subscription or named clusters (up to 100), with Subscription/Cluster filters and a fleet overview | Clusters the identity cannot read, a fleet-wide health verdict, or data borrowed by a cluster whose collection failed |
 | Four native downloadable files from one complete report call | Remediation, Azure/IAM changes, a new AKS cluster or an automatic schedule |
 
 > [!IMPORTANT]
@@ -57,6 +61,10 @@ evidence. See the [capture manifest](images/capture-manifest.json).
 > These dated results come from the live baseline; the report screenshots in
 > this guide use the SIMULATED sample run instead.
 > [Dated evidence and release state](#dated-evidence-and-release-state).
+>
+> **Fleet build, 17 November 2026:** auto-discovery, the `subscription` filter
+> and the single fleet report were run on the same LAB (two clusters, one
+> subscription) through the Test playground; see [TESTS.md](TESTS.md).
 
 ## Contents
 
@@ -95,15 +103,16 @@ Before the meeting:
    copy of this complete case with its relative folders. Use the file links
    below and **Raw / Download raw file**; verify Python/JSON/Markdown rather
    than an HTML sign-in page.
-2. Have an **existing SRE Agent**, its attached reporting UAMI, and one or more (up to
-   500, across subscriptions of one tenant) exact approved clusters. Record the SRE-hosting subscription separately
-   from the monitored subscription and verify compatible tenant/access.
+2. Have an **existing SRE Agent** and its attached reporting UAMI, and agree the
+   read scope: ideally one management group, so clusters in every current and
+   future subscription below it are discovered (up to 500; 100 per report).
+   Record the SRE-hosting subscription separately and verify the tenant.
 3. Agree associated-resource and optional billing scopes, source expectations,
    intended report audience and customer-admin availability. A running ARM
    cluster, Reader or an enabled addon is not Kubernetes data, sensor,
    network-reachability or historical-usage proof.
-4. Prepare the privately configured standalone file/schema and optional
-   authorized logo outside Git. Do not paste IDs, token material or configured
+4. Prepare the privately configured standalone file (only `TENANT_ID` and
+   `MANAGED_IDENTITY_CLIENT_ID`) and optional authorized logo outside Git. Do not paste IDs, token material or configured
    source from another customer's session.
 5. Keep new-cluster/power scheduling **out of ordinary implementation**.
    [Operator assets](operator/README.md) are a separate privileged/manual,
@@ -121,7 +130,7 @@ transfer the LAB identity/access or establish customer acceptance.
 
 | Object | Meaning in this case | Required now? |
 |---|---|---|
-| **Tool** - `generate-aks-waf-report` | The Python code that performs the fixed approved reads and writes the four report files. This is where the private source configuration and typed parameters belong. | Yes; create it in Step 2. |
+| **Tool** - `generate-aks-waf-report` | The Python code that discovers the clusters the identity can read, performs the fixed read-only reads and writes the four report files. This is where the private configuration (tenant and identity) and the typed parameters belong. | Yes; create it in Step 2. |
 | **Skill** - `aks-waf-live` | The runtime `SKILL.md`: instructions explaining how to use that one tool and disclose unknowns. It is not a second collector or a Copilot authoring skill. | Yes; create it separately in Step 3. |
 | **Specialist / custom agent** - `aks-waf-live` | The responder you select in normal SRE chat. It is restricted to the one tool and one runtime skill above. | Yes; configure and read it back in Step 4. |
 | **Scheduled task** | An optional later trigger that asks the same specialist for an approved read-only report at an agreed time. It does not create the tool, grant access or start a cluster. | No; leave Step 7 until a customer report has been accepted and cadence is separately requested. |
@@ -144,8 +153,8 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 |---|---|
 | SRE Agent resource, hosting subscription and tenant; implementer's user/group | [Prerequisites](#prerequisites) and [Step 0](#step-0---identify-the-reporting-identity-and-approve-scope): human Author + Standard User access is on this resource, separate from source permissions. |
 | Attached reporting UAMI **Client ID** and **Object/principal ID** | Client ID goes into `MANAGED_IDENTITY_CLIENT_ID`; the principal identifies the role-assignment member. They are not interchangeable and neither is the browser user's identity. |
-| Monitored tenant/subscription, exact approved AKS names/resource groups and environment | [Step 1](#step-1---configure-the-private-standalone-file): configure the existing clusters (up to 500, any subscription of the tenant) in the private allowlist; do not copy the demonstration's cluster IDs. |
-| Approved associated-resource IDs, node-RG inventory choice and optional billing scope/timeframe | Agree which reads are in scope and which remain disabled. Node-RG inventory, resource-detail access and billing-query authorization are not the same permission. |
+| Management group (recommended) or subscriptions to read, and any cluster that needs an override (for example `PRODUCTION`) | [Step 0](#grant-the-read-only-roles-with-the-script) grants read-only roles on that scope; [Step 1](#step-1---configure-the-private-standalone-file) needs no cluster list, only optional overrides. Do not copy the demonstration's IDs. |
+| Associated-resource IDs, node-RG inventory choice and billing | Agree which reads are in scope. Cost is read per node resource group by default (Cost Management Reader); `cost_scope="disabled"` skips it. Node-RG inventory, resource-detail access and billing-query authorization are not the same permission. |
 | Four independent read-boundary results and any source exclusions | [Step 0](#step-0---identify-the-reporting-identity-and-approve-scope): ARM, clusterUser, Kubernetes data and billing. Record denied/unavailable kinds explicitly; do not ask for Cluster Admin to make a demo green. |
 | Availability, scaling, segmentation and other actual workload requirements | Unknown requirements stay unknown; they are not invented from the report's reference architecture. |
 | Approved audience, optional authorized logo and report reviewer | Use only this customer's authorized artwork in the private copy. The generic source default is `Customer` and the reusable screenshots show the fictitious **Contoso**; never copy a previous customer's branding or inline logo. |
@@ -155,8 +164,8 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 | Stage | Your guided action | What you should see before proceeding |
 |---|---|---|
 | Watch the demonstration | Walk through [Step 6](#step-6---read-and-explore-the-html-report) and the [scope matrix](#customer-scope-coverage-and-checklist-limits) with the customer. | Four real files, dated source receipts and separate score/coverage. The demonstrated 19 Kubernetes 502s and stopped second cluster remain limitations, not a completed customer workload review. |
-| Configure your own approved scope | Download the actual [standalone tool](generate-aks-waf-report.py), [schema](tool-parameters.schema.json), [requirements](requirements.txt), [runtime skill](skills/aks-waf-live/SKILL.md), [specialist instructions](subagent-instructions-and-prompts.md) and the optional [permissions script](grant-aks-permissions.ps1). Complete Steps 0-1 privately. | Valid Python/JSON/Markdown downloads, not GitHub sign-in HTML; confirmed IDs/permissions, matching code/schema cluster allowlists and authorized branding only. No collector edits or rebuild are needed for customer configuration. |
-| Create and read back the components | Follow the actual portal steps in [Step 2](#step-2---create-the-python-tool-and-verify-its-inputs), [Step 3](#step-3---create-the-runtime-skill) and [Step 4](#step-4---create-the-restricted-specialist). Use all [12 current typed inputs](#verify-the-current-typed-schema), not an old screenshot's 11. | Saved whole-file code, correct defaults/enums/bounds and the documented identity design; then exactly one tool and one skill on the specialist. A filled but unsaved form is not deployment. |
+| Configure your own scope | Download the actual [standalone tool](generate-aks-waf-report.py), [schema](tool-parameters.schema.json), [requirements](requirements.txt), [runtime skill](skills/aks-waf-live/SKILL.md), [specialist instructions](subagent-instructions-and-prompts.md) and the [permissions script](grant-aks-permissions.ps1). Complete Steps 0-1 privately. | Valid Python/JSON/Markdown downloads, not GitHub sign-in HTML; read-only roles granted on the agreed scope, `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` set, authorized branding only. No cluster list, schema enum, collector edit or rebuild is needed. |
+| Create and read back the components | Follow the actual portal steps in [Step 2](#step-2---create-the-python-tool-and-verify-its-inputs), [Step 3](#step-3---create-the-runtime-skill) and [Step 4](#step-4---create-the-restricted-specialist). Use all [13 current typed inputs](#verify-the-current-typed-schema), not an old screenshot's 11 or 12. | Saved whole-file code, correct defaults/enums/bounds and the documented identity design; then exactly one tool and one skill on the specialist. A filled but unsaved form is not deployment. |
 | Accept your first customer run | In normal chat, explicitly select the specialist and follow [Step 5](#step-5---run-one-report-in-normal-chat-and-download-its-files), then inspect each selected cluster as in Step 6. | Four actual downloads for the requested scope and matching run references. `Not evaluated` means evidence/applicability is missing, not passed; an empty workload table after failed GETs means unknown, not no workloads. Use [Troubleshooting](#troubleshooting) without broadening access or starting a stopped cluster. |
 | Decide on repetition later | Only after acceptance and a separate customer request, use [Step 7](#step-7---keep-reporting-cadence-optional). | Approved owner/scope/cadence/cost and an actual saved/read-back task plus any separately authorized run receipt; no schedule is required for an on-demand implementation. |
 
@@ -164,18 +173,19 @@ placeholders, not LAB or another customer's values, in reusable instructions.
 
 ```mermaid
 flowchart LR
-    H["Human selects<br/>approved cluster(s)"] --> C["Normal SRE chat<br/>aks-waf-live"]
+    H["Human asks: all clusters,<br/>one subscription or names"] --> C["Normal SRE chat<br/>aks-waf-live"]
     C --> S["Runtime skill<br/>aks-waf-live"]
     C --> T["Only selected tool<br/>generate-aks-waf-report"]
     S -.->|"uses only"| T
-    T --> I["Explicit reporting UAMI<br/>fixed tenant and subscription"]
-    I --> A["Approved ARM reads<br/>AKS + associated resources"]
+    T --> I["Explicit reporting UAMI<br/>fixed tenant"]
+    I --> G["Resource Graph discovery<br/>every readable AKS cluster"]
+    G --> A["Per-cluster ARM reads in parallel<br/>AKS + associated resources"]
     I --> K["Selected Kubernetes GETs<br/>per-kind source receipts"]
     I --> F["Approved ActualCost scope<br/>cached Advisor reads"]
     A --> M["Complete normalized snapshot<br/>local rules + confirmed graph"]
     K --> M
     F --> M
-    M --> R["Offline HTML report<br/>full JSON + two CSVs"]
+    M --> R["One offline HTML report with fleet filters<br/>full JSON + two CSVs"]
     R --> D["Four native links<br/>from this actual SRE thread"]
 ```
 
@@ -183,6 +193,28 @@ The tool collects fresh evidence, evaluates bounded local predicates and writes
 the four complete files. The specialist explains that result; it does not
 replace a failed read with old data, invoke another tool or change Azure.
 HTML filters are **local**: they do not make another cloud call.
+
+### How scope works
+
+- **Auto-discovery, no approved list.** Every call runs one fixed, read-only
+  Azure Resource Graph query and works with every AKS cluster the reporting
+  identity can read, in any subscription of the tenant (up to 500). Granting
+  Reader once at a management group makes clusters in current and future
+  subscriptions appear on their own; a cluster the identity cannot read is not
+  in scope.
+- **Selection from chat.** `cluster_names="all"` (or a report without a
+  selection) covers every visible cluster; `subscription` narrows to one
+  subscription by display name or ID; `cluster_name` or `cluster_names` pick
+  exact names. One report covers up to 100 clusters.
+- **Optional per-cluster overrides.** `APPROVED_CLUSTERS` can stay empty; an
+  entry only overrides the defaults for one cluster (environment,
+  requirements, Kubernetes reads, cost scope).
+- **The same name in two subscriptions.** The second cluster is listed with a
+  prefix (the first 8 characters of its subscription ID); asking for the plain
+  name returns `ambiguous_cluster_name` unless `subscription` is added.
+- **Each cluster in its own subscription.** Clusters are collected in parallel;
+  every read uses that cluster's subscription, and a reference into another
+  subscription is skipped, never followed.
 
 The assessment covers three levels, four areas and five WAF pillars:
 
@@ -210,13 +242,13 @@ the [fixed Kubernetes GET list](engine.py#L447-L467) and
 | Requested scope / area | Existing checks and collected configuration | Evidence prerequisite | Limits / still unassessed |
 |---|---|---|---|
 | AKS best practices and operations | `C11-C20`, `C22`: tier/SLA requirement, pool zones/state/taints, system/application placement, autoscaling, upgrade channels, regional version catalog, upgrade profile, diagnostic settings and maintenance windows | Approved managedCluster, agentPools, maintenance, diagnostic, regional-version and upgrade-profile ARM reads; `C14` also needs complete Nodes/Pods and exact pool-label joins | Intent-dependent absence is not automatically failure. ARM `Running`, configured diagnostics, an upgrade channel or multiple zones does not establish application availability, log delivery, completed upgrades or DR readiness. |
-| Workload reliability and optimization | `W01-W05`, `N01`: CPU/memory requests, memory limits, readiness/liveness presence for identified serving containers, PDB selectors, HPA targets, desired/ready replicas and ResourceQuota. Startup-probe presence is retained as inventory, not a separate rule. | Current Deployments/StatefulSets/DaemonSets/Jobs/CronJobs; Services, PDBs, HPAs, Namespaces and ResourceQuotas as required by each join; confirmed per-workload requirements where applicability is unknown | Namespace filtering happens after fixed GET collection. Missing manifests are not zero workloads. Batch/system/zero-replica cases are qualified separately; probe presence, HPA configuration and desired replicas do not prove effective behavior. CPU limits are required only when explicitly agreed. |
+| Workload reliability and optimization | `W01-W05`, `N01`: CPU/memory requests, memory limits, readiness/liveness presence for identified serving containers, PDB selectors, HPA targets, desired/ready replicas and ResourceQuota. Startup-probe presence is retained as inventory, not a separate rule. | Kubernetes reads enabled for the cluster (`kubernetes_enabled`, off by default); current Deployments/StatefulSets/DaemonSets/Jobs/CronJobs; Services, PDBs, HPAs, Namespaces and ResourceQuotas as required by each join; confirmed per-workload requirements where applicability is unknown | Namespace filtering happens after fixed GET collection. Missing manifests are not zero workloads. Batch/system/zero-replica cases are qualified separately; probe presence, HPA configuration and desired replicas do not prove effective behavior. CPU limits are required only when explicitly agreed. |
 | Cluster and workload security | `C01-C07`, `C09-C10`, `W06-W08`, `N02`: managed identity/Entra, RBAC/local-account/API-access options, OIDC/Workload ID, policy engine/addons, explicit Linux container privileges, image references, NetworkPolicy selection and Pod Security Admission `enforce` labels | Exact ARM cluster configuration plus authorized manifests, namespace labels and complete policy lists; explicit business requirements for conditional controls | Configuration is not effective least privilege, policy enforcement, use of Workload ID by every pod, image vulnerability scanning or Defender sensor/license/telemetry health. Windows is not evaluated by analogy with Linux controls. No secrets, image contents or runtime exploitation tests are collected. |
 | Associated Storage | `R01`: PVC binding state with consumer/StorageClass context. `R03`: Storage-account HTTPS/minimum TLS. Inventory also retains PV/PVC capacity, CSI handles/approved attributes, reclaim/binding policy, selected StorageClass parameters, disk state/encryption/zones and Storage-account access flags. | Authorized PVC/Pod/PV/StorageClass GETs plus exact approved or observed-reference ARM resource reads. Azure Files account association requires observed CSI account/resource-group attributes matching an already collected account. | No Storage keys/share data, mount/read tests, IOPS/latency history, backup/restore proof or complete storage-resilience assessment. Access flags are admitted evidence, not additional automatic rules. A configured CSI driver or `Bound` PVC does not prove a working or recoverable mount. |
 | Public Azure Load Balancer (ELB) and internal Load Balancer (ILB) | `R02`: Standard versus Basic SKU. Observed topology retains frontend public-IP/private-IP/subnet fields, probes, backend pools and rule references; Services retain type, selected Azure annotations, ports and `status.loadBalancer.ingress`. | Approved/referenced/node-RG ARM LB and public-IP details; current Services for a Service-to-frontend join. That join needs an exact observed ingress-IP match without a conflicting internal/public annotation. | ELB here is Azure public Load Balancer, not AWS. An annotation or resource name alone is not an observed mapping. Probe configuration is not backend health, traffic reachability, end-to-end ingress/TLS validation or an automatic review of every balancing setting. |
 | DNS, IPAM and network context | `R06` explicitly records an unassessed DNS/IPAM review. Inventory retains cluster service/pod CIDR, DNS service IP, FQDN/private FQDN/private-DNS reference, VNet address space/DNS servers and whitelisted public/private DNS-zone metadata. | Exact ARM cluster and approved or directly referenced VNet/subnet/DNS-zone detail reads; a zone reference must be an actual resource ID to trigger a detail read | No DNS queries, record-set/VNet-link enumeration, CoreDNS configuration, resolver latency/failover tests, LocalDNS effectiveness or IP-exhaustion calculation. Successful zone inventory does **not** change `R06` to passed. |
 | Other associated resources and network security | `R04`: Key Vault RBAC option. `R05`: explicit broad Internet-to-administrative-port NSG rules. Inventory/topology also admit ACR `loginServer`, matching workload image hosts, exact referenced identities and optional observed-kubelet-principal registry-role metadata. | Fixed approved resource IDs, direct-reference closure or the exact observed node resource group; whitelisted detail reads and separately permitted role-metadata reads when applicable | Node-RG membership is context, not ownership. No SecretProviderClass/vault mount, secret value, effective ACR pull, full IAM/ABAC decision or effective NSG traffic/priority analysis. Unsupported detail types and missing joins stay explicit, not invented dependencies. |
-| FinOps and general optimization | `C08`, `C16`, `C21`, `F01-F04`: network/scaling/current-metric context, ActualCost/PreTaxCost ResourceId rows with actual currency/window/scope, cached exact-cluster Advisor recommendations and qualified current capacity-review candidates | Billing disabled unless separately approved: exact ARM-observed node-RG query or subscription query filtered to approved observed IDs; separate Cost Management authorization. Current metrics need authorized `metrics.k8s.io` Nodes/Pods and timestamp/window/denominator evidence. | `F01-F03` remain unassessed for workload cost allocation, historical right-sizing and Spot/commitment eligibility. Current CPU samples are not monthly utilization; requests are not consumption; no guaranteed savings, price/reservation model, deletion or paid-plan activation is inferred. |
+| FinOps and general optimization | `C08`, `C16`, `C21`, `F01-F04`: network/scaling/current-metric context, ActualCost/PreTaxCost ResourceId rows with actual currency/window/scope, cached exact-cluster Advisor recommendations and qualified current capacity-review candidates | Default `cost_scope="node_resource_group"`: the exact ARM-observed node-RG query, or a subscription query filtered to approved observed IDs; needs Cost Management Reader (`-IncludeCost`); `disabled` skips it. Current metrics need authorized `metrics.k8s.io` Nodes/Pods and timestamp/window/denominator evidence. | `F01-F03` remain unassessed for workload cost allocation, historical right-sizing and Spot/commitment eligibility. Current CPU samples are not monthly utilization; requests are not consumption; no guaranteed savings, price/reservation model, deletion or paid-plan activation is inferred. |
 
 **Reference mapping is not full control coverage.** The pinned Microsoft
 checklist has 112 items; the 42 local rules reference 36 distinct IDs, and
@@ -246,7 +278,7 @@ remain separate, and the stopped cluster is never started to complete a demo.
 
 ```mermaid
 flowchart LR
-    I["0<br/>Identity + approved read boundaries"] --> P["1<br/>Private code/schema configuration"]
+    I["0<br/>Identity + read-only roles<br/>(grant script)"] --> P["1<br/>Two values in the private code"]
     P --> T["2<br/>Create/test Python tool"]
     T --> S["3<br/>Create runtime skill"]
     S --> A["4<br/>Restrict specialist"]
@@ -269,7 +301,7 @@ Before opening **Build + configure**, confirm these separately:
 | An existing Azure SRE Agent and an approved AKS scope | This guide does not deploy a new SRE Agent or AKS cluster |
 | **SRE Agent Author + SRE Agent Standard User** on the **SRE Agent resource** | Authoring and chat are different data actions; **SRE Agent Administrator** is the full-management alternative |
 | The reporting agent's **user-assigned managed identity Client ID** | The Python code uses that exact UAMI, not your browser identity, Object ID or cached Azure CLI login |
-| Fixed tenant, default subscription and approved cluster names/resource groups/subscriptions (up to 500) | Requests cannot expand the allowlist or discover the subscription |
+| Tenant ID and read-only roles for the UAMI on the management group or subscriptions that hold the clusters | The tool reviews exactly what the identity can read (up to 500 clusters); chat can narrow the selection, never widen access |
 | An authorized operator who can verify each source read | Reader, clusterUser credentials, Kubernetes data reads and billing access are separate boundaries |
 | A private working copy and a browser | Configured source, real snapshots and customer logos must remain outside Git |
 
@@ -296,9 +328,9 @@ so you do not have to scroll back here.
 | [`requirements.txt`](requirements.txt) | Declared runtime dependencies; optional Pillow is needed only for a configured raster logo |
 | [`skills/aks-waf-live/SKILL.md`](skills/aks-waf-live/SKILL.md) | Separate SRE runtime skill, not the repository's authoring skill |
 | [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) | Restricted specialist instructions and copy-ready report/query prompts |
-| [`grant-aks-permissions.ps1`](grant-aks-permissions.ps1) | Optional: grants the read-only roles to the reporting UAMI and writes `approved-clusters.generated.py`; see [Multi-subscription fleet](#multi-subscription-fleet-tens-of-subscriptions-hundreds-of-clusters) |
+| [`grant-aks-permissions.ps1`](grant-aks-permissions.ps1) | Grants the read-only roles to the reporting UAMI (management group recommended), lists the clusters it finds and writes `aks-clusters.csv` and `aks-auth-modes.csv`; nothing to paste into the tool. See [Grant the read-only roles](#grant-the-read-only-roles-with-the-script) |
 | [`report_template.html`](report_template.html) | Development source for the offline UI; **do not paste it as a Python tool** |
-| [`sample-run/`](sample-run/) | English sample run: the four files of one SIMULATED two-cluster report (fictitious Contoso data) |
+| [`sample-run/`](sample-run/) | English sample run: the four files of one SIMULATED fleet report, seven clusters in three subscriptions (fictitious Contoso data) |
 | [`rules_catalog.json`](rules_catalog.json) and [`references/`](references/) | Source-qualified local-rule mappings, pinned checklist and licenses |
 
 ## Step 0 - Identify the reporting identity and approve scope
@@ -314,37 +346,39 @@ so you do not have to scroll back here.
    **Object (principal) ID** into code: they are different GUIDs. Record the
    principal separately for source RBAC checks, and do not select the internal
    system-assigned identity or the cluster's kubelet identity as the reporter.
-3. Record the approved tenant, subscription, exact AKS names/resource groups
-   and environment. Keep that record privately.
-4. Ask the authorized operator to verify the following **four read boundaries**
+3. Record the tenant and the read scope: the management group (recommended) or
+   the subscriptions whose AKS clusters the identity may read, plus any cluster
+   that needs an override such as `PRODUCTION`. Keep that record privately.
+4. Grant the read-only roles ([script below](#grant-the-read-only-roles-with-the-script)
+   or the manual procedure) and verify the following **four read boundaries**
    with the reporting UAMI. Do not grant broader access to improve a score.
 
 | Boundary | Required permission/read check |
 |---|---|
-| Approved ARM resources | Reader or verified approved equivalent on AKS, its agent pools/maintenance/diagnostics, exact associated resources and optional node-RG inventory. Regional Kubernetes-version and filtered cached Advisor reads use subscription-level provider endpoints; resource-only Reader is not proof that those are authorized. No subscription inventory discovery is performed. |
-| clusterUser server/CA | Azure Kubernetes Service Cluster User Role on the exact managed-Entra cluster; Reader alone does not grant `listClusterUserCredential/action` |
-| Kubernetes configuration | Customer-approved Kubernetes / Azure AKS RBAC **data reads** for the fixed GET lists below. AKS RBAC Reader is not Cluster Admin and can exclude Nodes/PVs/StorageClasses; an ARM Reader/clusterUser grant does not grant these data reads. |
-| Billing evidence | Applicable Cost Management query/data-read authorization on the **actual query scope**. `node_resource_group` queries that exact observed group; `resource_ids` uses a subscription-level query with a fixed approved-ID filter. Resource Reader on one selected ID does not prove billing-query authorization. 429 is throttling, not denial. |
+| ARM resources and discovery | **Reader** on the management group (recommended) or on each subscription. It covers the Resource Graph discovery query, AKS, its agent pools/maintenance/diagnostics, associated resources, node-RG inventory, regional Kubernetes versions and filtered cached Advisor reads. Resource-only Reader does not authorize discovery or the subscription-level reads. |
+| clusterUser server/CA | Only when Kubernetes reads are enabled: Azure Kubernetes Service Cluster User Role on each managed-Entra cluster, or once at scope with `-AksRolesAtScope`; Reader alone does not grant `listClusterUserCredential/action` |
+| Kubernetes configuration | Only when `kubernetes_enabled` is set (off by default): customer-approved Kubernetes / Azure AKS RBAC **data reads** for the fixed GET lists below. AKS RBAC Reader is not Cluster Admin and can exclude Nodes/PVs/StorageClasses; an ARM Reader/clusterUser grant does not grant these data reads. |
+| Billing evidence | **Cost Management Reader** (`-IncludeCost`) or equivalent on the **actual query scope**; cost is read by default. `node_resource_group` queries that exact observed group; `resource_ids` uses a subscription-level query with a fixed approved-ID filter. Resource Reader on one selected ID does not prove billing-query authorization. 429 is throttling, not denial. |
 
 ```mermaid
 flowchart TD
-    U["Reporting UAMI<br/>(MANAGED_IDENTITY_CLIENT_ID)"] --> B1["1. ARM cluster/pool/diagnostics/version/Advisor reads<br/>Role: Reader on approved subscription / resource scopes"]
-    B1 -->|"Primary AKS GET denied/error"| E1["Single-cluster: stop error (no fabricated files)<br/>Multi-cluster: failed cluster recorded in run_errors"]
+    U["Reporting UAMI<br/>(MANAGED_IDENTITY_CLIENT_ID)"] --> B1["1. Resource Graph discovery + ARM cluster/pool/diagnostics/version/Advisor reads<br/>Role: Reader on the management group or subscriptions"]
+    B1 -->|"Primary AKS GET denied/error"| E1["Single cluster: stop error (no fabricated files)<br/>Fleet: that cluster is an error run, others continue"]
     B1 -->|"Sub-source denied (e.g. diagnostics/versions/Advisor)"| P1["Partial source receipt -> dependent checks Not evaluated"]
     B1 -->|"AKS Running + Managed Entra + RBAC"| B2["2. listClusterUserCredential action<br/>Role: Azure Kubernetes Service Cluster User Role"]
     B2 -->|"Denied (403) or cluster Stopped"| P2["kube_cluster_user denied/not_applicable -> all 19 Kubernetes kinds Not evaluated"]
     B2 -->|"Server FQDN + public CA returned"| B3["3. 19 fixed Kubernetes GET lists<br/>Role: AKS RBAC / Kubernetes RBAC data reads"]
     B3 -->|"Per-kind 403 / 502 / timeout"| P3["Independent per-kind receipt (denied/error) -> dependent workload/cluster checks Not evaluated"]
-    U --> B4["4. Optional ActualCost Cost Management query<br/>Scope: node_resource_group or resource_ids"]
+    U --> B4["4. ActualCost Cost Management query (on by default)<br/>Scope: node_resource_group or resource_ids"]
     B4 -->|"cost_scope=disabled, 403, or 429"| P4["azure_cost not_configured/denied/error -> FinOps billing Not evaluated (never 0.00)"]
 ```
 
 | Read boundary | Exact API / operation | Required role & scope | Outcome if missing, denied or unreachable (`Not evaluated` vs stop error) |
 |---|---|---|---|
-| **1. ARM cluster/pool/diagnostics/version/Advisor reads** | ARM `GET` on `managedClusters`, `agentPools`, `maintenanceConfigurations`, `diagnosticSettings`, `upgradeProfiles`, subscription regional `orchestrators` and filtered cached `Advisor/recommendations` | **Reader** (or verified equivalent) on the monitored subscription or exact cluster, node-RG and approved related resources | Primary `arm_cluster` / `arm_node_pools` failure stops a single-cluster run with a sanitized error (or records the cluster in `run_errors` in a multi-cluster run); optional ARM sub-source denials record `denied`/`error` and leave only dependent rules **`Not evaluated`** |
-| **2. `listClusterUserCredential` action** | ARM `POST .../managedClusters/<name>/listClusterUserCredential` (extracts server FQDN + public CA only; never admin credentials) | **Azure Kubernetes Service Cluster User Role** on each approved AKS resource (ARM `Reader` alone does **not** grant this `POST` action) | `kube_cluster_user` is recorded as `denied` (or `not_applicable` when the cluster is `Stopped`); all 19 Kubernetes data-plane lists and workload checks remain **`Not evaluated`**, while ARM/billing evidence still delivers |
+| **1. Discovery and ARM cluster/pool/diagnostics/version/Advisor reads** | Fixed Resource Graph query (`POST /providers/Microsoft.ResourceGraph/resources`), then ARM `GET` on `managedClusters`, `agentPools`, `maintenanceConfigurations`, `diagnosticSettings`, `upgradeProfiles`, subscription regional `orchestrators` and filtered cached `Advisor/recommendations` | **Reader** (or verified equivalent) on the management group or monitored subscriptions | Primary `arm_cluster` / `arm_node_pools` failure stops a single-cluster run with a sanitized error (or marks that cluster as an `error` run in a fleet report while the other clusters continue); optional ARM sub-source denials record `denied`/`error` and leave only dependent rules **`Not evaluated`** |
+| **2. `listClusterUserCredential` action** | ARM `POST .../managedClusters/<name>/listClusterUserCredential` (extracts server FQDN + public CA only; never admin credentials) | **Azure Kubernetes Service Cluster User Role** on each AKS resource, or once at scope with `-AksRolesAtScope` (ARM `Reader` alone does **not** grant this `POST` action) | `kube_cluster_user` is recorded as `denied` (or `not_applicable` when the cluster is `Stopped`); all 19 Kubernetes data-plane lists and workload checks remain **`Not evaluated`**, while ARM/billing evidence still delivers |
 | **3. 19 fixed Kubernetes GET lists** | 19 HTTPS `GET` lists against the cluster API server (`namespaces`, `nodes`, `pods`, `services`, `pvcs`, `pvs`, `resource_quotas`, `deployments`, `statefulsets`, `daemonsets`, `replicasets`, `jobs`, `cronjobs`, `pdbs`, `hpas`, `network_policies`, `storage_classes`, `node_metrics`, `pod_metrics`) | **Azure Kubernetes Service RBAC Reader** + cluster-scoped `nodes`/`persistentvolumes`/`storageclasses`/`metrics.k8s.io` read binding (or equivalent Kubernetes RBAC `get`/`list`) | Each failed or forbidden kind records its own `403`/`502` receipt independently; successful kinds are retained and only rules depending on unavailable kinds become **`Not evaluated`** (never zero workloads) |
-| **4. Optional `ActualCost` Cost Management query** | ARM `POST .../providers/Microsoft.CostManagement/query` on `node_resource_group` or subscription `resource_ids` filter | **Cost Management Reader** (or `Microsoft.CostManagement/query/action`) on the exact queried `node_resource_group` or subscription scope | When `cost_scope="disabled"`, denied (`403`) or throttled (`429`), `azure_cost` is `not_configured`/`denied`/`error` and FinOps cost/savings stay **`Not evaluated` / `To be estimated`** (never `$0`) |
+| **4. `ActualCost` Cost Management query** (on by default) | ARM `POST .../providers/Microsoft.CostManagement/query` on `node_resource_group` or subscription `resource_ids` filter | **Cost Management Reader** (or `Microsoft.CostManagement/query/action`) on the exact queried `node_resource_group` or subscription scope | When `cost_scope="disabled"`, denied (`403`) or throttled (`429`), `azure_cost` is `not_configured`/`denied`/`error` and FinOps cost/savings stay **`Not evaluated` / `To be estimated`** (never `$0`) |
 
 Cached Advisor reads remain filtered to the approved AKS ResourceId. ACR role
 metadata, when configured, is restricted to the observed kubelet principal and
@@ -355,8 +389,8 @@ The code reads **configuration**, not Key Vault secret values, Storage keys,
 ACR image contents or Log Analytics tables. Diagnostic settings are ARM
 configuration receipts, not log ingestion/history. Do not add Key Vault/
 Storage data roles, Graph grants or workspace access without another scoped
-requirement. The clusterUser and ActualCost operations use bounded **POST
-read requests**; only the Kubernetes data-plane adapter is GET-only.
+requirement. The Resource Graph discovery, clusterUser and ActualCost operations
+use bounded **POST read requests** with fixed bodies; only the Kubernetes data-plane adapter is GET-only.
 
 ### Exact Kubernetes data-read scope
 
@@ -375,9 +409,38 @@ verify its actual authorization mode and explicitly permitted reads; this
 guide supplies no guessed universal minimum custom role and no Cluster Admin
 shortcut. Keep unavailable kinds **Not evaluated**.
 
+### Grant the read-only roles with the script
+
+[`grant-aks-permissions.ps1`](grant-aks-permissions.ps1) is the usual way to
+give the reporting UAMI its read-only roles once. An administrator with
+**Owner**, **User Access Administrator** or **Role Based Access Control
+Administrator** on the chosen scope runs it with Azure CLI signed in
+(`az login`) and the UAMI **Client ID**:
+
+```powershell
+.\grant-aks-permissions.ps1 -IdentityClientId "<client-id>" -ManagementGroupId "<management-group-id>" -AksRolesAtScope -IncludeCost
+```
+
+| Parameter | Meaning |
+|---|---|
+| `-IdentityClientId` (mandatory) | Client ID of the reporting UAMI, the same value as `MANAGED_IDENTITY_CLIENT_ID` |
+| `-ManagementGroupId` (recommended) | Assigns the roles once at the management group; current and future subscriptions below it inherit them |
+| `-AllSubscriptions` / `-SubscriptionIds a,b` / `-SubscriptionId` | Alternative scopes: every subscription the administrator can see, a list, or one subscription |
+| `-IncludeCost` | Adds **Cost Management Reader** for the default node-resource-group cost reads |
+| `-AksRolesAtScope` | Assigns **Azure Kubernetes Service Cluster User Role** and **Azure Kubernetes Service RBAC Reader** at the scope instead of on each cluster |
+| `-WhatIf` | Prints what it would do and changes nothing |
+
+It assigns **Reader** plus the read-only roles above, lists the clusters it
+finds per subscription with their Kubernetes authentication mode (Kubernetes
+reads need managed Entra ID with Azure RBAC) and writes `aks-clusters.csv` and
+`aks-auth-modes.csv`. It generates **nothing to paste into the tool**: clusters
+are discovered at run time. Re-running it is safe and does not duplicate
+assignments; new assignments can take 5-10 minutes to apply.
+
 ### Customer administrator's assignment procedure
 
-Inspect existing direct/inherited rights first. Only if missing access has
+Use this manual procedure only when the script is not used. Inspect existing
+direct/inherited rights first. Only if missing access has
 been approved:
 
 1. For **human setup/chat/task roles**, open the actual **SRE Agent Azure
@@ -416,151 +479,107 @@ ARM read is not proof that Kubernetes or Cost Management reads work.
 [`requirements.txt`](requirements.txt).
 
 1. Save the canonical Python file **outside the repository**.
-2. Replace `SUBSCRIPTION_ID`, `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` with
-   the approved values. Use the UAMI **Client ID** from Step 0.
+2. Replace `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` with the approved
+   values; use the UAMI **Client ID** from Step 0. These are the only required
+   values. `SUBSCRIPTION_ID` is optional: only an override entry without its own
+   `subscription_id` uses it.
 3. Set `CLIENT_NAME`; the generic source default is `Customer`. The documentation
    images and the sample run use the fictitious **Contoso**, not real customer branding.
    The name appears after **Prepared for**; without a logo the plaque keeps the fixed
    **CUSTOMER** placeholder, so the sample also sets the optional logo to a plain
    CONTOSO wordmark ([Optional private branding](#optional-private-branding)).
-4. Configure `APPROVED_CLUSTERS` with the exact approved names and resource
-   groups. Its order defines the legacy empty-selector default.
+4. Leave `APPROVED_CLUSTERS` empty unless one cluster needs an override. There is
+   no cluster list to paste and no schema enum to synchronize: the clusters are
+   discovered on every run, and their names come from `list_clusters`.
 
 ```python
-SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"
-TENANT_ID = "<YOUR_TENANT_ID>"
-MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"
+SUBSCRIPTION_ID = "<YOUR_SUBSCRIPTION_ID>"             # optional: only for APPROVED_CLUSTERS entries without "subscription_id"
+TENANT_ID = "<YOUR_TENANT_ID>"                         # (*) tenant; every subscription must belong to this tenant
+MANAGED_IDENTITY_CLIENT_ID = "<YOUR_AGENT_CLIENT_ID>"  # (*) client ID (not object ID) of the SRE Agent managed identity
 CLIENT_NAME = "Customer"
 CLIENT_LOGO_DATA_URI = ""
 CLIENT_LOGO_ALT = "Authorized customer logo"
+# Defaults for EVERY cluster (normally unchanged).
 CLUSTER_DEFAULTS = {
-    "environment": "UNSPECIFIED",
-    "kubernetes_enabled": True,
-    "include_node_resource_group": True,
-    "advisor_enabled": True,
+    "environment": "UNSPECIFIED",          # LAB / PRODUCTION / UNSPECIFIED (exactly)
+    "kubernetes_enabled": False,           # True = read workloads (needs Entra ID + Azure RBAC AKS and network reach to the API server)
+    "include_node_resource_group": True,   # inventory of the node resource group (MC_...)
+    "advisor_enabled": True,               # cached Azure Advisor recommendations
     "approved_related_resource_ids": [],
     "approved_cost_resource_ids": [],
-    "cost_scope": "disabled",
+    "cost_scope": "node_resource_group",   # actual cost of the node resource group (Cost Management Reader); "disabled" to skip costs
     "cost_timeframe": "month_to_date",
     "requirements": {},
 }
+# OPTIONAL (may stay empty): per-cluster overrides, for example to mark one cluster as production.
+#     "<aks-name>": {"resource_group": "<resource-group>", "subscription_id": "<subscription-id>", "environment": "PRODUCTION"},
+#     Keys that start with "<" are ignored.
 APPROVED_CLUSTERS = {
-    "<APPROVED_AKS_NAME>": {
-        "resource_group": "<APPROVED_AKS_RESOURCE_GROUP>",
-        "environment": "UNSPECIFIED",
-        "kubernetes_enabled": True,
-        "include_node_resource_group": True,
-        "advisor_enabled": True,
-        "approved_related_resource_ids": [],
-        "approved_cost_resource_ids": [],
-        "cost_scope": "disabled",
-        "cost_timeframe": "month_to_date",
-        "requirements": {}
-    }
 }
+# Auto-discovery (recommended): one fixed read-only Azure Resource Graph query on every run.
+AUTO_DISCOVERY = True
+# Optional: restrict discovery to these subscription IDs. Empty = every subscription the identity can read.
+DISCOVERY_SUBSCRIPTION_IDS = []
 ```
 
-5. Add associated resource IDs only after exact scope approval. A similarly
+5. `CLUSTER_DEFAULTS` applies to every discovered cluster. Kubernetes reads are
+   off by default (`kubernetes_enabled: False`): turn them on only where the API
+   server is reachable from the agent and the Kubernetes read roles are granted.
+   Cost is read for each cluster's exact ARM-observed node resource group
+   (`cost_scope: "node_resource_group"`, MonthToDate) and needs Cost Management
+   Reader; `"disabled"` skips it, `"resource_ids"` uses fixed approved IDs that
+   are present in the collected inventory, and `last_30_days` is a separate
+   explicit Custom/Daily billing window.
+6. Add associated resource IDs only after exact scope approval. A similarly
    named resource group is not proof of ownership. Actual `nodeResourceGroup`
    membership is contextual inventory, not an orphan/ownership assertion.
-6. Keep cost disabled until its scope/access is approved. Then use
-   `cost_scope="node_resource_group"` for the exact group returned by ARM, or
-   `cost_scope="resource_ids"` for fixed approved billing IDs that are present
-   in approved inventory. MonthToDate is the default; `last_30_days` is a
-   separate explicit Custom/Daily billing window.
 7. Set business requirements only when agreed: SLA, zones, autoscaling,
    network policy, CPU limits and per-workload requirements. Empty
    `requirements={}` means **unknown**, not "apply every recommendation".
 
-The canonical defaults above are not a customer configuration. Replace cluster
-and resource-group placeholders, set `environment` only to confirmed `LAB`,
-`PRODUCTION` or `UNSPECIFIED`, and keep boolean source flags deliberate.
-`CLIENT_NAME` is 1..120 plain characters. The fixed global identity/tenant/
-subscription and each approved cluster/resource ID are not chat overrides.
-For a handful of clusters you may privately set `cluster_name.enum` in the
-linked schema to `""` plus the **same exact approved names** as
-`APPROVED_CLUSTERS`; for a large fleet keep it as the shipped free string with
-pattern (the code still rejects any name outside the allowlist). Preserve all
-other types/defaults/bounds. There is no `period` or arbitrary snapshot-path input.
+`CLIENT_NAME` is 1..120 plain characters. The identity and tenant are not chat
+overrides, and chat can only narrow the discovered scope, never widen it. Do
+not add a `cluster_name.enum` to the schema: names are discovered at run time
+and the code rejects any name the identity cannot see. There is no `period` or
+arbitrary snapshot-path input.
 
 ![Test playground of today's portal: operation, view and the cluster placeholder](images/newui-playground.png)
 
 Today's **Create a Python tool > Test playground** (16 November 2026), filled in
 by hand and **not tested**: **1** *Test playground* tab · **2** **Test** ·
-**3** `operation` = `report` · **4** `view` = `summary` · **5** `cluster_name` =
-`<APPROVED_AKS_NAME>` (type your exact approved name) · **6** *Create tool*,
-grey until **Test**. The boxes start empty; this guide's report test values are
-listed in [Step 2](#step-2---create-the-python-tool-and-verify-its-inputs).
+**3** `operation` = `report` · **4** `view` = `summary` · **5** `cluster_name`
+(type an exact name returned by `list_clusters`) · **6** *Create tool*, grey
+until **Test**. The boxes start empty; this guide's test values are listed in
+[Step 2](#step-2---create-the-python-tool-and-verify-its-inputs).
 The October preview of the 11-input baseline is
 [kept for reference](images/aks04-step01-cluster-choice.png).
 
-**Checkpoint:** the code and the schema contain the **same fixed allowlist**.
-Unreplaced placeholders must fail before authentication.
+**Checkpoint:** only `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` are set (plus
+optional overrides); unreplaced placeholders fail before authentication. After
+Step 2, `list_clusters` returns the clusters you expect in every subscription.
 
-### Side-by-side synchronization example (structural only — NOT paste-ready)
+### Optional per-cluster overrides
 
-Whenever you configure `APPROVED_CLUSTERS` in your private copy of
-`generate-aks-waf-report.py`, update `properties.cluster_name.enum` in your
-private copy of `tool-parameters.schema.json` to contain `""` followed by the
-**exact same cluster keys**. For multi-cluster runs, pass `cluster_names` as
-comma-separated names with **no spaces** (for example `"aks-prod-01,aks-prod-02"`),
-and leave `cluster_name=""`.
-
-> [!WARNING]
-> **Structural overview only — NOT paste-ready Python:** The `APPROVED_CLUSTERS` column below uses `...` to abbreviate the remaining per-cluster dictionary keys (`kubernetes_enabled`, `include_node_resource_group`, `advisor_enabled`, `approved_related_resource_ids`, `approved_cost_resource_ids`, `cost_scope`, `cost_timeframe`, `requirements`). Do **not** paste `...` into `generate-aks-waf-report.py`; copy and duplicate the **complete 10-field cluster configuration block** shown in the preceding Step 1 code example above.
-
-| Scenario | Private `generate-aks-waf-report.py` (`APPROVED_CLUSTERS` — structural only, see full block above) | Private `tool-parameters.schema.json` (`cluster_name.enum`) | Valid runtime selector call |
-|---|---|---|---|
-| **Single cluster** (`aks-prod-01`) | `APPROVED_CLUSTERS = {"aks-prod-01": {"resource_group": "rg-aks-prod-01", "environment": "PRODUCTION", ...}}` *(abbreviated; use full 10-key dict above)* | `"enum": ["", "aks-prod-01"]` | `{"operation":"report","cluster_name":"aks-prod-01"}` (or `cluster_name=""` for the first key) |
-| **Two clusters** (`aks-prod-01`, `aks-prod-02`) | `APPROVED_CLUSTERS = {"aks-prod-01": {"resource_group": "rg-aks-prod-01", ...}, "aks-prod-02": {"resource_group": "rg-aks-prod-02", ...}}` *(abbreviated; use full 10-key dict above)* | `"enum": ["", "aks-prod-01", "aks-prod-02"]` | Single: `{"operation":"report","cluster_name":"aks-prod-02"}`<br/>Combined (no spaces): `{"operation":"report","cluster_names":"aks-prod-01,aks-prod-02"}` |
-
-### Multi-subscription fleet (tens of subscriptions, hundreds of clusters)
-
-The allowlist accepts up to **500 clusters** in **any number of subscriptions
-of the same tenant**. Every entry inherits `CLUSTER_DEFAULTS`, so a fleet entry
-only needs its resource group and, when it is not in `SUBSCRIPTION_ID`, its
-`subscription_id`. When two clusters share a name in different subscriptions,
-use a unique key and set `aks_name` to the real AKS name:
+An `APPROVED_CLUSTERS` entry overrides `CLUSTER_DEFAULTS` for one discovered
+cluster. It needs `resource_group` and, unless `SUBSCRIPTION_ID` is set,
+`subscription_id`; use `aks_name` when the key differs from the AKS name. Keys
+that start with `<` are ignored.
 
 ```python
 APPROVED_CLUSTERS = {
-    "aks-prod-01": {"resource_group": "rg-aks-prod-01", "environment": "PRODUCTION"},
-    "aks-prod-02": {"resource_group": "rg-aks", "environment": "PRODUCTION",
-                    "subscription_id": "<SECOND_SUBSCRIPTION_ID>"},
-    "9f3c1a2b-aks-api": {"resource_group": "rg-api", "aks_name": "aks-api",
-                         "subscription_id": "<THIRD_SUBSCRIPTION_ID>"},
+    "aks-prod-01": {"resource_group": "rg-aks-prod-01", "subscription_id": "<SUBSCRIPTION_ID>",
+                    "environment": "PRODUCTION", "requirements": {"availability_zones_required": True}},
+    "aks-prod-02": {"resource_group": "rg-aks-prod-02", "subscription_id": "<SUBSCRIPTION_ID>",
+                    "kubernetes_enabled": True},
 }
 ```
 
-- [grant-aks-permissions.ps1](grant-aks-permissions.ps1) can write this block
-  for you. Once the access is approved, an administrator with **Owner**, **User
-  Access Administrator** or **Role Based Access Control Administrator** on the
-  chosen scope runs it with Azure CLI signed in (`az login`) and the reporting
-  UAMI **Client ID**:
-
-  ```powershell
-  .\grant-aks-permissions.ps1 -IdentityClientId "<client-id>" -ManagementGroupId "<mg-id>"
-  ```
-
-  It grants **Reader** once per scope (the management group, or each
-  subscription with `-AllSubscriptions` / `-SubscriptionIds a,b,c`), **Azure
-  Kubernetes Service Cluster User Role** and **Azure Kubernetes Service RBAC
-  Reader** on each AKS (once per scope with `-AksRolesAtScope`) and, only with
-  `-IncludeCost`, **Cost Management Reader** plus
-  `cost_scope="node_resource_group"`. It then lists every AKS in scope (more
-  than 500 is an error), saves each cluster's authentication mode to
-  `aks-auth-modes.csv` (Kubernetes reads need Entra ID + Azure RBAC) and writes
-  `SUBSCRIPTION_ID`, `TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`,
-  `CLUSTER_DEFAULTS` and `APPROVED_CLUSTERS` to `approved-clusters.generated.py`;
-  replace the same five variables in your private copy. Re-running it does not
-  duplicate assignments.
-- Remove any `cluster_name` enum in the portal for large fleets.
-- `list_clusters` is paged: `{"operation":"list_clusters","limit":100,"offset":0}`
-  returns `total`, `subscription_count`, `returned` and `next_offset`.
-- A report still covers at most five clusters (`cluster_names`); the skill
-  reviews a fleet in batches of five and then summarizes per subscription.
-- Every collection reads only the selected cluster's own subscription; a
-  reference into another subscription is skipped, never followed.
+- `DISCOVERY_SUBSCRIPTION_IDS = ["<subscription-id>", ...]` restricts discovery
+  to those subscriptions; empty means every subscription the identity can read.
+- More than 500 discovered clusters is an error: restrict
+  `DISCOVERY_SUBSCRIPTION_IDS` or the granted scope.
+- `AUTO_DISCOVERY = False` restores the previous fixed-list behaviour: only the
+  `APPROVED_CLUSTERS` entries are in scope.
 
 ### Optional private branding
 
@@ -598,17 +617,18 @@ source dates or file-delivery contract to add branding.
    canonical Python file** (`Ctrl+A` in the editor, then paste). Do not select
    Generate, paste a fragment, or paste unbuilt `engine.py`.
 4. Set **Timeout (seconds)** (default 120) to the approved value. The verified
-   deployment used **900 seconds** (the portal maximum);
-   the collector's separate shared budget bounds new reads to 240 seconds /
-   300 HTTP attempts across selected clusters, with a bounded in-flight read
-   allowed to finish.
+   deployment used **900 seconds** (the portal maximum); keep it for fleet
+   reports. The collector reads up to 8 clusters in parallel under one shared
+   750-second bound (240 seconds and 300 HTTP attempts per cluster) and reports
+   a cluster still running at the bound as `collection_timeout`.
 
 Copy-ready **Description**:
 
 ```text
-Read-only AKS architecture/configuration review for the fixed approved
-clusters and associated resources. Collect source-qualified ARM, Kubernetes
-and optional ActualCost evidence; return offline HTML, complete JSON,
+Read-only AKS architecture/configuration review of the AKS clusters the agent
+identity can read (all, one subscription or named clusters) and their
+associated resources. Collect source-qualified ARM, Kubernetes and ActualCost
+evidence; return one offline HTML with fleet filters, complete JSON,
 failed-findings CSV and inventory CSV, or bounded typed queries. No remediation.
 ```
 
@@ -638,18 +658,20 @@ during capture.**
 
 ### Verify the current typed schema
 
-The current package has **12 inputs**. There is no parameter editor: the
+The current package has **13 inputs**. There is no parameter editor: the
 inputs are read from the typed `def main(...)` when you paste the code, and the
-**Test playground** shows one empty box per input (12 boxes, including
-`cluster_names`). The dated October portal baseline had 11; read the 12 back
-after saving instead of inferring them from an older screenshot.
+**Test playground** shows one empty box per input (13 boxes, including
+`cluster_names` and `subscription`). The dated October portal baseline had 11
+and the previous package 12; read the 13 back after saving instead of inferring
+them from an older screenshot.
 
 | Input | Type / default | What to enter |
 |---|---|---|
 | `operation` | string / `report` | `report`, `query`, or `list_clusters` |
 | `view` | string / `summary` | `summary`, `cluster`, `node_pools`, `workloads`, `resources`, `findings`, `finops`, `coverage`, `actions`, `architecture` |
-| `cluster_name` | string / `""` | One exact fixed name; empty selects the first configured cluster |
-| `cluster_names` | string / `""` | One to five distinct comma-separated fixed names, **no spaces**, maximum 319 characters |
+| `cluster_name` | string / `""` | One exact cluster name returned by `list_clusters` (case-insensitive) |
+| `cluster_names` | string / `""` | `all`, or 1 to 100 distinct exact names separated by commas, **no spaces**; empty in a report means all |
+| `subscription` | string / `""` | Optional filter for `report`, `query` and `list_clusters`: subscription display name (case-insensitive) or ID |
 | `namespace` | string / `""` | Exact local name, maximum 63 characters; not a server-side scope override |
 | `workload_name` | string / `""` | Exact local name, maximum 253 characters |
 | `area` | string / `all` | `all`, `best_practices`, `security`, `finops`, `optimization` |
@@ -665,10 +687,13 @@ and `offset` say *Enter int value* and the saved tool's **Query parameters**
 list shows **`int`**. Supply numeric values such as `25` and `0`, not quoted
 strings; do not rewrite the schema type to `int`.
 
-Do not supply both selectors. For `report`, leave `view=summary`, filters empty/
-`all`, `limit=25`, `offset=0`; otherwise the report is rejected instead of
-quietly narrowed. `list_clusters` accepts no selector/filter overrides and
-returns fixed configuration metadata **without authentication or network**.
+Do not supply both `cluster_name` and `cluster_names`. For `report`, leave
+`view=summary`, filters empty/`all`, `limit=25`, `offset=0`; otherwise the
+report is rejected instead of quietly narrowed. A report covers at most 100
+clusters; `query` reads one cluster (or up to five `cluster_names`).
+`list_clusters` accepts only `subscription`, `limit` and `offset`; it runs the
+discovery query and returns inventory (name, resource group, subscription
+name/ID, region, environment), not health.
 
 For queries, `area`/`level`/`severity` apply only to findings/actions.
 Summary/cluster/node_pools/coverage/architecture reject namespace/workload
@@ -681,7 +706,7 @@ cursor into the last downloaded report. A filtered page is not its exact total.
 Bottom of the same Test playground (not run): **1** *Test playground* tab ·
 **2** `status` = `all` · **3** `limit` = `25` · **4** `offset` = `0` ·
 **5** *Create tool*, grey until **Test**. `cluster_names` stays empty when
-`cluster_name` is used. Use the linked current schema for all 12 inputs, exact
+`cluster_name` is used. Use the linked current schema for all 13 inputs, exact
 enums, defaults and bounds; read them back after saving. The October 11-input
 paging preview is [kept for reference](images/aks04-step02-03-typed-parameters.png).
 
@@ -704,10 +729,13 @@ after switching it off again: delete them if that happens. Do not enable broad
 Key Vault/Storage/token presets simply to resemble another case. Step 0's
 four read boundaries still require explicit approval and verification.
 
-5. In **Test playground**, the boxes start empty: type an explicit approved
-   `cluster_name` and the report values shown above (`operation` = `report`,
-   `view` = `summary`, `area`/`level`/`severity`/`status` = `all`, `limit` =
-   `25`, `offset` = `0`), leaving the other boxes empty.
+5. In **Test playground**, the boxes start empty: first run `operation` =
+   `list_clusters` (`view` = `summary`, filters `all`, `limit` = `25`,
+   `offset` = `0`) to confirm discovery, then a report for one listed
+   `cluster_name` (`operation` = `report`, `view` = `summary`,
+   `area`/`level`/`severity`/`status` = `all`, `limit` = `25`, `offset` = `0`),
+   leaving the other boxes empty. Test one or two clusters there; run fleet
+   reports from chat.
    An authorized operator tests the code before creation. If a source fails,
    inspect the sanitized error and its **Not evaluated** result; do not broaden
    access or fabricate a smaller successful scope.
@@ -852,37 +880,47 @@ permission.
 
    **1** `/agent` and the specialist name · **2** pick `aks-waf-live`.
 
-3. Ask for the fixed roster first when needed:
+3. Ask which clusters the identity can see, optionally per subscription:
 
    ```json
-   {"operation":"list_clusters"}
+   {"operation":"list_clusters","subscription":"<SUBSCRIPTION_NAME_OR_ID>","limit":100,"offset":0}
    ```
 
-   A roster is configured scope, not proof of presence/health.
-4. Choose an exact approved cluster. Ask for one complete report, for example:
+   The list is Resource Graph inventory (name, resource group, subscription
+   name/ID, region), not proof of health; page with `next_offset` until it is
+   null.
+4. Choose the scope and ask for one complete report:
+
+   | You want | Call |
+   |---|---|
+   | Every cluster in every subscription | `{"operation":"report","cluster_names":"all"}` |
+   | Every cluster of one subscription (display name or ID) | `{"operation":"report","subscription":"<SUBSCRIPTION_NAME_OR_ID>"}` |
+   | One cluster | `{"operation":"report","cluster_name":"<AKS_NAME>"}` |
+   | Several named clusters | `{"operation":"report","cluster_names":"aks-prod-01,aks-prod-02"}` |
+
+   For one cluster, for example:
 
    ```text
    Generate the complete read-only AKS configuration review for
-   <APPROVED_AKS_NAME>. Use operation=report once, include all three levels,
+   <AKS_NAME>. Use operation=report once, include all three levels,
    four areas and five WAF pillars, and immediately deliver the HTML,
    complete JSON, findings CSV and inventory CSV. Show score and coverage
    together, preserve Not evaluated/Not applicable and source errors. Change nothing.
    ```
 
    ```json
-   {"operation":"report","cluster_name":"<APPROVED_AKS_NAME>"}
+   {"operation":"report","cluster_name":"<AKS_NAME>"}
    ```
 
    ![New chat: Agent chip and the report prompt](images/newui-chat-ready.png)
 
-   **1** chip *Agent: aks-waf-live* · **2** the prompt above (replace
-   `<APPROVED_AKS_NAME>`) · **3** send (not clicked in this capture).
+   **1** chip *Agent: aks-waf-live* · **2** the prompt above with an exact
+   cluster name · **3** send (not clicked in this capture).
 
-   For the current multi-cluster package, explicitly choose the fixed names:
-
-   ```json
-   {"operation":"report","cluster_names":"<APPROVED_AKS_NAME>,<APPROVED_SECOND_AKS_NAME>"}
-   ```
+   A fleet report collects up to 8 clusters in parallel: a few clusters take
+   about a minute, 100 clusters several minutes. The reply summarizes clusters
+   collected / partial / failed, findings by severity and cost per currency; a
+   failed or timed-out cluster stays an error, never healthy.
 
 5. Wait for **four native links/file widgets in the same response**. Partial
    sources must not suppress the real files.
@@ -916,43 +954,20 @@ download are different failures.
 For a **separate** English follow-up, keep the same selected specialist:
 
 ```text
-For <APPROVED_AKS_NAME>, use query/coverage once. Show the failed or partial
+For <AKS_NAME>, use query/coverage once. Show the failed or partial
 source receipts, their UTC reference and HTTP/error codes, and explain which
 checks cannot be evaluated. A successful download is not Kubernetes recovery;
 do not substitute historical workloads, grant roles or start a cluster.
 ```
 
 ```json
-{"operation":"query","view":"coverage","cluster_name":"<APPROVED_AKS_NAME>","limit":5}
+{"operation":"query","view":"coverage","cluster_name":"<AKS_NAME>","limit":5}
 ```
 
 Read `total_matched`, `returned`, `has_more`, `next_offset` and
 `transport_capped`. Use the complete JSON for exhaustive evidence; do not page
 merely to discover totals already returned. No follow-up is hidden inside the
 report call or its scheduled run.
-
-Spanish (ES) copy-ready equivalents for the normal-chat report and coverage
-follow-up above (matching [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)).
-With the **Agent: aks-waf-live** chip selected, the leading `@aks-waf-live` is
-plain text and can be left out:
-
-- **Single-cluster full report (ES):**
-
-```text
-@aks-waf-live Genera la revision de configuracion de AKS para
-<APPROVED_AKS_NAME> con operation=report. Cubre cluster, workloads y recursos
-asociados: buenas practicas, seguridad, FinOps y optimizacion, con los cinco
-pilares WAF. Entrega HTML, JSON completo, CSV de hallazgos y CSV de inventario.
-Muestra cobertura, fuentes, Not evaluated/Not applicable y limites. No cambies nada.
-```
-
-- **Source coverage follow-up (ES):**
-
-```text
-@aks-waf-live Usa query/coverage para <APPROVED_AKS_NAME>. Que fuentes
-fallaron o fueron parciales, con que codigo HTTP y que campos no podemos
-evaluar? Un 502/429 no es permiso denegado, y un 403 no significa cero objetos.
-```
 
 **Checkpoint:** four actual downloads; matching run/reference time; complete
 normalized JSON; source errors visible; no historic workloads silently
@@ -964,7 +979,35 @@ Open the **downloaded HTML** in Edge or another current browser. It needs local
 JavaScript but has no external scripts, fonts, analytics or fetches. Keep the
 JSON beside it privately; the HTML already embeds the complete model.
 
+### Start with the fleet overview
+
+A report with more than one cluster opens on the fleet overview:
+
+1. Use **Subscription** (All, or one subscription by display name with its
+   cluster count), **Cluster** (All, or one cluster of that subscription) and
+   **Search** (cluster, resource group or region). The filters are local; they
+   collect nothing again.
+2. The KPI cards follow the filters: visible clusters and their collection
+   status, subscriptions, findings by severity, critical findings, combined
+   local index and coverage, actual cost per currency (different currencies
+   are never added) and estimated savings (not calculated).
+3. **Visible clusters** has one row per cluster: subscription, resource
+   group/region, collection status, coverage, local index, findings by
+   severity, cost and incomplete sources. Clusters with collection errors come
+   first with their error code. **Findings in the visible clusters** lists the
+   failed checks, with a severity filter.
+4. Choose a cluster in **Cluster** (or click its name) to open its detailed
+   review; choose **All** to return to the fleet.
+
+![SIMULATED fleet overview: Subscription, Cluster and Search filters, KPI cards and one row per cluster](images/aks04-report-06-fleet-filters.png)
+
+A cluster with a collection error has no score, cost, workloads or topology:
+it counts as an error, never as healthy. A single-cluster report opens directly
+on its detailed view.
+
 ### Start with identity, date and coverage
+
+After choosing a cluster (or in a single-cluster report):
 
 1. Read the blue band at the top: the **Verdict** card, the one-line summary
    and the chips (UTC reference, **LIVE/SIMULATED** provenance, environment,
@@ -1054,22 +1097,23 @@ are needed before a monetary savings figure is meaningful.
 
 ### Select clusters, export and print
 
-The multi-cluster document has a separate supplied aggregate and an explicit
-**Cluster for the detailed view** selector. Selecting a cluster resets local
-filters. A failed primary read shows its error and **no borrowed score, cost,
-workload or topology**. In the top band, the **Cluster 1 of 2 · change** chip
-jumps to that selector. Configured roster entries absent from the artifact are
-marked unavailable for local selection; choosing them requires a new approved
-SRE call.
+The fleet document keeps the engine's whole-selection aggregate beside the
+filtered KPI cards. Selecting a cluster resets the local filters of its
+detailed view. A failed primary read shows its error and **no borrowed score,
+cost, workload or topology**. In the top band of a detailed view, the
+**Cluster 1 of 7 · change** chip jumps back to the filters. Clusters outside
+the report need a new SRE call.
 
 Cluster identity comparisons validate the complete Azure resource ID and
 ignore only its case. A prefix, another subscription/resource group/cluster,
 or an unsafe path is not equivalent. Each run retains its own exact UTC
-reference; sequential collection times need not equal the wrapper reference.
+reference; parallel collection times need not equal the wrapper reference.
 Original IDs and timestamps are never rewritten in display or exports.
 
 **Full JSON** preserves the original wrapper and every run, including
-errors. Scope JSON filters only the selected snapshot and explicitly preserves
+errors. Above 4 MB the HTML embeds the same JSON gzip-compressed, and a current
+Edge, Chrome, Firefox or Safari decompresses it locally without any network
+call. Scope JSON filters only the selected snapshot and explicitly preserves
 all other snapshots/errors and the original aggregate. CSV exports include all
 matching records, not just the visible page. **Findings** are sorted by
 severity by default (**Sort** restores the engine order); exports keep the
@@ -1098,7 +1142,7 @@ Only after an explicit customer request and an accepted ordinary-chat run:
    To create a new one, open **Automation > Create ▾ > Scheduled task**, or
    **Build + configure > Agent Canvas > Create ▾ > Trigger › > Scheduled tasks**.
 2. Choose `aks-waf-live` as the **Response subagent** and specify the approved
-   cadence/time zone and exact fixed cluster selection.
+   cadence/time zone and selection (all, one subscription or named clusters).
 3. Use a prompt for **one complete report call** and immediate four-file
    delivery. Include source-error/partial disclosure; no hidden queries,
    narrower retries, remediation or start/stop operations.
@@ -1118,17 +1162,17 @@ snapshot**, the following is a complete proposed template to approve:
 | Task name | `Monthly AKS configuration review` |
 | Response subagent | `aks-waf-live` |
 | Frequency / cron | **Custom cron (UTC)** / `0 9 1 * *` = first day at 09:00 UTC, only if chosen |
-| Scope | One exact fixed `cluster_name`, or the distinct approved comma-separated `cluster_names`; never both |
+| Scope | `cluster_names="all"`, one `subscription`, one `cluster_name` or exact comma-separated `cluster_names` (never both name selectors) |
 | Evidence meaning | Configuration/current Kubernetes samples at execution time, plus the **privately configured** billing timeframe; not a previous-month telemetry report |
 | Start on / model tier | Customer-approved activation date and usage policy |
 | Agent autonomy level / Message grouping for updates | Autonomous only for approved unattended read-only execution; Review can pause. Choose **New chat thread for each run** (the default is *Use same chat thread*). |
 
-Replace `<APPROVED_AKS_NAME>` with the actual fixed approved name before
-saving **Task details**:
+The template reports every visible cluster; replace the selector if the
+customer approved a narrower scope before saving **Task details**:
 
 ```text
 Use aks-waf-live and ONLY generate-aks-waf-report. Make exactly one complete
-call with operation=report and cluster_name="<APPROVED_AKS_NAME>"; keep all
+call with operation=report and cluster_names="all"; keep all
 other report defaults. Do not add query filters, period parameters, paging,
 fresh follow-up calls, narrower retries or changes.
 If status=error, stop with the sanitized code/source and invent no files,
@@ -1147,9 +1191,9 @@ enable plans, start/stop a cluster, remediate, call operator assets, fabricate
 links, drop evidence, split the requested scope or upload to alternative storage.
 ```
 
-For a requested multi-cluster task, replace only the single selector with
-`cluster_names="<APPROVED_AKS_NAME>,<APPROVED_SECOND_AKS_NAME>"`, using actual
-configured names **without spaces**. Do not add `period`, start/end dates or a
+For one subscription, replace the selector with
+`subscription="<SUBSCRIPTION_NAME_OR_ID>"`; for named clusters use
+`cluster_names="<AKS_NAME_1>,<AKS_NAME_2>"` **without spaces**. Do not add `period`, start/end dates or a
 billing-window override to the call; those are not supported tool parameters.
 
 The normal picker can display browser-local time but save a fixed UTC
@@ -1179,18 +1223,25 @@ New-cloud captures remain **Not collected** until that deployment happens.
 
 | Symptom | What to do honestly |
 |---|---|
-| `configuration_required` | Correct fixed private constants before authentication; no alternate identity |
-| Wrong cluster / selector rejected | Match the private code/schema allowlist exactly; use one selector only and no spaces in `cluster_names`. Empty selects the first configured cluster, not all clusters. |
+| `configuration_required` | Set `TENANT_ID` and `MANAGED_IDENTITY_CLIENT_ID` (GUIDs) before authentication; an override entry without `subscription_id` needs the optional `SUBSCRIPTION_ID`; more than 500 discovered clusters needs `DISCOVERY_SUBSCRIPTION_IDS` or a narrower granted scope. No alternate identity. |
+| `no_clusters_visible`, or a cluster/subscription missing from `list_clusters` | The identity cannot read it: grant Reader on that management group or subscription ([script](#grant-the-read-only-roles-with-the-script)) and wait 5-10 minutes. Never widen access from chat. |
+| `unknown_cluster` / `unknown_subscription` | Use exact names from `list_clusters`; the message lists close matches. A subscription matches by ID or exact display name, ignoring case. |
+| `ambiguous_cluster_name` | The same AKS name exists in several subscriptions: add `subscription` or use the prefixed name from `list_clusters`. |
+| `too_many_clusters` | One report covers at most 100 clusters: ask for one subscription or named clusters. |
+| `selection_required` | `query` reads one cluster: add `cluster_name`, or use a report for many clusters. |
+| Selector rejected (`invalid_parameter`) | Use one name selector only and no spaces in `cluster_names`; `all` covers every visible cluster. |
 | Human Build + configure/chat denied | Verify Author + Standard User (or Administrator) on the SRE Agent resource; do not self-grant based on a warning |
-| Import / syntax error or only 11 saved inputs | Check declared dependencies, complete standalone paste and the current 12-input schema. Do not Generate/Refine a replacement, use unbuilt `engine.py` or infer `cluster_names` from the old screenshot. |
+| Import / syntax error or only 11-12 saved inputs | Check declared dependencies, complete standalone paste and the current 13-input schema. Do not Generate/Refine a replacement, use unbuilt `engine.py` or infer `cluster_names`/`subscription` from an old screenshot. |
 | `invalid_combination` / wrong type | Use query-only filters only with compatible views/statuses; leave report defaults untouched. Namespace filtering does not change server-side data-read scope. |
 | clusterUser HTTP 403 | Ask the authorized operator to verify the exact minimal approved permission; never use admin kubeconfig |
 | A Kubernetes kind HTTP 403 | Preserve that blind spot; AKS RBAC Reader can exclude cluster-scoped kinds |
 | Kubernetes HTTP 502 / TLS / timeout | Inspect approved reachability, source and peer/FQDN validation; no insecure/proxy/endpoint workaround |
-| Cost HTTP 429 | Bounded retries, then the actual error / Not evaluated; no zero cost or savings |
+| Cost HTTP 429 | At most two cost queries run at once and `Retry-After` is honoured within the time bound; then that cluster's cost source is `throttled` / Not evaluated and the cluster is partial. No zero cost or savings. |
+| A cluster shows `collection_timeout` | It did not finish within the shared fleet bound: unknown, not healthy. Report fewer clusters (one subscription) or that cluster alone. |
+| Every cluster is `partial` | Expected while Kubernetes reads are off (`kubernetes_enabled=False`) or a source such as cost is disabled: those sources are disclosed as not collected, not as failures. |
 | Partial list / continuation / cap error | Retain normalized rows with their partial receipt; do not call page one the whole estate |
 | Invalid HTML startup | Request a complete compatible snapshot; the UI deliberately exposes no partial success |
-| File/response limit exceeded | Keep the requested full scope; do not drop records, ZIP, upload to Storage or silently compress metadata |
+| File/response limit exceeded (`artifact_size_exceeded`) | Report fewer clusters (one subscription). Do not drop records, ZIP or upload to Storage; the tool already compresses only the HTML's embedded JSON. |
 | File written but native download failed | Report the actual delivery failure; writing a path is not HTTP/download verification |
 | Missing tool/widget / wrong specialist answered | Reopen normal chat, explicitly select `aks-waf-live`, and verify its saved one-tool/one-skill allowlist. Do not attach global execution/file tools as a workaround. |
 | High local index with low coverage | Read unknown counts and source errors; no official WAF/health conclusion |
@@ -1208,6 +1259,7 @@ New-cloud captures remain **Not collected** until that deployment happens.
 | Real portal captures, 2026-11-16 (`newui-*`) | Today's portal with the guide's values, read-only: nothing saved, tested, sent or run; readbacks show the existing lab skill/specialist under the guide's names. Navigation and form evidence, not a new deployment, execution or download receipt |
 | Corrected two-scope package, **2026-10-14T09:25:00Z / 09:26:26Z** | Actual saved/read-back 12-input deployment; four automatic HTTP 200 downloads; both selectors, full JSON/CSV, observed/reference views, light/dark/mobile and print passed. First cluster: 19 Kubernetes 502s; second: stopped ARM configuration read without starting it |
 | New demo cluster / power scheduler | Not deployed or collected; no new paid cluster, roles or scheduler approval is implied by an existing-tool update |
+| Fleet build, **2026-11-17** | Local fleet tests (including 100 clusters across 20 subscriptions) and the LAB Test playground (two clusters, one subscription): discovery, `subscription` filter by name and ID, reports for all/one/two clusters and a query; see [TESTS.md](TESTS.md). Not a new production deployment. |
 
 The verified baseline generic canonical source was
 `b1df6c82582018735e75771efa32d8d1d40a9ef0b9b74cf3e58811d3e4befee0`
@@ -1269,13 +1321,21 @@ reads are fixed GET paths with independent per-kind continuation/resourceVersion
 receipts. Metrics retain current timestamps/durations, cores/bytes and sample
 counts, not history. Cost uses read-only ActualCost/PreTaxCost queries
 (`2023-11-01`) on approved observed scope; Advisor reads cached recommendations
-(`2025-01-01`) without generation actions.
+(`2025-01-01`) without generation actions. At most two Cost Management queries
+run at once; HTTP 429 honours `Retry-After` and the
+`x-ms-ratelimit-microsoft.costmanagement-*-retry-after` hints (four attempts,
+waits up to 60 seconds, never past the time bound), then that cluster's cost
+source is `throttled`.
 
 GETs have 30-second timeouts, at most three attempts for
 429/500/502/503/504 and bounded Retry-After. Source limits are 100 pages /
 20,000 rows, Kubernetes 500 rows/page, HTTP bodies 8,000,000 bytes, related
-details 200 records. A shared 240-second / 300-attempt budget bounds new reads
-across selected clusters; an in-flight bounded read can finish. Failed pages
+details 200 records. Discovery is one fixed Resource Graph query (no user text
+in KQL, up to 500 clusters). Up to 8 clusters are collected in parallel, each
+with its own 240-second / 300-attempt budget, under one shared 750-second fleet
+bound (+40 s grace); a cluster still running is reported as
+`collection_timeout`. Each worker keeps its cluster's subscription
+thread-local, so parallel clusters never read with another cluster's scope. Failed pages
 retain already normalized rows with an explicit partial/error receipt.
 Successful-empty, denied, unsupported/unconfigured and transport-error sources
 are different states. Stopped clusters are never started.
@@ -1308,8 +1368,12 @@ inferred.
 The fixed runtime-owned `cwd\aks-waf-reports` directory has symlink/junction/
 escape guards and unique run names. Four prepared files are byte-checked,
 written atomically and read back against the complete normalized model.
-Each artifact is at most **4,800,000 actual encoded bytes**, including CSV BOM;
-oversize complete evidence fails before writing instead of dropping data.
+The HTML is at most **16,000,000 bytes** and each other artifact at most
+**64,000,000 actual encoded bytes**, including CSV BOM; above 4,000,000 bytes
+the HTML embeds the same JSON gzip+base64 and the browser decompresses it
+locally. Oversize complete evidence fails before writing instead of dropping
+data. A simulated 100-cluster report measured about 4.3 MB of HTML and 40 MB of
+JSON.
 Responses must fit **3,500 bytes with Python's default JSON serialization**.
 Queries reduce whole-row count with explicit paging/cap disclosure; one
 oversized row is an error, not an endless zero-row cursor.
@@ -1401,70 +1465,50 @@ MIT license. Only the eleven needed original SVGs are persisted, with
 asset/script/CDN is required by the report. WARA/Polaris inform narrative and
 wayfinding only; neither is installed or presented as the scoring authority.
 
-<!-- BILINGUAL_QA_PROMPT_PACK -->
+<!-- QA_PROMPT_PACK -->
 
 ---
 
-## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
+## Copy-ready Q&A prompt pack
 
-Select `/agent aks-waf-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. Typing `@` no longer opens a picker: with the **Agent: aks-waf-live** chip selected, the leading `@aks-waf-live` below is plain text and can be left out.
+Select `/agent aks-waf-live` in **New chat** and use any of these prompts. With the **Agent: aks-waf-live** chip selected, no `@` mention is needed.
 
-### 1. Discover Configured AKS Clusters Roster / Listar los Clusteres AKS Configurados (`list_clusters`)
-- **Castellano:**
-  ```text
-  @aks-waf-live Ejecuta operation="list_clusters" para mostrarme los clusteres AKS configurados en el alcance aprobado antes de lanzar la evaluacion completa.
-  ```
-- **English:**
-  ```text
-  @aks-waf-live Run operation="list_clusters" to show the configured AKS clusters in the approved roster before launching the full assessment.
-  ```
+### 1. Discover the clusters (`list_clusters`)
 
-### 2. Full Multi-Cluster Well-Architected Report (4 Files) / Informe Completo Multi-Cluster AKS WAF (4 Archivos)
-- **Castellano:**
-  ```text
-  @aks-waf-live Genera el informe completo Well-Architected y de configuracion para todos los clusteres AKS aprobados (operation="report", cluster_name="all") y entregame los 4 enlaces descargables (HTML, JSON, CSV de hallazgos y CSV de inventario) manteniendo cada cluster independiente.
-  ```
-- **English:**
-  ```text
-  @aks-waf-live Generate the complete Well-Architected and configuration review report across all approved AKS clusters (operation="report", cluster_name="all") and deliver all 4 downloadable file links (HTML, JSON, findings CSV, and inventory CSV) while keeping each cluster's posture independent.
-  ```
+```text
+List every AKS cluster you can see, grouped by subscription, with resource group and region (operation="list_clusters", limit=100, following next_offset until it is null).
+```
 
-### 3. Security, Identity & Network Isolation Findings / Hallazgos de Seguridad, Identidad y Red en AKS
-- **Castellano:**
-  ```text
-  @aks-waf-live Consulta en modo query los hallazgos del pilar Security (operation="query", view="findings", pillar="Security", status="fail") y explicame el estado de RBAC/Entra ID, Workload Identity, red privada/authorized IP ranges, Network Policy y Defender for Containers en cada cluster.
-  ```
-- **English:**
-  ```text
-  @aks-waf-live Query the failing findings in the Security pillar (operation="query", view="findings", pillar="Security", status="fail") and explain the posture of RBAC/Entra ID, Workload Identity, private cluster/authorized IP ranges, Network Policy, and Defender for Containers for each cluster.
-  ```
+### 2. One report for the fleet, one subscription or named clusters
 
-### 4. Reliability, Availability Zones & Node Pool Architecture / Fiabilidad, Zonas de Disponibilidad y Node Pools
-- **Castellano:**
-  ```text
-  @aks-waf-live Revisa los hallazgos del pilar Reliability y el inventario de node pools (operation="query", view="node_pools"): que node pools separan modo System vs User, cuales tienen Availability Zones y autoscaling habilitados, y que pasa si un cluster esta detenido (Stopped)?
-  ```
-- **English:**
-  ```text
-  @aks-waf-live Review the Reliability pillar findings and node pool inventory (operation="query", view="node_pools"): which node pools separate System vs User mode, which ones have Availability Zones and cluster autoscaler enabled, and how is a Stopped cluster qualified?
-  ```
+```text
+Generate the complete read-only AKS configuration review for every cluster in every subscription (operation="report", cluster_names="all") and deliver the 4 downloadable files (HTML, JSON, findings CSV and inventory CSV), keeping each cluster's result independent.
+```
 
-### 5. Cost Optimization (FinOps) & Capacity Sizing / Optimizacion de Costes (FinOps) y Dimensionamiento
-- **Castellano:**
-  ```text
-  @aks-waf-live Consulta los hallazgos del pilar Cost Optimization (operation="query", view="findings", pillar="Cost Optimization") y resume las oportunidades reales de ahorro en SKUs de nodos, autoscale min/max, entorno dev/test y telemetria de uso de CPU/memoria.
-  ```
-- **English:**
-  ```text
-  @aks-waf-live Query the Cost Optimization pillar findings (operation="query", view="findings", pillar="Cost Optimization") and summarize the concrete optimization opportunities across node VM SKUs, autoscale min/max bounds, dev/test lifecycle, and observed CPU/memory utilization.
-  ```
+```text
+Generate the AKS configuration review for all clusters in subscription <SUBSCRIPTION_NAME_OR_ID> (operation="report", subscription="<SUBSCRIPTION_NAME_OR_ID>").
+```
 
-### 6. Unassessed In-Cluster Kubernetes Checks vs. ARM Plane / Controles Dentro de Kubernetes (`Not evaluated`) frente a ARM
-- **Castellano:**
-  ```text
-  @aks-waf-live Que controles de la checklist oficial de AKS quedaron en estado "Not evaluated" porque requieren inspeccionar objetos dentro de la API de Kubernetes (PodDisruptionBudgets, ResourceQuotas, requests/limits de pods) y no solo el plano ARM?
-  ```
-- **English:**
-  ```text
-  @aks-waf-live Which checks from the official AKS checklist remained "Not evaluated" because they require inspecting in-cluster Kubernetes API objects (PodDisruptionBudgets, ResourceQuotas, pod requests/limits) rather than the ARM control plane?
-  ```
+### 3. Security, identity and network isolation findings
+
+```text
+For <AKS_NAME>, query the failed security findings (operation="query", view="findings", cluster_name="<AKS_NAME>", area="security", status="failed") and explain RBAC/Entra ID, Workload Identity, private cluster/authorized IP ranges, Network Policy and Defender for Containers.
+```
+
+### 4. Reliability, availability zones and node pools
+
+```text
+For <AKS_NAME>, review the node pool inventory (operation="query", view="node_pools", cluster_name="<AKS_NAME>"): which pools separate System and User mode, which have availability zones and autoscaling, and how is a Stopped cluster qualified?
+```
+
+### 5. Cost optimization (FinOps) and capacity sizing
+
+```text
+For <AKS_NAME>, query the FinOps evidence (operation="query", view="finops", cluster_name="<AKS_NAME>") and summarize observed cost, currency and period, the current capacity candidates and why savings are not calculated.
+```
+
+### 6. In-cluster Kubernetes checks versus the ARM plane
+
+```text
+Which checks remained "Not evaluated" because they need in-cluster Kubernetes objects (PodDisruptionBudgets, ResourceQuotas, pod requests/limits) rather than the ARM control plane, and what would enabling Kubernetes reads require?
+```

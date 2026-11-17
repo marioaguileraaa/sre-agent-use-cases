@@ -332,7 +332,7 @@ and provenance chips on the left, the client plaque and verdict card on the
 right, and the severity distribution across the bottom. Five KPI cards overlap
 its lower edge. Content then sits in a centred column (max 1320px, 40px side
 padding; 16px on phones) as white cards: the snapshot scope card, the optional
-multi-cluster card, the executive grid (index and areas, assessment bar and
+multi-cluster fleet card, the executive grid (index and areas, assessment bar and
 coverage, critical priorities, next actions, engine reading, pillars), the
 filter card and the chapters. Grids collapse to one column at 1100px; KPI
 cards become two columns on phones.
@@ -455,11 +455,14 @@ as audited static data URIs; usage terms and source hashes live in
 `images/azure-icons/`. SVG-internal Microsoft paint remains original; the
 application still introduces no decorative gradient.
 
-A multi-cluster overview displays the supplied aggregate and every run status.
-The selected cluster supplies the detailed reading and local scope. Selection
-resets filters; failed primary reads expose their errors and hide all detailed
-assessment instead of borrowing another cluster's data. Fixed roster entries
-outside this artifact are explicitly unavailable for local selection.
+A multi-cluster report (up to 100 clusters across subscriptions) opens on a
+fleet overview: **Subscription** and **Cluster** drop-downs and a search box
+filter the KPI cards, the one-row-per-cluster table and the findings, while the
+engine's whole-selection aggregate stays beside them. Choosing a cluster
+supplies the detailed reading and local scope; **All** returns to the fleet.
+Selection resets filters; failed primary reads expose their errors, count as
+errors in the fleet cards and hide all detailed assessment instead of borrowing
+another cluster's data.
 
 ### FinOps emphasis
 

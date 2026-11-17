@@ -323,10 +323,10 @@ or either original cluster. Failed schedules require operator attention.
 
 ## 6. Audit integration and source boundaries
 
-Add the new cluster to the private fixed reporting allowlist/schema **only
-after its actual ARM ID and approved read access are verified**. Until then,
-only the approved existing cluster scopes are selectable. `list_clusters`
-is configured scope metadata, not resource-presence or health evidence.
+The reporting tool discovers a new cluster on its own once the reporting
+identity can read it; grant that read access **only after its actual ARM ID and
+approved scope are verified**. `list_clusters` is Resource Graph inventory, not
+health evidence.
 `cluster_names` selects distinct exact names and preserves each full
 snapshot/error. The stopped existing cluster is never started. Current
 gateway 502, missing nodes/PVs and historical captures remain explicitly

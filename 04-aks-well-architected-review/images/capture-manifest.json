@@ -1,17 +1,17 @@
 {
   "capture_policy": "Real SRE UI or actual dated source; burned-in privacy masks; no private original/config/source data included.",
-  "report_source_note": "Report images (aks04-report-00..05) are rendered from the English sample run in sample-run/ (simulated-20261010T120000Z-4596adfa1b2c.html), which the standalone tool wrote from the permanently SIMULATED public test fixture (tests/support.py + tests/multicluster_fixture.py, with documented demo variations) renamed to fictitious Contoso names and 00000000-0000-0000-0000-0000000000NN GUIDs. The sample sets CLIENT_NAME to Contoso and the optional client logo to a plain CONTOSO wordmark, so the cover plaque matches 'Prepared for Contoso'; the tool default remains Customer with no logo. They show no customer, tenant or lab data and are not a live collection.",
+  "report_source_note": "Report images (aks04-report-00..06) are rendered from the English fleet sample run in sample-run/ (simulated-20261010T120000Z-4596adfa1b2c.html): seven fictitious Contoso AKS clusters in three subscriptions, one of them with a SIMULATED primary-read error, written by the standalone tool from the permanently SIMULATED public test fixture (tests/support.py + tests/multicluster_fixture.py, with documented demo variations) renamed to fictitious Contoso names and 00000000-0000-0000-0000-0000000000NN GUIDs. Images 00-05 show the detailed view of contoso-aks-prod-01; image 06 shows the fleet overview with the Subscription/Cluster filters. The sample sets CLIENT_NAME to Contoso and the optional client logo to a plain CONTOSO wordmark; the tool default remains Customer with no logo. They show no customer, tenant or lab data and are not a live collection.",
   "captures": [
     {
       "filename": "aks04-report-00-cover.png",
-      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "0e3a34c25233dd138e1c8ba874354cf7d0bef70ba036c69168cba0f390566c2a",
+      "published_image_sha256": "34d0b48c6fc8748fa0d451671e143dbe1cdbc0718aa38e0bfb8ae506d55bd676",
       "pixels": [
         1600,
         1196
       ],
-      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Detailed view: contoso-aks-prod-01",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -20,14 +20,14 @@
     },
     {
       "filename": "aks04-report-01-assessment.png",
-      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "f4fbb4441ad1b3f7474057adcfe8b5fd7386a81a8f1c3208faefa2dc991f8e7f",
+      "published_image_sha256": "422a0c202ffd7242715e66c4cefeb71d559810a8f861a2666d7c8c2987b9f970",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Detailed view: contoso-aks-prod-01",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -36,14 +36,14 @@
     },
     {
       "filename": "aks04-report-02-drilldown.png",
-      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "b00bda48def1b433053840c4812ccf2361f2d20902c5406566bf0763eddf862b",
+      "published_image_sha256": "ab80db59988d12b8df8996a8462833ab6297e15a920c05fe3a9865013e0ff0ed",
       "pixels": [
         1600,
         1896
       ],
-      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection",
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Detailed view: contoso-aks-prod-01",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],
@@ -52,9 +52,9 @@
     },
     {
       "filename": "aks04-report-03-observed-architecture.png",
-      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "378f6fb7e3236a9c17037aa33e711cc9e04a8061e02d7354369fc781685d6156",
+      "published_image_sha256": "a4565ba48804436b9e38e27e6528315f8471155e1601b67c3490bb2b0707e9d6",
       "pixels": [
         1600,
         1896
@@ -68,9 +68,9 @@
     },
     {
       "filename": "aks04-report-04-reference.png",
-      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "de979de12e7c1d58a3efe2b445481699d54cc4662e6c80f6157de9116fe3e4fa",
+      "published_image_sha256": "a57815a1b416fdf51b3d3ed54d80d455cde8251998bd57905ccf793fcf736f58",
       "pixels": [
         1600,
         1896
@@ -84,14 +84,30 @@
     },
     {
       "filename": "aks04-report-05-finops.png",
-      "capture_utc": "2026-11-16T22:25:37.788623+00:00",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
       "source_type": "SIMULATED_FIXTURE_RENDER",
-      "published_image_sha256": "98086f55eba594f8101086325d1a2a9aafda745e182f4e12f715896b479407b7",
+      "published_image_sha256": "d72d4912aa1e98c3be41a22befb8d9d0f7f9dda25ca7bdfedca65f74f36fd1fa",
       "pixels": [
         1600,
         1896
       ],
       "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Observed billing currency; savings not calculated",
+      "cloud_configuration_changed": false,
+      "new_runtime_invocation": false,
+      "burned_in_masks": [],
+      "source_reference_utc": "2026-10-10T12:00:00Z",
+      "fixture_provenance": "SIMULATED"
+    },
+    {
+      "filename": "aks04-report-06-fleet-filters.png",
+      "capture_utc": "2026-11-17T15:45:46.481367+00:00",
+      "source_type": "SIMULATED_FIXTURE_RENDER",
+      "published_image_sha256": "6e20f32dcb68e41cdb81ab805b24ab65048ca42f043be3caa2146be7cc77fec5",
+      "pixels": [
+        1600,
+        1896
+      ],
+      "caption": "SIMULATED sample run | Fictitious Contoso data | Reference 2026-10-10 12:00 UTC | Not a live collection | Fleet overview: 7 clusters, 3 subscriptions",
       "cloud_configuration_changed": false,
       "new_runtime_invocation": false,
       "burned_in_masks": [],

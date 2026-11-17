@@ -248,14 +248,14 @@
       "latin": "aks-waf-live",
       "key": "Our Kubernetes clusters may not follow best practices",
       "symptom": "Our Kubernetes clusters grew fast, and we are not sure they follow best practices or what they really cost.",
-      "does": "It reviews the configuration of approved AKS clusters, their workloads and related resources against best practices for security, cost and optimisation, and proposes an improved reference design without deploying anything.",
+      "does": "It reviews every AKS cluster the agent can read, in any subscription, or just one subscription or the clusters you name, with their workloads and related resources, against best practices for security, cost and optimisation. One report covers the whole selection, with subscription and cluster filters, and proposes an improved reference design without deploying anything.",
       "runs": "Monthly, on the 1st",
       "reads": "Azure Kubernetes Service and related resources",
       "delivers": "HTML report, two CSVs and JSON",
       "image": "site/img/plates/04.webp",
       "thumb": "site/img/plates/04-thumb.webp",
-      "full": "04-aks-well-architected-review/images/aks04-report-00-cover.png",
-      "caption": "Sample run with simulated data. Field marks: 1 verdict · 2 evidence labels (simulated, declared production) · 3 findings, local index, coverage, cost and workloads.",
+      "full": "04-aks-well-architected-review/images/aks04-report-06-fleet-filters.png",
+      "caption": "Sample run with simulated data: 7 clusters in 3 subscriptions. Field marks: 1 subscription and cluster filters · 2 fleet indicators · 3 one row per cluster, including one that could not be read.",
       "compare": [
         "08-databricks-dependency-configuration-review"
       ]

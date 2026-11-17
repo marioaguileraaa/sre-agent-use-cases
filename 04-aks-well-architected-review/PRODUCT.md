@@ -31,9 +31,12 @@ phone and in a matching dark theme. It is not a live monitoring application.
   network dependency, framework, analytics or dynamic fetch.
 - Render the complete normalized engine model. Do not evaluate Kubernetes
   controls, generate recommendations, infer savings or recalculate scores.
-- Accept a legacy single-cluster snapshot or the explicit multi-cluster wrapper.
-  Show the supplied aggregate separately from the selected cluster. Failed
-  primary reads have no borrowed snapshot, index, topology or cost.
+- Accept a legacy single-cluster snapshot or the explicit multi-cluster wrapper
+  (up to 100 clusters across subscriptions). Open the wrapper on a fleet
+  overview with Subscription and Cluster filters, a search box, KPI cards and
+  one row per cluster; show the supplied aggregate separately from the
+  selected cluster. Failed primary reads have no borrowed snapshot, index,
+  topology or cost.
 - Use confirmed graph nodes/edges with source, identity and exact-field receipts.
   Keep the conditional Azure reference proposal separate and visibly undeployed.
 - Distinguish cluster, namespace, workload and associated-resource observations.
@@ -88,7 +91,8 @@ The confirmed brief supplies the audience, scene, language, brand, structure and
 accessibility requirements; no additional aesthetic interview is needed. The
 case-03 report is read-only implementation context, not visual authority here.
 The engine contracts are legacy schema 1.0 and the explicit
-`aks-waf-multi-cluster-v1` wrapper, with a single safe JSON placeholder.
+`aks-waf-multi-cluster-v1` wrapper, with a single safe JSON placeholder (above
+4 MB the same JSON is embedded gzip+base64 and decompressed locally).
 Public UI fixtures are labeled SIMULATED and LAB; they are not live observations.
 An opt-in test can read a complete private runtime snapshot by a caller-supplied
 local path. That snapshot is not committed, converted to a public fixture or

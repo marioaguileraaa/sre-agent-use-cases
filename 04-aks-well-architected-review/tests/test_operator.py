@@ -48,9 +48,10 @@ class OperatorTests(unittest.TestCase):
         result = self.run_ps(self.operator_prefix()
                              + "$r=Get-Content " + ps_path(OPERATOR / "retail-price-reference.json")
                              + " -Raw|ConvertFrom-Json -AsHashtable; Get-DemoForecast $r.rates 'Standard_D4pls_v6'|ConvertTo-Json")
-        self.assertEqual(result["base_before_scheduler_and_variables"], 85.0044)
-        self.assertEqual(result["with_one_hour_daily_stop_allowance_and_max_scheduler"], 98.5644)
-        self.assertEqual(result["stop_failure_24x7_before_variables"], 203.1444)
+        # Money values are compared to 4 decimals: PowerShell 7.5 serializes 85.0044 + 13.56 as 98.56439999999999.
+        self.assertAlmostEqual(result["base_before_scheduler_and_variables"], 85.0044, places=4)
+        self.assertAlmostEqual(result["with_one_hour_daily_stop_allowance_and_max_scheduler"], 98.5644, places=4)
+        self.assertAlmostEqual(result["stop_failure_24x7_before_variables"], 203.1444, places=4)
         self.assertEqual(result["scheduler_max_minutes"], 3660)
         self.assertEqual(result["free_scheduler_minutes_assumed"], 0)
         self.assertFalse(result["budget_is_hard_cap"])
