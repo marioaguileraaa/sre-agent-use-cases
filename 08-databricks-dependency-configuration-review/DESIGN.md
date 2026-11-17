@@ -114,7 +114,7 @@ spacing:
 
 **Creative North Star: "The Lakehouse Dependency Dossier"**
 
-An offline Azure SRE Agent report in the family house style: a slim sticky top bar (product mark, section navigation, `Read-only` chip, dark mode, an export menu and Print / PDF), a verdict-first navy band (title, one sentence with the key numbers, provenance chips, `Customer` plaque, verdict card, severity distribution), KPI cards overlapping the band, then white cards on a light neutral ground. Corporate deep navy and industrial steel (`#003865`, `#0066a1`) carry the chrome and the hero; the Databricks lava and teal accents (`#ff3621`, `#00875a`) live in the four-colour brand ribbon.
+An offline Azure SRE Agent report in the family house style: a slim sticky top bar (product mark, section navigation, `Read-only` chip, dark mode, an export menu and Print / PDF), a verdict-first navy band (title, one sentence with the key numbers, provenance chips, `Customer` plaque, verdict card, severity distribution), KPI cards overlapping the band, then white cards on a light neutral ground. A report of several workspaces adds a filter band under the top bar (**Subscription** with workspace counts, **Workspace**, **Search**) and opens on a fleet overview (KPI cards over the visible workspaces, one row per workspace, findings); choosing a workspace shows its dossier. Corporate deep navy and industrial steel (`#003865`, `#0066a1`) carry the chrome and the hero; the Databricks lava and teal accents (`#ff3621`, `#00875a`) live in the four-colour brand ribbon.
 
 ## Components
 
@@ -123,6 +123,7 @@ An offline Azure SRE Agent report in the family house style: a slim sticky top b
 - **Charts** are labelled horizontal bars with values (check status, areas, pillars, source status); no decorative charts. Cost bars in section 6 share one track width per card (CSS subgrid), use `chart` for DBU and `chart-2` (`#8fb3d3`) for infrastructure, and hatch the partial current month.
 - **Cost section (6)**: stat block (`cstat`), monthly stacked DBU/infrastructure rows, cost tables with right-aligned `en-US` amounts (`19,575 EUR`), change in `up-ink` (cost up, red family) or `down-ink` (cost down, green family), and an estimated-saving cell that states its basis and whether it counts towards the total.
 - **Tables** scroll inside their card with edge-shadow cues, sort by column, page long lists, and show long ARM IDs as name, resource group and a Portal link; raw JSON evidence stays behind a `Full JSON` disclosure.
+- **Fleet table**: one row per workspace (name as a link to its dossier, subscription, resource group, region / SKU, collection status pill, in-workspace access `Yes` / `No` with its reason, index / coverage, severity chips that wrap in narrow columns, period cost). A workspace without in-workspace access also shows an amber banner at the top of its dossier; missing data is never drawn as zero.
 - **Print / PDF**: A4 with `@page` margins, colours kept, controls hidden, cards not split, and a running footer with the report title, workspace, UTC reference and page numbers. Dark mode is reset while printing.
 
 ## Customer editions (presentation hooks)

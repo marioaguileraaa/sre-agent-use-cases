@@ -8,11 +8,11 @@ web
 
 ## Users
 
-Platform architects, data engineering leads, security reviewers and FinOps owners inspecting an Azure Databricks workspace, its compute/orchestration workloads, Unity Catalog objects and associated Azure infrastructure.
+Platform architects, data engineering leads, security reviewers and FinOps owners inspecting the Azure Databricks workspaces they can read (one, several or all of them across subscriptions), their compute/orchestration workloads, Unity Catalog objects and associated Azure infrastructure.
 
 ## Product Purpose
 
-Deliver a dated, read-only assessment of an Azure Databricks workspace across **dependency mapping, best practices, security, FinOps and general optimization**, aligned with the five Azure Well-Architected Framework pillars and the Databricks Well-Architected Lakehouse principles.
+Deliver a dated, read-only assessment of one or many Azure Databricks workspaces (auto-discovered across subscriptions, no allowlist; up to 50 per report) across **dependency mapping, best practices, security, FinOps and general optimization**, aligned with the five Azure Well-Architected Framework pillars and the Databricks Well-Architected Lakehouse principles.
 
 ## Operating Context
 
@@ -23,7 +23,7 @@ An offline, single-file HTML consulting dossier suitable for executive review, t
 - One self-contained HTML file with inline CSS and JavaScript, system fonts, strict CSP (`default-src 'none'`), and zero network calls.
 - Deep dependency map distinguishing **OBSERVED** native joins (ARM IDs, cluster IDs, job task DAG `depends_on`, `run_job_task`, `pipeline_id`, `warehouse_id`, `instance_pool_id`, `policy_id`, Unity Catalog `credential_name`, `access_connector_id`, Key Vault `resource_id`), explicit **INFERRED** configuration references (`abfss://` storage account hosts or Key Vault DNS names not in ARM inventory), and **UNKNOWN** blind spots (runtime table/column lineage in `system.access.table_lineage` requiring billable SQL warehouse execution, notebook code reads, and untested data-plane reachability).
 - Never starts stopped clusters or SQL warehouses, and never executes SQL queries to fabricate lineage or FinOps workload attribution.
-- Multi-workspace and single-workspace support, preserving failed workspace runs without substituting healthy-zero inventories.
+- Fleet and single-workspace reports: every readable workspace is auto-discovered, selected from chat (all, one subscription or named workspaces) and shown with Subscription / Workspace filters and a fleet overview; failed workspace runs and workspaces without in-workspace access are preserved and flagged, never replaced with healthy-zero inventories.
 - Local pass index displayed beside evaluated/unevaluated coverage counts; never presented as an official Microsoft WAF or Databricks certification.
 
 ## Brand Commitments

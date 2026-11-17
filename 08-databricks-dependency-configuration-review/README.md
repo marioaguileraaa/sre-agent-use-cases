@@ -2,9 +2,12 @@
 
 > **Azure SRE Agent** · Read-only Python tool · Runtime skill · Restricted specialist · Offline HTML, full JSON and two CSVs
 
-Turn a fixed, approved Azure Databricks workspace scope into a dated review of
+Turn every Azure Databricks workspace the agent can read (auto-discovered
+across subscriptions, with no list to maintain) into one dated review of
 **deep dependency mapping (`OBSERVED`, `INFERRED`, `UNKNOWN`), best practices,
-security, FinOps and general optimization**. Trace how the ARM workspace, VNet
+security, FinOps and general optimization**. Ask from chat for all workspaces,
+one subscription or a few named workspaces and get one report with
+**Subscription** and **Workspace** filters. Trace how the ARM workspace, VNet
 injection, Private Link, Access Connector, clusters, pools, policies, jobs and
 task DAGs, Lakeflow Declarative Pipelines (DLT), SQL Warehouses, Unity Catalog
 objects (metastore, catalogs, schemas, storage credentials, external locations,
@@ -14,12 +17,13 @@ reference proposal**.
 
 | What you get | What it does not claim |
 |---|---|
+| **Fleet scope without a list**: every workspace the agent identity can read, auto-discovered with one fixed Azure Resource Graph query across subscriptions, selected from chat (all, one subscription or named workspaces, up to 50 per report) into one report with Subscription / Workspace filters, a fleet overview and each workspace's in-workspace access status | Workspaces the identity cannot read, or Databricks-side results for a workspace without in-workspace access: those checks stay `Not evaluated` and the workspace is flagged, never shown as empty or healthy |
 | A deep dependency graph classifying **OBSERVED** native ID/key joins, explicit **INFERRED** URI/hostname references and **UNKNOWN** blind spots, plus referential-integrity detection (`G05`) | Runtime SQL table/column lineage fabricated from job or notebook names, or untested data-plane network reachability |
 | A local assessment indicator **beside coverage and check counts** across 36 rules, 3 levels, 4 areas and 5 WAF pillars | An official Microsoft Well-Architected Review, Databricks certification or production SLA guarantee |
 | First-party-grounded **cross-tenant authentication modes** separating Azure Resource Manager (ARM) from Databricks Workspace and Unity Catalog REST APIs | That a Tenant-A SRE User-Assigned Managed Identity (UAMI) automatically acquires Tenant-B tokens or workspace permissions without administrator setup |
 | Control-plane and metadata-only REST reads that **never start clusters or SQL Warehouses**; a billable SQL statement runs only if you opt in to system tables | Runtime table lineage (`system.access.table_lineage`), or per-run and per-user DBU detail unless you opt in to `system.billing.usage` on an existing SQL warehouse |
 | **Databricks costs: where they come from and how to optimize them** (report section 6): Cost Management grouped by the tags Databricks puts on clusters, jobs, SQL warehouses and pools, DBU vs infrastructure, the cost no tag explains, and optimization signals with documented savings estimates | Exact savings: each estimate is labelled lower bound, upper bound or estimate and shows its formula; no estimate is shown where cost data is missing |
-| Four native downloadable files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) from one complete report call | Remediation, RBAC/Unity Catalog grants, secret rotation or unattended compute changes |
+| Four native downloadable files (`HTML`, `snapshot.json`, `findings.csv`, `dependencies.csv`) from one complete report call | Remediation, RBAC/Unity Catalog grants, secret rotation or unattended compute changes by the tool (the separate grant script is run once by an administrator) |
 
 > [!IMPORTANT]
 > **Validation state: Code `OFFLINE_VALIDATED` · Native SRE bootstrap saved & readiness-validated (`2026-10-16`) · Connected Cross-Tenant Plane 2 Live Run Verified (`2026-10-19`, `cross_tenant_multitenant_fic`).**
@@ -69,9 +73,33 @@ reference proposal**.
 > current tool, skill and subagent instructions to update a saved agent, and see
 > the [English sample run](#step-6---read-and-explore-the-html-dependency-and-configuration-dossier).
 
+> [!NOTE]
+> **Update 17 November 2026 — fleet review.** The tool no longer needs an
+> approved workspace list. In the same tenant it discovers every Azure
+> Databricks workspace the agent identity can read, with one fixed, read-only
+> Azure Resource Graph query, in every subscription where it has Reader
+> (granted once at the management group with
+> [`grant-databricks-permissions.ps1`](grant-databricks-permissions.ps1)). From
+> chat you ask for all workspaces, one subscription or named workspaces; one
+> report covers up to 50 workspaces, collected in parallel, and opens on a fleet
+> overview with **Subscription** and **Workspace** filters. A workspace where
+> the agent has no in-workspace access keeps its Azure-side review and says why.
+> The new `subscription` parameter is the 13th input and `APPROVED_WORKSPACES`
+> is now optional (per-workspace overrides, and the list for cross-tenant
+> workspaces). Paste the current tool, skill and subagent instructions to update
+> a saved agent. Validated with 67 offline tests, a simulated fleet
+> ([sample run](#step-6---read-and-explore-the-html-dependency-and-configuration-dossier))
+> and live runs in a same-tenant lab agent through the Python tool **Test
+> playground**: `list_workspaces`, and reports of all workspaces and of one
+> workspace with the detailed cost analysis off, because the playground cuts
+> calls at about 100 seconds (see [Limits and timings](#limits-and-timings)).
+> The case without in-workspace access is covered by the offline tests and the
+> simulated sample run.
+
 ## Contents
 
 - [Brief and validation state](#brief-and-validation-state)
+- [How scope works: every readable workspace, selected from chat](#how-scope-works-every-readable-workspace-selected-from-chat)
 - [Cross-tenant feasibility: Tenant-A SRE Agent to Tenant-B Azure Databricks](#cross-tenant-feasibility-tenant-a-sre-agent-to-tenant-b-azure-databricks)
 - [Colleague session handoff checklist (cross-tenant connection)](#colleague-session-handoff-checklist-cross-tenant-connection)
 - [How the pieces fit together](#how-the-pieces-fit-together)
@@ -80,14 +108,15 @@ reference proposal**.
 - [Databricks costs: where they come from and how to optimize them](#databricks-costs-where-they-come-from-and-how-to-optimize-them)
 - [Prerequisites](#prerequisites)
 - [Files to download](#files-to-download)
-- [Step 0 - Identify the reporting identity and approve cross-tenant or same-tenant scope](#step-0---identify-the-reporting-identity-and-approve-cross-tenant-or-same-tenant-scope)
+- [Step 0 - Identify the reporting identity and grant read access](#step-0---identify-the-reporting-identity-and-grant-read-access)
 - [Step 1 - Configure the private standalone file](#step-1---configure-the-private-standalone-file)
-- [Step 2 - Create the Python tool and verify its 12 typed inputs](#step-2---create-the-python-tool-and-verify-its-12-typed-inputs)
+- [Step 2 - Create the Python tool and verify its 13 typed inputs](#step-2---create-the-python-tool-and-verify-its-13-typed-inputs)
 - [Step 3 - Create the runtime skill](#step-3---create-the-runtime-skill)
 - [Step 4 - Create the restricted specialist](#step-4---create-the-restricted-specialist)
-- [Step 5 - Run one report in normal chat and download its four files](#step-5---run-one-report-in-normal-chat-and-download-its-four-files)
+- [Step 5 - Ask from chat and download the four files](#step-5---ask-from-chat-and-download-the-four-files)
 - [Step 6 - Read and explore the HTML dependency and configuration dossier](#step-6---read-and-explore-the-html-dependency-and-configuration-dossier)
 - [Step 7 - Keep reporting cadence optional](#step-7---keep-reporting-cadence-optional)
+- [Limits and timings](#limits-and-timings)
 - [Troubleshooting](#troubleshooting)
 - [Evidence, screenshot plan and release gates](#evidence-screenshot-plan-and-release-gates)
 - [Technical boundaries and maintainer checks](#technical-boundaries-and-maintainer-checks)
@@ -99,11 +128,35 @@ reference proposal**.
 | Title / folder | Azure Databricks dependency mapping, configuration and FinOps review / `08-databricks-dependency-configuration-review` |
 | Customer problem | Platform, data engineering, security and FinOps teams need an evidence-backed assessment of Azure Databricks workspace configuration, workloads, associated Azure resources (Storage/ADLS Gen2, VNet, NSG, NAT Gateway, Private Endpoints, DNS, Key Vault, Access Connector) and internal/external dependencies without starting clusters or running billable queries. |
 | Business value | Consolidates control-plane ARM, Databricks Workspace REST and Unity Catalog metadata into one dependency graph (`OBSERVED`, `INFERRED`, `UNKNOWN`) and 36-rule review workpaper so owners can identify broken task/compute references, interactive cluster waste and governance gaps before production incidents occur. Report section 6 explains the month's Databricks cost by cluster, job, SQL warehouse, pool and allocation tag and lists optimization signals; savings are estimated only where Cost Management data allows, with the formula shown, and are never fabricated. |
-| Workload and exact scope | One to five fixed, operator-approved `Microsoft.Databricks/workspaces` instances, their Workspace/Unity Catalog REST metadata and whitelisted associated Azure resources in the approved subscription. |
+| Workload and exact scope | Every `Microsoft.Databricks/workspaces` instance the agent identity can read in its tenant, auto-discovered with one fixed Azure Resource Graph query (up to 500 listed, up to 50 per report), or the configured `APPROVED_WORKSPACES` list for cross-tenant workspaces; their Workspace/Unity Catalog REST metadata and whitelisted associated Azure resources. |
 | Exclusions | No cluster or SQL Warehouse start/stop, no `/api/2.0/sql/statements` execution (except the fixed read-only `system.billing.usage` statement when `system_tables_warehouse_id` is set; off by default), no `system.access.table_lineage` SQL queries, no `/api/2.0/secrets/get` secret-value reads, no `spark_env_vars` / `spark_conf` / init-script bodies / notebook source / job parameter values, and no RBAC or Unity Catalog grants. |
-| Provenance | Live collector outputs carry collector-path label `LIVE` (`provenance="LIVE"` in `configuration_required` readiness responses identifies the live code path, not a connected source); isolated unit/UI test fixtures are permanently labeled `SIMULATED` and `LAB` inside `tests/`, and so is the English sample run built from them in `sample-run/`. |
-| Validation state | Code `OFFLINE_VALIDATED` (34+ unit, browser UI, media and privacy checks passing); native SRE tool/skill/specialist saved, read back and readiness-validated on `2026-10-16` ([`native-readiness-validation.json`](native-readiness-validation.json)); colleague Tenant-B Databricks source remains `UNKNOWN_NOT_CONFIGURED` / `NOT_RUN`. |
+| Provenance | Live collector outputs carry collector-path label `LIVE` (`provenance="LIVE"` in `configuration_required` readiness responses identifies the live code path, not a connected source); isolated unit/UI test fixtures are permanently labeled `SIMULATED` and `LAB` inside `tests/`, and the English sample run in `sample-run/` (a fleet of four simulated workspaces) is labeled `SIMULATED`. |
+| Validation state | Code `OFFLINE_VALIDATED` (67 unit, browser UI, media and privacy tests passing on `2026-11-17`); native SRE tool/skill/specialist saved, read back and readiness-validated on `2026-10-16` ([`native-readiness-validation.json`](native-readiness-validation.json)); fleet discovery (`list_workspaces`) and reports of all workspaces and of one workspace (detailed cost analysis off) run live in a same-tenant lab agent through the Python tool **Test playground** on `2026-11-17`; colleague Tenant-B Databricks source remains `UNKNOWN_NOT_CONFIGURED` / `NOT_RUN`. |
 | Runtime specialist model | Platform-supported Azure SRE Agent default (`llmModelName=null`). *(Authoring note: repository authoring subagents ran on `Gemini 4 Argon` with `high` reasoning and `1M` context, which is a Copilot coding-agent setting and not an Azure SRE Agent runtime field.)* |
+
+## How scope works: every readable workspace, selected from chat
+
+| Setup | Workspaces the tool works with | What you maintain |
+|---|---|---|
+| **Same tenant** (`SRE_TENANT_ID == TARGET_TENANT_ID`, `AUTO_DISCOVERY = True`, the default) | Every workspace the agent identity can read, from one fixed read-only Azure Resource Graph query on each call (`POST /providers/Microsoft.ResourceGraph/resources`), with subscription display names, across every readable subscription (or only `DISCOVERY_SUBSCRIPTION_IDS`) | Nothing: Reader (plus Cost Management Reader) once at the management group; new subscriptions and workspaces appear on their own |
+| **Optional overrides** | An `APPROVED_WORKSPACES` entry wins over the discovered workspace with the same resource ID (for example `environment`, `cost_scope`, `system_tables_warehouse_id` or `requirements`); keys that start with `<` are ignored, so the committed placeholder does nothing | Only the workspaces you want to tune; the rest use `WORKSPACE_DEFAULTS` |
+| **Cross-tenant** (`SRE_TENANT_ID != TARGET_TENANT_ID`) or `AUTO_DISCOVERY = False` | Only the `APPROVED_WORKSPACES` entries, each with its `auth_mode`; discovery stays off (`discovery.reason` is `cross_tenant_configuration` or `auto_discovery_disabled`) | The configured list, as before |
+
+- **Selection happens in chat, never in code:** `workspace_names="all"` (or no
+  selection) for every visible workspace, `subscription` (display name or ID)
+  for one subscription, `workspace_name` for one workspace and
+  `workspace_names` for up to 50 exact names. A name that exists in two
+  subscriptions is listed as `<first 8 characters of the subscription ID>-<name>`.
+- Rows from another tenant or with invalid names are skipped. A workspace whose
+  URL is not available in Azure (not provisioned or being deleted) gets the
+  Azure-side review only.
+- **Two access planes per workspace.** The Azure side (Plane 1) needs Reader.
+  The in-workspace side (Plane 2: clusters, jobs, pipelines, SQL warehouses,
+  Unity Catalog) needs the identity added inside the workspace and a network
+  route to it. Where Plane 2 is missing, the report still delivers the
+  Azure-side review and flags the workspace **without in-workspace access**,
+  with the reason: `denied` (HTTP 401/403), `unreachable` (private network),
+  `token_failed`, `disabled` or `not_collected`.
 
 ## Cross-tenant feasibility: Tenant-A SRE Agent to Tenant-B Azure Databricks
 
@@ -146,7 +199,9 @@ Tenant B configure one of the supported cross-tenant trust patterns below.
 ### Supported authentication modes implemented in `generate-databricks-dependency-report.py`
 
 The collector enforces explicit tenant and token verification and supports four
-fixed `auth_mode` values (configured per workspace in `APPROVED_WORKSPACES`):
+fixed `auth_mode` values (`WORKSPACE_DEFAULTS` gives discovered same-tenant
+workspaces `same_tenant_uami`; cross-tenant workspaces set theirs in their
+`APPROVED_WORKSPACES` entry):
 
 | `auth_mode` | When to use | Plane 1 (ARM `management.azure.com`) | Plane 2 (Databricks Workspace & Unity Catalog `adb-*.azuredatabricks.net`) | Secrets required? |
 |---|---|---|---|---|
@@ -179,8 +234,8 @@ place.
 | `SRE_TENANT_ID` | You (Tenant A) | Azure Portal (Tenant A) > **Microsoft Entra ID > Overview > Tenant ID** |
 | `MANAGED_IDENTITY_CLIENT_ID` | You (Tenant A) | Azure Portal (Tenant A) > **Managed Identities** > the user-assigned identity attached to the SRE Agent (`id-…`) > **Overview > Client ID** (also record **Object (principal) ID** for FIC `subject` / Lighthouse RBAC). Today's SRE Agent menu has no **Settings** page. |
 | `TARGET_TENANT_ID` | Colleague (Tenant B) | Azure Portal (Tenant B) > **Microsoft Entra ID > Overview > Tenant ID** |
-| `SUBSCRIPTION_ID` | Colleague (Tenant B) | Azure Portal (Tenant B) > **Azure Databricks workspace > Overview > Subscription ID** |
-| `<APPROVED_DATABRICKS_WORKSPACE_NAME>` | Colleague (Tenant B) | Exact ARM resource name of `Microsoft.Databricks/workspaces` |
+| `SUBSCRIPTION_ID` | Colleague (Tenant B) | Azure Portal (Tenant B) > **Azure Databricks workspace > Overview > Subscription ID** (or set it as the entry's own `subscription_id`) |
+| `<COLLEAGUE_DATABRICKS_WORKSPACE_NAME>` | Colleague (Tenant B) | Exact ARM resource name of `Microsoft.Databricks/workspaces` (the key of its `APPROVED_WORKSPACES` entry) |
 | `resource_group` | Colleague (Tenant B) | Exact Resource Group name containing the Databricks workspace in Tenant B |
 | `workspace_host` | Colleague (Tenant B) | Per-workspace URL hostname from **Azure Databricks workspace > Overview > URL**, without `https://` or trailing slash (for example `adb-1234567890123456.7.azuredatabricks.net`) |
 | `FEDERATED_APP_CLIENT_ID` | You / Colleague | Application (client) ID of the multi-tenant Entra App Registration (for `cross_tenant_multitenant_fic`) or Databricks Service Principal Application ID (for `cross_tenant_lighthouse_plus_keyvault_oauth_m2m`) |
@@ -231,10 +286,12 @@ place.
 
 Edit **only** the configuration block at the top of your private copy of
 `generate-databricks-dependency-report.py` (never commit customer GUIDs, hosts,
-names or logos to Git):
+names or logos to Git). Cross-tenant workspaces are not auto-discovered
+(discovery runs only when both tenant IDs are equal), so list each one; missing
+fields come from `WORKSPACE_DEFAULTS`:
 
 ```python
-SUBSCRIPTION_ID = "<COLLEAGUE_SUBSCRIPTION_ID>"
+SUBSCRIPTION_ID = "<COLLEAGUE_SUBSCRIPTION_ID>"   # used by entries without their own "subscription_id"
 SRE_TENANT_ID = "<YOUR_SRE_TENANT_ID>"
 TARGET_TENANT_ID = "<COLLEAGUE_DATABRICKS_TENANT_ID>"
 MANAGED_IDENTITY_CLIENT_ID = "<YOUR_SRE_UAMI_CLIENT_ID>"
@@ -246,8 +303,9 @@ CLIENT_NAME = "Customer"
 CLIENT_LOGO_DATA_URI = ""
 CLIENT_LOGO_ALT = "Authorized customer logo"
 APPROVED_WORKSPACES = {
-    "<APPROVED_DATABRICKS_WORKSPACE_NAME>": {
-        "resource_group": "<APPROVED_DATABRICKS_RESOURCE_GROUP>",
+    "<COLLEAGUE_DATABRICKS_WORKSPACE_NAME>": {
+        "resource_group": "<COLLEAGUE_DATABRICKS_RESOURCE_GROUP>",
+        "subscription_id": "<COLLEAGUE_SUBSCRIPTION_ID>",
         "workspace_host": "<adb-XXXXXXXXXXXXXXXX.X.azuredatabricks.net>",
         "environment": "LAB",
         "auth_mode": "cross_tenant_multitenant_fic",
@@ -264,28 +322,28 @@ APPROVED_WORKSPACES = {
 }
 ```
 
-And in your private copy of `tool-parameters.schema.json`, replace
-`"<APPROVED_DATABRICKS_WORKSPACE_NAME>"` in `properties.workspace_name.enum`
-with the exact workspace name.
+Keep `tool-parameters.schema.json` unchanged: workspace names are no longer an
+enum, and the specialist uses the names that `list_workspaces` returns.
 
 ## How the pieces fit together
 
 ```mermaid
 flowchart LR
-    H["Human selects<br/>approved workspace(s)"] --> C["Normal SRE chat<br/>databricks-dependency-live"]
+    H["Human asks in chat<br/>all · one subscription · named workspaces"] --> C["Normal SRE chat<br/>databricks-dependency-live"]
     C --> S["Runtime skill<br/>databricks-dependency-live"]
     C --> T["Only selected tool<br/>databricks-dependency-report"]
     S -.->|"uses only"| T
-    T --> I["Explicit SRE UAMI<br/>+ verified cross-tenant / same-tenant auth"]
+    T --> G["Plane 1: Azure Resource Graph<br/>one fixed query lists every readable workspace"]
+    G --> I["Explicit SRE UAMI<br/>+ verified cross-tenant / same-tenant auth<br/>parallel collection per workspace"]
     I --> A["Plane 1: ARM GETs<br/>Workspace + VNet/NSG/PE/Storage/KV/AccessConnector"]
     I --> D["Plane 2: Workspace REST<br/>Clusters/Pools/Policies/Jobs/Pipelines/Warehouses/Scopes"]
     I --> U["Plane 2: Unity Catalog REST<br/>Metastore/Catalogs/Schemas/Credentials/ExternalLocations"]
     I --> K["Plane 1: Cost Management query<br/>grouped by Databricks tags (read-only POST)"]
-    A --> M["Normalized snapshot<br/>OBSERVED / INFERRED / UNKNOWN graph + 36 rules"]
+    A --> M["Normalized snapshot per workspace<br/>OBSERVED / INFERRED / UNKNOWN graph + 36 rules<br/>+ in-workspace access status"]
     D --> M
     U --> M
     K --> M
-    M --> R["Offline HTML report<br/>full JSON + findings CSV + dependencies CSV"]
+    M --> R["One offline HTML report<br/>Subscription / Workspace filters + fleet overview<br/>full JSON + findings CSV + dependencies CSV"]
     R --> F["Four native links<br/>from this actual SRE thread"]
 ```
 
@@ -293,8 +351,9 @@ flowchart LR
 
 | Source ID | Endpoint / API version | Plane & identity | Paging & bounds | Valid empty / unavailable / error behavior | Exclusions |
 |---|---|---|---|---|---|
-| `arm_workspace` | `GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Databricks/workspaces/{name}?api-version=2024-05-01` | Plane 1 (ARM) | Single resource GET; 30s timeout, 3 attempts | Primary source: failure stops workspace run with structured error (`access_denied` / `http_error`), never an empty workspace | Excludes authorization principal display names and internal tokens |
-| `arm_outbound_endpoints` | `GET .../workspaces/{name}/outboundNetworkDependenciesEndpoints?api-version=2024-05-01` | Plane 1 (ARM) | Top-level array GET | Recorded in `sources`; 403/5xx becomes `denied`/`error` and adds an explicit `UNKNOWN` blind spot | Read-only control-plane endpoint list only |
+| `arm_discovery` | `POST /providers/Microsoft.ResourceGraph/resources?api-version=2022-10-01` with one fixed KQL (`microsoft.databricks/workspaces` joined to subscription display names) | Plane 1 (ARM), Reader at the management group or subscriptions; same tenant only | `$skipToken`, 1,000 rows per page, up to 5 pages; at most 500 workspaces (else narrow `DISCOVERY_SUBSCRIPTION_IDS`) | No readable workspace returns `no_workspaces_visible`; a failed query falls back to the `APPROVED_WORKSPACES` entries (with `discovery.error`) or stops with its error; rows from another tenant or with invalid names are skipped | The only POST besides Cost Management; no user input in the query or URL; workspace metadata only |
+| `arm_workspace` | `GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Databricks/workspaces/{name}?api-version=2024-05-01` | Plane 1 (ARM) | Single resource GET; 30s timeout, 3 attempts | Primary source: failure stops that workspace's run with structured error (`access_denied` / `http_error`), never an empty workspace; the other workspaces of a fleet report continue | Excludes authorization principal display names and internal tokens |
+| `arm_outbound_endpoints` | `GET .../workspaces/{name}/outboundNetworkDependenciesEndpoints?api-version=2024-05-01` | Plane 1 (ARM) | Top-level array GET | Recorded in `sources`; `404` on a workspace without VNet injection is `not_applicable`; 403/5xx becomes `denied`/`error` and adds an explicit `UNKNOWN` blind spot | Read-only control-plane endpoint list only |
 | `arm_diagnostics` | `GET .../workspaces/{name}/providers/Microsoft.Insights/diagnosticSettings?api-version=2021-05-01-preview` | Plane 1 (ARM) | `nextLink` paged up to 50 pages | Empty list means `C08` fails (`failed`); 403/error makes `C08` `not_evaluated` | No log query execution |
 | `arm_managed_rg_inventory` & `arm_resource_*` | `GET /subscriptions/{sub}/resourceGroups/{managed_rg}/resources?api-version=2021-04-01` + whitelisted `RESOURCE_APIS` GETs | Plane 1 (ARM) | `nextLink` paged; max 200 related resources | Uncollected external targets referenced by URI become `INFERRED` nodes, never `OBSERVED` | Never reads Storage keys, blob data or Key Vault secret/key material |
 | `dbx_workspace_conf` | `GET /api/2.0/workspace-conf?keys=enableTokensConfig,maxTokenLifetimeDays,...` | Plane 2 (Databricks Workspace) | Single GET | 403 (non-admin SP) records `status="denied"` and keeps `C09` `not_evaluated` | Reads only the 5 whitelisted governance keys |
@@ -304,10 +363,17 @@ flowchart LR
 | `dbx_secret_scopes` & `dbx_init_scripts` | `GET /api/2.0/secrets/scopes/list`, `GET /api/2.0/global-init-scripts` | Plane 2 (Databricks Workspace) | `page_token` / `next_page_token` | Maps `AZURE_KEYVAULT` `resource_id`/`dns_name` to Key Vault nodes | `/api/2.0/secrets/get` is explicitly blocked; script bodies excluded |
 | `uc_metastore_summary`, `uc_catalogs`, `uc_schemas`, `uc_storage_credentials`, `uc_external_locations`, `uc_connections` | `GET /api/2.1/unity-catalog/...` | Plane 2 (Unity Catalog) | `page_token` / `next_page_token` | Joins External Locations -> Storage Credentials -> Access Connector -> ADLS Storage Accounts (`OBSERVED` vs `INFERRED`) | Never reads table data, volumes or files |
 | `uc_system_lineage` | `system.access.table_lineage`, `system.access.column_lineage` | Not queried in control-plane mode | N/A (`status="not_configured"`) | Permanently disclosed as `UNKNOWN` (`not_evaluated` on `G06`) so no SQL Warehouse is started or billed | No SQL Warehouse startup or DBU spend |
-| `arm_advisor` & `azure_cost` | `GET .../Microsoft.Advisor/recommendations`, `POST .../Microsoft.CostManagement/query?api-version=2023-11-01` | Plane 1 (ARM) | `nextLink` paged | `cost_scope="disabled"` by default; preserves exact currency and ARM `ResourceId` rows without fabricating savings | No workload-level DBU split inferred from ARM resource totals |
-| `azure_cost_databricks` | `POST /subscriptions/{sub}/providers/Microsoft.CostManagement/query?api-version=2025-03-01` (about 12 queries, `AmortizedCost` by default) | Plane 1 (ARM), Cost Management Reader | Filter: workspace `ResourceId` (+ `approved_cost_resource_ids`) **or** its managed resource group; previous month to today, monthly and daily; `nextLink` paged; patient retry on `429` honouring the `*retry-after` headers; skipped when the collection budget is short | One receipt with per-query status; `403` makes the whole section `denied` (never zero); a failed query stays missing, not zero | No resources outside the workspace and its managed resource group unless approved; no write |
+| `arm_advisor` & `azure_cost` | `GET .../Microsoft.Advisor/recommendations`, `POST .../Microsoft.CostManagement/query?api-version=2023-11-01` | Plane 1 (ARM) | `nextLink` paged | Discovered workspaces use `cost_scope="workspace_and_managed_resource_group"` (one query: workspace DBUs plus managed resource group infrastructure, the period cost of the fleet table); an entry can set `disabled`; preserves exact currency and ARM `ResourceId` rows without fabricating savings | No workload-level DBU split inferred from ARM resource totals |
+| `azure_cost_databricks` | `POST /subscriptions/{sub}/providers/Microsoft.CostManagement/query?api-version=2025-03-01` (about 12 queries, `AmortizedCost` by default) | Plane 1 (ARM), Cost Management Reader | Filter: workspace `ResourceId` (+ `approved_cost_resource_ids`) **or** its managed resource group; previous month to today, monthly and daily; `nextLink` paged; patient retry on `429` honouring the `*retry-after` headers; at most 2 Cost Management queries at a time across a fleet; only in reports of up to 5 workspaces; after a throttled query the rest of that workspace's plan is skipped; skipped when the collection budget is short | One receipt with per-query status; `403` makes the whole section `denied` (never zero); a failed, throttled or skipped query stays missing, not zero | No resources outside the workspace and its managed resource group unless approved; no write |
 | `dbx_spark_versions` & `dbx_node_types` | `GET /api/2.0/clusters/spark-versions`, `GET /api/2.0/clusters/list-node-types` | Plane 2 (Databricks Workspace) | Single GETs | Feed the runtime and VM-family signals; when denied those signals are omitted | Catalog metadata only |
 | `dbx_system_billing` (opt-in) | `POST /api/2.0/sql/statements` with one fixed read-only `SELECT` over `system.billing.usage` and `system.billing.list_prices` | Plane 2 (Databricks SQL), only when `system_tables_warehouse_id` is set | `INLINE` JSON, 50 s wait then `CANCEL`, up to 600 rows | `not_configured` by default; any other statement text is rejected before sending | **Consumes DBUs** on your existing SQL warehouse; list prices only |
+
+**In-workspace access status.** Each workspace gets `workspace_access`
+(`granted`, `partial`, `denied`, `unreachable`, `token_failed`, `disabled` or
+`not_collected`) from its Plane 2 receipts. The first `401`, token failure or
+network failure inside a workspace skips its remaining in-workspace calls (each
+recorded with that error), so a workspace without access costs seconds, and its
+Azure-side review is still delivered.
 
 ## Customer scope coverage and rule catalog
 
@@ -360,7 +426,8 @@ Signals without a cost basis show *No estimate*.
 | SQL warehouse without auto-stop / long auto-stop (`> COST_WAREHOUSE_AUTOSTOP_MAX_MINUTES`, default 30); classic or pro warehouse to evaluate serverless | `auto_stop_mins`, type, size | No auto-stop: warehouse cost × weekend share of the month |
 | Continuous jobs, Photon candidates, clusters without policy, policies that do not enforce allocation tags, missing allocation tags, unsupported runtimes, old VM families | Jobs, clusters, policies, `spark-versions`, `list-node-types` | Not estimated (no cost basis that would not be invented) |
 
-**Configuration (private copy).** Per workspace in `APPROVED_WORKSPACES`:
+**Configuration (private copy).** In `WORKSPACE_DEFAULTS` (every discovered
+workspace) or per workspace in `APPROVED_WORKSPACES`:
 `cost_analysis_enabled` (default `True`) and `system_tables_warehouse_id`
 (default `""`, off). Globals: `COST_METRIC`, `COST_ALLOCATION_TAGS` (up to three
 of your tag keys), `COST_AUTOTERMINATION_MAX_MINUTES`,
@@ -372,16 +439,22 @@ variables, `#RRGGBB` or `rgba()` only), `BRAND_DISPLAY_FONT_DATA_URI` (inline
 WOFF2 up to 80 KB for headings) and `BRAND_LOGO_PLACEMENT` (`hero` or `bar`).
 
 **Permissions.** The reporting identity needs **Cost Management Reader** (or
-Reader) on the subscription that holds the workspace and its managed resource
-group, in addition to the existing ARM Reader and Databricks workspace access.
+Reader) on the subscriptions that hold the workspaces and their managed resource
+groups, in addition to the existing ARM Reader and Databricks workspace access;
+`grant-databricks-permissions.ps1 -IncludeCost` assigns it once at the
+management group ([Step 0](#step-0---identify-the-reporting-identity-and-grant-read-access)).
 In cross-tenant modes, grant it to the identity that reads ARM in the target
 tenant. A `403` marks section 6 `denied`; it is never shown as zero.
 
-**Cost Management limits.** About a dozen queries run sequentially with patient
-retries on `429` (honouring the `x-ms-ratelimit-*-retry-after` headers, at most
-30 s per wait) inside the 420-second collection budget; a query that cannot run
-in time is `skipped` and stays missing. Cost data for the last one or two days
-can still change.
+**Cost Management limits.** About a dozen queries per workspace run
+sequentially with patient retries on `429` (honouring the
+`x-ms-ratelimit-*-retry-after` headers, at most 30 s per wait) inside the
+420-second collection budget; a query that cannot run in time is `skipped` and
+stays missing. Cost Management throttles per tenant, so a fleet report runs at
+most two cost queries at a time, keeps the detailed section 6 for reports of up
+to 5 workspaces (larger reports keep each workspace's period cost) and, after a
+throttled query, skips the rest of that workspace's plan: its cost is `partial`,
+never zero. Cost data for the last one or two days can still change.
 
 **Optional system tables (off by default, costs DBUs).** Set
 `system_tables_warehouse_id` to an existing SQL warehouse to add per-run and
@@ -400,11 +473,11 @@ a demo.
 
 ![Report section 6 with the month's Databricks cost, DBU vs infrastructure and who consumes it, from SIMULATED data](images/17-report-databricks-costs.png)
 
-*Report section 6 rendered from `operation="self_test"` (`17-report-databricks-costs.png`, `SIMULATED`): **(1)** month cost, DBU · infrastructure split, unattributed share and estimated savings with the three-month trend; **(2)** DBU by compute type and infrastructure by service; **(3)** who consumes it, by cluster, job, SQL warehouse, pool, creator and allocation tag.*
+*Report section 6 of `dbx-analytics-prod` in the [simulated fleet sample run](sample-run/) (`17-report-databricks-costs.png`, `SIMULATED`): **(1)** month cost, DBU · infrastructure split, unattributed share and estimated savings with the three-month trend; **(2)** DBU by compute type and infrastructure by service; **(3)** who consumes it, by cluster, job, SQL warehouse, pool, creator and allocation tag.*
 
 ![Report section 6 optimization signals with evidence, month cost, estimated saving and action, from SIMULATED data](images/18-report-databricks-cost-signals.png)
 
-*Optimization signals (`18-report-databricks-cost-signals.png`, `SIMULATED`): **(1)** signal count and the counted savings (only the largest per object), with severity, savings and search filters and a filtered CSV; **(2)** each signal with its evidence, object, cost of the month, estimated saving and its basis, and what to do with a Microsoft Learn link.*
+*Optimization signals of the same workspace (`18-report-databricks-cost-signals.png`, `SIMULATED`): **(1)** signal count and the counted savings (only the largest per object), with severity, savings and search filters and a filtered CSV; **(2)** each signal with its evidence, object, cost of the month, estimated saving and its basis, and what to do with a Microsoft Learn link.*
 
 ## Prerequisites
 
@@ -414,26 +487,35 @@ a demo.
    Administrator**). Azure `Owner`/`Contributor` does not replace SRE Agent
    data-action roles.
 3. **Reporting Managed Identity (`MANAGED_IDENTITY_CLIENT_ID`):** Attached
-   User-Assigned Managed Identity on the SRE Agent, plus one of the supported
-   [cross-tenant or same-tenant authentication setups](#cross-tenant-feasibility-tenant-a-sre-agent-to-tenant-b-azure-databricks)
+   User-Assigned Managed Identity on the SRE Agent, with read access granted
+   once: in the same tenant with
+   [`grant-databricks-permissions.ps1`](grant-databricks-permissions.ps1)
+   ([Step 0](#step-0---identify-the-reporting-identity-and-grant-read-access)),
+   or with one of the supported
+   [cross-tenant setups](#cross-tenant-feasibility-tenant-a-sre-agent-to-tenant-b-azure-databricks)
    completed with the colleague's administrator.
+4. **For the one-time grant:** Azure CLI signed in (`az login`) as someone with
+   **Owner**, **User Access Administrator** or **Role Based Access Control
+   Administrator** on the management group (or subscriptions) and **Workspace
+   Admin** in the workspaces.
 
 ## Files to download
 
 Use **Raw / Download raw file** in GitHub so you save plain Python, JSON and
 Markdown files (never an HTML sign-in wrapper):
 
-- Standalone Python tool: [`generate-databricks-dependency-report.py`](generate-databricks-dependency-report.py) (current LF SHA-256: `163f6c79d6ee1fbe1d0c9627270765ce891f7861b518667d1af2c18d9ec161ed`; every change after the readiness receipt is listed in [`runtime-changes.json`](runtime-changes.json))
-- Typed parameter schema: [`tool-parameters.schema.json`](tool-parameters.schema.json) (current LF SHA-256: `139c88710fdeb321a0d6b9834287b6c29bee8909d83c45ed5c6cb0e236288ed0`)
+- Standalone Python tool: [`generate-databricks-dependency-report.py`](generate-databricks-dependency-report.py) (current LF SHA-256: `70a17a4cb862fa394a57764c5d0b14ac84d21ce643709bff9b1e31351326bfc0`; every change after the readiness receipt is listed in [`runtime-changes.json`](runtime-changes.json))
+- Typed parameter schema: [`tool-parameters.schema.json`](tool-parameters.schema.json) (current LF SHA-256: `a938a4522ac502f7066d951c28fb15e6192e1a4a28cbc3940af358d51b53a15a`)
 - Runtime dependencies reference: [`requirements.txt`](requirements.txt)
-- Runtime skill: [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md) (current LF SHA-256: `6800b43dd20f5f8cc293c45c2ee1a7d85f8cabdb084f7fe25dfceab6a5d3e943`)
-- Specialist instructions and EN/ES prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (current LF SHA-256: `bb58aefe4f2128b4a6fb59d5386e948a7ea7fe687188b5de7c039c46419b8794`; LF copy-ready instruction block SHA-256: `a628fdffd1a56d08b6aec6f60920c95c7a5a915452df2851edf7c7b4678dd375`)
+- Runtime skill: [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md) (current LF SHA-256: `f7950c44080f4c9f55d2c8b0c6e61c94e6fc2495df82f14a5ba33dd270c768d3`)
+- Specialist instructions and chat prompts: [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md) (current LF SHA-256: `b782ed04806a09db0011af23b5a2229753787181170bc1f3b72179dd1f88e145`; LF copy-ready instruction block SHA-256: `97f1e9f9e05e1f9a187ee6ca5528bd0145dfeef37b5858e469f1c27de2d3c5aa`)
+- One-time grant of read-only access to every workspace (same tenant; run by an administrator): [`grant-databricks-permissions.ps1`](grant-databricks-permissions.ps1) (see [Step 0](#step-0---identify-the-reporting-identity-and-grant-read-access))
 - Pinned rule catalog (already embedded in the standalone tool): [`rules_catalog.json`](rules_catalog.json)
 - Public native-readiness validation receipt: [`native-readiness-validation.json`](native-readiness-validation.json)
-- Public visual evidence manifest (32 annotated PNGs: the 18 images of the October and November 2026 evidence plus 14 portal screenshots recaptured on 2026-11-16): [`visual-evidence.json`](visual-evidence.json)
-- English sample run with simulated data (the four files of one report): [`sample-run/`](sample-run/)
+- Public visual evidence manifest (33 annotated PNGs: the 19 images of the October and November 2026 evidence, report images regenerated on 2026-11-17, plus 14 portal screenshots recaptured on 2026-11-16): [`visual-evidence.json`](visual-evidence.json)
+- English sample run with simulated data (the four files of one fleet report: four workspaces in three subscriptions): [`sample-run/`](sample-run/)
 
-## Step 0 - Identify the reporting identity and approve cross-tenant or same-tenant scope
+## Step 0 - Identify the reporting identity and grant read access
 
 1. Today's SRE Agent menu has no **Settings** page. In the Azure portal, open
    **Managed Identities** > the user-assigned identity attached to the SRE Agent
@@ -441,21 +523,74 @@ Markdown files (never an HTML sign-in wrapper):
    `MANAGED_IDENTITY_CLIENT_ID`) and **Object (principal) ID** (for Entra FIC
    `subject` or Azure RBAC assignments), or run
    `az identity show --name <IDENTITY_NAME> --resource-group <IDENTITY_RG> --query "{clientId:clientId, principalId:principalId}" -o table`.
-2. Confirm your SRE Agent's tenant GUID (`SRE_TENANT_ID`).
-3. If your colleague's Azure Databricks workspace is in another tenant, follow
-   the [Colleague session handoff checklist](#colleague-session-handoff-checklist-cross-tenant-connection)
+2. Confirm your SRE Agent's tenant GUID (`SRE_TENANT_ID`). When the Databricks
+   workspaces are in the same tenant, `TARGET_TENANT_ID` is the same value.
+3. **Same tenant (recommended): run
+   [`grant-databricks-permissions.ps1`](grant-databricks-permissions.ps1) once.**
+   It gives the identity read-only access to every workspace in the scope you
+   choose; nothing has to be pasted into the tool afterwards:
+
+   ```powershell
+   .\grant-databricks-permissions.ps1 -IdentityClientId "<client-id>" -ManagementGroupId "<management-group-id>" -IncludeCost
+   ```
+
+   | Parameter | Meaning |
+   |---|---|
+   | `-IdentityClientId` | **Mandatory.** Client ID of the agent's managed identity (item 1). |
+   | `-ManagementGroupId` | **Recommended scope.** Reader (plus Cost Management Reader with `-IncludeCost`) assigned once at the management group and inherited by its current and future subscriptions. |
+   | `-AllSubscriptions` · `-SubscriptionIds a,b` · `-SubscriptionId` | Other scopes: every enabled subscription of the tenant that you can see, a list, or one subscription (without any scope parameter, the current `az` subscription). |
+   | `-Workspaces "<sub>/<rg>/<name>"` | Optional filter: only these workspaces. |
+   | `-IncludeCost` | Also assigns Cost Management Reader (period cost and report section 6). |
+   | `-SkipDatabricksGrants` | Azure roles only; nothing changes inside the workspaces. |
+   | `-SkipUnityCatalog` | Skips the Unity Catalog grants. |
+   | `-WhatIf` | Prints what it would do and changes nothing. |
+
+   It discovers every workspace in the scope with Azure Resource Graph and,
+   inside each one (the person running it must be **Workspace Admin** there),
+   adds the identity as a Microsoft Entra ID managed service principal with the
+   `workspace-access` and `databricks-sql-access` entitlements (never admin),
+   `CAN_VIEW` on the existing jobs, pipelines and SQL warehouses, and Unity
+   Catalog `BROWSE`, `USE_CATALOG` and `USE_SCHEMA` on the catalogs (metadata
+   only). A workspace that fails (runner not admin, private network, workspace
+   never opened) is recorded and the script continues; at the end it prints a
+   summary and writes `databricks-access-summary.csv`. It generates nothing to
+   paste. Re-running it is safe and gives `CAN_VIEW` on jobs, pipelines and
+   warehouses created since. A workspace it could not reach still gets its
+   Azure-side review and appears in the report without in-workspace access. To
+   grant by hand instead, use the least-privilege matrix of
+   [Phase B](#phase-b--choose-and-complete-one-cross-tenant-permission-path)
+   (Plane 2) and Reader plus Cost Management Reader at the management group.
+4. **Cross-tenant:** if a workspace is in another tenant, follow the
+   [Colleague session handoff checklist](#colleague-session-handoff-checklist-cross-tenant-connection)
    with your colleague and the authorized Entra/Azure/Databricks administrators.
-   Until those values are filled in a private copy, the tool safely remains in
-   `NOT_CONFIGURED` state (`error.code = "configuration_required"`).
+   Until the required values are filled in a private copy, the tool safely
+   remains in `NOT_CONFIGURED` state (`error.code = "configuration_required"`).
 
 ## Step 1 - Configure the private standalone file
 
 Keep the repository copy untouched with `<PLACEHOLDER>` values. In a **private
 staging copy outside Git**, edit only the administrator constants at the top of
-`generate-databricks-dependency-report.py` (`SUBSCRIPTION_ID`, `SRE_TENANT_ID`,
-`TARGET_TENANT_ID`, `MANAGED_IDENTITY_CLIENT_ID`, `FEDERATED_APP_CLIENT_ID`,
-`KEYVAULT_OAUTH_SECRET_URI`, `CROSS_TENANT_CERT_KEYVAULT_URL`, `CROSS_TENANT_CERT_NAME`, `CLIENT_NAME`, `CLIENT_LOGO_DATA_URI`,
-`CLIENT_LOGO_ALT`, `APPROVED_WORKSPACES`). The Databricks cost section has its
+`generate-databricks-dependency-report.py`. In the same tenant, three values
+are enough:
+
+```python
+SRE_TENANT_ID = "<YOUR_TENANT_ID>"
+TARGET_TENANT_ID = "<YOUR_TENANT_ID>"            # same value: same tenant, auto-discovery on
+MANAGED_IDENTITY_CLIENT_ID = "<YOUR_SRE_UAMI_CLIENT_ID>"
+```
+
+Everything else is optional and validated before any network call:
+`SUBSCRIPTION_ID` (only for an `APPROVED_WORKSPACES` entry without its own
+`subscription_id`), `DISCOVERY_SUBSCRIPTION_IDS` (limit discovery to some
+subscriptions), `WORKSPACE_DEFAULTS` (settings of every discovered workspace:
+environment `UNSPECIFIED`, `same_tenant_uami`, workspace and Unity Catalog
+reads, managed resource group and Advisor on, `cost_scope`
+`workspace_and_managed_resource_group`, `cost_timeframe` `month_to_date`, cost
+analysis on), `APPROVED_WORKSPACES` (per-workspace overrides; the committed
+placeholder entry is ignored), `CLIENT_NAME`, `CLIENT_LOGO_DATA_URI`,
+`CLIENT_LOGO_ALT` and the cross-tenant constants (`FEDERATED_APP_CLIENT_ID`,
+`KEYVAULT_OAUTH_SECRET_URI`, `CROSS_TENANT_CERT_KEYVAULT_URL`,
+`CROSS_TENANT_CERT_NAME`; see Phase C). The Databricks cost section has its
 own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
 `COST_*`, `REPORT_FOCUS`, `BRAND_*`), described in
 [Databricks costs](#databricks-costs-where-they-come-from-and-how-to-optimize-them).
@@ -469,7 +604,7 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
   Git, Pillow validates that it is a single-frame PNG/JPEG (`<= 100,000` bytes,
   `<= 2048 x 2048` px) before any source call.
 
-## Step 2 - Create the Python tool and verify its 12 typed inputs
+## Step 2 - Create the Python tool and verify its 13 typed inputs
 
 1. In the SRE Agent portal, open **Build + configure → Agent Canvas**, click the
    drop-down arrow beside **Create** (**Create ▾**), and choose
@@ -487,7 +622,7 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
    `toolMode="Auto"`), paste this **Description**:
 
    ```text
-   Read-only Azure Databricks dependency mapping, configuration, security, FinOps and optimization for a fixed workspace allowlist. Four complete artifacts or bounded source-qualified queries. Fails closed before authentication when source setup is missing. No SQL, compute starts, source writes, IAM or tasks.
+   Read-only Azure Databricks dependency mapping, configuration, security, FinOps and optimization for every workspace the agent can read: all, one subscription or named workspaces. Four complete artifacts or bounded source-qualified queries. Fails closed before authentication when setup is missing. No SQL, compute starts, source writes, IAM or tasks.
    ```
 
    and paste the entire standalone file `generate-databricks-dependency-report.py`
@@ -510,43 +645,49 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
 
    ***Identity** tab (`newui-identity.png`): **(1)** open the **Identity** tab; **(2)** **Enable Azure Identity** stays `OFF` (`authEnabled=false`)—source authorization is separate.*
 
-4. There is no parameter editor: the portal reads the **12** typed inputs from
+4. There is no parameter editor: the portal reads the **13** typed inputs from
    the `def main(...)` signature of the pasted file, matching
    [`tool-parameters.schema.json`](tool-parameters.schema.json) (`limit` and
-   `offset` are `int`):
+   `offset` are `int`). The screenshots of this step were captured on
+   2026-11-16, before `subscription` was added: today the last box is
+   `subscription`.
 
 | Parameter | Runtime type | Default | Allowed values / constraint |
 |---|---|---|---|
-| `operation` | `string` | `report` | `report`, `query`, `list_workspaces`, `self_test` (demo: four files from a built-in `SIMULATED` workspace, no authentication or network) |
+| `operation` | `string` | `report` | `report` (one report for the selection; no selection = every visible workspace, up to 50), `query` (1–5 workspaces), `list_workspaces` (discovered inventory with subscription names, paged), `self_test` (demo: four files from a built-in `SIMULATED` workspace, no authentication or network) |
 | `view` | `string` | `summary` | `summary`, `workspace`, `compute`, `jobs`, `pipelines`, `warehouses`, `unity_catalog`, `resources`, `findings`, `finops`, `costs`, `coverage`, `actions`, `dependencies` |
-| `workspace_name` | `string` | `""` | `""` or exact allowlisted workspace name (1–64 chars) |
-| `workspace_names` | `string` | `""` | 1–5 comma-separated allowlisted workspace names; mutually exclusive with `workspace_name` |
+| `workspace_name` | `string` | `""` | `""`, `all` or one exact workspace name returned by `list_workspaces` (a name present in two subscriptions is listed as `<first 8 characters of the subscription ID>-<name>`) |
+| `workspace_names` | `string` | `""` | `""`, `all` or 1–50 exact comma-separated names without spaces; mutually exclusive with `workspace_name` |
 | `workload_name` | `string` | `""` | Exact local name filter (cluster, job, pipeline, warehouse, UC object or resource) |
 | `classification` | `string` | `all` | `all`, `OBSERVED`, `INFERRED`, `UNKNOWN` (applies to `view="dependencies"`) |
 | `area` | `string` | `all` | `all`, `best_practices`, `security`, `finops`, `optimization` |
 | `level` | `string` | `all` | `all`, `workspace`, `workload`, `resource` |
 | `severity` | `string` | `all` | `all`, `critical`, `high`, `medium`, `low` |
 | `status` | `string` | `all` | `all`, `passed`, `failed`, `not_evaluated`, `not_applicable`, `complete`, `partial`, `denied`, `error`, `not_configured` |
-| `limit` | `int` | `25` | `1..100` |
+| `limit` | `int` | `25` | `1..100` (`query` and `list_workspaces`) |
 | `offset` | `int` | `0` | `0..500000` |
+| `subscription` | `string` | `""` | `""` or a subscription ID or exact display name (case-insensitive) from `list_workspaces`; filters `list_workspaces`, `report` and `query` |
 
    Open the **Test playground** tab: every input has an empty box (no defaults
    and no drop-down lists). Type the *Default* column in every box (`report`,
    `summary`, `all` for the five filters, `25` and `0`) and leave
-   `workspace_name`, `workspace_names` and `workload_name` empty: an empty enum
-   box is rejected with `invalid_parameter`, and `limit` / `offset` take numbers.
+   `workspace_name`, `workspace_names`, `workload_name` and `subscription`
+   empty: an empty enum box is rejected with `invalid_parameter`, and `limit` /
+   `offset` take numbers. Once the file is configured, test with `operation` =
+   `list_workspaces` (about 2 seconds): a report can outlast the playground's
+   cut at about 100 seconds, so run reports from chat (Step 5).
 
    ![Test playground with the 12 parameter boxes, top](images/newui-playground.png)
 
    ![Test playground with the 12 parameter boxes, bottom](images/newui-playground-b.png)
 
-   ***Test playground** tab (`newui-playground.png`, `newui-playground-b.png`): top **(1)** the tab; **(2)** **Test**; **(3)** `operation` = `report`; **(4)** `view` = `summary`; **(5)** **Create tool**, grey until a test has run. Bottom: **(2)** `limit` = `25` and **(3)** `offset` = `0` (number boxes); `classification`, `area`, `level`, `severity` and `status` = `all` are typed above them.*
+   ***Test playground** tab (`newui-playground.png`, `newui-playground-b.png`, captured before `subscription` was added): top **(1)** the tab; **(2)** **Test**; **(3)** `operation` = `report`; **(4)** `view` = `summary`; **(5)** **Create tool**, grey until a test has run. Bottom: **(2)** `limit` = `25` and **(3)** `offset` = `0` (number boxes); `classification`, `area`, `level`, `severity` and `status` = `all` are typed above them. Today an empty `subscription` box follows `offset`.*
 
 5. **Native unconfigured test boundary (`Function test succeeded` vs
    `configuration_required`):** Click **Test**; **Create tool** (and **Save**
    when you edit the tool later) stays grey until a test has run. Before the
-   colleague session populates the
-   target Tenant-B constants, running **Test** in the native playground returns
+   tenant and identity constants are filled in a private copy, running **Test**
+   in the native playground returns
    green **Function test succeeded** because the Python function returned a
    structured dictionary normally (`harness_returned_normally=true`,
    `stdout_empty=true`, `files_written=0`), while the domain payload is
@@ -556,7 +697,8 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
    `SIMULATED` test fixture), **not** that a live Databricks source was
    connected or queried. With a configured file, a full `report` can stop the
    playground at about 100 seconds with HTTP 504 even with the 900-second
-   timeout; that is not a tool failure, so run it from chat (Step 5).
+   timeout; that is not a tool failure: test there with `list_workspaces` and
+   run reports from chat (Step 5).
 
    ![Native Test playground showing Function test succeeded with domain result configuration_required](images/04-native-unconfigured-test.png)
 
@@ -565,12 +707,12 @@ own keys and defaults (`cost_analysis_enabled`, `system_tables_warehouse_id`,
 6. Click **Create tool**, then verify the saved tool: **Agent Canvas → Table
    view →** card **Tools & skills → Python tools →** search
    `databricks-dependency-report` **→** click its name. The details panel lists
-   the 12 **Query parameters** read from `main`, with `limit` and `offset`
+   the 13 **Query parameters** read from `main`, with `limit` and `offset`
    typed `int`; the pencil reopens **Edit Python tool**.
 
-   ![Saved Python tool details with the 12 typed query parameters](images/newui-edit-tool-params.png)
+   ![Saved Python tool details with the typed query parameters](images/newui-edit-tool-params.png)
 
-   *Saved tool details (`newui-edit-tool-params.png`): **(1)** the saved tool `databricks-dependency-report`; **(2)** the 12 parameters the portal read from `def main(...)`; **(3)** `limit` and `offset` typed `int`.*
+   *Saved tool details (`newui-edit-tool-params.png`, captured before `subscription` was added): **(1)** the saved tool `databricks-dependency-report`; **(2)** the parameters the portal read from `def main(...)` (12 then, 13 today); **(3)** `limit` and `offset` typed `int`.*
 
 ## Step 3 - Create the runtime skill
 
@@ -578,7 +720,7 @@ In **Build + configure → Agent Canvas → Create ▾ → Skill**, create
 **`databricks-dependency-live`** from the exact content of
 [`skills/databricks-dependency-live/SKILL.md`](skills/databricks-dependency-live/SKILL.md)
 (current LF SHA-256:
-`a6c5dca83feb5f203f1ae4d4bc7665714970326c2ff9b14c3ec819ecb2858d42`) and bind
+`f7950c44080f4c9f55d2c8b0c6e61c94e6fc2495df82f14a5ba33dd270c768d3`) and bind
 only `databricks-dependency-report`. The order matters:
 
 1. Paste the whole `SKILL.md` into the editor **first**: **Name**
@@ -618,7 +760,7 @@ form) and configure:
 - **Instructions:** Paste the copy-ready block from
   [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)
   (LF instruction block SHA-256:
-  `5f282acc196de910a8aea89179fa18b62c050a5bac01740e7b7e3b74ae88d8ef`).
+  `97f1e9f9e05e1f9a187ee6ca5528bd0145dfeef37b5858e469f1c27de2d3c5aa`).
 - Do not use *Refine with AI* or *View AI suggestions*. Then **Create**.
 
 ![Create a custom agent with name and pasted instructions](images/newui-agent.png)
@@ -647,7 +789,7 @@ policy in [`native-readiness-validation.json`](native-readiness-validation.json)
 (`tools=["generate-databricks-dependency-report"]`, `allowedSkills=["databricks-dependency-live"]`, `enableSkills=true`, `addSystemSkills=false`, `disableDocumentRetrieval=true`, `commonTools=[]`, `mcpTools=[]`, `connectors=[]`, `handoffs=[]`, `agentsAsTools=[]`, `commonPrompts=[]`, `allowParallelToolCalls=false`, `maxReflectionCount=0`, `llmModelName=null`, `hooks=null`)
 establish the configured restriction. Do not modify Global Settings.
 
-## Step 5 - Run one report in normal chat and download its four files
+## Step 5 - Ask from chat and download the four files
 
 1. Open **New chat**, type `/agent` followed by the specialist name and pick
    the registered specialist **`databricks-dependency-live`** in the list: the
@@ -664,8 +806,8 @@ establish the configured restriction. Do not modify Global Settings.
 
    *Composer after selecting the specialist (`newui-chat-ready.png`): **(1)** chip **Agent: databricks-dependency-live** (it can be ellipsized; the full name is in the picker above); **(2)** the report prompt of item 3 without the `@` mention; **(3)** send. No message is sent by this capture.*
 
-2. **Pre-session unconfigured readiness check:** Before the colleague's
-   Tenant-B workspace constants are configured, asking the selected specialist
+2. **Unconfigured readiness check:** Before the tenant and identity constants
+   are configured, asking the selected specialist
    for a readiness/report check invokes `databricks-dependency-report`,
    stops before authentication, returns `configuration_required` /
    `artifact_status="not_written"`, and confirms that no source data,
@@ -675,12 +817,30 @@ establish the configured restriction. Do not modify Global Settings.
 
    *Actual selected-specialist readiness conversation (`09-native-no-source-no-files.png`, 2026-10-16 run; today's portal labels may differ): **(1)** actual returned `configuration_required` / `not_written` result (`provenance="LIVE"` is the collector-path label, not evidence of a connected source run); **(2)** the specialist explicitly states that no source read occurred; **(3)** no dependency graph, score, cost figure or report files were fabricated.*
 
-3. **Post-session live report & four-file delivery:** Once privately configured
-   after the colleague session, run the report prompt from
-   [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md)
-   and verify that all four native links (`report_url`, `snapshot_url`,
-   `findings_csv_url`, `dependencies_csv_url`) are returned and download with
-   HTTP 200.
+3. **Ask for what you need.** Once configured, ask in plain words; the
+   specialist maps the request to one tool call, never guesses names (with
+   approximate names it lists the workspaces first) and warns that a large
+   report can take several minutes. The names below are those of the
+   [sample run](sample-run/):
+
+   | You want | Ask in chat, for example | Tool call |
+   |---|---|---|
+   | The workspaces it can see, by subscription | *List every Databricks workspace you can see, grouped by subscription.* | `list_workspaces`, `limit=100` (then `offset=next_offset`) |
+   | The workspaces of one subscription | *List the Databricks workspaces of subscription Contoso-Data-Dev.* | `list_workspaces`, `subscription="Contoso-Data-Dev"` |
+   | Everything | *Generate the Databricks report for every workspace in every subscription.* | `report`, `workspace_names="all"` |
+   | One subscription, by display name or ID | *Generate the Databricks report of subscription Contoso-Analytics-Prod.* | `report`, `subscription="Contoso-Analytics-Prod"` (or its subscription ID) |
+   | One workspace | *Generate the report of workspace dbx-sales-prod.* | `report`, `workspace_name="dbx-sales-prod"` |
+   | Several workspaces | *One report for dbx-sales-prod, dbx-ml-prod and dbx-data-dev.* | `report`, `workspace_names="dbx-sales-prod,dbx-ml-prod,dbx-data-dev"` |
+   | A question about one workspace | *Which sources of dbx-ml-prod could not be read, and why?* | `query`, `view="coverage"`, `workspace_name="dbx-ml-prod"` |
+
+   More prompts are in the [prompt pack](#copy-ready-qa-prompt-pack) and in
+   [`subagent-instructions-and-prompts.md`](subagent-instructions-and-prompts.md).
+   The chat answer summarizes the fleet (collected `ok` / `partial` / `error`,
+   workspaces without in-workspace access and why, findings by severity, top
+   critical findings, cost) within 3,500 bytes and links the four files.
+4. **Live report & four-file delivery:** verify that all four native links
+   (`report_url`, `snapshot_url`, `findings_csv_url`, `dependencies_csv_url`)
+   are returned and download with HTTP 200.
 
    ![Connected cross-tenant report turn delivering all four native files and source/dependency disclosures](images/12-live-chat-four-files.png)
 
@@ -688,33 +848,49 @@ establish the configured restriction. Do not modify Global Settings.
 
 ## Step 6 - Read and explore the HTML dependency and configuration dossier
 
-The report opens verdict-first: a slim top bar (section navigation, `Read-only`
-chip, dark mode, an **Export** menu with the snapshot JSON and the dependencies,
-checks, cost and signals CSVs, and **Print / PDF**), a navy summary band with
-the key numbers and the verdict, then KPI cards. Printing gives an A4 PDF with a
-running footer (workspace and UTC reference).
+A report of several workspaces opens on the **fleet overview**. Under the top
+bar, a filter band holds **Subscription** (All, or one subscription with its
+workspace count), **Workspace** (All, or one workspace) and **Search** (name,
+resource group or region). Below come KPI cards over the visible workspaces,
+the fleet table (one row per workspace: subscription, resource group, region /
+SKU, collection status, in-workspace access, index / coverage, findings by
+severity and period cost) and the findings of the visible workspaces; the
+filters drive all three.
+
+![Fleet overview with the Subscription, Workspace and Search filters, fleet KPI cards and one row per workspace](images/19-report-fleet-filters.png)
+
+*Fleet overview of the [sample run](sample-run/) (`19-report-fleet-filters.png`, `SIMULATED`): **(1)** **Subscription**, **Workspace** and **Search** filters; **(2)** KPI cards over the visible workspaces (workspaces and collection status, without in-workspace access, findings, combined index and coverage, cost of the period); **(3)** one row per workspace, its name opening the detailed review; **(4)** `dbx-ml-prod`: collection `Partial` and in-workspace access `No` with the reason, while its Azure-side review is still delivered.*
+
+Choosing a workspace (or clicking its name) opens its detailed review, the
+same dossier as a one-workspace report. It opens verdict-first: a slim top bar
+(section navigation, `Read-only` chip, dark mode, an **Export** menu with the
+snapshot JSON and the dependencies, checks, cost and signals CSVs, and
+**Print / PDF**), a navy summary band with the key numbers and the verdict,
+then KPI cards. A workspace without in-workspace access shows a banner with the
+reason, and its Databricks-side checks stay `Not evaluated`. Printing gives an
+A4 PDF with a running footer (workspace and UTC reference).
 
 A sample run with simulated data is in [`sample-run/`](sample-run/):
 - the [HTML report](sample-run/simulated-20261016T120000Z-c0a7e5d10b2c.html) (download it and open it in a browser);
 - the [JSON snapshot](sample-run/simulated-20261016T120000Z-c0a7e5d10b2c-snapshot.json);
 - the [findings CSV](sample-run/simulated-20261016T120000Z-c0a7e5d10b2c-findings.csv) and the [dependencies CSV](sample-run/simulated-20261016T120000Z-c0a7e5d10b2c-dependencies.csv).
 
-It was generated offline from the sanitized test fixture, not from a real
-workspace: every name, GUID and host is fictitious (`Contoso`,
-`dbx-contoso-prod-weu-01`, `00000000-0000-0000-0000-000000000001`,
-`adb-0000000000000001.1.azuredatabricks.net`) and the report is labelled
-`SIMULATED` / `LAB`. It shows a cross-tenant run in which Plane 1 ARM and Cost
-Management reads return `HTTP 403` while the Databricks REST and Unity Catalog
-reads succeed. Images 13 to 16 below come from this report; the section 6
-images above come from `operation="self_test"`.
+It was generated offline from the tool's built-in simulated workspace, not from
+a real one: a fleet of **four workspaces in three subscriptions** with
+fictitious Contoso names (`dbx-analytics-prod` and `dbx-sales-prod` in
+`Contoso-Analytics-Prod`, `dbx-ml-prod` in `Contoso-ML-Prod`, `dbx-data-dev` in
+`Contoso-Data-Dev`), GUIDs and hosts, labelled `SIMULATED`. `dbx-ml-prod` has
+**no in-workspace access** (every Databricks REST and Unity Catalog read returns
+`HTTP 403`) and keeps its Azure-side review. Images 13 to 19 come from this
+report.
 
 - **Summary and sections 1-2 (Workspace identity & Executive summary):** Verify
   the verdict, the local index beside coverage, the workspace identity,
-  `auth_mode`, cross-tenant chip and UTC reference.
+  `auth_mode`, tenant chip and UTC reference.
 
-  ![HTML report summary with verdict, local index beside coverage and KPI cards](images/13-report-overview-and-pillars.png)
+  ![HTML report summary of one workspace with the Workspace filter, verdict, local index beside coverage and KPI cards](images/13-report-overview-and-pillars.png)
 
-  *Report summary (`13-report-overview-and-pillars.png`, `Contoso` plaque from the sample data; the tool default is `Customer`): **(1)** slim top bar with section navigation, `Read-only` chip, dark-mode toggle, **Export** menu (snapshot JSON and the dependencies, checks, cost and signals CSVs) and **Print / PDF**; **(2)** verdict-first summary with provenance chips (`cross_tenant_multitenant_fic`, `LAB`, `SIMULATED DATA`), verdict card and severity distribution; **(3)** KPI cards pairing the local index (`75%`) with coverage (`32` of `42` applicable checks evaluated, `10` not evaluated).*
+  *Detailed review of one workspace (`13-report-overview-and-pillars.png`, `dbx-analytics-prod`; `Contoso` plaque from the sample data, the tool default is `Customer`): **(1)** slim top bar with section navigation, `Read-only` chip, dark-mode toggle, **Export** menu (snapshot JSON and the dependencies, checks, cost and signals CSVs) and **Print / PDF**; **(2)** the **Workspace** filter with the chosen workspace and its collection status (**All** returns to the fleet overview); **(3)** verdict-first summary with provenance chips (`same_tenant_uami`, `PRODUCTION`, `SIMULATED DATA`), verdict card and severity distribution; **(4)** KPI cards pairing the local index (`67.14%`) with coverage (`70` of `75` applicable checks evaluated).*
 
 - **Section 3 (Deep Dependency Map):** Filter by layer (`control_plane`,
   `compute`, `orchestration`, `governance`, `associated_resource`) and
@@ -722,9 +898,9 @@ images above come from `operation="self_test"`.
   references (`G05`) and switch to the second tab (**Reference proposal - NOT
   deployed**) to compare with the undeployed Lakehouse baseline.
 
-  ![Deep dependency map showing OBSERVED native joins and INFERRED ADLS Gen2 URI references](images/14-report-dependency-graph.png)
+  ![Deep dependency map showing OBSERVED native joins and an INFERRED ADLS Gen2 URI reference](images/14-report-dependency-graph.png)
 
-  *Section 3 dependency map (`14-report-dependency-graph.png`): **(1)** classification counts, observed vs. undeployed reference tabs and interactive layer/classification/search filters (`OBSERVED`, `INFERRED`, `UNKNOWN`); **(2)** layered neighborhood graph (one column per layer) with solid `OBSERVED` joins and dashed amber `INFERRED` ADLS Gen2 and Key Vault references; **(3)** sortable dependency relationships table with exact join fields and source IDs.*
+  *Section 3 dependency map (`14-report-dependency-graph.png`): **(1)** classification counts, observed vs. undeployed reference tabs and interactive layer/classification/search filters (`OBSERVED`, `INFERRED`, `UNKNOWN`); **(2)** layered neighborhood graph (one column per layer) with solid `OBSERVED` joins and a dashed amber `INFERRED` ADLS Gen2 reference; **(3)** sortable dependency relationships table with exact join fields and source IDs.*
 
   ![Undeployed Azure Databricks Well-Architected Lakehouse reference architecture tab](images/15-report-controls-and-reference.png)
 
@@ -740,17 +916,40 @@ images above come from `operation="self_test"`.
   checks first, with sortable columns and a filtered CSV export; the action plan
   is grouped by horizon (`Quick win`, `Short term`, `Medium term`).
 
-  ![Section 8 Source Coverage and HTTP Receipts Ledger](images/16-report-source-coverage-ledger.png)
+  ![Section 8 Source Coverage and HTTP Receipts Ledger of the workspace without in-workspace access](images/16-report-source-coverage-ledger.png)
 
-  *Section 8 source ledger and HTTP receipts (`16-report-source-coverage-ledger.png`): **(1)** Plane 1 ARM receipts honestly recorded as `Denied` (`HTTP 403`) when target resource-group `Reader` is pending; **(2)** Plane 2 Databricks Workspace & Unity Catalog REST sources recorded as `Complete` via `cross_tenant_multitenant_fic`.*
+  *Section 8 source ledger of `dbx-ml-prod`, the workspace without in-workspace access (`16-report-source-coverage-ledger.png`): **(1)** the Plane 1 ARM receipt is `Complete`, so the Azure-side review still runs; **(2)** Plane 2 Databricks Workspace & Unity Catalog REST sources are recorded as `Denied` (`HTTP 403`) because the identity was not added inside the workspace, never as empty inventories.*
 
 ## Step 7 - Keep reporting cadence optional
 
 Default operation is **on demand**. Create a scheduled task only if the
 customer explicitly requests recurring control-plane reviews after accepting the
-first report. For the cost section, a monthly run on day 3 (once Cost Management
-has settled the closed month) fits the month-over-month view; a weekly run
-catches always-on clusters and warehouses sooner.
+first report; with many workspaces, one scheduled report per subscription keeps
+each run short. For the cost section, a monthly run on day 3 (once Cost
+Management has settled the closed month) fits the month-over-month view; a
+weekly run catches always-on clusters and warehouses sooner.
+
+## Limits and timings
+
+| Limit | Value | Behavior |
+|---|---|---|
+| Workspaces discovered | Up to 500 per call | Above that the tool asks to narrow `DISCOVERY_SUBSCRIPTION_IDS`. |
+| Workspaces per report | Up to 50 | `too_many_workspaces` above 50: filter with `subscription` or exact names (one report per subscription). |
+| Workspaces per `query` | Up to 5 | For more, use the report and its filters. |
+| Parallel collection | 6 workspaces at a time; 720-second shared budget, 800-second hard stop, 420 seconds per workspace | Inside the 900-second tool timeout. A workspace that does not finish is reported as not collected, never as empty. |
+| Cost Management | 2 queries at a time; detailed section 6 only in reports of up to 5 workspaces | Throttling (`429`) honours `retry-after` (at most 30 s per wait); throttled cost is `partial`, never zero. |
+| Files | Up to 40 MB per file | A simulated 50-workspace report is about 18.5 MB of HTML and opens in under a second in Microsoft Edge. |
+| Chat response | Up to 3,500 bytes | Fleet summary with lists capped at five entries; the files hold everything. |
+
+**Timings (approximate, measured in a lab with one workspace on 2026-11-17).**
+`list_workspaces` takes about 2 seconds. A report of one workspace took about
+20 to 75 seconds with the detailed cost analysis off; most of that time went to
+Cost Management, which was throttling and asking to wait (`Retry-After`). With
+the detailed cost analysis on, those waits took the same report past the **Test
+playground** cut at about 100 seconds (HTTP 504), although the tool timeout is
+900 seconds. Reports of many workspaces were not timed live: they are collected
+six at a time within the 720-second budget. Test with `list_workspaces` in the
+playground and run reports from chat.
 
 ## Troubleshooting
 
@@ -758,17 +957,25 @@ catches always-on clusters and warehouses sooner.
 |---|---|---|
 | The tool name is cut when you type it | Today's portal limits **Tool Name** to 36 characters, so the previous name `generate-databricks-dependency-report` (37 characters) becomes `generate-databricks-dependency-repor` | Name the tool `databricks-dependency-report`. If you already saved a cut name, use exactly that saved name in the skill, the subagent instructions and **Choose tools**. |
 | **Create tool** or **Save** stays grey | The tool dialog has not run a test yet | Open **Test playground**, type the values of Step 2 and click **Test**. It is not a role problem. |
-| `invalid_parameter` in **Test playground** | A box was left empty or mistyped | Type every value of the *Default* column (only `workspace_name`, `workspace_names` and `workload_name` stay empty); `limit` and `offset` are numbers. |
-| `configuration_required` | Committed `<PLACEHOLDER>` GUIDs or workspace host are still present | Expected before the colleague session. Fill the fixed constants in your private deployment copy during the session. |
+| `invalid_parameter` in **Test playground** | A box was left empty or mistyped | Type every value of the *Default* column (only `workspace_name`, `workspace_names`, `workload_name` and `subscription` stay empty); `limit` and `offset` are numbers. |
+| HTTP 504 after about 100 seconds in **Test playground** | The playground cuts long calls; a report can take longer (Cost Management throttling, several workspaces) | Test with `list_workspaces`; run reports from chat, where the tool has its 900 seconds. |
+| `configuration_required` | Committed `<PLACEHOLDER>` values are still present in `SRE_TENANT_ID`, `TARGET_TENANT_ID` or `MANAGED_IDENTITY_CLIENT_ID`, or an `APPROVED_WORKSPACES` entry is incomplete | Fill the required constants in your private deployment copy ([Step 1](#step-1---configure-the-private-standalone-file)); for cross-tenant workspaces, during the colleague session. |
+| `no_workspaces_visible` | Auto-discovery found no workspace the identity can read | Run `grant-databricks-permissions.ps1` (or assign Reader at the management group or subscriptions) and wait 5–10 minutes. |
+| A workspace is missing from `list_workspaces` | The identity cannot read its subscription, the role assignment is still propagating, or the workspace is in another tenant (skipped) | Re-run the grant script for that scope; put cross-tenant workspaces in `APPROVED_WORKSPACES`. |
+| `invalid_parameter` (unknown workspace or subscription) or `ambiguous_workspace_name` | A name or subscription that `list_workspaces` does not return, or a workspace name present in several subscriptions | Use the names exactly as `list_workspaces` returns them; for a repeated name, use its `<first 8 characters of the subscription ID>-<name>` key or add `subscription`. |
+| `too_many_workspaces` | More than 50 workspaces in a report, or more than 5 in a query | Filter with `subscription` or exact names: one report per subscription. |
+| In-workspace access `No`, status `denied` (HTTP 401/403) | The identity is not added inside that workspace or lacks permissions | A Workspace Admin runs `grant-databricks-permissions.ps1` for it (`-Workspaces "<sub>/<rg>/<name>"`); the Azure-side review is already in the report. |
+| In-workspace access `No`, status `unreachable` | Private workspace (`publicNetworkAccess=Disabled`, Private Link) or an IP access list: the agent has no network route to the data plane | Expected for private workspaces; the report keeps the Azure-side review. Open a route only if your network policy allows it. |
 | `cross_tenant_configuration_required` | `SRE_TENANT_ID != TARGET_TENANT_ID` while `auth_mode == "same_tenant_uami"` | Switch `auth_mode` to `cross_tenant_multitenant_fic`, `cross_tenant_lighthouse_plus_databricks_oidc` or `cross_tenant_lighthouse_plus_keyvault_oauth_m2m` after completing cross-tenant setup. |
 | `identity_mismatch` on every source, with no HTTP status | Tool code older than November 2026: it does not recognize the SRE Agent sandbox placeholder tokens (`iss` = `adc-msi-sidecar`) | Update `generate-databricks-dependency-report.py` from this folder; `normalize_sidecar_claims` maps their tenant, client and scope before the same checks. |
 | `cross_tenant_auth_failed` with `AADSTS5002723` | The federated exchange sent a sandbox placeholder token as client assertion | Configure the Key Vault certificate (`CROSS_TENANT_CERT_KEYVAULT_URL`, `CROSS_TENANT_CERT_NAME`) as described in Option 1. |
 | `keyvault_secret_read_failed` | The SRE Agent identity cannot read the certificate (missing *Key Vault Secrets User*, or vault public network access disabled) | Re-run the setup script; enable public access or use a resource group exempted from the policy that disables it. |
 | `cross_tenant_auth_failed` | Entra FIC token exchange at `login.microsoftonline.com/<TARGET_TENANT_ID>/oauth2/v2.0/token` failed | Verify the multi-tenant App Registration in Tenant A has the UAMI's **Object (principal) ID** as `subject`, `issuer = https://login.microsoftonline.com/<SRE_TENANT_ID>/v2.0`, `audience = api://AzureADTokenExchange`, and is provisioned in Tenant B. |
-| `access_denied` on `dbx_*` or `uc_*` while `arm_workspace` is `complete` | Plane 1 (ARM) succeeded (e.g., via Lighthouse), but the service principal is not authorized inside the Databricks Workspace or Unity Catalog | Have the colleague's Databricks Workspace/Account Admin add the service principal in **Settings > Identity and access > Service principals** and grant read/browse privileges. |
+| `access_denied` on `dbx_*` or `uc_*` while `arm_workspace` is `complete` | Plane 1 (ARM) succeeded (e.g., via Lighthouse), but the service principal is not authorized inside the Databricks Workspace or Unity Catalog | Same tenant: a Workspace Admin runs `grant-databricks-permissions.ps1`. Cross-tenant: have the colleague's Databricks Workspace/Account Admin add the service principal in **Settings > Identity and access > Service principals** and grant read/browse privileges. |
 | `G06` shown as `not_evaluated` (`Not evaluated`) | Runtime table lineage (`system.access.table_lineage`) requires SQL Warehouse execution | Expected by design: this control-plane collector never starts compute or executes lineage SQL. |
-| Section 6 `Denied` / `azure_cost_databricks` `denied` (`HTTP 403`) | The reporting identity cannot read Cost Management on the workspace subscription | Grant **Cost Management Reader** (or Reader) on that subscription to the identity that reads ARM; until then the section says so and shows no figures. |
-| Section 6 `Partial`, a query `throttled` or `skipped` | Cost Management throttled (`429`) beyond the patient retries, or the 420-second budget ran out before that query | Run the report again later; missing queries stay missing (never zero) and the signals that need them show *No estimate*. |
+| Section 6 `Denied` / `azure_cost_databricks` `denied` (`HTTP 403`) | The reporting identity cannot read Cost Management on the workspace subscription | Grant **Cost Management Reader** (or Reader) to the identity that reads ARM, once at the management group (`grant-databricks-permissions.ps1 -IncludeCost`) or on that subscription; until then the section says so and shows no figures. |
+| Section 6 `Partial`, a query `throttled` or `skipped` | Cost Management throttled (`429`) beyond the patient retries, or the 420-second budget ran out before that query | Run the report again later, or for fewer workspaces; missing queries stay missing (never zero) and the signals that need them show *No estimate*. |
+| Section 6 says the detailed analysis was skipped | The report covers more than 5 workspaces; each keeps its period cost | Ask for a report (or a `query` with `view="costs"`) of up to 5 workspaces. |
 | `R06` shown as `not_evaluated` | No Databricks cost data (cost analysis disabled, denied or no usage in the month) | Enable `cost_analysis_enabled` and grant Cost Management Reader; `R06` then measures tag coverage. |
 | `dbx_system_billing` `error` / `denied` | `system_tables_warehouse_id` is set but the warehouse is stopped too long, the identity lacks `CAN USE`, or `SELECT` on `system.billing.usage` / `list_prices` | Fix the grant or clear `system_tables_warehouse_id` (the default); the rest of section 6 does not depend on it. |
 
@@ -791,8 +998,9 @@ completed, colleague-tenant source captures remain **Not collected
 | Tool, schema & unconfigured safety gate | Saved `generate-databricks-dependency-report`, `timeoutSeconds=900`, `authEnabled=false`, 12 typed parameters (`limit`/`offset` as `int`), and 2 native Python tests (API + UI) returning `configuration_required` / `not_written` before auth | **Collected (`2026-10-16`):** [`08-create-drop-down-arrow.png`](images/08-create-drop-down-arrow.png), [`02-private-code-and-timeout.png`](images/02-private-code-and-timeout.png), [`03-identity-access-off.png`](images/03-identity-access-off.png), [`01-saved-tool-and-12-parameters.png`](images/01-saved-tool-and-12-parameters.png), [`04-native-unconfigured-test.png`](images/04-native-unconfigured-test.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
 | Skill & restricted subagent | Saved `databricks-dependency-live` skill and specialist read back with `tools=["generate-databricks-dependency-report"]`, `allowedSkills=["databricks-dependency-live"]`, `addSystemSkills=false`, `disableDocumentRetrieval=true`, `llmModelName=null` | **Collected (`2026-10-16`):** [`05-saved-runtime-skill.png`](images/05-saved-runtime-skill.png), [`06-saved-restricted-specialist.png`](images/06-saved-restricted-specialist.png), [`07-saved-explicit-allowlists.png`](images/07-saved-explicit-allowlists.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
 | Selected-specialist unconfigured readiness chat | Registered specialist selected via `/agent`, composer chip verified, and real readiness turn returning `configuration_required` / `not_written` with zero source reads or fabricated files | **Collected (`2026-10-16`):** [`10-select-registered-specialist.png`](images/10-select-registered-specialist.png), [`11-selected-specialist-composer.png`](images/11-selected-specialist-composer.png), [`09-native-no-source-no-files.png`](images/09-native-no-source-no-files.png), [`native-readiness-validation.json`](native-readiness-validation.json) |
-| Databricks dependency map & configuration dossier (report design) | Verdict-first summary (`Contoso` plaque from the sample data), `OBSERVED`/`INFERRED`/`UNKNOWN` dependency graph, undeployed reference tab and source ledger | **Regenerated (`2026-11-12`) from the sanitized synthetic test fixture after the report redesign, and recaptured in English (`2026-11-16`) from the [sample run](sample-run/) built from that fixture with Contoso names** (connected-run delivery evidence of `2026-10-19` stays in [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png)): [`13-report-overview-and-pillars.png`](images/13-report-overview-and-pillars.png), [`14-report-dependency-graph.png`](images/14-report-dependency-graph.png), [`15-report-controls-and-reference.png`](images/15-report-controls-and-reference.png), [`16-report-source-coverage-ledger.png`](images/16-report-source-coverage-ledger.png) |
-| Databricks costs (report section 6) | Month cost, DBU vs infrastructure, who consumes it and optimization signals | **Rendered (`2026-11-12`) from `operation="self_test"` (`SIMULATED`, no customer data) and recaptured in English (`2026-11-16`)**; Cost Management query shapes validated read-only against a lab subscription without Databricks: [`17-report-databricks-costs.png`](images/17-report-databricks-costs.png), [`18-report-databricks-cost-signals.png`](images/18-report-databricks-cost-signals.png) |
+| Databricks dependency map & configuration dossier (report design) | Fleet overview with Subscription / Workspace / Search filters, verdict-first summary of one workspace (`Contoso` plaque from the sample data), `OBSERVED`/`INFERRED`/`UNKNOWN` dependency graph, undeployed reference tab and the source ledger of a workspace without in-workspace access | **Regenerated (`2026-11-17`) from the [simulated fleet sample run](sample-run/)** (four Contoso workspaces in three subscriptions; earlier versions came from the sanitized synthetic test fixture; connected-run delivery evidence of `2026-10-19` stays in [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png)): [`19-report-fleet-filters.png`](images/19-report-fleet-filters.png), [`13-report-overview-and-pillars.png`](images/13-report-overview-and-pillars.png), [`14-report-dependency-graph.png`](images/14-report-dependency-graph.png), [`15-report-controls-and-reference.png`](images/15-report-controls-and-reference.png), [`16-report-source-coverage-ledger.png`](images/16-report-source-coverage-ledger.png) |
+| Databricks costs (report section 6) | Month cost, DBU vs infrastructure, who consumes it and optimization signals | **Regenerated (`2026-11-17`) from the same simulated sample run** (`SIMULATED`, no customer data; first rendered on `2026-11-12` from `operation="self_test"`); Cost Management query shapes validated read-only against a lab subscription: [`17-report-databricks-costs.png`](images/17-report-databricks-costs.png), [`18-report-databricks-cost-signals.png`](images/18-report-databricks-cost-signals.png) |
+| Fleet discovery and reports | Live and read-only, in a same-tenant lab agent through the Python tool **Test playground**: auto-discovery, `list_workspaces` with and without `subscription`, and reports of all workspaces and of one workspace with the detailed cost analysis off (the playground cuts calls at about 100 seconds). Offline: the case without in-workspace access (tests and the simulated sample run) and a simulated 50-workspace report, checked in Microsoft Edge (filters, detail view, no console errors) | **Validated (`2026-11-17`)**; [`runtime-changes.json`](runtime-changes.json) lists the change and its checks |
 | Live four-file native delivery | Actual `report_url`, `snapshot_url`, `findings_csv_url`, `dependencies_csv_url` HTTP 200 downloads from a connected workspace run | **Collected (`2026-10-19`):** [`12-live-chat-four-files.png`](images/12-live-chat-four-files.png), [`visual-evidence.json`](visual-evidence.json) |
 | Portal screenshots in today's UI | Steps 2-5 recaptured read-only in a lab agent (nothing saved, tested or sent): Agent Canvas menu, **Code**, **Test playground** and **Identity** tabs, saved-tool parameters, skill, custom agent and `/agent` chat, with the new tool name `databricks-dependency-report` | **Captured (`2026-11-16`):** 14 `newui-*.png` files listed in [`visual-evidence.json`](visual-evidence.json). The October images above stay in `images/` as evidence of the `2026-10-16` bootstrap. |
 
@@ -810,86 +1018,62 @@ python -m unittest discover -s 08-databricks-dependency-configuration-review\tes
 
 ---
 
-## Copy-Ready Bilingual Q&A Prompt Pack (Castellano & English)
+## Copy-ready Q&A prompt pack
 
-Select `/agent databricks-dependency-live` in **New chat** and use any of these prompts in **Spanish (Castellano)** or **English**. With the **Agent: databricks-dependency-live** chip selected, leave out the leading `@databricks-dependency-live` mention (typing `@` no longer opens a picker):
+Select `/agent databricks-dependency-live` in **New chat** and use any of these prompts. With the **Agent: databricks-dependency-live** chip selected, no leading `@databricks-dependency-live` mention is needed (typing `@` no longer opens a picker). Replace the `<...>` values with names returned by `list_workspaces`.
 
-### 1. Discover Configured Databricks Workspaces / Listar los Workspaces de Databricks Configurados (`list_workspaces`)
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Ejecuta operation="list_workspaces" para mostrar los workspaces de Azure Databricks configurados en el alcance y su modo de conexion (same_tenant_uami vs cross_tenant_multitenant_fic) sin realizar llamadas de red.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Run operation="list_workspaces" to list the configured Azure Databricks workspaces in scope and their connection mode (same_tenant_uami vs cross_tenant_multitenant_fic) without making network calls.
-  ```
+### 1. Which workspaces can the agent see? (`list_workspaces`)
+```text
+List every Azure Databricks workspace you can see, grouped by subscription, with region and SKU (operation="list_workspaces", limit=100, following next_offset until it is null).
+```
+```text
+List the Azure Databricks workspaces of subscription <SUBSCRIPTION_NAME_OR_ID> (operation="list_workspaces", subscription="<SUBSCRIPTION_NAME_OR_ID>").
+```
 
-### 2. Full Databricks Dependency & Configuration Dossier (4 Files) / Informe Completo de Dependencias y Configuracion Databricks (4 Archivos)
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Genera el informe completo de dependencias y configuracion para los workspaces aprobados (operation="report", workspace_name="all", view="overview") y entregame los 4 archivos descargables (HTML, JSON, CSV de hallazgos y CSV de dependencias) distinguiendo aristas OBSERVED, INFERRED y UNKNOWN.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Generate the complete dependency map and configuration review report across the approved workspaces (operation="report", workspace_name="all", view="overview") and deliver all 4 downloadable files (HTML, JSON, findings CSV, and dependencies CSV) distinguishing OBSERVED, INFERRED, and UNKNOWN edges.
-  ```
+### 2. One report for every workspace (4 files)
+```text
+Generate the complete dependency and configuration report for every Azure Databricks workspace in every subscription (operation="report", workspace_names="all"). Deliver the 4 files (HTML, JSON, findings CSV and dependencies CSV) and tell me which workspaces have no in-workspace access and why.
+```
 
-### 3. Dependency Graph & Lineage Inspection (`OBSERVED` vs `INFERRED` vs `UNKNOWN`) / Grafo de Dependencias y Linaje
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Consulta el grafo de dependencias del workspace (operation="query", workspace_name="all", view="dependencies", confidence="all") y explicame que relaciones entre Jobs, Clusters, SQL Warehouses, Catalogos Unity Catalog y External Locations son OBSERVED frente a INFERRED.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Query the workspace dependency graph (operation="query", workspace_name="all", view="dependencies", confidence="all") and explain which edges across Jobs, Clusters, SQL Warehouses, Unity Catalog objects, and External Locations are OBSERVED versus INFERRED.
-  ```
+### 3. One report for one subscription
+```text
+Generate the Azure Databricks report for every workspace of subscription <SUBSCRIPTION_NAME_OR_ID> (operation="report", subscription="<SUBSCRIPTION_NAME_OR_ID>") and summarize the most important findings per workspace.
+```
 
-### 4. Governance & Unity Catalog Posture / Gobernanza y Postura en Unity Catalog
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Consulta los controles del pilar Governance (operation="query", workspace_name="all", view="findings", pillar="Governance") y resume que catalogos, esquemas, storage credentials y external locations se han detectado y por que G03 queda not_evaluated cuando solo hay permiso BROWSE.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Query the Governance pillar findings (operation="query", workspace_name="all", view="findings", pillar="Governance") and summarize which catalogs, schemas, storage credentials, and external locations were discovered and why G03 is qualified as Not evaluated under BROWSE-only privileges.
-  ```
+### 4. One workspace, or a few
+```text
+Generate the dependency and configuration report of workspace <WORKSPACE_NAME> (operation="report", workspace_name="<WORKSPACE_NAME>") and distinguish OBSERVED, INFERRED and UNKNOWN edges.
+```
+```text
+Generate one report for <WORKSPACE_1>, <WORKSPACE_2> and <WORKSPACE_3> (operation="report", workspace_names="<WORKSPACE_1>,<WORKSPACE_2>,<WORKSPACE_3>").
+```
 
-### 5. Compute, SQL Warehouses & Cost Optimization (FinOps) / Clusters, SQL Warehouses y Optimizacion FinOps
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Consulta los controles de Cost Optimization y Reliability (operation="query", workspace_name="all", view="findings", pillar="Cost Optimization") y detalla si hay clusters interactivos o SQL Warehouses sin auto-termination acotada, sin Photon o sin cluster policy asignada.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Query the Cost Optimization and Reliability findings (operation="query", workspace_name="all", view="findings", pillar="Cost Optimization") and detail whether any all-purpose clusters or SQL Warehouses lack bounded auto-termination, Photon, or an assigned cluster policy.
-  ```
+### 5. Dependency graph (`OBSERVED` vs `INFERRED` vs `UNKNOWN`)
+```text
+Query the dependency graph of <WORKSPACE_NAME> (operation="query", view="dependencies", classification="all") and explain which edges across jobs, clusters, SQL warehouses, Unity Catalog objects and external locations are OBSERVED versus INFERRED, and which stay UNKNOWN.
+```
 
-### 6. Plane 1 (ARM) vs. Plane 2 (Databricks REST) Source Coverage / Cobertura de Fuentes Plano 1 ARM frente a Plano 2 Databricks REST
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Consulta el registro de cobertura de fuentes (operation="query", workspace_name="all", view="sources") y explica que fuentes del Plano 2 (Clusters, Jobs, SQL Warehouses, Workspace Conf, Unity Catalog) respondieron HTTP 200 y como se comporta el colector si el Plano 1 ARM devuelve 403 en un escenario Cross-Tenant.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Query the source coverage ledger (operation="query", workspace_name="all", view="sources") and explain which Plane 2 APIs (Clusters, Jobs, SQL Warehouses, Workspace Conf, Unity Catalog) returned HTTP 200 and how the collector preserves Plane 2 evaluation when Plane 1 ARM returns 403 in a cross-tenant setup.
-  ```
+### 6. Governance and Unity Catalog posture
+```text
+Query the Unity Catalog inventory of <WORKSPACE_NAME> (operation="query", view="unity_catalog") and summarize which catalogs, schemas, storage credentials and external locations were discovered and why G03 can stay Not evaluated under BROWSE-only privileges.
+```
 
-### 7. Databricks Costs: Where They Come From and How to Optimize Them / Costes de Databricks: de donde vienen y como optimizarlos (`view="costs"`)
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Consulta los costes de Databricks del ultimo mes cerrado (operation="query", view="costs") y explicame cuanto es DBU y cuanto infraestructura, que clusteres, jobs, SQL warehouses y pools concentran el coste, que parte no explica ninguna etiqueta y que cambios ahorrarian mas, indicando como se estima cada ahorro.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Query last closed month's Databricks costs (operation="query", view="costs") and explain the DBU vs infrastructure split, which clusters, jobs, SQL warehouses and pools drive the cost, what share no tag explains, and which changes would save the most, stating how each saving is estimated.
-  ```
+### 7. Compute, SQL warehouses and FinOps findings
+```text
+Query the FinOps findings of <WORKSPACE_NAME> (operation="query", view="findings", area="finops") and detail whether any all-purpose clusters or SQL warehouses lack bounded auto-termination, Photon or an assigned cluster policy.
+```
 
-### 8. Demo Without a Workspace / Demostracion sin workspace (`self_test`, SIMULATED)
-- **Castellano:**
-  ```text
-  @databricks-dependency-live Ejecuta operation="self_test" para una demostracion con el workspace simulado incorporado y entregame los 4 archivos, dejando claro que los datos son SIMULADOS.
-  ```
-- **English:**
-  ```text
-  @databricks-dependency-live Run operation="self_test" for a demo with the built-in simulated workspace and deliver the 4 files, making clear the data is SIMULATED.
-  ```
+### 8. Source coverage and in-workspace access
+```text
+Query the source coverage of <WORKSPACE_NAME> (operation="query", view="coverage") and explain which Plane 2 APIs (clusters, jobs, SQL warehouses, workspace-conf, Unity Catalog) answered, whether the agent has access inside the workspace and what the Azure-side review still covers when it does not.
+```
+
+### 9. Databricks costs: where they come from and how to optimize them (`view="costs"`)
+```text
+Query last closed month's Databricks costs of <WORKSPACE_NAME> (operation="query", view="costs") and explain the DBU vs infrastructure split, which clusters, jobs, SQL warehouses and pools drive the cost, what share no tag explains, and which changes would save the most, stating how each saving is estimated.
+```
+
+### 10. Demo without a workspace (`self_test`, SIMULATED)
+```text
+Run operation="self_test" for a demo with the built-in simulated workspace and deliver the 4 files, making clear the data is SIMULATED.
+```
