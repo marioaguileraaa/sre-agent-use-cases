@@ -13,7 +13,7 @@ CLIENT_ID = "12345678-1234-4abc-8def-123456789abc"
 TENANT = "11111111-1111-4111-8111-111111111111"
 NOW = datetime(2026, 11, 6, 18, 0, 0, tzinfo=timezone.utc)
 HUMAN = "alice@contoso.com"
-AKS_APP = "be1a5d97-013c-4105-b240-4a6428fdd4c8"
+AKS_APP = "22222222-2222-4222-8222-222222222222"
 
 
 def load_tool(configure=True):
